@@ -1,0 +1,87 @@
+{% include 'partials/header.html' %}
+
+<div id="center-stage">
+	<div id="key-panel">
+		<article>
+			<header>
+				<!--<div class="selector-wrapper">
+					<button class="selector">
+						<span class="horizontal-caret"></span>
+					</button>
+				</div> -->
+				<div class="select-wrapper">
+					<select id="chapter-select">
+						<option data-slug="algebraic-expressions"><h2>Algebraic Expressions</h2></option>
+						<option data-slug="cool"><h2>Cool guy</h2></option>
+					</select>
+				</div>
+				<section class="breadcrumb">
+					<div class="links">
+						<a href="">OpenCurriculum</a> <span class="vertical-caret breadcrumbs-caret"></span> <a href="">Mathematics</a> <span class="vertical-caret breadcrumbs-caret"></span> <a href="">Advanced Algebra</a>
+					</div>
+					<div id="thermometer">
+						<div class="thermometer-difficulty-wrapper">
+							<div class="thermometer-difficulty" data-level="{{ article.difficulty }}"></div>
+						</div>
+					</div>
+				</section>
+				<section class="article-actions">
+					<ul>
+						<li class="edit-action"><a href=""><span class="icon"></span>Edit</a></li>
+						<li class="download-action"><a href=""><span class="icon"></span>Download as...</li>
+						<li class="history-action"><a href=""><span class="icon"></span>View history</a></li>
+						<li class="share-action"><a href=""><span class="icon"></span>Share</a></li>
+					</ul>		
+				</section>
+			</header>
+			<section id="article-objectives">
+				<h3>Article objectives:</h3>
+				<ul>
+					{% for objective in article.objectives %}
+						<li><span class="vertical-caret breadcrumbs-caret"></span>{{ objective }}</li>
+					{% endfor %}
+				</ul>			
+			<p/>
+			</section>
+			<section id="article">
+				{{ article.bodyContent|safe }}
+			</section>
+		</article>
+	</div>
+	
+	<div id="fill-panel">
+		<aside id="social-panel">
+			
+		</aside>
+		
+		<aside id="resources">
+			<h3>Resources</h3>
+			{% for resource in article.resources.all %}
+				<div class="resource">
+					<div class="resource-thumbnail"></div>
+					<div class="description">
+						<div class="resource-title"><a href="">{{ resource.title }}</a></div>
+						<div class="resource-description">{{ resource.body }}</div>
+					</div>
+				</div>
+			{% endfor %}
+			
+			<div class="resource">
+				<div class="resource-thumbnail"></div>
+				<div class="description">
+					<div class="resource-title"><a href="">Introduction to algebraic formu...</a></div>
+					<div class="resource-description">This in video, we learn the fundamentals of the steps used in deriving some lorem ipsum dolor sit..</div>
+				</div>
+			</div>
+			<div class="resource">
+				<div class="resource-thumbnail"></div>
+				<div class="description">
+					<div class="resource-title"><a href="">Introduction to algebraic formu...</a></div>
+					<div class="resource-description">This in video, we learn the fundamentals of the steps used in deriving some lorem ipsum dolor sit..</div>
+				</div>
+			</div>
+		</aside>
+	</div>
+</div>
+
+{% include 'partials/footer.html' %}

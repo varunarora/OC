@@ -10,7 +10,7 @@ urlpatterns = patterns('',
     # url(r'^oc_platform/', include('oc_platform.foo.urls')),
     url(r'^chapter/', 'oc_platform.views.chapter', name='chapter'),
 
-	url(r'^articles/', include('articles.urls', namespace="articles")),
+	url(r'^(?P<subject>)/', include('articles.urls', namespace="articles")),
 	
 	url(r'^meta/', include('meta.urls', namespace="meta")),
 
