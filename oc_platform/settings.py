@@ -61,10 +61,13 @@ STATIC_ROOT = ''
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
+    
+import os.path
+TEMPLATE_DIR = os.path.dirname(__file__)
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-	'/home/varunaro/Desktop/dev/opencurriculum/oc_platform/assets/',
+	os.path.join(TEMPLATE_DIR, 'assets'),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -103,12 +106,8 @@ ROOT_URLCONF = 'oc_platform.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'oc_platform.wsgi.application'
 
-    
-import os
-PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
-
 TEMPLATE_DIRS = (
-	os.path.join(PROJECT_PATH, 'templates'),
+	os.path.join(TEMPLATE_DIR, 'templates'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
