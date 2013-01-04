@@ -105,7 +105,7 @@ WSGI_APPLICATION = 'oc_platform.wsgi.application'
 
     
 import os
-PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
+PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 TEMPLATE_DIRS = (
 	os.path.join(PROJECT_PATH, 'templates'),
