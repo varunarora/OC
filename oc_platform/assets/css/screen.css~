@@ -243,6 +243,9 @@ body > header {
 #search-bar input[type=submit]{
 	border-width: 0px;
 	background-color: #f2f2f2;
+	background-image: url('../images/search-icon.png');
+	background-repeat: no-repeat;
+	background-position: center;
 	border-radius: 5px;
 	border-top-left-radius: 0px;
 	border-bottom-left-radius: 0px;
@@ -255,6 +258,17 @@ body > header {
 
 #search-bar input[type=submit]:hover {
 	background-color: #e2e2e2;
+}
+
+.live-filter-wrapper input[type=search] {
+	background-color: #f8f8f8;
+	border: 1px solid #b2b2b2;
+	border-radius: 5px;
+	height: 12px;
+	width: 200px;
+	padding: 4px;
+	margin-left: 20px;
+	font-size: 0.75em;
 }
 
 #chief-panel-container {
@@ -349,12 +363,8 @@ a:hover {
 }
 
 #left-panel > h1 {
-	font-family: 'PT Sans', sans-serif;
-	font-size: 2.5em;
-	font-style: italic;
-	font-size-adjust: none;
 	margin-bottom: 20px;
-
+	font-style: italic;
 }
 
 #right-panel {
@@ -363,18 +373,24 @@ a:hover {
 }
 
 #key-panel {
-	float: left;
 	width: 573px;
+}
+
+.panel-left {
+	float: left;
 	padding-right: 20px;
 }
 
 #fill-panel {
-	float: right;
 	width: 367px;
 }
 
+.panel-right {
+	float: right;
+}
+
 #article-panel li {
-	background-image: url('../images/article.jpg');
+	/*background-image: url('../images/article.jpg');*/
 	width: 114px;
 	height: 88px;
 	float: left;
@@ -385,6 +401,40 @@ a:hover {
 #article-panel li:nth-child(1) {
 	height: 178px;
 	width: 346px;
+}
+
+#article-panel a:hover, .catalog-article-panel a:hover, .category-article-panel a:hover {
+	text-decoration: none;
+}
+
+#article-panel a:hover .chapter-info, .catalog-article-panel a:hover .chapter-info, .category-article-panel a:hover .chapter-info {
+	background: rgba(0,0,0,0.8);
+}
+
+.catalog-article-panel {
+	background-color: #efefef;
+	width: 573px;
+	height: 83px;
+	box-shadow: 0px 6px 5px -6px rgba(0,0,0,0.25);
+}
+
+.catalog-article-panel li, .category-article-panel li {
+	float: left;
+	width: 114px;
+	height: 88px;
+}
+
+.catalog-article-panel li.more-articles {
+	line-height: 88px;
+	text-align: center;
+}
+
+.catalog-article-panel li.more-articles a:hover {
+	color: #1155cc;
+}
+
+.catalog-article-panel li.more-articles a:hover span {
+	border-color: transparent transparent transparent #1155cc;
 }
 
 .chapter-thumbnail {
@@ -532,6 +582,46 @@ ul[data-liffect="slideRight"].play li {
     100% { opacity: 1; left: 0; }
 }
 
+ul[data-liffect="slideUp"] li {
+    opacity: 0;
+    position: relative;
+    -webkit-animation: slideUp 600ms ease both;
+    -webkit-animation-play-state: paused;
+    -moz-animation: slideUp 600ms ease both;
+    -moz-animation-play-state: paused;
+    -o-animation: slideUp 600ms ease both;
+    -o-animation-play-state: paused;
+    animation: slideUp 600ms ease both;
+    animation-play-state: paused;
+}
+
+ul[data-liffect="slideUp"].play li {
+    -webkit-animation-play-state: running;
+    -moz-animation-play-state: running;
+    -o-animation-play-state: running;
+    animation-play-state: running;
+}
+
+@-webkit-keyframes slideUp {
+    0% { opacity: 0; top: 30px; }
+    100% { opacity: 1; top: 0; }
+}
+
+@-moz-keyframes slideUp {
+    0% { opacity: 0; top: 30px; }
+    100% { opacity: 1; top: 0; }
+}
+
+@-o-keyframes slideUp {
+    0% { opacity: 0; top: 30px; }
+    100% { opacity: 1; top: 0; }
+}
+
+@keyframes slideUp {
+    0% { opacity: 0; top: 30px; }
+    100% { opacity: 1; top: 0; }
+}
+
 .thermometer-difficulty-wrapper {
 	width: 100%;
 	height: 100%;
@@ -586,7 +676,11 @@ ul[data-liffect="slideRight"].play li {
     100% { opacity: 1; width: 100%; }
 }
 
-.bold { font-weight: bold; }
+h1 {	
+	font-family: 'PT Sans', sans-serif;
+	font-size: 2.5em;
+	font-size-adjust: none;
+}
 
 h2 {
 	font-family: 'PT Sans', sans-serif;
@@ -653,7 +747,6 @@ select option {
 .breadcrumb {
 	line-height: normal;
 	font-size: 0.87em;
-	font-weight: bold;
 	overflow: hidden;
 }
 
@@ -661,7 +754,23 @@ select option {
 	color: #557799;
 }
 
-#thermometer {
+#article-thermometer {
+	height: 8px;
+	width: 120px;
+	float: left;
+	margin-top: 4px;
+	margin-right: 40px;
+}
+
+.chapter-thermometer {
+	height: 8px;
+	width: 80px;
+	position: relative;
+	top: -88px;
+	right: -25px;
+}
+
+.thermometer {
 	background: #ff2222; /* Old browsers */
 	background: -moz-linear-gradient(left, #ff2222 0%, #ff22ff 15%, #2222ff 30%, #22ffff 45%, #22ff22 60%, #22ff22 75%, #ffff22 90%, #ff2222 100%); /* FF3.6+ */
 	background: -webkit-gradient(linear, left top, right top, color-stop(0%,#ff2222), color-stop(15%,#ff22ff), color-stop(30%,#2222ff), color-stop(45%,#22ffff), color-stop(60%,#22ff22), color-stop(75%,#22ff22), color-stop(90%,#ffff22), color-stop(100%,#ff2222)); /* Chrome,Safari4+ */
@@ -670,11 +779,6 @@ select option {
 	background: -ms-linear-gradient(left, #ff2222 0%,#ff22ff 15%,#2222ff 30%,#22ffff 45%,#22ff22 60%,#22ff22 75%,#ffff22 90%,#ff2222 100%); /* IE10+ */
 	background: linear-gradient(to right, #ff2222 0%,#ff22ff 15%,#2222ff 30%,#22ffff 45%,#22ff22 60%,#22ff22 75%,#ffff22 90%,#ff2222 100%); /* W3C */
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff2222', endColorstr='#ff2222',GradientType=1 ); /* IE6-9 */
-	height: 8px;
-	width: 120px;
-	float: left;
-	margin-top: 4px;
-	margin-right: 40px;
 }
 
 .breadcrumb .links {
@@ -704,9 +808,7 @@ select option {
 }
 
 .article-actions ul li a {
-	font-weight: bold;
 	color: #666;
-	letter-spacing: -1px;
 }
 
 .article-actions ul li {
@@ -780,7 +882,7 @@ p {
 	margin-bottom: 12px;
 }
 
-#resources {
+aside#support {
 	background-color: #efefef;
 	padding: 18px;
 	overflow: hidden;
@@ -809,17 +911,177 @@ p {
 }
 
 .resource-description {
-	height: 48px;
+	height: 45px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	-o-text-overflow: ellipsis;
 	-ms-text-overflow: ellipsis;
 }
 
-.resource-title a {
-	font-weight: bold;
+.search-result {
+	margin: 20px 0px;
+	overflow: hidden;
+	font-size: 0.9em;
+}
+
+.search-result-thumbnail {
+	background-color: #b2b2b2;
+	width: 80px;
+	height: 80px;
+	margin-left: 15px;
+	float: left;
+}
+
+.search-result > .description {
+	float: left;
+	width: 475px;
+}
+
+.search-result-meta {
+	font-style: italic;
+	color: #666;
+}
+
+.search-filter {
+	margin-bottom: 20px;
+}
+
+.search-filter-header {
+	margin: 5px 0px;
 }
 
 li, p {
 	line-height: 1.1em;
+}
+
+.search-term {
+	color: #000;
+}
+
+#difficulty-slider-range {
+	margin-left: 8px;
+	margin-top: 20px;
+}
+
+/** Styling done in em as per base jQuery UI styling */
+.ui-slider .ui-slider-handle {
+	background-color: #444;
+	height: 1.8em;
+	width: 0.9em;
+	top: -0.5em;
+}
+
+#slider-prefade, #slider-postfade {
+	width: 0%;
+	background-color: rgba(0,0,0,0.8);
+	height: 0.8em;
+}
+
+#slider-prefade {
+	float: left;
+}
+
+#slider-postfade {
+	float: right;
+	top: -0.8em;
+}
+
+/** jQuery UI style rule units ends here */
+
+label {
+	display: block;
+	margin: 4px 0px;
+	cursor: pointer;
+}
+
+label input {
+	vertical-align: bottom;
+	margin-right: 8px;
+}
+
+.spinner-background {
+	background-image: url("../images/spinner.gif");
+	background-repeat: no-repeat;
+	background-position: center;	
+}
+
+.caption {
+	font-family: 'PT Sans', sans-serif;
+}
+
+#catalog-listing {
+	margin: 20px 0px;
+	overflow: hidden;
+}
+
+.catalog-subject {
+	margin-bottom: 20px;
+	overflow: hidden;
+}
+
+.article-count {
+	color: #666;
+}
+
+.true-h3-color {
+	color: #444;
+}
+
+.true-color {
+	color: #1a1a1a;
+}
+
+span.highlighted, .search-filter-header, .resource-title a, .search-result-title a, .article-actions ul li a, .breadcrumb, .bold, strong, th {
+	font-family: "Proxima Nova Bold", 'Helvetica Neue', Arial, Helvetica, sans-serif; font-size-adjust:0.488; font-weight:bold; font-style:normal;
+}
+
+em {
+	font-style: italic;
+}
+
+.bold-italic {
+	font-weight: bold;
+	font-style: italic;
+}
+
+/** Article content styling **/
+
+.article-example {
+	padding: 10px;
+	padding-top: 2px;
+	background-color: #FFF8E7;
+	margin: 20px 0px;
+}
+
+.article-block {
+	padding: 10px;
+	padding-top: 2px;
+	background-color: #E9EFFA;
+	margin: 20px 0px;
+}
+
+#article table {
+	margin: 10px 0px;
+}
+
+.article-caption {
+	text-align: center;
+}
+
+.live-filter-wrapper {
+	padding: 8px;
+	margin: 15px 0px;
+	background-color: #efefef;
+}
+
+.filter-caption {
+	color: #444;
+}
+
+.page-category-title {
+	margin-bottom: 5px;
+}
+
+.aside-section {
+	margin-bottom: 20px;
 }

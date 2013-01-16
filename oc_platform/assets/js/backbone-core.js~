@@ -1,0 +1,181 @@
+jQuery(document).ready(function($) {
+	init_search();
+});
+
+function init_search(){
+
+	$("#difficulty-slider-range").slider({
+		range: true,
+		min: 0,
+		max: 100,
+		values: [0,100],
+		slide: function(event, ui){
+			// Fade out the regions on the slider that do not belong to the selected range
+			_refadeSliderRegions();
+		},
+		stop: function(event, ui){
+			// Fade out the regions on the slider that do not belong to the selected range
+			_refadeSliderRegions();
+
+			// Repopulate search results based on difficulty level filter
+			repopulateSearchResults(ui, resultCollectionView);
+		}
+	});
+	
+	$("<div/>", {
+			id: "slider-prefade",
+		}).insertBefore(".ui-slider-range");
+	$("<div/>", {
+			id: "slider-postfade",
+		}).insertAfter(".ui-slider-range");
+			
+
+	var resultCollectionView = new ResultsCollectionView({collection: resultSet});
+	resultCollectionView.render();
+	
+	$(".search-result-set").fadeIn("slow");
+	//$(".search-result-set").addClass('spinner-background');	
+	
+	// Listen to changes on all options in the filters panel
+	var filters = $('.search-filter input:checkbox');
+
+	_.each(filters, function(filter){
+		$(filter).change(function(){
+			repopulateSearchResults(this, resultCollectionView);
+		});
+	});
+}
+			
+// Initialize Search results Model
+var Result = Backbone.Model.extend({
+	// URL of the search result
+	url: "",
+
+	// Title of the search result page
+	title: "",
+	
+	// Summary of the search result with highlighting
+	summary: "",
+	
+	// Page created at what time
+	created: "",
+	
+	// User who created the page
+	user: "",
+	
+	// Difficulty level of result
+	difficulty: "",
+	
+	// Cost of the search result
+	cost: "",
+	
+	// License of the result page
+	license: "",
+	
+	// Type of content
+	type: ""
+});
+
+// Initialize Search results set Collection
+var ResultsSet = Backbone.Collection.extend({
+	model: Result
+});
+
+// Initialize Search results View
+var ResultsView = Backbone.View.extend({
+	initialize: function(){
+	//	this.model.view = this;
+	},
+	tagName: "div",
+	className: "search-result",
+	template: _.template("<div class=\"description\">" +
+		"<div class=\"search-result-title\">" + 
+		"<a href=\"<%= url %>\"><%= title %></a></div>" + 
+		"<div class=\"search-result-description\"><%= summary %></a></div>" + 
+		"<div class=\"search-result-meta\">Created on <%= created %> by <%= user %></div>" +
+		"</div><div class=\"search-result-thumbnail\"></div>"),
+	
+	render: function(){
+		this.$el.html(this.template(this.model.toJSON()));
+		$('.search-result-set:first').append(this.$el);
+		return this;
+	}
+});
+
+var ResultsCollectionView = Backbone.View.extend({
+	render: function(newCollection){
+		this.clearView();
+		this.prepareView();
+		var collectionToRender = newCollection || this.collection;
+		_.each(collectionToRender.models, function(item){
+			new ResultsView({model: item}).render();
+		});
+		this.revealView();
+	},
+	
+	clearView: function(){
+		$('.search-result-set:first').html('');
+	},
+	
+	prepareView: function(){
+		$(".search-result-set").addClass('spinner-background');
+	},
+	
+	revealView: function(){
+		$(".search-result-set").removeClass('spinner-background');
+		$('.search-result-set:first').css('display', 'none');
+		$(".search-result-set:first").fadeIn("fast");
+	}
+});
+
+
+var resultSet = new ResultsSet();
+
+// The word "filters" is used in the traditional sense here, and not as described in the spec of
+	// _.js. Here, the filter is used to eliminate results that don't pass the truth test, as
+	// opposed to creating a white list, as in the case of _.js
+var filters = {
+	type: [],
+	cost: [],
+	license: [],
+	difficulty: [0,100]
+};
+
+
+function repopulateSearchResults(target, resultCollectionView){
+	/* Filter from current results */
+	// Get target filter type and value
+	var targetFilterType = $(target).attr("name");
+	var targetFilterValue = $(target).attr("value");
+	
+	// Add or remove the value of filter from the filters object based on target modified
+	var targetType = $(target).attr("type");
+	if (typeof targetType != 'undefined' && $(target).attr("type") == "checkbox"){
+		if (!target.checked) filters[targetFilterType].push(targetFilterValue);
+		else filters[targetFilterType].splice(
+			_.indexOf(filters[targetFilterType], targetFilterValue), 1);
+	} else  // In the case that the target is the difficulty slider
+		filters.difficulty = target.values; // target here is the UI object
+	
+	var collectionToRender = new ResultsSet(resultSet.reject(function(result){
+		return _.some(filters, function(filterValues, filterType){
+			if (filterType == "difficulty") return !_fallsInRange(
+				filterValues, result.get(filterType));
+			else return _.indexOf(filterValues, result.get(filterType)) != -1;
+		});
+	}));
+	
+	// Recreate the view (clears previous view)
+	resultCollectionView.render(collectionToRender);
+}
+/**
+	Helper function to repopulateSearchResults() that returns whether or not the an integer falls in
+		the "range" of two other integers representing a range.
+	@param filterRange:Integer[2] Representing the range
+	@param currentDifficulty:Integer Representing the ambiguous value whose position in range unknown
+	@return Boolean Whether or not currentDifficulty falls in filterRange
+*/
+function _fallsInRange(filterRange, currentDifficulty){
+	return (filterRange[1] >= currentDifficulty) && (filterRange[0] <= currentDifficulty);
+}
+

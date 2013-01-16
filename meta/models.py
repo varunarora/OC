@@ -5,6 +5,10 @@ class Category(models.Model):
 	parent = models.ForeignKey('self')
 	project = models.NullBooleanField(default=False)
 	created = models.DateTimeField(auto_now_add=True, editable=False)
+	slug = models.SlugField(max_length=256, blank=True)
+	
+	def __unicode__(self):
+		return self.title
 
 class Tag(models.Model):
 	title = models.CharField(max_length=256)

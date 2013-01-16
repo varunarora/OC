@@ -7,10 +7,13 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'oc_platform.views.home', name='home'),
+    
+    url(r'^search/', include('haystack.urls')),
+    
     # url(r'^oc_platform/', include('oc_platform.foo.urls')),
     url(r'^chapter/', 'oc_platform.views.chapter', name='chapter'),
 
-	url(r'^articles/', include('articles.urls', namespace="articles")),
+	url(r'^articles/', include('articles.urls', namespace='articles')),
 	
 	url(r'^meta/', include('meta.urls', namespace="meta")),
 

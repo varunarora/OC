@@ -1,0 +1,79 @@
+{% include 'partials/header.html' %}
+<script src="{{ STATIC_URL }}js/search-results.js" type="text/javascript"></script>
+
+{% load highlight %}
+
+<div id="center-stage">
+	<div id="fill-panel" class="panel-left">
+		<aside id="support">
+			<h3>Search filters</h3>
+			<div class="search-filter">
+				<div class="search-filter-header">Content type</div>
+				<label><input type="checkbox" name="type" value="article" checked />OpenCurriculum article</label>
+				<label><input type="checkbox" name="type" value="project" checked />OpenCurriculum project</label>
+				<label><input type="checkbox" name="type" value="audio-clip" checked />Audio clip</label>
+				<label><input type="checkbox" name="type" value="video-clip" checked />Video clip</label>
+				<label><input type="checkbox" name="type" value="app-game" checked />App / game</label>
+				<label><input type="checkbox" name="type" value="image" checked />Image(s) / Graphic(s)</label>
+				<label><input type="checkbox" name="type" value="pdf-document" checked />PDF / Document</label>
+				<label><input type="checkbox" name="type" value="ex-webpage" checked />External Webpage</label>
+			</div>
+			<div class="search-filter">
+				<div class="search-filter-header">Difficulty level</div>
+				<div id="difficulty-slider-range" class="thermometer"></div>
+			</div>
+			<div class="search-filter">
+				<div class="search-filter-header">Cost</div>
+				<label><input type="checkbox" name="cost" value="free-resource" checked />Free</label>
+				<label><input type="checkbox" name="cost" value="paid-resource" checked />Paid (Premium)</label>
+			</div>
+			<div class="search-filter">
+				<div class="search-filter-header">License type</div>
+				<label><input type="checkbox" name="license" value="creative commons" checked />Creative Commons</label>
+				<label><input type="checkbox"  name="license" value="gnu-gpl" checked />GNU / GPL</label>
+			</div>
+		</aside>
+	</div>
+	<div id="key-panel" class="panel-right">
+		<h3>Search results for <span class="search-term">{{ query }}</span></h3>
+		{% if query %}
+			<div id="search-result-set">
+				{% for result in page.object_list %}
+				<script type="text/javascript">
+					var result = new Result({
+						url: '{% url articles:read subject=result.object.category.slug article_slug=result.object.slug %}',
+		    			title: '{{ result.object.title }}',
+		    			summary: '{% highlight result.object.revision.body with query %}',
+		    			created: '{{ result.object.created }}',
+		    			user: '{{ result.object.revision.user }}',
+		    			difficulty: '{{ result.object.difficulty }}',
+		    			cost: 'free',
+		    			license: '{{ result.object.license }}',
+		    			type: 'article'
+		    		});
+					resultSet.add(result);
+				</script>
+				<!--<div class="search-result">
+					<div class="description">
+						<div class="search-result-title"><a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a></div>
+						<div class="search-result-description">{% highlight result.object.revision.body with query %}</div>
+						<div class="search-result-meta">Created on {{ result.object.created }} by {{ result.object.revision.user }}</div>
+					</div>
+					<div class="search-result-thumbnail"></div>
+				</div>-->
+				{% empty %}
+		            <p>No results found.</p>
+		        {% endfor %}
+			</div>
+				{% if page.has_previous or page.has_next %}
+			        <div>
+			            {% if page.has_previous %}<a href="?q={{ query }}&amp;page={{ page.previous_page_number }}">{% endif %}&laquo; Previous{% if page.has_previous %}</a>{% endif %}
+			            |
+			            {% if page.has_next %}<a href="?q={{ query }}&amp;page={{ page.next_page_number }}">{% endif %}Next &raquo;{% if page.has_next %}</a>{% endif %}
+			        </div>
+			    {% endif %}
+		{% endif %}
+	</div>
+</div>
+
+{% include 'partials/footer.html' %}

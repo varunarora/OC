@@ -62,8 +62,7 @@ STATIC_ROOT = ''
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
     
-import os
-PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
+import os.path
 TEMPLATE_DIR = os.path.dirname(__file__)
 
 # Additional locations of static files
@@ -126,6 +125,7 @@ INSTALLED_APPS = (
 	'oer',
 	'media',
 	'articles',
+	'haystack',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -160,3 +160,7 @@ LOGGING = {
         },
     }
 }
+
+HAYSTACK_SITECONF = 'search_sites'
+HAYSTACK_SEARCH_ENGINE = 'solr'
+HAYSTACK_SOLR_URL = 'http://54.235.197.234:8983/solr'

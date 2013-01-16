@@ -1,0 +1,50 @@
+{% include 'partials/header.html' %}
+<div id="center-stage">
+	<div id="key-panel" class="panel-left">
+		<h2 class="bold page-category-title">Mathematics <span class="article-count">({{ articles.count }} articles)</span></h2>
+		<section class="breadcrumb">
+			<div class="links">
+				{% for bc_category in breadcrumb %}
+					<a href="{% url articles:category_catalog category=bc_category.slug %}">{{ bc_category.title }}</a> 
+					{% if bc_category.next %}
+					<span class="vertical-caret breadcrumbs-caret"></span> 
+					{% endif %}
+				{% endfor %}
+			</div>
+		</section>
+		<section class="live-filter-wrapper">
+			<span class="bold filter-caption">Filter articles by typing</span>
+			<input type="search" name="live-filter" />
+		</section>
+		<div id="catalog-listing">
+			<ul class="category-article-panel">
+				{% for article in articles %}			
+					<li>
+						<div class="chapter-thumbnail"><img src="{{ STATIC_URL }}images/article.jpg" /></div>
+						<a href="{% url articles:read category_slug=article.category.slug article_slug=article.slug %}"><div class="chapter-info">{{ article.title }}</div>
+						<div class="chapter-thermometer thermometer">
+							<div class="thermometer-difficulty-wrapper">
+								<div class="thermometer-difficulty" data-level="{{ article.difficulty }}"></div>
+							</div>
+						</div></a>
+					</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div id="fill-panel" class="panel-right">
+		<aside id="support">
+			<h3>Sets</h3>
+				<ul class="aside-section">
+					{% for set in sets %}
+					<li><a href="">{{ set.title }} ({{ set.count }})</a></li>
+					{% endfor %}
+				</ul>
+			<h3>Resources</h3>
+			{% for resource in resources %}
+				{% include 'partials/resource.html' %}
+			{% endfor %}
+		</aside>
+	</div>
+</div>
+{% include 'partials/footer.html' %}

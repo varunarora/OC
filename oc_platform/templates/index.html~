@@ -6,11 +6,11 @@
 			<div id="chief-panel">
 			
 				<div id="left-panel">
-					<h1>High-quality K-12 textbook content, <span class="bold">created by you</span></h1>
+					<h1>High-quality K-12 textbook content, <span class="bold-italic">created by you</span></h1>
 					<span class="bold">80+</span> textbook articles along with 1000s of related videos, audio, worksheets, documents, etc. produced and curated by the community!
 					
 					<div class="actions-wrapper">
-						<button class="success-button btn">Get more FREE content <span class="vertical-caret"></span></button>
+						<a href="articles"><button class="success-button btn">Get more FREE content <span class="vertical-caret"></span></button></a>
 						<button class="dull-button btn">Learn more</button>
 						<div class="fine-print">No sign-up or logging-in required.</div>
 					</div>
@@ -19,13 +19,15 @@
 				
 				<div id="right-panel">
 					<ul id="article-panel">
+						{% for article in top_articles %}
 						<li>
 							<div class="chapter-thumbnail"><img src="{{ STATIC_URL }}images/article.jpg" /></div>
-							<div class="chapter-info">
-								<div class="chapter-info-title">Algebraic Expressions</div>
-								<div class="chapter-info-caption">30,272 views </div> 
-							</div>
+							<a href="{% url articles:read subject=article.category.slug article_slug=article.slug %}"><div class="chapter-info">
+								<div class="chapter-info-title">{{ article.title }}</div>
+								<div class="chapter-info-caption">{{ article.views }} views</div> 
+							</div></a>
 						</li>
+						{% endfor %}
 						<li>
 							<div class="chapter-thumbnail"><img src="{{ STATIC_URL }}images/article.jpg" /></div>
 							<div class="chapter-info">Magnetism - II</div>
@@ -70,4 +72,4 @@
 		<div id="chief-panel-footer">
 			<img src="{{ STATIC_URL }}images/plant.png" id="plant" />
 		</div>
-		{% include 'partials/footer.html' %}
+{% include 'partials/footer.html' %}

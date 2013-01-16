@@ -1,7 +1,7 @@
 {% include 'partials/header.html' %}
 
 <div id="center-stage">
-	<div id="key-panel">
+	<div id="key-panel" class="panel-left">
 		<article>
 			<header>
 				<!--<div class="selector-wrapper">
@@ -11,15 +11,24 @@
 				</div> -->
 				<div class="select-wrapper">
 					<select id="chapter-select">
-						<option data-slug="algebraic-expressions"><h2>Algebraic Expressions</h2></option>
-						<option data-slug="cool"><h2>Cool guy</h2></option>
+						<option data-url="{% url articles:read category_slug=article.category.slug article_slug=article.slug %}"><h2>{{ article.title }}</h2></option>
+						{% for sibling in siblings %}
+							{% if sibling.title != article.title %}
+							<option data-url="{% url articles:read category_slug=sibling.category.slug article_slug=sibling.slug %}"><h2>{{ sibling.title }}</h2></option>
+							{% endif %}
+						{% endfor %}
 					</select>
 				</div>
 				<section class="breadcrumb">
 					<div class="links">
-						<a href="">OpenCurriculum</a> <span class="vertical-caret breadcrumbs-caret"></span> <a href="">Mathematics</a> <span class="vertical-caret breadcrumbs-caret"></span> <a href="">Advanced Algebra</a>
+						{% for category in breadcrumb %}
+							<a href="{% url articles:category_catalog category_slug=category.slug %}">{{ category.title }}</a> 
+							{% if category != article.category %}
+							<span class="vertical-caret breadcrumbs-caret"></span> 
+							{% endif %}
+						{% endfor %}
 					</div>
-					<div id="thermometer">
+					<div id="article-thermometer" class="thermometer">
 						<div class="thermometer-difficulty-wrapper">
 							<div class="thermometer-difficulty" data-level="{{ article.difficulty }}"></div>
 						</div>
@@ -44,26 +53,20 @@
 			<p/>
 			</section>
 			<section id="article">
-				{{ article.bodyContent|safe }}
+				{{ article.body_markdown_html|safe }}
 			</section>
 		</article>
 	</div>
 	
-	<div id="fill-panel">
+	<div id="fill-panel" class="panel-right">
 		<aside id="social-panel">
 			
 		</aside>
 		
-		<aside id="resources">
+		<aside id="support">
 			<h3>Resources</h3>
 			{% for resource in article.resources.all %}
-				<div class="resource">
-					<div class="resource-thumbnail"></div>
-					<div class="description">
-						<div class="resource-title"><a href="">{{ resource.title }}</a></div>
-						<div class="resource-description">{{ resource.body }}</div>
-					</div>
-				</div>
+				{% include 'partials/resource.html' %}
 			{% endfor %}
 		</aside>
 	</div>

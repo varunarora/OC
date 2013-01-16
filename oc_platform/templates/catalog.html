@@ -1,0 +1,40 @@
+{% include 'partials/header.html' %}
+<div id="center-stage">
+	<div id="key-panel" class="panel-left">
+		<h2>Free high-quality articles' catalog.<br/>
+		By you, for you.</h2>
+		<span class="caption">100+ learning modules for K-12 math, science, geography, etc.</span>
+		
+		<div id="catalog-listing">
+			{% for category in articles.categories %}
+				<div class="catalog-category">
+					<div class="catalog-category-title"><h3><a href="{% url articles:category_catalog category_slug=category.slug %}" class="true-h3-color">{{ category.title }} <span class="article-count">({{ category.count }} {% if category.count != 1 %}articles{% else %}article{%endif%})</span></a></h3></div>
+					<ul class="catalog-article-panel">
+						{% for article in category.articlesView %}			
+							<li>
+								<div class="chapter-thumbnail"><img src="{{ STATIC_URL }}images/article.jpg" /></div>
+								<a href="{% url articles:read category_slug=category.slug article_slug=article.slug %}"><div class="chapter-info">{{ article.title }}</div></a>
+							</li>
+						{% endfor %}
+					
+						<li class="more-articles">
+							{% if category.countMore != 0 %}
+								<a href="{% url articles:category_catalog category_slug=category.slug %}" class="true-color">{{ subject.countMore }} more<span class="vertical-caret breadcrumbs-caret"></span></a>
+							{% endif %}
+						</li>
+					</ul>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+	
+	<div id="fill-panel" class="panel-right">
+		<aside id="support">
+			<h3>Popular resources</h3>
+			{% for resource in articles.resources %}
+				{% include 'partials/resource.html' %}
+			{% endfor %}
+		</aside>
+	</div>
+</div>
+{% include 'partials/footer.html' %}
