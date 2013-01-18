@@ -21,8 +21,11 @@
 					<ul id="article-panel">
 						{% for article in top_articles %}
 						<li>
-							<div class="chapter-thumbnail"><img src="{{ STATIC_URL }}images/article.jpg" /></div>
-							<a href="{% url articles:read subject=article.category.slug article_slug=article.slug %}"><div class="chapter-info">
+							<div class="chapter-thumbnail">
+								{% include 'partials/article_image.html' %}
+							</div>
+							
+							<a href="{% url articles:read category_slug=article.category.slug article_slug=article.slug %}"><div class="chapter-info">
 								<div class="chapter-info-title">{{ article.title }}</div>
 								<div class="chapter-info-caption">{{ article.views }} views</div> 
 							</div></a>
@@ -59,10 +62,6 @@
 						<li>
 							<div class="chapter-thumbnail"><img src="{{ STATIC_URL }}images/article.jpg" /></div>
 							<div class="chapter-info">Intro to Integration</div>
-						</li>
-						<li>
-							<div class="chapter-thumbnail"><img src="{{ STATIC_URL }}images/article.jpg" /></div>
-							<div class="chapter-info">The Civil War II</div>
 						</li>
 					</ul>
 				</div>

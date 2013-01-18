@@ -414,7 +414,7 @@ a:hover {
 .catalog-article-panel {
 	background-color: #efefef;
 	width: 573px;
-	height: 83px;
+	height: 88px;
 	box-shadow: 0px 6px 5px -6px rgba(0,0,0,0.25);
 }
 
@@ -443,7 +443,7 @@ a:hover {
 
 .chapter-thumbnail img {
 	display: block;
-	height: 72px;
+	height: 88px;
 	width: 114px;
 }
 
@@ -468,7 +468,7 @@ a:hover {
 	background: -moz-linear-gradient(top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.76) 25%, rgba(0,0,0,0) 50%, rgba(256,256,256,0) 100%); /* FF3.6+ */
 	height: 72px;
 	color: #fff;
-	top: -72px;
+	top: -88px;
 }
 
 .btn {
@@ -766,7 +766,7 @@ select option {
 	height: 8px;
 	width: 80px;
 	position: relative;
-	top: -88px;
+	top: -104px;
 	right: -25px;
 }
 
@@ -1015,7 +1015,8 @@ label input {
 }
 
 .catalog-category {
-	margin-bottom: 20px;
+	margin-bottom: 15px;
+	padding-bottom: 5px;
 	overflow: hidden;
 }
 

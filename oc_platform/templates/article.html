@@ -1,0 +1,75 @@
+{% include 'partials/header.html' %}
+
+<div id="center-stage">
+	<div id="key-panel" class="panel-left">
+		<article>
+			<header>
+				<!--<div class="selector-wrapper">
+					<button class="selector">
+						<span class="horizontal-caret"></span>
+					</button>
+				</div> -->
+				<div class="select-wrapper">
+					<select id="chapter-select">
+						<option data-url="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }}"><h2>{{ article.title }}</h2></option>
+						{% for sibling in siblings %}
+							{% if sibling.title != article.title %}
+							<option data-url="{% url articles:reader category_slug=sibling.category.slug article_slug=sibling.slug %}"><h2>{{ sibling.title }}</h2></option>
+							{% endif %}
+						{% endfor %}
+					</select>
+				</div>
+				<section class="breadcrumb">
+					<div class="links">
+						{% for category in breadcrumb %}
+							<a href="{% url articles:reader category_slug=category.slug %}">{{ category.title }}</a> 
+							{% if category != article.category %}
+							<span class="vertical-caret breadcrumbs-caret"></span> 
+							{% endif %}
+						{% endfor %}
+					</div>
+					<div id="article-thermometer" class="thermometer">
+						<div class="thermometer-difficulty-wrapper">
+							<div class="thermometer-difficulty" data-level="{{ article.difficulty }}"></div>
+						</div>
+					</div>
+				</section>
+				<section class="article-actions">
+					<ul>
+						<li class="edit-action"><a href=""><span class="icon"></span>Edit</a></li>
+						<li class="download-action"><a href=""><span class="icon"></span>Download as...</li>
+						<li class="history-action"><a href=""><span class="icon"></span>View history</a></li>
+						<li class="share-action"><a href=""><span class="icon"></span>Share</a></li>
+					</ul>		
+				</section>
+			</header>
+			<section id="article-objectives">
+				<h3>Article objectives:</h3>
+				<ul>
+					{% for objective in article.objectives %}
+						<li><span class="vertical-caret breadcrumbs-caret"></span>{{ objective }}</li>
+					{% endfor %}
+				</ul>			
+			<p/>
+			</section>
+			<section id="article">
+				{{ article.body_markdown_html|safe }}
+			</section>
+		</article>
+	</div>
+	
+	<div id="fill-panel" class="panel-right">
+		<aside id="social-panel">
+			
+		</aside>
+		
+		<aside id="support">
+			<h3>Resources</h3>
+			{% for resource in article.resources.all %}
+				{% include 'partials/resource.html' %}
+			{% endfor %}
+		</aside>
+	</div>
+</div>
+
+{% include 'partials/footer.html' %}

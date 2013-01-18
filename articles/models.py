@@ -26,6 +26,7 @@ class ArticleRevision(models.Model):
 	body_markdown = MarkdownTextField()
 	tags = models.ManyToManyField('meta.Tag', blank=True)
 	user = models.ForeignKey(User)
+	log = models.CharField(max_length=256)
 
 class Article(models.Model):
 	revision = models.ForeignKey(ArticleRevision, editable=False)
@@ -35,11 +36,13 @@ class Article(models.Model):
 	changed = models.DateTimeField(auto_now=True, editable=False)
 	title = models.CharField(max_length=256)
 	resources = models.ManyToManyField('oer.Resource', blank=True)
+	# TODO: Articles should have only one image, this is wrongly done
 	image = models.ManyToManyField('media.Image', default=get_default_image)
 	views = models.IntegerField(editable=False, default=0)
 	license = models.ForeignKey('license.License', default=get_default_license)
 	slug = models.SlugField(max_length=256)
 	difficulty = models.PositiveIntegerField(editable=True, default=0)
+	published = models.NullBooleanField()
 	
 	def __unicode__(self):
 		return self.title
