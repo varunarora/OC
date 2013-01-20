@@ -75,7 +75,7 @@ jQuery(document).ready(function($) {
 
 	// Render animation of difficulty level "thermometer"
 	renderThermometer();
-	
+
 	$("input[name=live-filter]").liveUpdate('.category-article-panel').focus();
 	
 	init_categoryArticles();
@@ -95,7 +95,7 @@ function init_articlePanel(){
                 + "-o-animation-delay:" + i * 300 + "ms;"
                 + "animation-delay:" + i * 300 + "ms;");
         if (i == $("ul[data-liffect] li").size() -1) {
-            $("ul[data-liffect]").addClass("play")
+            $("ul[data-liffect]").addClass("play");
         }
     });
     
@@ -104,6 +104,7 @@ function init_articlePanel(){
 }
 
 function init_categoryArticles(){
+
 	$("ul.category-article-panel li").each(function (i) {
         var interval = Math.ceil((i+1)/5);
         $(this).attr("style", "-webkit-animation-delay:" + interval * 300 + "ms;"
@@ -111,12 +112,13 @@ function init_categoryArticles(){
                 + "-o-animation-delay:" + interval * 300 + "ms;"
                 + "animation-delay:" + interval * 300 + "ms;");
         if (interval == $("ul.category-article-panel li").size() -1) {
-            $("ul.category-article-panel").addClass("play")
+            $("ul.category-article-panel").addClass("play");
         }
     });
     
     $('ul.category-article-panel').attr('data-liffect', 'slideUp');
     $("ul.category-article-panel").addClass("play");
+
 }
 
 /**

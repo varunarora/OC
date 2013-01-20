@@ -1,2 +1,2 @@
 {{ object.title }}
-{{ object.revision.body }}
+{{ object.revision.body_markdown_html|striptags }}

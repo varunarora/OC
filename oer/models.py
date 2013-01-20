@@ -7,7 +7,7 @@ def get_default_license():
 
 class Resource(models.Model):
 	title = models.CharField(max_length=256)
-	type = models.CharField(max_length=40, default='Article')
+	type = models.CharField(max_length=40, default='URL')
 	license = models.ForeignKey('license.License', default=get_default_license)
 	url = models.URLField(blank=True)
 	body = models.TextField()

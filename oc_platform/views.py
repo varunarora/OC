@@ -6,11 +6,6 @@ def home(request):
 	context = {'top_articles': top_articles, 'title': 'OpenCurriculum: A K-12 Textbook Hub'}	
 	return render(request, 'index.html', context)
 	
-def chapter(request):
-	top_articles = Article.objects.order_by('title')[:2]
-	context = {'top_articles': top_articles}	
-	return render(request, 'chapter.html', context)
-	
 def search(request):
 	top_articles = Article.objects.order_by('title')[:2]
 	context = {'top_articles': top_articles}	

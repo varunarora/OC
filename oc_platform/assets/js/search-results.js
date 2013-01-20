@@ -1,81 +1,3 @@
-// Initialize the search results collection before page loads
-var resultSet = new ResultsSet();
-
-jQuery(document).ready(function($) {
-	// Initiatilize the search filter slider
-	init_slider();
-	
-	// Initiatialize the Backbone models/collection/view
-	init_mvc();
-});
-
-/**
-	Initializes the jQuery UI slider
-	@param none
-	@return none
-*/
-function init_slider(){
-	$("#difficulty-slider-range").slider({
-		range: true,
-		min: 0,
-		max: 100,
-		values: [0,100], // Always set slider to full range
-		slide: function(event, ui){
-			// Fade out the regions on the slider that do not belong to the selected range
-			_refadeSliderRegions();
-		},
-		stop: function(event, ui){
-			// Fade out the regions on the slider that do not belong to the selected range
-			_refadeSliderRegions();
-
-			// Repopulate search results based on difficulty level filter
-			repopulateSearchResults(ui, resultCollectionView);
-		}
-	});
-	
-	// Insert faded region containers before the left slider and after the right slider. These are
-	//    brought to their faded stated using _refadeSliderRegions()
-	$("<div/>", {
-			id: "slider-prefade",
-		}).insertBefore(".ui-slider-range");
-	$("<div/>", {
-			id: "slider-postfade",
-		}).insertAfter(".ui-slider-range");
-}
-
-/**
-	Helper function called in the event that the slider positions change so as to change the faded
-		region indicating out of bounds.
-	@param none
-	@return none
-*/
-function _refadeSliderRegions(){
-	$('#slider-prefade').css('width', $( "#difficulty-slider-range" ).slider("values", 0) + "%");
-	$('#slider-postfade').css('width', (100 - $( "#difficulty-slider-range" ).slider("values", 1)) + "%");
-}
-
-/**
-	Initializes the Views for the Backbone collection of search results on the page
-	@param none
-	@return none
-*/
-function init_mvc(){
-	// Construct a collection view using the search result objects built in
-	var resultCollectionView = new ResultsCollectionView({collection: resultSet});
-	
-	// Render the collection view
-	resultCollectionView.render();
-	
-	// Listen to changes on all options in the filters panel
-	var filterCheckboxes = $('.search-filter input:checkbox');
-
-	// Bind change listeners on function that repopulates the search results
-	_.each(Checkboxes, function(filter){
-		$(filter).change(function(){
-			repopulateSearchResults(this, resultCollectionView);
-		});
-	});
-}
 
 // Initialize Search results Model
 var Result = Backbone.Model.extend({
@@ -161,6 +83,76 @@ var ResultsCollectionView = Backbone.View.extend({
 	}
 });
 
+jQuery(document).ready(function($) {
+	// Initiatilize the search filter slider
+	init_slider();
+	
+	// Initiatialize the Backbone models/collection/view
+	init_mvc();
+});
+
+/**
+	Initializes the jQuery UI slider
+	@param none
+	@return none
+*/
+function init_slider(){
+	$("#difficulty-slider-range").slider({
+		range: true,
+		min: 0,
+		max: 100,
+		values: [0,100], // Always set slider to full range
+		slide: function(event, ui){
+			// Fade out the regions on the slider that do not belong to the selected range
+			_refadeSliderRegions();
+		},
+		stop: function(event, ui){
+			// Fade out the regions on the slider that do not belong to the selected range
+			_refadeSliderRegions();
+
+			// Repopulate search results based on difficulty level filter
+			repopulateSearchResults(ui, resultCollectionView);
+		}
+	});
+	
+	// Insert faded region containers before the left slider and after the right slider. These are
+	//    brought to their faded stated using _refadeSliderRegions()
+	$("<div/>", {
+			id: "slider-prefade",
+		}).insertBefore(".ui-slider-range");
+	$("<div/>", {
+			id: "slider-postfade",
+		}).insertAfter(".ui-slider-range");
+}
+
+/**
+	Helper function called in the event that the slider positions change so as to change the faded
+		region indicating out of bounds.
+	@param none
+	@return none
+*/
+function _refadeSliderRegions(){
+	$('#slider-prefade').css('width', $( "#difficulty-slider-range" ).slider("values", 0) + "%");
+	$('#slider-postfade').css('width', (100 - $( "#difficulty-slider-range" ).slider("values", 1)) + "%");
+}
+
+/**
+	Initializes the Views for the Backbone collection of search results on the page
+	@param none
+	@return none
+*/
+function init_mvc(){
+	// Listen to changes on all options in the filters panel
+	var filterCheckboxes = $('.search-filter input:checkbox');
+
+	// Bind change listeners on function that repopulates the search results
+	_.each(filterCheckboxes, function(filter){
+		$(filter).change(function(){
+			repopulateSearchResults(this, resultCollectionView);
+		});
+	});
+}
+
 // The word "filters" is used in the traditional sense here, and not as described in the spec of
 	// _.js. Here, the filter is used to eliminate results that don't pass the truth test, as
 	// opposed to creating a white list, as in the case of _.js
@@ -223,3 +215,12 @@ function _fallsInRange(filterRange, currentDifficulty){
 	return (filterRange[1] >= currentDifficulty) && (filterRange[0] <= currentDifficulty);
 }
 
+// Initialize the search results collection before page loads
+var resultSet = new ResultsSet();
+
+// Construct a collection view using the search result objects built in
+var resultCollectionView = new ResultsCollectionView({collection: resultSet});
+	
+// Render the collection view
+resultCollectionView.render();
+	

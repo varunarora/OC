@@ -14,6 +14,6 @@ class Resource(models.Model):
 	tags = models.ManyToManyField('meta.Tag', blank=True)
 	created = models.DateTimeField(auto_now_add=True, editable=False)
 	cost = models.FloatField()
-	views = models.IntegerField(editable=False)
+	views = models.IntegerField(editable=False, default=0)
 	user = models.ForeignKey(User)
 	file = models.FileField(upload_to='resources')

@@ -1,0 +1,2 @@
+{{ object.title }}
+{{ object.revision.body_markdown_html|safe }}

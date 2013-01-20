@@ -7,16 +7,13 @@ from articles.MarkdownTextField import MarkdownTextField
 from articles.jsonfield.fields import JSONField
 
 def get_default_category():
-	return Category.objects.get(id=1)
+	return Category.objects.get(pk=1)
 
 def get_default_language():
-	return Language.objects.get(id=1)
-
-def get_default_image():
-	return Image.objects.get(id=1)
-
+	return Language.objects.get(pk=1)
+	
 def get_default_license():
-	return License.objects.get(id=1)
+	return License.objects.get(pk=1)
 
 class ArticleRevision(models.Model):
 	title = models.CharField(max_length=256)
@@ -27,9 +24,12 @@ class ArticleRevision(models.Model):
 	tags = models.ManyToManyField('meta.Tag', blank=True)
 	user = models.ForeignKey(User)
 	log = models.CharField(max_length=256)
+	
+	def __unicode__(self):
+		return self.title
 
 class Article(models.Model):
-	revision = models.ForeignKey(ArticleRevision, editable=False)
+	revision = models.ForeignKey(ArticleRevision) # TODO: Make this editable=False
 	category = models.ForeignKey('meta.Category')
 	language = models.ForeignKey('meta.Language', default=get_default_language)
 	created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -37,7 +37,7 @@ class Article(models.Model):
 	title = models.CharField(max_length=256)
 	resources = models.ManyToManyField('oer.Resource', blank=True)
 	# TODO: Articles should have only one image, this is wrongly done
-	image = models.ManyToManyField('media.Image', default=get_default_image)
+	image = models.ManyToManyField('media.Image')
 	views = models.IntegerField(editable=False, default=0)
 	license = models.ForeignKey('license.License', default=get_default_license)
 	slug = models.SlugField(max_length=256)

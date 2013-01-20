@@ -5,7 +5,7 @@ from oer.models import Resource
 def resource_center(request):
 	return HttpResponse("Page under construction")
 	
-def view_resource(request, resource_id):
+def read(request, resource_id):
 	resource = Resource.objects.get(pk=resource_id)
 	# TODO: Need to OC-ize the title here
 	context = {'resource': resource, 'title': resource }	

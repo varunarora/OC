@@ -10,10 +10,10 @@ urlpatterns = patterns('',
     url(r'^$', 'oc_platform.views.home', name='home'),
     
     url(r'^search/', include('haystack.urls')),
-    
-    url(r'^chapter/', 'oc_platform.views.chapter', name='chapter'),
 
 	url(r'^articles/', include('articles.urls', namespace='articles')),
+	
+	url(r'^resources/', include('oer.urls', namespace='resource')),
 	
 	url(r'^meta/', include('meta.urls', namespace="meta")),
 
