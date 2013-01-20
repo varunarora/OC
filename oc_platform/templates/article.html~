@@ -22,7 +22,7 @@
 				<section class="breadcrumb">
 					<div class="links">
 						{% for category in breadcrumb %}
-							<a href="{% url articles:category_catalog category_slug=category.slug %}">{{ category.title }}</a> 
+							<a href="{% url articles:reader category_slug=category.slug %}">{{ category.title }}</a> 
 							{% if category != article.category %}
 							<span class="vertical-caret breadcrumbs-caret"></span> 
 							{% endif %}

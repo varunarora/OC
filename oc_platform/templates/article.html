@@ -14,7 +14,7 @@
 						<option data-url="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }}"><h2>{{ article.title }}</h2></option>
 						{% for sibling in siblings %}
 							{% if sibling.title != article.title %}
-							<option data-url="{% url articles:reader category_slug=sibling.category.slug article_slug=sibling.slug %}"><h2>{{ sibling.title }}</h2></option>
+							<option data-url="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }}"><h2>{{ sibling.title }}</h2></option>
 							{% endif %}
 						{% endfor %}
 					</select>
