@@ -219,7 +219,7 @@ body > header {
 	background-color: #f6f6f6;
 	font-style: normal;
 	font-weight: normal;
-	box-shadow: 0 0 5px rgba(90, 189, 2, 0.6);
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
     outline: 0 none;
 }
 
@@ -1016,7 +1016,7 @@ label input {
 
 .catalog-category {
 	margin-bottom: 15px;
-	padding-botton: 15px;
+	padding-bottom: 5px;
 	overflow: hidden;
 }
 

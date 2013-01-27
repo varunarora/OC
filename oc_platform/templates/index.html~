@@ -25,13 +25,13 @@
 								{% include 'partials/article_image.html' %}
 							</div>
 							
-							<a href="{% url articles:read category_slug=article.category.slug article_slug=article.slug %}"><div class="chapter-info">
+							<a href="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }}"><div class="chapter-info">
 								<div class="chapter-info-title">{{ article.title }}</div>
 								<div class="chapter-info-caption">{{ article.views }} views</div> 
 							</div></a>
 						</li>
 						{% endfor %}
-						<li>
+						<!--<li>
 							<div class="chapter-thumbnail"><img src="{{ STATIC_URL }}images/article.jpg" /></div>
 							<div class="chapter-info">Magnetism - II</div>
 						</li>
@@ -62,7 +62,7 @@
 						<li>
 							<div class="chapter-thumbnail"><img src="{{ STATIC_URL }}images/article.jpg" /></div>
 							<div class="chapter-info">Intro to Integration</div>
-						</li>
+						</li>-->
 					</ul>
 				</div>
 			</div>
