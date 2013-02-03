@@ -1,0 +1,13 @@
+<div class="article-actions">
+	<ul>
+		<li class="share-action"><a href=""><span class="icon"></span>Share</a></li>
+	</ul>
+</div>
+<div class="article-community">
+	<ul>
+		<li class="no-action">2461 views</li>
+		<li class="favorite-action"><a href=""><span class="icon"></span>Favorite</a></li>
+		<li class="thumbs-up-action"><a href=""><span class="icon"></span>49</a></li>
+		<li class="thumbs-down-action"><a href=""><span class="icon"></span>2</a></li>		
+	</ul>
+</div>

@@ -1,5 +1,5 @@
 		<footer>
-			OpenCurriculum, Inc., a 501(c)3 non-profit organization &#183; <a href="/about">About</a> &#183; <a href="/blog">Blog</a> &#183;  <a href="/help">Help</a> &#183; <a href="/developers">Developers</a> &#183; <a href="/jobs">Jobs</a> &#183; <a href="/terms">Terms of use</a> &#183; <a href="/privacy">Privacy Policy</a> &#183; <a href="/license"><img src="{{ STATIC_URL }}images/by-sa.png" /></a>
+			OpenCurriculum, Inc., a 501(c)3 non-profit organization &#183; <a href="/about">About</a> &#183; <a href="http://blog.theopencurriculum.org">Blog</a> &#183;  <a href="/help">Help</a> &#183; <a href="/developers">Developers</a> &#183; <a href="/jobs">Jobs</a> &#183; <a href="/terms">Terms of use</a> &#183; <a href="/privacy">Privacy Policy</a> &#183; <a href="/license"><img src="{{ STATIC_URL }}images/by-sa.png" /></a>
 		</footer>
 	</body>
 </html>

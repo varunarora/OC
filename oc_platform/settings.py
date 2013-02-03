@@ -20,6 +20,17 @@ DATABASES = {
     }
 }
 
+import sys
+if 'test' in sys.argv:
+	DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'ocrootutesting',
+        'USER': 'root',
+        'PASSWORD': 'lifeme',
+        'HOST': 'localhost',    
+        'PORT': '',    
+	}
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.

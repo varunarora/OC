@@ -1,16 +1,22 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
+from django.utils import unittest
 
-Replace this with more appropriate tests for your application.
-"""
+from license.models import License
 
-from django.test import TestCase
+class LicenseTests(unittest.TestCase):
+	def createLicenses(self):
+	
+		self.license1 = License(title="CC BY ND")
+		self.license2 = License(title="CC BY", description="All free, as long as you attribute")
+		self.license3 = License(custom=True)
 
+		self.assertEqual(self.license1.title, "CC BY ND")
+		self.assertFalse(self.license1.custom)
+		self.assertEqual(self.license1.description, '')
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
+		self.assertEqual(self.license2.title, "CC BY")
+		self.assertFalse(self.license2.custom)
+		self.assertEqual(self.license2.description, "All free, as long as you attribute")
+
+		self.assertEqual(self.license3.title, '')
+		self.assertTrue(self.license3.custom)
+		self.assertEqual(self.license3.description, '')

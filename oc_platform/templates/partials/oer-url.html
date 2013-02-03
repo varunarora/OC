@@ -1,0 +1,25 @@
+<div class="oer-external">
+	<div id="oer-preview">
+		<div id="oer-description" class="summary-text">
+			<div class="bold oer-url-title">{{ resource.url_title }}</div>
+			{{ resource.body }}
+		</div>
+		<div id="oer-thumbnail">
+			<div id="thumbnail-wrapper">
+				<div id="thumbnail-image">
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="oer-info">
+		<div id="oer-details">
+			<ul>
+				<li><span class="oer-info-caption">URL</span>: <span class="oer-info-detail"><a href="{{ resource.url }}">{{ resource.url }}</a></span></li>
+				<li><span class="oer-info-caption">Posted on</span>: <span class="oer-info-detail">February 6th, 2013</span></li>
+			</ul>
+		</div>
+		<div id="oer-get">
+			<a href="{{ resource.url }}" target="_blank"><button class="success-button btn">Open website</button></a>
+		</div>
+	</div>
+</div>

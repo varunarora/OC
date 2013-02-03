@@ -5,6 +5,8 @@ psycopg2==2.4.5
 dj-database-url==0.2.0
 mysql-python
 PIL==1.1.7
-django-haystack=1.2.7
-pysolr=2.1.0
-markdown=2.2.1
+django-haystack==1.2.7
+pysolr==2.1.0
+markdown==2.2.1
+python-magic
+BeautifulSou[

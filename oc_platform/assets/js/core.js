@@ -79,7 +79,85 @@ jQuery(document).ready(function($) {
 	$("input[name=live-filter]").liveUpdate('.category-article-panel').focus();
 	
 	init_categoryArticles();
+	
+	init_showMore();
 });
+
+function init_showMore(){
+	// Grab all the excerpt class
+	$('.summary-text').add('[class^="showmore"]').each(function () {
+	
+		var words = 80;
+		
+		if ($(this).hasClass('showmore-20')) words = 20;
+		else if ($(this).hasClass('showmore-40')) words = 40;
+		else if ($(this).hasClass('showmore-60')) words = 60;
+		else if ($(this).hasClass('showmore-80')) words = 80;
+		else if ($(this).hasClass('showmore-100')) words = 100;
+		
+		// Run formatWord function and specify the length of words display to viewer
+		if ( $.browser.msie ){
+			$(this).html(formatWords($(this).html(), words));
+		}
+		else $(this).html(formatWords($(this).html(), words+5));
+			
+		// Hide the extra words
+		$(this).children('span').hide();
+	
+		// Apply click event to read more link
+		}).click(function () {
+			
+			// Grab the hidden span and anchor
+			var more_text = $(this).children('span.more_text');
+			var more_link = $(this).children('a.more_link');
+			
+			// Toggle visibility using hasClass
+			// I know you can use is(':visible') but it doesn't work in IE8 somehow.
+			
+			if (more_text.hasClass('hide')) {
+				if ($(this).hasClass('summary-text')) more_text.show();
+				else more_text.slideDown('slow');
+	
+				more_link.html(' &#171; hide');
+				more_text.removeClass('hide');
+			} else {
+			
+				if ($(this).hasClass('summary-text')) more_text.hide();
+				else more_text.slideUp('slow');
+	
+				more_link.html(' Show more...');
+				more_text.addClass('hide');
+			}
+		
+			return false;
+		});
+	
+	// Accept a paragraph and return a formatted paragraph with additional html tags
+	function formatWords(sentence, show) {
+		
+		// split all the words and store it in an array
+		var words = sentence.split(' ');
+		var new_sentence = '';
+		
+		// loop through each word
+		for (i = 0; i < words.length; i++) {
+		
+			// process words that will visible to viewer
+			if (i <= show) {
+				new_sentence += words[i] + ' ';
+				// process the rest of the words
+			} else {
+				// add a span at start
+				if (i == (show + 1)) new_sentence += '<span class="more_text hide">';
+				new_sentence += words[i] + ' ';
+				// close the span tag and add read more link in the very end
+				if (words[i+1] == null) new_sentence += '</span><a href="#" class="more_link"> Show more...</a>';
+			}
+		}
+	
+		return new_sentence;
+	}
+}
 
 /**
 	Randomly assigns a delay to all article panel elements for the home and then renders the

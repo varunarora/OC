@@ -1,16 +1,33 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
+from django.utils import unittest
 
-Replace this with more appropriate tests for your application.
-"""
+from oer.models import Resource
+from license.models import License
+from django.contrib.auth.models import User
 
-from django.test import TestCase
+class OerTests(unittest.TestCase):
 
-
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
+	def createResources(self):
+		self.license = License(id=2, title="CC BY SA NC", description="Need to attribute, share-alike and not charge")
+		self.user = User(username="chacha_1234", password="nobodysgonnaguessthis")
+	
+		self.resource = Resource(title="Bloody berry", license=self.license, url="http://www.google.com", body_markdown="Bloody berry is bloody very bloody merry", cost=9.78, user=self.user)
+	
+		
+		self.assertEqual(self.resource.title, "Bloody berry")
+		self.assertEqual(self.resource.type, "url")
+		self.assertEqual(self.resource.license, self.license)
+		self.assertEqual(self.resource.url, "http://www.google.com")
+		self.assertEqual(self.resource.body_markdown, "Bloody berry is bloody very bloody merry")
+		#self.assertIsNone(self.resource.tags)
+		self.assertIsNone(self.resource.created)		
+		self.assertEqual(self.resource.cost, 9.78)
+		self.assertEqual(self.resource.views, 0)
+		
+		# TODO: Find a test for the file field
+		#self.assertIsNone(self.resource.file)
+				
+		self.assertEqual(self.resource.license.id, 2)
+		self.assertEqual(self.resource.license.title, "CC BY SA NC")
+		self.assertEqual(self.resource.license.description, "Need to attribute, share-alike and not charge")
+		self.assertEqual(self.resource.user.username, "chacha_1234")
+		self.assertEqual(self.resource.user.password, "nobodysgonnaguessthis")

@@ -37,7 +37,7 @@ def read_article(request, article):
 	
 	# Limit the body size of all resources descriptions to 200 chars
 	for resource in articleRevision.resources.all():
-		resource.body = resource.body[0:200]
+		resource.body_markdown_html = resource.body_markdown_html[0:200]
 
 	context = {'article' : articleRevision, 'breadcrumb': breadcrumb, 'title': title,
 		'siblings': siblings }

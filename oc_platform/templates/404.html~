@@ -1,0 +1,19 @@
+{% include 'partials/header.html' %}
+
+<div id="center-stage">
+	<div id="fill-panel" class="panel-left">
+		<h2>Page not found</h2>
+		<p>Unfortunately, we can't find what you are looking for. We tried, really. Moe sends his personal apologies to you.</p>
+			
+			<p>May be try searching for the contents of the page you are looking for using 'Search', or check back to the place where you found the link? If you still can't find it, and think that we have probably misplaced the page in our stacks of books scattered around, try <a href="{% url contact %}">contacting us</a>, and we should be thrilled to help. Long live Moe (and his ability to find things after misplacing them in the first place)!
+		</p>
+	</div>
+	<div id="key-panel" class="panel-right">
+		<div style="text-align: center">
+		<img src="{{ STATIC_URL }}images/404.png" />
+		</div>
+	</div>
+</div>
+
+
+{% include 'partials/footer.html' %}

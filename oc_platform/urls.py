@@ -15,7 +15,10 @@ urlpatterns = patterns('',
 	
 	url(r'^resources/', include('oer.urls', namespace='resource')),
 	
-	url(r'^meta/', include('meta.urls', namespace="meta")),
+	url(r'^contact/', 'oc_platform.views.contact', name='contact'),
+
+	url(r'^404testing/', 'oc_platform.views.t404'),
+	url(r'^500testing/', 'oc_platform.views.t505'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -27,4 +30,5 @@ urlpatterns = patterns('',
 if settings.DEBUG:
     urlpatterns += patterns('',
         (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
     )

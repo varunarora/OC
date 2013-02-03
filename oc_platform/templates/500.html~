@@ -1,0 +1,21 @@
+{% include 'partials/header.html' %}
+
+<div id="center-stage">
+	<div id="fill-panel" class="panel-left">
+		<h2>Oopsie, something went wrong!</h2>
+		<p>
+			Looks like Moe's arch enermy, Troy the Pirate, is back and giving our servers some trouble. To fight Troy the Pirate away, we are dispatching our highly trained team of engineering fighters. They have been armed to protect the OpenCurriculum territory, so please be careful.</p>
+			
+			<p>If Troy the Pirate continues to give you trouble wherever you go, don't be a silent spectator. Warn us of this terrible situation by <a href="{% url contact %}">contacting us</a>, and help shall be on its way. After all, we have the incredible Moe on our side!
+		</p>
+		
+		<p>Peace,<br/>
+		<span class="bold">The International Server Protection Declaration Team</span></p>
+	</div>
+	<div id="key-panel" class="panel-right">
+		<img src="{{ STATIC_URL }}images/500.png" />
+	</div>
+</div>
+
+
+{% include 'partials/footer.html' %}

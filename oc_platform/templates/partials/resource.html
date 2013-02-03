@@ -1,7 +1,7 @@
 <div class="resource">
 	<div class="resource-thumbnail"></div>
 	<div class="description">
-		<div class="resource-title"><a href="{{ resource.url }}">{{ resource.title }}</a></div>
-		<div class="resource-description">{{ resource.body }}</div>
+		<div class="resource-title"><a href="{% url resource:read resource_id=resource.id %}">{{ resource.title }}</a></div>
+		<div class="resource-description">{{ resource.body_markdown_html|striptags}}</div>
 	</div>
 </div>
