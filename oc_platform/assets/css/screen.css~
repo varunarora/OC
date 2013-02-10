@@ -1199,6 +1199,9 @@ em {
 .oer-info-caption {
 	color: #666;
 }
+.oer-url-title {
+	margin-bottom: 10px;
+}
 
 #thumbnail-image {
 	border: 1px solid #b2b2b2;
@@ -1217,4 +1220,19 @@ em {
 	position: relative;
 	bottom: 28px;
 	height: 20px;
+}
+
+code, pre {
+	font-family: monospace;
+	margin: 10px 0px;
+	background-color: #e9effa;
+}
+
+pre {
+	padding: 10px;
+}
+
+#article ol {
+	list-style-type: decimal;
+	padding-left: 20px;
 }

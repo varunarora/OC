@@ -787,11 +787,20 @@ select option {
 }
 
 .article-actions {
+	float: left;
+
+}
+
+.article-community {
+	float: right;
+}
+
+#article-do {
 	margin-top: 10px;
 	overflow: hidden;
 }
 
-.article-actions ul li {
+.article-actions ul li, .article-community ul li {
 	float: left;
 	margin: 0px 20px 0px 0px;
 	border: 1px solid #fff;
@@ -799,7 +808,12 @@ select option {
 	border-radius: 2px 2px 2px 2px;
 }
 
-.article-actions ul li:hover {
+#article-do li.no-action:hover {
+	background-color: #fff;
+	border: 1px solid #fff;
+}
+
+.article-actions ul li:hover, .article-community ul li:hover {
 	border: 1px solid #b2b2b2;
 	background-color: #efefef;
 	transition: background-color .1s linear;
@@ -807,15 +821,15 @@ select option {
     -moz-transition: background-color .1s linear;
 }
 
-.article-actions ul li a {
+.article-actions ul li a, .article-community ul li a, #article-do li.no-action {
 	color: #666;
 }
 
-.article-actions ul li {
+.article-actions ul li, .article-community ul li, #article-do li.no-action {
 	font-size: 0.9em;
 }
 
-.article-actions ul li a:hover {
+.article-actions ul li a:hover, .article-community ul li a:hover {
 	text-decoration: none;
 	color: #333;
 }
@@ -845,6 +859,18 @@ ul li span.icon {
 
 .share-action span {
 	background-position: -120px -72px;
+}
+
+.favorite-action span {
+	background-position: -120px 0px;
+}
+
+.thumbs-up-action span {
+	background-position: -96px -144px;
+}
+
+.thumbs-down-action span {
+	background-position: -120px -144px;
 }
 
 #article-objectives {
@@ -882,6 +908,39 @@ p {
 	margin-bottom: 12px;
 }
 
+#author-panel {
+	height: 100px;
+	background-color: #444;
+	color: #fff;
+	padding: 18px;
+}
+
+#author-thumbnail {
+	background-color: #b2b2b2;
+	width: 100px;
+	height: 100px;
+	float: left;
+	margin-right: 15px;
+}
+
+#author-info {
+
+}
+
+#author-name {
+
+}
+
+#author-resources {
+	color: #888;
+}
+
+button.subscribe {
+	padding: 2px 8px;
+	margin-top: 15px;
+	font-size: 0.9em;
+}
+
 aside#support {
 	background-color: #efefef;
 	padding: 18px;
@@ -916,6 +975,7 @@ aside#support {
 	text-overflow: ellipsis;
 	-o-text-overflow: ellipsis;
 	-ms-text-overflow: ellipsis;
+	color: #666;
 }
 
 .search-result {
@@ -1032,8 +1092,24 @@ label input {
 	color: #1a1a1a;
 }
 
-span.highlighted, .search-filter-header, .resource-title a, .search-result-title a, .article-actions ul li a, .breadcrumb, .bold, strong, th {
+span.highlighted,
+.search-filter-header,
+.resource-title a,
+.search-result-title a,
+.article-actions ul li a,
+.article-community ul li a,
+#article-do li.no-action,
+.breadcrumb,
+.bold,
+strong,
+th,
+#author-name,
+.oer-info-detail {
 	font-family: "Proxima Nova Bold", 'Helvetica Neue', Arial, Helvetica, sans-serif; font-size-adjust:0.488; font-weight:bold; font-style:normal;
+}
+
+.resource-title a {
+	line-height: 1.25em;
 }
 
 em {
@@ -1085,4 +1161,78 @@ em {
 
 .aside-section {
 	margin-bottom: 20px;
+}
+
+.oer-video {
+	margin-top: 15px;
+}
+
+.oer-external {
+	margin-top: 15px;
+	box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.25);
+	padding: 18px;
+	margin-left: 5px;
+	overflow: hidden;
+}
+
+#oer-preview {
+	overflow: hidden;
+	margin-bottom: 18px;
+}
+
+#oer-description, #oer-details {
+	float: left;
+	width: 320px;
+	margin-right: 18px;
+}
+
+#oer-get, #oer-thumbnail {
+	float: right;
+	width: 194px;
+}
+
+#oer-get {
+	text-align: center;
+	padding-top: 9px;
+}
+
+.oer-info-caption {
+	color: #666;
+}
+.oer-url-title {
+	margin-bottom: 10px;
+}
+
+#thumbnail-image {
+	border: 1px solid #b2b2b2;
+	height: 150px;
+	width: 120px;
+	margin: auto;
+}
+
+#thumbnail-info {
+	margin: auto;
+	text-align: center;
+	width: 120px;
+	color: #fff;
+	background-color: #444;
+	padding: 4px 0px;
+	position: relative;
+	bottom: 28px;
+	height: 20px;
+}
+
+code, pre {
+	font-family: monospace;
+	margin: 10px 0px;
+	background-color: #e9effa;
+}
+
+pre {
+	padding: 10px;
+}
+
+#article ol {
+	list-style-type: decimal;
+	padding-left: 25px;
 }

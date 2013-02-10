@@ -1221,3 +1221,18 @@ em {
 	bottom: 28px;
 	height: 20px;
 }
+
+code, pre {
+	font-family: monospace;
+	margin: 10px 0px;
+	background-color: #e9effa;
+}
+
+pre {
+	padding: 10px;
+}
+
+#article ol {
+	list-style-type: decimal;
+	padding-left: 25px;
+}
