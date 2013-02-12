@@ -3,6 +3,8 @@ from django.shortcuts import render, redirect
 from articles.models import Article
 from meta.models import Category
 from oer.models import Resource
+from django.core.cache import cache
+from datetime import datetime
 import itertools
 
 def index(request):
@@ -10,26 +12,36 @@ def index(request):
 
 def read_article(request, article):
 	# from datetime import datetime
-	# print datetime.now()
+	print datetime.now()
 
-	# Fetch the current revision associated with the article
-	articleRevision = article.revision
-	articleRevision.title = article.title
-	
-	# Store other article fields in the revision object to be passed to the view
-	articleRevision.difficulty = article.difficulty
-	articleRevision.resources = article.resources
-	articleRevision.slug = article.slug
+	# Look for breadcrumb value in cache
+	ar_cache_key = "ar_" + str(article.id)
+	articleRevision = cache.get(ar_cache_key)
 
-	breadcrumb = buildBreadcrumb(article.category)
-	breadcrumbTitle = breadcrumb[:]
-	breadcrumbTitle.pop()
-	title = article.title + " / "
+	if not articleRevision:
+		# Fetch the current revision associated with the article
+		articleRevision = article.revision
+		articleRevision.title = article.title
 	
+		# Store other article fields in the revision object to be passed to the view
+		articleRevision.difficulty = article.difficulty
+		articleRevision.resources = article.resources
+		articleRevision.slug = article.slug
+
+	# Look for breadcrumb value in cache
+	bc_cache_key = "bc_" + str(article.id)
+	breadcrumb = cache.get(bc_cache_key)
+
+	if not breadcrumb:
+		breadcrumb = buildBreadcrumb(article.category)
+		breadcrumbTitle = breadcrumb[:]
+		breadcrumbTitle.pop()
+		title = article.title + " / "
+
 	for category in breadcrumbTitle:
 		title += category.title + " / "
 	title+= "OpenCurriculum"	
-	
+
 	breadcrumb.reverse()
 
 	# Get sibling articles of current article
@@ -38,6 +50,10 @@ def read_article(request, article):
 	# Limit the body size of all resources descriptions to 200 chars
 	for resource in articleRevision.resources.all():
 		resource.body_markdown_html = resource.body_markdown_html[0:200]
+
+	# Set caches
+	cache.set(bc_cache_key, breadcrumb)
+	cache.set(ar_cache_key, articleRevision)
 
 	context = {'article' : articleRevision, 'breadcrumb': breadcrumb, 'title': title,
 		'siblings': siblings }
@@ -53,8 +69,15 @@ def category_catalog(request, category):
 		title += bc_category.title + " / "
 	title+= "OpenCurriculum"
 
-	# TODO: This operation is very slow. Need to optimize
-	childCategories = buildChildCategories([], [category])
+	# Look for childCategories in cache
+	cc_cache_key = "cc_" + str(category.id)
+	childCategories = cache.get(cc_cache_key)
+	
+	if not childCategories:
+		# TODO: This operation is very slow. Need to optimize
+		childCategories = buildChildCategories([], [category])
+		
+		cache.set(cc_cache_key, childCategories)
 
 	top_articles = Article.objects.filter(category__in=childCategories).order_by('views')
 
@@ -211,10 +234,10 @@ def reader(request, category_slug):
 			article = Article.objects.filter(slug=articleSlug)
 		except Article.DoesNotExist:
 			raise Http404
-	
+
 		# If non-unique article name, call articleURLResolver()
 		articleCount = article.count()
-
+		
 		if articleCount == 1:
 			# TODO: Due to this rather trivial code, the category is not even looked up is a unique
 			#	child is found. This ought to be fixed to avoid misleading. Ideally, a lookup table

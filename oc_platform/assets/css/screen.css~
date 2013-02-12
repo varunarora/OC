@@ -271,17 +271,29 @@ body > header {
 	font-size: 0.75em;
 }
 
-#chief-panel-container {
+#chief-panel-container.home {
 	height: 450px;
 	background-color: #b7dcf7;
 	background: -moz-radial-gradient(center, ellipse cover, rgba(210,229,242,1) 0%, rgba(210,229,242,1) 1%, rgba(183,220,247,1) 100%);
 		
 }
 
+#chief-panel-container.developers {
+	height: 800px;
+	background: url('../images/developers_backdrop.jpg') no-repeat center center fixed;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+
 #chief-panel-wrapper {
-	background-image: url('../images/sun-flare.png');
 	width: 100%;
 	margin: auto;
+}
+
+.home #chief-panel-wrapper {
+	background-image: url('../images/sun-flare.png');
 	height: 450px;
 	background-position: center -50px;
 	background-repeat: no-repeat;
@@ -292,6 +304,10 @@ body > header {
 	margin: auto;
 	padding: 60px 0px 0px 0px;
 	position: relative;
+	overflow: hidden;
+}
+
+.home #chief-panel {
 	top: -450px;
 	overflow: hidden;
 	height: 390px;
@@ -1104,7 +1120,8 @@ span.highlighted,
 strong,
 th,
 #author-name,
-.oer-info-detail {
+.oer-info-detail,
+h1.developers-title {
 	font-family: "Proxima Nova Bold", 'Helvetica Neue', Arial, Helvetica, sans-serif; font-size-adjust:0.488; font-weight:bold; font-style:normal;
 }
 
@@ -1234,5 +1251,13 @@ pre {
 
 #article ol {
 	list-style-type: decimal;
-	padding-left: 20px;
+	padding-left: 25px;
+}
+
+.developers #chief-panel {
+	color: #fff;
+}
+
+h1.developers-title {
+	margin-bottom: 15px;
 }

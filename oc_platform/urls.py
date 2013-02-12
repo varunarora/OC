@@ -16,6 +16,8 @@ urlpatterns = patterns('',
 	url(r'^resources/', include('oer.urls', namespace='resource')),
 	
 	url(r'^contact/', 'oc_platform.views.contact', name='contact'),
+	
+	url(r'^developers/', 'oc_platform.views.developers', name='developers'),
 
 	url(r'^404testing/', 'oc_platform.views.t404'),
 	url(r'^500testing/', 'oc_platform.views.t505'),

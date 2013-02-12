@@ -20,3 +20,8 @@ def contact(request):
 	top_articles = Article.objects.order_by('title')[:10]
 	context = {'top_articles': top_articles, 'title': 'OpenCurriculum: A K-12 Textbook Hub'}	
 	return render(request, 'contact.html', context)
+	
+def developers(request):
+	top_articles = Article.objects.order_by('title')[:10]
+	context = {'top_articles': top_articles, 'title': 'OpenCurriculum: A K-12 Textbook Hub'}	
+	return render(request, 'developers.html', context)	

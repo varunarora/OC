@@ -24,7 +24,7 @@ import sys
 if 'test' in sys.argv:
 	DATABASES['default'] = {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'localhost',
+        'NAME': 'ocrootutesting',
         'USER': 'root',
         'PASSWORD': 'lifeme',
         'HOST': 'localhost',    
@@ -178,3 +178,16 @@ LOGGING = {
 HAYSTACK_SITECONF = 'search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
 HAYSTACK_SOLR_URL = 'http://54.235.197.234:8983/solr'
+
+os.environ['MEMCACHE_SERVERS'] = os.environ.get('MEMCACHIER_SERVERS', 'dev1.ec2.memcachier.com:11211').replace(',', ';')
+os.environ['MEMCACHE_USERNAME'] = os.environ.get('MEMCACHIER_USERNAME', '12d7b2')
+os.environ['MEMCACHE_PASSWORD'] = os.environ.get('MEMCACHIER_PASSWORD', '78d0da6ae9bb1409dcde')
+
+CACHES = {
+  'default': {
+    'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
+    'LOCATION': os.environ.get('MEMCACHIER_SERVERS', 'dev1.ec2.memcachier.com:11211').replace(',', ';'),
+    'TIMEOUT': 500,
+    'BINARY': True,
+  }
+}
