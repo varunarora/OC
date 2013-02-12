@@ -34,9 +34,10 @@ def read_article(request, article):
 
 	if not breadcrumb:
 		breadcrumb = buildBreadcrumb(article.category)
-		breadcrumbTitle = breadcrumb[:]
-		breadcrumbTitle.pop()
-		title = article.title + " / "
+	
+	breadcrumbTitle = breadcrumb[:]
+	breadcrumbTitle.pop()
+	title = article.title + " / "
 
 	for category in breadcrumbTitle:
 		title += category.title + " / "

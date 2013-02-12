@@ -71,7 +71,7 @@ def category_catalog(request, category):
 
 	# Look for childCategories in cache
 	cc_cache_key = "cc_" + str(category.id)
-	childCategories = cache.get(cc_key_cache)
+	childCategories = cache.get(cc_cache_key)
 	
 	if not childCategories:
 		# TODO: This operation is very slow. Need to optimize
