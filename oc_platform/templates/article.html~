@@ -34,7 +34,7 @@
 						</div>
 					</div>
 				</section>
-				<section class="article-do">
+				<section id="article-do">
 					<div class="article-actions">
 						<ul>
 							<li class="edit-action"><a href=""><span class="icon"></span>Edit</a></li>

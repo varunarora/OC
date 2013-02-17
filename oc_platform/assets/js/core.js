@@ -81,6 +81,41 @@ jQuery(document).ready(function($) {
 	init_categoryArticles();
 	
 	init_showMore();
+	
+	
+	$('#article img').each(function(){
+		var imgCaption = $('<div/>');
+		imgCaption.addClass('img-caption');
+		
+		var imgCaptionWrapper = $('<div/>');
+		imgCaptionWrapper.addClass('img-caption-wrapper');
+
+		var imgWrapper = $('<div/>');
+		imgWrapper.addClass('img-wrapper');
+		
+		imgCaption.appendTo(imgCaptionWrapper);
+		
+		var imgSrc = $(this).attr('src');
+		
+		var lastIndexOfSlash = imgSrc.lastIndexOf('/');
+		var lastIndexOfPeriod = imgSrc.lastIndexOf('.');
+		
+		var imgNum = $(this).attr('src').substring(lastIndexOfSlash+1, lastIndexOfPeriod);
+		
+		console.log(imgNum);
+		
+		imgCaption.text("Figure " + imgNum);
+		
+		imgWrapper.insertAfter($(this));
+		
+		var currentWidth = $(this).css('width')
+		$(this).css('width', currentWidth.substring(0, currentWidth.indexOf('px'))*0.5);
+
+		$(this).appendTo(imgWrapper);
+		imgCaptionWrapper.appendTo(imgWrapper);
+		
+	})
+	
 });
 
 function init_showMore(){

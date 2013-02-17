@@ -23,7 +23,7 @@
 					<div class="links">
 						{% for category in breadcrumb %}
 							<a href="{% url articles:reader category_slug=category.slug %}">{{ category.title }}</a> 
-							{% if category != article.category %}
+							{% if not forloop.last %}
 							<span class="vertical-caret breadcrumbs-caret"></span> 
 							{% endif %}
 						{% endfor %}

@@ -34,14 +34,20 @@ def read_article(request, article):
 
 	if not breadcrumb:
 		breadcrumb = buildBreadcrumb(article.category)
+		# Set cache
+		cache.set(bc_cache_key, breadcrumb)	
 	
 	breadcrumbTitle = breadcrumb[:]
 	breadcrumbTitle.pop()
-	title = article.title + " / "
+	title = article.title + " - "
 
 	for category in breadcrumbTitle:
-		title += category.title + " / "
+		title += category.title + " - "
 	title+= "OpenCurriculum"	
+
+	# Set caches
+
+	cache.set(ar_cache_key, articleRevision)
 
 	breadcrumb.reverse()
 
@@ -51,10 +57,6 @@ def read_article(request, article):
 	# Limit the body size of all resources descriptions to 200 chars
 	for resource in articleRevision.resources.all():
 		resource.body_markdown_html = resource.body_markdown_html[0:200]
-
-	# Set caches
-	cache.set(bc_cache_key, breadcrumb)
-	cache.set(ar_cache_key, articleRevision)
 
 	context = {'article' : articleRevision, 'breadcrumb': breadcrumb, 'title': title,
 		'siblings': siblings }
