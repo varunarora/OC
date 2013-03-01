@@ -52,8 +52,6 @@ class ResourceThumbnail:
 			#if __name__ == "__main__":
 				#webkit2png = WebKit2PNG.generatePng(resource.url, options)
 			
-			print "teri jaat ki"
-			
 			call(["phantomjs", "oer/takeScreenshot.js", resource.url, thumbnail + "-tmp" +  ResourceThumbnail.THUMBNAIL_EXT])
 			
 			call(["convert", thumbnail + "-tmp" +  ResourceThumbnail.THUMBNAIL_EXT, "-resize", "200x200",
