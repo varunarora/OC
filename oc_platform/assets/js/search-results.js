@@ -45,8 +45,9 @@ var ResultsView = Backbone.View.extend({
 		"<div class=\"search-result-title\">" + 
 		"<a href=\"<%= url %>\"><%= title %></a></div>" + 
 		"<div class=\"search-result-description\"><%= summary %></a></div>" + 
-		"<div class=\"search-result-meta\">Created on <%= created %> by <%= user %></div>" +
-		"</div><div class=\"search-result-thumbnail\"></div>"),
+		"<div class=\"search-result-meta\">Created on <%= created %></div>" +
+		"</div><div class=\"search-result-thumbnail\" style=\"background-image: " + 
+		"url('<%= thumbnail %>');\"></div>"),
 	
 	render: function(){
 		this.$el.html(this.template(this.model.toJSON()));
@@ -223,4 +224,3 @@ var resultCollectionView = new ResultsCollectionView({collection: resultSet});
 	
 // Render the collection view
 resultCollectionView.render();
-	

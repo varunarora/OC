@@ -5,6 +5,7 @@ from license.models import License
 from media.models import Image
 from articles.MarkdownTextField import MarkdownTextField
 from articles.jsonfield.fields import JSONField
+from ArticleThumbnail import ArticleThumbnail
 
 def get_default_category():
 	return Category.objects.get(pk=1)
@@ -37,7 +38,7 @@ class Article(models.Model):
 	title = models.CharField(max_length=256)
 	resources = models.ManyToManyField('oer.Resource', blank=True)
 	# TODO: Articles should have only one image, this is wrongly done
-	image = models.ManyToManyField('media.Image')
+	image = models.ManyToManyField('media.Image', blank=True)
 	views = models.IntegerField(editable=False, default=0)
 	license = models.ForeignKey('license.License', default=get_default_license)
 	slug = models.SlugField(max_length=256)
@@ -46,3 +47,9 @@ class Article(models.Model):
 	
 	def __unicode__(self):
 		return self.title
+		
+	def save(self, *args, **kwargs):
+		#TODO: Shouldn't need to create instance object
+		a = ArticleThumbnail()
+		a.generateThumbnail(self)
+		return super(Article, self).save(*args, **kwargs)	

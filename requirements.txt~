@@ -10,3 +10,4 @@ pysolr==2.1.0
 markdown==2.2.1
 python-magic
 BeautifulSoup
+pylibmc==1.2.2

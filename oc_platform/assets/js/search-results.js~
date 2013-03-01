@@ -45,8 +45,9 @@ var ResultsView = Backbone.View.extend({
 		"<div class=\"search-result-title\">" + 
 		"<a href=\"<%= url %>\"><%= title %></a></div>" + 
 		"<div class=\"search-result-description\"><%= summary %></a></div>" + 
-		"<div class=\"search-result-meta\">Created on <%= created %> by <%= user %></div>" +
-		"</div><div class=\"search-result-thumbnail\"></div>"),
+		"<div class=\"search-result-meta\">Created on <%= created %>" +
+		"</div><div class=\"search-result-thumbnail\" style=\"background-image: " + 
+		"url('<%= thumbnail %>');\"></div>"),
 	
 	render: function(){
 		this.$el.html(this.template(this.model.toJSON()));
@@ -142,12 +143,6 @@ function _refadeSliderRegions(){
 	@return none
 */
 function init_mvc(){
-	// Construct a collection view using the search result objects built in
-	var resultCollectionView = new ResultsCollectionView({collection: resultSet});
-	
-	// Render the collection view
-	resultCollectionView.render();
-	
 	// Listen to changes on all options in the filters panel
 	var filterCheckboxes = $('.search-filter input:checkbox');
 
@@ -224,3 +219,8 @@ function _fallsInRange(filterRange, currentDifficulty){
 // Initialize the search results collection before page loads
 var resultSet = new ResultsSet();
 
+// Construct a collection view using the search result objects built in
+var resultCollectionView = new ResultsCollectionView({collection: resultSet});
+	
+// Render the collection view
+resultCollectionView.render();

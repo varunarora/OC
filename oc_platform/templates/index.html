@@ -7,7 +7,7 @@
 			
 				<div id="left-panel">
 					<h1>High-quality K-12 textbook content, <span class="bold-italic">created by you</span></h1>
-					<span class="bold">80+</span> textbook articles along with 1000s of related videos, audio, worksheets, documents, etc. produced and curated by the community!
+					<span class="bold">{{ count }}</span> textbook articles along with 100s of related videos, audio, worksheets, documents, etc. produced and curated by the community!
 					
 					<div class="actions-wrapper">
 						<a href="articles"><button class="success-button btn">Get more FREE content <span class="vertical-caret"></span></button></a>
@@ -21,11 +21,11 @@
 					<ul id="article-panel">
 						{% for article in top_articles %}
 						<li>
-							<div class="chapter-thumbnail">
+							<div class="chapter-thumbnail-wrapper">
 								{% include 'partials/article_image.html' %}
 							</div>
 							
-							<a href="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }}"><div class="chapter-info">
+							<a href="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }}" title="{{ article.title }}" alt="{{ article.title }}"><div class="chapter-info">
 								<div class="chapter-info-title">{{ article.title }}</div>
 								<div class="chapter-info-caption">{{ article.views }} views</div> 
 							</div></a>

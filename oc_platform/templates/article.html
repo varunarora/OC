@@ -69,6 +69,8 @@
 			<h3>Resources</h3>
 			{% for resource in article.resources.all %}
 				{% include 'partials/resource.html' %}
+			{% empty %}
+				No resources have been linked to this article yet.
 			{% endfor %}
 		</aside>
 	</div>

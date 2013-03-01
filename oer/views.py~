@@ -17,12 +17,17 @@ def view_resource(request, resource_id):
 		soup = BeautifulSoup(source)
 		
 		resource.url_title = soup.find('title').text
-		description = soup.findAll('meta', attrs={'name' : "description"})[0]
 		
-		if description:
-			resource.body = description['content']
+		try:
+			description = soup.findAll('meta', attrs={'name' : "description"})[0]
+		
+			if description:
+				resource.body = description['content']
+		except:
+			pass
 	
 	if resource.type == "attachment":
+		#TODO: Replace with |filesizeformat template tag
 		filesize = resource.file.size
 		if filesize >= 104856:
 			resource.filesize = str(_filesizeFormat(float(filesize) / 104856)) + " MB"
@@ -53,6 +58,9 @@ def view_resource(request, resource_id):
 	
 	userResourceCount = Resource.objects.filter(user=resource.user).count()
 	
+	# Increment page views (always remains -1 based on current view)
+	Resource.objects.filter(id=resource_id).update(views=resource.views+1)
+	
 	context = {'resource': resource, 'title': resource.title + " / OpenCurriculum", 'related' : related, "user_resource_count" : userResourceCount }	
 	return render(request, 'resource.html', context)
 
@@ -65,7 +73,7 @@ def download(request, resource_id):
 	import magic
 	mime = magic.Magic(mime=True)
 	content_type = mime.from_file(resource.file.path)
-	
+	# TODO: Security risk. Check file name for safeness
 	response = HttpResponse(resource.file, content_type)
 	response['Content-Disposition'] = 'attachment; filename="' + resource.file.name + '"'
 	return response

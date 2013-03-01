@@ -23,7 +23,7 @@
 					<div class="links">
 						{% for category in breadcrumb %}
 							<a href="{% url articles:reader category_slug=category.slug %}">{{ category.title }}</a> 
-							{% if category != article.category %}
+							{% if not forloop.last %}
 							<span class="vertical-caret breadcrumbs-caret"></span> 
 							{% endif %}
 						{% endfor %}
@@ -69,6 +69,8 @@
 			<h3>Resources</h3>
 			{% for resource in article.resources.all %}
 				{% include 'partials/resource.html' %}
+			{% empty %}
+				No resources linked to this article yet.
 			{% endfor %}
 		</aside>
 	</div>

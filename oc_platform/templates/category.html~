@@ -6,7 +6,7 @@
 			<div class="links">
 				{% for bc_category in breadcrumb %}
 					<a href="{% url articles:reader category_slug=bc_category.slug %}">{{ bc_category.title }}</a> 
-					{% if not foorloop.last %}
+					{% if not forloop.last %}
 					<span class="vertical-caret breadcrumbs-caret"></span> 
 					{% endif %}
 				{% endfor %}
@@ -40,11 +40,15 @@
 				<ul class="aside-section">
 					{% for key, value in sets.items %}
 					<li><a href="{% url articles:reader category_slug=key.slug %}">{{ key.title }} ({{ value }})</a></li>
+					{% empty %}
+						No subsets found.
 					{% endfor %}
 				</ul>
 			<h3>Resources</h3>
 			{% for resource in resources %}
 				{% include 'partials/resource.html' %}
+			{% empty %}
+				No resources have been linked to articles in this category yet.	
 			{% endfor %}
 		</aside>
 	</div>

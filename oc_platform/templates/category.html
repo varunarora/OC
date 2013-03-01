@@ -23,7 +23,7 @@
 						<div class="chapter-thumbnail">
 							{% include 'partials/article_image.html' %}
 						</div>
-						<a href="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }} "><div class="chapter-info">{{ article.title }}</div>
+						<a href="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }} " title="{{ article.title }}" alt="{{ article.title }}"><div class="chapter-info">{{ article.title }}</div>
 						<div class="chapter-thermometer thermometer">
 							<div class="thermometer-difficulty-wrapper">
 								<div class="thermometer-difficulty" data-level="{{ article.difficulty }}"></div>
@@ -40,11 +40,15 @@
 				<ul class="aside-section">
 					{% for key, value in sets.items %}
 					<li><a href="{% url articles:reader category_slug=key.slug %}">{{ key.title }} ({{ value }})</a></li>
+					{% empty %}
+						No subsets found.
 					{% endfor %}
 				</ul>
 			<h3>Resources</h3>
 			{% for resource in resources %}
 				{% include 'partials/resource.html' %}
+			{% empty %}
+				No resources have been linked to articles in this category yet.	
 			{% endfor %}
 		</aside>
 	</div>

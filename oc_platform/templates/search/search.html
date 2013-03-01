@@ -53,7 +53,8 @@
 		    			difficulty: '{{ result.object.difficulty }}',
 		    			cost: 'free',
 		    			license: '{{ result.object.license }}',
-		    			type: 'article'
+		    			type: 'article',
+		    			thumbnail: '{{ STATIC_URL }}images/thumbnails/{{ result.object.id }}-thumb.jpg'
 		    		});
 		    		{% endif %}
 					{% if result.content_type == "oer.resource" %}
@@ -68,7 +69,8 @@
 		    			difficulty: '{{ result.object.difficulty }}',
 		    			cost: 'free',
 		    			license: '{{ result.object.license }}',
-		    			type: '{{ result.object.type }}'
+		    			type: '{{ result.object.type }}',
+		    			thumbnail: '{{ STATIC_URL }}images/oer_thumbnails/{{ result.object.id }}-thumb.jpg'
 		    		});
 					{% endif %}
 					resultSet.add(result);

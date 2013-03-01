@@ -20,7 +20,7 @@
 			</ul>
 		</div>
 		<div id="oer-get">
-			<a href="{# url resource:download resource_id=resource.id #}" target="_blank"><button class="success-button btn">Download</button></a>
+			<a href="{% url resource:download resource_id=resource.id %}" target="_blank"><button class="success-button btn">Download</button></a>
 		</div>
 	</div>
 </div>

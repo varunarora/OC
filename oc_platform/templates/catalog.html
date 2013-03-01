@@ -15,7 +15,7 @@
 								<div class="chapter-thumbnail">
 									{% include 'partials/article_image.html' %}
 								</div>
-								<a href="{% url articles:reader category_slug=category.slug %}?q={{ article.slug }}"><div class="chapter-info">{{ article.title }}</div></a>
+								<a href="{% url articles:reader category_slug=category.slug %}?q={{ article.slug }}" title="{{ article.title }}" alt="{{ article.title }}"><div class="chapter-info">{{ article.title }}</div></a>
 							</li>
 						{% endfor %}
 					
@@ -35,6 +35,8 @@
 			<h3>Popular resources</h3>
 			{% for resource in articles.resources %}
 				{% include 'partials/resource.html' %}
+			{% empty %}
+				No resources found.
 			{% endfor %}
 		</aside>
 	</div>

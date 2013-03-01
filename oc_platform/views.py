@@ -2,8 +2,10 @@ from django.shortcuts import render
 from articles.models import Article
 
 def home(request):
-	top_articles = Article.objects.order_by('title')[:10]
-	context = {'top_articles': top_articles, 'title': 'OpenCurriculum: A K-12 Textbook Hub'}	
+	top_articles = Article.objects.order_by('title').order_by('-views')[:10]
+	article_count = Article.objects.all().count()
+	context = {'top_articles': top_articles, 'title': 'OpenCurriculum: A K-12 Textbook Hub',
+		'count' : article_count}	
 	return render(request, 'index.html', context)
 	
 def t404(request):

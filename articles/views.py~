@@ -11,9 +11,6 @@ def index(request):
 	return HttpResponse("Page under construction")
 
 def read_article(request, article):
-	# from datetime import datetime
-	print datetime.now()
-
 	# Look for breadcrumb value in cache
 	ar_cache_key = "ar_" + str(article.id)
 	articleRevision = cache.get(ar_cache_key)
@@ -22,6 +19,7 @@ def read_article(request, article):
 		# Fetch the current revision associated with the article
 		articleRevision = article.revision
 		articleRevision.title = article.title
+		articleRevision.article_id = article.id
 	
 		# Store other article fields in the revision object to be passed to the view
 		articleRevision.difficulty = article.difficulty
@@ -39,18 +37,16 @@ def read_article(request, article):
 	
 	breadcrumbTitle = breadcrumb[:]
 	breadcrumbTitle.pop()
-	title = article.title + " - "
+	title = article.title + " &lsaquo; "
 
 	for category in breadcrumbTitle:
-		title += category.title + " - "
+		title += category.title + " &lsaquo; "
 	title+= "OpenCurriculum"	
 
 	# Set caches
-
 	cache.set(ar_cache_key, articleRevision)
 
 	breadcrumb.reverse()
-	print breadcrumb
 
 	# Get sibling articles of current article
 	siblings = Article.objects.filter(category=article.category)
@@ -58,6 +54,10 @@ def read_article(request, article):
 	# Limit the body size of all resources descriptions to 200 chars
 	for resource in articleRevision.resources.all():
 		resource.body_markdown_html = resource.body_markdown_html[0:200]
+
+	# Increment page views (always remains -1 based on current view)
+	article.views += 1
+	article.save()
 
 	context = {'article' : articleRevision, 'breadcrumb': breadcrumb, 'title': title,
 		'siblings': siblings }

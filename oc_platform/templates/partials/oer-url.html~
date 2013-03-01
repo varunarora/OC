@@ -6,7 +6,7 @@
 		</div>
 		<div id="oer-thumbnail">
 			<div id="thumbnail-wrapper">
-				<div id="thumbnail-image">
+				<div id="thumbnail-image" style="background-image: url('{{ STATIC_URL }}images/oer_thumbails/{{ resource.id }}-thumb.jpg');">
 				</div>
 			</div>
 		</div>
@@ -14,13 +14,12 @@
 	<div id="oer-info">
 		<div id="oer-details">
 			<ul>
-				<li><span class="oer-info-caption">URL</span>: <span class="oer-info-detail"><a href="">http://www.kidsonline.
-net/learn/algebra/algebra.html</a></span></li>
+				<li><span class="oer-info-caption">URL</span>: <span class="oer-info-detail"><a href="{{ resource.url }}">{{ resource.url }}</a></span></li>
 				<li><span class="oer-info-caption">Posted on</span>: <span class="oer-info-detail">February 6th, 2013</span></li>
 			</ul>
 		</div>
 		<div id="oer-get">
-			<button class="success-button btn">Open website</button>
+			<a href="{{ resource.url }}" target="_blank"><button class="success-button btn">Open website</button></a>
 		</div>
 	</div>
 </div>

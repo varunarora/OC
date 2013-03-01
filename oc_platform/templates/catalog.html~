@@ -21,7 +21,7 @@
 					
 						<li class="more-articles">
 							{% if category.countMore != 0 %}
-								<a href="{% url articles:category_catalog category_slug=category.slug %}" class="true-color">{{ subject.countMore }} more<span class="vertical-caret breadcrumbs-caret"></span></a>
+								<a href="{% url articles:reader category_slug=category.slug %}" class="true-color">{{ subject.countMore }} more<span class="vertical-caret breadcrumbs-caret"></span></a>
 							{% endif %}
 						</li>
 					</ul>
@@ -35,6 +35,8 @@
 			<h3>Popular resources</h3>
 			{% for resource in articles.resources %}
 				{% include 'partials/resource.html' %}
+			{% empty %}
+				No resources found.
 			{% endfor %}
 		</aside>
 	</div>

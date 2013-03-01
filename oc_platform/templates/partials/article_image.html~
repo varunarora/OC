@@ -1,0 +1,8 @@
+{# This is a hack owing to the image field being ManyToMany in the mode #}
+{# with article.image.all|first as article_image #}
+<!--<img src="{{ article_image.path.url }}" />-->
+{# endwith #}
+<!--<img src="{{ STATIC_URL }}images/thumbnails/{{ article.id }}-thumb.jpg" />-->
+
+<div class="chapter-thumbnail" style="background-image: url('{{ STATIC_URL }}images/thumbnails/{{ article.id }}-thumb.jpg');" title="{{ article.title }}">
+</div>

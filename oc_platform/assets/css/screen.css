@@ -455,18 +455,29 @@ a:hover {
 
 .chapter-thumbnail {
 	z-index: 1;
+	height: 88px;
+	width: 114px;
+	background-position: center;
+	background-size: 100%;
 }
 
+/**
 .chapter-thumbnail img {
 	display: block;
 	height: 88px;
 	width: 114px;
-}
+}**/
 
-#article-panel li:nth-child(1) .chapter-thumbnail img {
+#article-panel li:nth-child(1) .chapter-thumbnail {
 	height: 178px;
 	width: 346px;
 }
+
+/**
+#article-panel li:nth-child(1) .chapter-thumbnail img {
+	height: 178px;
+	width: 346px;
+}**/
 
 #article-panel li:nth-child(1) .chapter-info {
 	top: -178px;
@@ -481,7 +492,8 @@ a:hover {
 .chapter-info {
 	padding: 8px;
 	position: relative;
-	background: -moz-linear-gradient(top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.76) 25%, rgba(0,0,0,0) 50%, rgba(256,256,256,0) 100%); /* FF3.6+ */
+	background: -moz-linear-gradient(top, rgba(0,0,0,0.65) 0%, rgba(150,150,150,0.25) 100%); /* FF3.6+ */
+	text-shadow: 0 0 3px #000;
 	height: 72px;
 	color: #fff;
 	top: -88px;
@@ -970,6 +982,8 @@ aside#support {
 	height: 60px;
 	float: left;
 	margin-right: 15px;
+	background-size: 150%;
+	background-position: center;
 }
 
 .resource {
@@ -1225,6 +1239,7 @@ em {
 	height: 150px;
 	width: 120px;
 	margin: auto;
+	background-position: center;
 }
 
 #thumbnail-info {

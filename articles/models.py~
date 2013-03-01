@@ -5,6 +5,7 @@ from license.models import License
 from media.models import Image
 from articles.MarkdownTextField import MarkdownTextField
 from articles.jsonfield.fields import JSONField
+from ArticleThumbnail import ArticleThumbnail
 
 def get_default_category():
 	return Category.objects.get(pk=1)
@@ -29,7 +30,7 @@ class ArticleRevision(models.Model):
 		return self.title
 
 class Article(models.Model):
-	revision = models.ForeignKey(ArticleRevision) # Make this editable=False
+	revision = models.ForeignKey(ArticleRevision) # TODO: Make this editable=False
 	category = models.ForeignKey('meta.Category')
 	language = models.ForeignKey('meta.Language', default=get_default_language)
 	created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -46,3 +47,9 @@ class Article(models.Model):
 	
 	def __unicode__(self):
 		return self.title
+		
+	def save(self, *args, **kwargs):
+		#TODO: Shouldn't need to create instance object
+		a = ArticleThumbnail()
+		a.generateThumbnail(self)
+		return super(Article, self).save(*args, **kwargs)	
