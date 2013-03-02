@@ -14,7 +14,7 @@ class ResourceThumbnail:
 	
 	@staticmethod
 	def generateThumbnail(resource):
-		thumbnailDir = "oc_platform/assets/images/oer_thumbnails/"
+		thumbnailDir = "static/images/oer_thumbnails/"
 		thumbnail = thumbnailDir + str(resource.id) + "-thumb"
 
 		if resource.type == "video":

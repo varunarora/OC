@@ -16,7 +16,7 @@ class ArticleThumbnail:
 		articleImages = self.getArticleImages(article.revision.body_markdown_html)
 
 		from subprocess import call
-		thumbnail = "oc_platform/assets/images/thumbnails/" + str(article.id) + "-thumb"
+		thumbnail = "static/images/thumbnails/" + str(article.id) + "-thumb"
 		
 		if articleImages:
 			# Figure out largest image among list of images
