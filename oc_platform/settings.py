@@ -5,6 +5,11 @@ ADMINS = (
     ('Varun Arora', 'varun@theopencurriculum.org'),
 )
 
+EMAIL_HOST = "aspmx.l.google.com"
+EMAIL_HOST_USER = "info@theopencurriculum.org"
+EMAIL_HOST_PASSWORD = "OCProD7!"
+SERVER_EMAIL = "info@theopencurriculum.org"
+
 MANAGERS = ADMINS
 
 DATABASES = {
