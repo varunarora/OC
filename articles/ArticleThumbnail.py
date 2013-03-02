@@ -79,7 +79,7 @@ class ArticleThumbnail:
 	def setRandomTexture(self, article):
 		import random
 		txtr = random.randint(1,5)
-		return "oc_platform/assets/images/thumbnails/txtrs/" + str(txtr) + ".jpg"
+		return "static/images/thumbnails/txtrs/" + str(txtr) + ".jpg"
 		
 	def getLargestImage(self, images):
 		maxWidthImage = None
