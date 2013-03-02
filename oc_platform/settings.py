@@ -2,7 +2,7 @@ DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    # ('Varun Arora', 'varun@theopencurriculum.org'),
+    ('Varun Arora', 'varun@theopencurriculum.org'),
 )
 
 MANAGERS = ADMINS
@@ -167,8 +167,6 @@ LOGGING = {
         },
     }
 }
-
-
 
 
 try:
