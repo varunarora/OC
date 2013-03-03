@@ -1,4 +1,5 @@
 from oer.BeautifulSoup import BeautifulSoup
+from django.conf import settings
 
 class ArticleThumbnail:
 	THUMBNAIL_HEIGHT = 346
@@ -16,7 +17,7 @@ class ArticleThumbnail:
 		articleImages = self.getArticleImages(article.revision.body_markdown_html)
 
 		from subprocess import call
-		thumbnail = "static/images/thumbnails/" + str(article.id) + "-thumb"
+		thumbnail = settings.STATIC_ROOT + "images/thumbnails/" + str(article.id) + "-thumb"
 		
 		if articleImages:
 			# Figure out largest image among list of images
@@ -79,7 +80,7 @@ class ArticleThumbnail:
 	def setRandomTexture(self, article):
 		import random
 		txtr = random.randint(1,5)
-		return "static/images/thumbnails/txtrs/" + str(txtr) + ".jpg"
+		return settings.STATIC_ROOT + "images/thumbnails/txtrs/" + str(txtr) + ".jpg"
 		
 	def getLargestImage(self, images):
 		maxWidthImage = None
