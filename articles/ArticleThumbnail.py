@@ -66,7 +66,7 @@ class ArticleThumbnail:
 		else: 
 			# Return article thumbnail to be a generated random texture
 			thumbnailSrc = self.setRandomTexture(article)
-			call(["cp", thumbnailSrc, thumbnail])
+			call(["cp", thumbnailSrc, thumbnail + ".jpg"])
 		
 	def getArticleImages(self, body):
 		soup = BeautifulSoup(body)
