@@ -1,0 +1,68 @@
+.article-actions
+	float: left
+
+.article-community
+	float: right
+
+#article-do
+	margin-top: 10px
+	overflow: hidden
+	
+	li.no-action:hover
+		background-color: #fff
+		border: 1px solid #fff
+
+/* NEEDS ATTENTION */
+.article-actions ul li, .article-community ul li
+	float: left
+	margin: 0px 20px 0px 0px
+	border: 1px solid #fff
+	padding: 2px 4px
+	@include border-radius(2px 2px 2px 2px)
+
+	&:hover
+		border: 1px solid #b2b2b2
+		background-color: #efefef
+		@include transition(background-color .1s linear)
+	
+	a:hover
+		text-decoration: none
+		color: #333
+
+.article-actions ul li, .article-community ul li, #article-do li.no-action
+	font-size: 0.9em
+	
+	a
+		color: #666
+
+ul li span.icon
+	background-image: url("../images/glyphicons-halflings.png")
+	width: 14px
+	height: 14px
+	margin-top: 1px
+	line-height: 14px
+	vertical-align: text-top
+	display: inline-block
+	margin-right: 4px
+
+.edit-action span
+	background-position: 0 -72px
+
+.download-action span
+	background-position: -96px -24px
+
+.history-action span
+	background-position: -48px -24px
+
+.share-action span
+	background-position: -120px -72px
+
+.favorite-action span
+	background-position: -120px 0px
+
+.thumbs-up-action span
+	background-position: -96px -144px
+
+.thumbs-down-action span
+	background-position: -120px -144px
+

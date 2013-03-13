@@ -1,0 +1,455 @@
+@import "base"
+
+@import "additional-reset"
+
+body
+	font-family: "Proxima Nova Regular", 'Helvetica Neue', Arial, Helvetica, sans-serif
+	font-size-adjust: 0.488
+	font-weight: normal
+	font-style: normal
+	line-height: 1
+	font-size: 0.95em
+	color: #1a1a1a
+	
+	> header
+		background-color: #efefef
+		display: block
+		height: 55px
+		
+#header-prebanner
+	background-color: #5abd02
+	display: block
+	height: 4px
+
+#header-center
+	width: 960px
+	margin: auto
+	padding-top: 10px
+
+#logo
+	height: 25px
+	float: left
+	margin-top: 2px
+
+.live-filter-wrapper input[type=search]
+	background-color: #f8f8f8
+	border: 1px solid #b2b2b2
+	@include border-radius(5px)
+	height: 12px
+	width: 200px
+	padding: 4px
+	margin-left: 20px
+	font-size: 0.75em
+
+@import "search_bar"
+@import "scaffolds"
+
+footer
+	font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif
+	margin: auto
+	width: 960px
+	text-align: right
+	margin-top: 15px
+	font-size: 0.95em
+	color: #666666
+	margin-bottom: 20px
+
+	a
+		color: #557799
+
+		&:hover
+			color: #1155cc
+
+a
+	color: #1155cc
+	text-decoration: none
+
+	&:hover
+		text-decoration: underline
+
+#plant
+	margin: 0px 0px 0px 150px
+	position: relative
+	top: -20px
+
+#cloud
+	position: relative
+	float: right
+	right: 75px
+	
+@import "article_panels"
+
+.btn
+	/* Can work using css3/pie - but put off until really needed */
+	@include border-radius(4px)
+	/* No custom IE styling given */
+	border-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.25)
+	border-width: 1px
+	border-style: solid
+	/* Custom IE styling in ie.sass, no inset styling given */
+	@include box-shadow(0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.05))
+	padding: 6px 12px
+	min-height: 20px
+	font-size: 0.9em
+	background-repeat: repeat-x
+
+	&:hover
+		@include transition(background-position 0.1s linear 0s)
+		background-color: #E6E6E6
+		background-position: 0 -15px
+
+.success-button
+	color: #fff
+	/* Custom IE styling in ie.sass */
+	@include background-image(linear-gradient(center top, #0088CC 0%, #0044CC 100%))
+	background-color: #006DCC
+
+	&:hover
+		background-color: #0044CC
+
+.fine-print
+	font-size: 0.7em
+	margin-top: 8px
+	color: #666
+
+.dull-button
+	/* Custom IE styling in ie.sass */
+	@include background-image(linear-gradient(center top, #FFFFFF 0%, #E6E6E6 100%))
+	background-color: #F5F5F5
+
+.vertical-caret
+	margin-left: 8px
+	content: ""
+	display: inline-block
+	border-width: 5px 0px 5px 5px
+	border-style: solid
+	/* NEEDS ATTENTION */
+	border-color: transparent transparent transparent #fff
+	height: 0px
+
+.breadcrumbs-caret
+	margin-left: 4px
+	margin-right: 4px
+	border-width: 4px 0px 4px 4px
+	/* NEEDS ATTENTION */
+	border-color: transparent transparent transparent #aaa
+
+.horizontal-caret
+	margin-top: 8px
+	content: ""
+	display: inline-block
+	border-width: 10px 10px 0px 10px
+	border-style: solid
+	/* NEEDS ATTENTION */
+	border-color: #000 transparent transparent transparent
+	height: 0px
+
+#chief-panel .actions-wrapper
+	margin-top: 30px
+	text-align: right
+
+@import "animations"
+
+.thermometer-difficulty-wrapper
+	width: 100%
+	height: 100%
+	float: right
+	
+h1
+	/* NEEDS ATTENTION (and every instance of PT Sans ahead */
+	font-family: 'PT Sans', sans-serif
+	font-size: 2.5em
+	font-size-adjust: none
+
+h2
+	font-family: 'PT Sans', sans-serif
+	font-weight: bold
+	font-size: 1.8em
+	letter-spacing: -1px
+
+h3
+	font-family: 'PT Sans', sans-serif
+	font-size: 1.5em
+	letter-spacing: -1px
+	margin-bottom: 12px
+	color: #444
+
+select
+	font-family: 'PT Sans', sans-serif
+	/* NEEDS ATTENTION */
+	background: transparent
+	border-width: 0px
+	outline: 0 none
+	font-weight: bold
+	font-size: 1.8em
+	letter-spacing: -1px
+	width: 540px
+	color: #000		
+		
+	&:hover
+		cursor: pointer
+
+	option
+		padding: 5px
+		font-size: 0.8em
+
+.select-wrapper
+	z-index: 5
+	width: 520px
+	overflow: hidden
+	background: url('../images/arrow.png') no-repeat right
+	left: -5px
+	position: relative
+	top: -2px
+	height: 35px
+	border-bottom: 1px solid #ffffff
+	
+	&:hover
+		border-bottom: 1px solid #efefef
+		background: url('../images/arrow-hover.png') no-repeat right
+
+.selector
+	width: 20px
+	background-color: #fff
+
+.selector-wrapper
+	text-align: right
+	top: 30px
+	margin-right: 78px
+	position: relative
+	float: right
+	width: 20px
+	margin-top: -25px
+
+.breadcrumb
+	line-height: normal
+	font-size: 0.87em
+	overflow: hidden
+
+	a
+		color: #557799
+
+#article-thermometer
+	height: 8px
+	width: 120px
+	float: left
+	margin-top: 4px
+	margin-right: 40px
+
+.chapter-thermometer
+	height: 5px
+	width: 80px
+	position: relative
+	top: -104px
+	right: -25px
+
+.thermometer
+	background: #ff2222 /* Old browsers */
+	@include background(linear-gradient(left, #ff22ff 0%,#2222ff 16%,#22ffff 32%,#22ff22 48%,#ffff22 64%, #ffa500 80%, #ff2222 100%)) /* W3C */
+
+.breadcrumb .links
+	float: left
+	width: 400px
+
+@import "article/actions"
+
+#article-objectives
+	margin-top: 15px
+	padding: 18px
+	margin-bottom: 15px
+	border-bottom: 1px solid #b2b2b2
+	background: #E4F7D2 /* Old browsers */
+	@include border-radius(2px 2px 0px 0px)
+
+	ul
+		padding-left: 0px
+		
+	li
+		padding-left: 0px
+		font-size: 0.9em
+
+	span.breadcrumbs-caret
+		left: -12px
+		margin-right: -8px
+		position: relative
+
+p
+	margin-top: 12px
+	font-size: 0.9em
+
+#social-panel
+	border: 1px solid #b2b2b2
+	height: 80px
+	margin-bottom: 12px
+
+#author-panel
+	height: 100px
+	background-color: #444
+	color: #fff
+	padding: 18px
+
+#author-thumbnail
+	background-color: #b2b2b2
+	width: 100px
+	height: 100px
+	float: left
+	margin-right: 15px
+
+#author-resources
+	color: #888
+
+button.subscribe
+	padding: 2px 8px
+	margin-top: 15px
+	font-size: 0.9em
+
+aside#support
+	background-color: #efefef
+	padding: 18px
+	overflow: hidden
+	font-size: 0.9em
+	
+li, p
+	line-height: 1.1em
+
+@import "resources"
+@import "search"
+
+.caption
+	/* NEEDS ATTENTION */
+	font-family: 'PT Sans', sans-serif
+
+#catalog-listing
+	margin: 20px 0px
+	overflow: hidden
+
+.catalog-category
+	margin-bottom: 15px
+	padding-bottom: 5px
+	overflow: hidden
+
+.article-count, .title-helper
+	color: #666
+
+.true-h3-color
+	color: #444
+
+.true-color
+	color: #1a1a1a
+
+/* NEEDS ATTENTION */
+span.highlighted,
+.search-filter-header,
+.resource-title a,
+.search-result-title a,
+.pressult-title a,
+.article-actions ul li a,
+.article-community ul li a,
+#article-do li.no-action,
+.breadcrumb,
+.bold,
+strong,
+th,
+#author-name,
+.oer-info-detail,
+h1.developers-title,
+.about nav ul li.selected a,
+.pillar-caption,
+#pillars-description, #pillars-default-description,
+.license-caption,
+#license-description, #license-default-description,
+.press-kit-header
+	font-family: "Proxima Nova Bold", 'Helvetica Neue', Arial, Helvetica, sans-serif
+	font-size-adjust: 0.488
+	font-weight: bold
+	font-style: normal
+
+em
+	font-style: italic
+
+.bold-italic
+	font-weight: bold
+	font-style: italic
+
+@import "article/content"
+
+.live-filter-wrapper
+	padding: 8px
+	margin: 15px 0px
+	background-color: #efefef
+
+.filter-caption
+	color: #444
+
+.page-category-title
+	margin-bottom: 5px
+
+.aside-section
+	margin-bottom: 20px
+
+#thumbnail-image
+	border: 1px solid #b2b2b2
+	height: 150px
+	width: 120px
+	margin: auto
+	background-position: center
+
+#thumbnail-info
+	margin: auto
+	text-align: center
+	width: 120px
+	color: #fff
+	background-color: #444
+	padding: 4px 0px
+	position: relative
+	bottom: 28px
+	height: 20px
+
+h1.developers-title
+	margin-bottom: 20px
+
+.img-caption
+	background-color: #000
+	color: #fff
+	display: inline-block
+	padding: 4px 8px
+	position: relative
+	@include border-radius(4px 4px 4px 4px)
+
+.img-wrapper
+	text-align: center
+	margin: 8px
+	display: inline-block
+
+@import "about"
+
+.jobs-image-rotator-wrapper
+	width: 100%
+	overflow: hidden
+
+.jobs-image-rotator
+	height: 400px
+	width: 4000px
+	position: relative
+
+	li
+		height: 400px
+		float: left
+		@include background-size(cover)
+		/* No custom IE styling given */
+		@include box-shadow(inset 0 0 600px #000)
+
+		&:hover
+			box-shadow: none 
+
+.bulleted-list
+	padding-left: 15px
+	margin: 10px 0px
+
+	li
+		list-style-type: disc
+
+.line
+	margin: 15px 0px
+	border-bottom: 1px solid #efefef
+

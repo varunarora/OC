@@ -1,0 +1,64 @@
+{% include 'partials/header.html' %}
+<div class="center-stage about press">
+	<nav>
+		<ul>
+			<li><a href="{% url about %}">About</a></li>
+			<li><a href="{% url team %}">Team</a></li>
+			<li class="selected"><a href="{% url press %}">Press</a></li>
+		</ul>
+	</nav>
+	<div id="key-panel" class="panel-left">
+		<div class="pressult-set">
+			<div class="pressult">
+				<div class="pressult-thumbnail">
+					<img src="{{ STATIC_URL }}images/varun-google-thinkvoice.jpg" />
+				</div>
+				<div class="description">
+					<div class="pressult-title">
+						<a href="https://www.youtube.com/watch?v=rUqnF4TD28I" target="_blank">Google thinkvoices: Communities Building Curriculum</a>
+					</div>
+					<div class="pressult-description">
+						Varun Arora, Founding Director of OpenCurriculum and a Zeitgeist Young Mind (http://www.youtube.com/user/ZeitgeistYoungMinds), talks about online communities can build K-12 curriculum and technology empowers education.<br/>
+						<div class="pressult-meta">Uploaded on Oct 18, 2011</a></div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="press-block">
+			As you can see, we have not had much press coverage yet. If you are a press/media agency,
+we would love for you to cover us - reach us at press-inquiries [at] theopencurriculum [dot] org
+			</div>
+			
+		</div>
+		<h3>Our story <span class="title-helper">(for your reading pleasure)</span></h3>
+		<p>
+		Our founder, Varun, spent a huge amount of time in middle and high school building social websites hosting learning content and building communities for his school. In 2009, as an undergraduate student at Carnegie Mellon University in Qatar, when he got the opportunity to spend 3 months on assessing a One Laptop Per Child deployment in the island country Niue, he finally got the chance to apply his learnings in a developing country. What he learned there would change the course of his life and become the reasons that gave birth to OpenCurriculum.</p>
+<p>Varun spent the rest of his undergraduate and graduate degrees focusing on learning about technology and international development, education & literacy, software engineering, information design and online communities. He started working on OpenCurriculum as a proof-of-concept in mid-2010 and began development of a web platform in mid-2011 after putting together a team. By mid-2012, OpenCurriculum would go on to be released in private beta and fail magnanimously quietly. Varun wasn’t done yet.</p>
+<p>While working on OpenCurriculum’s v 1.0, Varun became friends with Zeinab, his neighbor at Shirley Apartments who would invite him to free food events all around campus. Zeinab started contributing content early on, and went on to lead content efforts since the beginning of 2013, which is when OpenCurriculum got its new beginning.</p>
+<p>While the team got a couple of micro-grants in the past to pay for basic costs, the project has never received any real funding.
+		</p>
+	</div>
+	<div id="fill-panel" class="panel-right">
+		<aside id="support">
+			<h3>Press Kit</h3>
+			<div class="press-kit-header">Logo graphics</div>
+			<p>
+				Color: <a href="" target="_blank">S.png</a> - <a href="" target="_blank">M.png</a> - <a href="" target="_blank">L.png</a> - <a href="" target="_blank">Vector.eps</a><br/>
+				Mono (white): <a href="" target="_blank">S.png</a> - <a href="" target="_blank">M.png</a> - <a href="" target="_blank">L.png</a> - <a href="" target="_blank">Vector.eps</a>
+			</p>
+			<div class="press-kit-header">Fonts</div>
+			<p>
+				<a href="http://www.fontsquirrel.com/fonts/Luxi-Sans" target="_blank">Luxi Sans</a><br/>
+				<a href="http://www.fontsquirrel.com/fonts/PT-Sans" target="_blank">PT Sans</a>
+			</p>
+			<div class="press-kit-header">Boilerplate</div>
+			<p>
+				OpenCurriculum is a non-profit technology initiative to empower people to create and share K-12 curricula material around the world. Started in 2010, it aims to create the largest repository of openly-licensed textbook content that can be used to print and distribute millions of free textbooks in the developing world. To get access to the amazing content catalog, or to contribute your own feedback on a K-12
+curriculum you care about, visit www.theopencurriculum.org
+			</p>
+			<div class="press-kit-header">Strategic goals</div>
+			<p><a href="{{ STATIC_URL }}other/OCStrategicGoals.pdf" target="_blank">[PDF] OpenCurriculum Strategic goals 2012-13</a></p>		
+		</aside>
+	</div>
+</div>
+{% include 'partials/footer.html' %}

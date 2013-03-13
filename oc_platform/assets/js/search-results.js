@@ -1,4 +1,3 @@
-
 // Initialize Search results Model
 var Result = Backbone.Model.extend({
 	// URL of the search result
@@ -62,10 +61,16 @@ var ResultsCollectionView = Backbone.View.extend({
 		this.clearView();
 		this.prepareView();
 		var collectionToRender = newCollection || this.collection;
-		// Create a new view object for each object in the collection and render it
-		_.each(collectionToRender.models, function(item){
-			new ResultsView({model: item}).render();
-		});
+		// If no search results found
+		if (collectionToRender.length == 0){
+			this.showNullView();
+		}
+		else {
+			// Create a new view object for each object in the collection and render it
+			_.each(collectionToRender.models, function(item){
+				new ResultsView({model: item}).render();
+			});
+		}
 		this.revealView();
 	},
 	
@@ -81,10 +86,20 @@ var ResultsCollectionView = Backbone.View.extend({
 		$('#search-result-set').removeClass('spinner-background');
 		$('#search-result-set').css('display', 'none');
 		$('#search-result-set').fadeIn("fast");
+	},
+	
+	showNullView: function(){
+		$('#search-result-set').html('<p>No results matching your criteria found.</p>');
 	}
 });
 
 jQuery(document).ready(function($) {
+	// Construct a collection view using the search result objects built in
+	resultCollectionView = new ResultsCollectionView({collection: resultSet});
+	
+	// Render the collection view
+	resultCollectionView.render();
+
 	// Initiatilize the search filter slider
 	init_slider();
 	
@@ -219,8 +234,6 @@ function _fallsInRange(filterRange, currentDifficulty){
 // Initialize the search results collection before page loads
 var resultSet = new ResultsSet();
 
-// Construct a collection view using the search result objects built in
-var resultCollectionView = new ResultsCollectionView({collection: resultSet});
-	
-// Render the collection view
-resultCollectionView.render();
+// Initialize the ResultCollectionView global
+// TODO: Making it global is not a great idea; have it passed around correctly
+var resultCollectionView;

@@ -19,6 +19,20 @@ urlpatterns = patterns('',
 	
 	url(r'^developers/', 'oc_platform.views.developers', name='developers'),
 
+	url(r'^about/team/', 'oc_platform.views.team', name='team'),
+	url(r'^about/press/', 'oc_platform.views.press', name='press'),	
+	url(r'^about/', 'oc_platform.views.about', name='about'),
+	
+	url(r'^help/', 'oc_platform.views.help', name='help'),
+	
+	url(r'^jobs/', 'oc_platform.views.jobs', name='jobs'),
+	
+	url(r'^terms/', 'oc_platform.views.terms', name='terms'),
+	
+	url(r'^privacy/', 'oc_platform.views.privacy', name='privacy'),
+	
+	url(r'^license/', 'oc_platform.views.license', name='license'),
+
 	url(r'^404testing/', 'oc_platform.views.t404'),
 	url(r'^500testing/', 'oc_platform.views.t505'),
 

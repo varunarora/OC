@@ -1,0 +1,67 @@
+{% include 'partials/header.html' %}
+<div id="chief-panel-container" class="jobs">
+	<div id="chief-panel-wrapper">
+		<div class="jobs-image-rotator-wrapper">
+			<ul class="jobs-image-rotator">
+				<li style="background-image: url('{{ STATIC_URL }}images/pgh-skyline.jpg'); width: 500px;" >\
+					<div class="jobs-footer-caption">Image source: <a href="http://www.flickr.com/photos/hajnosa/6523094135/" target="_blank">hajnosa</a></div>
+				</li>				
+				<li style="background-image: url('{{ STATIC_URL }}images/work-den.jpg');  width: 350px;" ></li>
+				<li style="background-image: url('{{ STATIC_URL }}images/steelers.jpg'); width: 600px;" >
+					<div class="jobs-footer-caption">Image source: <a href="http://www.flickr.com/photos/mike_s_etc/485738320/" target="_blank">mike_s_etc</a></div>
+				</li>
+				<li style="background-image: url('{{ STATIC_URL }}images/mirko-eunice.jpg'); width: 450px;" ></li>
+				<li style="background-image: url('{{ STATIC_URL }}images/school-pictures.jpg'); width: 550px;" ></li>
+				<li style="background-image: url('{{ STATIC_URL }}images/moe-desk.jpg'); width: 500px;" ></li>
+				<li style="background-image: url('{{ STATIC_URL }}images/pgh-towers.jpg'); width: 300px;" ></li>
+				<li style="background-image: url('{{ STATIC_URL }}images/recruitment-flyer.jpg'); width: 525px;" ></li>
+			</ul>
+		</div>
+	</div>
+	<div id="chief-panel">
+		<div id="chief-panel-center">
+			<h1>Join us in changing the world</h1>
+			<h4>Proudly based in USA's most livable city, Pittsburgh</h4>
+		</div>
+	</div>
+</div>
+<div class="center-stage">
+	<div id="key-panel" class="panel-left">
+		<h3>We're hiring!</h3>
+		<p>We're always looking for the finest talent in engineering, design and content that is deeply passionate about addressing core K-12 education challenges around the world. For internships and other roles listed below, contact careers [at] theopencurriculum [dot] org.</p>
+		<div class="line"></div>
+		<p><h2>Founding Software Engineer</h2><p/>
+		<p>
+		OpenCurriculum is attempting to be a Github for textbooks that allows communities to collaboratively create and share K-12 curricula material.</p>
+<p>We are trying to solve the problems of lack of access to free textbooks, lack of innovation, and lack of technology readiness of education systems for more than 100 million learners. Our mission is to make K-12 education open and innovative around the world. Thus, we pride ourselves in trying to become the Mozilla of education.
+<p>In a Founding Software Engineer, we seek a star hacker who loves scalability, security and testing and doesn't fear working all across the stack. Our platform has to perform complex operations of managing contribution concurrency, Git-like revision
+management, and user profile+feed management. In addition, he/she will be required to optimize user experiences for web and tablets.<p/>
+		<div class="bold">Requirements:</div>
+		<ul class="bulleted-list">
+			<li>BSc., MSc. or PhD. in CS, ECE or related field from a top-tier university</li>
+			<li>Proficiency in programming, preferrably in Python and/or JavaScript</li>
+			<li>Working familiarity with HTML & CSS. SASS experience preferred</li>
+			<li>Experience with SQL databases and web server configuration and management is a plus</li>
+			<li>Good communication skills and healthy disregard for the impossible</li>
+			<li>Willingness to learn rapidly on the fly</li>
+		</ul>
+		</p>
+	</div>
+	<div id="fill-panel" class="panel-right">
+		<aside id="support">
+			<h3>What you see is what you get</h3>
+			<img src="{{ STATIC_URL }}images/thrill-mill.png" title="Thrill Mill's office space in East Liberty, Pittsburgh"/>
+			<p>While we may not be around the perks in Silicon Valley, we do our fair share to make people we work with happy, including:</p>
+			<ul class="bulleted-list">
+				<li>24/7 access to kickass office space with ping pong tables and more in East Liberty</li>
+				<li>Commuter assistance program</li>
+				<li>Vacation time as you need it</li>
+				<li>Maternity leave</li>
+				<li>Discounted access to the best fitness facilities in Pittsburgh</li>
+				<li>Occasional meals cooked (or sometimes heated) by the founder</li>				
+			</ul>
+		</aside>
+	</div>
+</div>
+
+{% include 'partials/footer.html' %}

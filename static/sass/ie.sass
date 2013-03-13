@@ -1,0 +1,41 @@
+@import "compass/css3/images"
+
+/* From _article_panels.sass */
+.chapter-info
+	@include filter-gradient(rgba(0,0,0,0.65), rgba(150,150,150,0.25))
+
+/* From _article_panels.sass */	
+#article-panel a:hover .chapter-info, .catalog-article-panel a:hover .chapter-info, .category-article-panel a:hover .chapter-info
+	@include filter-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8))
+
+/* From _style.sass */
+.btn
+	zoom: 1
+	filter: progid:DXImageTransform.Microsoft.Shadow(Color=#aaaaaa, Strength=3, Direction=0), progid:DXImageTransform.Microsoft.Shadow(Color=#aaaaaa, Strength=3, Direction=90), progid:DXImageTransform.Microsoft.Shadow(Color=#aaaaaa, Strength=3, Direction=180), progid:DXImageTransform.Microsoft.Shadow(Color=#aaaaaa, Strength=3, Direction=270)
+	
+/* From _style.sass */
+.success-button
+	@include filter-gradient(rgba(0,136,204,0), rgba(0,68,204,1))
+
+/* From _style.sass */
+.dull-button
+	@include filter-gradient(rgba(255,255,255,0), rgba(230,230,230,1))
+
+/* From _about.sass */
+.pillar-community, .pillar-innovation, .pillar-freedom
+	background-position-x: center
+	background-position-y: 20px
+
+/* From _about.sass */	
+.license-cc, .license-by, .license-sa
+	background-position-x: center
+	background-position-y: 10px
+
+/* From _about.sass */
+#our-philosophy
+	background-position-x: right
+	background-position-y: -40px
+
+#search-bar
+	input[type=search]
+		border: 0px solid blue

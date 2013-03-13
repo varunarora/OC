@@ -4,7 +4,7 @@
 {% load highlight %}
 {% load stripper %}
 
-<div id="center-stage">
+<div class="center-stage">
 	<div id="fill-panel" class="panel-left">
 		<aside id="support">
 			<h3>Search filters</h3>
@@ -25,13 +25,14 @@
 			</div>
 			<div class="search-filter">
 				<div class="search-filter-header">Cost</div>
-				<label><input type="checkbox" name="cost" value="free-resource" checked />Free</label>
-				<label><input type="checkbox" name="cost" value="paid-resource" checked />Paid (Premium)</label>
+				<label><input type="checkbox" name="cost" value="free" checked />Free</label>
+				<label><input type="checkbox" name="cost" value="paid" checked />Paid (Premium)</label>
 			</div>
 			<div class="search-filter">
-				<div class="search-filter-header">License type</div>
-				<label><input type="checkbox" name="license" value="creative commons" checked />Creative Commons</label>
-				<label><input type="checkbox"  name="license" value="gnu-gpl" checked />GNU / GPL</label>
+				<div class="search-filter-header">License category</div>
+				<!-- TODO: Change value of license to "creative commons" and support other licenses -->
+				<label><input type="checkbox" name="license" value="CC-BY-SA" checked />Creative Commons</label>
+				<label><input type="checkbox"  name="license" value="gnu-fdl" checked />GNU / FDL</label>
 			</div>
 		</aside>
 	</div>
@@ -88,13 +89,14 @@
 				</div>-->
 
 			</div>
+				<!--
 				{% if page.has_previous or page.has_next %}
 			        <div>
 			            {% if page.has_previous %}<a href="?q={{ query }}&amp;page={{ page.previous_page_number }}">{% endif %}&laquo; Previous{% if page.has_previous %}</a>{% endif %}
 			            |
 			            {% if page.has_next %}<a href="?q={{ query }}&amp;page={{ page.next_page_number }}">{% endif %}Next &raquo;{% if page.has_next %}</a>{% endif %}
 			        </div>
-			    {% endif %}
+			    {% endif %}-->
 		{% endif %}
 	</div>
 </div>

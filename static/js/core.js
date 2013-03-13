@@ -61,6 +61,20 @@ jQuery.fn.liveUpdate = function(list){
 	}
 };
 
+
+WebFontConfig = { fontdeck: { id: '25967' } };
+
+(function() {
+	 var wf = document.createElement('script');
+	 wf.src = ('https:' == document.location.protocol ? 'https' : 'http') + 
+	 	'://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+	 wf.type = 'text/javascript';
+	 wf.async = 'true';
+	 var s = document.getElementsByTagName('script')[0];
+	 s.parentNode.insertBefore(wf, s);
+})();
+
+
 jQuery(document).ready(function($) {
 	// Set up flashing (liffect) article panel
 	init_articlePanel();
@@ -102,8 +116,6 @@ jQuery(document).ready(function($) {
 		
 		var imgNum = $(this).attr('src').substring(lastIndexOfSlash+1, lastIndexOfPeriod);
 		
-		console.log(imgNum);
-		
 		imgCaption.text("Figure " + imgNum);
 		
 		imgWrapper.insertAfter($(this));
@@ -114,14 +126,104 @@ jQuery(document).ready(function($) {
 		$(this).appendTo(imgWrapper);
 		imgCaptionWrapper.appendTo(imgWrapper);
 		
-	})
+	});
 	
+	
+	
+	$('.pillar').mouseover(function(){
+		var showPillarDescription = function(targetBlock){
+			$(targetBlock).fadeIn('fast');
+		}
+		
+		if ($(this).hasClass('pillar-community')){
+			showPillarDescription('#pillars-community-description');
+		}
+		else if ($(this).hasClass('pillar-innovation')){
+			showPillarDescription('#pillars-innovation-description');
+		}
+		else if ($(this).hasClass('pillar-freedom')){
+			showPillarDescription('#pillars-freedom-description');
+		}
+	});
+	
+	$('.pillar').mouseleave(function(){
+		var hidePillarDescription = function(targetBlock){
+			$(targetBlock).fadeOut('fast');
+		}
+		
+		if ($(this).hasClass('pillar-community')){
+			hidePillarDescription('#pillars-community-description');
+		}
+		else if ($(this).hasClass('pillar-innovation')){
+			hidePillarDescription('#pillars-innovation-description');
+		}
+		else if ($(this).hasClass('pillar-freedom')){
+			hidePillarDescription('#pillars-freedom-description');
+		}
+	});
+	
+	$('.license').mouseover(function(){
+		var showLicenseDescription = function(targetBlock){
+			$(targetBlock).fadeIn('fast');
+		}
+		
+		if ($(this).hasClass('license-cc')){
+			showLicenseDescription('#license-cc-description');
+		}
+		else if ($(this).hasClass('license-by')){
+			showLicenseDescription('#license-by-description');
+		}
+		else if ($(this).hasClass('license-sa')){
+			showLicenseDescription('#license-sa-description');
+		}
+	});
+	
+	$('.license').mouseleave(function(){
+		var hideLicenseDescription = function(targetBlock){
+			$(targetBlock).fadeOut('fast');
+		}
+		
+		if ($(this).hasClass('license-cc')){
+			hideLicenseDescription('#license-cc-description');
+		}
+		else if ($(this).hasClass('license-by')){
+			hideLicenseDescription('#license-by-description');
+		}
+		else if ($(this).hasClass('license-sa')){
+			hideLicenseDescription('#license-sa-description');
+		}
+	});
+	
+	
+	$('#philosophy-button').click(function(){
+		$('html, body').animate({
+			scrollTop: $("#our-philosophy").offset().top
+		}, 1000);
+	});
+
+
+	$('.jobs-image-rotator').animate({
+		left: "-1950px"
+	}, 200000);
+
+	
+	/*
+	position = 0;
+
+	var init = setInterval(function(){
+		
+		position -= 1;
+
+		$('.jobs-image-rotator').css("left", position + "px");
+		
+	}, 200);
+	*/
 });
 
 function init_showMore(){
 	// Grab all the excerpt class
 	$('.summary-text').add('[class^="showmore"]').each(function () {
-	
+	s
 		var words = 80;
 		
 		if ($(this).hasClass('showmore-20')) words = 20;
