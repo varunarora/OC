@@ -81,16 +81,17 @@ def signupinvite(request):
 			subject = "OC-Invite" + purpose
 			message = name + ", " + organization + ", " + email
 			
-			try:				
-				from django.core.mail import send_mail
-				send_mail(subject, message, email, recipients)
-		
-				response['status'] = True
-				response['message'] = 'Congratulations! We have successfully received your invite request.'
-			
+			#try:				
+			from django.core.mail import send_mail
+			send_mail(subject, message, email, recipients)
+	
+			response['status'] = True
+			response['message'] = 'Congratulations! We have successfully received your invite request.'
+			"""
 			except:
 				response['status'] = False
 				response['message'] = 'Unknown error occured. Try again or contact us at hello@ for a resolution.'
+			"""
 			
 		else:
 			response['status'] = False
