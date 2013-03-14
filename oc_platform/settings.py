@@ -8,9 +8,11 @@ ADMINS = (
 SIGNUPS_ADMINS = ['info@theopencurriculum.org']
 
 EMAIL_HOST = "aspmx.l.google.com"
+EMAIL_PORT = "587"
 EMAIL_HOST_USER = "info@theopencurriculum.org"
 EMAIL_HOST_PASSWORD = "OCProD7!"
 SERVER_EMAIL = "info@theopencurriculum.org"
+EMAIL_USE_TLS = True
 
 MANAGERS = ADMINS
 

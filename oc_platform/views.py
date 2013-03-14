@@ -83,6 +83,7 @@ def signupinvite(request):
 			
 			#try:				
 			from django.core.mail import send_mail
+
 			send_mail(subject, message, email, recipients)
 	
 			response['status'] = True

@@ -239,10 +239,11 @@ jQuery(document).ready(function($) {
 				message = response['message'];
 				
 				if (!status){
+					console.log('got in');
 					$('#general-invite-error').html(message);
 					$('#general-invite-error').slideDown('fast');
 				}
-				else {
+				else if (status){
 					form.fadeOut('fast', function(){
 						successImage = '<div class="success-check"></div>'
 						$('#general-invite-success').html(successImage + message);
