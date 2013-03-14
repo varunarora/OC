@@ -34,9 +34,36 @@
 					</ul>
 				</div>
 			</div>
-
 		</div>
+
 		<div id="chief-panel-footer">
 			<img src="{{ STATIC_URL }}images/plant.png" id="plant" />
+		</div>
+		
+		<div class="center-stage">
+			<div id="key-panel" class="panel-left">
+				<h3>Are you a teacher?</h3>
+				
+			</div>
+			<div id="fill-panel" class="panel-right">
+				<aside id="support">
+					<h3>Sign up for updates</h3>
+					<p>To get one of our first private invites to sign up as a user on OpenCurriculum in a couple of weeks, sign up below so we can package it up and send it to you just right:</p>						
+					
+					<br/>
+					<div id="general-invite-error" class="form-error"></div>
+					<div id="general-invite-success" class="form-success"></div>
+					<form id="general-invite" action="/signup-invite/">
+						{% csrf_token %}
+						<p class="center"><input type="text" name="name" id="id_name" max_length="100" placeholder="Your name"/><br/>
+						<input type="text" name="organization" id="id_organization" placeholder="Organization you are affiliated with" /><br/>
+						<input type="hidden" name="purpose" id="id_purpose" value="Invite" />
+						<input type="text" name="email" id="id_email" placeholder="Your email address" /></p>
+						<p class="center"><button class="btn dull-button">Sign up</button>
+						<div class="form-spinner"></div>
+						</p>
+					</form>
+				</aside>
+			</div>
 		</div>
 {% include 'partials/footer.html' %}

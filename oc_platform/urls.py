@@ -32,6 +32,8 @@ urlpatterns = patterns('',
 	url(r'^privacy/', 'oc_platform.views.privacy', name='privacy'),
 	
 	url(r'^license/', 'oc_platform.views.license', name='license'),
+	
+	url(r'^signup-invite/', 'oc_platform.views.signupinvite', name='signupinvite'),	
 
 	url(r'^404testing/', 'oc_platform.views.t404'),
 	url(r'^500testing/', 'oc_platform.views.t505'),

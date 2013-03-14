@@ -358,7 +358,8 @@ h1.developers-title,
 #pillars-description, #pillars-default-description,
 .license-caption,
 #license-description, #license-default-description,
-.press-kit-header
+.press-kit-header,
+.form-success
 	font-family: "Proxima Nova Bold", 'Helvetica Neue', Arial, Helvetica, sans-serif
 	font-size-adjust: 0.488
 	font-weight: bold
@@ -453,3 +454,39 @@ h1.developers-title
 	margin: 15px 0px
 	border-bottom: 1px solid #efefef
 
+.center
+	text-align: center
+	
+.form-error
+	text-align: center
+	background-color: #f2dede
+	color: #B94A48
+	border-color: #eed3d7
+	@include border-radius(4px)
+	padding: 8px 4px
+	@include text-shadow(0 1px 0 rgba(255, 255, 255, 0.5))
+	display: none
+
+.form-success
+	text-align: center
+	background-color: #dff0d8
+	color: #468847
+	border-color: #d6epc6
+	@include border-radius(4px)
+	padding: 8px 4px
+	@include text-shadow(0 1px 0 rgba(255, 255, 255, 0.5))
+	display: none
+	
+.form-spinner
+	display: none
+	background: url('../images/spinner.gif') no-repeat right
+	width: 175px
+	height: 16px
+	position: relative
+	top: -20px
+	margin: auto
+	
+.success-check
+	background: url('../images/sa-hover.png') no-repeat center center
+	height: 50px
+	padding: 10px

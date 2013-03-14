@@ -218,6 +218,43 @@ jQuery(document).ready(function($) {
 		
 	}, 200);
 	*/
+	
+	$('#general-invite').submit(function() {
+	
+		var form = $(this);
+		$('.form-spinner').show();
+		$('#general-invite-error').slideUp('fast');
+		$('#general-invite-success').slideUp('fast');
+		
+		$.ajax({
+			data: $(this).serialize(),
+			type: 'POST',
+			url: $(this).attr('action'),
+			success: function(response) {
+				// Hide the spinner
+				$('.form-spinner').hide();
+				
+				// Capture the responses from the JSON objects returned
+				status = response['status'];
+				message = response['message'];
+				
+				if (!status){
+					$('#general-invite-error').html(message);
+					$('#general-invite-error').slideDown('fast');
+				}
+				else {
+					form.fadeOut('fast', function(){
+						successImage = '<div class="success-check"></div>'
+						$('#general-invite-success').html(successImage + message);
+						$('#general-invite-success').slideDown('fast');
+					});
+				}
+			}
+		});
+		
+		return false;
+	});
+	
 });
 
 function init_showMore(){

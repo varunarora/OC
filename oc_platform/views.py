@@ -1,11 +1,15 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse
 from articles.models import Article
 
 def home(request):
 	top_articles = Article.objects.order_by('title').order_by('-views')[:10]
 	article_count = Article.objects.all().count()
+	
+	import SignupForm
+	form = SignupForm.SignupForm()
+	
 	context = {'top_articles': top_articles, 'title': 'OpenCurriculum: A K-12 Learning Content Hub',
-		'count' : article_count}	
+		'count' : article_count, 'form' : form}	
 	return render(request, 'index.html', context)
 	
 def t404(request):
@@ -58,3 +62,39 @@ def privacy(request):
 def license(request):
 	context = {'title': 'License &lsaquo; OpenCurriculum'}
 	return render(request, 'license.html', context)
+
+def signupinvite(request):
+	response = {}
+	import SignupForm
+	if request.method == "POST":
+		# TODO: Put a try here
+		form = SignupForm.SignupForm(request.POST)
+		if form.is_valid():
+			name = form.cleaned_data['name']
+			organization = form.cleaned_data['organization']
+			email = form.cleaned_data['email']
+			purpose = form.cleaned_data['purpose']
+			
+			from django.conf import settings
+			recipients = settings.SIGNUPS_ADMINS
+			
+			subject = "OC-Invite" + purpose
+			message = name + ", " + organization + ", " + email
+			
+			try:				
+				from django.core.mail import send_mail
+				send_mail(subject, message, email, recipients)
+		
+				response['status'] = True
+				response['message'] = 'Congratulations! We have successfully received your invite request.'
+			
+			except:
+				response['status'] = False
+				response['message'] = 'Unknown error occured. Try again or contact us at hello@ for a resolution.'
+			
+		else:
+			response['status'] = False
+			response['message'] = form.errors
+
+	import json
+	return HttpResponse(json.dumps(response), content_type="application/json")

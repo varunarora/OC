@@ -5,6 +5,8 @@ ADMINS = (
     ('Varun Arora', 'varun@theopencurriculum.org'),
 )
 
+SIGNUPS_ADMINS = ['info@theopencurriculum.org']
+
 EMAIL_HOST = "aspmx.l.google.com"
 EMAIL_HOST_USER = "info@theopencurriculum.org"
 EMAIL_HOST_PASSWORD = "OCProD7!"
