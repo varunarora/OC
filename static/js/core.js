@@ -239,9 +239,7 @@ jQuery(document).ready(function($) {
 				// Capture the responses from the JSON objects returned
 				status = response['status'];
 				message = response['message'];
-				
-				console.log(response);
-				
+
 				var field_error = false;
 				
 				// Webkit and FF interpret the 'false' JSON response differently
