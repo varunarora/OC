@@ -96,36 +96,40 @@ jQuery(document).ready(function($) {
 	
 	init_showMore();
 	
-	
+	// HACK: Because Webkit browsers do not compute image width until it is loaded, this hack
+	//     may be used to make an in-memory copy of the image to compute the dimensions
 	$('#article img').each(function(){
-		var imgCaption = $('<div/>');
-		imgCaption.addClass('img-caption');
+		var image = $(this);
+		$("<img/>").attr("src", $(this).attr('src')).load(function(){
+			var imgCaption = $('<div/>');
+			imgCaption.addClass('img-caption');
 		
-		var imgCaptionWrapper = $('<div/>');
-		imgCaptionWrapper.addClass('img-caption-wrapper');
+			var imgCaptionWrapper = $('<div/>');
+			imgCaptionWrapper.addClass('img-caption-wrapper');
 
-		var imgWrapper = $('<div/>');
-		imgWrapper.addClass('img-wrapper');
+			var imgWrapper = $('<div/>');
+			imgWrapper.addClass('img-wrapper');
 		
-		imgCaption.appendTo(imgCaptionWrapper);
+			imgCaption.appendTo(imgCaptionWrapper);
 		
-		var imgSrc = $(this).attr('src');
+			var imgSrc = image.attr('src');
 		
-		var lastIndexOfSlash = imgSrc.lastIndexOf('/');
-		var lastIndexOfPeriod = imgSrc.lastIndexOf('.');
+			var lastIndexOfSlash = imgSrc.lastIndexOf('/');
+			var lastIndexOfPeriod = imgSrc.lastIndexOf('.');
 		
-		var imgNum = $(this).attr('src').substring(lastIndexOfSlash+1, lastIndexOfPeriod);
+			var imgNum = image.attr('src').substring(lastIndexOfSlash+1, lastIndexOfPeriod);
 		
-		imgCaption.text("Figure " + imgNum);
+			imgCaption.text("Figure " + imgNum);
 		
-		imgWrapper.insertAfter($(this));
+			imgWrapper.insertAfter(image);
 		
-		var currentWidth = $(this).css('width')
-		$(this).css('width', currentWidth.substring(0, currentWidth.indexOf('px'))*0.5);
+			var currentWidth = this.width;
+			console.log(image)
+			image.css('width', currentWidth*0.5);
 
-		$(this).appendTo(imgWrapper);
-		imgCaptionWrapper.appendTo(imgWrapper);
-		
+			image.appendTo(imgWrapper);
+			imgCaptionWrapper.appendTo(imgWrapper);
+		});
 	});
 	
 	
