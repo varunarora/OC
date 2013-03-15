@@ -242,7 +242,7 @@ jQuery(document).ready(function($) {
 				
 				var field_error = false;
 				
-				if (!status){
+				if (status == false){
 					['name', 'organization', 'email'].forEach(function(element, index, array){
 						if (message[element]){
 							var error = $('.' + element + '-error', form);
