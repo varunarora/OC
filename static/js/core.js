@@ -219,12 +219,14 @@ jQuery(document).ready(function($) {
 	}, 200);
 	*/
 	
-	$('#general-invite').submit(function() {
-	
+	$('form.signup').submit(function() {
 		var form = $(this);
-		$('.form-spinner').show();
-		$('#general-invite-error').slideUp('fast');
-		$('#general-invite-success').slideUp('fast');
+		var formIDWHash = '#' + form.attr('id');
+		$('.form-spinner', form).show();
+		
+		// Clear previous error/success signals
+		$(formIDWHash + '-error').slideUp('fast');
+		$('.form-error', form).removeClass('form-error-show');
 		
 		$.ajax({
 			data: $(this).serialize(),
@@ -232,22 +234,35 @@ jQuery(document).ready(function($) {
 			url: $(this).attr('action'),
 			success: function(response) {
 				// Hide the spinner
-				$('.form-spinner').hide();
+				$('.form-spinner', form).hide();
 				
 				// Capture the responses from the JSON objects returned
 				status = response['status'];
 				message = response['message'];
 				
+				var field_error = false;
+				
 				if (!status){
-					console.log('got in');
-					$('#general-invite-error').html(message);
-					$('#general-invite-error').slideDown('fast');
+					['name', 'organization', 'email'].forEach(function(element, index, array){
+						if (message[element]){
+							var error = $('.' + element + '-error', form);
+							// TODO: Add support for viewing multiple message errors
+							error.html(message[element][0]);
+							error.addClass("form-error-show");
+							$('#id_' + element, form).addClass("form-input-error");
+							field_error = true;
+						}
+					});
+					if (!field_error){
+						$(formIDWHash + '-error').html(message);
+						$(formIDWHash + '-error').slideDown('fast');
+					}
 				}
 				else if (status){
 					form.fadeOut('fast', function(){
 						successImage = '<div class="success-check"></div>'
-						$('#general-invite-success').html(successImage + message);
-						$('#general-invite-success').slideDown('fast');
+						$(formIDWHash + '-success').html(successImage + message);
+						$(formIDWHash + '-success').slideDown('fast');
 					});
 				}
 			}

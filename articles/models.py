@@ -44,6 +44,7 @@ class Article(models.Model):
 	slug = models.SlugField(max_length=256)
 	difficulty = models.PositiveIntegerField(editable=True, default=0)
 	published = models.NullBooleanField()
+	citation = models.CharField(max_length=1024, blank=True, null=True)
 	
 	def __unicode__(self):
 		return self.title

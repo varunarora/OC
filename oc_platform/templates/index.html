@@ -41,9 +41,30 @@
 		</div>
 		
 		<div class="center-stage">
-			<div id="key-panel" class="panel-left">
-				<h3>Are you a teacher?</h3>
-				
+			<div id="key-panel" class="panel-left moe-audience">
+				<h2>Are you a teacher?</h2>
+				<div id="mini-key-panel" class="panel-left mini">
+					<p>Do you have what it takes to be a core contributor on our content team? We, led by Moe, are looking for the smartest, sharpest and most versatile education minds to lead our content efforts as volunteers.</p>
+					<p>If you think you have what it takes to be a core contributor, sign-up below and we will reach out to you with further details.</p>
+					<p>
+						<div id="contributor-invite-error" class="form-error"></div>
+						<div id="contributor-invite-success" class="form-success"></div>
+						<form id="contributor-invite" action="/signup-invite/" class="signup">
+							{% csrf_token %}
+							<table>
+								<tr><td class="input-description">Name</td><td><input type="text" name="name" id="id_name" max_length="100" placeholder="Your name"/><br/>							
+								<div class="name-error form-error"></div></td></tr>
+								<tr><td class="input-description">Email</td><td><input type="text" name="email" id="id_email" placeholder="Your email address" /><br/>							
+								<div class="email-error form-error"></div></td></tr>
+							</table>
+							<p class="center"><button class="btn dull-button">Submit</button></p>
+							<input type="hidden" name="purpose" id="id_purpose" value="Contribute" /> 
+							<div class="form-spinner"></div>
+						</form>
+					</p>
+				</div>
+				<div id="mini-fill-panel" class="panel-right mini">
+				</div>
 			</div>
 			<div id="fill-panel" class="panel-right">
 				<aside id="support">
@@ -53,12 +74,19 @@
 					<br/>
 					<div id="general-invite-error" class="form-error"></div>
 					<div id="general-invite-success" class="form-success"></div>
-					<form id="general-invite" action="/signup-invite/">
+					<form id="general-invite" action="/signup-invite/" class="signup">
 						{% csrf_token %}
-						<p class="center"><input type="text" name="name" id="id_name" max_length="100" placeholder="Your name"/><br/>
-						<input type="text" name="organization" id="id_organization" placeholder="Organization you are affiliated with" /><br/>
-						<input type="hidden" name="purpose" id="id_purpose" value="Invite" />
-						<input type="text" name="email" id="id_email" placeholder="Your email address" /></p>
+						<div class="center">
+							<table>
+								<tr><td class="input-description">Name</td><td><input type="text" name="name" id="id_name" max_length="100" placeholder="Your name"/><br/>
+								<div class="name-error form-error"></div></td></tr>
+								<tr><td class="input-description">Organization</td><td><input type="text" name="organization" id="id_organization" placeholder="Organization you are affiliated with" /><br/>
+								<div class="organization-error form-error"></div></td></tr>
+								<input type="hidden" name="purpose" id="id_purpose" value="Invite" />
+								<tr><td class="input-description">Email</td><td><input type="text" name="email" id="id_email" placeholder="Your email address" />
+								<div class="email-error form-error"></div></td></tr>
+							</table>
+						</div>
 						<p class="center"><button class="btn dull-button">Sign up</button>
 						<div class="form-spinner"></div>
 						</p>

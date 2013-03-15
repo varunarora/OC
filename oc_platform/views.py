@@ -71,28 +71,29 @@ def signupinvite(request):
 		form = SignupForm.SignupForm(request.POST)
 		if form.is_valid():
 			name = form.cleaned_data['name']
-			organization = form.cleaned_data['organization']
+			try:
+				organization = form.cleaned_data['organization']
+			except:
+				organization = "NA"
 			email = form.cleaned_data['email']
 			purpose = form.cleaned_data['purpose']
 			
 			from django.conf import settings
 			recipients = settings.SIGNUPS_ADMINS
 			
-			subject = "OC-Invite" + purpose
+			subject = "OC-Invite: " + purpose
 			message = name + ", " + organization + ", " + email
 			
-			#try:				
-			from django.core.mail import send_mail
-
-			send_mail(subject, message, email, recipients)
+			try:				
+				from django.core.mail import send_mail
+				send_mail(subject, message, email, recipients)
 	
-			response['status'] = True
-			response['message'] = 'Congratulations! We have successfully received your invite request.'
-			"""
+				response['status'] = True
+				response['message'] = 'Congratulations! We have successfully received your request submission.'
+
 			except:
 				response['status'] = False
 				response['message'] = 'Unknown error occured. Try again or contact us at hello@ for a resolution.'
-			"""
 			
 		else:
 			response['status'] = False

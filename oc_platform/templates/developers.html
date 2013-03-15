@@ -5,12 +5,30 @@
 	</div>
 	
 	<div id="chief-panel">
-		<div id="left-panel">	
-
+		<div id="left-panel">
+			<div class="center">
+				<img src="{{ STATIC_URL }}images/developers.png" />
+			</div>
 		</div>
 		<div id="right-panel">
 			<h1 class="developers-title">Developers, Developers, Developers...</h1>
-			We love developers. Because we are developers, ourselves.
+			<p>We love developers. Because we are developers, ourselves. It is our goal to provide to every developer interested in building educational apps the power to leverage the depth and breadth of our content, using an truly open API.</p>
+			
+			<p><span class="bold">Our API is currently in closed beta. </span> But we soon plan to introduce the same to a select group of developers who can create amazing apps and leverage our RESTful API to the fullest. If you think you belong to this category of developers, sign-up for an early developer invite below, and we will send you further information when we are opening up to select developers.</p>
+			 <p>
+			 	<div id="developers-invite-error" class="form-error"></div>
+				<div id="developers-invite-success" class="form-success"></div>
+				 <form id="developers-invite" action="/signup-invite/" class="signup">
+					{% csrf_token %}
+					<table>
+						<tr><td class="input-description">Name</td><td><input type="text" name="name" id="id_name" max_length="100" placeholder="Your name"/></td><td class="input-description">Email</td><td><input type="text" name="email" id="id_email" placeholder="Your email address" /></td></tr>
+						<tr><td></td><td><div class="name-error form-error"></div></td><td></td><td><div class="email-error form-error"></div></td></tr>
+					</table>
+					<p class="right"><button class="btn success-button">Sign up</button></p>
+					<input type="hidden" name="purpose" id="id_purpose" value="Developers" /> 
+					<div class="form-spinner"></div>
+				</form>
+			</p>
 		</div>
 	</div>
 

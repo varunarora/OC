@@ -13,12 +13,11 @@ def view_resource(request, resource_id):
 		from BeautifulSoup import BeautifulSoup
 		from urllib import urlopen
 		
-		source = urlopen(resource.url)
-		soup = BeautifulSoup(source)
+		try:		
+			source = urlopen(resource.url)
+			soup = BeautifulSoup(source)
 		
-		resource.url_title = soup.find('title').text
-		
-		try:
+			resource.url_title = soup.find('title').text
 			description = soup.findAll('meta', attrs={'name' : "description"})[0]
 		
 			if description:

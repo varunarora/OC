@@ -20,6 +20,7 @@ def read_article(request, article):
 		articleRevision = article.revision
 		articleRevision.title = article.title
 		articleRevision.article_id = article.id
+		articleRevision.citation = article.citation
 	
 		# Store other article fields in the revision object to be passed to the view
 		articleRevision.difficulty = article.difficulty
@@ -155,9 +156,21 @@ def catalog(request):
 	science.countMore = (science.count - 4) if science.count>=4 else 0
 	science.title = "Science"
 	science.slug = scienceCategory.slug
-		
+	
+	# Build the object for showing the science panel
+	# TODO: Need to get objects for all relevant article together, not using separate calls
+	literatureCategory = Category.objects.get(title='Literature')
+	literature = CatalogCategory()
+	literatureChildCategories = buildChildCategories([], [literatureCategory])
+	literatureArticles = Article.objects.filter(category__in=literatureChildCategories).order_by('views')
+	literature.articlesView = literatureArticles.order_by('views')[:4]
+	literature.count = literatureArticles.count()
+	literature.countMore = (literature.count - 4) if literature.count>=4 else 0
+	literature.title = "Literature"
+	literature.slug = literatureCategory.slug
+
 	articles = CatalogCategorySet()
-	articles.categories = {mathematics, science}
+	articles.categories = {mathematics, science, literature}
 	articles.resources = Resource.objects.order_by('views')[:8]
 	
 	context = {'articles' : articles, 'title': 'High-quality article catalog / OpenCurriculum'}	

@@ -62,7 +62,9 @@
 	
 	<div id="fill-panel" class="panel-right">
 		<aside id="social-panel">
-			
+			{% if article.citation %}
+				{{ article.citation|safe }}
+			{% endif %}
 		</aside>
 		
 		<aside id="support">
