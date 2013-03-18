@@ -168,7 +168,7 @@ def catalog(request):
 	literature.countMore = (literature.count - 4) if literature.count>=4 else 0
 	literature.title = "Literature"
 	literature.slug = literatureCategory.slug
-
+	
 	articles = CatalogCategorySet()
 	articles.categories = {mathematics, science, literature}
 	articles.resources = Resource.objects.order_by('views')[:8]

@@ -247,9 +247,10 @@ class SanitizedSearchView(SearchView):
 		for result in page.object_list:
 			try:
 				import re
-				result.object.revision.body_markdown_html = re.sub("\s+", ' ', result.object.revision.body_markdown_html.strip()).replace("'", "\'")
+				result.object.revision.body_markdown_html = re.sub("\s+", ' ', result.object.revision.body_markdown_html.strip())
 			except:
 				pass
 		extra['page'] = page
 		extra['paginator'] = paginator
+		extra['title'] = self.query + " &lsaquo; OpenCurriculum"
 		return extra
