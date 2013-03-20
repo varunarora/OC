@@ -83,7 +83,7 @@ def category_catalog(request, category):
 		
 		cache.set(cc_cache_key, childCategories)
 
-	top_articles = Article.objects.filter(category__in=childCategories).order_by('views')
+	top_articles = Article.objects.filter(category__in=childCategories).exclude(published=False).order_by('views')
 
 	breadcrumb.reverse()
 	breadcrumb.pop()
@@ -138,7 +138,7 @@ def catalog(request):
 	mathematicsCategory = Category.objects.get(title='Mathematics')
 	mathematics = CatalogCategory()
 	mathChildCategories = buildChildCategories([], [mathematicsCategory])
-	mathematicsArticles = Article.objects.filter(category__in=mathChildCategories).order_by('views')
+	mathematicsArticles = Article.objects.filter(category__in=mathChildCategories).exclude(published=False).order_by('views')
 	mathematics.articlesView = mathematicsArticles.order_by('views')[:4]
 	mathematics.count = mathematicsArticles.count()
 	mathematics.countMore = (mathematics.count - 4) if mathematics.count>=4 else 0
@@ -150,7 +150,7 @@ def catalog(request):
 	scienceCategory = Category.objects.get(title='Science')
 	science = CatalogCategory()
 	scienceChildCategories = buildChildCategories([], [scienceCategory])
-	scienceArticles = Article.objects.filter(category__in=scienceChildCategories).order_by('views')
+	scienceArticles = Article.objects.filter(category__in=scienceChildCategories).exclude(published=False).order_by('views')
 	science.articlesView = scienceArticles.order_by('views')[:4]
 	science.count = scienceArticles.count()
 	science.countMore = (science.count - 4) if science.count>=4 else 0
@@ -162,7 +162,7 @@ def catalog(request):
 	literatureCategory = Category.objects.get(title='Literature')
 	literature = CatalogCategory()
 	literatureChildCategories = buildChildCategories([], [literatureCategory])
-	literatureArticles = Article.objects.filter(category__in=literatureChildCategories).order_by('views')
+	literatureArticles = Article.objects.filter(category__in=literatureChildCategories).exclude(published=False).order_by('views')
 	literature.articlesView = literatureArticles.order_by('views')[:4]
 	literature.count = literatureArticles.count()
 	literature.countMore = (literature.count - 4) if literature.count>=4 else 0
