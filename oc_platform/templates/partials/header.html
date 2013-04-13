@@ -54,7 +54,7 @@
 						<nav id="user-buttons">
 							<ul>
 							{% if user.is_authenticated %}
-								<li><a href="{% url register %}" id="user-dropdown">{{ user.first_name }} <span class="horizontal-caret username-caret"></span></a>				
+								<li><a href="{# url register #}" id="user-dropdown">{# user.first_name #} <span class="horizontal-caret username-caret"></span></a>				
 								</li>
 								<nav id="user-menu">
 									<div id="user-menu-spacer"></div>
@@ -68,8 +68,8 @@
 					{% else %}
 						<nav id="authenticate-buttons">
 							<ul>
-								<li id="sign-up-button"><a href="{% url register %}">Sign up</a></li>
-								<li id="login"><a href="{% url home %}">Login</a></li>
+								<li id="sign-up-button"><a href="{# url register #}">Sign up</a></li>
+								<li id="login"><a href="{# url home #}">Login</a></li>
 							</ul>
 						</nav>
 					{% endif %}
