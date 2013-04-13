@@ -2,30 +2,66 @@
 
 @import "additional-reset"
 
+$content-width: 960px
+@mixin pt-sans-title
+	font-family: 'PT Sans', sans-serif
+	font-size-adjust: none
+	letter-spacing: -1px
+
+@mixin pretty-select
+	background-color: #efefef
+	border: 1px solid #b2b2b2
+	font-size: 0.85em
+	@include sans-bold
+	padding: 4px 0px
+	@include border-radius(4px)
+	
+$header-height: 55px
+$header-prebanner-height: 4px
+
+$body-color: #1a1a1a
+
+$link-hover: #1155cc
+
+$light-font: #666666
+
 body
 	font-family: "Proxima Nova Regular", 'Helvetica Neue', Arial, Helvetica, sans-serif
 	font-size-adjust: 0.488
 	font-weight: normal
 	font-style: normal
 	line-height: 1
-	font-size: 0.95em
+	font-size: 14px
 	color: #1a1a1a
 	
 	> header
 		background-color: #efefef
 		display: block
-		height: 55px
+		height: $header-height
+		z-index: 1
+		position: relative
 		
 #header-prebanner
 	background-color: #5abd02
 	display: block
-	height: 4px
+	height: $header-prebanner-height
 
 #header-center
-	width: 960px
+	width: $content-width
 	margin: auto
-	padding-top: 10px
+	height: $header-height - $header-prebanner-height
 
+	#header-left
+		width: 593px
+		float: left
+		
+		#header-brand-wrapper
+			padding-top: 10px			
+		
+	#header-right
+		float: right
+		width: 337px
+	
 #logo
 	height: 25px
 	float: left
@@ -47,7 +83,7 @@ body
 footer
 	font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif
 	margin: auto
-	width: 960px
+	width: $content-width
 	text-align: right
 	margin-top: 15px
 	font-size: 0.95em
@@ -79,7 +115,7 @@ a
 	
 @import "article_panels"
 
-.btn
+.btn, .ui-button
 	/* Can work using css3/pie - but put off until really needed */
 	@include border-radius(4px)
 	/* No custom IE styling given */
@@ -98,6 +134,11 @@ a
 		background-color: #E6E6E6
 		background-position: 0 -15px
 
+	&.disabled
+		opacity: 0.65
+		background-image: none
+		cursor: default			
+
 .success-button
 	color: #fff
 	/* Custom IE styling in ie.sass */
@@ -107,12 +148,16 @@ a
 	&:hover
 		background-color: #0044CC
 
+	&.disabled
+		&:hover
+			background-color: #006DCC
+
 .fine-print
 	font-size: 0.7em
 	margin-top: 8px
 	color: #666
 
-.dull-button
+.dull-button, .ui-button
 	/* Custom IE styling in ie.sass */
 	@include background-image(linear-gradient(center top, #FFFFFF 0%, #E6E6E6 100%))
 	background-color: #F5F5F5
@@ -128,8 +173,8 @@ a
 	height: 0px
 
 .breadcrumbs-caret
-	margin-left: 4px
-	margin-right: 4px
+	margin-left: 8px
+	margin-right: 8px
 	border-width: 4px 0px 4px 4px
 	/* NEEDS ATTENTION */
 	border-color: transparent transparent transparent #aaa
@@ -138,11 +183,15 @@ a
 	margin-top: 8px
 	content: ""
 	display: inline-block
-	border-width: 10px 10px 0px 10px
+	border-width: 5px 5px 0px 5px
 	border-style: solid
 	/* NEEDS ATTENTION */
 	border-color: #000 transparent transparent transparent
 	height: 0px
+
+.username-caret
+	border-color: #666 transparent transparent transparent
+	margin: -2px 2px 0px 6px
 
 #chief-panel .actions-wrapper
 	margin-top: 30px
@@ -174,7 +223,7 @@ h3
 	margin-bottom: 12px
 	color: #444
 
-select
+article select#chapter-select
 	font-family: 'PT Sans', sans-serif
 	/* NEEDS ATTENTION */
 	background: transparent
@@ -277,6 +326,9 @@ select
 		margin-right: -8px
 		position: relative
 
+section#history
+	margin-top: 15px
+
 p
 	margin-top: 12px
 	font-size: 0.9em
@@ -316,9 +368,15 @@ aside#support
 	padding: 18px
 	overflow: hidden
 	font-size: 0.9em
-	
+
+aside.content-block
+	background-color: #efefef
+	padding: 8px
+	margin: 10px 0px
+	overflow: hidden
+
 li, p
-	line-height: 1.1em
+	line-height: 1.2em
 
 @import "resources"
 @import "search"
@@ -345,6 +403,12 @@ li, p
 .true-color
 	color: #1a1a1a
 
+@mixin sans-bold
+	font-family: "Proxima Nova Bold", 'Helvetica Neue', Arial, Helvetica, sans-serif
+	font-size-adjust: 0.488
+	font-weight: bold
+	font-style: normal
+
 /* NEEDS ATTENTION */
 span.highlighted,
 .search-filter-header,
@@ -367,11 +431,9 @@ h1.developers-title,
 .license-caption,
 #license-description, #license-default-description,
 .press-kit-header,
-.form-success
-	font-family: "Proxima Nova Bold", 'Helvetica Neue', Arial, Helvetica, sans-serif
-	font-size-adjust: 0.488
-	font-weight: bold
-	font-style: normal
+.form-success,
+h4
+	@include sans-bold
 
 em
 	font-style: italic
@@ -496,13 +558,20 @@ h1.developers-title
 	position: relative
 	top: -20px
 	margin: auto
-	
+
+.spinner
+	display: none
+	background: url('../images/spinner.gif') no-repeat right
+	width: 16px
+	height: 16px
+	margin: auto
+
 .success-check
 	background: url('../images/check.png') no-repeat center center
 	height: 50px
 	padding: 10px
 
-form input[type=text]
+form input[type=text], form input[type=password] 
 	background-color: #f5f5f5
 	border: 1px solid #b2b2b2
 	@include border-radius(5px)
@@ -510,7 +579,6 @@ form input[type=text]
 	width: 200px
 	padding: 4px
 	font-size: 0.9em
-	margin: 5px
 	
 	&:focus
 		background-color: #ffffff
@@ -538,3 +606,270 @@ td.input-description
 	
 th, td
 	padding: 4px
+
+.sign-up .row-item
+	margin: 5px 0px
+	margin-right: 10px
+
+.sign-up .row-item-thumbnail img
+	width: 50px
+	height: 50px
+	
+.sign-up .row-set
+	margin-top: 40px
+	
+.strong
+	font-weight: bold
+	
+.sign-up #fill-panel
+	padding-top: 60px
+
+.register-box
+	background: rgba(255,255,255,0.5)
+	@include border-radius(4px)
+	padding: 6px
+	@include sans-bold
+	margin-bottom: 20px
+
+.sign-up
+
+	form input[type=text], form input[type=password]
+		width: 96%
+		margin: 5px 0px
+		
+	#signinButton
+		text-align: center
+
+nav#authenticate-buttons, nav#user-buttons
+	float: right
+	
+	> ul
+		> li
+			float: right
+			height: $header-height - $header-prebanner-height - 13px
+			padding-top: 13px
+		
+			a
+				padding: 13px 20px 18px 20px
+				margin-top: 8px
+				color: #666666
+				@include sans-bold
+			
+				&:hover
+					background-color: #f8f8f8
+					border-bottom: 2px solid #006dcc
+					color: $link-hover
+					text-decoration: none
+					
+nav#user-buttons > ul > li a.hover
+	background-color: #f8f8f8
+	border-bottom: 3px solid #006dcc
+	color: $link-hover
+	text-decoration: none
+	
+.horizontal-caret-hover
+	border-color: $link-hover transparent transparent
+					
+nav#user-menu.showMenu
+	display: block
+
+nav#user-menu
+	display: none
+	/*top: $header-height - 5px*/
+	z-index: 5
+	width: 210px
+	position: absolute
+
+	#user-menu-spacer
+		height: 8px
+		width: 210px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		background-position: 145px bottom
+		z-index: 10
+		position: relative
+	
+	ul
+		background-color: #ffffff
+		@include border-radius(4px)
+		@include box-shadow(0 0 4px rgba(0, 0, 0, 0.4))
+		z-index: 4
+		
+		li
+			height: 44px
+			padding-top: 8px
+		
+			a
+				text-align: left
+				height: 20px
+				padding: 2px 12px
+				display: block
+				color: #666666
+		
+				&:hover
+					background-color: #006dcc
+					color: #fff
+					text-decoration: none
+
+#forgot-username-password
+	text-align: right
+	
+#signup-or
+	margin: 10px 0px
+
+	.signup-or-flank
+		width: 180px
+		background: url('../images/signup-flank.png') repeat-x
+
+#loggedin-button
+	margin: 10px 0px
+	overflow: hidden
+	
+	input[type=checkbox]
+		float: left
+		margin-right: 5px
+	
+	button
+		float: right
+
+#signup-form
+	input[name=dob_date]
+		width: 30px
+
+	input[name=dob_year]
+		width: 50px
+
+	select
+		@include pretty-select
+
+		&[name=dob_month]
+			width: 100px
+
+			option:nth-child(1)
+				display: none
+
+		&[name=profession]
+			width: 210px
+
+	.form-error
+		text-align: left
+		display: block
+		background-color: transparent
+
+table#signup-form-table
+	margin: 10px 0px
+	width: 100%
+	
+	tr
+		padding: 6px 0px
+		height: 40px
+	
+	.field
+		width: 445px
+
+#session-state
+	display: none
+
+.registration
+	#signinButton
+		float: left
+		margin-right: 10px
+
+@import "editor"
+
+.history-set
+	margin-bottom: 20px
+
+	> .current
+		background-color: #E4F7D2
+
+		.revision-number
+			background-color: #5ABD02
+			color: #ffffff
+
+.edit
+	overflow: hidden
+	margin-bottom: 20px
+	padding: 15px
+
+	.edit-thumbnail
+		margin-right: 15px
+		float: left
+
+		img
+			width: 50px
+			height: 50px
+
+	.description
+		float: left
+		width: 425px
+
+		a
+			color: $body-color
+
+			&:hover
+				color: $link-hover
+
+		.edit-description
+			color: $light-font
+
+			a
+				color: $light-font
+
+				&:hover
+					color: $link-hover
+
+			select.revision-selector
+				@include pretty-select
+				
+				option
+					padding-right: 10px 
+
+.edit-meta
+	float: left
+	color: $light-font
+
+.revision-number
+	padding: 2px 6px
+	background-color: #E9EFFA
+	@include sans-bold
+	font-size: 0.85em
+
+#diff-header
+	margin: 20px 0px
+
+.diff_add
+	background-color: #AAFFAA
+
+.diff_sub
+	background-color: #FFAAAA
+
+table.diff
+	tr
+		&.titles
+			td
+				@include sans-bold
+
+				&.diff_header
+					background-color: #ffffff
+					border: 1px solid #ffffff
+
+				&[nowrap=nowrap]
+					padding: 6px 0px
+
+		td
+			font-family: "Arial"
+			padding: 0px 4px
+			border: 1px solid #fff
+
+			&.diff_header
+				background-color: #efefef
+				border: 1px solid #efefef
+				padding: 0px 8px
+				width: 60px
+				color: #b2b2b2
+
+			&.diff_next
+				width: 40px
+
+			&[nowrap=nowrap]
+				min-width: 400px
