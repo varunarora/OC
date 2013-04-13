@@ -38,12 +38,42 @@
 		<header>
 			<div id="header-prebanner"></div>
 			<hgroup id="header-center">
-						<a href="/"><img src="{{ STATIC_URL }}images/logo.png" id="logo" alt="OpenCurriculum" title="OpenCurriculum" /></a>
-						<hgroup id="search-bar">
-							<form method="GET" action="/search">
-								<input type="search" data-default="Search..." name="q" title="Search">
-								<input type="submit" value="" />
-							</form>
-						</hgroup>
+					<hgroup id="header-left">
+						<div id="header-brand-wrapper">
+							<a href="/"><img src="{{ STATIC_URL }}images/logo.png" id="logo" alt="OpenCurriculum" title="OpenCurriculum" /></a>
+							<hgroup id="search-bar">
+								<form method="GET" action="/search">
+									<input type="search" data-default="Search..." name="q" title="Search">
+									<input type="submit" value="" />
+								</form>
+							</hgroup>
+						</div>
+					</hgroup>
+					<hgroup id="header-right">
+						<!--
+						<nav id="user-buttons">
+							<ul>
+							{% if user.is_authenticated %}
+								<li><a href="{% url register %}" id="user-dropdown">{{ user.first_name }} <span class="horizontal-caret username-caret"></span></a>				
+								</li>
+								<nav id="user-menu">
+									<div id="user-menu-spacer"></div>
+									<ul>
+										<li><a href="/logout/">Logout</a></li>
+									</ul>
+								</nav>
+
+							</ul>
+						</nav>
+					{% else %}
+						<nav id="authenticate-buttons">
+							<ul>
+								<li id="sign-up-button"><a href="{% url register %}">Sign up</a></li>
+								<li id="login"><a href="{% url home %}">Login</a></li>
+							</ul>
+						</nav>
+					{% endif %}
+					-->
+					</hgroup>
 			</hgroup>
 		</header>
