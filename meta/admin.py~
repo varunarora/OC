@@ -1,9 +1,0 @@
-from django.contrib import admin
-from meta.models import Language, Category
-
-admin.site.register(Language)
-admin.site.register(Category)
-
-class CategoryAdmin(admin.ModelAdmin):
-	list_display = ('title', 'parent')
-

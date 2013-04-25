@@ -1,7 +1,0 @@
-
-import os
-os.environ['DJANGO_SETTINGS_MODULE'] = "oc_platform.settings"
-
-from articles.models import Article
-a = Article.objects.all().count()
-print a

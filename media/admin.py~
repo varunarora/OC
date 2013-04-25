@@ -1,4 +1,0 @@
-from django.contrib import admin
-from media.image import Image
-
-admin.site.register(Image)
