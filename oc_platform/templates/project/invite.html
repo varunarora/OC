@@ -1,0 +1,129 @@
+{% include 'partials/header.html' %}
+<div id="projects-page">
+    <div id="chief-panel-container" class="projects-launch">
+        <div id="chief-panel-wrapper">
+            <div id="chief-panel">
+                <div id="fill-panel" class="panel-left">
+                    <div id="project-screens">
+                        <div id="project-computer"></div>
+                        <div id="project-mobile"></div>
+                        <div id="project-tablet"></div>
+                    </div>
+                    <button class="project-invite-signup" id="projects-signup-anchor">SIGN UP FOR AN INVITE</button>
+                </div>
+                <div id="key-panel" class="panel-right">
+                    <h1 id="projects-title">Introducing <span class="simple-bold">Projects</span>.</h1>
+                    <h3 id="projects-caption">The easiest way to share your learning content.</h3>
+
+                    <div id="projects-description">Projects are online workspaces for teachers, schools and other content creators to create, manage and share their lesson plans, worksheets, syllabi, tests, etc.
+                    </div>
+                    <div id="projects-launch-date">Launching in private beta in June 2013</div>
+                    <div id="projects-anchor-panel">
+                        <div class="anchor-image" id="anchor-upload" title="Create"></div>
+                        <div class="anchor-image" id="anchor-organize" title="Organize"></div>
+                        <div class="anchor-image" id="anchor-search" title="Discover"></div>
+                        <div class="anchor-image" id="anchor-social" title="Collaborate"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="create-share" class="wide-banner-container">
+        <div class="wide-banner-panel">
+            <h1 class="simple-bold center">Create or upload and share without any hassles</h1>
+            <div id="create-steps-panel" class="tripanel">
+                <div id="upload-create">
+                        <img src="{{ STATIC_URL }}images/projects/upload.png" />
+                        <h1 class="simple-bold">CREATE</h1>Create or upload (from your computer or Dropbox) using our intuitive and easy to use tools
+                </div>
+                <div class="arrow-spacer hidden-arrow"></div>
+                <div id="rename-create">
+                    <img src="{{ STATIC_URL }}images/projects/rename.png" />
+                    <h1 class="simple-bold">EDIT</h1>Instantly rename your files and set appropriate sharing settings
+                </div>
+                <div class="arrow-spacer hidden-arrow"></div>
+                <div id="share-create">
+                    <img src="{{ STATIC_URL }}images/projects/share.png" />
+                    <h1 class="simple-bold">SHARE</h1>Get beautiful links to share with other teachers and students
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="organize-content" class="wide-banner-container">
+        <div class="wide-banner-panel">
+            <div id="fill-panel" class="panel-left">
+                <h1 class="simple-bold">Organize your content with complete flexibility</h1>
+                <p>Label your content with one of the labels from our library or create your own, to easily sort and filter in those crunch times.</p>
+                <p>Move files and collections with ease and rename resources to easy discoverability. Also, use open and closed sharing settings to control who sees what.
+                </p>
+            </div>
+            <div id="key-panel" class="panel-right">
+                <img src="{{ STATIC_URL }}images/projects/organize.png" />
+            </div>
+        </div>
+    </div>
+
+    <div id="discover-content" class="wide-banner-container">
+        <div class="wide-banner-panel">
+            <div id="fill-panel" class="panel-left">
+                <h1 class="simple-bold">Discover content by other teachers and schools</h1>
+                <p>Easily search through open content shared and created by other schools and teachers.</p>
+                <p>Using our powerful search filters, instantly find exactly what you are looking for - whether it be a worksheet, video, specifically-licensed content or practice tests.
+                </p>
+            </div>
+            <div id="key-panel" class="panel-right">
+                <img src="{{ STATIC_URL }}images/projects/discover.png" />
+            </div>
+        </div>
+    </div>
+
+    <div id="social-content" class="wide-banner-container">
+        <div class="wide-banner-panel">
+            <div id="social-steps-panel" class="tripanel">
+                <div id="collaborate-social">
+                    <img src="{{ STATIC_URL }}images/projects/social.png" />
+                    <h1 class="simple-bold">SOCIAL</h1>Comment, rate and collaborate on each other’s work. Because the more, the merrier.
+                </div>
+                <div id="anywhere-social">
+                    <img src="{{ STATIC_URL }}images/projects/anywhere.png" />
+                    <h1 class="simple-bold">ANYWHERE</h1>Share content accessible on our computer, tablet and phone apps. Be a 100% ready for print and digital use.
+                </div>
+                <div id="free-social">
+                    <img src="{{ STATIC_URL }}images/projects/free.png" />
+                    <h1 class="simple-bold">IT'S FREE</h1>Get instant access to 2GB of space without any setup or recurring hosting fees. Get rid of Blackboard or Moodle today.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="projects-invite-background" class="wide-banner-container">
+    </div>
+
+    <div id="projects-invite" class="wide-banner-container">
+        <div class="wide-banner-panel">
+            <div id="fill-panel" class="panel-left">
+                <img src="{{ STATIC_URL }}images/projects/invite.png" />
+                <div id="invite-info">For any questions relating to Projects, you may get in touch with our Director of Content Operations, Zeinab Mohamed, at zeinab@theopencurriculum.org</div>
+            </div>
+            <div id="key-panel" class="panel-right">
+                <form id="projects-signup" action="/project/invite/" method="POST">
+                    {% csrf_token %}
+                    {{ form_failure }}
+                    <input type="text" name="name" placeholder="Full Name"/ >
+                    <input type="text" name="email" placeholder="Email address"/ >
+                    <input type="text" name="organization" placeholder="Organization"/ >
+                    <textarea name="use" placeholder="How do you plan to use Projects?"></textarea>
+                    <button class="project-invite-signup">SIGN UP</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <footer id="projects-footer">
+        <div class="center-stage">
+                <a class="non-url">OpenCurriculum, Inc.</a> / <a href="{% url about %}">About</a> / <a href="{% url help %}">Help</a> / <a href="{% url terms %}">Terms of Use</a> / <a href="{% url privacy %}">Privacy Policy</a>
+        </div>
+    </footer>
+</div>

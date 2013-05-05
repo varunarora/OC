@@ -189,6 +189,18 @@ a
 	border-color: #000 transparent transparent transparent
 	height: 0px
 
+.horizontal-caret-up
+	position: relative
+	top: -2px
+	margin-left: 4px
+	content: ""
+	display: inline-block
+	border-width: 5px 5px 0px 5px
+	border-style: solid
+	/* NEEDS ATTENTION */
+	border-color: #666 transparent transparent transparent
+	height: 0px
+
 .username-caret
 	border-color: #666 transparent transparent transparent
 	margin: -2px 2px 0px 6px
@@ -571,15 +583,9 @@ h1.developers-title
 	height: 50px
 	padding: 10px
 
-form input[type=text], form input[type=password] 
-	background-color: #f5f5f5
-	border: 1px solid #b2b2b2
-	@include border-radius(5px)
-	height: 16px
-	width: 200px
-	padding: 4px
-	font-size: 0.9em
-	
+// TODO: All this form non-sense needs a lot of cleaning up
+
+form input[type=text], form input[type=password], textarea
 	&:focus
 		background-color: #ffffff
 		font-style: normal
@@ -590,6 +596,48 @@ form input[type=text], form input[type=password]
 	&.form-input-error
 		border-color: #E9322D
 		@include box-shadow(0 0 6px #F8B9B7)
+
+form#signup-form,
+form#new-project-form,
+form#sign-in-form,
+form#contributor-invite,
+form#general-invite,
+form#share-via-email,
+	input[type=text], input[type=password], textarea
+		background-color: #f5f5f5
+		border: 1px solid #b2b2b2
+		@include border-radius(5px)
+		height: 16px
+		width: 200px
+		padding: 4px
+		font-size: 0.9em
+
+		&:focus
+			background-color: #ffffff
+
+	textarea
+		height: 200px
+		font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif
+
+form#sign-in-form
+
+	input[type=text], input[type=password]
+		width: 96%
+		margin: 5px 0px
+		
+	#signinButton
+		text-align: center
+
+textarea
+	height: 200px
+
+form#share-via-email
+	textarea, input[type=text]
+		&.full-width
+			width: 100%
+
+	textarea
+		height: 100px
 
 .form-error
 	display: none
@@ -631,15 +679,6 @@ th, td
 	@include sans-bold
 	margin-bottom: 20px
 
-.sign-up
-
-	form input[type=text], form input[type=password]
-		width: 96%
-		margin: 5px 0px
-		
-	#signinButton
-		text-align: center
-
 nav#authenticate-buttons, nav#user-buttons
 	float: right
 	
@@ -670,24 +709,17 @@ nav#user-buttons > ul > li a.hover
 .horizontal-caret-hover
 	border-color: $link-hover transparent transparent
 					
-nav#user-menu.showMenu
+nav#user-menu.showMenu, nav#share-menu.showMenu
 	display: block
 
-nav#user-menu
+nav#user-menu, nav#share-menu
 	display: none
-	/*top: $header-height - 5px*/
-	z-index: 5
-	width: 210px
 	position: absolute
 
-	#user-menu-spacer
+	.floating-menu-spacer
 		height: 8px
-		width: 210px
-		background: url('../images/user-nav-pointer.png') no-repeat
-		background-position: 145px bottom
-		z-index: 10
 		position: relative
-	
+
 	ul
 		background-color: #ffffff
 		@include border-radius(4px)
@@ -710,6 +742,33 @@ nav#user-menu
 					color: #fff
 					text-decoration: none
 
+nav#user-menu
+	z-index: 5
+	width: 210px
+
+	.floating-menu-spacer
+		width: 210px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		background-position: 145px bottom
+		z-index: 10
+
+
+nav#share-menu
+	z-index: 5
+	width: 120px
+
+	.floating-menu-spacer
+		width: 120px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		background-position: 55px bottom
+		z-index: 10
+
+	ul
+		padding-bottom: 8px
+
+		li
+			height: 20px
+
 #forgot-username-password
 	text-align: right
 	
@@ -731,7 +790,7 @@ nav#user-menu
 	button
 		float: right
 
-#signup-form
+form#signup-form
 	input[name=dob_date]
 		width: 30px
 
@@ -873,3 +932,65 @@ table.diff
 
 			&[nowrap=nowrap]
 				min-width: 400px
+
+.form-info-box
+	margin: 10px 0px
+
+table#project-form-table
+	td.inputs
+		width: 400px
+
+		input[type=text], textarea
+			width: 350px
+			font-family: "Arial"
+
+header#project-header
+	height: 150px
+
+	hgroup#project-info-wrapper
+		background: rgba(0,0,0,0.6)
+		width: 375px
+		float: right
+		height: 100%
+
+		#project-info
+			padding: 20px
+			color: #fff
+
+			#project-info-description
+				color: #b2b2b2
+
+textarea[name=objectives]
+	display: none
+
+.revision-message
+	@include border-radius(2px)
+	/* Custom IE styling in ie.sass */
+	@include box-shadow(0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.05))
+	color: #ffffff
+	/* Custom IE styling in ie.sass */
+	@include background-image(linear-gradient(center top, #00DB12 0%, #00A10D 100%))
+	@include sans-bold
+	padding: 8px
+	margin: 10px 0px
+
+.revision-user
+
+	.revision-user-thumbnail
+		float: left
+		margin-right: 10px
+
+		img
+			width: 50px
+			height: 50px
+
+	.revision-user-log
+		float: left
+
+#email-share-dialog-wrapper
+	width: 80%
+	margin: auto
+
+@import "projects_launch"
+
+@import "tipsy"
