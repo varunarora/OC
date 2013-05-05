@@ -9,12 +9,12 @@ def project_home(request, project_slug):
 
 
 def launch(request):
-    context = {}
+    context = {'title': 'OpenCurriculum Projects: The easiest way to share your learning content'}
     return render(request, 'project/invite.html', context)
 
 
 def invite(request):
-    context = {}
+    context = {'title': 'OpenCurriculum Projects: The easiest way to share your learning content'}
 
     # If a form submission was made
     if request.method == "POST":
@@ -29,9 +29,9 @@ def invite(request):
 
             send_mail(
                 'OC-Invite: Projects', message,
-                'OpenCurriculum <info@theopencurriculum.org>', recipients + ['futuregenious@gmail.com'],
+                'OpenCurriculum <info@theopencurriculum.org>', recipients + ['anup@theopencurriculum.org'],
                 fail_silently=False)
-            context = {}
+            context = {'title': 'Successfully received your projects invite'}
             return render(request, 'project/invite-success.html', context)
 
         except:
