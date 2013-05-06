@@ -112,10 +112,14 @@
                 <form id="projects-signup" action="/project/invite/" method="POST">
                     {% csrf_token %}
                     {{ form_failure }}
-                    <input type="text" name="name" placeholder="Full Name"/ >
-                    <input type="text" name="email" placeholder="Email address"/ >
-                    <input type="text" name="organization" placeholder="Organization"/ >
-                    <textarea name="use" placeholder="How do you plan to use Projects?"></textarea>
+                    <label for="name-input">Full Name</label>
+                    <input type="text" id="name-input" name="name" placeholder="Full Name"/ >
+                    <label for="name-input">Email address</label>
+                    <input type="text" id="email-input" name="email" placeholder="Email address"/ >
+                    <label for="name-input">Organization</label>
+                    <input type="text" id="organization-input" name="organization" placeholder="Organization"/ >
+                    <label for="name-input">How do you plan to use Projects?</label>
+                    <textarea name="use" id="placeholder-input" placeholder="How do you plan to use Projects?"></textarea>
                     <button class="project-invite-signup">SIGN UP</button>
                 </form>
             </div>
