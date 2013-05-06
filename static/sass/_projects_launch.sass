@@ -1,0 +1,420 @@
+#chief-panel-container.projects-launch
+    height: 530px
+    background-color: #000
+    font-family: 'PT Sans', sans-serif
+    background-image: url("../images/projects/earth.jpg")
+    background-position: center bottom
+    background-repeat: no-repeat
+    -webkit-animation: bgRise 1000ms ease both
+    -webkit-animation-play-state: paused
+    -moz-animation: bgRise 1000ms ease both
+    -moz-animation-play-state: paused
+    -o-animation: bgRise 1000ms ease both
+    -o-animation-play-state: paused
+
+    &.play
+        -webkit-animation-play-state: running
+        -moz-animation-play-state: running
+        -o-animation-play-state: running
+        animation-play-state: running
+
+    #chief-panel-wrapper
+
+
+        #chief-panel
+            padding-top: 80px
+
+            #fill-panel
+                text-align: center
+
+                #project-screens
+
+                    div
+                        position: relative
+                        margin-top: -176px
+
+                    #project-computer
+                        width: 221px
+                        height: 176px
+                        background-image: url("../images/projects/computer.png")
+                        margin: auto
+                        -webkit-animation: moveDown 1000ms ease both
+                        -webkit-animation-play-state: paused
+                        -moz-animation: moveDown 1000ms ease both
+                        -moz-animation-play-state: paused
+                        -o-animation: moveDown 1000ms ease both
+                        -o-animation-play-state: paused
+
+                    #project-mobile
+                        width: 46px
+                        height: 89px
+                        background-image: url("../images/projects/mobile.png")
+                        top: -89px
+                        margin-top: 10px
+                        left: 270px
+                        -webkit-animation: moveLeft 1000ms ease both
+                        -webkit-animation-play-state: paused
+                        -moz-animation: moveLeft 1000ms ease both
+                        -moz-animation-play-state: paused
+                        -o-animation: moveLeft 1000ms ease both
+                        -o-animation-play-state: paused
+
+                    #project-tablet
+                        width: 79px
+                        height: 125px
+                        background-image: url("../images/projects/tablet.png")
+                        left: 25px
+                        top: -30px
+                        -webkit-animation: moveRight 1000ms ease both
+                        -webkit-animation-play-state: paused
+                        -moz-animation: moveRight 1000ms ease both
+                        -moz-animation-play-state: paused
+                        -o-animation: moveRight 1000ms ease both
+                        -o-animation-play-state: paused
+
+                    #project-computer, #project-mobile, #project-tablet
+                        &.play
+                            -webkit-animation-play-state: running
+                            -moz-animation-play-state: running
+                            -o-animation-play-state: running
+                            animation-play-state: running
+
+    h1#projects-title
+        color: #fff
+        font-size: 3.4em
+
+    h3#projects-caption
+        font-size: 1.8em
+
+    #projects-description
+        color: #b2b2b2
+        font-size: 1.2em
+        margin-top: 60px
+        margin-right: 120px
+        line-height: 1.2em
+
+    #projects-launch-date
+        margin-top: 30px
+        font-size: 1.2em
+
+    #projects-anchor-panel
+        margin-top: 15px
+
+        div.anchor-image
+            margin-right: 20px
+            width: 56px
+            height: 55px
+            float: left
+
+            &:hover
+                cursor: pointer
+
+            &#anchor-upload
+                background-image: url("../images/projects/anchor-upload.png")
+
+                &:hover
+                    background-image: url("../images/projects/anchor-upload-white.png")
+
+            &#anchor-organize
+                background-image: url("../images/projects/anchor-organize.png")
+
+                &:hover
+                    background-image: url("../images/projects/anchor-organize-white.png")
+
+            &#anchor-search
+                background-image: url("../images/projects/anchor-search.png")
+
+                &:hover
+                    background-image: url("../images/projects/anchor-search-white.png")
+
+            &#anchor-social
+                background-image: url("../images/projects/anchor-social.png")
+
+                &:hover
+                    background-image: url("../images/projects/anchor-social-white.png")            
+
+
+#projects-page
+    .wide-banner-container
+        font-family: 'PT Sans', sans-serif
+        color: #fff
+        padding-top: 40px
+        padding-bottom: 40px
+
+        &#create-share
+            min-height: 350px
+            background-color: #CC0C39
+
+        &#organize-content
+            min-height: 310px
+            background-color: #E6781E
+
+        &#discover-content
+            min-height: 300px
+            background-color: #C8CF02
+
+        &#social-content
+            min-height: 300px
+            background-color: #1693A7
+
+        &#projects-invite
+            min-height: 420px
+            z-index: 1
+            position: relative
+            margin-top: -300px
+            background-color: transparent
+            padding-bottom: 0px
+
+            .wide-banner-panel
+                padding-bottom: 0px
+
+                #invite-info
+                    padding: 40px
+                    color: $light-font
+
+
+        &#projects-invite-background
+            /* Custom IE styling in ie_override.sass */
+            background-image: url("../images/projects/earth.jpg")
+            background-position: bottom center
+            background-repeat: no-repeat
+            @include rotate(180deg)
+            position: relative
+            top: 200px
+            margin-top: -200px
+            min-height: 500px
+            z-index: 0
+            background-color: #000
+
+        h1
+            font-size: 1.8em
+            line-height: 1.2em
+
+        p
+            font-family: 'PT Sans', sans-serif
+            font-size: 1.2em
+
+        #create-steps-panel #upload-create,
+        #create-steps-panel #rename-create,
+        #create-steps-panel #share-create,
+        #social-steps-panel > div
+            width: 160px
+            padding: 20px
+            display: inline-block
+            margin: 10px 35px
+            text-align: center
+            vertical-align: top
+
+        #social-steps-panel > div
+            margin: 10px 57px
+
+        #create-steps-panel
+            h1
+                margin-top: 20px
+                margin-bottom: 10px
+
+        #create-steps-panel #upload-create,
+        #create-steps-panel #rename-create,
+        #create-steps-panel #share-create,
+        #create-steps-panel .hidden-arrow
+            opacity: 0
+
+        .arrow-spacer
+            width: 60px
+            background-image: url("../images/projects/arrow.png")
+            background-position: center center
+            background-repeat: no-repeat
+            height: 250px
+            display: inline-block
+
+        #social-steps-panel
+            h1
+                margin-bottom: 40px
+                margin-top: 10px
+
+
+.simple-bold
+    font-weight: bold
+
+.project-invite-signup
+    background-color: #5ABD02
+    padding: 12px
+    border: 0px solid #fff
+    color: #fff
+    font-family: 'PT Sans', sans-serif
+    font-size: 1.8em
+    margin-top: 30px
+
+    &:hover
+        background-color: #51ac00
+
+#projects-signup
+    padding-left: 60px
+    padding-top: 10px
+    text-align: right
+
+    input, textarea
+        width: 95%
+        height: 30px
+        margin: 5px 0px
+        font-family: 'PT Sans', sans-serif
+        font-size: 1.8em
+        padding: 5px
+        letter-spacing: -1px
+
+        &:focus
+            @include box-shadow(none)
+
+    textarea
+        height: 100px
+
+    label
+        /* Custom IE styling in ie_override.sass */
+        visibility: hidden
+
+footer#projects-footer
+    background-color: #000
+    width: 100%
+    height: 60px
+    margin-bottom: 0px
+    text-align: center
+
+    a
+        margin: 0px 10px
+        color: #666
+
+        &:hover
+            color: #fff
+
+a.non-url
+    &:hover
+        text-decoration: none
+
+
+
+
+/* SASS for invite success page */
+
+.full-page-cover
+    width: 100%
+    height: 800px
+
+    &#project-invite-success
+        background-color: #CC0C39
+
+        .center-stage
+            color: #fff
+            margin: auto
+            margin-top: 0px
+
+            h2
+                margin: 200px 200px
+
+/* End of SASS for invite success page */
+
+
+
+@-webkit-keyframes bgRise
+    0%
+        background-position: center 300px
+    100%
+        background-position: center bottom
+
+@-moz-keyframes bgRise
+    0%
+        background-position: center 300px
+    100%
+        background-position: center bottom
+
+@-o-keyframes bgRise
+    0%
+        background-position: center 300px
+    100%
+        background-position: center bottom
+
+@keyframes bgRise
+    0%
+        background-position: center 300px
+    100%
+        background-position: center bottom
+
+
+
+
+@-webkit-keyframes moveLeft
+    0%
+        left: 300px
+    100%
+        left: 270px
+
+@-moz-keyframes moveLeft
+    0%
+        left: 300px
+    100%
+        left: 270px
+
+@-o-keyframes moveLeft
+    0%
+        left: 300px
+    100%
+        left: 270px
+
+@keyframes moveLeft
+    0%
+        left: 300px
+    100%
+        left: 270px
+
+
+
+
+@-webkit-keyframes moveRight
+    0%
+        left: 0px
+    100%
+        left: 25px
+
+@-moz-keyframes moveRight
+    0%
+        left: 0px
+    100%
+        left: 25px
+
+@-o-keyframes moveRight
+    0%
+        left: 0px
+    100%
+        left: 25px
+
+@keyframes moveRight
+    0%
+        left: 0px
+    100%
+        left: 25px
+
+
+
+@-webkit-keyframes moveDown
+    0%
+        top: -30px
+    100%
+        top: 0px
+
+@-moz-keyframes moveDown
+    0%
+        top: -30px
+    100%
+        top: 0px
+
+@-o-keyframes moveDown
+    0%
+        top: -30px
+    100%
+        top: 0px
+
+@keyframes moveDown
+    0%
+        top: -30px
+    100%
+        top: 0px
+

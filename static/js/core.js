@@ -1,6 +1,6 @@
 /*jslint plusplus: true, browser: true, todo: true */
 /*jslint nomen: true */
-var jQuery, $, Modernizr, gapi, _;
+/*global jQuery, $, Modernizr, gapi, _*/
 /*jslint nomen: false */
 
 'use strict';
@@ -693,6 +693,33 @@ jQuery(document).ready(function ($) {
     }, 8000);
 
     playProjectCreate();
+
+    // Deprecate placeholders for all IE browsers
+    if (!Modernizr.input.placeholder) {
+
+        // Adapted from Dropbox Help page implementation
+        var initProjectForm = (function () {
+            // If this page is refresh, set all values of the form to ''
+            $('form#projects-signup input, form#projects-signup textarea').val('');
+
+            $('form#projects-signup input, form#projects-signup textarea').keyup(function () {
+                if ($(this).val() === '') {
+                    $(this).prev('label').removeClass('typing');
+                } else {
+                    $(this).prev('label').addClass('typing');
+                }
+            });
+
+            $('form#projects-signup input, form#projects-signup textarea').focus(function () {
+                $(this).prev('label').addClass('empty');
+            });
+
+            $('form#projects-signup input, form#projects-signup textarea').blur(function () {
+                $(this).prev('label').removeClass('empty');
+            });
+        }());
+
+    }
 
 });
 
