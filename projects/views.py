@@ -15,6 +15,8 @@ def launch(request):
         vocab = ["curricula", "workbooks", "lesson plans", "assessments", "old exam papers", "supplementary exams"]
     elif country.lower() == 'npl':
         vocab = ["syllabus", "examinations", "textbooks", "support materials", "activities", "model question papers"]
+    elif country.lower() == 'ind':
+        vocab = ["worksheets", "mock exams", "notes", "question banks", "guides", "tests"]
     else:
         vocab = ["lesson plans", "worksheets", "syllabi", "tests"]
 
