@@ -9,7 +9,19 @@ def project_home(request, project_slug):
 
 
 def launch(request):
-    context = {'title': 'OpenCurriculum Projects: The easiest way to share your learning content'}
+    country = request.GET.get('q', '')
+
+    if country.lower() == 'rsa':
+        vocab = ["curricula", "workbooks", "lesson plans", "assessments", "old exam papers", "supplementary exams"]
+    elif country.lower() == 'npl':
+        vocab = ["syllabus", "examinations", "textbooks", "support materials", "activities", "model question papers"]
+    else:
+        vocab = ["lesson plans", "worksheets", "syllabi", "tests"]
+
+    context = {
+        'title': 'OpenCurriculum Projects: The easiest way to share your learning content',
+        'vocab': vocab
+    }
     return render(request, 'project/invite.html', context)
 
 
