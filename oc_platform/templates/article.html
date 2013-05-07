@@ -22,7 +22,7 @@
 				<section class="breadcrumb">
 					<div class="links">
 						{% for category in breadcrumb %}
-							<a href="{% url articles:reader category_slug=category.slug %}">{{ category.title }}</a> 
+							<a href="{% url articles:reader category_slug=category.url %}">{{ category.title }}</a> 
 							{% if not forloop.last %}
 							<span class="vertical-caret breadcrumbs-caret"></span> 
 							{% endif %}
@@ -34,29 +34,9 @@
 						</div>
 					</div>
 				</section>
-				<section id="article-do">
-					<div class="article-actions">
-						<ul>
-							<li class="edit-action"><a href=""><span class="icon"></span>Edit</a></li>
-							<li class="download-action"><a href=""><span class="icon"></span>Download as...</li>
-							<li class="history-action"><a href=""><span class="icon"></span>View history</a></li>
-							<li class="share-action"><a href=""><span class="icon"></span>Share</a></li>
-						</ul>		
-					</div>
-				</section>
+				{# include 'partials/article-do.html' #}
 			</header>
-			<section id="article-objectives">
-				<h3>Article objectives:</h3>
-				<ul>
-					{% for objective in article.objectives %}
-						<li><span class="vertical-caret breadcrumbs-caret"></span>{{ objective }}</li>
-					{% endfor %}
-				</ul>			
-			<p/>
-			</section>
-			<section id="article">
-				{{ article.body_markdown_html|safe }}
-			</section>
+			{% include 'partials/article-content.html' %}
 		</article>
 	</div>
 	
