@@ -1,0 +1,12 @@
+<section id="article-objectives">
+    <h3>Article objectives:</h3>
+    <ul>
+        {% for objective in article.objectives %}
+            <li><span class="vertical-caret breadcrumbs-caret"></span>{{ objective }}</li>
+        {% endfor %}
+    </ul>           
+<p/>
+</section>
+<section id="article">
+    {{ article.body_markdown_html|safe }}
+</section>
