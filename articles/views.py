@@ -221,17 +221,17 @@ def categoryURLResolver(request, categories_slugs, n):
 	
 	category = Category.objects.filter(slug=childCategorySlug)
 
-	if category.count() == 1:
-		return category_catalog(request, category.all()[0])
-	else:
-		# If parent/child category pair unique, return child category page (through correct def)
-		truePairs = [cat for cat in category if _testCategoryUniqueness(cat, categories_slugs[n])]
-		if len(truePairs) == 1:
-			# HACK: For some reason, when a child is not found, the nearest parent is rendered. This
-			#	surprisingly works in terms of usability in future, but in future there should be a
-			# 	redirection to the parent page or a 404 should be raised
-			return category_catalog(request, truePairs[0][-1])
-		else:
+    if category.count() == 1:
+        return category_catalog(request, category.all()[0])
+    else:
+        # If parent/child category pair unique, return child category page (through correct def)
+        truePairs = [cat for cat in category if _testCategoryUniqueness(cat, categories_slugs[n])]
+        if len(truePairs) == 1:
+            # HACK: For some reason, when a child is not found, the nearest parent is rendered. This
+            #	surprisingly works in terms of usability in future, but in future there should be a
+            # 	redirection to the parent page or a 404 should be raised
+            return category_catalog(request, truePairs[0][-1])
+        else:
             # Try/except in the cases of poorly created URL. Simply return a 404
             try:
                 # Else recursively call function with parent as child
