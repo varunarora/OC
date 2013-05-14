@@ -232,14 +232,21 @@ def categoryURLResolver(request, categories_slugs, n):
 			# 	redirection to the parent page or a 404 should be raised
 			return category_catalog(request, truePairs[0][-1])
 		else:
-			# Else recursively call function with parent as child
-			return categoryURLResolver(request, categories_slugs, n-1)
-		
+            # Try/except in the cases of poorly created URL. Simply return a 404
+            try:
+                # Else recursively call function with parent as child
+                return categoryURLResolver(request, categories_slugs, n-1)
+            except IndexError:
+                raise Http404
+
+
 def _testCategoryUniqueness(category, parent_slug):
 	if category.parent.slug == parent_slug:
 		return True
 
-#def articleURLResolver():
+def articleURLResolver():
+    pass
+
 
 def reader(request, category_slug):
 	articleSlug = request.GET.get('q', '')
@@ -259,8 +266,10 @@ def reader(request, category_slug):
 			#	child is found. This ought to be fixed to avoid misleading. Ideally, a lookup table
 			# 	of URLs to category/article pages
 			return read_article(request, article[0])
-		else:
-			return articleURLResolver(category_slug, articleSlug) 
+        elif articleCount == 0:
+            raise Http404
+        else:
+            return articleURLResolver(category_slug, articleSlug)
 	
 	else:
 		# Else, this is a category page, give back category if it is unique
