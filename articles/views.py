@@ -249,23 +249,29 @@ def articleURLResolver():
 
 
 def reader(request, category_slug):
-	articleSlug = request.GET.get('q', '')
+    articleSlug = request.GET.get('q', '')
+    view = request.GET.get('view', 'read')
+    revision = request.GET.get('revision', None)
 
-	if articleSlug != '':
-		# Look up article from slug, if article name provided
-		try:
-			article = Article.objects.filter(slug=articleSlug)
-		except Article.DoesNotExist:
-			raise Http404
+    # Diff GET parameters
+    compare = request.GET.get('compare', None)
+    to = request.GET.get('to', None)
 
-		# If non-unique article name, call articleURLResolver()
-		articleCount = article.count()
-		
-		if articleCount == 1:
-			# TODO: Due to this rather trivial code, the category is not even looked up is a unique
-			#	child is found. This ought to be fixed to avoid misleading. Ideally, a lookup table
-			# 	of URLs to category/article pages
-			return read_article(request, article[0])
+    if articleSlug != '':
+        # Look up article from slug, if article name provided
+        try:
+            article = Article.objects.filter(slug=articleSlug)
+        except Article.DoesNotExist:
+            raise Http404
+
+        # If non-unique article name, call articleURLResolver()
+        articleCount = article.count()
+
+        if articleCount == 1:
+            # TODO: Due to this rather trivial code, the category is not even looked up is a unique
+            #	child is found. This ought to be fixed to avoid misleading. Ideally, a lookup table
+            # 	of URLs to category/article pages
+            return read_article(request, article[0])
         elif articleCount == 0:
             raise Http404
         else:
