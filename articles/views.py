@@ -270,11 +270,12 @@ def reader(request, category_slug):
             raise Http404
         else:
             return articleURLResolver(category_slug, articleSlug)
-	
-	else:
-		# Else, this is a category page, give back category if it is unique
-		categories_slugs = category_slug.split('/')
-		return categoryURLResolver(request, categories_slugs, -1)
+
+    else:
+        # Else, this is a category page, give back category if it is unique
+        categories_slugs = category_slug.split('/')
+        return categoryURLResolver(request, categories_slugs, -1)
+
 
 class CatalogCategory():
 	pass
