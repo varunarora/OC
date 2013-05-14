@@ -211,15 +211,15 @@ def _hasImmediateChildren(category):
 		return childCategories
 
 def categoryURLResolver(request, categories_slugs, n):
-	# Get the Category object of the parent of the request
-	childCategorySlug = categories_slugs[n]
-	
-	# TODO: This does not belong to this function, design wise. Move it out and may be create a hook
-	#	of sorts or place in URLConf
-	if childCategorySlug == "opencurriculum":
-		return redirect('articles:catalog')
-	
-	category = Category.objects.filter(slug=childCategorySlug)
+    # Get the Category object of the parent of the request
+    childCategorySlug = categories_slugs[n]
+
+    # TODO: This does not belong to this function, design wise. Move it out and may be create a hook
+    #	of sorts or place in URLConf
+    if childCategorySlug == "opencurriculum":
+        return redirect('articles:catalog')
+
+    category = Category.objects.filter(slug=childCategorySlug)
 
     if category.count() == 1:
         return category_catalog(request, category.all()[0])
