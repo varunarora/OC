@@ -1,0 +1,1 @@
+4 0 * * * python ~/OC/manage.py rebuild_index
