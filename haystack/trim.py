@@ -4,7 +4,11 @@ def trim(s):
     So, "34\u2345\u3456" remains untouched
         "34\u2345\u3456\u45" its last \u and later characters removed
         "34\u2345\u3456\" would have its last backslash removed
+        Edge case: Empty string, which obviously would be returned as it is
     """
+    
+    if s == "":
+        return s
     
     if (s[-1] == "\\"):   # Need to escape backslashes
         # Just the last character needs to be removed
@@ -43,4 +47,4 @@ def testTrim():
     assert(trim(str6) == str6[:14])
     print("Passed my dumb test cases")
 
-testTrim()
+#testTrim()
