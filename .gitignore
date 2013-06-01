@@ -1,9 +1,0 @@
-ocrootu-dump052913.sql
-oc_platform/settings_dev.py
-venv
-crontab.txt
-*.pyc
-*.*~
-*.sassc
-*.scssc
-*.xcf

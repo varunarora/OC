@@ -51,6 +51,7 @@ def isTrimmed(s):
     
 
 def testTrim():
+    """ Use testTrim2 instead"""
     str0 = "34\u2345\u3456"
     str1 = "\u1234\u2345\u3456"
     str2 = "\u2345\u3456\\"
@@ -70,6 +71,7 @@ def testTrim():
     print("Passed my dumb test cases")
 
 def testTrim2():
+    """Checks the validity of each test case, rather than comparing it to its output"""
     str0 = "34\u2345\u3456"
     str1 = "\u1234\u2345\u3456"
     str2 = "\u2345\u3456\\"
@@ -77,6 +79,7 @@ def testTrim2():
     str4 = "34\u2345\u3456\u3"
     str5 = "34\u2345\u3456\u34"
     str6 = "34\u2345\u3456\u345"
+    str7 = ""
     
     print("Testing trim...")
     assert(isTrimmed(trim(str0))) 
@@ -86,5 +89,6 @@ def testTrim2():
     assert(isTrimmed(trim(str4)))
     assert(isTrimmed(trim(str5)))
     assert(isTrimmed(trim(str6)))
-    print("Passed my smarter test cases")
+    assert(isTrimmed(trim(str7)))
+    print("Passed my smarter tests")
 

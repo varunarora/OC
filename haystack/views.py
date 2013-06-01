@@ -246,11 +246,7 @@ class SanitizedSearchView(SearchView):
 		for result in page.object_list:
 			try:
 				import re
-				#import haystack.trim
-				#if result.object.difficulty == 80:
-					# print result.object.revision.body_markdown_html
 				result.object.revision.body_markdown_html = re.sub("\s+", ' ', result.object.revision.body_markdown_html.strip())
-        
 			except:
 				pass
 		extra['page'] = page
