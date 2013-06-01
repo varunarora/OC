@@ -53,7 +53,6 @@ class Highlighter(object):
         self.text_block = strip_tags(text_block)
         highlight_locations = self.find_highlightable_words()
         start_offset, end_offset = self.find_window(highlight_locations)
-        #print self.render_html(highlight_locations, start_offset, end_offset).decode('ascii')
         return self.render_html(highlight_locations, start_offset, end_offset)
     
     def find_highlightable_words(self):
@@ -181,7 +180,7 @@ class Highlighter(object):
         
         from haystack import trim
         highlighted_chunk = trim.trim(highlighted_chunk)
-
+        
         if start_offset > 0:
             highlighted_chunk = '...%s' % highlighted_chunk
         
