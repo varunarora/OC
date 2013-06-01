@@ -8,7 +8,6 @@ from haystack.query import EmptySearchQuerySet
 
 RESULTS_PER_PAGE = getattr(settings, 'HAYSTACK_SEARCH_RESULTS_PER_PAGE', 150)
 
-
 class SearchView(object):
     __name__ = 'SearchView'
     template = 'search/search.html'
