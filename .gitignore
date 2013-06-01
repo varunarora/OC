@@ -1,0 +1,8 @@
+oc_platform/settings_dev.py
+venv
+.gitignore
+*.pyc
+*.*~
+*.sassc
+*.scssc
+*.xcf
