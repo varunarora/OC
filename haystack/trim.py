@@ -50,7 +50,6 @@ def is_trimmed(s):
 
     Returns:
         A boolean value, as described above
-    
     """
 
     if not s:

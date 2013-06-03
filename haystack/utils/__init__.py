@@ -180,9 +180,9 @@ class Highlighter(object):
         
         # Unicode characters at the end of highlighted_chunk might get split,
         # leaving behind partial encodings at the end that break Javascript.
-        # So our highlighted_chunk could be "My heart is in the \u4"
+        # So our highlighted_chunk could be "My heart is in the \u4".
         # 
-        # Remove the orphaned encodings by calling trim()
+        # Remove the orphaned encodings by calling trim().
         from haystack import trim
         highlighted_chunk = trim.trim(highlighted_chunk)
         
