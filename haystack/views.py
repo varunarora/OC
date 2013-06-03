@@ -6,7 +6,6 @@ from django.template import RequestContext
 from haystack.forms import ModelSearchForm, FacetedSearchForm
 from haystack.query import EmptySearchQuerySet
 
-
 RESULTS_PER_PAGE = getattr(settings, 'HAYSTACK_SEARCH_RESULTS_PER_PAGE', 150)
 
 
@@ -247,7 +246,11 @@ class SanitizedSearchView(SearchView):
 		for result in page.object_list:
 			try:
 				import re
+				#import haystack.trim
+				#if result.object.difficulty == 80:
+					# print result.object.revision.body_markdown_html
 				result.object.revision.body_markdown_html = re.sub("\s+", ' ', result.object.revision.body_markdown_html.strip())
+        
 			except:
 				pass
 		extra['page'] = page

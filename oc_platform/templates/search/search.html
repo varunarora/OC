@@ -46,8 +46,8 @@
 					var result = new Result({
 						url: '{% url articles:reader category_slug=result.object.category.slug %}?q={{ result.object.slug }}',
 		    			title: '{{ result.object.title }}',
-		    			{% with result.object.revision.body_markdown_html|striptags|escapejs as stripped_result %}
-		    			summary: '{% highlight stripped_result with query %}',
+				   	{% with result.object.revision.body_markdown_html|striptags|escapejs as stripped_result %}				
+					summary: '{% highlight stripped_result with query %}',
 		    			{% endwith %}
 		    			created: '{{ result.object.created }}',
 		    			user: '{{ result.object.revision.user }}',

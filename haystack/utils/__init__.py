@@ -178,6 +178,9 @@ class Highlighter(object):
         # Don't forget the chunk after the last term
         highlighted_chunk += text[matched_so_far:]
         
+        from haystack import trim
+        highlighted_chunk = trim.trim(highlighted_chunk)
+        
         if start_offset > 0:
             highlighted_chunk = '...%s' % highlighted_chunk
         

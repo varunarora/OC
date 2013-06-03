@@ -1,0 +1,2 @@
+# 4am daily. Location of manage.py would differ on the production server
+4 0 * * * python ~/OC/manage.py rebuild_index
