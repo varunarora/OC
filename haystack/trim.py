@@ -25,7 +25,7 @@ def trim(s):
             return s
 
 
-def isTrimmed(s):
+def is_trimmed(s):
     """
     A string is "trimmed" if there's no partial unicode encoding at the end.
 
