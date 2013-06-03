@@ -6,6 +6,7 @@ ADMINS = (
 )
 
 SIGNUPS_ADMINS = ['info@theopencurriculum.org']
+HELP_EMAIL = 'hello@theopencurriculum.org'
 
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = "587"
@@ -18,7 +19,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql',   # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'oc_platform',                      # Or path to database file if using sqlite3.
         'USER': 'bobbyTM',                      # Not used with sqlite3.
         'PASSWORD': 'LukeWildwood5054',                  # Not used with sqlite3.
@@ -54,7 +55,7 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
-    
+
 import os.path
 TEMPLATE_DIR = os.path.dirname(__file__)
 ABSOLUTE_PATH = lambda x: os.path.join(os.path.abspath(TEMPLATE_DIR), x)
@@ -74,13 +75,15 @@ MEDIA_URL = '/media/'
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = '/home/django/OC/static/'
 
+STATIC_ASSETS_ROOT = STATIC_ROOT
+
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-	os.path.join(TEMPLATE_DIR, 'assets'),
+    os.path.join(TEMPLATE_DIR, 'assets'),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -91,7 +94,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -101,7 +104,7 @@ SECRET_KEY = 'y2yz3rhi5i(z=b8e*o=rzz(@e*o6!m32dkk_t3re7mg1k@jxuj'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -121,7 +124,7 @@ ROOT_URLCONF = 'oc_platform.urls'
 WSGI_APPLICATION = 'oc_platform.wsgi.application'
 
 TEMPLATE_DIRS = (
-	os.path.join(TEMPLATE_DIR, 'templates'),
+    os.path.join(TEMPLATE_DIR, 'templates'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -136,11 +139,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.markup',
     'meta',
-	'license',
-	'oer',
-	'media',
-	'articles',
-	'haystack',
+    'license',
+    'oer',
+    'media',
+    'articles',
+    'haystack',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     'debug_toolbar',
@@ -177,8 +180,97 @@ LOGGING = {
     }
 }
 
+AUTH_PROFILE_MODULE = 'user_account.UserProfile'
+
+RECAPTCHA_PRIVATE_KEY = '6LeG_8USAAAAALqEAEupYoiLIsguhIruYa0QmIVK'
+
+TEMP_IMAGE_DIR = 'static/images/tmp/'
+
+STRINGS = {
+    'global': {
+        'TITLE': 'OpenCurriculum: A K-12 Learning Content Hub',
+        'invite': {
+            'SUCCESS': 'Congratulations! We have successfully received your request submission.',
+            'FAILURE': 'Unknown error occured. Try again or contact us at hello@ for a resolution.'
+        }
+    },
+    'about': {
+        'TITLE': 'About OpenCurriculum',
+        'team': {
+            'TITLE': 'OpenCurriculum\'s Team'
+        },
+        'press': {
+            'TITLE': 'OpenCurriculum\'s Team'
+        },
+    },
+    'jobs': {
+        'TITLE': 'Jobs @ OpenCurriculum'
+    },
+    'terms': {
+        'TITLE': 'Terms of Use &lsaquo; OpenCurriculum'
+    },
+    'privacy': {
+        'TITLE': 'Privacy Policy &lsaquo; OpenCurriculum'
+    },
+    'license': {
+        'TITLE': 'License &lsaquo; OpenCurriculum'
+    },
+    'meta': {
+        'category': {
+            'API_LOCATION_FAILURE': 'Failed to locate category'
+        }
+    },
+    'share': {
+        'SUBJECT_APPEND': 'shared an article with you'
+    },
+    'articles': {
+        'CATALOG_TITLE': 'High-quality article catalog / OpenCurriculum',
+        'HISTORY_TITLE': 'Edit history for %s &lsaquo; OpenCurriculum',
+        'messages': {
+            'SUBMIT_REVIEW': 'Your edits have been successfully submitted for review',
+            'EDITS_SAVE': 'Successfully saved edits at %s'
+        }
+    },
+    'user': {
+        'REGISTER_TITLE': 'Sign up for a new account &lsaquo; OpenCurriculum',
+        'register': {
+            'PROFESSIONS': ['Student', 'Teacher', 'School administrator', 'Publisher', 'Other'],
+            'ACCOUNT_CREATE_SUCCESS': 'Congratulations! Now confirm your account',
+            'EMAIL_CONFIRMATION_MSG': (
+                'Dear %s,\n\nCongratulations for signing up for an account on '
+                'OpenCurriculum. We are delighted to welcome you to our community.'
+                'Our mascot, Moe, extends his warmest greetings! \n\n'
+                'To confirm your new account to use the website as a user, '
+                'click on the link below or copy the entire URL and paste and open '
+                'it in your favorite browser: \n\n%s\n\n'
+                'If you are experiencing any problems with confirming your account, '
+                'do not hesitate to get in touch with us by writing to us at %s. \n\n'
+                'Thank you,\nNew User team @ OpenCurriculum'
+            ),
+            'EMAIL_CONFIRMAITON_SUBJECT': 'Confirm your new OpenCurriculum account',
+            'EMAIL_CONFIMATION_SUCCESS': 'Congratulations! Your account is now active and ready to go!',
+            'EMAIL_CONFIMATION_FAILURE': 'Either your username or your confirmation key were incorrect',
+            'form': {
+                'DOB_OUT_OF_RANGE': 'The date of birth is out of range',
+                'DOB_INCORRECT': 'The date of birth is incorrect',
+                'RECAPTCHA_VALIDATION_FAILURE': 'reCaptcha validation failed. Please try again or contact us for support',
+                'PASSWORD_MISMATCH': 'The two passwords did not match',
+                'USERNAME_VALIDATION_ERROR': 'Username must only have letters, digits, and underscores.',
+                'NAME_VALIDATION_ERROR': 'This field must only have letters.'
+            }
+        }
+    },
+    'projects': {
+        'TITLE': 'OpenCurriculum Projects: The easiest way to share your learning content',
+        'MEMBERS_TITLE': 'Members',
+        'invite': {
+            'SUCCESS_TITLE': 'Successfully received your projects invite',
+            'FAILURE': 'Failed to submit form'
+        }
+    }
+}
 
 try:
-	from settings_dev import *
+    from settings_dev import *
 except ImportError:
-	pass
+    pass
