@@ -1,6 +1,15 @@
 def trim(s):
     """
     Removes partial unicode characters from the end of the string.
+    
+    Args:
+        s: A string
+
+    Returns:
+        A string containing the characters of s after removing any partial 
+        unicode encodings from the end.
+    
+    Examples:
     "34\u2345\u3456" remains untouched.
     "34\u2345\u3456\u45" would have its last \u and later characters removed.
     "34\u2345\u3456\" would have its last backslash removed.
@@ -27,14 +36,21 @@ def trim(s):
 
 def is_trimmed(s):
     """
-    A string is "trimmed" if there's no partial unicode encoding at the end.
-
+    Checks if the input string does not end with a partial Unicode encoding.
+    
     "\u9000" is ok, but "a\u900", "asdf\u" and "asdfg\" are not.
      654321              654321    654321       654321           <- indexes
     
     So, we return True if the string is empty, or if both these are true:
     i)   There is no instance of \u in the last five characters.
     ii)  The last character is not a '\'.
+    
+    Args:
+        s: A string
+
+    Returns:
+        A boolean value, as described above
+    
     """
 
     if not s:

@@ -2,6 +2,8 @@ from django.test import TestCase
 from haystack import trim
 
 class TrimTests(TestCase):
+    """ Simple class for testing trim() """
+    
     def test_trim(self):
         """Making sure trim() never has bad outputs."""
         str0 = "34\u2345\u3456"
