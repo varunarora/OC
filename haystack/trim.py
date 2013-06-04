@@ -61,4 +61,3 @@ def is_trimmed(s):
 
         return condition1 and condition2
 
-
