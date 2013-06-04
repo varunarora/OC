@@ -5,7 +5,7 @@ class TrimTests(TestCase):
     """Simple class for testing trim()."""
     
     def test_trim(self):
-        """Making sure trim() never has bad outputs."""
+        """Checks the output of trim() against selected test cases."""
         str0 = "34\u2345\u3456"
         str1 = "\u1234\u2345\u3456"
         str2 = "\u2345\u3456\\"
