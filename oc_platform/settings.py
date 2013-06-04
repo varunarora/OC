@@ -234,7 +234,13 @@ STRINGS = {
     'user': {
         'REGISTER_TITLE': 'Sign up for a new account &lsaquo; OpenCurriculum',
         'register': {
-            'PROFESSIONS': ['Student', 'Teacher', 'School administrator', 'Publisher', 'Other'],
+            'professions': {
+                'STUDENT': 'Student',
+                'TEACHER': 'Teacher',
+                'ADMIN': 'School administrator',
+                'PUBLISHER': 'Publisher',
+                'OTHER': 'Other'
+            },
             'ACCOUNT_CREATE_SUCCESS': 'Congratulations! Now confirm your account',
             'EMAIL_CONFIRMATION_MSG': (
                 'Dear %s,\n\nCongratulations for signing up for an account on '
