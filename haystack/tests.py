@@ -2,7 +2,7 @@ from django.test import TestCase
 from haystack import trim
 
 class TrimTests(TestCase):
-    """ Simple class for testing trim() """
+    """Simple class for testing trim()."""
     
     def test_trim(self):
         """Making sure trim() never has bad outputs."""
