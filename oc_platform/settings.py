@@ -144,6 +144,9 @@ INSTALLED_APPS = (
     'media',
     'articles',
     'haystack',
+    #'user_account',
+    'interactions',
+    #'projects',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     'debug_toolbar',
