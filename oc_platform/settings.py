@@ -10,9 +10,9 @@ HELP_EMAIL = 'hello@theopencurriculum.org'
 
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = "587"
-EMAIL_HOST_USER = "info@theopencurriculum.org"
-EMAIL_HOST_PASSWORD = "OCProD7!"
-SERVER_EMAIL = "info@theopencurriculum.org"
+EMAIL_HOST_USER = ""  # This needs to filled in
+EMAIL_HOST_PASSWORD = ""  # This needs to filled in
+SERVER_EMAIL = "info@theopencurriculum.org"  # This needs to filled in
 EMAIL_USE_TLS = True
 
 MANAGERS = ADMINS
@@ -20,10 +20,10 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',   # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'oc_platform',                      # Or path to database file if using sqlite3.
-        'USER': 'bobbyTM',                      # Not used with sqlite3.
-        'PASSWORD': 'LukeWildwood5054',                  # Not used with sqlite3.
-        'HOST': 'oc1.cnskgopefuhu.us-east-1.rds.amazonaws.com',                      # Set to empty string for localhost. Not used with sqlite3.
+        'NAME': '',                      # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
@@ -281,5 +281,10 @@ STRINGS = {
 
 try:
     from settings_dev import *
+except ImportError:
+    pass
+    
+try:
+    from settings_prod import *
 except ImportError:
     pass
