@@ -59,11 +59,16 @@ urlpatterns = patterns(
     url(r'^interactions/', include('interactions.urls', namespace='interactions')),
 
 
+    # Article Center Registration
+    url(r'^article-center-registration/', 'oc_platform.views.article_center_registration', name='article_center_registration'),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+
+
 )
 
 if settings.DEBUG:
