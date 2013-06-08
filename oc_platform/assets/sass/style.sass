@@ -603,6 +603,7 @@ form#sign-in-form,
 form#contributor-invite,
 form#general-invite,
 form#share-via-email,
+form#project-add-member
 	input[type=text], input[type=password], textarea
 		background-color: #f5f5f5
 		border: 1px solid #b2b2b2
@@ -979,6 +980,7 @@ textarea[name=objectives]
 	.revision-user-thumbnail
 		float: left
 		margin-right: 10px
+		width: 20%
 
 		img
 			width: 50px
@@ -986,6 +988,7 @@ textarea[name=objectives]
 
 	.revision-user-log
 		float: left
+		width: 70%
 
 #email-share-dialog-wrapper
 	width: 80%
@@ -994,3 +997,58 @@ textarea[name=objectives]
 @import "projects_launch"
 
 @import "tipsy"
+
+#revision-comment
+	textarea[name="body_markdown"]
+		display: block
+		width: 100%
+		height: 50px
+
+	button
+		margin: 10px 0px
+
+.member
+	padding: 10px 0px
+	overflow: hidden
+
+	.member-info
+		float: left
+
+		.member-photo
+			float: left
+			margin-right: 16px
+
+		.member-description
+			float: left
+
+	.member-actions
+		float: right
+
+/* jQuery UI stuff */
+
+.ui-autocomplete
+	background-color: #fff
+	border: 1px solid #efefef
+	border-top-width: 0px
+
+	a
+		font-weight: bold
+
+	a:hover
+		color: #fff
+		cursor: pointer
+		background-color: #1155cc
+
+/* End jQuery UI stuff */
+
+form#project-add-member
+	margin: 10px 0px
+
+	label
+		float: left
+
+	input[name="add-member"]
+		margin-left: 20px
+
+@import "profile"
+
