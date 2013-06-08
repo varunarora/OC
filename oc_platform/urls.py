@@ -40,7 +40,7 @@ urlpatterns = patterns(
 
 
     # User stuff
-    url(r'^signup-invite/', 'oc_platform.views.signupinvite', name='signupinvite'),
+    url(r'^signup-invite/', 'oc_platform.views.signup_invite', name='signupinvite'),
     url(r'^signup/', 'user_account.views.register', name='register'),
     url(r'^signuptest/', 'user_account.views.register_tmp', name='register_tmp'),
     url(r'^authenticate/', 'user_account.views.authenticate', name='authenticate'),
@@ -48,12 +48,15 @@ urlpatterns = patterns(
     url(r'^logout/', 'user_account.views.logout_view', name='logout'),
     url(r'^gauth/', 'user_account.views.googleplus_login', name='gplus_login'),
     url(r'^404testing/', 'oc_platform.views.t404'),
-    url(r'^500testing/', 'oc_platform.views.t505'),
+    url(r'^500testing/', 'oc_platform.views.t500'),
 
 
     # Initialize API stuff
     url(r'^api/getBreadcrumb/', 'oc_platform.views.get_breadcrumb', name='api-get-breadcrumb'),
     url(r'^api/emailShare/', 'oc_platform.views.email_share', name='api-email-share'),
+
+    # Interactions
+    url(r'^interactions/', include('interactions.urls', namespace='interactions')),
 
 
     # Uncomment the admin/doc line below to enable admin documentation:
