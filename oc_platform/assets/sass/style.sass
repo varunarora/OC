@@ -603,6 +603,7 @@ form#sign-in-form,
 form#contributor-invite,
 form#general-invite,
 form#share-via-email,
+form#article-center-registration,
 	input[type=text], input[type=password], textarea
 		background-color: #f5f5f5
 		border: 1px solid #b2b2b2
@@ -994,3 +995,27 @@ textarea[name=objectives]
 @import "projects_launch"
 
 @import "tipsy"
+
+form#article-center-registration 
+	span.clarifier-txt 
+		font-size: 0.8em
+		color: gray
+
+	.required
+		color: red
+
+	input, select, textarea
+		margin-top: 4px
+
+	input[type=checkbox], input[type=radio]
+		margin-right: 4px
+
+	.question
+		margin-bottom: 30px
+
+	textarea
+		width: 400px
+
+#animating-panda-column
+	padding-bottom: 1200px /* Figure out how to actually make a rectangle */
+	background-color: #5abd02
