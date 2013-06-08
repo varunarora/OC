@@ -89,7 +89,7 @@ def privacy(request):
 
 
 def license(request):
-    context = {'title': _(settings.STRINGS['about']['license']['TITLE'])}
+    context = {'title': _(settings.STRINGS['license']['TITLE'])}
     return render(request, 'license.html', context)
 
 
