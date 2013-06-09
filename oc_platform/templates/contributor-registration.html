@@ -41,15 +41,15 @@
 				<input type="password" name="password2">
 			</div>
 			<div class="question">
-				<span class="req-txt">Date of Birth</span><br />
+				<span class="req-txt">Date of Birth <span class="required">*</span></span><br />
 				<select name="dob_month" placeholder="Month">
 					<option value="0">Month</option>
 					{% for key, value in months %}
 					<option value="{{ key }}" {% ifequal form.dob_month key %}selected{% endifequal %}>{{ value }}</option>
 					{% endfor %}
 				</select>
-				<input type="text" placeholder="Date" name="dob_date" value="{{ form.dob_date }}" />
-				<input type="text" placeholder="Year" name="dob_year" value="{{ form.dob_year }}"/>
+				<input type="text" placeholder="dd" name="dob_date" value="{{ form.dob_date }}" />
+				<input type="text" placeholder="yyyy" name="dob_year" value="{{ form.dob_year }}"/>
 				<div id="dob-error" class="form-error">{{ profile_form.dob.errors }}</div>
 			</div>
 			<div class="question">
@@ -74,7 +74,7 @@
 				<div id="profession-error" class="form-error">{{ profile_form.profession.error }}</div>
 			</div>
 			<div class="question">
-				<span class="req-txt">Why are you interested in contributing to OpenCurriculum? <span class="required">*</span></span><br />
+				<span class="req-txt">Why are you interested in contributing to OpenCurriculum?</span><br />
 				<textarea name="interest" cols="56" rows="8">{{ form.interest }}</textarea><br />
 			</div> 
 			<div class="question">

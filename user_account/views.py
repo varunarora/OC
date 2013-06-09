@@ -218,6 +218,7 @@ def _create_user(request):
                         print profile_form.errors
                         new_user.delete()
             except:
+                new_user.delete()
                 # TODO(Varun): Create a django error notication.
                 print "User object failed to be created"
         else:
@@ -742,23 +743,23 @@ def _email_contributor_admins(original_form_inputs):
         'Comments: %s'
     ) % (
         original_form_inputs['username'],
-        original_form_inputs['interest'],
-        original_form_inputs['experience'],
+        original_form_inputs['interest'] if original_form_inputs['interest'] else '',
+        original_form_inputs['experience'] if original_form_inputs['experience'] else '',
 
-        original_form_inputs['subject'],
-        original_form_inputs['other_subject'],
+        original_form_inputs['subject'] if original_form_inputs['subject'] else '',
+        original_form_inputs['other_subject'] if original_form_inputs['other_subject'] else '',
 
-        original_form_inputs['savvy'],
-        original_form_inputs['other_savvy'],
+        original_form_inputs['savvy'] if original_form_inputs['savvy'] else '',
+        original_form_inputs['other_savvy'] if original_form_inputs['other_savvy'] else '',
 
-        original_form_inputs['time_commitment'],
+        original_form_inputs['time_commitment'] if original_form_inputs['time_commitment'] else '',
 
-        original_form_inputs['contact_type'],
-        original_form_inputs['phone_number'],
-        original_form_inputs['video_call_id'],
-        original_form_inputs['contact_other'],
+        original_form_inputs['contact_type'] if original_form_inputs['contact_type'] else '',
+        original_form_inputs['phone_number'] if original_form_inputs['phone_number'] else '',
+        original_form_inputs['video_call_id'] if original_form_inputs['video_call_id'] else '',
+        original_form_inputs['contact_other'] if original_form_inputs['contact_other'] else '',
 
-        original_form_inputs['comments']
+        original_form_inputs['comments'] if original_form_inputs['comments'] else ''
     )
 
     # Send the email with the fields prepared above.
