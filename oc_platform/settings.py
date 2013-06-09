@@ -78,6 +78,8 @@ STATIC_ROOT = '/home/django/OC/static/'
 
 STATIC_ASSETS_ROOT = STATIC_ROOT
 
+TEMP_IMAGE_DIR = STATIC_ROOT + 'images/tmp/'
+
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
@@ -188,8 +190,6 @@ AUTH_PROFILE_MODULE = 'user_account.UserProfile'
 
 RECAPTCHA_PRIVATE_KEY = '6LeG_8USAAAAALqEAEupYoiLIsguhIruYa0QmIVK'
 
-TEMP_IMAGE_DIR = 'static/images/tmp/'
-
 STRINGS = {
     'global': {
         'TITLE': 'OpenCurriculum: A K-12 Learning Content Hub',
@@ -285,7 +285,7 @@ try:
     from settings_dev import *
 except ImportError:
     pass
-    
+
 try:
     from settings_prod import *
 except ImportError:
