@@ -365,7 +365,7 @@ def _set_dob(request, profile_form):
             profile_form.dob.errors = _(
                 settings.STRINGS['user']['register']['form']['DOB_AFTER_TODAY'])
         # TODO(Varun): This needs to be a stronger date check.
-        elif datetime.datetime.today().year - date_of_birth.year <= 13:
+        elif datetime.datetime.today().year - date_of_birth.year <= 12:
             profile_form.dob.errors = _(
                 settings.STRINGS['user']['register']['form']['DOB_LESS_THAN_THIRTEEN'])
         else:
