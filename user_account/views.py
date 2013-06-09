@@ -312,7 +312,10 @@ def confirm_account(request):
         #     account has been confirmed.
         popup_message = _(
             settings.STRINGS['user']['register']['EMAIL_CONFIRMATION_SUCCESS'])
-        context = {'popup_message': popup_message}
+        context = {
+            'popup_message': popup_message,
+            'title': popup_message
+        }
         # TODO(Varun): Change redirection back to profile.html when
         #     profile/auth ready.
         return render(request, 'confirmation.html', context)
@@ -320,7 +323,10 @@ def confirm_account(request):
         # Set the appropriate failure message and return failed page to user.
         failure_message = _(
             settings.STRINGS['user']['register']['EMAIL_CONFIRMATION_FAILURE'])
-        context = {'failure_message': failure_message}
+        context = {
+            'failure_message': failure_message,
+            'title': failure_message
+        }
         return render(request, 'failed_confirmation.html', context)
 
 
