@@ -1,0 +1,12 @@
+{% include 'partials/header.html' %}
+<div class="center-stage">
+    <div id="key-panel" class="panel-left">
+        <h2>Congratulations! Now confirm your account</h2>
+        <p>Congratulations, {{ new_user.first_name }}! You have successfully signed up for an account on OpenCurriculum. Now all you need to do is to confirm your account to get started.</p>
+        <p>We have sent you an email on your email address {{ new_user.email }} with the confirmation link. Check your inbox to find the email with necessary information on confirming your account.</p>
+        <p>If you experience any problems with this sign up process, report this on our <a href="{% url help%}">Help page</a>.</p>
+    </div>
+    <div id="fill-panel" class="panel-right">
+    </div>
+</div>
+{% include 'partials/footer.html' %}
