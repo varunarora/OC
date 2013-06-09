@@ -249,7 +249,7 @@ STRINGS = {
             'ACCOUNT_CREATE_SUCCESS': 'Congratulations! Now confirm your account',
             'EMAIL_CONFIRMATION_MSG': (
                 'Dear %s,\n\nCongratulations for signing up for an account on '
-                'OpenCurriculum. We are delighted to welcome you to our community.'
+                'OpenCurriculum. We are delighted to welcome you to our community. '
                 'Our mascot, Moe, extends his warmest greetings! \n\n'
                 'To confirm your new account to use the website as a user, '
                 'click on the link below or copy the entire URL and paste and open '
@@ -263,10 +263,12 @@ STRINGS = {
             'EMAIL_CONFIRMATION_FAILURE': 'Either your username or your confirmation key were incorrect',
             'form': {
                 'DOB_OUT_OF_RANGE': 'The date of birth is out of range',
+                'DOB_AFTER_TODAY': 'The date of birth cannot be later than today',
+                'DOB_LESS_THAN_THIRTEEN': 'You need to be above 13 years of age to sign up',
                 'DOB_INCORRECT': 'The date of birth is incorrect',
                 'RECAPTCHA_VALIDATION_FAILURE': 'reCaptcha validation failed. Please try again or contact us for support',
                 'PASSWORD_MISMATCH': 'The two passwords did not match',
-                'USERNAME_VALIDATION_ERROR': 'Username must only have letters, digits, and underscores.',
+                'USERNAME_VALIDATION_ERROR': 'Username should be all lowercase, and must only have letters, digits, and underscores.',
                 'NAME_VALIDATION_ERROR': 'This field must only have letters.'
             }
         }

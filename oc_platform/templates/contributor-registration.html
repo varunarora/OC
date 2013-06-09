@@ -34,7 +34,7 @@
 			<div class="question">
 				<span class="req-txt">Password <span class="required">*</span></span><br />
 				<input type="password" name="password">
-				<div id="password-error" class="form-error">{{ user_form.password1.errors }}</div>
+				<div id="password-error" class="form-error">{{ user_form.password.errors }}</div>
 			</div>
 			<div class="question">
 				<span class="req-txt">Confirm Password <span class="required">*</span></span><br />
@@ -78,14 +78,14 @@
 				<textarea name="interest" cols="56" rows="8">{{ form.interest }}</textarea><br />
 			</div> 
 			<div class="question">
-				<span class="req-txt">Do you have any experience writing educational content? <span class="required">*</span></span><br />
+				<span class="req-txt">Do you have any experience writing educational content?</span><br />
 				<div id="boxes">
 					<input type="radio" name="experience" value="1" {% ifequal form.experience "1" %}checked{% endifequal %}>Yes<br />
 					<input type="radio" name="experience" value="0" {% ifequal form.experience "0" %}checked{% endifequal %}>No<br />
 				</div>
 			</div>
 			<div class="question">
-				<span class="req-txt">What subjects are you interested in contributing to? <span class="required">*</span></span><br />
+				<span class="req-txt">What subjects are you interested in contributing to?</span><br />
 				<span class="clarifier-txt">Check as many as apply.</span><br />
 				<div id="boxes">
 					<input type="checkbox" name="subject" value="math" {% if "math" in form.subject %}checked{% endif %}>Math<br />
@@ -105,7 +105,7 @@
 				</div>
 			</div>
 			<div class="question">
-				<span class="req-txt">How tech savvy are you? <span class="required">*</span></span><br />
+				<span class="req-txt">How tech savvy are you?</span><br />
 				<span class="clarifier-txt">Check things you have experience using</span><br />
 				<div id="boxes">
 					<input type="checkbox" name="savvy" value="browser" {% if "browser" in form.savvy %}checked{% endif %}>Internet browsers (Internet Explorer, Safari, Mozilla, Chrome, etc.)<br />
@@ -118,12 +118,12 @@
 				</div>
 			</div>
 			<div class="question">
-				<span class="req-txt">How much time are you willing to contribute per week? <span class="required">*</span></span><br />
+				<span class="req-txt">How much time are you willing to contribute per week?</span><br />
 				<span class="clarifier-txt">OpenCurriculum is a non-profit organization. All activies are voluntary with no monetary compensation, and are meant for the good of the world.</span><br />
 				<input type="text" name="time_commitment" value="{{ form.time_commitment }}" />
 			</div>
 			<div class="question">
-				<span class="req-txt">Preferred method of contact <span class="required">*</span></span><br />
+				<span class="req-txt">Preferred method of contact</span><br />
 				<div id="boxes">
 					<table>
 						<tr>

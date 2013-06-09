@@ -353,13 +353,21 @@ def _set_dob(request, profile_form):
 
     try:
         import datetime
-        date_of_birth = datetime.date(int(year), int(month), int(date))
+        date_dob = datetime.date(int(year), int(month), int(date))
+        date_of_birth = datetime.datetime.combine(date_dob, datetime.time())
 
         # If the person is born before 1900 (unlikely), set error as this
         #     leads to Python error due to lack of support.
         if date_of_birth.year < 1900:
             profile_form.dob.errors = _(
                 settings.STRINGS['user']['register']['form']['DOB_OUT_OF_RANGE'])
+        elif date_of_birth > datetime.datetime.now():
+            profile_form.dob.errors = _(
+                settings.STRINGS['user']['register']['form']['DOB_AFTER_TODAY'])
+        # TODO(Varun): This needs to be a stronger date check.
+        elif datetime.datetime.today().year - date_of_birth.year <= 13:
+            profile_form.dob.errors = _(
+                settings.STRINGS['user']['register']['form']['DOB_LESS_THAN_THIRTEEN'])
         else:
             profile_form.dob = date_of_birth
             setting_success = True
@@ -721,6 +729,26 @@ def contributor_registration(request):
 
 
 def _email_contributor_admins(original_form_inputs):
+    try:
+        experience = original_form_inputs['experience']
+    except:
+        experience = ''
+
+    try:
+        subject = original_form_inputs['subject']
+    except:
+        subject = ''
+
+    try:
+        savvy = original_form_inputs['savvy']
+    except:
+        savvy = ''
+
+    try:
+        contact_type = original_form_inputs['contact_type']
+    except:
+        contact_type = ''
+
     signup_message = (
         'New contributor sign-up: \n\n'
         'Username: %s\n'
@@ -744,17 +772,17 @@ def _email_contributor_admins(original_form_inputs):
     ) % (
         original_form_inputs['username'],
         original_form_inputs['interest'] if original_form_inputs['interest'] else '',
-        original_form_inputs['experience'] if original_form_inputs['experience'] else '',
+        experience,
 
-        original_form_inputs['subject'] if original_form_inputs['subject'] else '',
+        subject,
         original_form_inputs['other_subject'] if original_form_inputs['other_subject'] else '',
 
-        original_form_inputs['savvy'] if original_form_inputs['savvy'] else '',
+        savvy,
         original_form_inputs['other_savvy'] if original_form_inputs['other_savvy'] else '',
 
         original_form_inputs['time_commitment'] if original_form_inputs['time_commitment'] else '',
 
-        original_form_inputs['contact_type'] if original_form_inputs['contact_type'] else '',
+        contact_type,
         original_form_inputs['phone_number'] if original_form_inputs['phone_number'] else '',
         original_form_inputs['video_call_id'] if original_form_inputs['video_call_id'] else '',
         original_form_inputs['contact_other'] if original_form_inputs['contact_other'] else '',
