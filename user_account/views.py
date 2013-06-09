@@ -126,7 +126,7 @@ def _create_user(request):
 
     # Set recaptcha success defaults.
     recaptcha_success = False
-    password_match_success = False
+    password_success = False
 
     # Determine if social login was used or organic signup.
     social_login = request.POST.get('social_login').lower() == "true"
@@ -142,28 +142,18 @@ def _create_user(request):
     if social_login:
         # Ignore reCaptcha validation entirely.
         recaptcha_success = True
-        password_match_success = True
+        password_success = True
 
     else:
         if not recaptcha_success:
             # Check if the captcha entries were valid.
             recaptcha_success = _check_recaptcha(request, profile_form)
 
-        # Validate the match between both passwords.
-        # TODO(Varun): Remove this check, default check built into
-        #     UserCreationForm.
-        password1 = request.POST.get('password')
-        password2 = request.POST.get('password2')
-        password_match_success = password1 == password2
-
-    if not password_match_success:
-        # If password mismatch, set appropriate error message.
-        user_form.password.errors = _(
-            settings.STRINGS['user']['register']['form']['PASSWORD_MISMATCH'])
+        password_success = _check_password(request, user_form)
 
     # Only if passwords match, reCaptcha is successful and DoB is created,
     #     move forward with creating a user and connected Profile model.
-    if password_match_success and recaptcha_success and dob_success:
+    if password_success and recaptcha_success and dob_success:
         user_form = NewUserForm.NewUserForm(request.POST, social_login)
 
         if user_form.is_valid():
@@ -229,6 +219,31 @@ def _create_user(request):
         'user_form': user_form, 'profile_form': profile_form,
         'social_login': social_login
     }, False)
+
+
+def _check_password(request, user_form):
+    password1 = request.POST.get('password')
+    password2 = request.POST.get('password2')
+
+    # If the password does not match the simple regex pattern of only
+    #     atleast letters, numbers, and special characters from the list,
+    #     @#$%^&+=, raise validation error.
+    import re
+    if re.match(r'^.*(?=.{6,})(?=.*[a-z])(?=.*[A-Z])(?=.*[\d\W]).*$', password1) is None:
+        user_form.password.errors = _(
+            settings.STRINGS['user']['register']['form']['PASSWORD_VALIDATION_ERROR'])
+        return False
+
+    # Validate the match between both passwords.
+    # TODO(Varun): Remove this check, default check built into
+    #     UserCreationForm.
+    if not password1 == password2:
+        # If password mismatch, set appropriate error message.
+        user_form.password.errors = _(
+            settings.STRINGS['user']['register']['form']['PASSWORD_MISMATCH'])
+        return False
+
+    return True
 
 
 def _generate_confirmation_code(user):

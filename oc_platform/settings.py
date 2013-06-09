@@ -269,6 +269,7 @@ STRINGS = {
                 'RECAPTCHA_VALIDATION_FAILURE': 'reCaptcha validation failed. Please try again or contact us for support',
                 'PASSWORD_MISMATCH': 'The two passwords did not match',
                 'USERNAME_VALIDATION_ERROR': 'Username should be all lowercase, and must only have letters, digits, and underscores.',
+                'PASSWORD_VALIDATION_ERROR': 'Password must contain at least 6 characters, with atleast one lowercase and one uppercase character and atleast one digit or symbol.',
                 'NAME_VALIDATION_ERROR': 'This field must only have letters.'
             }
         }
