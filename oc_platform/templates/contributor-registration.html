@@ -1,0 +1,188 @@
+{% include 'partials/header.html' %}
+<div class="center-stage">
+	<div id="key-panel" class="panel-left">
+		<h2>Early Contributor registration</h2>
+		<form id="contributor-registration" method="POST" action="/contributor-registration/">
+			<input type="hidden" name="social_login" value="false" />
+			<input type="hidden" name="no-recaptcha" value="true" />
+			{% csrf_token %}
+			<p>Please fill out the fields below to complete the registration as an early contributor on OpenCurriculum. Have a great day!</p>
+			<p></p>
+			<div class="question">
+				<span class="required">* Required</span>
+			</div>
+			<div class="question">
+				<span class="req-txt">First Name <span class="required">*</span></span><br />
+				<input type="text" name="first_name" value="{{ form.first_name }}">
+				<div id="first-name-error" class="form-error">{{ user_form.first_name.errors }}</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">Last Name <span class="required">*</span></span><br />
+				<input type="text" name="last_name" value="{{ form.last_name }}">
+				<div id="last-name-error" class="form-error">{{ user_form.last_name.errors }}</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">Contact Email <span class="required">*</span></span><br />
+				<input type="text" name="email" value="{{ form.email }}">
+				<div id="email-error" class="form-error">{{ user_form.email.errors }}</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">Username <span class="required">*</span></span><br />
+				<input type="text" name="username" value="{{ form.username }}">
+				<div id="username-error" class="form-error">{{ user_form.username.errors }}</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">Password <span class="required">*</span></span><br />
+				<input type="password" name="password">
+				<div id="password-error" class="form-error">{{ user_form.password1.errors }}</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">Confirm Password <span class="required">*</span></span><br />
+				<input type="password" name="password2">
+			</div>
+			<div class="question">
+				<span class="req-txt">Date of Birth</span><br />
+				<select name="dob_month" placeholder="Month">
+					<option value="0">Month</option>
+					{% for key, value in months %}
+					<option value="{{ key }}" {% ifequal form.dob_month key %}selected{% endifequal %}>{{ value }}</option>
+					{% endfor %}
+				</select>
+				<input type="text" placeholder="Date" name="dob_date" value="{{ form.dob_date }}" />
+				<input type="text" placeholder="Year" name="dob_year" value="{{ form.dob_year }}"/>
+				<div id="dob-error" class="form-error">{{ profile_form.dob.errors }}</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">Location <span class="required">*</span></span><br />
+				<span class="clarifier-txt">City, Country</span><br />
+				<input type="text" name="location" value="{{ form.location }}">
+				<div id="location-error" class="form-error">{{ profile_form.location.errors }}</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">Gender <span class="required">*</span></span><br />
+				<label><input type="radio" name="gender" value="1" {% ifequal form.gender "1" %}checked{% endifequal %}> Male</label>
+				<label><input type="radio" name="gender" value="0" {% ifequal form.gender "0" %}checked{% endifequal %}> Female</label>
+				<div id="gender-error" class="form-error">{{ profile_form.gender.errors }}</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">I am a... <span class="required">*</span></span><br />
+				<select name="profession">
+					{% for p in professions %}
+					<option name="{{ p }}" {% ifequal form.profession p %}selected{% endifequal %}>{{ p }}</option>
+					{% endfor %}				
+				</select>
+				<div id="profession-error" class="form-error">{{ profile_form.profession.error }}</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">Why are you interested in contributing to OpenCurriculum? <span class="required">*</span></span><br />
+				<textarea name="interest" cols="56" rows="8">{{ form.interest }}</textarea><br />
+			</div> 
+			<div class="question">
+				<span class="req-txt">Do you have any experience writing educational content? <span class="required">*</span></span><br />
+				<div id="boxes">
+					<input type="radio" name="experience" value="1" {% ifequal form.experience "1" %}checked{% endifequal %}>Yes<br />
+					<input type="radio" name="experience" value="0" {% ifequal form.experience "0" %}checked{% endifequal %}>No<br />
+				</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">What subjects are you interested in contributing to? <span class="required">*</span></span><br />
+				<span class="clarifier-txt">Check as many as apply.</span><br />
+				<div id="boxes">
+					<input type="checkbox" name="subject" value="math" {% if "math" in form.subject %}checked{% endif %}>Math<br />
+					<input type="checkbox" name="subject" value="languages" {% if "languages" in form.subject %}checked{% endif %}>Languages<br />
+					<input type="checkbox" name="subject" value="biology" {% if "biology" in form.subject %}checked{% endif %}>Biology<br />
+					<input type="checkbox" name="subject" value="chemistry" {% if "chemistry" in form.subject %}checked{% endif %}>Chemistry<br />
+					<input type="checkbox" name="subject" value="history" {% if "history" in form.subject %}checked{% endif %}>History<br />
+					<input type="checkbox" name="subject" value="geography" {% if "geography" in form.subject %}checked{% endif %}>Geography<br />
+					<input type="checkbox" name="subject" value="literature" {% if "literature" in form.subject %}checked{% endif %}>Literature<br />
+					<input type="checkbox" name="subject" value="physics" {% if "physics" in form.subject %}checked{% endif %}>Physics<br />
+					<input type="checkbox" name="subject" value="english-language" {% if "english-language" in form.subject %}checked{% endif %}>English Language<br />
+					<input type="checkbox" name="subject" value="english-literature" {% if "english-literature" in form.subject %}checked{% endif %}>English Literature<br />
+					<input type="checkbox" name="subject" value="civic-studies" {% if "civic-studies" in form.subject %}checked{% endif %}>Civic Studies<br />
+					<input type="checkbox" name="subject" value="computer-science" {% if "computer-science" in form.subject %}checked{% endif %}>Computer Science<br />
+					<input type="checkbox" name="subject" value="other" {% if "other" in form.subject %}checked{% endif %}>Other: 
+					<input type="text" name="other_subject" value="{{ form.other_subject }}">
+				</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">How tech savvy are you? <span class="required">*</span></span><br />
+				<span class="clarifier-txt">Check things you have experience using</span><br />
+				<div id="boxes">
+					<input type="checkbox" name="savvy" value="browser" {% if "browser" in form.savvy %}checked{% endif %}>Internet browsers (Internet Explorer, Safari, Mozilla, Chrome, etc.)<br />
+					<input type="checkbox" name="savvy" value="office" {% if "office" in form.savvy %}checked{% endif %}>Microsoft Office (Word, Excel, Powerpoint, etc.)<br />
+					<input type="checkbox" name="savvy" value="markdowns" {% if "markdowns" in form.savvy %}checked{% endif %}>HTML Markdowns<br />
+					<input type="checkbox" name="savvy" value="latex" {% if "latex" in form.savvy %}checked{% endif %}>LaTeX<br />
+					<input type="checkbox" name="savvy" value="image-software" {% if "image-software" in form.savvy %}checked{% endif %}>Image software (Photoshop, GIMP, etc.)<br />
+					<input type="checkbox" name="savvy" value="other" {% if "other" in form.savvy %}checked{% endif %}>Other:
+					<input type="text" name="other_savvy" value="{{ form.other_savvy }}">
+				</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">How much time are you willing to contribute per week? <span class="required">*</span></span><br />
+				<span class="clarifier-txt">OpenCurriculum is a non-profit organization. All activies are voluntary with no monetary compensation, and are meant for the good of the world.</span><br />
+				<input type="text" name="time_commitment" value="{{ form.time_commitment }}" />
+			</div>
+			<div class="question">
+				<span class="req-txt">Preferred method of contact <span class="required">*</span></span><br />
+				<div id="boxes">
+					<table>
+						<tr>
+							<td>
+								<input type="checkbox" name="contact_type" value="phone" {% if "phone" in form.contact_type %}checked{% endif %}>Phone
+							</td>
+							<td>
+								<input type="text" name="phone_number" placeholder="Phone number" value="{{ form.phone_number }}">
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" name="contact_type" value="email" {% if "email" in form.contact_type %}checked{% endif %}>Email
+							</td>
+							<td>
+								
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" name="contact_type" value="skype-video" {% if "skype-video" in form.contact_type %}checked{% endif %}>Skype/Video Calls
+							</td>
+							<td>
+								<input type="text" name="video_call_id" placeholder="Skype username" value="{{ form.video_call_id }}">
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" name="contact_type" value="other" {% if "other" in form.contact_type %}checked{% endif %}>Other: 
+							</td>
+							<td>
+								<input type="text" name="contact_other" value="{{ form.contact_other }}">
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="question">
+				<span class="req-txt">Comments or concerns?</span><br />
+				<span class="clarifier-txt">We take privacy very seriously. If you want to know how your information is being used, contact us at <a href="privacy@theopencurriculum.org">privacy@theopencurriculum.org</a> or check out our site (<a href="http://theopencurriculum.org">theopencurriculum.org.</a>)</span><br />
+				<textarea name="comments" cols="56" rows="8">{{ form.comments }}</textarea>
+			</div>
+			<div class="question">
+				<button class="btn success-button">Submit</button>
+			</div>
+		</form>
+	</div>
+	<div id="fill-panel" class="panel-right">
+		<div id="animating-panda-column">
+			<div class="animating-panda-wrapper">
+				<div></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+    /* Article center specific initializers and renderers */
+    OC.articleCenter.registrationInit();
+</script>
+
+{% include 'partials/footer.html' %}

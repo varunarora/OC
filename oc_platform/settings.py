@@ -6,6 +6,7 @@ ADMINS = (
 )
 
 SIGNUPS_ADMINS = ['info@theopencurriculum.org']
+CONTRIBUTOR_SIGNUPS_ADMINS = ['info@theopencurriculum.org', 'zeinab@theopencurriculum.org', 'duncan@theopencurriculum.org']
 HELP_EMAIL = 'hello@theopencurriculum.org'
 
 EMAIL_HOST = "smtp.gmail.com"
@@ -144,9 +145,9 @@ INSTALLED_APPS = (
     'media',
     'articles',
     'haystack',
-    #'user_account',
+    'user_account',
     'interactions',
-    #'projects',
+    'projects',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     'debug_toolbar',
@@ -236,6 +237,7 @@ STRINGS = {
     },
     'user': {
         'REGISTER_TITLE': 'Sign up for a new account &lsaquo; OpenCurriculum',
+        'CONTRIBUTOR_REGISTER_TITLE': 'Register as an Early contributor',
         'register': {
             'professions': {
                 'STUDENT': 'Student',
@@ -256,9 +258,9 @@ STRINGS = {
                 'do not hesitate to get in touch with us by writing to us at %s. \n\n'
                 'Thank you,\nNew User team @ OpenCurriculum'
             ),
-            'EMAIL_CONFIRMAITON_SUBJECT': 'Confirm your new OpenCurriculum account',
-            'EMAIL_CONFIMATION_SUCCESS': 'Congratulations! Your account is now active and ready to go!',
-            'EMAIL_CONFIMATION_FAILURE': 'Either your username or your confirmation key were incorrect',
+            'EMAIL_CONFIRMATION_SUBJECT': 'Confirm your new OpenCurriculum account',
+            'EMAIL_CONFIRMATION_SUCCESS': 'Congratulations! Your account is now active and ready to go!',
+            'EMAIL_CONFIRMATION_FAILURE': 'Either your username or your confirmation key were incorrect',
             'form': {
                 'DOB_OUT_OF_RANGE': 'The date of birth is out of range',
                 'DOB_INCORRECT': 'The date of birth is incorrect',

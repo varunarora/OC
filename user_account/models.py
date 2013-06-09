@@ -9,3 +9,6 @@ class UserProfile(models.Model):
     location = models.CharField(max_length=256)
     profession = models.CharField(max_length=256)
     profile_pic = models.ImageField(upload_to='profile', blank=True)
+
+    def __unicode__(self):
+        return self.user.username

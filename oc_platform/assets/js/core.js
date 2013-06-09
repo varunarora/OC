@@ -984,6 +984,30 @@ var OC = {
                 }
             }
         }
+    },
+
+    articleCenter: {
+        registrationInit: function(){
+            $(window).bind('scroll', function(e){
+                scrollMoe();
+            });
+
+            var moeWrapper = $('.animating-panda-wrapper > div');
+
+            var scrollMoe = function(){
+                var scrolled = $(window).scrollTop();
+
+                if (scrolled > 400 && scrolled < 1399) {
+                    moeWrapper.removeClass();
+                    moeWrapper.addClass('eating-panda');
+                } else if (scrolled > 1400){
+                    moeWrapper.removeClass();
+                    moeWrapper.addClass('sleeping-panda');
+                } else {
+                    moeWrapper.removeClass();
+                }
+            };
+        }
     }
 };
 
