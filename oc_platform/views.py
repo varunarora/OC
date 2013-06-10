@@ -240,19 +240,19 @@ def email_share(request):
 
 
 def fp_upload(request):
-    """Add data from POST request at api/fpUpload/ to database after sanitizing.
+    """Add data from POST request at api/fpUpload/ to database.
 
     Returns:
         JSON object with a key of 'status' with JavaScript boolean
         representation of success of operation.
     """
 
-    # TODO: Implement user sessions during the upload process to filter out most 
-    # bogus requests.
+    # TODO: Implement user sessions during the upload process 
+    # to filter out most bogus requests.
     
     # Fetch POST fields.
-    # TODO(Srinivasan): Change the API (and the front-end) so only one POST request
-    # is required even if multiple files are uploaded at once.
+    # TODO(Srinivasan): Change the API (and the front-end) so only one POST 
+    # request is required even if multiple files are uploaded at once.
     key = request.POST.get('key')
     filename = request.POST.get('filename')
 
