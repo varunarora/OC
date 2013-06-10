@@ -54,6 +54,8 @@ urlpatterns = patterns(
     # Initialize API stuff
     url(r'^api/getBreadcrumb/', 'oc_platform.views.get_breadcrumb', name='api-get-breadcrumb'),
     url(r'^api/emailShare/', 'oc_platform.views.email_share', name='api-email-share'),
+    url(r'^api/fpUpload/', 'oc_platform.views.fp_upload', name='api-fp-upload'),
+
 
     # Interactions
     url(r'^interactions/', include('interactions.urls', namespace='interactions')),
