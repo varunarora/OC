@@ -38,7 +38,11 @@ urlpatterns = patterns(
 
     url(r'^license/', 'oc_platform.views.license', name='license'),
 
-
+    # Very very temporary (< 1 day), and for testing only #############
+    url(r'^test', 'django.views.generic.simple.direct_to_template',  ##
+        {'template': '/oc_platform/static/index.html'}),             ##
+    ###################################################################
+    
     # User stuff
     url(r'^signup-invite/', 'oc_platform.views.signup_invite', name='signupinvite'),
     url(r'^signup/', 'user_account.views.register', name='register'),

@@ -128,6 +128,7 @@ WSGI_APPLICATION = 'oc_platform.wsgi.application'
 
 TEMPLATE_DIRS = (
     os.path.join(TEMPLATE_DIR, 'templates'),
+    "/home/OC/oc_platform/static",
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
