@@ -239,5 +239,40 @@ def email_share(request):
             json.dumps(status), 401, content_type="application/json")
 
 
+def fp_upload(request):
+    """Add data from POST request at api/fpUpload/ to database after sanitizing.
+
+    Returns:
+        JSON object with a key of 'status' with JavaScript boolean
+        representation of success of operation.
+    """
+
+    # TODO: Implement user sessions during the upload process to filter out most 
+    # bogus requests.
+    
+    # Fetch POST fields.
+    # TODO(Srinivasan): Change the API (and the front-end) so only one POST request
+    # is required even if multiple files are uploaded at once.
+    key = request.POST.get('key')
+    filename = request.POST.get('filename')
+
+    # Storage location.
+    s3_main_addr = "http://ocstatic.s3.amazonaws.com/"
+
+    try:
+        # do database stuff.
+        status = {'status': 'true'}
+
+        return HttpResponse(
+            json.dumps(status), 200, content_type="application/json")
+
+    except: 
+        # Oh noez.
+        status = {'status': 'false'}
+        
+        return HttpResponse(
+            json.dumps(status), 401, content_type="application/json")
+
+
 def article_center_registration(request):
     return render(request, 'article-center-registration.html', {})
