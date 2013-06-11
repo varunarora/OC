@@ -247,16 +247,19 @@ def fp_upload(request):
         representation of success of operation.
     """
 
-    # TODO: Implement user sessions during the upload process 
-    # to filter out most bogus requests.
-    
     # Fetch POST fields.
-    # TODO(Srinivasan): Change the API (and the front-end) so only one POST 
-    # request is required even if multiple files are uploaded at once.
-    key = request.POST.get('key')
-    filename = request.POST.get('filename')
+    print request.POST
+    file_list = request.POST.get("files")
+        
+    if not file_list:
+        print file_list
+    
+    else:
+        for item in file_list:
+          key = item.key
+          title = item.filename     # Title can be changed later
+          print str(key) + str(title) + "\n"
 
-    #print key + " " + filename + "\n"
 
     # Storage location.
     s3_main_addr = "http://ocstatic.s3.amazonaws.com/"
