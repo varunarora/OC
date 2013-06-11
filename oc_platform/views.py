@@ -256,6 +256,8 @@ def fp_upload(request):
     key = request.POST.get('key')
     filename = request.POST.get('filename')
 
+    #print key + " " + filename + "\n"
+
     # Storage location.
     s3_main_addr = "http://ocstatic.s3.amazonaws.com/"
 
