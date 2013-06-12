@@ -264,10 +264,23 @@ def fp_upload(request):
     try:
         # TODO: validation (so no one trolls us with "funposts").
         # do database stuff.
-        status = {'status': 'true'}
+        
+        urls = [];
+        from oer.models import Resource
+        
+        # Create Resource objects for each file uploaded.
+        # And generate the list of URLs for the response.
+        for (url, title) in file_list:     # I love Python
+            k = Resource()
+            k.title = title
+            k.url = url
+            k.save()
+            urls.append(url)
 
+        response_data = {"urls": urls}
+        print response_data
         return HttpResponse(
-            json.dumps(status), 200, content_type="application/json")
+            json.dumps(response_data), 200, content_type="application/json")
 
     except: 
         # Oh noez.
