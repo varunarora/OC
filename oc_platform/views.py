@@ -247,24 +247,22 @@ def fp_upload(request):
         representation of success of operation.
     """
 
-    # Fetch POST fields.
-    print request.POST
-    file_list = request.POST.get("files")
-        
-    if not file_list:
-        print file_list
-    
-    else:
-        for item in file_list:
-          key = item.key
-          title = item.filename     # Title can be changed later
-          print str(key) + str(title) + "\n"
-
-
     # Storage location.
-    s3_main_addr = "http://ocstatic.s3.amazonaws.com/"
+    s3_main_addr = str("http://ocstatic.s3.amazonaws.com/")
+    
+    # Fetch keys and filenames from POST, and build a list of
+    # (url, title) tuples.
+    file_list = []
+    
+    for key_unicode in request.POST:        
+        key = str(key_unicode)             # Unicode by default.
+        url = s3_main_addr + key
+        title = str(request.POST[key])
+
+        file_list.append((url, title))     # Two parens because tuple.
 
     try:
+        # TODO: validation (so no one trolls us with "funposts").
         # do database stuff.
         status = {'status': 'true'}
 
