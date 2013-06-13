@@ -242,11 +242,13 @@ def email_share(request):
 
 
 def fp_upload(request):
-    """Add data from POST request at api/fpUpload/ to database.
+    """Adds data from POST request at api/fpUpload/ to database.
+
+    Paramters:
+        Request containing list of key-title pairs.
 
     Returns:
-        JSON object with a key of 'status' with JavaScript boolean
-        representation of success of operation.
+        Response containing JSON with ResourceID-title pairs.
     """
 
     # Storage location.
@@ -303,6 +305,31 @@ def fp_upload(request):
 #        
 #        return HttpResponse(
 #            json.dumps(status), 401, content_type="application/json")
+
+
+def project7(request):
+    """Accepts final submission of attachment titles and persists them.
+    
+    Parameters:
+        Request contaiing list of ResourceID-title pairs.
+
+    Returns:
+        Redirect to project/collection page.
+    """
+    from oer.models import Resource
+    for id in request.POST:
+        resource = Resource.objects.get(pk=id)
+        #TODO (Srinivasan): Don't change it if it's the same
+        resource.title = request.POST[id]
+        resource.save();
+
+    #TODO: Make synchronous and use redirect('projects: collection')...
+
+    response_dict = dict()
+    response_dict['url'] = str("http://www.theonion.com")
+    
+    return HttpResponse(
+        json.dumps(response_dict), 200, content_type="application/json")
 
 
 def article_center_registration(request):

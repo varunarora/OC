@@ -10,6 +10,22 @@ uploaded_files = new Object();
 filepicker.setKey("AGuSaWwXNQFi60wveigBHz");
 //var s3_main_addr = "http://ocstatic.s3.amazonaws.com/";
 
+
+
+/** @function redirect_cb
+ * @desc Redirects to URL sent by server
+ */
+function redirect_cb(response)  {
+    var link = JSON.parse(response)["url"];
+    window.location.href = link;
+}
+
+
+$("#submit").click(function()   {
+
+    jQuery.post("/projects/7/", window.uploaded_files, redirect_cb);
+
+});
 /** @function upload_cb
  * @desc Callback for POST request from FPpost.<br><br>
  * Updates the HTML to show that the upload was successful.
@@ -21,6 +37,7 @@ function upload_cb(response) {
     new_files = JSON.parse(response);
     $.extend(window.uploaded_files, new_files);
     $("#file").html("Upload more files");
+    $("#form").show();
     console.log(window.uploaded_files);
 
     for (var key in new_files) {
@@ -39,6 +56,7 @@ function upload_cb(response) {
         title_box = $('<div>').addClass(key).append(text_box).append(button);
         $("#titles").append(title_box);
     }
+    
 }
 
 /** @function FPpost
