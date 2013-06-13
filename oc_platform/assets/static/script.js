@@ -6,6 +6,7 @@
  */
 
 // Set global variables, such as the Filepicker.io API key.
+uploaded_files = new Object();
 filepicker.setKey("AGuSaWwXNQFi60wveigBHz");
 //var s3_main_addr = "http://ocstatic.s3.amazonaws.com/";
 
@@ -15,11 +16,29 @@ filepicker.setKey("AGuSaWwXNQFi60wveigBHz");
  * @param {object} response - Response from server.
  * @return none
  */
-function upload_cb(response){
-    $("#fpfilebox").append("Upload success!!");
-    $("#fpfilebox").append(response);
-    $("#fpfilebox").append("\r\n");
-    console.log(response);
+function upload_cb(response) {
+    var title_box, new_files;
+    new_files = JSON.parse(response);
+    $.extend(window.uploaded_files, new_files);
+    $("#file").html("Upload more files");
+    console.log(window.uploaded_files);
+
+    for (var key in new_files) {
+        var text_box = $("<input>").val(new_files[key]).addClass(key).attr('type', 'text');
+        
+        var button = $('<button>').html("Update title");
+        button.click(function()   {
+            var element = $(this);
+            var selected = element.parent().attr('class');
+            var new_text = $("." + selected + " input").val();
+            console.log(selected);
+            console.log(new_text);
+            window.uploaded_files[selected] = new_text;
+        });
+        
+        title_box = $('<div>').addClass(key).append(text_box).append(button);
+        $("#titles").append(title_box);
+    }
 }
 
 /** @function FPpost
@@ -50,7 +69,8 @@ var FPpost = function(fpfiles){
  */
 $("#file").click(function() {
     // Allow multiple files at once, store to S3, and the callback is FPpost
-    filepicker.pickAndStore({multiple: true}, {location: "S3"}, FPpost);
+    filepicker.pickAndStore({multiple: true},
+        {location: "S3", path: "/attachments/", access: 'public'}, FPpost);
 });
 
 /*
@@ -59,8 +79,8 @@ $("#file").click(function() {
  */
 function funpost()  {
     var data = { 
-            "yolo0": "testingfile0",
-            "yolo1": "testingfile1"
+            "yolo0": String(Math.round(10000000*Math.random())),
+            "yolo1": String(Math.round(10000000*Math.random()))
     };
     
     jQuery.post("/api/fpUpload/", data, function(response)   {
@@ -68,7 +88,6 @@ function funpost()  {
          console.log(response);
     });
 }
-
 
 $(document).ajaxSend(function (event, xhr, settings) {
     function getCookie(name) {

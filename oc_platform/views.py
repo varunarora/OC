@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.utils.translation import ugettext as _
+from django.core.files import File
 from django.conf import settings
 from articles.models import Article
 import json
-
+import urllib2
+import os
 
 def home(request):
     """Fetches the top articles, a count and the sign-in form"""
@@ -253,41 +255,54 @@ def fp_upload(request):
     # Fetch keys and filenames from POST, and build a list of
     # (url, title) tuples.
     file_list = []
+
     
-    for key_unicode in request.POST:        
+    for key_unicode in request.POST:       # TODO: Map? 
         key = str(key_unicode)             # Unicode by default.
-        url = s3_main_addr + key
+        #url = s3_main_addr + key
         title = str(request.POST[key])
 
-        file_list.append((url, title))     # Two parens because tuple.
+        file_list.append((key, title))     # Two parens because tuple.
 
-    try:
-        # TODO: validation (so no one trolls us with "funposts").
-        # do database stuff.
+#    try:
+    # do database stuff.
+
+    response_dict = dict()
+    from oer.models import Resource
+    
+    # For each file, download it to local.
+    # Create Resource objects for each file uploaded.
+    # And generate the list for the response.
+    for (key, title) in file_list:     # TODO: Map?
+        s3_file = urllib2.urlopen(s3_main_addr + key)
         
-        urls = [];
-        from oer.models import Resource
+        fname = key.rsplit('/', 1)[-1]      #fname can't have slashes
+        static_file = open(fname, 'w+')
+        static_file.write(s3_file.read())
         
-        # Create Resource objects for each file uploaded.
-        # And generate the list of URLs for the response.
-        for (url, title) in file_list:     # I love Python
-            k = Resource()
-            k.title = title
-            k.url = url
-            k.save()
-            urls.append(url)
+        k = Resource()
+        k.title = title
+        k.url = s3_main_addr + key
+        k.cost = 0
+        k.user_id = 7
+        k.file = File(static_file)
+        k.save()
+        response_dict[k.id] = k.title
+        static_file.close()
+        os.remove(fname)
+    
+    return HttpResponse(
+        json.dumps(response_dict), 200, content_type="application/json")
 
-        response_data = {"urls": urls}
-        print response_data
-        return HttpResponse(
-            json.dumps(response_data), 200, content_type="application/json")
-
-    except: 
+#    except Exception as inst:
+#        print type(inst)
+#        print inst.args
+#        print inst 
         # Oh noez.
-        status = {'status': 'false'}
-        
-        return HttpResponse(
-            json.dumps(status), 401, content_type="application/json")
+#        status = {'status': 'false'}
+#        
+#        return HttpResponse(
+#            json.dumps(status), 401, content_type="application/json")
 
 
 def article_center_registration(request):

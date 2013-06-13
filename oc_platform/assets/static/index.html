@@ -5,15 +5,20 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>Playing with filepicker.io</title>
-  <!--link rel="stylesheet" type="text/css" href="style.css"-->
+  <link rel="stylesheet" type="text/css" href="reset.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
 
 </head>
 
 
 
 <body>
-    <a id="file">Pick and Store</a>
-    <div id="fpfilebox"></div>
+    
+    <button id="file">Upload files</button>
+    
+    <p id="fpfilebox">Hint: You can upload multiple files at a time.</p>
+
+    <div id="titles"></div>
 
     <!-- jQuery, filepicker, and own scripts -->
     <script type="text/javascript" src="jquery-1.8.2.min.js"></script>
