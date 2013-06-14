@@ -1252,7 +1252,6 @@ function gPlusSignInCallback(authResult){
     return OC.signInCallback(authResult);
 }
 
-
 /* global $:false, jQuery:false, filepicker:false, console:false */
 
 /**
