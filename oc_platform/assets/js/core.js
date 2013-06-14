@@ -1314,7 +1314,7 @@ function upload_cb(response) {
     var title_box, new_files;
     new_files = JSON.parse(response);
     $.extend(window.uploaded_files, new_files);
-    $("#file").html("Upload more files");
+    $("#uploadfiles").html("Upload more files");
     $("form").show();
 
     for (var key in new_files) {
