@@ -7,21 +7,15 @@
   <title>Playing with filepicker.io</title>
   <link rel="stylesheet" type="text/css" href="reset.css">
   <link rel="stylesheet" type="text/css" href="style.css">
-
 </head>
 
-
-
 <body>
-    
     <button id="file">Upload files</button>
-    
     <p id="fpfilebox">Hint: You can upload multiple files at a time.</p>
-
-    <div id="form">
+    <form id="rename" action="/projects/7/" method="post">
         <div id="titles"></div>
-        <button id="submit">Submit</button>
-    </div>
+        <button type="submit">Submit</button>
+    </form>
 
     <!-- jQuery, filepicker, and own scripts -->
     <script type="text/javascript" src="jquery-1.8.2.min.js"></script>

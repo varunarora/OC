@@ -21,11 +21,23 @@ function redirect_cb(response)  {
 }
 
 
-$("#submit").click(function()   {
-
-    jQuery.post("/projects/7/", window.uploaded_files, redirect_cb);
-
+$(document).ready(function()    { 
+    $("#rename").submit(function(event)  {
+        console.log(event);
+        event.data = window.uploaded_files;
+        /* $(this).submit();
+        event.stopPropagation();
+        event.preventDefault();
+        return false; */
+        return true;
+   });
 });
+
+
+/* $("#submit").click(function()   {
+    jQuery.post("/projects/7/", window.uploaded_files, redirect_cb);
+}); */
+
 /** @function upload_cb
  * @desc Callback for POST request from FPpost.<br><br>
  * Updates the HTML to show that the upload was successful.

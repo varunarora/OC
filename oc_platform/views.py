@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.utils.translation import ugettext as _
 from django.core.files import File
+from django.template import loader, RequestContext
 from django.conf import settings
 from articles.models import Article
 import json
@@ -241,6 +242,15 @@ def email_share(request):
             json.dumps(status), 401, content_type="application/json")
 
 
+def upload(request):
+    """Renders the upload page to the client"""
+    
+    #t = loader.get_template('upload.html')
+    #c = context:
+    #return HttpResponse(t.render())
+    return render(request, 'upload.html', 
+                  context_instance = RequestContext(request));
+
 def fp_upload(request):
     """Adds data from POST request at api/fpUpload/ to database.
 
@@ -318,18 +328,16 @@ def project7(request):
     """
     from oer.models import Resource
     for id in request.POST:
+        if (id == "csrfmiddlewaretoken"):
+            continue
         resource = Resource.objects.get(pk=id)
-        #TODO (Srinivasan): Don't change it if it's the same
-        resource.title = request.POST[id]
-        resource.save();
+        # If the title has changed, persist it
+        if (resource.id != request.POST[id]):
+            resource.title = request.POST[id]
+            resource.save();
 
-    #TODO: Make synchronous and use redirect('projects: collection')...
-
-    response_dict = dict()
-    response_dict['url'] = str("http://www.theonion.com")
-    
-    return HttpResponse(
-        json.dumps(response_dict), 200, content_type="application/json")
+    from projects.views import project_home
+    return redirect(project_home(request, "some_slug"))
 
 
 def article_center_registration(request):
