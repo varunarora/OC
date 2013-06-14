@@ -3,8 +3,9 @@
 <button id="uploadfiles">Upload Files</button>
 <div id="titles"></div>
 
-<form method="post" action="/project/7/">
-    <button id="rename">Submit</button>
+<form method="post" id="rename" action="/projects/7/">
+    {% csrf_token %}
+    <button type="submit">Submit</button>
 </form>
 
 <script type="text/javascript" src="http://api.filepicker.io/v1/filepicker.js"></script>
