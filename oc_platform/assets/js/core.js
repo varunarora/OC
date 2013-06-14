@@ -1087,7 +1087,7 @@ jQuery(document).ready(function ($) {
     OC.projects.adminToggleHandler();
 
     // Setup autocomplete for add member functionality.
-    OC.projects.initAddMemberAutocomplete();
+    // OC.projects.initAddMemberAutocomplete();
 
 
     /* Other initializers/renderers/handlers */
