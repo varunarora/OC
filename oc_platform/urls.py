@@ -61,11 +61,6 @@ urlpatterns = patterns(
     # Article Center Registration
     url(r'^contributor-registration/', 'user_account.views.contributor_registration', name='contributor_registration'),
 
-    # Discussion board stuff
-    # TODO: Editing a post
-    url(r'^board/(\d+)/$', 'oc_platform.views.discussionBoard', name='board'),
-    url(r'^topic/(\d+)/$', 'oc_platform.views.topic', name='topic'),
-    
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

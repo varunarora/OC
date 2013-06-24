@@ -242,9 +242,3 @@ def email_share(request):
 def article_center_registration(request):
     return render(request, 'article-center-registration.html', {})
 
-def discussionBoard(request):
-    return 42
-
-def topic(request):
-    return 42
-
