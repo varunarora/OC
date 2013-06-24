@@ -9,9 +9,9 @@
 </div>
 <div id="contrib-map"></div> <!-- Varun wants this across the page but the buttons go below it. I guess I could create new styling for those. -->
 <div class="tabs"> <!-- How should I make the content box? -->
-	<div class="tab-label-1"><span>Contributors</span></div> <!-- div nesting is still up in the air -->
+	<div class="tab-label-1">Contributors</div> <!-- div nesting is still up in the air -->
 	<div class="tab-separator"></div>
-	<div class="tab-label-2"><span>Frequently Asked Questions</span></div>
+	<div class="tab-label-2">Frequently Asked Questions</div>
 </div>
 <div class="tab-info">
 	<div id="content-box"> 
@@ -223,45 +223,55 @@
 
 <script type="text/javascript">
 	$(document).ready(function() {
-		// Do I want contributors to be open initially?
-		var $tab1 = $('.tabs .tab-label-1');
-		var $tab1_text = $('.tabs .tab-label-1 span');
-		$tab1.mouseenter(function() {
-			//$tab1.fadeTo('fast', 0.5);
-			//$tab1_text.css('color', 'white');
-			$tab1.addClass('selected');
+		var tab1 = $('.tabs .tab-label-1');
+        var tab2 = $('.tabs .tab-label-2');
+        tab1.css('background-color','#C0C0C0');
+        tab1.css('color','black');
+        $('.tab-info #content-box .faqs').hide(); 
+// I'm an idiot.
+		/*tab1.mouseenter(function() {
+			tab1.fadeTo('slow', 0.5);
+			tab1.css('color', 'white');
+			//tab1.addClass('selected');
+		});*/
+		/*tab1.mouseexit(function() {
+			tab1.fadeTo('slow', 1);
+			tab1.css('color', 'black');
+			//tab1.removeClass('selected');
+		});*/
+		tab1.click(function() {
+			//console.log("this works");
+			//tab1.addClass('selected');
+			//tab2.removeClass('selected'); 
+            // classes / toggling isn't working
+            tab1.css('background-color','#C0C0C0');
+            tab1.css('color','black');
+            tab2.css('background-color','#808080');
+            tab2.css('color','white');
+			$('.tab-info #content-box .contributors').show(); // by default this toggles visibility of elements
+			$('.tab-info #content-box .faqs').hide();
 		});
-		$tab1.mouseexit(function() {
-			//$tab1.fadeTo('fast', 1);
-			//$tab1_text.css('color', 'black');
-			$tab1.removeClass('selected');
-		});
-		$tab1.click(function() {
-			$tab1.toggleClass('selected');
-			$tab2.toggleClass('selected');
-			$('tab-info #content-box .contributors').toggle(); // by default this toggles visibility of elements
-			$('tab-info #content-box .faqs').toggle();
+		
+		//$tab2.mouseenter(function() {
+			//$tab2.addClass('selected');
+		//});
+		//$tab2.mouseexit(function() {
+			//$tab2.removeClass('selected');
+		//});
+		tab2.click(function() {
+			//$tab2.toggleClass('selected');
+			//$tab1.toggleClass('selected');
+            tab2.css('background-color','#C0C0C0');
+            tab2.css('color','black');
+            tab1.css('background-color','#808080');
+            tab1.css('color','white');
+			$('.tab-info #content-box .faqs').show();
+			$('.tab-info #content-box .contributors').hide();
 		});
 
-		var $tab2 = $(".tabs tab-label-2");
-		$tab2.mouseenter(function() {
-			$tab2.addClass('selected');
-		});
-		$tab2.mouseexit(function() {
-			$tab2.removeClass('selected');
-		});
-		$tab2.click(function() {
-			$tab2.toggleClass('selected');
-			$tab1.toggleClass('selected');
-			$('tab-info #content-box .faqs').toggle();
-			$('tab-info #content-box .contributors').toggle();
-		});
+	});
 
-		$('div').click(function() { // This test shows whether jQuery is working on page
-			$(this).css('color', 'green');
-		});
-	})
-// Let's change border color of unused tab border to white or something
+
 
 </script>
 	
@@ -272,7 +282,5 @@
 
 	 Fix jQuery not working problem
 
-	 Figure out how to make faqs and contributor classes occupy same space. 
-
-	 When nothing at all is working (changes), stop and start the server
+     Decide whether I want mixed styling. Some values may have to change from being fixed. I might want to set some SASS variables. On the other hand, it might just be that jsbin isn't showing those values correctly as well (like how one of the buttons is larger than the other).
 
