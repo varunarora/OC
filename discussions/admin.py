@@ -1,4 +1,4 @@
-from oc_platform.models import DiscussionBoard, Topic, Comment
+from models import DiscussionBoard, Topic, Comment
 from django.contrib import admin
 
 admin.site.register(DiscussionBoard)
