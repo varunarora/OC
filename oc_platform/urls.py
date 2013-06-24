@@ -63,11 +63,11 @@ urlpatterns = patterns(
 
     # Discussion board stuff
     # TODO: Editing a post
-    url(r'^board/(\d+)/$', name='board'),
-    url(r'^topic/(\d+)/$', name='topic'),
+    url(r'^board/(\d+)/$', 'oc_platform.views.discussionBoard', name='board'),
+    url(r'^topic/(\d+)/$', 'oc_platform.views.topic', name='topic'),
     
     # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
