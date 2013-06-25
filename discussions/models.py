@@ -19,13 +19,13 @@ class Comment(models.Model):
     poster = models.CharField(max_length=30)   #TODO
     post_time = models.DateTimeField(auto_now=False, auto_now_add=True)
     content = models.TextField()
-    is_edited = models.BooleanField()
+    is_edited = models.BooleanField(default=False)
     edit_time = models.DateTimeField(auto_now=True, auto_now_add=False)
-    upvotes = models.PositiveIntegerField()
-    downvotes = models.PositiveIntegerField()
+    upvotes = models.PositiveIntegerField(default=0)
+    downvotes = models.PositiveIntegerField(default=0)
     
     def __unicode__(self):
-        return self.text
+        return self.content
 
 class Topic(models.Model):
     """Class for topics. Includes text of topic.
@@ -51,11 +51,11 @@ class Topic(models.Model):
     title = models.CharField(max_length=title_length)
     content = models.TextField()
     comments = models.ManyToManyField(Comment)
-    comment_count = models.PositiveIntegerField()
-    is_edited = models.BooleanField()
+    comment_count = models.PositiveIntegerField(default=0)
+    is_edited = models.BooleanField(default=False)
     edit_time = models.DateTimeField(auto_now=True, auto_now_add=True)
-    upvotes = models.PositiveIntegerField()
-    downvotes = models.PositiveIntegerField()   
+    upvotes = models.PositiveIntegerField(default=0)
+    downvotes = models.PositiveIntegerField(default=0)   
     
     def __unicode__(self):
         return self.title
@@ -74,7 +74,7 @@ class DiscussionBoard(models.Model):
     title = models.CharField(max_length=title_length)
     description = models.CharField(max_length=description_length)
     topics = models.ManyToManyField(Topic)
-    topic_count = models.PositiveIntegerField()
+    topic_count = models.PositiveIntegerField(default=0)
     
     def __unicode__(self):
         return self.title
