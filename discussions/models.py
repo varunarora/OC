@@ -4,14 +4,12 @@ title_length = 60
 description_length = 100
 
 class Comment(models.Model):
-    """Individual comment reply to a topic.
+    """Individual comment reply to a topic. Comments cannot be edited.
     
     Attributes:
         poster: User who posted this comment.
         content: Content of the comment.
         post_time: Time the commend was first posted.
-        is_edited: Whether the comment has been edited (Boolean).
-        edit_time: Time of latest edit to this comment.
         upvotes: Number of users who have upvoted this topic.
         downvotes: Number of users who have downvoted this topic.
     """
@@ -19,8 +17,6 @@ class Comment(models.Model):
     poster = models.CharField(max_length=30)   #TODO
     post_time = models.DateTimeField(auto_now=False, auto_now_add=True)
     content = models.TextField()
-    is_edited = models.BooleanField(default=False)
-    edit_time = models.DateTimeField(auto_now=True, auto_now_add=False)
     upvotes = models.PositiveIntegerField(default=0)
     downvotes = models.PositiveIntegerField(default=0)
     
@@ -28,7 +24,7 @@ class Comment(models.Model):
         return self.content
 
 class Topic(models.Model):
-    """Class for topics. Includes text of topic.
+    """Class for topics. Text of topic can be edited.
 
     Treating original posts and comments differently. This allows for 
     more flexibility in content and searching.
@@ -39,7 +35,6 @@ class Topic(models.Model):
         title: Title of topic.
         content: Content of topic.
         comments: All comments associated with this topic (Relationship).
-        comment_count: Number of comments associated with this topic.
         is_edited: Whether the comment has been edited (Boolean).
         edit_time: Time of latest edit to this comment.
         upvotes: Number of users who have upvoted this topic.
@@ -51,7 +46,6 @@ class Topic(models.Model):
     title = models.CharField(max_length=title_length)
     content = models.TextField()
     comments = models.ManyToManyField(Comment)
-    comment_count = models.PositiveIntegerField(default=0)
     is_edited = models.BooleanField(default=False)
     edit_time = models.DateTimeField(auto_now=True, auto_now_add=True)
     upvotes = models.PositiveIntegerField(default=0)
@@ -68,13 +62,11 @@ class DiscussionBoard(models.Model):
         description: For example, /r/bestof has the description "The very 
                      best reddit has to offer."
         topics: All topics on this discussion board (Relationship).
-        topic_count: Number of topics associated with this discussion board.
     """
 
     title = models.CharField(max_length=title_length)
     description = models.CharField(max_length=description_length)
     topics = models.ManyToManyField(Topic)
-    topic_count = models.PositiveIntegerField(default=0)
     
     def __unicode__(self):
         return self.title
