@@ -36,7 +36,7 @@ class Topic(models.Model):
         downvotes: Number of users who have downvoted this topic.
     """
     
-    discussion_board = models.ForeignKey(DiscussionBoard)
+    discussion_board = models.ForeignKey('DiscussionBoard')
     poster = models.CharField(max_length=30)   #TODO
     post_time = models.DateTimeField(auto_now=False, auto_now_add=True)
     title = models.CharField(max_length=title_length)
@@ -61,7 +61,7 @@ class Comment(models.Model):
         downvotes: Number of users who have downvoted this topic.
     """
 
-    topic = models.ForeignKey(Topic)
+    topic = models.ForeignKey('Topic')
     poster = models.CharField(max_length=30)   #TODO
     post_time = models.DateTimeField(auto_now=False, auto_now_add=True)
     content = models.TextField()
