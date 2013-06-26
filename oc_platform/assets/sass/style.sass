@@ -1097,10 +1097,7 @@ form#contributor-registration
 
 .center-stage
 	.center-panel
-		// Use this to center things
-		
-		
-		#video
+		.introduction-video
 			display: block
 			margin: 0 auto
 			//margin-bottom: 40px // not working
@@ -1109,113 +1106,93 @@ form#contributor-registration
 		.map-instruction
 			text-align: center
 			margin-top: 40px
-			font-size: 39px
+			font-size: 3em
 
-#contrib-map
-	margin-top: 40px
-	margin-bottom: 40px
+.contributor-map
+	margin: 40px 0px 40px 0px
 	width: 100%
 	height: 500px
 
 .tabs
-	width: 70%
+	width: 1000px
 	height: 40px
 	margin: auto
 
-	.tab-label-1 //play around with tab looks / crossing over
+	.contributor-tab, #faq-tab
 		float: left
-		width: 49%
+		width: 490px
 		height: 100%
-		background-color: #808080
+		background-color: #444
 		border-radius: 10px 10px 0px 0px
-		border: 3px solid black
-		color: white
-		font-size: 26px
-		text-align: center
-
-	.tab-label-2
-		float: left
-		width: 49%
-		height: 100%
-		background-color: #808080
-		border-radius: 10px 10px 0px 0px
-		border: 3px solid black
-		color: white
-		font-size: 26px
+		border: 3px solid #000000
+		color: #ffffff
+		font-size: 2em
 		text-align: center
 			
 .tab-info
 	margin-top: 3px
 	border: 2px solid
 
-	#content-box
+	.content-box
 		.contributors
-			
-
-			.contributors-left-column
+			.contributors-column-1
 				float: left
-				width: 35.2%
+				width: 500px
 				margin-top: 70px
-				margin-left: 16%
+				margin-left: 330px
 
-				#info-box
-					//border: 1px solid
+				.info-box
 					width: 100%
 					height: 60px
 					margin-bottom: 40px
 
-					#propic
+					.profile-picture
 						float: left
 						height: 60px
 						width: 60px
-						border: 1px solid
+						border: 1px solid #000000
 
-					#contrib-info
+					.contributor-info
 						float: left
 						margin-top: 8px
 						margin-left: 30px
 
-			.contributors-right-column
+			.contributors-column-2
 				float: left
-				width: 35%
+				width: 500px
 				margin-top: 70px
-				
 
-				#info-box
-					//border: 1px solid
+				.info-box
 					float: left
 					width: 100%
 					height: 60px
 					margin-bottom: 40px
 
-					#propic
+					.profile-picture
 						float: left
 						height: 60px
 						width: 60px
-						border: 1px solid
+						border: 1px solid #000000
 
-					#contrib-info
+					.contributor-info
 						float: left
 						margin-top: 8px
 						margin-left: 30px 
 
 		.faqs
-			//border: 1px
 			margin-top: 50px
-			margin-left: 16%
+			margin-left: 300px
 			float: left
-			width: 70%
+			width: 1000px
 			padding-bottom: 100px
 
-			#question
-				font-size: 20px
+			.question
+				font-size: 1.7em
 				font-weight: bold
 
-			#highlight
+			.highlight
 				background: #ffff00				
 
-// jQuery for intro page
-.selected // This didn't work and was replaced with .css 
-	background-color: #C0C0C0
-	color: black
-	
+.selected-tab
+	background-color: #efefef
+	color: #000000

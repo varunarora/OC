@@ -1,181 +1,173 @@
 {% include 'partials/header.html' %}
 <div class="center-stage">
 	<div class="center-panel">
-		<div id="video">
+		<div class="introduction-video">
 			<iframe width="640" height="360" src="http://www.youtube.com/embed/TLa1jmD0S18" frameborder="0" allowfullscreen></iframe>
 		</div>
 		<div class="map-instruction">Use the map to find teachers near you!</div>
 	</div>
 </div>
-<div id="contrib-map"></div> <!-- Varun wants this across the page but the buttons go below it. I guess I could create new styling for those. -->
-<div class="tabs"> <!-- How should I make the content box? -->
-	<div class="tab-label-1">Contributors</div> <!-- div nesting is still up in the air -->
-	<div class="tab-separator"></div>
-	<div class="tab-label-2">Frequently Asked Questions</div>
+<div class="contributor-map"></div>
+	<div class="contributor-tab">Contributors</div>
+	<div class="faq-tab">Frequently Asked Questions</div>
 </div>
 <div class="tab-info">
-	<div id="content-box"> 
+	<div class="content-box"> 
 		<div class="contributors">
-			<div class="contributors-left-column">
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+			<div class="contributors-column-1">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>Anna Gabali</strong></span><br />
 							<span>agabali</span><br />
 							<span>Digital Media - Gaming</span>
 						</div>
 				</div>
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>Osama Shareif</strong></span><br />
 							<span>osama2_78</span><br />
 							<span>Physics</span>
 						</div>
 				</div>
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>Melissa Stadtfeld</strong></span><br />
 							<span>Mstadtfeld</span><br />
 							<span>Math, Biology, Chemistry</span>
 						</div>
 				</div>
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>Rashmi Acharya</strong></span><br />
 							<span>rashmi</span><br />
 							<span>English Language</span>
 						</div>
 				</div>
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>Luciano D'Orazio</strong></span><br />
 							<span>Ldorazio1</span><br />
 							<span>History, Geography, English Literature, Civic Studies</span>
 						</div>
 				</div>
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>Buddhi Sapkota</strong></span><br />
 							<span>buddhi</span><br />
 							<span>Math, Sociology</span>
 						</div>
 				</div>
 			</div>
-			<div class="contributors-right-column">
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+			<div class="contributors-column-2">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>Rachel Wilks</strong></span><br />
 							<span>RachelWilks</span><br />
 							<span>Math, English Language, English Literature, Civic Studies</span>
 						</div>
 				</div>
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>David Oryang</strong></span><br />
 							<span>wegesa</span><br />
 							<span>Math</span>
 						</div>
 				</div>
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>Sheri Otillio</strong></span><br />
 							<span>Sheri</span><br />
 							<span>Math, Languages, History, Social-Emotional</span>
 						</div>
 				</div>
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>Jyotsna Anand</strong></span><br />
 							<span>Jane_Anand</span><br />
-							<span>English Language</span>
+							<span>English Language, Hindi</span>
 						</div>
 				</div>
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>Mary Taft</strong></span><br />
 							<span>mmtaft</span><br />
-							<span>Earth and Space Science, Life Science, Technology/Engineering</span>
+							<span>Earth and Space Science, Life Science, Tech/Engineering</span>
 						</div>
 				</div>
-				<div id="info-box">
-					<div id="propic"></div>
-						<div id="contrib-info">
+				<div class="info-box">
+					<div class="profile-picture"></div>
+						<div class="contributor-info">
 							<span><strong>Marie Dicardy</strong></span><br />
 							<span>sasevre56</span><br />
 							<span>Languages</span>
 						</div>
 				</div>
-
 			</div>
-			<!-- This is where photo / info will go. There will be divs for each person's photo + info -->
-			<!-- make a div to take the place of the picture (django code will come later) -->
-			<!-- For users I can do name, username and location for now, next to "picture" and in 2 columns -->
-
-			<!-- The ^ is ideal; I don't have geographic information right now, so I'll do name, username, subjects. I'll put info below and change the margin-top -->
 		</div>
 	</div>
-	<div id="content-box">
+	<div class="content-box">
 		<div class="faqs">
-			<p id="question">1.	What is an article?</p>
+			<p class="question">1.	What is an article?</p>
 			<p>An article is a Wikipedia-like page of text and images that provide a general overview of a topic but are not linked to specific schools or organizations. In other words, an article is a page of information covering a topic meant for everyone.</p>
-			<p id="question">2. Who would see the content? Who has access?</p>
+			<p class="question">2. Who would see the content? Who has access?</p>
 			<p>Until the content is ready to be published, only the author and the moderator have access to the article. Once the article is ready to be published, everyone will have access to the article online.</p>
-			<p id="question">3. How do I write articles? What do I need to know?</p>
+			<p class="question">3. How do I write articles? What do I need to know?</p>
 			<p>
-				<span id="highlight">Articles are written as text with some HTML and LaTeX tricks for special formatting.</span><br />
-				<span id="highlight">Writing text: Simply requires typing materials as you would type in any Word or text document.</span><br />
+				<span class="highlight">Articles are written as text with some HTML and LaTeX tricks for special formatting.</span><br />
+				<span class="highlight">Writing text: Simply requires typing materials as you would type in any Word or text document.</span><br />
 				<br />
-				<span id="highlight">Special Formatting: For formatting requiring special indentation or not available in our text interface, use the following tricks:</span><br />
-				<span id="highlight">&gt;&emsp;&emsp;&emsp;&emsp;Creating texts indented entirely for quotes</span><br />
-				<span id="highlight">###Hello###&emsp;&emsp;&emsp;Using # creates larger fonts or headings and subheadings.</span><br />
-				<span id="highlight">\\(x^{2}\\)&emsp;&emsp;&emsp;Superscripts are created using the carrot function, ^, in the format shown. Subscripts are created by 
+				<span class="highlight">Special Formatting: For formatting requiring special indentation or not available in our text interface, use the following tricks:</span><br />
+				<span class="highlight">&gt;&emsp;&emsp;&emsp;&emsp;Creating texts indented entirely for quotes</span><br />
+				<span class="highlight">###Hello###&emsp;&emsp;&emsp;Using # creates larger fonts or headings and subheadings.</span><br />
+				<span class="highlight">\\(x^{2}\\)&emsp;&emsp;&emsp;Superscripts are created using the carrot function, ^, in the format shown. Subscripts are created by 
 				 replacing the carrot with _. A combination of both can also be implemented at once (i.e. \\(x^{2}_{n}\\)</span><br />
-				<span id="highlight">\\(\frac{1}{2}\\)&emsp;&emsp;&emsp;This function creates fractions within text with the first {1} being the numerator and {2} denominator.</span><br />
+				<span class="highlight">\\(\frac{1}{2}\\)&emsp;&emsp;&emsp;This function creates fractions within text with the first {1} being the numerator and {2} denominator.</span><br />
 				<br />
-				<span id="highlight">To create special boxes for examples or quotes, use:</span><br />
-				<span id="highlight">&lt;div class=”article-example” markdown=”1”&gt;</span><br /> 
-				<span id="highlight">&emsp;&emsp;Example.  Write using same formatting as previously.</span><br />
-				<span id="highlight">&lt;/div&gt;</span><br />
+				<span class="highlight">To create special boxes for examples or quotes, use:</span><br />
+				<span class="highlight">&lt;div class=”article-example” markdown=”1”&gt;</span><br /> 
+				<span class="highlight">&emsp;&emsp;Example.  Write using same formatting as previously.</span><br />
+				<span class="highlight">&lt;/div&gt;</span><br />
 				<br />
-				<span id="highlight">&lt;div class=”article-block” markdown=”1”&gt;</span><br />
-				<span id="highlight">&emsp;&emsp;Block for anything else. Could be for figures, etc.</span><br />
-				<span id="highlight">&lt;/div&gt;</span><br />
+				<span class="highlight">&lt;div class=”article-block” markdown=”1”&gt;</span><br />
+				<span class="highlight">&emsp;&emsp;Block for anything else. Could be for figures, etc.</span><br />
+				<span class="highlight">&lt;/div&gt;</span><br />
 				<br />
-				<span id="highlight">To create tables:</spa><br />
-				<span id="highlight">&lt;table markdown=”1”&gt;</span><br />
-				<span id="highlight">&emsp;&lt;tr&gt;&lt;th&gt;Header 1&lt;/th&gt;&lt;th&gt;Header 2&lt;/th&gt;&lt;/tr&gt;&emsp;&lt;= for a row of headers</span><br />
-				<span id="highlight">&emsp;&lt;tr&gt;&lt;td&gt;Column 1&lt;/td&gt;&lt;td&gt;Column 2&lt;/td&gt;&lt;/tr&gt;&emsp;&lt;= for a row of columns, same formatting rules as elsewhere apply.</span><br />
-				<span id="highlight">&lt;/table&gt;</span><br />
+				<span class="highlight">To create tables:</spa><br />
+				<span class="highlight">&lt;table markdown=”1”&gt;</span><br />
+				<span class="highlight">&emsp;&lt;tr&gt;&lt;th&gt;Header 1&lt;/th&gt;&lt;th&gt;Header 2&lt;/th&gt;&lt;/tr&gt;&emsp;&lt;= for a row of headers</span><br />
+				<span class="highlight">&emsp;&lt;tr&gt;&lt;td&gt;Column 1&lt;/td&gt;&lt;td&gt;Column 2&lt;/td&gt;&lt;/tr&gt;&emsp;&lt;= for a row of columns, same formatting rules as elsewhere apply.</span><br />
+				<span class="highlight">&lt;/table&gt;</span><br />
 				<br />
-				<span id="highlight"><strong>For specific details about functions or information not covered here or questions on other things, please contact Zeinab at <a href="zeinab@theopencurriculum.org">zeinab@theopencurriculum.org</a>.</strong></span>
+				<span class="highlight"><strong>For specific details about functions or information not covered here or questions on other things, please contact Zeinab at <a href="zeinab@theopencurriculum.org">zeinab@theopencurriculum.org</a>.</strong></span>
 			</p>
-			<p id="question">4. What topics can I write about?</p>
+			<p class="question">4. What topics can I write about?</p>
 			<p>To get you started, a list of topics within specific subjects are provided for articles. You are free to write on the topics provided. However, if you are not interested in the suggested list of topics provided, contact us and we will do our best to address your needs. We do our best to tailor the subjects to your interest based on the user form filled out previously.</p>
-			<p id="question">5. How long should the articles be? What are the requirements of the articles?</p>
+			<p class="question">5. How long should the articles be? What are the requirements of the articles?</p>
 			<p>The articles don’t have a length limit. However, we require that the articles have some depth or overview of the topic covered. The articles should also have an objective so that the users have an idea of what the article will cover.</p>
-			<p id="question">6. What if someone else already started working on an article I am interested in?</p>
+			<p class="question">6. What if someone else already started working on an article I am interested in?</p>
 			<p>In such cases, you may either work on a different article or collaborate and work with the person on the article.</p>
-			<p id="question">7. Can there be more than one article on the same topic?</p>
-			<p>No. There are endless amounts of topics and information that need to covered. We try to limit the number of repetitions of topics, since there are so many things to cover in this world. <span id="highlight">If articles do not contain enough depth on a topic as is  needed, you may collaborate with the authors to include the missing content.</span></p>
-			<p id="question">8. Who decides what gets published?</p>
+			<p class="question">7. Can there be more than one article on the same topic?</p>
+			<p>No. There are endless amounts of topics and information that need to covered. We try to limit the number of repetitions of topics, since there are so many things to cover in this world. <span class="highlight">If articles do not contain enough depth on a topic as is  needed, you may collaborate with the authors to include the missing content.</span></p>
+			<p class="question">8. Who decides what gets published?</p>
 			<p>An appointed moderator decides whether an article can be published based on the quality and depth of content covered.</p>
-			<p id="question">9. How does one become a moderator?</p>
-			<p>After contributing <span id="highlight">XX</span> articles continuously, one can become a moderator in the subject of their expertise.</p>
-			<p id="question">10. Who do I contact if I have questions or need help?</p>
+			<p class="question">9. How does one become a moderator?</p>
+			<p>After contributing <span class="highlight">XX</span> articles continuously, one can become a moderator in the subject of their expertise.</p>
+			<p class="question">10. Who do I contact if I have questions or need help?</p>
 			<p>If you have any questions or concerns, feel free to contact <a href="zeinab@theopencurriculum.org">zeinab@theopencurriculum.org</a>. We will do our best to address your questions or concerns.</p>
-			<p id="question">11. How do you maintain quality?</p>
+			<p class="question">11. How do you maintain quality?</p>
 			<p>Quality control is maintained by the moderators. We will do our best to ensure articles contain the same depth on topics consistently.</p>
-			<p id="question">12. How do I add images or embed videos? What do I need to do to add resources?</p>
+			<p class="question">12. How do I add images or embed videos? What do I need to do to add resources?</p>
 			<p>
 				<span>Images can be added by sending the image of interest to Varun at <a href="varun@theopencurriculum.org">varun@theopencurriculum.org</a>. As of now, videos cannot be embedded within articles, however, they can be listed as resource and linked to the specific line or words of interest.</span><br />
 				<span>Adding images within the article requires using the specific line within the text:</span><br />
@@ -184,27 +176,23 @@
 				<br />
 				<span>The only things that need to change within the lines are the category of the topic, the title of the article, and figure name. The are written within the line in a specific format, as illustrated above.</span>
 			</p>
-			<p id="question">13. How do you select your Article Center contributors? Can I invite someone?</p>
+			<p class="question">13. How do you select your Article Center contributors? Can I invite someone?</p>
 			<p>Article Center contributors were selected based on the sign-up form on the OpenCurriculum home page. We invited all those who had signed up with us to contribute. If you know people who are interested in contributing, invite them! The more people we have, the better!</p>
-			<p id="question">14. When will the article center be officially open to everyone? Will there be more people contributing?</p>
-			<p>Article Center will be open officially to the public on <span id="highlight">XXXX 2013</span>. After the public launch, there will be more people contributing materials and more topics available for people to contribute to.</p>
-			<p id="question">15. Why isn’t OpenCurriculum open to the public yet?</p>
+			<p class="question">14. When will the article center be officially open to everyone? Will there be more people contributing?</p>
+			<p>Article Center will be open officially to the public on <span class="highlight">XXXX 2013</span>. After the public launch, there will be more people contributing materials and more topics available for people to contribute to.</p>
+			<p class="question">15. Why isn’t OpenCurriculum open to the public yet?</p>
 			<p>OpenCurriculum wants to make sure it is doing everything right first. You’re one of the first few who will determine the future and direction of the Article Center.</p>
-			<p id="question">16. How do we get involved in and learn about Projects?</p>
-			<p>You can learn more about projects here <span id="highlight">(linked to website)</span>.</p>
-			<p id="question">17. How do we collaborate and talk with the other contributors?</p>
-			<p>You can contact and collaborate with the other contributors using the <span id="highlight">XXX LAB HUB</span> for connecting and discussing materials with the other contributors.</p>
-			<p id="question">18. I submitted my article for publishing. When do I expect to hear back?</p>
-			<p><span id="highlight">Moderators are expected to respond with edits or approve the materials for publishing within 48 hours</span>. If no response is given within that time frame, contact <a href="zeinab@theopencurriculum.org">zeinab@theopencurriculum.org</a>.</p>
-			<p id="question">19. What if I want to contribute materials in a different language?</p>
+			<p class="question">16. How do we get involved in and learn about Projects?</p>
+			<p>You can learn more about projects here <span class="highlight">(linked to website)</span>.</p>
+			<p class="question">17. How do we collaborate and talk with the other contributors?</p>
+			<p>You can contact and collaborate with the other contributors using the <span class="highlight">XXX LAB HUB</span> for connecting and discussing materials with the other contributors.</p>
+			<p class="question">18. I submitted my article for publishing. When do I expect to hear back?</p>
+			<p><span class="highlight">Moderators are expected to respond with edits or approve the materials for publishing within 48 hours</span>. If no response is given within that time frame, contact <a href="zeinab@theopencurriculum.org">zeinab@theopencurriculum.org</a>.</p>
+			<p class="question">19. What if I want to contribute materials in a different language?</p>
 			<p>We will do our best to adapt other languages to our platform as we get better. For now, we are accepting English as the language of the articles.</p>
 		</div>
 	</div>
 </div>
-
-<!-- How I'm doing div nesting: tabs will be centered (I'll worry about the line later) and each tab float left or float right. I'll have to decide later whether I want 
-	 information to stretch across page or stay within that box, which will be determined by another class. -->
-
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGhhkbXlDChv7uPQaPivPTEJ0ls9ka1Yg&sensor=true"></script>
 <script type="text/javascript">
@@ -223,63 +211,33 @@
 
 <script type="text/javascript">
 	$(document).ready(function() {
-		var tab1 = $('.tabs .tab-label-1');
-        var tab2 = $('.tabs .tab-label-2');
-        tab1.css('background-color','#C0C0C0');
+		var tab1 = $('.tabs .contributor-tab');
+        var tab2 = $('.tabs .faq-tab');
+        tab1.css('background-color','#efefef');
         tab1.css('color','black');
-        $('.tab-info #content-box .faqs').hide(); 
-// I'm an idiot.
-		/*tab1.mouseenter(function() {
-			tab1.fadeTo('slow', 0.5);
-			tab1.css('color', 'white');
-			//tab1.addClass('selected');
-		});*/
-		/*tab1.mouseexit(function() {
-			tab1.fadeTo('slow', 1);
-			tab1.css('color', 'black');
-			//tab1.removeClass('selected');
-		});*/
+        $('.tab-info .content-box .faqs').hide(); 
 		tab1.click(function() {
 			//console.log("this works");
-			//tab1.addClass('selected');
-			//tab2.removeClass('selected'); 
+			//tab1.addClass('selected-tab');
+			//tab2.removeClass('selected-tab'); 
             // classes / toggling isn't working
-            tab1.css('background-color','#C0C0C0');
+            tab1.css('background-color','#efefef');
             tab1.css('color','black');
-            tab2.css('background-color','#808080');
+            tab2.css('background-color','#444');
             tab2.css('color','white');
-			$('.tab-info #content-box .contributors').show(); // by default this toggles visibility of elements
-			$('.tab-info #content-box .faqs').hide();
+			$('.tab-info .content-box .contributors').show(); // by default this toggles visibility of elements
+			$('.tab-info .content-box .faqs').hide();
 		});
-		
-		//$tab2.mouseenter(function() {
-			//$tab2.addClass('selected');
-		//});
-		//$tab2.mouseexit(function() {
-			//$tab2.removeClass('selected');
-		//});
 		tab2.click(function() {
-			//$tab2.toggleClass('selected');
-			//$tab1.toggleClass('selected');
-            tab2.css('background-color','#C0C0C0');
+			//$tab2.toggleClass('selected-tab');
+			//$tab1.toggleClass('selected-tab');
+            tab2.css('background-color','#efefef');
             tab2.css('color','black');
-            tab1.css('background-color','#808080');
+            tab1.css('background-color','#444');
             tab1.css('color','white');
-			$('.tab-info #content-box .faqs').show();
-			$('.tab-info #content-box .contributors').hide();
+			$('.tab-info .content-box .faqs').show();
+			$('.tab-info .content-box .contributors').hide();
 		});
-
 	});
-
-
-
 </script>
-	
 
-<!-- To do list:
-	 
-	 Graphic behind video/message that continues into map (no whitespace in between) <- that would get rid of the weirdness
-
-	 Fix jQuery not working problem
-
-     Decide whether I want mixed styling. Some values may have to change from being fixed. I might want to set some SASS variables. On the other hand, it might just be that jsbin isn't showing those values correctly as well (like how one of the buttons is larger than the other).

@@ -814,7 +814,7 @@ def _email_contributor_admins(original_form_inputs):
         settings.CONTRIBUTOR_SIGNUPS_ADMINS, fail_silently=False
     )
 
-# Article Center Introduction
 def contributor_introduction(request):
+    # Article Center Introduction
     return render(request, 'contributor-introduction.html', {})
     
