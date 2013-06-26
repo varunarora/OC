@@ -1,3 +1,4 @@
+oc_platform/settings_dev.py
 venv
 *.pyc
 *.*~
