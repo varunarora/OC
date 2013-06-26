@@ -11,12 +11,12 @@ def trim(s):
         s: A string.
 
     Returns:
-        A string containing the characters of s after removing any partial 
+        A string containing the characters of s after removing any partial
         unicode encodings from the end.
-    """    
+    """
     if not s:               # Checking for empty strings, PEP-8 style
         return s
-    
+
     if s[-1] == "\\":       # Need to escape backslashes.
         return s[:-1]
     else:
@@ -33,14 +33,14 @@ def trim(s):
 
 def is_trimmed(s):
     """Checks if the input string doesn't end with a partial Unicode encoding.
-    
+
     "\u9000" is ok, but "a\u900", "asdf\u" and "asdfg\" are not.
      654321              654321    654321       654321           <- indexes
-    
+
     So, we return True if the string is empty, or if both these are true:
     i)   There is no instance of \u in the last five characters.
     ii)  The last character is not a '\'.
-    
+
     Args:
         s: A string.
 
@@ -54,4 +54,3 @@ def is_trimmed(s):
         last_char_not_backslash = (s[-1] != "\\")
 
         return no_u_near_end and last_char_not_backslash
-

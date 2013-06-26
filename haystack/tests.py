@@ -1,9 +1,10 @@
 from django.test import TestCase
 from haystack import trim
 
+
 class TrimTests(TestCase):
     """Simple class for testing trim()."""
-    
+
     def test_trim(self):
         """Checks the output of trim() against selected test cases."""
         str0 = "34\u2345\u3456"
@@ -14,8 +15,8 @@ class TrimTests(TestCase):
         str5 = "34\u2345\u3456\u34"
         str6 = "34\u2345\u3456\u345"
         str7 = ""
-    
-        self.assertTrue(trim.is_trimmed(trim.trim(str0))) 
+
+        self.assertTrue(trim.is_trimmed(trim.trim(str0)))
         self.assertTrue(trim.is_trimmed(trim.trim(str1)))
         self.assertTrue(trim.is_trimmed(trim.trim(str2)))
         self.assertTrue(trim.is_trimmed(trim.trim(str3)))
@@ -23,4 +24,3 @@ class TrimTests(TestCase):
         self.assertTrue(trim.is_trimmed(trim.trim(str5)))
         self.assertTrue(trim.is_trimmed(trim.trim(str6)))
         self.assertTrue(trim.is_trimmed(trim.trim(str7)))
-
