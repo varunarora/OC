@@ -446,7 +446,7 @@ var OC = {
             left: "-1950px"
         }, 200000);
 
-        /*
+        /* 
         // The setInterval-timeout callback way
         position = 0;
         var init = setInterval(function(){
@@ -699,7 +699,7 @@ var OC = {
             var spinner = $('#revision-comment .form-spinner');
             spinner.show();
 
-            // Submit the comment through the interactions API
+            // Submit the comment through the interactions API        
             $.post('/interactions/comment/', $('#revision-comment').serialize(),
                 function (response) {
                     OC.commentSubmissionHandler(response);
@@ -883,7 +883,7 @@ var OC = {
 
                     var projectID = OC.getProjectID();
 
-                    // Submit the add request through the project API
+                    // Submit the add request through the project API        
                     $.get('/project/' + projectID + '/add/' + ui.item.id + '/',
                         function (response) {
                         OC.projects.addMemberHandler(response);
