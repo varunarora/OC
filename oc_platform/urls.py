@@ -38,8 +38,8 @@ urlpatterns = patterns(
 
     url(r'^license/', 'oc_platform.views.license', name='license'),
 
-    url(r'^upload/', 'oc_platform.views.upload', name='upload'),
-    
+    url(r'^upload/', 'oc_platform.views.upload_page', name='upload'),
+
     # User stuff
     url(r'^signup-invite/', 'oc_platform.views.signup_invite', name='signupinvite'),
     url(r'^signup/', 'user_account.views.register', name='register'),

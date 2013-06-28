@@ -242,84 +242,66 @@ def email_share(request):
             json.dumps(status), 401, content_type="application/json")
 
 
-def upload(request):
+def upload_page(request):
     """Renders the upload page to the client"""
-    
-    #t = loader.get_template('upload.html')
-    #c = context:
-    #return HttpResponse(t.render())
-    return render(request, 'upload.html', 
-                  context_instance = RequestContext(request));
+
+    return render(request, 'upload.html', {})
+
 
 def fp_upload(request):
     """Adds data from POST request at api/fpUpload/ to database.
 
-    Paramters:
+    Parameters:
         Request containing list of key-title pairs.
 
     Returns:
         Response containing JSON with ResourceID-title pairs.
     """
 
-    # Storage location.
+    # Constants
     s3_main_addr = str("http://ocstatic.s3.amazonaws.com/")
-    
+    default_cost = 0
+
     # Fetch keys and filenames from POST, and build a list of
     # (url, title) tuples.
     file_list = []
 
-    
-    for key_unicode in request.POST:       # TODO: Map? 
+    for key_unicode in request.POST:
         key = str(key_unicode)             # Unicode by default.
-        #url = s3_main_addr + key
         title = str(request.POST[key])
-
         file_list.append((key, title))     # Two parens because tuple.
-
-#    try:
-    # do database stuff.
 
     response_dict = dict()
     from oer.models import Resource
-    
+
     # For each file, download it to local.
     # Create Resource objects for each file uploaded.
     # And generate the list for the response.
-    for (key, title) in file_list:     # TODO: Map?
+    for (key, title) in file_list:
         s3_file = urllib2.urlopen(s3_main_addr + key)
-        
-        fname = key.rsplit('/', 1)[-1]      #fname can't have slashes
+
+        fname = key.rsplit('/', 1)[-1]      # fname can't have slashes
         static_file = open(fname, 'w+')
         static_file.write(s3_file.read())
-        
-        k = Resource()
-        k.title = title
-        k.url = s3_main_addr + key
-        k.cost = 0
-        k.user_id = 7
-        k.file = File(static_file)
-        k.save()
-        response_dict[k.id] = k.title
+
+        new_resource = Resource()
+        new_resource.title = title
+        new_resource.url = s3_main_addr + key
+        new_resource.cost = default_cost
+        new_resource.user_id = 7
+        new_resource.file = File(static_file)
+        new_resource.save()
+        response_dict[new_resource.id] = new_resource.title
         static_file.close()
         os.remove(fname)
-    
+
     return HttpResponse(
         json.dumps(response_dict), 200, content_type="application/json")
-
-#    except Exception as inst:
-#        print type(inst)
-#        print inst.args
-#        print inst 
-        # Oh noez.
-#        status = {'status': 'false'}
-#        
-#        return HttpResponse(
-#            json.dumps(status), 401, content_type="application/json")
 
 
 def project7(request):
     """Accepts final submission of attachment titles and persists them.
-    
+
     Parameters:
         Request contaiing list of ResourceID-title pairs.
 
@@ -327,14 +309,15 @@ def project7(request):
         Redirect to project/collection page.
     """
     from oer.models import Resource
-    for id in request.POST:
+    post_data = request.POST
+    for id in post_data:
         if (id == "csrfmiddlewaretoken"):
             continue
         resource = Resource.objects.get(pk=id)
         # If the title has changed, persist it
-        if (resource.id != request.POST[id]):
-            resource.title = request.POST[id]
-            resource.save();
+        if (resource.id != post_data[id]):
+            resource.title = post_data[id]
+            resource.save()
 
     from projects.views import project_home
     return redirect(project_home(request, "some_slug"))

@@ -446,7 +446,7 @@ var OC = {
             left: "-1950px"
         }, 200000);
 
-        /* 
+        /*
         // The setInterval-timeout callback way
         position = 0;
         var init = setInterval(function(){
@@ -699,7 +699,7 @@ var OC = {
             var spinner = $('#revision-comment .form-spinner');
             spinner.show();
 
-            // Submit the comment through the interactions API        
+            // Submit the comment through the interactions API
             $.post('/interactions/comment/', $('#revision-comment').serialize(),
                 function (response) {
                     OC.commentSubmissionHandler(response);
@@ -883,7 +883,7 @@ var OC = {
 
                     var projectID = OC.getProjectID();
 
-                    // Submit the add request through the project API        
+                    // Submit the add request through the project API
                     $.get('/project/' + projectID + '/add/' + ui.item.id + '/',
                         function (response) {
                         OC.projects.addMemberHandler(response);
@@ -1087,7 +1087,7 @@ jQuery(document).ready(function ($) {
     OC.projects.adminToggleHandler();
 
     // Setup autocomplete for add member functionality.
-    // OC.projects.initAddMemberAutocomplete();
+    OC.projects.initAddMemberAutocomplete();
 
 
     /* Other initializers/renderers/handlers */
@@ -1260,84 +1260,82 @@ function gPlusSignInCallback(authResult){
  */
 
 // Set global variables, such as the Filepicker.io API key.
-uploaded_files = new Object();
-filepicker.setKey("AGuSaWwXNQFi60wveigBHz");
+var uploaded_files = new Object();
+filepicker.setKey('AGuSaWwXNQFi60wveigBHz');
 
-/** @function redirect_cb
- * @desc Redirects to URL sent by server
- */
-function redirect_cb(response)  {
-    var link = JSON.parse(response)["url"];
-    window.location.href = link;
-}
 
-$(document).ready(function()    { 
-    $("form").hide();
+$(document).ready(function() {
+    $('form').hide();
 
     // Prevent form being submitted on hitting enter
-    $("form").bind("keypress", function (e) {
+    $('form').bind('keypress', function (e) {
         if (e.keyCode == 13) {
             e.preventDefault();
         }
     });
 
-    /** @function on-click
+    /**
+     * @function on-click
      * @desc On-click handler for the upload button.
      * @return none
      */
-    $("#uploadfiles").click(function() {
+    $('#uploadfiles').click(function() {
         // Allow multiple files at once, store to S3, and the callback is FPpost
         filepicker.pickAndStore({multiple: true},
-            {location: "S3", path: "/attachments/", access: 'public'}, FPpost);
+            {location: 'S3', path: '/attachments/', access: 'public'}, FPpost);
         return true;
     });
 
-    $("#rename").submit(function(event)  {
-        for (key in window.uploaded_files)  {
-            $("<input/>").attr("type", "hidden")
-                .attr("name", key)
-                .attr("value", window.uploaded_files[key])
-                .appendTo("#rename");
+    $('#rename').submit(function(event) {
+        for (key in window.uploaded_files) {
+            $('<input/>').attr('type', 'hidden')
+                .attr('name', key)
+                .attr('value', window.uploaded_files[key])
+                .appendTo('#rename');
         }
         return true;
    });
 });
 
-/** @function upload_cb
+/**
+ * @function uploadCallback
  * @desc Callback for POST request from FPpost.<br><br>
  * Updates the HTML to show that the upload was successful.
  * @param {object} response - Response from server.
  * @return none
  */
-function upload_cb(response) {
+function uploadCallback(response) {
     var title_box, new_files;
     new_files = JSON.parse(response);
     $.extend(window.uploaded_files, new_files);
-    $("#uploadfiles").html("Upload more files");
-    $("form").show();
+    $('#uploadfiles').html('Upload more files');
+    $('form').show();
 
     for (var key in new_files) {
-        var text_box = $("<input>").val(new_files[key]).addClass(key).attr('type', 'text');
-        
-        text_box.change(function()   {
+        var text_box = $('<input>').val(new_files[key])
+                        .addClass(key)
+                        .attr('type', 'text');
+
+        text_box.change(function() {
             var element = $(this);
             var selected = element.attr('class');
             var new_text = element.val();
             window.uploaded_files[selected] = new_text;
         });
-        
-        $("#titles").append(text_box);
+
+        $('#titles').append(text_box);
     }
 }
 
-/** @function FPpost
+/**
+ * @function FPpost
  * @desc Callback for filepicker.pickAndStore. <br><br>
  * Generates key-filename pairs for each file from its FPFile properties.<br>
  * Then POST's a list of these to the server.
  * @param {list} fpfiles - List of FPFile objects from filepicker.io API.
  * @return none
  */
-var FPpost = function(fpfiles)  {
+function FPpost(fpfiles) {
     var data, i, num_files, pair;
     num_files = fpfiles.length;
     data = new Object();
@@ -1345,68 +1343,25 @@ var FPpost = function(fpfiles)  {
     for (i = 0; i < num_files; i++) {
         key = fpfiles[i].key;
         filename = fpfiles[i].filename;
-        
+
         data[key] = filename;
     }
-    
-    jQuery.post("/api/fpUpload/", data, upload_cb);
+
+    $.post('/api/fpUpload/', data, uploadCallback);
 };
 
 /*
  * @desc Function to test without polluting the S3 bucket.
  * @return none
  */
-function funpost()  {
-    var data = { 
-            "yolo0": String(Math.round(10000000*Math.random())),
-            "yolo1": String(Math.round(10000000*Math.random()))
+function funpost() {
+    var data = {
+            'yolo0': String(Math.round(10000000*Math.random())),
+            'yolo1': String(Math.round(10000000*Math.random()))
     };
-    
-    jQuery.post("/api/fpUpload/", data, function(response)   {
-         $("#fpfilebox").append("Upload success!!");
+
+    $.post('/api/fpUpload/', data, function(response) {
+         $('#fpfilebox').append('Upload success!!');
          console.log(response);
     });
 }
-
-$(document).ajaxSend(function (event, xhr, settings) {
-    function getCookie(name) {
-        var cookieValue = null, cookies, i, cookie;
-        if (document.cookie && document.cookie !== '') {
-            cookies = document.cookie.split(';');
-            for (i = 0; i < cookies.length; i++) {
-                cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(
-                        cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    function sameOrigin(url) {
-        // url could be relative or scheme relative or absolute
-        var host = document.location.host, // host + port
-            protocol = document.location.protocol,
-            sr_origin = '//' + host,
-            origin = protocol + sr_origin;
-
-        // Allow absolute or scheme relative URLs to same origin
-        return (url === origin || url.slice(
-            0, origin.length + 1) === origin + '/') ||
-            (url === sr_origin || url.slice(
-                0, sr_origin.length + 1) === sr_origin + '/') ||
-            // or any other URL that isn't scheme relative or absolute i.e
-            //     relative.
-            !(/^(\/\/|http:|https:).*/.test(url));
-    }
-    function safeMethod(method) {
-        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-    }
-
-    if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
-        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-    }
-});
-
