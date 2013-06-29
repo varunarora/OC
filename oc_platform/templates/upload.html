@@ -1,4 +1,5 @@
 {% include 'partials/header.html' %}
+<script type="text/javascript" src="http://api.filepicker.io/v1/filepicker.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/upload-files.js"></script>
 
 <button id="uploadfiles">Upload Files</button>
@@ -8,7 +9,5 @@
     {% csrf_token %}
     <button type="submit">Submit</button>
 </form>
-
-<script type="text/javascript" src="http://api.filepicker.io/v1/filepicker.js"></script>
 
 {% include 'partials/footer.html' %}
