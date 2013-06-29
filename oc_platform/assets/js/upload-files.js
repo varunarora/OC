@@ -26,10 +26,10 @@ $(document).ready(function() {
      * @return none
      */
     $('#uploadfiles').click(function() {
-        // Allow multiple files at once, store to S3, and the callback is FPpost
+        // Allow multiple files at once, store to S3, and the callback is fpPost
         filepicker.pickAndStore({multiple: true},
             {location: 'S3', path: '/attachments/', access: 'public'}, 
-             OC.upload.FPpost);
+             OC.upload.fpPost);
         return true;
     });
 
@@ -49,7 +49,7 @@ OC.upload = {
 
     /**
      * @function uploadCallback
-     * @desc Callback for POST request from FPpost.<br><br>
+     * @desc Callback for POST request from fpPost.<br><br>
      * Updates the HTML to show that the upload was successful.
      * @param {object} response - Response from server.
      * @return none
@@ -78,14 +78,14 @@ OC.upload = {
     },
 
     /**
-     * @function FPpost
+     * @function fpPost
      * @desc Callback for filepicker.pickAndStore. <br><br>
      * Generates key-filename pairs for each file from its FPFile properties.<br>
      * Then POST's a list of these to the server.
      * @param {list} fpfiles - List of FPFile objects from filepicker.io API.
      * @return none
      */
-    FPpost: function(fpfiles) {
+    fpPost: function(fpfiles) {
         var data, i, num_files;
         num_files = fpfiles.length;
         data = {};
