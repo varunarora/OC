@@ -56,7 +56,7 @@ urlpatterns = patterns(
     url(r'^api/getBreadcrumb/', 'oc_platform.views.get_breadcrumb', name='api-get-breadcrumb'),
     url(r'^api/emailShare/', 'oc_platform.views.email_share', name='api-email-share'),
     url(r'^api/fpUpload/', 'oc_platform.views.fp_upload', name='api-fp-upload'),
-    url(r'^projects/7/', 'oc_platform.views.project7', name='api-fp-submit'),
+    url(r'^api/fpSubmit/', 'oc_platform.views.fp_submit', name='api-fp-submit'),
 
 
     # Interactions

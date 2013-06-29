@@ -300,7 +300,7 @@ def fp_upload(request):
         json.dumps(response_dict), 200, content_type="application/json")
 
 
-def project7(request):
+def fp_submit(request):
     """Accepts final submission of attachment titles and persists them.
 
     Parameters:
