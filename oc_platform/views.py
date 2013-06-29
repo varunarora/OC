@@ -259,7 +259,8 @@ def fp_upload(request):
     """
 
     # Constants
-    s3_main_addr = str("http://ocstatic.s3.amazonaws.com/")
+    from django.conf import settings
+    s3_main_addr = settings.AWS_STATIC_BUCKET
     default_cost = 0
 
     # Fetch keys and filenames from POST, and build a list of

@@ -39,6 +39,10 @@ TIME_ZONE = 'America/New_York'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
+
+# Location of AWS S3 bucket for static content
+AWS_STATIC_BUCKET = str("http://ocstatic.s3.amazonaws.com/")
+
 HAYSTACK_SITECONF = 'search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
 HAYSTACK_SOLR_URL = 'http://54.235.197.234:8983/solr'
