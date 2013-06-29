@@ -1,4 +1,4 @@
-/* global $:false, jQuery:false, filepicker:false, console:false */
+/* global $:false, filepicker:false, console:false */
 
 /**
  * @file Client-side for file upload using filepicker.io
@@ -6,13 +6,11 @@
  */
 
 // Set global variables, such as the Filepicker.io API key.
-var uploaded_files = new Object();
+var uploaded_files = {};
 filepicker.setKey('AGuSaWwXNQFi60wveigBHz');
 
 
 $(document).ready(function() {
-    $('form').hide();
-
     // Prevent form being submitted on hitting enter
     $('form').bind('keypress', function (e) {
         if (e.keyCode == 13) {
@@ -55,7 +53,7 @@ function uploadCallback(response) {
     new_files = JSON.parse(response);
     $.extend(window.uploaded_files, new_files);
     $('#uploadfiles').html('Upload more files');
-    $('form').show();
+    $('form').removeClass("hide");
 
     for (var key in new_files) {
         var text_box = $('<input>').val(new_files[key])
@@ -82,9 +80,9 @@ function uploadCallback(response) {
  * @return none
  */
 function FPpost(fpfiles) {
-    var data, i, num_files, pair;
+    var data, i, num_files;
     num_files = fpfiles.length;
-    data = new Object();
+    data = {};
 
     for (i = 0; i < num_files; i++) {
         key = fpfiles[i].key;
