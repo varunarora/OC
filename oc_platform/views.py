@@ -303,6 +303,9 @@ def fp_upload(request):
 def fp_submit(request):
     """Accepts final submission of attachment titles and persists them.
 
+    The POST data include the CSRF middleware token, which is
+    removed before database operations.
+
     Parameters:
         Request contaiing list of ResourceID-title pairs.
 
@@ -310,10 +313,9 @@ def fp_submit(request):
         Redirect to project/collection page.
     """
     from oer.models import Resource
-    post_data = request.POST
+    post_data = request.POST.copy()
+    del post_data["csrfmiddlewaretoken"]
     for id in post_data:
-        if (id == "csrfmiddlewaretoken"):
-            continue
         resource = Resource.objects.get(pk=id)
         # If the title has changed, persist it
         if (resource.id != post_data[id]):
