@@ -1,0 +1,18 @@
+{% include 'partials/header.html' %}
+
+    <div class = "title">
+        Discussion Boards
+    </div>
+
+    {% for board in board_list %}
+        <div class="board">
+            <p class="board_title">
+                <a href="/board/{{ board.id }}/">{{ board.title }}</a>
+            </p>
+            <p class = "board_desc">
+                {{ board.description }}
+            </p>
+        </div>
+    {% endfor %}
+
+{% include 'partials/footer.html' %}

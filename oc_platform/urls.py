@@ -61,6 +61,11 @@ urlpatterns = patterns(
     # Article Center Registration
     url(r'^contributor-registration/', 'user_account.views.contributor_registration', name='contributor_registration'),
 
+    # Discussions
+    url(r'^topic/(?P<topic_id>.*)/$', 'discussions.views.topic', name='topic'),
+    url(r'^board/(?P<board_id>.*)/$', 'discussions.views.board', name='board'),
+    url(r'^discussions/', 'discussions.views.discussions', name='discussions'),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

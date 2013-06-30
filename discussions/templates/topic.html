@@ -1,0 +1,13 @@
+{% include 'partials/header.html' %}
+
+    <div class = "title">
+        {{ topic_title }}
+    </div>
+
+    {% for comment in comment_list %}
+        <div class="comment">
+            {{ comment.content }}
+        </div>
+    {% endfor %}
+
+{% include 'partials/footer.html' %}
