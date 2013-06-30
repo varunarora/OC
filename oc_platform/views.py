@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.utils.translation import ugettext as _
 from django.core.files import File
-from django.template import loader, RequestContext
+from django.template import loader, Context
 from django.conf import settings
 from articles.models import Article
 import json
 import urllib2
 import os
+
 
 def home(request):
     """Fetches the top articles, a count and the sign-in form"""
@@ -243,16 +244,24 @@ def email_share(request):
 
 
 def upload_page(request):
-    """Renders the upload page to the client"""
+    """Renders the upload page to the client.
 
-    return render(request, 'upload.html', {})
+    Also has userId and projectId in the context.
+    """
+
+    c = Context({
+        "userId": request.user.id,
+        "projectId": "7"
+    })
+
+    return render(request, 'upload.html', c)
 
 
 def fp_upload(request):
     """Adds data from POST request at api/fpUpload/ to database.
 
     Parameters:
-        Request containing list of key-title pairs.
+        Request containing user_id, project_id, and list of key-title pairs.
 
     Returns:
         Response containing JSON with ResourceID-title pairs.
@@ -263,13 +272,22 @@ def fp_upload(request):
     s3_main_addr = settings.AWS_STATIC_BUCKET
     default_cost = 0
 
-    # Fetch keys and filenames from POST, and build a list of
+    # Make a copy of the request.POST object, extract user and project IDs
+    # And remove them from the copy.
+    post_data = request.POST.copy()
+
+    user_id = post_data['user_id']
+    project_id = post_data['project_id']
+    del post_data['user_id']
+    del post_data['project_id']
+
+    # Fetch keys and filenames from post_data, and build a list of
     # (url, title) tuples.
     file_list = []
 
-    for key_unicode in request.POST:
+    for key_unicode in post_data:
         key = str(key_unicode)             # Unicode by default.
-        title = str(request.POST[key])
+        title = str(post_data[key])
         file_list.append((key, title))     # Two parens because tuple.
 
     response_dict = dict()
@@ -289,7 +307,7 @@ def fp_upload(request):
         new_resource.title = title
         new_resource.url = s3_main_addr + key
         new_resource.cost = default_cost
-        new_resource.user_id = 7
+        new_resource.user_id = user_id
         new_resource.file = File(static_file)
         new_resource.save()
         response_dict[new_resource.id] = new_resource.title
@@ -301,20 +319,27 @@ def fp_upload(request):
 
 
 def fp_submit(request):
-    """Accepts final submission of attachment titles and persists them.
+    """Accepts final file titles from client and persists any changed titles.
 
-    The POST data include the CSRF middleware token, which is
-    removed before database operations.
+    Before database operations, the project_id is extracted from post_data,
+    which is a copy of request.POST. Also, any fields not related to files
+    are removed from post_data.
+
+    Then, any changed titles in post_data are persisted.
 
     Parameters:
         Request contaiing list of ResourceID-title pairs.
 
     Returns:
-        Redirect to project/collection page.
+        Redirect to project slug.
     """
     from oer.models import Resource
     post_data = request.POST.copy()
+    project_id = post_data['project_id']
     del post_data["csrfmiddlewaretoken"]
+    del post_data['user_id']
+    del post_data['project_id']
+
     for id in post_data:
         resource = Resource.objects.get(pk=id)
         # If the title has changed, persist it
@@ -323,7 +348,9 @@ def fp_submit(request):
             resource.save()
 
     from projects.views import project_home
-    return redirect(project_home(request, "some_slug"))
+    from projects.models import Project
+    slug = Project.objects.get(pk=project_id).slug
+    return redirect(project_home(request, slug))
 
 
 def article_center_registration(request):

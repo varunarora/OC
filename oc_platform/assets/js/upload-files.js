@@ -49,7 +49,7 @@ OC.upload = {
      * @function fpPost
      * @desc Callback for filepicker.pickAndStore. <br><br>
      * Generates key-filename pairs for each file from its FPFile properties.<br>
-     * Then POST's a list of these to the server.
+     * Then POST's a list of these to the server, along with user and project.
      * @param {list} fpfiles - List of FPFile objects from filepicker.io API.
      * @return none
      */
@@ -64,6 +64,9 @@ OC.upload = {
 
             data[key] = filename;
         }
+
+        data['user_id'] = $('form input[name=user_id]').val();
+        data['project_id'] = $('form input[name=project_id]').val()
 
         $.post('/api/fpUpload/', data, OC.upload.uploadCallback);
     }
