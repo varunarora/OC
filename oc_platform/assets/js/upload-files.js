@@ -12,38 +12,6 @@
 
 filepicker.setKey('AGuSaWwXNQFi60wveigBHz');
 
-$(document).ready(function() {
-    // Prevent form being submitted on hitting enter
-    $('form').bind('keypress', function (e) {
-        if (e.keyCode == 13) {
-            e.preventDefault();
-        }
-    });
-
-    /**
-     * @function on-click
-     * @desc On-click handler for the upload button.
-     * @return none
-     */
-    $('.uploadfiles').click(function() {
-        // Allow multiple files at once, store to S3, and the callback is fpPost
-        filepicker.pickAndStore({multiple: true},
-            {location: 'S3', path: '/attachments/', access: 'public'}, 
-             OC.upload.fpPost);
-        return true;
-    });
-
-    $('#rename').submit(function(event) {
-        for (key in OC.upload.uploaded_files) {
-            $('<input/>').attr('type', 'hidden')
-                .attr('name', key)
-                .attr('value', OC.upload.uploaded_files[key])
-                .appendTo('#rename');
-        }
-        return true;
-   });
-});
-
 OC.upload = {
     uploaded_files: {},
 
@@ -100,3 +68,35 @@ OC.upload = {
         $.post('/api/fpUpload/', data, OC.upload.uploadCallback);
     }
 };
+
+$(document).ready(function() {
+    // Prevent form being submitted on hitting enter
+    $('form').bind('keypress', function (e) {
+        if (e.keyCode == 13) {
+            e.preventDefault();
+        }
+    });
+
+    /**
+     * @function on-click
+     * @desc On-click handler for the upload button.
+     * @return none
+     */
+    $('.uploadfiles').click(function() {
+        // Allow multiple files at once, store to S3, and the callback is fpPost
+        filepicker.pickAndStore({multiple: true},
+            {location: 'S3', path: '/attachments/', access: 'public'}, 
+             OC.upload.fpPost);
+        return true;
+    });
+
+    $('#rename').submit(function(event) {
+        for (key in OC.upload.uploaded_files) {
+            $('<input/>').attr('type', 'hidden')
+                .attr('name', key)
+                .attr('value', OC.upload.uploaded_files[key])
+                .appendTo('#rename');
+        }
+        return true;
+   });
+});
