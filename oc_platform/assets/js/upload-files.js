@@ -1,4 +1,4 @@
-/*global $, Modernizr, gapi, _*/
+/*global $, OC, filepicker */
 
 /**
  * @file Client-side for file upload using filepicker.io
@@ -6,6 +6,10 @@
  */
 
 // Set global variables, such as the Filepicker.io API key.
+
+OC.config.uploads = {
+    filepickerKey: 'AGuSaWwXNQFi60wveigBHz'
+};
 
 filepicker.setKey(OC.config.uploads.filepickerKey);
 
@@ -24,7 +28,7 @@ OC.upload = {
         new_files = JSON.parse(response);
         $.extend(OC.upload.uploaded_files, new_files);
         $('.uploadfiles').html('Upload more files');
-        $('form').removeClass("hide");
+        $('form').removeClass('hide');
 
         for (key in new_files) {
             var text_box = $('<input>').val(new_files[key])
@@ -90,7 +94,7 @@ $(document).ready(function() {
         return true;
     });
 
-    $('#rename').submit(function(event) {
+    $('#rename').submit(function() {
         var key;
         for (key in OC.upload.uploaded_files) {
             $('<input/>').attr('type', 'hidden')

@@ -52,9 +52,6 @@ var OC = {
             formSelector: 'form.signup',
             formSpinner: '.form-spinner',
             formError: '.form-error'
-        },
-        uploads: {
-            filepickerKey: 'AGuSaWwXNQFi60wveigBHz'
         }
     },
 
