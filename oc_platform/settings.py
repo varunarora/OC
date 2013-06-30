@@ -39,7 +39,6 @@ TIME_ZONE = 'America/New_York'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-
 # Location of AWS S3 bucket for static content
 AWS_STATIC_BUCKET = str("http://ocstatic.s3.amazonaws.com/")
 
