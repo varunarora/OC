@@ -7,8 +7,8 @@
 
 <form class="hide" method="post" id="rename" action="/api/fpSubmit/">
     {% csrf_token %}
-    <input type="hidden" name="user_id" value="{{ userId }}"/>
-    <input type="hidden" name="project_id" value="{{ projectId }}"/>
+    <input type="hidden" name="user_id" value="{{ user.id }}"/>
+    <input type="hidden" name="project_id" value="{{ project.id }}"/>
     <button type="submit">Submit</button>
 </form>
 

@@ -250,8 +250,8 @@ def upload_page(request):
     """
 
     c = Context({
-        "userId": request.user.id,
-        "projectId": "7"
+        "user": request.user,
+        "project": {"id": "7"}
     })
 
     return render(request, 'upload.html', c)
