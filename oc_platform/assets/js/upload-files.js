@@ -10,7 +10,7 @@
 
 // Set global variables, such as the Filepicker.io API key.
 
-filepicker.setKey('AGuSaWwXNQFi60wveigBHz');
+filepicker.setKey(OC.config.uploads.filepickerKey);
 
 OC.upload = {
     uploaded_files: {},
