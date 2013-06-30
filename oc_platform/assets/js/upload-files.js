@@ -25,7 +25,7 @@ $(document).ready(function() {
      * @desc On-click handler for the upload button.
      * @return none
      */
-    $('#uploadfiles').click(function() {
+    $('.uploadfiles').click(function() {
         // Allow multiple files at once, store to S3, and the callback is fpPost
         filepicker.pickAndStore({multiple: true},
             {location: 'S3', path: '/attachments/', access: 'public'}, 
@@ -58,17 +58,17 @@ OC.upload = {
         var title_box, new_files;
         new_files = JSON.parse(response);
         $.extend(OC.upload.uploaded_files, new_files);
-        $('#uploadfiles').html('Upload more files');
+        $('.uploadfiles').html('Upload more files');
         $('form').removeClass("hide");
 
         for (var key in new_files) {
             var text_box = $('<input>').val(new_files[key])
-                            .addClass(key)
+                            .attr('id', key)
                             .attr('type', 'text');
 
             text_box.change(function() {
                 var element = $(this);
-                var selected = element.attr('class');
+                var selected = element.attr('id');
                 var new_text = element.val();
                 OC.upload.uploaded_files[selected] = new_text;
             });
