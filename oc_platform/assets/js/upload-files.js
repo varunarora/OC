@@ -1,7 +1,4 @@
-/*jslint plusplus: true, browser: true */
-/*jslint nomen: true, multistr: true */
-/*global jQuery, $, Modernizr, gapi, _*/
-/*jslint nomen: false */
+/*global $, Modernizr, gapi, _*/
 
 /**
  * @file Client-side for file upload using filepicker.io
@@ -23,13 +20,13 @@ OC.upload = {
      * @return none
      */
     uploadCallback: function(response) {
-        var title_box, new_files;
+        var new_files, key;
         new_files = JSON.parse(response);
         $.extend(OC.upload.uploaded_files, new_files);
         $('.uploadfiles').html('Upload more files');
         $('form').removeClass("hide");
 
-        for (var key in new_files) {
+        for (key in new_files) {
             var text_box = $('<input>').val(new_files[key])
                             .attr('id', key)
                             .attr('type', 'text');
@@ -54,7 +51,7 @@ OC.upload = {
      * @return none
      */
     fpPost: function(fpfiles) {
-        var data, i, num_files;
+        var data, i, num_files, key, filename;
         num_files = fpfiles.length;
         data = {};
 
@@ -66,7 +63,7 @@ OC.upload = {
         }
 
         data['user_id'] = $('form input[name=user_id]').val();
-        data['project_id'] = $('form input[name=project_id]').val()
+        data['project_id'] = $('form input[name=project_id]').val();
 
         $.post('/api/fpUpload/', data, OC.upload.uploadCallback);
     }
@@ -75,7 +72,7 @@ OC.upload = {
 $(document).ready(function() {
     // Prevent form being submitted on hitting enter
     $('form').bind('keypress', function (e) {
-        if (e.keyCode == 13) {
+        if (e.keyCode === 13) {
             e.preventDefault();
         }
     });
@@ -88,12 +85,13 @@ $(document).ready(function() {
     $('.uploadfiles').click(function() {
         // Allow multiple files at once, store to S3, and the callback is fpPost
         filepicker.pickAndStore({multiple: true},
-            {location: 'S3', path: '/attachments/', access: 'public'}, 
+            {location: 'S3', path: '/attachments/', access: 'public'},
              OC.upload.fpPost);
         return true;
     });
 
     $('#rename').submit(function(event) {
+        var key;
         for (key in OC.upload.uploaded_files) {
             $('<input/>').attr('type', 'hidden')
                 .attr('name', key)
