@@ -741,65 +741,31 @@ def _flattenChildren(child):
 def catalog(request):
     """Fetches articles and counts from specific subjects to be displayed on
     the catalog page"""
-    # TODO(Varun): Build administrative environment to choose top subjects to
-    #     display, not this way
+    # Get all categories with the parent category of OpenCurriculum.
+    root_category = Category.objects.get(title='OpenCurriculum')
 
-    # Build the object for showing the mathematics panel
-    # TODO(Varun): Need to get objects for all relevant article together, not
-    #     using separate calls
-    mathematicsCategory = Category.objects.get(title='Mathematics')
-    mathematics = CatalogCategory()
-    (mathChildCategories, mathFlatCategories) = buildChildCategories(
-        {'root': [mathematicsCategory]}, []
-    )
-    mathematicsArticles = Article.objects.filter(
-        category__in=mathFlatCategories).exclude(
-            published=False).order_by('views')
-    mathematics.articlesView = mathematicsArticles.order_by('views')[:4]
-    mathematics.count = mathematicsArticles.count()
-    mathematics.countMore = (
-        mathematics.count - 4) if mathematics.count >= 4 else 0
-    mathematics.title = "Mathematics"
-    mathematics.slug = mathematicsCategory.slug
-
-    # Build the object for showing the science panel
-    # TODO(Varun): Need to get objects for all relevant article together, not
-    #     using separate calls
-    scienceCategory = Category.objects.get(title='Science')
-    science = CatalogCategory()
-    (scienceChildCategories, scienceFlatCategories) = buildChildCategories(
-        {'root': [scienceCategory]}, []
-    )
-    scienceArticles = Article.objects.filter(
-        category__in=scienceFlatCategories).exclude(
-            published=False).order_by('views')
-    science.articlesView = scienceArticles.order_by('views')[:4]
-    science.count = scienceArticles.count()
-    science.countMore = (science.count - 4) if science.count >= 4 else 0
-    science.title = "Science"
-    science.slug = scienceCategory.slug
-
-    # Build the object for showing the literature panel
-    # TODO(Varun): Need to get objects for all relevant article together, not
-    #     using separate calls
-    literatureCategory = Category.objects.get(title='Literature')
-    literature = CatalogCategory()
-    (literatureChildCategories, literatureFlatCategories) = buildChildCategories(
-        {'root': [literatureCategory]}, []
-    )
-    literatureArticles = Article.objects.filter(
-        category__in=literatureFlatCategories).exclude(
-            published=False).order_by('views')
-    literature.articlesView = literatureArticles.order_by('views')[:4]
-    literature.count = literatureArticles.count()
-    literature.countMore = (
-        literature.count - 4) if literature.count >= 4 else 0
-    literature.title = "Literature"
-    literature.slug = literatureCategory.slug
+    page_categories = Category.objects.filter(
+        parent=root_category).exclude(pk=root_category.id)
 
     articles = CatalogCategorySet()
-    articles.categories = [mathematics, science, literature]
+    articles.categories = []
     articles.resources = Resource.objects.order_by('views')[:8]
+
+    for category in page_categories:
+        catalog_category = CatalogCategory()
+        (childCategories, flatCategories) = buildChildCategories(
+            {'root': [category]}, []
+        )
+        categoryArticles = Article.objects.filter(
+            category__in=flatCategories).exclude(
+                published=False).order_by('views')
+        catalog_category.articlesView = categoryArticles.order_by('views')[:4]
+        catalog_category.count = categoryArticles.count()
+        catalog_category.countMore = (
+            catalog_category.count - 4) if catalog_category.count >= 4 else 0
+        catalog_category.title = category.title
+        catalog_category.slug = category.slug
+        articles.categories.append(catalog_category)
 
     context = {
         'articles': articles,
