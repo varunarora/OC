@@ -244,14 +244,11 @@ def email_share(request):
 
 
 def upload_page(request):
-    """Renders the upload page to the client.
-
-    Also has userId and projectId in the context.
-    """
+    """Renders the upload page, with user and project objects in context."""
 
     c = Context({
         "user": request.user,
-        "project": {"id": "7"}
+        "project": {"id": "7"}      # TODO
     })
 
     return render(request, 'upload.html', c)
@@ -291,31 +288,49 @@ def fp_upload(request):
         file_list.append((key, title))     # Two parens because tuple.
 
     response_dict = dict()
+    failure_list = []
+
     from oer.models import Resource
 
-    # For each file, download it to local.
-    # Create Resource objects for each file uploaded.
-    # And generate the list for the response.
     for (key, title) in file_list:
-        s3_file = urllib2.urlopen(s3_main_addr + key)
+        try:
+            # For each file, download it to local.
+            # Create Resource objects for each file uploaded.
+            # And generate the list for the response.
+            raise ZeroDivisionError     # Obviously temporary, for testing except
+            s3_file = urllib2.urlopen(s3_main_addr + key)
 
-        fname = key.rsplit('/', 1)[-1]      # fname can't have slashes
-        static_file = open(fname, 'w+')
-        static_file.write(s3_file.read())
+            fname = key.rsplit('/', 1)[-1]      # fname can't have slashes
+            static_file = open(fname, 'w+')
+            static_file.write(s3_file.read())
 
-        new_resource = Resource()
-        new_resource.title = title
-        new_resource.url = s3_main_addr + key
-        new_resource.cost = default_cost
-        new_resource.user_id = user_id
-        new_resource.file = File(static_file)
-        new_resource.save()
-        response_dict[new_resource.id] = new_resource.title
-        static_file.close()
-        os.remove(fname)
+            new_resource = Resource()
+            new_resource.title = title
+            new_resource.url = s3_main_addr + key
+            new_resource.cost = default_cost
+            new_resource.user_id = user_id
+            new_resource.file = File(static_file)
+            new_resource.save()
+            response_dict[new_resource.id] = new_resource.title
+            static_file.close()
+            os.remove(fname)
 
-    return HttpResponse(
-        json.dumps(response_dict), 200, content_type="application/json")
+        except:
+            # Delete this file from S3, and add it to the failure list
+            from boto.s3.connection import S3Connection
+            from boto.s3.bucket import Bucket
+            from boto.s3.key import Key
+            conn = S3Connection(settings.AWS_ACCESS_KEY, settings.AWS_SECRET_KEY)
+            b = Bucket(conn, settings.S3_BUCKET_NAME)
+            k = Key(b)
+            k.key = key
+            b.delete_key(k)
+            failure_list.append(title)
+
+    if len(failure_list) > 0:
+        response_dict['failures'] = failure_list
+    return HttpResponse(json.dumps(
+        response_dict), 200, content_type="application/json")
 
 
 def fp_submit(request):
@@ -340,12 +355,17 @@ def fp_submit(request):
     del post_data['user_id']
     del post_data['project_id']
 
-    for id in post_data:
-        resource = Resource.objects.get(pk=id)
-        # If the title has changed, persist it
-        if (resource.id != post_data[id]):
-            resource.title = post_data[id]
-            resource.save()
+    try:
+        for id in post_data:
+            resource = Resource.objects.get(pk=id)
+            # If the title has changed, persist it
+            if (resource.id != post_data[id]):
+                resource.title = post_data[id]
+                resource.save()
+    except:
+        # TODO: Django message thingy
+        k = True
+        k = not k
 
     from projects.views import project_home
     from projects.models import Project

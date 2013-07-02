@@ -8,10 +8,11 @@
 // Set global variables, such as the Filepicker.io API key.
 
 OC.config.uploads = {
-    filepickerKey: 'AGuSaWwXNQFi60wveigBHz'
+    filepicker_key: 'AGuSaWwXNQFi60wveigBHz',
+    store_error_code: 151
 };
 
-filepicker.setKey(OC.config.uploads.filepickerKey);
+filepicker.setKey(OC.config.uploads.filepicker_key);
 
 OC.upload = {
     uploaded_files: {},
@@ -24,32 +25,41 @@ OC.upload = {
      * @return none
      */
     uploadCallback: function(response) {
-        var new_files, key;
+        var new_files, key, failed_list;
         new_files = JSON.parse(response);
         $.extend(OC.upload.uploaded_files, new_files);
         $('.uploadfiles').html('Upload more files');
         $('form').removeClass('hide');
 
+        // TODO: This is inefficient. Catch failures first, delete then do rest
         for (key in new_files) {
-            var text_box = $('<input>').val(new_files[key])
-                            .attr('id', key)
-                            .attr('type', 'text');
+            if (key === 'failures') {
+                failed_list = $(document.createElement('div'));
+                failed_list.html('The following files failed to upload: ');
+                failed_list.append(JSON.stringify(new_files['failures']));
+                $('.uploadfiles').before(failed_list);
+            }
+            else {
+                var text_box = $('<input>').val(new_files[key])
+                                .attr('id', key)
+                                .attr('type', 'text');
 
-            text_box.change(function() {
-                var element = $(this);
-                var selected = element.attr('id');
-                var new_text = element.val();
-                OC.upload.uploaded_files[selected] = new_text;
-            });
+                text_box.change(function() {
+                    var element = $(this);
+                    var selected = element.attr('id');
+                    var new_text = element.val();
+                    OC.upload.uploaded_files[selected] = new_text;
+                });
 
-            $('#titles').append(text_box);
+                $('#titles').append(text_box);
+            }
         }
     },
 
     /**
      * @function fpPost
-     * @desc Callback for filepicker.pickAndStore. <br><br>
-     * Generates key-filename pairs for each file from its FPFile properties.<br>
+     * @desc Success callback for filepicker.pickAndStore.
+     * Generates key-filename pairs for each file from its FPFile properties.
      * Then POST's a list of these to the server, along with user and project.
      * @param {list} fpfiles - List of FPFile objects from filepicker.io API.
      * @return none
@@ -70,6 +80,20 @@ OC.upload = {
         data['project_id'] = $('form input[name=project_id]').val();
 
         $.post('/api/fpUpload/', data, OC.upload.uploadCallback);
+    },
+
+    /**
+     * @function fpError
+     * @desc Failure callback for filepicker.pickAndStore.
+     * If dialog was closed, don't do anything.
+     * If there was a file store error, display a message.
+     * @param {number} error_code - from the filepicker API.
+     * @return none
+     */
+    fpError: function(error_code) {
+        if (error_code === 151) {       // If file store error
+            alert('Sorry, something went wrong');   //TODO
+        }
     }
 };
 
@@ -90,7 +114,7 @@ $(document).ready(function() {
         // Allow multiple files at once, store to S3, and the callback is fpPost
         filepicker.pickAndStore({multiple: true},
             {location: 'S3', path: '/attachments/', access: 'public'},
-             OC.upload.fpPost);
+             OC.upload.fpPost, OC.upload.fpError);
         return true;
     });
 
