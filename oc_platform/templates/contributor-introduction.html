@@ -1,4 +1,5 @@
 {% include 'partials/header.html' %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGhhkbXlDChv7uPQaPivPTEJ0ls9ka1Yg&sensor=true"></script>
 <div class="center-stage">
 	<div class="center-panel">
 		<div class="introduction-video">
@@ -7,10 +8,11 @@
 		<div class="map-instruction">Use the map to find teachers near you!</div>
 	</div>
 </div>
-<div class="contributor-map"></div>
-	<div class="contributor-tab">Contributors</div>
-	<div class="faq-tab">Frequently Asked Questions</div>
-</div>
+	<div id="contributor-map"></div>
+	<div class="tabs">
+		<div class="contributor-tab">Contributors</div>
+		<div class="faq-tab">Frequently Asked Questions</div>
+	</div>
 <div class="tab-info">
 	<div class="content-box"> 
 		<div class="contributors">
@@ -194,7 +196,7 @@
 	</div>
 </div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGhhkbXlDChv7uPQaPivPTEJ0ls9ka1Yg&sensor=true"></script>
+
 <script type="text/javascript">
     function initialize() {
       var mapOptions = {
@@ -202,7 +204,7 @@
         zoom: 6,
         mapTypeId: google.maps.MapTypeId.ROADMAP
       };
-      var map = new google.maps.Map(document.getElementById("contrib-map"),
+      var map = new google.maps.Map(document.getElementById("contributor-map"),
           mapOptions);
 
     }
@@ -211,6 +213,7 @@
 
 <script type="text/javascript">
 	$(document).ready(function() {
+		console.log("buttons are working");
 		var tab1 = $('.tabs .contributor-tab');
         var tab2 = $('.tabs .faq-tab');
         tab1.css('background-color','#efefef');
