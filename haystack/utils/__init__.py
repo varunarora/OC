@@ -50,9 +50,7 @@ class Highlighter(object):
         self.query_words = set([word.lower() for word in self.query.split() if not word.startswith('-')])
 
     def highlight(self, text_block):
-        dirty_text_block = strip_tags(text_block)
-        # HACK: Cleaning text_block for incomplete unicode characters
-        self.text_block = self.clean_unicode(dirty_text_block)
+        self.text_block = strip_tags(text_block)
         highlight_locations = self.find_highlightable_words()
         start_offset, end_offset = self.find_window(highlight_locations)
         return self.render_html(highlight_locations, start_offset, end_offset)
@@ -195,8 +193,3 @@ class Highlighter(object):
             highlighted_chunk = '%s...' % highlighted_chunk
 
         return highlighted_chunk
-
-    def clean_unicode(self, dirty_text_block):
-        # Try to remove incomplete \uNicode characters
-        import re
-        return re.sub('\\u', '', dirty_text_block)
