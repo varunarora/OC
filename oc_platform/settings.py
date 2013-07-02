@@ -116,12 +116,16 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django_hosts.middleware.HostsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+ROOT_HOSTCONF = 'oc_platform.hosts'
 ROOT_URLCONF = 'oc_platform.urls'
+
+DEFAULT_HOST = 'www'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'oc_platform.wsgi.application'
@@ -155,6 +159,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'django_hosts',
 )
 
 # A sample logging configuration. The only tangible logging
