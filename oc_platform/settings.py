@@ -39,6 +39,12 @@ TIME_ZONE = 'America/New_York'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
+# Location of AWS S3 bucket for static content
+AWS_STATIC_BUCKET = str('http://ocstatic.s3.amazonaws.com/')
+S3_BUCKET_NAME = str('ocstatic')
+AWS_ACCESS_KEY = str('AKIAJNPJU26BJC5LW6MA')
+AWS_SECRET_KEY = str('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')
+
 HAYSTACK_SITECONF = 'search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
 HAYSTACK_SOLR_URL = 'http://54.235.197.234:8983/solr'
@@ -280,6 +286,11 @@ STRINGS = {
         'invite': {
             'SUCCESS_TITLE': 'Successfully received your projects invite',
             'FAILURE': 'Failed to submit form'
+        }
+    },
+    'upload': {
+        'messages': {
+            'RENAME_ERROR': 'All your files were uploaded succesfully, but some were not renamed. Please rename them manually.'
         }
     }
 }

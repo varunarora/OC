@@ -10,7 +10,7 @@ from django.conf import settings
 class NewUserForm(UserCreationForm):
     """
     Sub-class of UserCreationForm which extends the superclass functionality
-    by performing validatoin functionality associated with new user form
+    by performing validation functionality associated with new user form
     objects.
 
     Attributes:
