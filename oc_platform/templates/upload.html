@@ -1,0 +1,15 @@
+{% include 'partials/header.html' %}
+<script type="text/javascript" src="http://api.filepicker.io/v1/filepicker.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/upload-files.js"></script>
+
+<button class="uploadfiles">Upload Files</button>
+<div id="titles"></div>
+
+<form class="hide" method="post" id="rename" action="/api/fpSubmit/">
+    {% csrf_token %}
+    <input type="hidden" name="user_id" value="{{ user.id }}"/>
+    <input type="hidden" name="project_id" value="{{ project.id }}"/>
+    <button type="submit">Submit</button>
+</form>
+
+{% include 'partials/footer.html' %}
