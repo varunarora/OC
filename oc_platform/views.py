@@ -285,7 +285,7 @@ def fp_upload(request):
     for key_unicode in post_data:
         key = str(key_unicode)             # Unicode by default.
         title = str(post_data[key])
-        file_list.append((key, title))     # Two parens because tuple.
+        file_list.append((key, title))    # Two parens because tuple.
 
     response_dict = dict()
     failure_list = []
@@ -297,7 +297,6 @@ def fp_upload(request):
             # For each file, download it to local.
             # Create Resource objects for each file uploaded.
             # And generate the list for the response.
-            raise ZeroDivisionError     # Obviously temporary, for testing except
             s3_file = urllib2.urlopen(s3_main_addr + key)
 
             fname = key.rsplit('/', 1)[-1]      # fname can't have slashes
@@ -363,9 +362,10 @@ def fp_submit(request):
                 resource.title = post_data[id]
                 resource.save()
     except:
-        # TODO: Django message thingy
-        k = True
-        k = not k
+        from django.contrib import messages
+        messages.error(
+            request, _(settings.STRINGS['upload']['messages']['RENAME_ERROR'])
+        )
 
     from projects.views import project_home
     from projects.models import Project

@@ -287,6 +287,11 @@ STRINGS = {
             'SUCCESS_TITLE': 'Successfully received your projects invite',
             'FAILURE': 'Failed to submit form'
         }
+    },
+    'upload': {
+        'messages': {
+            'RENAME_ERROR': 'All your files were uploaded succesfully, but some were not renamed. Please rename them manually.'
+        }
     }
 }
 
