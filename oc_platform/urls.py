@@ -38,7 +38,7 @@ urlpatterns = patterns(
 
     url(r'^license/', 'oc_platform.views.license', name='license'),
 
-    url(r'^upload/', 'oc_platform.views.upload_page', name='upload'),
+    url(r'^upload/', 'oer.views.upload_page', name='upload'),
 
     # User stuff
     url(r'^signup-invite/', 'oc_platform.views.signup_invite', name='signupinvite'),
@@ -51,13 +51,12 @@ urlpatterns = patterns(
     url(r'^404testing/', 'oc_platform.views.t404'),
     url(r'^500testing/', 'oc_platform.views.t500'),
 
-
     # Initialize API stuff
     url(r'^api/getBreadcrumb/', 'oc_platform.views.get_breadcrumb', name='api-get-breadcrumb'),
     url(r'^api/emailShare/', 'oc_platform.views.email_share', name='api-email-share'),
-    url(r'^api/fpUpload/', 'oc_platform.views.fp_upload', name='api-fp-upload'),
-    url(r'^api/fpSubmit/', 'oc_platform.views.fp_submit', name='api-fp-submit'),
-
+    url(r'^api/fpUpload/', 'oer.views.fp_upload', name='api-fp-upload'),
+    url(r'^api/fpSubmit/', 'oer.views.fp_submit', name='api-fp-submit'),
+    url(r'^api/file-upload/', 'oer.views.file_upload', name='api-file-upload'),
 
     # Interactions
     url(r'^interactions/', include('interactions.urls', namespace='interactions')),

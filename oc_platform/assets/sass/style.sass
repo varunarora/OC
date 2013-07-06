@@ -1095,5 +1095,198 @@ form#contributor-registration
 			&.sleeping-panda
 				background-image: url('../images/registration_form/Moe8SleepingBelt.png')
 
-.hide
-	visibility: hidden
+.projects-success-button, .projects-progress-button
+	padding: 12px
+	border: 0px solid #fff
+	color: #fff
+	font-family: 'PT Sans', sans-serif
+	font-size: 1.8em
+	margin-top: 30px
+
+	&:hover
+		background-color: #51ac00
+
+.projects-success-button
+	background-color: #5ABD02
+
+.projects-progress-button
+	background-color: #557799
+
+	&:hover
+		background-color: #2D6699
+
+.upload-drag-drop
+	width: 500px
+	border: 1px dashed #bcbcbc
+	padding-top: 10px
+	height: 300px
+	margin: auto
+	margin-top: 20px
+	background-image: url('../images/upload/upload-background.png')
+	background-position: center center
+	background-repeat: no-repeat
+
+.upload-drag-drop-message
+	color: #BCBCBC
+	font-size: 1.8em
+	letter-spacing: -1px
+	position: relative
+	top: -40px
+
+form.files-upload-rename
+	button[type=submit].hidden
+		display: none
+
+input.manual-upload
+	display: none
+
+.dz-preview
+	overflow: hidden
+	margin: 6px 12px
+
+	.dz-details
+		.dz-filename
+			padding-top: 4px
+			float: left
+			margin-right: 10px
+			@include sans-bold
+
+			span
+				padding: 2px
+				padding-right: 24px
+				padding-left: 4px
+				border: 1px solid #b2b2b2
+				outline: 0px
+				height: 100%
+				width: 100%
+				cursor: text
+				@include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
+
+		.dz-size
+			padding-top: 4px
+			float: left
+
+	.dz-success-mark
+		display: none
+
+	.dz-error-mark
+		float: left
+		display: none
+
+	.dz-progress
+		padding-top: 4px
+		background-color: #bcbcbc
+		@include border-radius(4px)
+		float: left
+		height: 20px
+		margin-left: 10px
+		width: 100px
+
+		.dz-upload
+			background-color: #557799
+			padding-top: 4px
+			height: 20px
+			float: left
+			@include border-radius(4px)
+
+.upload-services
+	margin-top: 20px
+
+	td
+		height: 100px
+		width: 100px
+		text-align: center
+
+		a
+			background-position: center center
+			background-repeat: no-repeat
+			height: 80px
+			width: 100px
+			display: block
+			@include sans-bold
+			vertical-align: bottom
+			display: table-cell
+			color: $light-font
+
+			&:hover
+				text-decoration: none
+
+		.gdrive-upload
+			background-image: url('../images/upload/google_drive.png')
+
+			&:hover
+				background-image: url('../images/upload/google_drive-hover.png')
+				color: #f1c40f
+
+		.skydrive-upload
+			background-image: url('../images/upload/sky_drive.png')
+
+			&:hover
+				background-image: url('../images/upload/sky_drive-hover.png')
+				color: #34495e			
+
+		.dropbox-upload
+			background-image: url('../images/upload/dropbox.png')
+
+			&:hover
+				background-image: url('../images/upload/dropbox-hover.png')
+				color: #3498db
+
+		.gmail-upload
+			background-image: url('../images/upload/gmail.png')
+
+			&:hover
+				background-image: url('../images/upload/gmail-hover.png')
+				color: #e74c3c
+
+		.box-upload
+			background-image: url('../images/upload/box.png')
+
+			&:hover
+				background-image: url('../images/upload/box-hover.png')
+				color: #2980b9
+
+		.picasa-upload
+			background-image: url('../images/upload/picasa.png')
+
+			&:hover
+				background-image: url('../images/upload/picasa-hover.png')
+				color: #f39c12
+
+		.ftp-upload
+			background-image: url('../images/upload/ftp.png')
+
+			&:hover
+				background-image: url('../images/upload/ftp-hover.png')
+				color: #95a5a6
+
+		.webdav-upload
+			background-image: url('../images/upload/webdav.png')
+
+			&:hover
+				background-image: url('../images/upload/webdav-hover.png')
+				color: #e74c3c
+
+		.facebook-upload
+			background-image: url('../images/upload/facebook.png')
+
+			&:hover
+				background-image: url('../images/upload/facebook-hover.png')
+				color: #2c3e50
+
+.dropzone-manual
+	float: left
+	width: 564px
+	
+.vertical-divider
+	float: left
+	background-image: url('../images/upload/vertical-divider.png')
+	height: 396px
+	width: 1px
+
+.vertical-divider-shadow
+	float: right
+	background-image: linear-gradient(to right, #F6F6F6 0%, #FFFFFF 8px)
+	width: 8px
+	height: 350px
+	margin-top: 22px
