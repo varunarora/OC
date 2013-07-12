@@ -813,3 +813,17 @@ def _email_contributor_admins(original_form_inputs):
         signup_message, 'OpenCurriculum <%s>' % settings.SERVER_EMAIL,
         settings.CONTRIBUTOR_SIGNUPS_ADMINS, fail_silently=False
     )
+
+
+def feed(request, user_id):
+    user = User.objects.get(id=user_id)
+    user_feed = user.feed.all()
+
+    from django.template import Context
+    c = Context({
+        'user': user,
+        'name': user.get_full_name(),
+        'feed': user_feed,
+    })
+
+    return render(request, 'feed.html', c)
