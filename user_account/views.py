@@ -816,6 +816,7 @@ def _email_contributor_admins(original_form_inputs):
 
 
 def feed(request, user_id):
+    """Show every feed item for which this user is a recipient."""
     user = User.objects.get(id=user_id)
     user_feed = user.feed.all()
 
@@ -830,6 +831,7 @@ def feed(request, user_id):
 
 
 def profile(request, user_id):
+    """Show every feed item where this user was the actor."""
     user = User.objects.get(id=user_id)
     from user_account.models import FeedItem
     user_feed = FeedItem.objects.filter(actor=user)
