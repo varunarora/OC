@@ -827,7 +827,7 @@ def feed(request, user_id):
         'feed': user_feed,
     })
 
-    return render(request, 'feed.html', c)
+    return render(request, 'home.html', c)
 
 
 def profile(request, user_id):
@@ -843,4 +843,4 @@ def profile(request, user_id):
         'feed': user_feed,
     })
 
-    return render(request, 'feed.html', c)
+    return render(request, 'profile.html', c)

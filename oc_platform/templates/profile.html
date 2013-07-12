@@ -1,11 +1,11 @@
 {% include 'partials/header.html' %}
 
-    <div class="title">
+    <h3>
         {{ name }}'s profile page.
-    </div>
+    </h3>
 
     {% for item in feed %}
-        <div class="feed_item">
+        <div class="activity">
             {{ item.id }}
         </div>
     {% endfor %}
