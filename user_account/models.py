@@ -14,7 +14,7 @@ class UserProfile(models.Model):
         return self.user.username
 
 
-class FeedItem(models.Model):
+class Activity(models.Model):
     actor = models.ForeignKey(User, related_name='actor')
     action = models.CharField(max_length=30)
     target = models.ForeignKey(User, null=True, blank=True,

@@ -17,10 +17,10 @@ class SimpleTest(TestCase):
 
 from interactions.models import Comment
 from django.dispatch import Signal
-from user_account.feeds import addFeedItem
+from user_account.feeds import addActivity
 from django.contrib.auth.models import User
 sig = Signal(providing_args=['actor_id', "action", "target_id", "object_id"])
-sig.connect(addFeedItem)
+sig.connect(addActivity)
 
 
 class Test(object):

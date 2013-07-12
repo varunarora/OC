@@ -1,6 +1,6 @@
 from django.dispatch import Signal
 from django.contrib.auth.models import User
-from user_account.models import FeedItem
+from user_account.models import Activity
 from interactions.models import Comment
 
 
@@ -54,8 +54,8 @@ def findRecipients(**kwargs):
     return recipients
 
 
-def addFeedItem(sender, **kwargs):
-    """Finds recipients, creates a FeedItem object, and returns it.
+def addActivity(sender, **kwargs):
+    """Finds recipients, creates an Activity object, and returns it.
 
     TODO: Change this to accept objects rather than IDs.
 
@@ -76,7 +76,7 @@ def addFeedItem(sender, **kwargs):
     args_dict['target'] = User.objects.get(id=kwargs['target_id'])
     action_object = Comment.objects.get(id=kwargs['object_id'])
     recipients = findRecipients(**args_dict)
-    item = FeedItem()
+    item = Activity()
     item.actor = args_dict['actor']
     item.action = args_dict['action']
     item.target = args_dict['target']
@@ -87,4 +87,4 @@ def addFeedItem(sender, **kwargs):
     print item.action
 
 sig = Signal(providing_args=['actor_id', "action", "target_id", "object_id"])
-sig.connect(addFeedItem)
+sig.connect(addActivity)
