@@ -15,10 +15,12 @@ class UserProfile(models.Model):
 
 
 class FeedItem(models.Model):
-    actor = models.CharField(max_length=30)
+    actor = models.ForeignKey(User, related_name='actor')
     action = models.CharField(max_length=30)
-    target = models.CharField(max_length=30)
-    recipients = models.CharField(max_length=60)
+    target = models.ForeignKey(User, null=True, blank=True,
+                               related_name='target')
+    action_object = models.CharField(max_length=30, blank=True)
+    recipients = models.ManyToManyField(User, related_name="feed")
 
     def __unicode__(self):
-        return "".join(self.recipients)
+        return unicode(self.action)
