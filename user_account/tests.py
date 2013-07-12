@@ -15,33 +15,28 @@ class SimpleTest(TestCase):
         """
         self.assertEqual(1 + 1, 2)
 
+from interactions.models import Comment
+from django.dispatch import Signal
+from user_account.feeds import addFeedItem
+from django.contrib.auth.models import User
+sig = Signal(providing_args=['actor_id', "action", "target_id", "object_id"])
+sig.connect(addFeedItem)
 
-def testFindRecipients():
-    class Struct:
-        pass
 
-    action1 = Struct()
-    action1.name = 'upload'
-    actor1 = Struct()
-    actor1.subscribers = ['Dude1', 'Dude2', 'Dude3']
-    print findRecipients(actor1, action1)
+class Test(object):
+    actor_id = '6'
+    action = "comment"
+    target_id = '3'
 
-    actor2 = Struct()
-    actor2.subscribers = ['Dude1', 'Dude2', 'Dude3']
-    action2 = Struct()
-    action2.name = 'subscribe'
-    target = Struct()
-    target.name = 'Dude2'
-    action2.target = target
-    print findRecipients(actor2, action2)
+    def test(self):
+        c = Comment()
+        c.body_markdown = "Hi"
+        c.user = User.objects.get(id='6')
+        c.parent = c.user
+        c.save()
+        sig.send(sender=self, actor_id=self.actor_id, action=self.action,
+                 target_id=self.target_id, object_id=c.id)
 
-    actor3 = Struct()
-    actor3.name = 'Dude1'
-    actor3.subscribers = ['Dude2', 'Dude3', 'Dude4', 'Dude5']
-    action3 = Struct()
-    action3.name = 'comment'
-    target = Struct()
-    target.name = 'Dude3'
-    target.subscribers = ['Dude1', 'Dude2', 'Dude4', 'Dude5']
-    action3.target = target
-    print findRecipients(actor3, action3)
+
+t = Test()
+t.test()

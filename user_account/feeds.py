@@ -88,22 +88,3 @@ def addFeedItem(sender, **kwargs):
 
 sig = Signal(providing_args=['actor_id', "action", "target_id", "object_id"])
 sig.connect(addFeedItem)
-
-
-class Test(object):
-    actor_id = '6'
-    action = "comment"
-    target_id = '3'
-
-    def test(self):
-        c = Comment()
-        c.body_markdown = "Hi"
-        c.user = User.objects.get(id='6')
-        c.parent = c.user
-        c.save()
-        sig.send(sender=self, actor_id=self.actor_id, action=self.action,
-                 target_id=self.target_id, object_id=c.id)
-
-
-t = Test()
-t.test()
