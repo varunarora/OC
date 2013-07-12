@@ -68,7 +68,9 @@ urlpatterns = patterns(
     url(r'^admin/', include(admin.site.urls)),
 
     # User feed
-    url(r'^users/(?P<user_id>\d+)/$', 'user_account.views.feed', name='feed'),
+    url(r'^feeds/(?P<user_id>\d+)/$', 'user_account.views.feed', name='feed'),
+    url(r'^users/(?P<user_id>\d+)/$', 'user_account.views.profile', name='profile'),
+
 
 )
 

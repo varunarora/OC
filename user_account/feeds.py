@@ -45,19 +45,19 @@ def findRecipients(**kwargs):
         # Hmm, this guy I'm subscribed to commented about Zuck, interesting.
         ##### recipients.update(actor.getSubscribers())
 
-        # I revere Zuck. Who dare comment on what he does?
-        ##### recipients.update(target.getSubscribers())
-        # If I'm the dude who commented on Zuck, don't tell me.
-        recipients.discard(actor)      # Removes iff present.
-
         # Wow, someone finally commented on my stuff!! :excited:
         recipients.add(target)
+
+        # If I commented on my own stuff, don't tell me.
+        recipients.discard(actor)      # Removes iff present.
 
     return recipients
 
 
 def addFeedItem(sender, **kwargs):
     """Finds recipients, creates a FeedItem object, and returns it.
+
+    TODO: Change this to accept objects rather than IDs.
 
     Parameters:
         actor_id: id to a user object.

@@ -827,3 +827,18 @@ def feed(request, user_id):
     })
 
     return render(request, 'feed.html', c)
+
+
+def profile(request, user_id):
+    user = User.objects.get(id=user_id)
+    from user_account.models import FeedItem
+    user_feed = FeedItem.objects.filter(actor=user)
+
+    from django.template import Context
+    c = Context({
+        'user': user,
+        'name': user.get_full_name(),
+        'feed': user_feed,
+    })
+
+    return render(request, 'feed.html', c)

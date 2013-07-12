@@ -19,7 +19,7 @@ class FeedItem(models.Model):
     action = models.CharField(max_length=30)
     target = models.ForeignKey(User, null=True, blank=True,
                                related_name='target')
-    action_object = models.CharField(max_length=30, blank=True)
+    action_object = models.CharField(max_length=30, blank=True, null=True)
     recipients = models.ManyToManyField(User, related_name="feed")
 
     def __unicode__(self):
