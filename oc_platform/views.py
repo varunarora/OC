@@ -5,6 +5,18 @@ from articles.models import Article
 import json
 
 
+def homepage(request):
+    """If the user is logged in, return their news feed.
+    Otherwise, show them the logged-out homepage.
+    """
+    if request.user.is_authenticated():
+        from user_account.views import feed
+        return feed(request, request.user.id)
+
+    else:
+        return home(request)
+
+
 def home(request):
     """Fetches the top articles, a count and the sign-in form"""
     # Get the top 10 articles ordered in descending order of views.

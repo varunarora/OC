@@ -8,7 +8,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     # Examples:
-    url(r'^$', 'oc_platform.views.home', name='home'),
+    url(r'^$', 'oc_platform.views.homepage', name='home'),
 
     url(r'^search/', include('haystack.urls')),
 
