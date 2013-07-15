@@ -9,7 +9,7 @@ SIGNUPS_ADMINS = ['info@theopencurriculum.org']
 CONTRIBUTOR_SIGNUPS_ADMINS = ['info@theopencurriculum.org', 'zeinab@theopencurriculum.org', 'duncan@theopencurriculum.org']
 HELP_EMAIL = 'hello@theopencurriculum.org'
 
-EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST = "smtp.sendgrid.net"
 EMAIL_PORT = "587"
 EMAIL_HOST_USER = ""  # This needs to filled in
 EMAIL_HOST_PASSWORD = ""  # This needs to filled in
@@ -67,10 +67,6 @@ import os.path
 TEMPLATE_DIR = os.path.dirname(__file__)
 ABSOLUTE_PATH = lambda x: os.path.join(os.path.abspath(TEMPLATE_DIR), x)
 
-# Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ABSOLUTE_PATH('media_content/')
-
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
@@ -80,9 +76,15 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = '/home/django/OC/static/'
+STATIC_MOUNT_POINT = '/home/django/OC/static/'
+
+STATIC_ROOT = STATIC_MOUNT_POINT + 'assets/'
 
 STATIC_ASSETS_ROOT = STATIC_ROOT
+
+# Absolute filesystem path to the directory that will hold user-uploaded files.
+# Example: "/home/media/media.lawrence.com/media/"
+MEDIA_ROOT = STATIC_MOUNT_POINT + 'media/'
 
 TEMP_IMAGE_DIR = STATIC_ROOT + 'images/tmp/'
 
@@ -114,6 +116,16 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
     # 'django.template.loaders.eggs.Loader',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'user_account.context_processors.notifications',
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.contrib.messages.context_processors.messages'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -207,10 +219,10 @@ STRINGS = {
     'about': {
         'TITLE': 'About OpenCurriculum',
         'team': {
-            'TITLE': 'OpenCurriculum\'s Team'
+            'TITLE': 'Leadership &lsaquo; OpenCurriculum'
         },
         'press': {
-            'TITLE': 'OpenCurriculum\'s Team'
+            'TITLE': 'Press &lsaquo; OpenCurriculum'
         },
     },
     'jobs': {
@@ -244,6 +256,8 @@ STRINGS = {
     'user': {
         'REGISTER_TITLE': 'Sign up for a new account &lsaquo; OpenCurriculum',
         'CONTRIBUTOR_REGISTER_TITLE': 'Register as an Early contributor',
+        'AUTHENTICATION_ERROR': 'Your username or password is incorrect. Please try again.',
+        'INACTIVE_ACCOUNT_ERROR': 'You need to activate your account before you login.',
         'register': {
             'professions': {
                 'STUDENT': 'Student',
@@ -283,10 +297,16 @@ STRINGS = {
     'projects': {
         'TITLE': 'OpenCurriculum Projects: The easiest way to share your learning content',
         'MEMBERS_TITLE': 'Members',
+        'ABOUT_TITLE': 'About',
+        'BROWSE_TITLE': 'Browse...',
         'invite': {
             'SUCCESS_TITLE': 'Successfully received your projects invite',
             'FAILURE': 'Failed to submit form'
         }
+    },
+    'article_center': {
+        'INTRODUCTION_TITLE': 'Hi - nice to meet you!',
+        'TITLE': 'Article Center: Your private guide into article contributions'
     }
 }
 
