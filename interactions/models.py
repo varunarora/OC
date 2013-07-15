@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from articles.MarkdownTextField import MarkdownTextField
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from django.dispatch import Signal
 
 
 class Comment(models.Model):
@@ -15,6 +16,9 @@ class Comment(models.Model):
 
     def __unicode__(self):
         return str(self.parent_type) + ": " + str(self.parent_id)
+
+    comment_created = Signal(providing_args=["comment_id"])
+
 
 """
 class Favorite(models.Model):
