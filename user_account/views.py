@@ -819,7 +819,7 @@ def _email_contributor_admins(original_form_inputs):
     )
 
 
-def feed(request, user_id):
+def user_home(request, user_id):
     """Show every activity for which this user is a recipient."""
     user = User.objects.get(id=user_id)
     user_feed = user.feed.all()

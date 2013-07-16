@@ -5,43 +5,39 @@ from articles.models import Article
 import json
 
 
-def homepage(request):
-    """If the user is logged in, return their news feed.
-    Otherwise, show them the logged-out homepage.
+def home(request):
+    """Display either the homepage or the user home based on login status.
+
+    If not logged in, fetch the top articles, count, and sign-in form.
     """
     if request.user.is_authenticated():
-        from user_account.views import feed
-        return feed(request, request.user.id)
+        from user_account.views import user_home
+        return user_home(request, request.user.id)
 
     else:
-        return home(request)
+        # Get the top 10 articles ordered in descending order of views.
+        top_articles = Article.objects.order_by('title').order_by('-views')[:10]
 
+        # Get the count of the total number of articles in the database.
+        article_count = Article.objects.all().count()
 
-def home(request):
-    """Fetches the top articles, a count and the sign-in form"""
-    # Get the top 10 articles ordered in descending order of views.
-    top_articles = Article.objects.order_by('title').order_by('-views')[:10]
+        # Get the sign-in form.
+        import SignupForm
+        form = SignupForm.SignupForm()
 
-    # Get the count of the total number of articles in the database.
-    article_count = Article.objects.all().count()
+        # Fetch context variables by importing and invoking Google Plus function
+        #     in AuthHelper library.
+        from user_account.AuthHelper import AuthHelper
 
-    # Get the sign-in form.
-    import SignupForm
-    form = SignupForm.SignupForm()
-
-    # Fetch context variables by importing and invoking Google Plus function
-    #     in AuthHelper library.
-    from user_account.AuthHelper import AuthHelper
-
-    context = dict(
-        AuthHelper.generateGPlusContext(request).items() + {
-            'top_articles': top_articles,
-            'title': _(settings.STRINGS['global']['TITLE']),
-            'count': article_count,
-            'form': form
-        }.items()
-    )
-    return render(request, 'index.html', context)
+        context = dict(
+            AuthHelper.generateGPlusContext(request).items() + {
+                'top_articles': top_articles,
+                'title': _(settings.STRINGS['global']['TITLE']),
+                'count': article_count,
+                'form': form
+            }.items()
+        )
+        return render(request, 'index.html', context)
 
 
 def t404(request):
