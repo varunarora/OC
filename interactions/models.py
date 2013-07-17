@@ -3,6 +3,10 @@ from django.contrib.auth.models import User
 from articles.MarkdownTextField import MarkdownTextField
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from django.dispatch import Signal
+
+new_comment = Signal(providing_args=['actor_id', "action", "target_id",
+                                     "object_id"])
 
 
 class Comment(models.Model):

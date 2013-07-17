@@ -930,5 +930,13 @@ def addActivity(sender, **kwargs):
     item.save()
     print item.action
 
-sig = Signal(providing_args=['actor_id', "action", "target_id", "object_id"])
-sig.connect(addActivity)
+
+new_subscription = Signal(providing_args=['actor_id', "action", "target_id"])
+
+new_upload = Signal(providing_args=['actor_id', "action", "object_id"])
+
+new_subscription.connect(addActivity)
+
+from interactions.models import new_comment
+new_comment.connect(addActivity)
+new_upload.connect(addActivity)
