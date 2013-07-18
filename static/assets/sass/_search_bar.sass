@@ -1,0 +1,53 @@
+#search-bar
+	margin-left: 20px
+	float: left
+	
+	/* Custom IE styling in ie.sass */	
+	input[type=search]
+		background-color: #f2f2f2
+		border: 1px solid #b2b2b2
+		@include border-radius(5px)
+		height: 16px
+		width: 260px
+		padding: 4px
+		padding-left: 6px
+		font-size: 0.75em
+		padding-right: 20px
+		float: left
+
+		&:focus
+			background-color: #f6f6f6
+			font-style: normal
+			font-weight: normal
+			@include box-shadow(0 0 5px rgba(90, 189, 2, 0.6))
+			outline: 0 none
+
+		&.typing
+			color: #222222
+
+		&.default
+			font-style: italic
+			font-weight: bold
+			color: #a2a2a2
+
+		&.empty
+			color: #cecece
+			@include transition(color .2s linear)
+
+	input[type=submit]
+		border-width: 0px
+		background-color: #f2f2f2
+		background-image: url('../images/search-icon.png')
+		background-repeat: no-repeat
+		background-position: center
+		@include border-radius(0px 5px 5px 0px)
+		height: 24px
+		left: -26px
+		top: 1px
+		width: 25px
+		position: relative
+		float: right
+
+		&:hover
+			background-color: #e2e2e2
+

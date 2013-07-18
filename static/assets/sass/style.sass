@@ -1,0 +1,1472 @@
+@import "base"
+
+@import "additional-reset"
+
+$content-width: 960px
+@mixin pt-sans-title
+	font-family: 'PT Sans', sans-serif
+	font-size-adjust: none
+	letter-spacing: -1px
+
+@mixin pretty-select
+	background-color: #efefef
+	border: 1px solid #b2b2b2
+	font-size: 0.85em
+	@include sans-bold
+	padding: 4px 0px
+	@include border-radius(4px)
+	
+$header-height: 55px
+$header-prebanner-height: 4px
+
+$body-color: #1a1a1a
+
+$link-hover: #1155cc
+
+$light-font: #666666
+
+body
+	font-family: "Proxima Nova Regular", 'Helvetica Neue', Arial, Helvetica, sans-serif
+	font-size-adjust: 0.488
+	font-weight: normal
+	font-style: normal
+	line-height: 1
+	font-size: 14px
+	color: #1a1a1a
+	
+	> header
+		background-color: #efefef
+		display: block
+		height: $header-height
+		z-index: 1
+		position: relative
+		
+#header-prebanner
+	background-color: #5abd02
+	display: block
+	height: $header-prebanner-height
+
+#header-center
+	width: $content-width
+	margin: auto
+	height: $header-height - $header-prebanner-height
+
+	#header-left
+		width: 593px
+		float: left
+		
+		#header-brand-wrapper
+			padding-top: 10px			
+		
+	#header-right
+		float: right
+		width: 337px
+	
+#logo
+	height: 25px
+	float: left
+	margin-top: 2px
+
+.live-filter-wrapper input[type=search]
+	background-color: #f8f8f8
+	border: 1px solid #b2b2b2
+	@include border-radius(5px)
+	height: 12px
+	width: 200px
+	padding: 4px
+	margin-left: 20px
+	font-size: 0.75em
+
+@import "search_bar"
+@import "scaffolds"
+
+footer
+	font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif
+	margin: auto
+	width: $content-width
+	text-align: right
+	margin-top: 15px
+	font-size: 0.95em
+	color: #666666
+	margin-bottom: 20px
+
+	a
+		color: #557799
+
+		&:hover
+			color: #1155cc
+
+a
+	color: #1155cc
+	text-decoration: none
+
+	&:hover
+		text-decoration: underline
+
+#plant
+	margin: 0px 0px 0px 150px
+	position: relative
+	top: -20px
+
+#cloud
+	position: relative
+	float: right
+	right: 75px
+	
+@import "article_panels"
+
+.btn, .ui-button
+	/* Can work using css3/pie - but put off until really needed */
+	@include border-radius(4px)
+	/* No custom IE styling given */
+	border-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.25)
+	border-width: 1px
+	border-style: solid
+	/* Custom IE styling in ie.sass, no inset styling given */
+	@include box-shadow(0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.05))
+	padding: 6px 12px
+	min-height: 20px
+	font-size: 0.9em
+	background-repeat: repeat-x
+
+	&:hover
+		@include transition(background-position 0.1s linear 0s)
+		background-color: #E6E6E6
+		background-position: 0 -15px
+
+	&.disabled
+		opacity: 0.65
+		background-image: none
+		cursor: default			
+
+.success-button
+	color: #fff
+	/* Custom IE styling in ie.sass */
+	@include background-image(linear-gradient(center top, #0088CC 0%, #0044CC 100%))
+	background-color: #006DCC
+
+	&:hover
+		background-color: #0044CC
+
+	&.disabled
+		&:hover
+			background-color: #006DCC
+
+.fine-print
+	font-size: 0.7em
+	margin-top: 8px
+	color: #666
+
+.dull-button, .ui-button
+	/* Custom IE styling in ie.sass */
+	@include background-image(linear-gradient(center top, #FFFFFF 0%, #E6E6E6 100%))
+	background-color: #F5F5F5
+
+.vertical-caret
+	margin-left: 8px
+	content: ""
+	display: inline-block
+	border-width: 5px 0px 5px 5px
+	border-style: solid
+	/* NEEDS ATTENTION */
+	border-color: transparent transparent transparent #fff
+	height: 0px
+
+.breadcrumbs-caret
+	margin-left: 8px
+	margin-right: 8px
+	border-width: 4px 0px 4px 4px
+	/* NEEDS ATTENTION */
+	border-color: transparent transparent transparent #aaa
+
+.horizontal-caret
+	margin-top: 8px
+	content: ""
+	display: inline-block
+	border-width: 5px 5px 0px 5px
+	border-style: solid
+	/* NEEDS ATTENTION */
+	border-color: #000 transparent transparent transparent
+	height: 0px
+
+.horizontal-caret-up
+	position: relative
+	top: -2px
+	margin-left: 4px
+	content: ""
+	display: inline-block
+	border-width: 5px 5px 0px 5px
+	border-style: solid
+	/* NEEDS ATTENTION */
+	border-color: #666 transparent transparent transparent
+	height: 0px
+
+.username-caret
+	border-color: #666 transparent transparent transparent
+	margin: -2px 2px 0px 6px
+
+#chief-panel .actions-wrapper
+	margin-top: 30px
+	text-align: right
+
+@import "animations"
+
+.thermometer-difficulty-wrapper
+	width: 100%
+	height: 100%
+	float: right
+	
+h1
+	/* NEEDS ATTENTION (and every instance of PT Sans ahead */
+	font-family: 'PT Sans', sans-serif
+	font-size: 2.5em
+	font-size-adjust: none
+
+h2
+	font-family: 'PT Sans', sans-serif
+	font-weight: bold
+	font-size: 1.8em
+	letter-spacing: -1px
+
+h3
+	font-family: 'PT Sans', sans-serif
+	font-size: 1.5em
+	letter-spacing: -1px
+	margin-bottom: 12px
+	color: #444
+
+article select#chapter-select
+	font-family: 'PT Sans', sans-serif
+	/* NEEDS ATTENTION */
+	background: transparent
+	border-width: 0px
+	outline: 0 none
+	font-weight: bold
+	font-size: 1.8em
+	letter-spacing: -1px
+	width: 540px
+	color: #000		
+		
+	&:hover
+		cursor: pointer
+
+	option
+		padding: 5px
+		font-size: 0.8em
+
+.select-wrapper
+	z-index: 5
+	width: 520px
+	overflow: hidden
+	background: url('../images/arrow.png') no-repeat right
+	left: -5px
+	position: relative
+	top: -2px
+	height: 35px
+	border-bottom: 1px solid #ffffff
+	
+	&:hover
+		border-bottom: 1px solid #efefef
+		background: url('../images/arrow-hover.png') no-repeat right
+
+.selector
+	width: 20px
+	background-color: #fff
+
+.selector-wrapper
+	text-align: right
+	top: 30px
+	margin-right: 78px
+	position: relative
+	float: right
+	width: 20px
+	margin-top: -25px
+
+.breadcrumb
+	line-height: normal
+	font-size: 0.87em
+	overflow: hidden
+
+	a
+		color: #557799
+
+#article-thermometer
+	height: 8px
+	width: 120px
+	float: left
+	margin-top: 4px
+	margin-right: 40px
+
+/* NEEDS ATTENTION (rename) */
+.chapter-thermometer
+	height: 5px
+	width: 80px
+	position: relative
+	top: -104px
+	right: -25px
+	
+	.thermometer-difficulty
+		height: 5px
+
+.thermometer
+	background: #ff2222 /* Old browsers */
+	@include background(linear-gradient(left, #ff22ff 0%,#2222ff 16%,#22ffff 32%,#22ff22 48%,#ffff22 64%, #ffa500 80%, #ff2222 100%)) /* W3C */
+
+.breadcrumb .links
+	float: left
+	width: 400px
+
+@import "article/actions"
+
+#article-objectives
+	margin-top: 15px
+	padding: 18px
+	margin-bottom: 15px
+	border-bottom: 1px solid #b2b2b2
+	background: #E4F7D2 /* Old browsers */
+	@include border-radius(2px 2px 0px 0px)
+
+	ul
+		padding-left: 0px
+		
+	li
+		padding-left: 0px
+		font-size: 0.9em
+
+	span.breadcrumbs-caret
+		left: -12px
+		margin-right: -8px
+		position: relative
+
+section#history
+	margin-top: 15px
+
+p
+	margin-top: 12px
+	font-size: 0.9em
+
+#social-panel
+	min-height: 54px
+	margin-bottom: 12px
+	color: #666
+	font-size: 0.9em
+	padding: 0px 18px
+
+#author-panel
+	height: 100px
+	background-color: #444
+	color: #fff
+	padding: 18px
+
+	a
+		color: #fff
+
+		&:hover
+			color: #b2b2b2
+			text-decoration: none
+
+#author-thumbnail
+	background-color: #b2b2b2
+	width: 100px
+	height: 100px
+	float: left
+	margin-right: 15px
+	background-size: cover
+
+#author-resources
+	color: #888
+
+button.subscribe
+	padding: 2px 8px
+	margin-top: 15px
+	font-size: 0.9em
+
+aside#support
+	background-color: #efefef
+	padding: 18px
+	overflow: hidden
+	font-size: 0.9em
+
+aside.content-block
+	background-color: #efefef
+	padding: 8px
+	margin: 10px 0px
+	overflow: hidden
+
+li, p
+	line-height: 1.2em
+
+@import "resources"
+@import "search"
+
+.caption
+	/* NEEDS ATTENTION */
+	font-family: 'PT Sans', sans-serif
+
+#catalog-listing
+	margin: 20px 0px
+	overflow: hidden
+
+.catalog-category
+	margin-bottom: 15px
+	padding-bottom: 5px
+	overflow: hidden
+
+.article-count, .title-helper
+	color: #666
+
+.true-h3-color
+	color: #444
+
+.true-color
+	color: #1a1a1a
+
+@mixin sans-bold
+	font-family: "Proxima Nova Bold", 'Helvetica Neue', Arial, Helvetica, sans-serif
+	font-size-adjust: 0.488
+	font-weight: bold
+	font-style: normal
+
+/* NEEDS ATTENTION */
+span.highlighted,
+.search-filter-header,
+.resource-title a,
+.search-result-title a,
+.pressult-title a,
+.article-actions ul li a,
+.article-community ul li a,
+#article-do li.no-action,
+.breadcrumb,
+.bold,
+strong,
+th,
+#author-name,
+.oer-info-detail,
+h1.developers-title,
+.about nav ul li.selected a,
+.pillar-caption,
+#pillars-description, #pillars-default-description,
+.license-caption,
+#license-description, #license-default-description,
+.press-kit-header,
+.form-success,
+h4
+	@include sans-bold
+
+em
+	font-style: italic
+
+.bold-italic
+	font-weight: bold
+	font-style: italic
+
+@import "article/content"
+
+.live-filter-wrapper
+	padding: 8px
+	margin: 15px 0px
+	background-color: #efefef
+
+.filter-caption
+	color: #444
+
+.page-category-title
+	margin-bottom: 5px
+
+.aside-section
+	margin-bottom: 20px
+
+#thumbnail-image
+	border: 1px solid #b2b2b2
+	height: 150px
+	width: 120px
+	margin: auto
+	background-position: center
+
+#thumbnail-info
+	margin: auto
+	text-align: center
+	width: 120px
+	color: #fff
+	background-color: #444
+	padding: 4px 0px
+	position: relative
+	bottom: 28px
+	height: 20px
+
+h1.developers-title
+	margin-bottom: 20px
+
+.img-caption
+	background-color: #000
+	color: #fff
+	display: inline-block
+	padding: 4px 8px
+	position: relative
+	@include border-radius(4px 4px 4px 4px)
+
+.img-wrapper
+	text-align: center
+	margin: 8px
+	display: inline-block
+
+@import "about"
+
+.jobs-image-rotator-wrapper
+	width: 100%
+	overflow: hidden
+
+.jobs-image-rotator
+	height: 400px
+	width: 4000px
+	position: relative
+
+	li
+		height: 400px
+		float: left
+		@include background-size(cover)
+		/* No custom IE styling given */
+		@include box-shadow(inset 0 0 600px #000)
+
+		&:hover
+			box-shadow: none 
+
+.bulleted-list
+	padding-left: 15px
+	margin: 10px 0px
+
+	li
+		list-style-type: disc
+
+.line
+	margin: 15px 0px
+	border-bottom: 1px solid #efefef
+
+.center
+	text-align: center
+
+.right
+	text-align: right
+
+.form-error
+	text-align: center
+	background-color: #f2dede
+	color: #B94A48
+	border-color: #eed3d7
+	@include border-radius(4px)
+	padding: 8px 4px
+	@include text-shadow(0 1px 0 rgba(255, 255, 255, 0.5))
+	display: none
+
+.form-success
+	text-align: center
+	background-color: #dff0d8
+	color: #468847
+	border-color: #d6epc6
+	@include border-radius(4px)
+	padding: 8px 4px
+	@include text-shadow(0 1px 0 rgba(255, 255, 255, 0.5))
+	display: none
+	
+.form-spinner
+	display: none
+	background: url('../images/spinner.gif') no-repeat right
+	width: 175px
+	height: 16px
+	position: relative
+	top: -20px
+	margin: auto
+
+.spinner
+	display: none
+	background: url('../images/spinner.gif') no-repeat right
+	width: 16px
+	height: 16px
+	margin: auto
+
+.success-check
+	background: url('../images/check.png') no-repeat center center
+	height: 50px
+	padding: 10px
+
+// TODO: All this form non-sense needs a lot of cleaning up
+
+form input[type=text], form input[type=password], textarea
+	&:focus
+		background-color: #ffffff
+		font-style: normal
+		font-weight: normal
+		@include box-shadow(0 0 5px rgba(82, 168, 236, 0.8))
+		outline: 0 none
+
+	&.form-input-error
+		border-color: #E9322D
+		@include box-shadow(0 0 6px #F8B9B7)
+
+form#signup-form,
+form#new-project-form,
+form#sign-in-form,
+form#contributor-invite,
+form#general-invite,
+form#share-via-email,
+form#contributor-registration,
+form#project-add-member
+	input[type=text], input[type=password], textarea
+		background-color: #f5f5f5
+		border: 1px solid #b2b2b2
+		@include border-radius(5px)
+		height: 16px
+		width: 200px
+		padding: 4px
+		font-size: 0.9em
+
+		&:focus
+			background-color: #ffffff
+
+	textarea
+		height: 200px
+		font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif
+
+form#sign-in-form
+
+	input[type=text], input[type=password]
+		width: 96%
+		margin: 5px 0px
+		
+	#signinButton
+		text-align: center
+
+textarea
+	height: 200px
+
+form#share-via-email
+	textarea, input[type=text]
+		&.full-width
+			width: 100%
+
+	textarea
+		height: 100px
+
+.form-error
+	display: none
+		
+.form-error-show
+	display: block
+	
+.moe-audience
+	background: url('../images/moe-audience.png') no-repeat 250px bottom
+	
+td.input-description
+	text-align: right
+	color: #666
+	
+th, td
+	padding: 4px
+
+.sign-up .row-item
+	margin: 5px 0px
+	margin-right: 10px
+
+.sign-up .row-item-thumbnail img
+	width: 50px
+	height: 50px
+	
+.sign-up .row-set
+	margin-top: 40px
+	
+.strong
+	font-weight: bold
+	
+.sign-up #fill-panel
+	padding-top: 60px
+
+.register-box
+	background: rgba(255,255,255,0.5)
+	@include border-radius(4px)
+	padding: 6px
+	@include sans-bold
+	margin-bottom: 20px
+
+nav#authenticate-buttons, nav#user-buttons
+	float: right
+	
+	> ul
+		> li
+			float: left
+			height: $header-height - $header-prebanner-height
+		
+			a
+				padding: 12px 20px 0px 20px
+				color: #666666
+				@include sans-bold
+				display: inline-block
+				height: 36px
+			
+				&:hover, &.hover
+					background-color: #f8f8f8
+					border-bottom: 3px solid #006dcc
+					color: $link-hover
+					text-decoration: none
+
+				.user-firstname
+					display: inline-block
+					float: left
+					height: 24px
+					margin: 6px 14px
+
+				.user-firstname-assistant
+					display: inline-block
+					float: right
+					height: 9px
+					margin: 15px 0px 6px 0px
+
+			&.user-firstname-wrapper
+				a
+					padding: 6px 20px
+	
+.horizontal-caret-hover
+	border-color: $link-hover transparent transparent
+					
+nav#user-menu.showMenu, nav#share-menu.showMenu, , nav#notifications-menu.showMenu
+	display: block
+
+nav#user-menu, nav#share-menu, nav#notifications-menu
+	display: none
+	position: absolute
+
+	.floating-menu-spacer
+		height: 8px
+		position: relative
+
+	ul
+		background-color: #ffffff
+		@include border-radius(4px)
+		@include box-shadow(0 0 4px rgba(0, 0, 0, 0.4))
+		z-index: 4
+		
+		li
+			height: 44px
+			padding-top: 8px
+		
+			a
+				text-align: left
+				height: 20px
+				padding: 2px 12px
+				display: block
+				color: #666666
+		
+				&:hover
+					background-color: #006dcc
+					color: #fff
+					text-decoration: none
+
+nav#user-menu
+	z-index: 5
+	width: 210px
+
+	.floating-menu-spacer
+		width: 210px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		background-position: 145px bottom
+		z-index: 10
+
+
+nav#share-menu
+	z-index: 5
+	width: 120px
+
+	.floating-menu-spacer
+		width: 120px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		background-position: 55px bottom
+		z-index: 10
+
+	ul
+		padding-bottom: 8px
+
+		li
+			height: 20px
+
+nav#notifications-menu
+	z-index: 4
+	width: 300px
+
+	.floating-menu-spacer
+		width: 300px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		background-position: 265px bottom
+		z-index: 10
+
+	.new-notification
+		background-color: #EFEFEF
+
+#forgot-username-password
+	text-align: right
+	
+#signup-or
+	margin: 10px 0px
+
+	.signup-or-flank
+		width: 180px
+		background: url('../images/signup-flank.png') repeat-x
+
+#loggedin-button
+	margin: 10px 0px
+	overflow: hidden
+	
+	input[type=checkbox]
+		float: left
+		margin-right: 5px
+	
+	button
+		float: right
+
+form#signup-form, form#contributor-registration
+	input[name=dob_date]
+		width: 30px
+
+	input[name=dob_year]
+		width: 50px
+
+	select
+		@include pretty-select
+
+		&[name=dob_month]
+			width: 100px
+
+			option:nth-child(1)
+				display: none
+
+		&[name=profession]
+			width: 210px
+
+	.form-error
+		text-align: left
+		display: block
+		background-color: transparent
+
+table#signup-form-table
+	margin: 10px 0px
+	width: 100%
+	
+	tr
+		padding: 6px 0px
+		height: 40px
+	
+	.field
+		width: 445px
+
+#session-state
+	display: none
+
+.registration
+	#signinButton
+		float: left
+		margin-right: 10px
+
+@import "editor"
+
+.history-set
+	margin-bottom: 20px
+
+	> .current
+		background-color: #E4F7D2
+
+		.revision-number
+			background-color: #5ABD02
+			color: #ffffff
+
+.edit
+	overflow: hidden
+	margin-bottom: 20px
+	padding: 15px
+
+	.edit-thumbnail
+		margin-right: 15px
+		float: left
+
+		img
+			width: 50px
+			height: 50px
+
+	.description
+		float: left
+		width: 425px
+
+		a
+			color: $body-color
+
+			&:hover
+				color: $link-hover
+
+		.edit-description
+			color: $light-font
+
+			a
+				color: $light-font
+
+				&:hover
+					color: $link-hover
+
+			select.revision-selector
+				@include pretty-select
+				
+				option
+					padding-right: 10px 
+
+.edit-meta
+	float: left
+	color: $light-font
+
+.revision-number
+	padding: 2px 6px
+	background-color: #E9EFFA
+	@include sans-bold
+	font-size: 0.85em
+
+#diff-header
+	margin: 20px 0px
+
+.diff_add
+	background-color: #AAFFAA
+
+.diff_sub
+	background-color: #FFAAAA
+
+table.diff
+	tr
+		&.titles
+			td
+				@include sans-bold
+
+				&.diff_header
+					background-color: #ffffff
+					border: 1px solid #ffffff
+
+				&[nowrap=nowrap]
+					padding: 6px 0px
+
+		td
+			font-family: "Arial"
+			padding: 0px 4px
+			border: 1px solid #fff
+
+			&.diff_header
+				background-color: #efefef
+				border: 1px solid #efefef
+				padding: 0px 8px
+				width: 60px
+				color: #b2b2b2
+
+			&.diff_next
+				width: 40px
+
+			&[nowrap=nowrap]
+				min-width: 400px
+
+.form-info-box
+	margin: 10px 0px
+
+table#project-form-table
+	td.inputs
+		width: 400px
+
+		input[type=text], textarea
+			width: 350px
+			font-family: "Arial"
+
+header#project-header
+	height: 150px
+
+	hgroup#project-info-wrapper
+		background: rgba(0,0,0,0.6)
+		width: 375px
+		float: right
+		height: 100%
+
+		#project-info
+			padding: 20px
+			color: #fff
+
+			#project-info-description
+				color: #b2b2b2
+
+textarea[name=objectives]
+	display: none
+
+.revision-message
+	@include border-radius(2px)
+	/* Custom IE styling in ie.sass */
+	@include box-shadow(0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.05))
+	color: #ffffff
+	/* Custom IE styling in ie.sass */
+	@include background-image(linear-gradient(center top, #00DB12 0%, #00A10D 100%))
+	@include sans-bold
+	padding: 8px
+	margin: 10px 0px
+
+.revision-user
+
+	.revision-user-thumbnail
+		float: left
+		margin-right: 10px
+		width: 20%
+
+		img
+			width: 50px
+			height: 50px
+
+	.revision-user-log
+		float: left
+		width: 70%
+
+#email-share-dialog-wrapper
+	width: 80%
+	margin: auto
+
+@import "projects_launch"
+
+@import "tipsy"
+
+#revision-comment
+	textarea[name="body_markdown"]
+		display: block
+		width: 100%
+		height: 50px
+
+	button
+		margin: 10px 0px
+
+.member
+	padding: 10px 0px
+	overflow: hidden
+
+	.member-info
+		float: left
+
+		.member-photo
+			float: left
+			margin-right: 16px
+
+		.member-description
+			float: left
+
+	.member-actions
+		float: right
+
+/* jQuery UI stuff */
+
+.ui-autocomplete
+	background-color: #fff
+	border: 1px solid #efefef
+	border-top-width: 0px
+
+	a
+		font-weight: bold
+
+	a:hover
+		color: #fff
+		cursor: pointer
+		background-color: #1155cc
+
+.ui-dialog-titlebar-close
+	background-repeat: no-repeat
+	background-image: url('../images/cross-buttons.png')
+
+/* End jQuery UI stuff */
+
+form#project-add-member
+	margin: 10px 0px
+
+	label
+		float: left
+
+	input[name="add-member"]
+		margin-left: 20px
+
+@import "profile"
+
+form#contributor-registration 
+	span.clarifier-txt 
+		font-size: 0.8em
+		color: gray
+
+	.required
+		color: red
+
+	input, select, textarea
+		margin-top: 4px
+
+	input[type=checkbox], input[type=radio]
+		margin-right: 4px
+
+	.question
+		margin-bottom: 30px
+
+	textarea
+		width: 400px
+
+#animating-panda-column
+	height: 2620px /* Figure out how to actually make a rectangle */
+	background-color: #5abd02
+
+	.animating-panda-wrapper
+		width: 200px
+		position: fixed
+		margin-left: 80px
+		bottom: 50px
+
+		div
+			height: 600px
+			background-position: bottom
+			background-repeat: no-repeat
+			background-image: url('../images/registration_form/Moe8StandingBeltWeb.png')
+
+			&.eating-panda
+				background-image: url('../images/registration_form/Moe8BambooBelt.png')
+
+			&.sleeping-panda
+				background-image: url('../images/registration_form/Moe8SleepingBelt.png')
+
+.projects-success-button, .projects-progress-button
+	padding: 12px
+	border: 0px solid #fff
+	color: #fff
+	font-family: 'PT Sans', sans-serif
+	font-size: 1.8em
+	margin-top: 30px
+
+	&:hover
+		background-color: #51ac00
+
+.projects-success-button
+	background-color: #5ABD02
+
+.projects-progress-button
+	background-color: #557799
+
+	&:hover
+		background-color: #2D6699
+
+.upload-drag-drop
+	width: 500px
+	border: 1px dashed #bcbcbc
+	padding-top: 10px
+	height: 300px
+	margin: auto
+	margin-top: 20px
+	background-image: url('../images/upload/upload-background.png')
+	background-position: center center
+	background-repeat: no-repeat
+
+.upload-drag-drop-message
+	color: #BCBCBC
+	font-size: 1.8em
+	letter-spacing: -1px
+	position: relative
+	top: -40px
+
+form.files-upload-rename
+	button[type=submit].hidden
+		display: none
+
+input.manual-upload
+	display: none
+
+.dz-preview
+	overflow: hidden
+	margin: 6px 12px
+
+	.dz-details
+		.dz-filename
+			padding-top: 4px
+			float: left
+			margin-right: 10px
+			@include sans-bold
+
+			span
+				padding: 2px
+				padding-right: 24px
+				padding-left: 4px
+				border: 1px solid #b2b2b2
+				outline: 0px
+				height: 100%
+				width: 100%
+				cursor: text
+				@include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
+
+		.dz-size
+			padding-top: 4px
+			float: left
+
+	.dz-success-mark
+		display: none
+
+	.dz-error-mark
+		float: left
+		display: none
+
+	.dz-progress
+		padding-top: 4px
+		background-color: #bcbcbc
+		@include border-radius(4px)
+		float: left
+		height: 20px
+		margin-left: 10px
+		width: 100px
+
+		.dz-upload
+			background-color: #557799
+			padding-top: 4px
+			height: 20px
+			float: left
+			@include border-radius(4px)
+
+.upload-services
+	margin-top: 20px
+
+	td
+		height: 100px
+		width: 100px
+		text-align: center
+
+		a
+			background-position: center center
+			background-repeat: no-repeat
+			height: 80px
+			width: 100px
+			display: block
+			@include sans-bold
+			vertical-align: bottom
+			display: table-cell
+			color: $light-font
+
+			&:hover
+				text-decoration: none
+
+		.gdrive-upload
+			background-image: url('../images/upload/google_drive.png')
+
+			&:hover
+				background-image: url('../images/upload/google_drive-hover.png')
+				color: #f1c40f
+
+		.skydrive-upload
+			background-image: url('../images/upload/sky_drive.png')
+
+			&:hover
+				background-image: url('../images/upload/sky_drive-hover.png')
+				color: #34495e			
+
+		.dropbox-upload
+			background-image: url('../images/upload/dropbox.png')
+
+			&:hover
+				background-image: url('../images/upload/dropbox-hover.png')
+				color: #3498db
+
+		.gmail-upload
+			background-image: url('../images/upload/gmail.png')
+
+			&:hover
+				background-image: url('../images/upload/gmail-hover.png')
+				color: #e74c3c
+
+		.box-upload
+			background-image: url('../images/upload/box.png')
+
+			&:hover
+				background-image: url('../images/upload/box-hover.png')
+				color: #2980b9
+
+		.picasa-upload
+			background-image: url('../images/upload/picasa.png')
+
+			&:hover
+				background-image: url('../images/upload/picasa-hover.png')
+				color: #f39c12
+
+		.ftp-upload
+			background-image: url('../images/upload/ftp.png')
+
+			&:hover
+				background-image: url('../images/upload/ftp-hover.png')
+				color: #95a5a6
+
+		.webdav-upload
+			background-image: url('../images/upload/webdav.png')
+
+			&:hover
+				background-image: url('../images/upload/webdav-hover.png')
+				color: #e74c3c
+
+		.facebook-upload
+			background-image: url('../images/upload/facebook.png')
+
+			&:hover
+				background-image: url('../images/upload/facebook-hover.png')
+				color: #2c3e50
+
+.dropzone-manual
+	float: left
+	width: 564px
+	
+.vertical-divider
+	float: left
+	background-image: url('../images/upload/vertical-divider.png')
+	height: 396px
+	width: 1px
+
+.vertical-divider-shadow
+	float: right
+	background-image: linear-gradient(to right, #F6F6F6 0%, #FFFFFF 8px)
+	width: 8px
+	height: 350px
+	margin-top: 22px
+
+.show-more
+	background-image: url('../images/signup-flank.png')
+	height: 15px
+	width: 100%
+	text-align: center
+
+	.show-more-text
+		background-color: #fff
+		padding: 4px
+		border: 1px solid #ddd
+		color: $light-font
+		font-size: 0.85em
+		
+		&:hover
+			background-color: #ddd
+			cursor: pointer
+			border: 1px solid #b2b2b2
+			color: #333
+
+.wf-loading *
+	opacity: 0
+
+.wf-active *, .wf-inactive *
+	-webkit-transition: opacity 0.1s ease-out
+	-moz-transition: opacity 0.1s ease-out
+	-o-transition: opacity 0.1s ease-out
+	transition: opacity 0.1s ease-out
+
+nav#user-buttons > ul > li.user-notification-count
+	&.unread-notifications
+		a
+			color: #fff
+			background-color: #5abd02
+			border-bottom: 2px solid #5abd02
+			&:hover
+				background-color: #4fa602
+				border-bottom: 2px solid #4fa602
+
+	border-width: 0px
+	text-decoration: none
+
+	&.menu-open
+		a
+			background-color: #E0E0E0
+			border-bottom: 2px solid #E0E0E0
+			&:hover
+				color: $light-font
+
+	&.no-notifications
+		a
+			background-image: url('../images/zero-notifications.png')
+			background-repeat: no-repeat
+			background-position: center center
+			width: 25px
+
+	a
+		outline: 0
+
+.header-user-picture
+	width: 36px
+	height: 36px
+	float: left
+
+nav.project-navigation
+	background-color: #EFEFEF
+	height: 50px
+
+	ul
+		li
+			float: left
+			padding: 16px 0px
+
+			a
+				padding: 16px 20px
+				color: $light-font
+				@include sans-bold
+
+				&:hover
+					text-decoration: none
+					background-color: #E0E0E0
+
+				&.current-page
+					color: $link-hover
+
+.project-about-body
+	padding: 10px
+	padding-top: 0px
+
+table
+	td
+		&.column-20
+			width: 20%
+
+		&.column-40
+			width: 40%
+
+		&.column-60
+			width: 60%
+
+#contributor-map
+	width: 100%
+	height: 400px
+
+.oc-tabs
+	nav
+		margin-top: 10px
+		height: 36px
+
+		ul
+			li
+				float: left
+				display: inline-block
+				height: 36px
+				margin: 0px 6px
+
+				a
+					min-width: 30px
+					padding: 8px 16px
+					height: 19px
+					outline: 0
+					border-width: 1px 1px 1px 1px
+					border-color: #bcbcbc
+					border-style: solid
+					background-color: #fff
+					border-radius: 4px 4px 0px 0px
+					display: inline-block
+					background-color: #efefef
+					color: $light-font
+					@include sans-bold
+
+					&:hover
+						text-decoration: none
+						color: $link-hover
+
+					&.selected
+						border-bottom-color: #fff
+						background-color: #fff
+						color: $link-hover
+
+	.oc-tabs-content
+		border-top: 1px solid #bcbcbc
+
+@import "article_center"
+
+.login-authentication-failure
+	color: #B94A48

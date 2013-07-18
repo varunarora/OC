@@ -1,0 +1,157 @@
+/* NEEDS ATTENTION (use of mixins and variables) */
+ul[data-liffect="slideRight"] li
+	opacity: 0
+	position: relative
+	-webkit-animation: slideRight 600ms ease both
+	-webkit-animation-play-state: paused
+	-moz-animation: slideRight 600ms ease both
+	-moz-animation-play-state: paused
+	-o-animation: slideRight 600ms ease both
+	-o-animation-play-state: paused
+	animation: slideRight 600ms ease both
+	animation-play-state: paused
+
+ul[data-liffect="slideRight"].play li
+	-webkit-animation-play-state: running
+	-moz-animation-play-state: running
+	-o-animation-play-state: running
+	animation-play-state: running
+
+@-webkit-keyframes slideRight
+	0%
+		opacity: 0
+		left: 30px
+	100%
+		opacity: 1
+		left: 0
+
+@-moz-keyframes slideRight
+	0%
+		opacity: 0
+		left: 30px
+	100%
+		opacity: 1
+		left: 0
+
+@-o-keyframes slideRight
+	0%
+		opacity: 0
+		left: 30px
+	100%
+		opacity: 1
+		left: 0
+
+@keyframes slideRight
+	0%
+		opacity: 0
+		left: 30px
+	100%
+		opacity: 1
+		left: 0
+
+ul[data-liffect="slideUp"] li
+	opacity: 0
+	position: relative
+	-webkit-animation: slideUp 600ms ease both
+	-webkit-animation-play-state: paused
+	-moz-animation: slideUp 600ms ease both
+	-moz-animation-play-state: paused
+	-o-animation: slideUp 600ms ease both
+	-o-animation-play-state: paused
+	animation: slideUp 600ms ease both
+	animation-play-state: paused
+
+ul[data-liffect="slideUp"].play li
+	-webkit-animation-play-state: running
+	-moz-animation-play-state: running
+	-o-animation-play-state: running
+	animation-play-state: running
+
+@-webkit-keyframes slideUp
+	0%
+		opacity: 0
+		top: 30px
+	100%
+		opacity: 1
+		top: 0
+
+@-moz-keyframes slideUp
+	0%
+		opacity: 0
+		top: 30px
+	100%
+		opacity: 1
+		top: 0
+
+@-o-keyframes slideUp
+	0%
+		opacity: 0
+		top: 30px
+	100%
+		opacity: 1
+		top: 0
+
+@keyframes slideUp
+	0%
+		opacity: 0
+		top: 30px
+	100%
+		opacity: 1
+		top: 0
+
+.thermometer-difficulty
+	background-color: rgba(0,0,0,0.8)
+	width: 0%
+	height: 8px
+	float: right
+	opacity: 0
+	-webkit-animation: rollLeft 1500ms ease both
+	-webkit-animation-play-state: paused
+	-moz-animation: rollLeft 1500ms ease both
+	-moz-animation-play-state: paused
+	-o-animation: rollLeft 1500ms ease both
+	-o-animation-play-state: paused
+	animation: rollLeft 1500ms ease both
+	animation-play-state: paused
+	-webkit-animation-delay: 300ms
+	-moz-animation-delay: 300ms
+	-o-animation-delay: 300ms
+	animation-delay: 300ms
+
+.renderDifficulty
+	-webkit-animation-play-state: running
+	-moz-animation-play-state: running
+	-o-animation-play-state: running
+	animation-play-state: running
+
+@-webkit-keyframes rollLeft
+	0%
+		opacity: 0
+		width: 0%
+	100%
+		opacity: 1
+		width: 100%
+
+@-moz-keyframes rollLeft 
+	0%
+		opacity: 0
+		width: 0%
+	100%
+		opacity: 1
+		width: 100%
+
+@-o-keyframes rollLeft
+	0%
+		opacity: 0
+		width: 0%
+	100%
+		opacity: 1
+		width: 100%
+
+@keyframes rollLeft
+	0%
+		opacity: 0
+		width: 0%
+	100%
+		opacity: 1
+		width: 100%
