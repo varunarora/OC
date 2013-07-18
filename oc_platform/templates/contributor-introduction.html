@@ -1,0 +1,144 @@
+{% include 'partials/header.html' %}
+<div class="center-stage">
+    <div class="center">
+        <iframe width="640" height="360" src="http://www.youtube.com/embed/00EZkcDAypw" frameborder="0" allowfullscreen></iframe> 
+    </div>
+</div>
+
+<div class="wide-banner-container article-center-url">
+    <div class="center">
+        <a href="{% url article_center %}" target="_blank">VISIT THE ARTICLE CENTER <img src="{{ STATIC_URL }}images/new_window.png" /></a>
+    </div>
+</div>
+
+<div id="contributor-map"></div>
+
+<div class="center-stage">
+    <div class="introduction-contributor-faqs">
+        <nav class="introduction-contributor-faqs-tabs">
+            <ul>
+                <li><a href=".contributors-list">Contributors</a></li>
+                <li><a href=".faqs-list">Frequently Asked Questions</a></li>
+            </ul>
+        </nav>
+        <div class="introduction-contributor-faqs-content oc-tabs-content">
+            <div class="contributors-list">
+                <div class="two-column-table">
+                    {% for contributor in cohort.members.all %}
+                    <div class="contributor">
+                        <div class="contributor-image">
+                            <img src="{{ MEDIA_URL }}{{ contributor.get_profile.profile_pic.name }}" />
+                        </div>
+                        <div class="contributor-info">
+                            <h3>{{ contributor.get_full_name }}</h3>
+                            <div><a href="{% url user:user_profile username=contributor.username %}">{{ contributor.username }}</a></div>
+                            <p>{{ contributor.get_profile.interests.all|join:", " }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="faqs-list">
+                <div id="key-panel" class="panel-left">
+                    <ol>
+                        <li><span class="bold">What is an article?</span>
+                            <p>An article is a Wikipedia-like page of text and images that provide a general overview of a topic but is not linked to local or school standards. In other words, an article is a page of information covering a topic meant for everyone.</p>
+                        </li>
+                        <li><span class="bold">Who would see the content? Who has access?</span>
+                            <p>Until the content is ready to be published, only the author(s) and the moderator(s) have access to the article. Once the article is ready to be published, everyone will have access to the article online.</p>
+                        </li>
+                        <li><span class="bold">What topics can I/should I write about?</span>
+                            <p>To get you started, a list of topics within specific subjects are provided for articles. You are invited to write on the topics listed. However, if you are not interested in the suggested list of topics provided, send an email to Zeinab Mohamed at zeinab@theopencurruculum.org and we will do our best to address your needs. We do our best to tailor the subjects to your interest based on the registration form filled out previously.</p>
+                        </li>
+                        <li><span class="bold">How long should the articles be? What are the requirements of the articles?</span>
+                            <p>The articles don’t have a length limit. However, we require that the articles have some depth or overview of the topic covered and meet the goals of the article objectives. You may refer to other published articles for ideas on how they should be structured and how long they can be.</p>
+                        </li>
+                        <li><span class="bold">What if someone else already started working on an article I am interested in?</span>
+                            <p>We prefer that you collaborate and work with the person(s) involved, however, we do understand if you want to work on other article topics that interest you.</p>
+                        </li>
+                        <li><span class="bold"> Can there be more than one article on the same topic?</span>
+                            <p>No. There are endless amounts of topics and information that need to covered. We try to limit the number of repetitions of topics, since there are so many things to cover in this world. If articles do not contain enough depth on a topic as is needed, you may collaborate with the authors to include the missing content. </p>
+                        </li>
+                        <li><span class="bold">Who decides what gets published?</span>
+                            <p>An appointed moderator decides whether an article can be published based on the quality and depth of content covered. Moderator may provide feedback on the quality of the article and suggest more work or edits as he/she feels appropriate.</p>
+                        </li>
+                        <li><span class="bold">How does one become a moderator?</span>
+                            <p>After contributing 20 articles, a contributor’s work is reviewed by our internal moderator screening committee, and a decision is made on whether not a contributor is promoted to the role of moderator.</p>
+                        </li>
+                        <li><span class="bold">Who do I contact if I have questions or need help?</span>
+                            <p>If you have any questions or concerns, feel free to contact Zeinab at zeinab@theopencurriculum.org. We will do our best to address your questions or concerns.</p>
+                        </li>
+                        <li><span class="bold">How do you maintain quality?</span>
+                            <p>Quality control is maintained by the moderators. We will do our best to ensure articles contain the same depth on topics consistently and do not contain any errors. We invite you to help us in this process.</p>
+                        </li>
+                        <li><span class="bold">How do I add images or embed videos? What do I need to do to add resources?</span>
+                            <p>Images can be uploaded using the article editor. Any multimedia resources like videos are not meant to be embedded within articles (to support easy printing), however, they can be listed as resource and linked to the specific line or words of interest.</p>
+                        </li>
+                        <li><span class="bold">How do you select your Article Center contributors? Can I invite someone?</span>
+                            <p>Article Center contributors were selected based on the contributor sign-up form on the OpenCurriculum home page. We had selected a batch of who had signed up with us to contribute. If you know people who are interested in contributing, invite them. We may have them participate in subsequent batches.</p>
+                        </li>
+                        <li><span class="bold">When will the article center be officially open to everyone? Will there be more people contributing?</span>
+                            <p>Article Center will be open officially to the public in October 2013. After the public launch, there will be more people contributing materials and more topics available for people to contribute to.</p>
+                        </li>
+                        <li><span class="bold">Why isn’t OpenCurriculum open to the public yet?</span>
+                            <p>We are working on building the core features that we need for launching. You’re one of the first few who will determine the future and direction of the Article Center.</p>
+                        </li> 
+                        <li><span class="bold">How do we get involved in and learn about Projects?</span>
+                            <p>You can learn more about projects <a href="{% url projects:launch %}">here</a>.</p>
+                        </li> 
+                        <li><span class="bold">How do we collaborate and talk with the other contributors?</span>
+                            <p>At this stage, we do not have the ability for a user to send private messages to another user but the contributors may communicate through comments in revisions. If need be, we will also happily facilitate email introductions and discussions between contributors.</p>
+                        </li>  
+                        <li><span class="bold">I submitted my article for publishing. When do I expect to hear back?</span>
+                            <p>Moderators are expected to respond with edits or approve the materials for publishing within 48 hours. If no response is given within that time frame, contact Zeinab at zeinab@theopencurriculum.org.</p>
+                        </li>
+                        <li><span class="bold">What if I want to contribute materials in a different language?</span>
+                            <p>We will do our best to adapt other languages to our platform as we get better. For now, we are accepting English as the language of the articles. Share with us what languages you would like us to support in the future.</p>
+                        </li>
+                        <li><span class="bold">Can I also contribute handouts, lesson plans, curricula and other learning materials besides articles?</span>
+                            <p>Yes, you are welcome to contribute learning materials of all kinds. However, materials other than articles are considered to be a part of Projects and can be uploaded to individual Projects.</p>
+                        </li>
+                        <li><span class="bold">Can I upload materials I’ve written before?</span>
+                            <p>Yes. These materials would ideally be a part of your profile's content. For the Article Center, we prefer if the materials are written using our editor to ensure consistency of materials.</p>
+                        </li>                                                                        
+                    </ol>
+                </div>
+                <div id="fill-panel" class="panel-right"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGhhkbXlDChv7uPQaPivPTEJ0ls9ka1Yg&sensor=true"></script>
+
+<script type="text/javascript">
+    function initialize() {
+
+      var mapOptions = {
+        center: new google.maps.LatLng(0.0, 0.0), // East and West are mixed for the API
+        zoom: 2,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      };
+      var map = new google.maps.Map(document.getElementById("contributor-map"),
+          mapOptions);
+
+      var latLng, image;
+      {% for contributor, location in contributor_locations.items %}
+      console.log('{{ contributor }}');
+      latLng = new google.maps.LatLng('{{ location.lat }}','{{ location.lng }}')
+      image = {
+        url: '{{ MEDIA_URL }}{{ contributor.get_profile.profile_pic.name }}',
+        size: new google.maps.Size(30,30),
+        scaledSize: new google.maps.Size(30, 30)
+      }
+      var marker = new google.maps.Marker({
+        position: latLng,
+        map: map,
+        title:'{{ contributor.get_full_name }}',
+        icon: image
+      });
+      {% endfor %}
+    }
+    google.maps.event.addDomListener(window, 'load', initialize);
+</script> 
+{% include 'partials/footer.html' %}
