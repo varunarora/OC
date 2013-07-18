@@ -1,0 +1,53 @@
+{% include 'partials/header.html' %}
+{% include 'project/header.html' with page="members" %}
+
+<div class="center-stage">
+    <div class="panel-left" id="fill-panel">
+        <aside id="support">
+        </aside>
+    </div>
+    <div class="panel-right" id="key-panel">
+        <h3>Members</h3>
+
+        <form id="project-add-member">
+            <input type="hidden" name="project_id" value="{{ project.id }}" />
+            <label>Invite a user</label><input type="text" name="add-member" />
+            <button name="add" class="btn success-button">Add</button>
+            <div class="form-spinner"></div>
+        </form>
+
+        <!-- If this changes, make changes to the associated JavaScript as well -->
+        <div id="member-list">
+        {% for member in project.members.all %}
+            <div class="member">
+                <div class="member-info">
+                    <div class="member-photo">
+                        <img src="{{ MEDIA_URL }}{{ member.get_profile.profile_pic.name }}" />
+                    </div>
+                    <div class="member-description">
+                        <a href="{% url user:user_profile username=member.username %}">{{ member.get_full_name }}</a>
+                    </div>
+                </div>
+                <div class="member-actions">
+                {% if member in project.admins.all and member != user %}
+                    <form>
+                        <input type="hidden" name="user_id" value="{{ member.id }}" />
+                        <input type="hidden" name="project_id" value="{{ project.id }}" />
+                        <button class="btn dull-button admin-toggle remove-admin">Remove admin</button>
+                    </form>
+                {% else %}
+                    <form>
+                        <input type="hidden" name="user_id" value="{{ member.id }}" />
+                        <input type="hidden" name="project_id" value="{{ project.id }}" />
+                        <button class="btn dull-button admin-toggle make-admin">Make admin</button>
+                    </form>
+                {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+        <!-- End of changes from JS -->
+    </div>
+</div>
+
+{% include 'partials/footer.html' %}

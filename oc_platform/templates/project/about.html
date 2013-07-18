@@ -1,0 +1,39 @@
+{% include 'partials/header.html' %}
+{% include 'project/header.html' with page="about" %}
+
+<div class="center-stage">
+    <div id="fill-panel" class="panel-left">
+        <p>
+            <h1>{{ project.members.count }}</h1>
+            member(s)
+        </p>
+        <p>
+            <h1>{{ project.visibility|title }}</h1>
+            project
+        </p>
+        <p>
+            Created on
+            <h1>{{ project.created }}</h1>
+        </p>
+        <p>
+            Tagline<br/>
+            <span class="bold">{{ project.short_description }}</span>
+        </p>
+        <p>
+            URL<br/>
+            <span class="bold"><a href="{% url projects:project_home project_slug=project.slug %}">theopencurriculum.org{% url projects:project_home project_slug=project.slug %}</a></span>
+        </p>
+        <p>
+            Administrator(s)<br/>
+            {% for admin in project.admins.all %}
+                <a href="{% url user:user_profile username=admin.username %}" class="bold">{{ admin.get_full_name }}</a>
+            {% endfor %}
+        </p>
+    </div>
+    <div id="key-panel" class="panel-right">
+        <h3>About {{ project.title }}</h3>
+        {{ project.description_html|safe }}
+    </div>
+</div>
+
+{% include 'partials/footer.html' %}
