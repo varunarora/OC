@@ -7,6 +7,21 @@ import json
 
 def home(request):
     """Fetches the top articles, a count and the sign-in form"""
+    login = request.GET.get('login', False)
+
+    if request.user.is_authenticated():
+        login = False
+
+    login_error_message = None
+    source = None
+    if login:
+        login_error = request.GET.get('error', False)
+        if login_error == 'auth':
+            login_error_message = _(settings.STRINGS['user']['AUTHENTICATION_ERROR'])
+        elif login_error == 'inactive':
+            login_error_message = _(settings.STRINGS['user']['INACTIVE_ACCOUNT_ERROR'])
+        source = request.GET.get('source', False)
+
     # Get the top 10 articles ordered in descending order of views.
     top_articles = Article.objects.order_by('title').order_by('-views')[:10]
 
@@ -26,7 +41,10 @@ def home(request):
             'top_articles': top_articles,
             'title': _(settings.STRINGS['global']['TITLE']),
             'count': article_count,
-            'form': form
+            'form': form,
+            'login': True if login else False,
+            'login_error_message': login_error_message,
+            'source': source
         }.items()
     )
     return render(request, 'index.html', context)
