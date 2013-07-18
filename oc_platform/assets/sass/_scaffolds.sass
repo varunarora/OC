@@ -1,19 +1,21 @@
+$chief-panel-height: 500px
+
 #chief-panel-container.home
-	height: 450px
+	height: $chief-panel-height
 	background-color: #b7dcf7
 	@include background-image(radial-gradient(center, ellipse cover, rgba(210,229,242,1) 0%, rgba(210,229,242,1) 1%, rgba(183,220,247,1) 100%))
 	
 	#chief-panel-wrapper
 		background-image: url('../images/sun-flare.png')
-		height: 450px
-		background-position: center -50px
+		height: $chief-panel-height
+		background-position: center 0px
 		background-repeat: no-repeat
 	
 	#chief-panel
-		top: -450px
+		top: -$chief-panel-height
 		overflow: hidden
-		height: 390px
-		margin-bottom: -450px
+		height: $chief-panel-height - 60px
+		margin-bottom: -$chief-panel-height
 
 #chief-panel-container.developers
 	height: 600px
@@ -73,6 +75,10 @@
 	#chief-panel
 		padding-top: 30px
 
+.project-home
+	#chief-panel
+		padding-top: 0px
+
 .center-stage
 	width: 960px
 	margin: auto
@@ -109,6 +115,20 @@
 
 #key-panel
 	width: 573px
+	
+	.row-item
+		margin-bottom: 20px
+		overflow: hidden
+		
+		.row-item-thumbnail
+			margin-right: 15px
+			float: left
+		
+		.row-item-description
+			font-size: 0.9em
+			
+			.row-item-description-detail
+				padding: 6px
 
 #fill-panel
 	width: 367px	

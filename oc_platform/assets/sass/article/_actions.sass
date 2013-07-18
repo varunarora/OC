@@ -6,8 +6,6 @@
 
 #article-do
 	margin-top: 10px
-	/* NEEDS ATTENTION */
-	display: none
 	overflow: hidden
 	
 	li.no-action:hover
@@ -15,7 +13,7 @@
 		border: 1px solid #fff
 
 /* NEEDS ATTENTION */
-.article-actions ul li, .article-community ul li
+.article-actions > ul > li, .article-community > ul > li
 	float: left
 	margin: 0px 20px 0px 0px
 	border: 1px solid #fff
@@ -47,24 +45,53 @@ ul li span.icon
 	display: inline-block
 	margin-right: 4px
 
-.edit-action span
+.edit-action span.icon
 	background-position: 0 -72px
 
-.download-action span
+.download-action span.icon
 	background-position: -96px -24px
 
-.history-action span
+.history-action span.icon
 	background-position: -48px -24px
 
-.share-action span
+.share-action span.icon
 	background-position: -120px -72px
 
-.favorite-action span
+.favorite-action span.icon
 	background-position: -120px 0px
 
-.thumbs-up-action span
+.thumbs-up-action span.icon
 	background-position: -96px -144px
 
-.thumbs-down-action span
+.thumbs-down-action span.icon
 	background-position: -120px -144px
 
+#share-menu
+	#share-on-facebook, #share-on-twitter, #share-on-plus, #share-on-email
+		a
+			background-repeat: no-repeat
+			background-position: 92px 1px		
+
+	#share-on-facebook a
+		background-image: url('../images/social-icons/f.png')
+
+		&:hover
+			background-image: url('../images/social-icons/f-hover.png')
+
+	#share-on-twitter a
+		background-image: url('../images/social-icons/t.png')
+
+		&:hover
+			background-image: url('../images/social-icons/t-hover.png')
+
+	#share-on-plus a
+		background-image: url('../images/social-icons/g.png')
+
+		&:hover
+			background-image: url('../images/social-icons/g-hover.png')
+
+	#share-on-email a
+		background-image: url('../images/social-icons/e.png')
+
+		&:hover
+			background-image: url('../images/social-icons/e-hover.png')			

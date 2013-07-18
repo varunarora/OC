@@ -31,12 +31,11 @@
 	
 	<div id="fill-panel" class="panel-right">
 		<aside id="author-panel">
-			<div id="author-thumbnail">
-			</div>
+			<div id="author-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ resource.user.get_profile.profile_pic.name }}')" ></div>
 			<div id="author-info">
-				<div id="author-name">{{ resource.user.first_name }} {{ resource.user.last_name }}</div>
+				<div id="author-name"><a href="{% url user:user_profile username=resource.user.username %}">{{ resource.user.first_name }} {{ resource.user.last_name }}</a></div>
 				<div id="author-resources">{{ user_resource_count }} resources</div>
-				<button class="subscribe">SUBSCRIBE</button>
+				<!--<button class="subscribe">SUBSCRIBE</button>-->
 			</div>
 		</aside>
 		

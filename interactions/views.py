@@ -12,6 +12,10 @@ def post_comment(request):
         if comment_form.is_valid():
             comment = comment_form.save()
 
+            from interactions.models import Comment
+            Comment.comment_created.send(
+                sender="Comments", comment_id=comment.id)
+
             serialized_comment = {'user': comment.user.id, 'body': comment.body_markdown_html}
 
             response['status'] = 'success'

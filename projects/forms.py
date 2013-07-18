@@ -4,7 +4,7 @@ from oer.models import Collection
 
 
 class ProjectForm(ModelForm):
-    cover_pic_tmp = open('static/images/tmp/default-profile.jpg')
+    cover_pic_tmp = open('static/images/tmp/default-project.jpg')
 
     def __init__(self, request, user):
         newRequest = request.copy()
@@ -19,6 +19,7 @@ class ProjectForm(ModelForm):
         root_collection.save()
 
         newRequest.__setitem__('admins', user.id)
+        newRequest.__setitem__('members', user.id)
 
         slug = self._get_fresh_slug(title)
         newRequest.__setitem__('slug', slug)

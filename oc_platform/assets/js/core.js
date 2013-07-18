@@ -127,9 +127,10 @@ var OC = {
             if (centerMenu) {
                 $(menu).css(
                     'left', loginPosition.left - ($(menu).outerWidth() - $(
-                        offsetSelector).outerWidth(true)));
+                        offsetSelector).outerWidth())/2);
             } else {
-                $(menu).css('left', loginPosition.left);
+                $(menu).css('left', loginPosition.left - (
+                    $(menu).outerWidth() - $(offsetSelector).outerWidth(true)));
             }
         }
     },
@@ -652,9 +653,8 @@ var OC = {
         });
     },
 
-    commentSubmissionHandler: function(response) {
+    commentSubmissionHandler: function(response, comment_input) {
         if (response.status === "success") {
-
             // TODO: Change everything resource to comment. Here, and in CSS
             var resource = $('<div/>', { 'class': 'resource' }),
                 resourceThumbnail = $('<div/>', {
@@ -669,6 +669,8 @@ var OC = {
             // Build and append the object to the document
             resourceThumbnail.appendTo(resource);
             description.appendTo(resource);
+
+            comment_input.text('');
 
             $('#comments').prepend(resource);
         } else {
@@ -699,10 +701,14 @@ var OC = {
             var spinner = $('#revision-comment .form-spinner');
             spinner.show();
 
+            // Get the comment textarea element.
+            var comment_input = $(
+                '#revision-comment textarea[name=body_markdown]');
+
             // Submit the comment through the interactions API        
             $.post('/interactions/comment/', $('#revision-comment').serialize(),
                 function (response) {
-                    OC.commentSubmissionHandler(response);
+                    OC.commentSubmissionHandler(response, comment_input);
                     spinner.hide();
                 }, 'json');
 
@@ -749,18 +755,18 @@ var OC = {
             OC.setUpMenuPositioning('nav#user-menu', '#user-dropdown');
         });
 
-        $('#user-buttons > ul > li a, nav#user-menu').mouseenter(function () {
-            $('#user-buttons > ul > li a .horizontal-caret').addClass('horizontal-caret-hover');
-            $('#user-buttons > ul > li a').addClass('hover');
+        $('#user-buttons > ul > li.user-firstname a, nav#user-menu').mouseenter(function () {
+            $('#user-buttons > ul > li.user-firstname a .horizontal-caret').addClass('horizontal-caret-hover');
+            $('#user-buttons > ul > li.user-firstname a').addClass('hover');
             $('#user-menu').addClass('showMenu');
         }).mouseleave(function () {
-            $('#user-buttons > ul > li a .horizontal-caret').removeClass('horizontal-caret-hover');
-            $('#user-buttons > ul > li a').removeClass('hover');
+            $('#user-buttons > ul > li.user-firstname a .horizontal-caret').removeClass('horizontal-caret-hover');
+            $('#user-buttons > ul > li.user-firstname a').removeClass('hover');
             $('#user-menu').removeClass('showMenu');
         });
 
         // Figure out absolute positioning of share menu
-        OC.setUpMenuPositioning('nav#share-menu', 'li.share-action');
+        OC.setUpMenuPositioning('nav#share-menu', 'li.share-action', true);
     },
 
     setupShareMenu: function(){
@@ -768,6 +774,225 @@ var OC = {
             $('#share-menu').addClass('showMenu');
         }).mouseleave(function () {
             $('#share-menu').removeClass('showMenu');
+        });
+    },
+
+    initShowMoreBlock: function(){
+        var blocksToCompress = [
+            '.profile-resources-added-list',
+            '.profile-contributions-list'
+        ];
+
+        // Compress all blocks.
+        var compressedBlocks = compressBlocks(blocksToCompress);
+
+        // Attach a handler to show more buttons.
+        bindShowMoreHandler(compressedBlocks);
+
+        function compressBlocks(blocksToCompress){
+            var BLOCK_HEIGHT = 200;
+            var showMoreWrapper = getShowMoreElement();
+
+            var compressedBlocks = [];
+            var i = 0;
+            for (i; i < blocksToCompress.length; i++){
+                if ($(blocksToCompress[i]).height() > BLOCK_HEIGHT){
+                    $(blocksToCompress[i]).parent().append(
+                        showMoreWrapper.clone());
+                    $(blocksToCompress[i]).addClass('compressed');
+
+                    compressedBlocks.push($(blocksToCompress[i]));
+                }
+            }
+            return compressedBlocks;
+        }
+
+        function bindShowMoreHandler(compressedBlocks){
+            var i = 0;
+            for (i; i < compressedBlocks.length; i++) {
+                var showMoreWrapper = $(
+                    '.show-more', compressedBlocks[i].parent());
+                if (showMoreWrapper.length == 1){
+                    $('.show-more-text', showMoreWrapper).click(
+                        {block: $(compressedBlocks[i])}, expandBlock
+                    );
+                }
+            }
+        }
+
+        function expandBlock(event){
+            event.data.block.removeClass('compressed');
+
+            var showMoreWrapper = $(
+                '.show-more', event.data.block.parent());
+
+            // Unbind all previously associated event handlers.
+            $('.show-more-text', showMoreWrapper).off();
+
+            // Rename 'Show more' button to 'Show less'
+            renameShowElement($('.show-more-text', showMoreWrapper), false);
+
+            $('.show-more-text', showMoreWrapper).click(
+                {block: event.data.block}, compressBlock
+            );
+        }
+
+        function compressBlock(event){
+            event.data.block.addClass('compressed');
+
+            var showMoreWrapper = $(
+                '.show-more', event.data.block.parent());
+
+            // Unbind all previously associated event handlers.
+            $('.show-more-text', showMoreWrapper).off();
+
+            // Rename 'Show more' button to 'Show less'
+            renameShowElement($('.show-more-text', showMoreWrapper), true);
+
+            $('.show-more-text', showMoreWrapper).click(
+                {block: event.data.block}, expandBlock
+            );
+        }
+
+        function getShowMoreElement(){
+            var showMoreWrapper = $('<div/>', {
+                class: 'show-more'
+            });
+            var showMore = $('<span/>', {
+                class: 'show-more-text',
+                text: 'SHOW MORE'
+            });
+            showMoreWrapper.append(showMore);
+
+            return showMoreWrapper;
+        }
+
+        function renameShowElement(element, more){
+            element.text(more ? 'SHOW MORE' : 'SHOW LESS');
+        }
+
+    },
+
+    bindEditHandlers: function(){
+        $('.edit-profile-picture').click(function(){
+            $('.picture-upload-dialog').dialog({
+                modal: true,
+                open: false,
+                width: OC.config.popup.width,
+                buttons: {
+                    Upload: function () {
+                        $('.picture-upload-dialog form').submit();
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        });
+    },
+
+    bindEditHeadlineHandler: function(){
+        $('.profile-headline').keypress(function(event) {
+            if (event.which == 13){
+                event.preventDefault();
+
+                // Remove focus from headline input.
+                $('.profile-headline').blur();
+
+                // Get new headline.
+                var new_headline = $('.profile-headline').val();
+
+                // Compare with previous headline, only if different, call POST
+                //     request.
+                var old_headline = '';
+
+                // Get the user ID.
+                var user_id = $('.profile-headline').parent('form').children(
+                    'input[name=user_id]').val();
+
+                if (old_headline != new_headline){
+                    // Set spinner on field to indicate change in progress.
+                    var spinnerElement = $('.profile-headline').parent(
+                        '.profile-headline-wrapper').children('.headline-edit');
+                    spinnerElement.addClass('changing');
+
+                    // Make the POST request.
+                    $.post('/user/api/headline/' + user_id + '/edit/',
+                        {'new_headline': new_headline },
+                        function (response) {
+                            spinnerElement.removeClass('changing');
+                        }, 'json'
+                    );
+                }
+            }
+        });
+    },
+
+    initNotificationHandler: function(){
+        OC.setUpMenuPositioning('nav#notifications-menu', '.user-notification-count');
+        OC.setupNotificationsMenu();
+    },
+
+    setupNotificationsMenu: function(){
+        $('nav#user-buttons > ul > li.user-notification-count').click(
+            function(e){
+                $('#notifications-menu').toggleClass('showMenu');
+                $('li.user-notification-count').toggleClass('menu-open');
+
+                var notificationsCount = $('nav#user-buttons > ul > li.user-notification-count');
+                if (notificationsCount.hasClass('unread-notifications')){
+                    notificationsCount.removeClass('unread-notifications');
+                    OC.dismissUnreadNotifications();
+                    $('li.user-notification-count').addClass('empty-notifications');
+                }
+
+                e.stopPropagation();
+                e.preventDefault();
+                return false;
+            }
+        );
+        // Bind a click outside handler to close the menu.
+        OC.closeMenusHandler();
+    },
+
+    dismissUnreadNotifications: function(){
+        // Get the IDs of all notifications that are not marked as read.
+        var unreadNotifications = $(
+            'nav#notifications-menu > ul > li > a.new-notification');
+        var unreadNotificationIDs = [];
+
+        var i;
+        for (i = 0; i < unreadNotifications.length; i++){
+            notification_id =  $(unreadNotifications[i]).attr('id');
+            var notification_prefix = 'notification-';
+            unreadNotificationIDs.push(
+               notification_id.substring(notification_prefix.length)
+            );
+        }
+
+        // Get logged in user's ID.
+        var userID = $('#user-info input[name=user_id]').val();
+        $.get(
+            '/user/api/notifications/dismiss/' + userID + '?ids=' + unreadNotificationIDs.join(','),
+                function (response) {}, 'json'
+        );
+    },
+
+    closeMenusHandler: function(){
+        $('body').on('click', function(){
+            // Get all menus with the class 'showMenu'.
+            var openMenus = $('.showMenu');
+
+            var i;
+            for (i = 0; i < openMenus.length; i++){
+                $(openMenus[i]).removeClass('showMenu');
+            }
+
+            // Get all target elements with the class 'menu-open'.
+            var highlightedMenuTargets = $('.menu-open');
+            var j;
+            for (j = 0; j < openMenus.length; j++){
+                $(highlightedMenuTargets[j]).removeClass('menu-open');
+            }
+
         });
     },
 
@@ -1015,7 +1240,20 @@ jQuery(document).ready(function ($) {
     // Set up search box effect.
     OC.renderSearch();
 
-    OC.setupUserMenu();
+    // NOTE: This call has been temporarily moved to the callback from the
+    //     WebFont loaded callback.
+    // OC.setupUserMenu();
+
+    OC.initShowMoreBlock();
+
+    OC.bindEditHeadlineHandler();
+
+    OC.initNotificationHandler();
+
+
+    /* Profile specific initializers and other functions */
+
+    OC.bindEditHandlers();
 
     // Set up flashing (liffect) article panel.
     OC.renderArticlePanel();
@@ -1139,19 +1377,6 @@ $(document).ajaxSend(function (event, xhr, settings) {
 
 
 /* All IIFEs below */
-
-// Initialize WebFont from typography website.
-var WebFontConfig = { fontdeck: { id: '25967' } };
-(function(){
-    var wf = document.createElement('script'),
-        s = document.getElementsByTagName('script')[0];
-    wf.src = ('https:' === document.location.protocol ? 'https' : 'http') +
-        '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-    wf.type = 'text/javascript';
-    wf.async = 'true';
-    s.parentNode.insertBefore(wf, s);
-})();
-
 
 // Function to initialize the Google+ login button.
 (function () {

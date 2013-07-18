@@ -5,25 +5,211 @@
         float: left
         margin-right: 40px
 
-        img
-            width: 100px
-            height: 100px
+        div.user-picture-cover
+            width: 150px
+            height: 150px
+            background-size: cover
+
+        .edit-profile-picture
+            background-color: #fff
+            position: relative
+            top: -8px
+            margin-top: -22px
+            left: 60px
+            width: 72px
+            font-size: 0.85em
+            padding: 4px
+            display: none
+            background-color: #efefef
+            border: 1px solid #b2b2b2
+
+            &:hover
+                background-color: #ddd
+
+            .edit-picture-icon
+                background-image: url("../images/glyphicons-halflings.png")
+                background-position: -168px 0
+                background-repeat: no-repeat
+                width: 10px
+                height: 10px
+                display: inline-block
+                margin-right: 6px
+
+        &:hover
+            cursor: move
+
+            .edit-profile-picture
+                display: block
+                cursor: pointer
 
     .user-profile-info
         float: left
 
+        .profile-name, profile-headline, profile-subscribe
+            padding-left: 4px
+
+        .profile-headline-wrapper
+            form
+                float: left
+
+            .profile-headline
+                border: 1px solid #fff
+                padding: 2px
+                width: 340px
+
+                &:focus
+                    border: 1px solid #b2b2b2
+                    @include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
+                
+            .headline-edit
+                visibility: hidden
+                background-image: url("../images/glyphicons-halflings.png")
+                background-position: 0px -72px
+                background-repeat: no-repeat
+                width: 14px
+                height: 14px
+                display: inline-block
+                margin-left: 6px
+
+                &.changing
+                    background-image: url("../images/spinner.gif")
+                    background-position: center center
+                    visibility: visible
+
+            &:hover, &:focus
+                .profile-headline
+                    border: 1px solid #b2b2b2
+                    @include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
+
+                .headline-edit
+                    visibility: visible
+
+        .profile-subscribe
+            margin: 6px 0px
+            margin-top: 12px
+
+            .profile-subscriber-count
+                color: $light-font
+                margin-left: 10px
+
+.profile-background-wrapper
+    background-image: url('../images/profile-header-bg.png')
+    background-repeat: no-repeat
+    height: 35px
+    width: 1030px
+    margin: auto
+    margin-top: 20px
+
+.profile-details
+    width: 1030px
+    margin-top: 0px
+
+    #key-panel
+        background-image: url('../images/profile-header-left.png')
+        background-repeat: no-repeat
+        padding-left: 45px
+        padding-top: 10px
+        min-height: 300px
+
+    #fill-panel
+        background-image: url('../images/profile-header-right.png')
+        background-repeat: no-repeat
+        background-position: right
+        padding-top: 10px
+        min-height: 300px
+
+.profile-contributions, .profile-projects, .profile-resources
+    margin-bottom: 20px
+    padding-bottom: 20px
+    border-bottom: 1px solid #efefef
+
+
+.profile-contribution, .profile-resource
+    padding: 4px 0px
+    
+    .contribution-icon
+        background-image: url("../images/glyphicons-halflings.png")
+        background-position: -96px -72px
+        background-repeat: no-repeat
+        width: 14px
+        height: 14px
+        display: inline-block
+        margin-right: 6px
+
+    .category-label
+        background-color: #efefef
+        color: $light-font
+        font-size: 0.85em
+        padding: 2px 8px
+
+        &:hover
+            background-color: #ddd
+            text-decoration: none
+            color: #333
+
 .profile-projects
+    color: #fff
 
     .profile-projects-item
-        img
-            width: 530px
+        .profile-projects-item-description-wrapper
+            background-size: 100%
+
+        .profile-projects-item-title
+            font-size: 1.4em
+
+        a
+            color: #fff
+
+        a:hover
+            text-decoration: none
+
+            .profile-projects-item-title
+                text-decoration: underline
 
     .profile-projects-item-description
         position: relative
-        top: -100px
-        padding-left: 10px
+        padding-left: 20px
+        height: 88px
+        padding-top: 12px
+        /* Custom IE styling in ie.sass */
+        @include background-image(linear-gradient(top, rgba(0,0,0,0.65) 0%, rgba(150,150,150,0.25) 100%))
 
-.profile-resources-added
-    .profile-resources-added-list
+    .profile-projects-item-description:hover
+        background-image: none
+
+
+.profile-resources-added-list, .profile-contributions-list
+    &.compressed
         height: 200px
         overflow: hidden
+
+.profile-resources-added
+    .profile-subheading
+        margin: 6px 0px
+        font-size: 1.15em
+        @include sans-bold
+
+    .profile-resources-added-list
+        .url-icon, .video-icon, .attachment-icon, .oer-article-icon
+            background-image: url("../images/glyphicons-halflings.png")
+            background-repeat: no-repeat
+            width: 14px
+            height: 14px
+            display: inline-block
+            margin-right: 6px
+
+        .url-icon
+            background-position: -72px -48px
+
+        .video-icon
+            background-position: -192px 0px
+
+        .attachment-icon
+            background-position: -120px -24px
+
+        .article-icon
+            background-position: -96px -72px
+
+        .resource-created
+            margin-left: 4px
+            color: $light-font
