@@ -20,7 +20,7 @@
         <aside id="social-panel">
             <section class="revision-user">
                 <div class="revision-user-thumbnail">
-                    <img src="{{ MEDIA_URL }}profile/{{ article.user.id }}-profile.jpg" />
+                    <img src="{{ MEDIA_URL }}{{ article.user.get_profile.profile_pic.name }}" />
                 </div>
                 <div  class="revision-user-log">
                 {% if article.log %}
@@ -46,7 +46,7 @@
             {% for comment in comments %}
                 <div id="comments">
                     <div class="resource">
-                        <div class="resource-thumbnail" style="background-image: url('{{ MEDIA_URL }}profile/{{ comment.user.id }}-profile.jpg')">
+                        <div class="resource-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ comment.user.get_profile.profile_pic.name }}')">
                         </div>
                         <div class="description">
                             {# comment.user.get_profile.profile_pic #}
