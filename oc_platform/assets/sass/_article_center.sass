@@ -1,0 +1,211 @@
+.introduction-contributor-faqs
+    nav
+        ul
+            text-align: center
+
+            li
+                float: none
+
+    .faqs-list
+        margin-top: 12px
+
+        ol
+            list-style-type: decimal
+            padding-left: 26px
+
+            li
+                margin-bottom: 20px
+
+.two-column-table
+    margin-top: 12px
+    width: 100%
+
+    .contributor
+        width: 50%
+        float: left
+        overflow: hidden
+        margin-top: 10px
+
+        .contributor-image
+            float: left
+            margin-right: 16px
+            
+            img
+                width: 100px
+                height: 100px
+
+        .contributor-info
+            h3
+                margin-bottom: 0px
+                margin-top: 4px
+
+.article-center-url
+    margin-top: 40px
+    padding: 20px 0px
+
+    a
+        color: $light-font
+        font-size: 1.8em
+
+        &:hover
+            text-decoration: none
+            color: $link-hover
+
+
+nav.article-center-categories
+    ul
+        border-top: 1px solid #efefef    
+        
+        li
+            a
+                height: 26px
+                display: block
+                padding: 10px 0px 6px 30px
+                color: $light-font
+                @include sans-bold
+                border-bottom: 1px solid #efefef
+
+                &:hover
+                    background-color: #efefef
+                    text-decoration: none
+                    background-image: url('../images/arrow-right.png')
+                    background-repeat: no-repeat
+                    background-position: 340px 14px
+
+                &.selected
+                    color: $link-hover
+
+            span
+                height: 12px
+                width: 12px
+                margin-right: 10px
+                display: inline-block
+                background-repeat: no-repeat
+
+                &.all-categories
+                    background-image: url('../images/all-subjects.png')
+
+                &.english-category
+                    background-image: url('../images/english-language.png')
+
+                &.social-studies-category
+                    background-image: url('../images/social-studies.png')
+
+                &.mathematics-category
+                    background-image: url('../images/mathematics-category.png')
+
+.article-suggestion-wrapper
+    float: left
+    width: 104px
+    height: 80px
+
+    .article-suggestion
+        width: 80px
+        height: 80px
+        @include border-radius(50%)
+        background-color: #5ABD02
+        text-align: center
+        color: #fff
+        font-size: 0.8em
+        margin-right: 24px
+
+        div
+            padding-top: 26px
+
+.article
+    border-bottom: 1px solid #efefef
+    overflow: hidden
+    padding-bottom: 20px
+    margin-bottom: 20px
+
+    .article-info
+        float: left
+        width: 342px
+
+        .article-title
+            @include sans-bold
+            font-size: 1.2em
+            margin-bottom: 4px
+
+            a
+                color: $body-color
+
+                &:hover
+                    color: $link-hover
+                    text-decoration: none
+
+        .article-contributors
+            color: $light-font
+
+        .article-objectives
+            background-image: url('../images/arrow-right.png')
+            background-repeat: no-repeat
+            background-position: 150px 12px
+            min-height: 30px
+            padding: 12px 0px
+
+            .article-objectives-title
+                cursor: pointer
+                @include sans-bold
+                color: $light-font
+
+                &:hover
+                    color: $link-hover
+
+            &:hover
+                background-image: url('../images/arrow-right-hover.png')
+
+            .objectives-list
+                display: none
+                color: $light-font
+                margin: 10px 0px
+
+                ol
+                    list-style-type: lower-roman
+                    padding-left: 30px
+
+            &.show-objectives
+                background-image: url('../images/arrow-bottom.png')
+                background-position: 150px 15px
+
+                .objectives-list
+                    display: block
+
+                &:hover
+                    background-image: url('../images/arrow-bottom-hover.png')
+
+
+        .article-labels
+            span
+                font-size: 0.85em
+                padding: 2px 8px
+                color: #fff
+                margin-right: 2px
+                cursor: pointer
+
+                &.image-issue
+                    background-color: #e74c3c
+
+                &.latex-issue
+                    background-color: #e67e22
+
+                &.formatting-issue
+                    background-color: #2ecc71
+
+                &.resources-issue
+                    background-color: #34495e
+
+                &.citation-issue
+                    background-color: #7f8c8d
+
+    .article-actions
+        float: right
+        
+        button
+            span
+                height: 12px
+                width: 14px
+                margin-left: 6px
+                background-image: url('../images/glyphicons-halflings.png')
+                background-position: -336px -96px
+                display: inline-block
