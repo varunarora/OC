@@ -17,6 +17,29 @@
 			<input type="search" name="live-filter" />
 		</section>
 		<div id="catalog-listing">
+			{% for key, value in sets.items %}
+				
+					{% if key != category %}
+					<h3>{{ key.title }}</h3>
+					{% endif %}
+
+					<ul class="category-article-panel">
+						{% for article in value %}
+							<li>
+								<div class="chapter-thumbnail">
+									{% include 'partials/article_image.html' %}
+								</div>
+								<a href="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }} " title="{{ article.title }}" alt="{{ article.title }}"><div class="chapter-info">{{ article.title }}</div>
+								<div class="chapter-thermometer thermometer">
+									<div class="thermometer-difficulty-wrapper">
+										<div class="thermometer-difficulty" data-level="{{ article.difficulty }}"></div>
+									</div>
+								</div></a>
+							</li>
+						{% endfor %}
+					</ul>
+			{% endfor %}
+			<!--
 			<ul class="category-article-panel">
 				{% for article in articles %}			
 					<li>
@@ -32,17 +55,22 @@
 					</li>
 				{% endfor %}
 			</ul>
+			-->
 		</div>
 	</div>
 	<div id="fill-panel" class="panel-right">
 		<aside id="support">
 			<h3>Sets</h3>
 				<ul class="aside-section">
+				{% if sets.items|length > 1 %}
 					{% for key, value in sets.items %}
-					<li><a href="{% url articles:reader category_slug=key.slug %}">{{ key.title }} ({{ value }})</a></li>
-					{% empty %}
-						No subsets found.
+						{% if key != category %}
+						<li><a href="{% url articles:reader category_slug=key.slug %}">{{ key.title }} ({{ value|length }})</a></li>
+						{% endif %}
 					{% endfor %}
+				{% else %}
+					No subsets found.
+				{% endif %}
 				</ul>
 			<h3>Resources</h3>
 			{% for resource in resources %}
@@ -53,4 +81,7 @@
 		</aside>
 	</div>
 </div>
+
+<script src="{{ STATIC_URL }}js/quicksilver.js" type="text/javascript"></script>
+
 {% include 'partials/footer.html' %}
