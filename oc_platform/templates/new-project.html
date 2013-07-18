@@ -1,0 +1,29 @@
+{% include 'partials/header.html' %}
+<div class="center-stage">
+    <div id="key-panel" class="panel-left">
+        <h2>Create a new project</h2>
+        <div id="new-project-info" class="form-info-box"><p>Creating a new project is easy. Simply fill out the form below and you are all set.</p></div>
+        <form method="POST" action="/project/new/" id="new-project-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table id="project-form-table">
+                <tr><td>Title*</td><td class="inputs"><input type="text" name="title" /></td></tr>
+                <tr><td>Description*</td><td class="inputs"><textarea name="description"></textarea></td></tr>
+                <tr><td>Who can see its contents?*</td><td class="inputs">
+                    <label><input type="radio" name="visibility" value="public" checked/>Everyone (public)</label>
+                    <label><input type="radio" name="visibility" value="private"/>Only people I choose (private)</label>
+                </td></tr>
+                <tr><td>Cover picture</td><td class="inputs"><input type="file" name="cover_pic"></td></tr>
+                <tr><td colspan="2" class="right"><p><button class="btn success-button" id="new-project-button">Create project <span class="vertical-caret"></span></button></p></td></tr>
+            </table>
+        </form>
+    </div>
+    <div id="fill-panel" class="panel-right">
+        <aside id="support">
+            <h3>What is a project?</h3>
+        </aside>
+    </div>
+</div>
+
+
+
+{% include 'partials/footer.html' %}
