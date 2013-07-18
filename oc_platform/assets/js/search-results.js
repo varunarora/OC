@@ -89,7 +89,7 @@ function repopulateSearchResults(target, resultCollectionView) {
 
     if (typeof targetType !== "undefined" && $(target).attr("type") === "checkbox") {
         if (!target.checked) {
-            filters[targetFilterType].push(targetFilterValue); 
+            filters[targetFilterType].push(targetFilterValue);
         } else {
             filters[targetFilterType].splice(
                 _.indexOf(filters[targetFilterType], targetFilterValue), 1);
@@ -137,7 +137,7 @@ var ResultsCollectionView = Backbone.View.extend({
         this.prepareView();
         var collectionToRender = newCollection || this.collection;
         // If no search results found
-        if (collectionToRender.length == 0) {
+        if (collectionToRender.length === 0) {
             this.showNullView();
         } else {
         // Create a new view object for each object in the collection and render it
@@ -204,14 +204,14 @@ function init_slider(){
 			repopulateSearchResults(ui, resultCollectionView);
 		}
 	});
-	
+
 	// Insert faded region containers before the left slider and after the right slider. These are
 	//    brought to their faded stated using _refadeSliderRegions()
 	$("<div/>", {
-			id: "slider-prefade",
+			id: "slider-prefade"
 		}).insertBefore(".ui-slider-range");
 	$("<div/>", {
-			id: "slider-postfade",
+			id: "slider-postfade"
 		}).insertAfter(".ui-slider-range");
 }
 
