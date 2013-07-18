@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, redirect, Http404
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 from django.conf import settings
@@ -29,6 +29,9 @@ def register(request):
         Either the form HttpResponse page (with or without errors), or a
         redirection object to successful account creation.
     """
+    if request.user.is_authenticated():
+        return redirect('home')
+
     # TODO(Varun): Make this more "function"al.
     registration_template = 'register.html'
     success_template = 'registration-success.html'
@@ -537,6 +540,9 @@ def _set_profile_picture(profile, profile_form):
 
 def authenticate(request):
     """Authenticates the user and redirects to previous page being surfed"""
+    # Determine redirect-to path, if any
+    redirect_to = request.POST.get('redirect_to', None)
+
     from django.contrib.auth import authenticate, login
 
     username = request.POST['username']
@@ -546,12 +552,21 @@ def authenticate(request):
     if user is not None:
         if user.is_active:
             login(request, user)
-            return HttpResponse('You logged in just fine, homie!')
+            if redirect_to:
+                return redirect(redirect_to)
+            else:
+                return redirect('home')
         else:
-            # TODO(Varun): Refine where added support for disabling of accounts
-            return HttpResponse('Sorry this account is not active')
+            # HACK(Varun): These GET parameters need to be moved to settings
+            redirect_url = '/?login=true&error=inactive'
+            if redirect_to:
+                return redirect(redirect_url + ('&source=%s' % redirect_to))
+            return redirect(redirect_url)
     else:
-        return HttpResponse('Faulty login, bituch')
+        redirect_url = '/?login=true&error=auth'
+        if redirect_to:
+            return redirect(redirect_url + ('&source=%s' % redirect_to))
+        return redirect(redirect_url)
 
 
 def logout_view(request):
@@ -559,7 +574,7 @@ def logout_view(request):
     from django.contrib.auth import logout
     logout(request)
 
-    return HttpResponse('You logged out all fine, son')
+    return redirect(request.META.get('HTTP_REFERER'))
 
 
 def googleplus_login(request):
@@ -650,6 +665,30 @@ def googleplus_login(request):
     )
 
 
+def glogin(request):
+    google_id = request.POST.get('google_id')
+
+    try:
+        # Look for Google ID in the user profiles.
+        from user_account.models import UserProfile
+        user_profile = UserProfile.objects.get(social_id=int(google_id))
+        user = user_profile.user
+
+        from django.contrib.auth import login
+        login(request, user)
+
+        response = {"status": "true"}
+        return HttpResponse(json.dumps(
+            response), 200, content_type="application/json"
+        )
+
+    except:
+        response = {"status": "false"}
+        return HttpResponse(json.dumps(
+            response), 401, content_type="application/json"
+        )
+
+
 def user_profile(request, username):
     """Renders the user profile page
 
@@ -659,49 +698,39 @@ def user_profile(request, username):
     Returns:
         The User profile HttpResponse page.
     """
-    user = User.objects.get(username=username)
+    try:
+        user = User.objects.get(username=username)
 
-    # Get all the articles the user has forked.
-    from articles.models import ArticleRevision
-    forks = ArticleRevision.objects.filter(
-        user=user.id, flag="fork").order_by("-created")
+        # Get all the articles the user has forked.
+        from articles.models import ArticleRevision
+        forks = ArticleRevision.objects.filter(
+            user=user.id, flag="fork").order_by("-created")
 
-    # Get all the projects that the user is a part of.
-    from projects.models import Project
-    projects = Project.objects.filter(members__id__contains=user.id)
+        # Get all the articles the user has submitted.
+        from articles.models import ArticleRevision
+        contributions = ArticleRevision.objects.filter(
+            user=user.id, flag="submit").order_by("-created")
 
-    # Get all the resources that the user has created.
-    from oer.models import Resource
-    resources = Resource.objects.filter(user=user)
+        # Get all the projects that the user is a part of.
+        from projects.models import Project
+        projects = Project.objects.filter(members__id__contains=user.id)
 
-    context = {
-        'user_profile': user, 'edits': forks, 'projects': projects,
-        'resources': resources,
-        'title': user.first_name + ' ' + user.last_name + " &lsaquo; OpenCurriculum"
-    }
-    return render(request, 'profile.html', context)
+        # Get all the resources that the user has created.
+        from oer.models import Resource
+        resources = Resource.objects.filter(user=user)
 
+        from forms import UploadProfilePicture
+        form = UploadProfilePicture(request.POST, request.FILES)
 
-def list_users(request, query):
-    users_by_username = User.objects.filter(username__icontains=query)
-    users_by_firstname = User.objects.filter(first_name__icontains=query)
-    users_by_lastname = User.objects.filter(last_name__icontains=query)
+        context = {
+            'user_profile': user, 'edits': forks, 'projects': projects,
+            'resources': resources, 'contributions': contributions, 'form': form,
+            'title': user.first_name + ' ' + user.last_name + " &lsaquo; OpenCurriculum"
+        }
+        return render(request, 'profile.html', context)
 
-    users = set(users_by_username)
-    users = users.union(set(users_by_firstname))
-    users = users.union(set(users_by_lastname))
-
-    serializedUsers = map(_build_user_object, users)
-
-    return HttpResponse(
-        json.dumps(serializedUsers), 200, content_type="application/json"
-    )
-
-
-def _build_user_object(user):
-    return {
-        'id': user.id, 'name': user.get_full_name(), 'username': user.username
-    }
+    except User.DoesNotExist:
+        raise Http404
 
 
 def contributor_registration(request):
@@ -813,3 +842,125 @@ def _email_contributor_admins(original_form_inputs):
         signup_message, 'OpenCurriculum <%s>' % settings.SERVER_EMAIL,
         settings.CONTRIBUTOR_SIGNUPS_ADMINS, fail_silently=False
     )
+
+
+def contributor_introduction(request):
+    if not request.user.is_authenticated():
+        return redirect('/?login=true&source=%s' % request.path)
+
+    cohortID = request.GET.get('cohort', None)
+
+    cohort = None
+    if cohortID:
+        from user_account.models import Cohort
+        cohort = Cohort.objects.get(pk=int(cohortID))
+
+    # Get locations of all contributors using the Google Geocoding API.
+    import urllib
+    import urllib2
+
+    contributor_locations = {}
+    for contributor in cohort.members.all():
+        params = urllib.urlencode(
+            {'address': contributor.get_profile().location, 'sensor': 'true'})
+        getRequest = urllib2.urlopen(
+            'http://maps.googleapis.com/maps/api/geocode/json?%s' % params)
+        response = json.loads(getRequest.read())
+        contributor_locations[contributor] = response['results'][0]['geometry']['location']
+
+    context = {
+        'title': _(settings.STRINGS['article_center']['INTRODUCTION_TITLE']),
+        'cohort': cohort,
+        'contributor_locations': contributor_locations
+    }
+    return render(request, 'contributor-introduction.html', context)
+
+
+# API Stuff below #/
+
+def list_users(request, query):
+    users_by_username = User.objects.filter(username__icontains=query)
+    users_by_firstname = User.objects.filter(first_name__icontains=query)
+    users_by_lastname = User.objects.filter(last_name__icontains=query)
+
+    users = set(users_by_username)
+    users = users.union(set(users_by_firstname))
+    users = users.union(set(users_by_lastname))
+
+    serializedUsers = map(_build_user_object, users)
+
+    return HttpResponse(
+        json.dumps(serializedUsers), 200, content_type="application/json"
+    )
+
+
+def _build_user_object(user):
+    return {
+        'id': user.id, 'name': user.get_full_name(), 'username': user.username
+    }
+
+
+def change_profile_picture(request, username):
+    if request.method == "POST":
+        # TODO(Varun): Get rid of this after setting the right form.
+        from forms import UploadProfilePicture
+        form = UploadProfilePicture(request.POST, request.FILES)
+
+        if form.is_valid():
+            user = User.objects.get(username=str(username))
+            user_profile = user.get_profile()
+
+            from django.core.files.base import ContentFile
+            profile_pic = ContentFile(request.FILES['new_profile_picture'].read())  # write_pic(request.FILES['new_profile_picture'])
+            user_profile.profile_pic.save(
+                str(user.id) + '-profile.jpg', profile_pic)
+
+    return redirect('user:user_profile', username=username)
+
+
+def edit_headline(request, user_id):
+    new_headline = request.POST.get('new_headline')
+
+    # Lookup user using QuerySet API.
+    user = User.objects.get(pk=user_id)
+    user_profile = user.get_profile()
+
+    try:
+        # Set user headline as the one coming through the request, and save the user
+        #     object.
+        user_profile.headline = new_headline
+        user_profile.save()
+
+        status = {'status': 'true'}
+        return HttpResponse(
+            json.dumps(status), 200,
+            content_type="application/json"
+        )
+
+    except:
+        status = {'status': 'false'}
+        return HttpResponse(
+            json.dumps(status), 401,
+            content_type="application/json"
+        )
+
+
+def dismiss_notifications(request, user_id):
+    notification_ids = request.GET.get('ids').split(',')
+
+    try:
+        from user_account.models import Notification
+        Notification.objects.filter(id__in=notification_ids).update(read=True)
+
+        status = {'status': 'true'}
+        return HttpResponse(
+            json.dumps(status), 200,
+            content_type="application/json"
+        )
+
+    except:
+        status = {'status': 'false'}
+        return HttpResponse(
+            json.dumps(status), 401,
+            content_type="application/json"
+        )
