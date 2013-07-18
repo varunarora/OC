@@ -848,14 +848,22 @@ def profile(request, user_id):
     return render(request, 'profile.html', c)
 
 
-def findRecipients(**kwargs):
+def get_subscribers_from_profile(profile):
+    """Return the user objects (not profiles) subscribed to a given profile.
+
+    The lambda method returns a user corresponding to a profile.
+    """
+    return map(lambda subscriber: subscriber.user, profile.subscribers.all())
+
+
+def find_recipients(**kwargs):
     """Given an actor and action (including its target), finds the users
     on whose feed this action would appear.
 
     Parameters:
         actor: a user object.
         action: a string (one word) about what the actor did.
-        target: the user on whom the action is performed.
+        target: the user on whom the action is performed. (optional)
 
     Examples:
         [Varun] [subscribed] to [Zeenab]                        # no object
@@ -874,20 +882,19 @@ def findRecipients(**kwargs):
         target = kwargs['target']
         # I'm subscribed to Zuck, I'm also interested in similar cool people.
         # If Zuck subscribes to x, I might be interested in x's coolness.
-        ##### recipients.update(actor.getSubscribers())
+        recipients.update(get_subscribers_from_profile(actor.profile))
 
         # Also, obviously x would want to know that Zuck is now stalking her.
         recipients.add(target)
 
     elif (action == 'upload'):
         # No targets involved. Only subscribers need know.
-        ##### recipients.update(actor.getSubscribers())
-        recipients.update(actor)    # temp
+        recipients.update(get_subscribers_from_profile(actor.profile))
 
     elif (action == 'comment'):
         target = kwargs['target']
         # Hmm, this guy I'm subscribed to commented about Zuck, interesting.
-        ##### recipients.update(actor.getSubscribers())
+        recipients.update(get_subscribers_from_profile(actor.profile))
 
         # Wow, someone finally commented on my stuff!! :excited:
         recipients.add(target)
@@ -898,7 +905,7 @@ def findRecipients(**kwargs):
     return recipients
 
 
-def addActivity(sender, **kwargs):
+def add_activity(sender, **kwargs):
     """Finds recipients, creates an Activity object, and returns it.
 
     TODO: Change this to accept objects rather than IDs.
@@ -919,7 +926,7 @@ def addActivity(sender, **kwargs):
     args_dict['action'] = kwargs['action']
     args_dict['target'] = User.objects.get(id=kwargs['target_id'])
     action_object = Comment.objects.get(id=kwargs['object_id'])
-    recipients = findRecipients(**args_dict)
+    recipients = find_recipients(**args_dict)
     item = Activity()
     item.actor = args_dict['actor']
     item.action = args_dict['action']
@@ -928,15 +935,12 @@ def addActivity(sender, **kwargs):
     item.save()
     item.recipients.add(*recipients)
     item.save()
-    print item.action
 
 
 new_subscription = Signal(providing_args=['actor_id', "action", "target_id"])
 
 new_upload = Signal(providing_args=['actor_id', "action", "object_id"])
 
-new_subscription.connect(addActivity)
+new_subscription.connect(add_activity)
 
-from interactions.models import new_comment
-new_comment.connect(addActivity)
-new_upload.connect(addActivity)
+new_upload.connect(add_activity)
