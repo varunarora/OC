@@ -15,6 +15,23 @@ class Category(models.Model):
 class Tag(models.Model):
     title = models.CharField(max_length=256)
     description = models.TextField(blank=True)
+    category = models.ForeignKey('meta.TagCategory')
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def __unicode__(self):
+        return self.title
+
+
+class TagCategory(models.Model):
+    title = models.CharField(max_length=256)
+    description = models.TextField(blank=True)
+    parent = models.ForeignKey('self', null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+
+
+class TagLabel(models.Model):
+    tag = models.ForeignKey(Tag)
+    label = models.CharField(max_length=256)
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
     def __unicode__(self):
