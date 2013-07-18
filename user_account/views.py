@@ -819,6 +819,22 @@ def _email_contributor_admins(original_form_inputs):
     )
 
 
+def add_subscription(request):
+    """Subscribes the requester to the user"""
+    subscribee_id = request.POST['subscribee_id']
+
+    from django.contrib.auth.models import User
+    subscribee_profile = User.objects.get(id=subscribee_id).profile
+    subscriber_profile = User.objects.get(id=request.user.id).profile
+
+    subscribee_profile.subscribers.add(subscriber_profile)
+
+    status = {'status': 'true'}
+
+    return HttpResponse(
+        json.dumps(status), 200, content_type="application/json")
+
+
 def user_home(request, user_id):
     """Show every activity for which this user is a recipient."""
     user = User.objects.get(id=user_id)
