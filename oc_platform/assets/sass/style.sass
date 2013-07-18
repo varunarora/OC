@@ -357,8 +357,13 @@ p
 	background-color: #444
 	color: #fff
 	padding: 18px
-	/* NEEDS ATTENTION */
-	display: none
+
+	a
+		color: #fff
+
+		&:hover
+			color: #b2b2b2
+			text-decoration: none
 
 #author-thumbnail
 	background-color: #b2b2b2
@@ -366,6 +371,7 @@ p
 	height: 100px
 	float: left
 	margin-right: 15px
+	background-size: cover
 
 #author-resources
 	color: #888
@@ -686,35 +692,45 @@ nav#authenticate-buttons, nav#user-buttons
 	
 	> ul
 		> li
-			float: right
-			height: $header-height - $header-prebanner-height - 13px
-			padding-top: 13px
+			float: left
+			height: $header-height - $header-prebanner-height
 		
 			a
-				padding: 13px 20px 18px 20px
-				margin-top: 8px
+				padding: 12px 20px 0px 20px
 				color: #666666
 				@include sans-bold
+				display: inline-block
+				height: 36px
 			
-				&:hover
+				&:hover, &.hover
 					background-color: #f8f8f8
-					border-bottom: 2px solid #006dcc
+					border-bottom: 3px solid #006dcc
 					color: $link-hover
 					text-decoration: none
-					
-nav#user-buttons > ul > li a.hover
-	background-color: #f8f8f8
-	border-bottom: 3px solid #006dcc
-	color: $link-hover
-	text-decoration: none
+
+				.user-firstname
+					display: inline-block
+					float: left
+					height: 24px
+					margin: 6px 14px
+
+				.user-firstname-assistant
+					display: inline-block
+					float: right
+					height: 9px
+					margin: 15px 0px 6px 0px
+
+			&.user-firstname-wrapper
+				a
+					padding: 6px 20px
 	
 .horizontal-caret-hover
 	border-color: $link-hover transparent transparent
 					
-nav#user-menu.showMenu, nav#share-menu.showMenu
+nav#user-menu.showMenu, nav#share-menu.showMenu, , nav#notifications-menu.showMenu
 	display: block
 
-nav#user-menu, nav#share-menu
+nav#user-menu, nav#share-menu, nav#notifications-menu
 	display: none
 	position: absolute
 
@@ -770,6 +786,19 @@ nav#share-menu
 
 		li
 			height: 20px
+
+nav#notifications-menu
+	z-index: 4
+	width: 300px
+
+	.floating-menu-spacer
+		width: 300px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		background-position: 265px bottom
+		z-index: 10
+
+	.new-notification
+		background-color: #EFEFEF
 
 #forgot-username-password
 	text-align: right
@@ -1040,6 +1069,10 @@ textarea[name=objectives]
 		cursor: pointer
 		background-color: #1155cc
 
+.ui-dialog-titlebar-close
+	background-repeat: no-repeat
+	background-image: url('../images/cross-buttons.png')
+
 /* End jQuery UI stuff */
 
 form#project-add-member
@@ -1290,3 +1323,150 @@ input.manual-upload
 	width: 8px
 	height: 350px
 	margin-top: 22px
+
+.show-more
+	background-image: url('../images/signup-flank.png')
+	height: 15px
+	width: 100%
+	text-align: center
+
+	.show-more-text
+		background-color: #fff
+		padding: 4px
+		border: 1px solid #ddd
+		color: $light-font
+		font-size: 0.85em
+		
+		&:hover
+			background-color: #ddd
+			cursor: pointer
+			border: 1px solid #b2b2b2
+			color: #333
+
+.wf-loading *
+	opacity: 0
+
+.wf-active *, .wf-inactive *
+	-webkit-transition: opacity 0.1s ease-out
+	-moz-transition: opacity 0.1s ease-out
+	-o-transition: opacity 0.1s ease-out
+	transition: opacity 0.1s ease-out
+
+nav#user-buttons > ul > li.user-notification-count
+	&.unread-notifications
+		a
+			color: #fff
+			background-color: #5abd02
+			border-bottom: 2px solid #5abd02
+			&:hover
+				background-color: #4fa602
+				border-bottom: 2px solid #4fa602
+
+	border-width: 0px
+	text-decoration: none
+
+	&.menu-open
+		a
+			background-color: #E0E0E0
+			border-bottom: 2px solid #E0E0E0
+			&:hover
+				color: $light-font
+
+	&.no-notifications
+		a
+			background-image: url('../images/zero-notifications.png')
+			background-repeat: no-repeat
+			background-position: center center
+			width: 25px
+
+	a
+		outline: 0
+
+.header-user-picture
+	width: 36px
+	height: 36px
+	float: left
+
+nav.project-navigation
+	background-color: #EFEFEF
+	height: 50px
+
+	ul
+		li
+			float: left
+			padding: 16px 0px
+
+			a
+				padding: 16px 20px
+				color: $light-font
+				@include sans-bold
+
+				&:hover
+					text-decoration: none
+					background-color: #E0E0E0
+
+				&.current-page
+					color: $link-hover
+
+.project-about-body
+	padding: 10px
+	padding-top: 0px
+
+table
+	td
+		&.column-20
+			width: 20%
+
+		&.column-40
+			width: 40%
+
+		&.column-60
+			width: 60%
+
+#contributor-map
+	width: 100%
+	height: 400px
+
+.oc-tabs
+	nav
+		margin-top: 10px
+		height: 36px
+
+		ul
+			li
+				float: left
+				display: inline-block
+				height: 36px
+				margin: 0px 6px
+
+				a
+					min-width: 30px
+					padding: 8px 16px
+					height: 19px
+					outline: 0
+					border-width: 1px 1px 1px 1px
+					border-color: #bcbcbc
+					border-style: solid
+					background-color: #fff
+					border-radius: 4px 4px 0px 0px
+					display: inline-block
+					background-color: #efefef
+					color: $light-font
+					@include sans-bold
+
+					&:hover
+						text-decoration: none
+						color: $link-hover
+
+					&.selected
+						border-bottom-color: #fff
+						background-color: #fff
+						color: $link-hover
+
+	.oc-tabs-content
+		border-top: 1px solid #bcbcbc
+
+@import "article_center"
+
+.login-authentication-failure
+	color: #B94A48

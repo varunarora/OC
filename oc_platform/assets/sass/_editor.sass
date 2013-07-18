@@ -22,7 +22,7 @@
 		#submission-buttons
 			float: right
 
-#article-edit input[type=text], #article-edit textarea, .breadcrumbs-edit
+#article-edit input[type=text].browser-edit, #article-edit textarea, .breadcrumbs-edit
 	border: 1px solid #ddd
 	padding: 8px
 	width: 550px
@@ -112,6 +112,32 @@
 		background-position: -312px 0
 
 @import "textext"
+
+.upload-new
+	text-align: center
+
+.show-image-history
+	.image-history-set
+		margin-top: 10px
+		overflow-y: scroll
+		height: 300px
+
+		.image
+			padding: 6px
+			border-bottom: 1px solid #efefef
+			overflow: hidden
+			
+			.image-title
+				@include sans-bold
+
+			.image-insert-button
+				float: right
+				display: inline-block
+
+			.image-info
+				float: left
+				min-height: 28px
+
 
 /** WMD specific styling starts here **/
 
