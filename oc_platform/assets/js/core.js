@@ -166,6 +166,46 @@ var OC = {
         });
     },
 
+    tabs: function(tabsWrapperClass){
+        /**
+         *  Tab and click handler for everything tabs
+         */
+        var tabbedUploader = $(tabsWrapperClass);
+        tabbedUploader.addClass('oc-tabs');
+
+        var tabs = $('nav > ul > li > a', tabbedUploader);
+
+        var i;
+        for (i = 0; i < tabs.length; i++){
+            // Add a unique class to all blocks represented by the navigation
+            var contentBlock = $(tabs[i]).attr('href');
+            $(contentBlock).addClass('tab-content');
+        }
+
+        var contentBlocks = $('.tab-content', tabbedUploader);
+
+        tabs.click(function(event){
+            if (! $(this).hasClass('selected')){
+                // Unselect all the other navigation items
+                tabs.removeClass('selected');
+                $(this).addClass('selected');
+
+                var blockToDisplay = $(this).attr('href');
+
+                // Hide all the other open blocks
+                $(contentBlocks).hide();
+                $(blockToDisplay).show();
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+
+        });
+
+        // Set the selected tab as the first one
+        $(tabs[0]).click();
+    },
 
     /* Beginning of functionality that may be moved into modules */
 
@@ -349,41 +389,6 @@ var OC = {
         });
     },
 
-    resizeArticleImages: function() {
-        // HACK: Because Webkit browsers do not compute image width until it is
-        //     loaded, this hack may be used to make an in-memory copy of the
-        //     image to compute the dimensions
-        $(OC.config.article.image).each(function () {
-            var image = $(this);
-            $("<img/>").attr("src", $(this).attr('src')).load(function () {
-                var imgCaption = $('<div/>'),
-                    imgCaptionWrapper = $('<div/>'),
-                    imgWrapper = $('<div/>'),
-                    imgSrc = image.attr('src'),
-                    lastIndexOfSlash = imgSrc.lastIndexOf('/'),
-                    lastIndexOfPeriod = imgSrc.lastIndexOf('.'),
-                    imgNum = imgSrc.substring(
-                        lastIndexOfSlash + 1, lastIndexOfPeriod),
-                    currentWidth = this.width;
-
-                imgCaption.addClass('img-caption');
-                imgCaptionWrapper.addClass('img-caption-wrapper');
-                imgWrapper.addClass('img-wrapper');
-
-                imgCaption.appendTo(imgCaptionWrapper);
-
-                imgCaption.text("Figure " + imgNum);
-
-                imgWrapper.insertAfter(image);
-
-                image.css('width', currentWidth * 0.5);
-
-                image.appendTo(imgWrapper);
-                imgCaptionWrapper.appendTo(imgWrapper);
-            });
-        });
-    },
-
     initImageHoverDescriptions: function() {
         $('.pillar').mouseover(function () {
             function showPillarDescription(targetBlock) {
@@ -481,7 +486,60 @@ var OC = {
     },
     /*jslint nomen: false */
 
-    signInCallback: function(authResult) {
+    googleRegistrationCallback: function(authResult){
+        function success(result, profile){
+            // Handle or verify the server response if
+            //     necessary.
+
+            // Eliminate fields that aren't required as a part
+            //     of social login and populate hidden fields
+            //     with necessary values
+            OC.expediteGLogin(profile);
+
+            // Set user message conveyed success with Google+
+            //     login
+            $(OC.config.registration.googleAuthResult).html(
+                'You have successfully connected to Google. Kindly complete the ' +
+                    'the form below to complete your sign up.'
+            );
+        }
+        OC.googleAuthenticationCallback(authResult, success);
+    },
+
+    googleSignInCallback: function(authResult) {
+        function success(result, profile){
+            // Fill the hidden Google form object holding the user Google ID.
+            $('.google-plus-login input[name=google_id]').val(
+                profile.id);
+
+            // Send a POST request for authenticating the user ID.
+            $.post('/glogin/', $('form.google-plus-login').serialize(),
+                function(response){
+                    // If authentication success, capture the source page and
+                    //     redirect the page.
+                    if (response.status === "true"){
+                        var redirect_to = $(
+                            '.google-plus-login input[name=redirect_to]');
+                        if (redirect_to.length > 0){
+                            window.location.href = redirect_to;
+                        } else {
+                            window.location.href = '/';
+                        }
+                    } else {
+                        if (authResult['g-oauth-window']){
+                            OC.popup('Your Google account is not linked to any user ' +
+                                'account. Please signup before you can connect through ' +
+                                'Google.', 'Google login failure'
+                            );
+                        }
+                    }
+                },
+            'json');
+        }
+        OC.googleAuthenticationCallback(authResult, success);
+    },
+
+    googleAuthenticationCallback: function(authResult, successCallback){
         if (authResult.code) {
             authResult.state = $('#session-state').attr('data-state');
 
@@ -500,21 +558,8 @@ var OC = {
                         url: OC.config.registration.googleAuthURL,
                         dataType: 'json',
                         contentType: 'application/octet-stream; charset=utf-8',
-                        success: function (result) {
-                            // Handle or verify the server response if
-                            //     necessary.
-
-                            // Eliminate fields that aren't required as a part
-                            //     of social login and populate hidden fields
-                            //     with necessary values
-                            OC.expediteGLogin(profile);
-
-                            // Set user message conveyed success with Google+
-                            //     login
-                            $(OC.config.registration.googleAuthResult).html(
-                                'You have successfully connected to Google. Kindly complete the ' +
-                                    'the form below to complete your sign up.'
-                            );
+                        success: function(result){
+                            successCallback(result, profile);
                         },
                         data: authObject
                     });
@@ -755,13 +800,13 @@ var OC = {
             OC.setUpMenuPositioning('nav#user-menu', '#user-dropdown');
         });
 
-        $('#user-buttons > ul > li.user-firstname a, nav#user-menu').mouseenter(function () {
-            $('#user-buttons > ul > li.user-firstname a .horizontal-caret').addClass('horizontal-caret-hover');
-            $('#user-buttons > ul > li.user-firstname a').addClass('hover');
+        $('#user-buttons > ul > li.user-firstname-wrapper a, nav#user-menu').mouseenter(function () {
+            $('#user-buttons > ul > li.user-firstname-wrapper a .horizontal-caret').addClass('horizontal-caret-hover');
+            $('#user-buttons > ul > li.user-firstname-wrapper a').addClass('hover');
             $('#user-menu').addClass('showMenu');
         }).mouseleave(function () {
-            $('#user-buttons > ul > li.user-firstname a .horizontal-caret').removeClass('horizontal-caret-hover');
-            $('#user-buttons > ul > li.user-firstname a').removeClass('hover');
+            $('#user-buttons > ul > li.user-firstname-wrapper a .horizontal-caret').removeClass('horizontal-caret-hover');
+            $('#user-buttons > ul > li.user-firstname-wrapper a').removeClass('hover');
             $('#user-menu').removeClass('showMenu');
         });
 
@@ -928,6 +973,11 @@ var OC = {
 
     initNotificationHandler: function(){
         OC.setUpMenuPositioning('nav#notifications-menu', '.user-notification-count');
+
+        $(window).resize(function () {
+            OC.setUpMenuPositioning('nav#notifications-menu', '.user-notification-count');
+        });
+
         OC.setupNotificationsMenu();
     },
 
@@ -993,6 +1043,16 @@ var OC = {
                 $(highlightedMenuTargets[j]).removeClass('menu-open');
             }
 
+        });
+    },
+
+    initArticleCenter: function(){
+        OC.tabs('.introduction-contributor-faqs');
+
+        $('.article-labels span').tipsy();
+
+        $('.article-objectives-title').click(function() {
+            $(this).parent().toggleClass('show-objectives');
         });
     },
 
@@ -1272,9 +1332,6 @@ jQuery(document).ready(function ($) {
     // Render animation of difficulty level "thermometer"
     OC.renderThermometer();
 
-    // Resize images assuming their original scale is 150%
-    OC.resizeArticleImages();
-
     OC.setupShareMenu();
 
     $('#submission-info').animate({
@@ -1331,6 +1388,8 @@ jQuery(document).ready(function ($) {
     /* Other initializers/renderers/handlers */
 
     OC.renderShowMore();
+
+    OC.initArticleCenter();
 });
 
 $(document).ajaxSend(function (event, xhr, settings) {
@@ -1474,5 +1533,11 @@ jQuery.fn.liveUpdate = function (list) {
 /* Global functions that can't be replaced with modules */
 
 function gPlusSignInCallback(authResult){
-    return OC.signInCallback(authResult);
+    // Calls the handler specific to logging in with G+.
+    return OC.googleSignInCallback(authResult);
+}
+
+function gPlusRegistrationCallback(authResult){
+    // Calls the handler specific to registration with G+.
+    return OC.googleRegistrationCallback(authResult);
 }
