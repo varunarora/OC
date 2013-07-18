@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from meta.models import Tag
 from django.db import models
 from django.dispatch import receiver
 from interactions.models import Comment
@@ -6,15 +7,21 @@ from interactions.models import Comment
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    headline = models.CharField(max_length=256)
+    headline = models.CharField(max_length=256, null=True, blank=True)
     dob = models.DateTimeField()
     gender = models.NullBooleanField()
     location = models.CharField(max_length=256)
     profession = models.CharField(max_length=256)
     profile_pic = models.ImageField(upload_to='images/users', blank=True)
+    interests = models.ManyToManyField(Tag, null=True, blank=True)
+    social_id = models.CharField(max_length=32)
 
     def __unicode__(self):
         return self.user.username
+
+
+class Cohort(models.Model):
+    members = models.ManyToManyField(User)
 
 
 class Notification(models.Model):
