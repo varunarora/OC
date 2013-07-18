@@ -1,0 +1,11 @@
+{% include 'partials/header.html' %}
+<div class="center-stage">
+    <div id="key-panel" class="panel-left">
+    <h2>Failed to confirm your account</h2>
+    <p>Failed to confirm and activate your account as {{ failure_message }}.</p>
+    <p>Try re-checking against the  URL as it appears in your email and opening this page again. If you continue to experience problems confirming your account, write to us on our <a href="{%url help %}">Help page</a></p>
+    </div>
+    <div id="fill-panel" class="panel-right">
+    </div>
+</div>        
+{% include 'partials/footer.html' %}
