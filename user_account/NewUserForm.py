@@ -111,7 +111,7 @@ class NewUserForm(UserCreationForm):
 
         # If the username does not match the simple regex pattern of only
         #     letters, digits, and underscores, raise validation error.
-        if re.match(r'^[A-Za-z]\w+$', username) is None:
+        if re.match(r'^[a-z]\w+$', username) is None:
             raise ValidationError(
                 _(settings.STRINGS['user']['register']['form']['USERNAME_VALIDATION_ERROR']))
 
@@ -161,8 +161,10 @@ class NewUserProfileForm(ModelForm):
     Attributes:
         profile_pic_tmp: A file IO object representing the default user profile
             picture.
+        gender: '1' for Male or '0' for Female.
     """
     profile_pic_tmp = open(settings.TEMP_IMAGE_DIR + 'default.jpg')
+    # gender = forms.BooleanField(required=True)
 
     def __init__(self, request, social_login, new_user, dob):
         """Initializes the profile form object after setting a profile picture,
@@ -190,6 +192,7 @@ class NewUserProfileForm(ModelForm):
             newRequest = request.copy()
             newRequest.__setitem__('dob', dob)
             newRequest.__setitem__('user', new_user.id)
+            newRequest.__setitem__('location', request.get('location').strip())
             newRequest.__setitem__('gender', request.get('gender') == '1')
 
             self.profile_pic_tmp = profile_pic
