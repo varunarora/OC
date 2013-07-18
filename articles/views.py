@@ -259,8 +259,8 @@ def read_article(request, article):
     context = {
         'article': articleRevision, 'breadcrumb': breadcrumb, 'title': title,
         'siblings': siblings,
-        'current_path': 'http://' + 'www.theopencurriculum.org' + request.get_full_path(),  # request.get_host()
-        'thumbnail': 'http://' + 'www.theopencurriculum.org' + '/static/images/thumbnails/' + str(article.id) + '-thumb.jpg'
+        'current_path': 'http://' + request.get_host() + request.get_full_path(),  # request.get_host()
+        'thumbnail': 'http://' + request.get_host() + '/static/images/thumbnails/' + str(article.id) + '-thumb.jpg'
     }
     return render(request, 'article.html', context)
 
