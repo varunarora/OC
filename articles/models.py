@@ -33,7 +33,7 @@ class ArticleRevision(models.Model):
     objectives = JSONField()
     body_markdown = MarkdownTextField()
     tags = models.ManyToManyField('meta.Tag', null=True, blank=True)
-    issues = models.ForeignKey(TagLabel, null=True, blank=True)
+    issues = models.ManyToManyField(TagLabel, null=True, blank=True)
     user = models.ForeignKey(User, null=True, blank=True)
     log = models.CharField(max_length=256, blank=True)
     flag = models.CharField(max_length=64)
