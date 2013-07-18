@@ -6,69 +6,113 @@ import json
 
 
 def resource_center(request):
+    # TODO(Varun): Build out the OER center
     return HttpResponse("Page under construction")
 
 
 def view_resource(request, resource_id):
-    resource = Resource.objects.get(pk=resource_id)
-    related = Resource.objects.all()[:5]
+    """Builds a resource view page from its unique ID.
 
-    if resource.type == "url":
-        from BeautifulSoup import BeautifulSoup
-        from urllib import urlopen
+    Args:
+        request: The HTTP request object, as passed by django.
+        resource_id: The unique key of the resource.
 
-        try:
-            source = urlopen(resource.url)
-            soup = BeautifulSoup(source)
+    Returns:
+        The HttpResponse resource page after preparing objects.
 
-            resource.url_title = soup.find('title').text
-            description = soup.findAll('meta', attrs={'name': "description"})[0]
+    Raises:
+        ObjectDoesNotExist: Error when resource cannot be found in the database.
+    """
+    from django.core.exceptions import ObjectDoesNotExist
+    try:
+        # Fetch the resource from its ID using the QuerySet API.
+        resource = Resource.objects.get(pk=resource_id)
+        # TODO(Varun): Change this to actually get the top 5 best resources.
+        related = Resource.objects.all()[:5]
 
-            if description:
-                resource.body = description['content']
-        except:
-            pass
+        # If this resource is a URL, fetch its page by making Http requests
+        #     using BeautifulSoup, and find meta tags in the DOM.
+        if resource.type == "url":
+            from BeautifulSoup import BeautifulSoup
+            from urllib import urlopen
 
-    if resource.type == "attachment":
-        #TODO: Replace with |filesizeformat template tag
-        filesize = resource.file.size
-        if filesize >= 104856:
-            resource.filesize = str(_filesizeFormat(float(filesize) / 104856)) + " MB"
-        elif filesize >= 1024:
-            resource.filesize = str(_filesizeFormat(float(filesize) / 1024)) + " KB"
-        else:
-            resource.filesize = str(_filesizeFormat(float(filesize))) + " B"
+            try:
+                # Open the resource and build its DOM into a BeautifulSoup
+                #     object.
+                source = urlopen(resource.url)
+                soup = BeautifulSoup(source)
 
-        from os.path import splitext
-        name, resource.extension = splitext(resource.file.name)
+                # Extract the page title, and the description from its meta
+                #     tags in <head>
+                resource.url_title = soup.find('title').text
+                description = soup.findAll(
+                    'meta', attrs={'name': "description"}
+                )[0]
 
-    if resource.type == "video":
-        import urlparse
-        url_data = urlparse.urlparse(resource.url)
+                # If a description was found, set it on the resource.
+                if description:
+                    resource.body = description['content']
+            except:
+                pass
 
-        domain = url_data.hostname
-        hostname = domain.split(".")[:-1]
+        # If the resource is a kind of attachment, format its metadata.
+        if resource.type == "attachment":
+            #TODO: Replace with |filesizeformat template tag
+            filesize = resource.file.size
+            if filesize >= 104856:
+                resource.filesize = str(
+                    _filesizeFormat(float(filesize) / 104856)) + " MB"
+            elif filesize >= 1024:
+                resource.filesize = str(
+                    _filesizeFormat(float(filesize) / 1024)) + " KB"
+            else:
+                resource.filesize = str(
+                    _filesizeFormat(float(filesize))) + " B"
 
-        if "youtube" in hostname:
-            query = urlparse.parse_qs(url_data.query)
-            video = query["v"][0]
-            resource.video_tag = video
-            resource.provider = "youtube"
+            # Determine the extension of the attachment.
+            from os.path import splitext
+            name, resource.extension = splitext(resource.file.name)
 
-        elif "vimeo" in hostname:
-            resource.video_tag = url_data.path.split('/')[1]
-            resource.provider = "vimeo"
+        # If the resource is a video, determine whether or not it is a YouTube
+        #     Vimeo video, and obtain the video ID (as determined by the
+        #     service provider), so that it can be plugged into its player.
+        if resource.type == "video":
+            import urlparse
+            url_data = urlparse.urlparse(resource.url)
 
-    userResourceCount = Resource.objects.filter(user=resource.user).count()
+            # Figure out the entire domain the specific hostname (eg. "vimeo")
+            domain = url_data.hostname
+            hostname = domain.split(".")[:-1]
 
-    # Increment page views (always remains -1 based on current view)
-    Resource.objects.filter(id=resource_id).update(views=resource.views+1)
+            # In either case, use an appropriate pattern matching to obtain the
+            #     video #.
+            if "youtube" in hostname:
+                query = urlparse.parse_qs(url_data.query)
+                video = query["v"][0]
+                resource.video_tag = video
+                resource.provider = "youtube"
 
-    context = {
-        'resource': resource, 'title': resource.title + " &lsaquo; OpenCurriculum",
-        'related': related, "user_resource_count": userResourceCount
-    }
-    return render(request, 'resource.html', context)
+            elif "vimeo" in hostname:
+                resource.video_tag = url_data.path.split('/')[1]
+                resource.provider = "vimeo"
+
+        # Fetch the number of resources that have been uploaded by the user who
+        #     has created this resource.
+        userResourceCount = Resource.objects.filter(user=resource.user).count()
+
+        # Increment page views (always remains -1 based on current view).
+        Resource.objects.filter(id=resource_id).update(views=resource.views+1)
+
+        context = {
+            'resource': resource,
+            'title': resource.title + " &lsaquo; OpenCurriculum",
+            'related': related, "user_resource_count": userResourceCount,
+            'current_path': 'http://' + 'www.theopencurriculum.org' + request.get_full_path(),  # request.get_host()
+            'thumbnail': 'http://' + 'www.theopencurriculum.org' + '/static/images/oer-thumbnails/' + str(resource.id) + '-thumb.jpg'
+        }
+        return render(request, 'resource.html', context)
+    except ObjectDoesNotExist:
+        raise Http404
 
 
 def _filesizeFormat(size):
@@ -76,14 +120,28 @@ def _filesizeFormat(size):
 
 
 def download(request, resource_id):
+    """Push a download of an attachment resource, based on its ID
+
+    Args:
+        request: The HTTP request object, as passed by django.
+        resource_id: The unique key of the resource that needs to be pushed for
+            download.
+
+    Returns:
+        An HttpResponse file object using the Apache 'Content-Disposition'
+            setting.
+    """
+    # TODO(Varun): Need to check whether the resource is of type "attachment"
     resource = Resource.objects.get(pk=resource_id)
 
     import magic
     mime = magic.Magic(mime=True)
     content_type = mime.from_file(resource.file.path)
-    # TODO: Security risk. Check file name for safeness
+
+    # TODO(Varun): Security risk. Check file name for safeness
     response = HttpResponse(resource.file, content_type)
-    response['Content-Disposition'] = 'attachment; filename="' + resource.file.name + '"'
+    response['Content-Disposition'] = (
+        'attachment; filename="%s"' % resource.file.name)
     return response
 
 
@@ -219,8 +277,37 @@ def fp_submit(request):
 
 
 def file_upload(request):
-    return HttpResponse(json.dumps(
-        {'400': 'cool_filename.jpg'}), 200, content_type="application/json")
+    import pdb
+    pdb.set_trace()
+    if request.method == "POST":
+        from forms import UploadResource
+        form = UploadResource(request.POST, request.FILES)
+
+        if form.is_valid():
+            # Get the Project ID / User ID & Collection name from the URL / form
+            import pdb
+            pdb.set_trace()
+
+            return HttpResponse(json.dumps(
+                {'400': 'cool_filename.jpg'}), 200, content_type="application/json")
+            resource_owner = ''
+
+            # Create a new resource
+            from django.core.files.base import ContentFile
+            resource = ContentFile(request.FILES['field_name'].read())  # write_pic(request.FILES['new_profile_picture'])
+
+            new_resource = Resource()
+            new_resource.title = title
+            new_resource.cost = default_cost
+            new_resource.user_id = user_id
+            new_resource.file = resource
+            new_resource.save()
+
+        return HttpResponse(json.dumps(
+            {'400': 'cool_filename.jpg'}), 200, content_type="application/json")
+    else:
+        return HttpResponse(json.dumps(
+            {'status': 'false'}), 401, content_type="application/json")
 
 
 def article_center_registration(request):
