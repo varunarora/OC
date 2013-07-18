@@ -1,0 +1,11 @@
+<h2>{{ article.title }}</h2>
+<section class="breadcrumb">
+    <div class="links">
+        {% for category in breadcrumb %}
+            <a href="{% url articles:reader category_slug=category.slug %}">{{ category.title }}</a> 
+            {% if not forloop.last %}
+            <span class="vertical-caret breadcrumbs-caret"></span> 
+            {% endif %}
+        {% endfor %}
+    </div>
+</section>

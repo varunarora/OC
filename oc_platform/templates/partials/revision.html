@@ -1,0 +1,7 @@
+<div class="resource">
+	<div class="resource-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ revision.user.get_profile.profile_pic.name }}')" title="{{ resource.title }}" alt="{{ revision.title }}"></div>
+	<div class="description">
+		<div class="resource-title"><a href="{% url articles:reader category_slug=revision.article.category.slug %}?q={{ revision.article.slug }}&revision={{ revision.id }}" title="{{ revision.title }}">{{ revision.title }}</a></div>
+		<div class="resource-description">{{ revision.body_markdown_html|striptags}}</div>
+	</div>
+</div>

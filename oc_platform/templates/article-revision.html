@@ -1,0 +1,66 @@
+{% include 'partials/header.html' %}
+
+<div class="center-stage">
+    <div id="key-panel" class="panel-left">
+        <header>
+            {% include 'partials/article-header.html' %}
+            {% if messages %}
+                {% for message in messages %}
+                <section class="revision-message">
+                    {{ message }}
+                </section>
+                {% endfor %}
+            {% endif %}
+        </header>
+        <article>
+            {% include 'partials/article-content.html' %}
+        </article>
+    </div>
+    <div id="fill-panel" class="panel-right">
+        <aside id="social-panel">
+            <section class="revision-user">
+                <div class="revision-user-thumbnail">
+                    <img src="{{ MEDIA_URL }}profile/{{ article.user.id }}-profile.jpg" />
+                </div>
+                <div  class="revision-user-log">
+                {% if article.log %}
+                    <h4>[#{{ article.id }}] {{ article.log|safe }}</h4>
+                {% endif %}
+                <br/>
+                On {{ article.created }}
+                </div>
+            </section>
+        </aside>
+        <aside id="support">
+            <h3>Comments</h3>
+            <form id="revision-comment">
+                <input type="hidden" name="user" value="{{ user.id }}" />
+                <input type="hidden" name="parent_type" value="{{ content_type.id }}" />
+                <input type="hidden" name="parent_id" value="{{ article.id }}" />
+                <textarea name="body_markdown"></textarea>
+                <div class="right">
+                    <button class="btn success-button">Post</button>
+                </div>
+                <div class="spinner"></div>
+            </form>
+            {% for comment in comments %}
+                <div id="comments">
+                    <div class="resource">
+                        <div class="resource-thumbnail" style="background-image: url('{{ MEDIA_URL }}profile/{{ comment.user.id }}-profile.jpg')">
+                        </div>
+                        <div class="description">
+                            {# comment.user.get_profile.profile_pic #}
+                            <span class="bold">{{ comment.user.get_full_name }}</span> on {{ comment.created }}
+                            {{ comment.body_markdown_html|safe }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="dialog" id="comment-fail">
+                <p>Your comment could not be posted. Kindly try again.</p>
+            </div>
+        </aside>
+    </div>
+</div>
+
+{% include 'partials/footer.html' %}
