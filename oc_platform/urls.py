@@ -58,7 +58,6 @@ urlpatterns = patterns(
     # Initialize API stuff
     url(r'^api/getBreadcrumb/', 'oc_platform.views.get_breadcrumb', name='api-get-breadcrumb'),
     url(r'^api/emailShare/', 'oc_platform.views.email_share', name='api-email-share'),
-    url(r'^api/subscribe/', 'user_account.views.add_subscription', name='api-subscribe'),
     url(r'^api/fpUpload/', 'oer.views.fp_upload', name='api-fp-upload'),
     url(r'^api/fpSubmit/', 'oer.views.fp_submit', name='api-fp-submit'),
     url(r'^api/file-upload/', 'oer.views.file_upload', name='api-file-upload'),
@@ -80,10 +79,6 @@ urlpatterns = patterns(
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 
-    # User feed
-    url(r'^feeds/(?P<user_id>\d+)/$', 'user_account.views.user_home', name='feed'),
-    url(r'^users/(?P<user_id>\d+)/$', 'user_account.views.profile', name='profile'),
-
 )
 
 if settings.DEBUG:
@@ -92,4 +87,3 @@ if settings.DEBUG:
         (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
         (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
     )
-
