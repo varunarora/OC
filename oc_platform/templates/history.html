@@ -1,0 +1,59 @@
+{% include 'partials/header.html' %}
+
+<div class="center-stage">
+    <div id="key-panel" class="panel-left">
+        <article>
+            <header>
+                {% include 'partials/article-header.html' %}
+            </header>
+            <section id="history">
+                <h3>History of edits</h3>
+            <div class="history-set">
+            {% for revision in article.revisions %}
+                <div class="edit {% ifequal article.revision revision %}current{% endifequal %}">
+                    <div class="edit-thumbnail">
+                        {% if revision.user %}
+                        <img src="{{ MEDIA_URL }}{{ revision.user.get_profile.profile_pic.name }}" />
+                        {% endif %}
+                    </div>
+                    <div class="description">
+                        {% if revision.flag == "fork" %}
+                        <div class="edit-title">
+                            <a href="{% url user:user_profile username=revision.user.username %}">{{ revision.user.username }}</a> started editing <a href="{% url articles:reader category_slug=revision.article.category.slug %}?q={{ article.slug }}&revision={{ revision.id }}">a copy</a> in 
+                            {% ifequal request.get_profile.gender 1 %}his{% else %}her{% endifequal %} collection
+                        </div>
+                        <div class="edit-description">
+                            On {{ revision.created }}
+                        </div>
+                        {% else %}
+                        <div class="edit-title">
+                            <span class="bold"><a href="{% url articles:reader category_slug=revision.article.category.slug %}?q={{ article.slug }}&revision={{ revision.id }}">{{ revision.log }}</a></span> by {% if revision.user %}<a href="{% url user:user_profile username=revision.user.username %}">{{ revision.user.username }}</a>{% else %}Anonymous{% endif %}
+                        </div>
+                        <div class="edit-description"> 
+                            On {{ revision.created }}
+                            <div>{% ifnotequal article.revision revision %}<a href="{% url articles:reader category_slug=revision.article.category.slug %}?q={{ article.slug }}&compare={{ revision.id }}">View changes</a> &#183; {% endifnotequal %}Compare changes with edit # 
+                                <select class="revision-selector">
+                                        <option selected></option>
+                                {% for r in article.revisions %}
+                                    {% ifnotequal r revision %}
+                                        <option data-url="{% url articles:reader category_slug=revision.article.category.slug %}?q={{ article.slug }}&compare={{ revision.id }}&to={{ r.id }}">{{ r.id }}</option>
+                                    {% endifnotequal %}
+                                {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="edit-meta">
+                        <span class="revision-number">#{{ revision.id }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+            </section>
+        </article>
+    </div>
+    <div id="fill-panel" class="panel-right">
+    </div>
+</div>
+
+{% include 'partials/footer.html' %}

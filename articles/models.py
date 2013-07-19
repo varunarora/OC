@@ -1,7 +1,7 @@
 from django.db import models
 
 from django.contrib.auth.models import User
-from meta.models import Language, Category
+from meta.models import Language, Category, TagLabel
 from license.models import License
 
 from articles.MarkdownTextField import MarkdownTextField
@@ -32,8 +32,9 @@ class ArticleRevision(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     objectives = JSONField()
     body_markdown = MarkdownTextField()
-    tags = models.ManyToManyField('meta.Tag', blank=True)
-    user = models.ForeignKey(User)
+    tags = models.ManyToManyField('meta.Tag', null=True, blank=True)
+    issues = models.ManyToManyField(TagLabel, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True)
     log = models.CharField(max_length=256, blank=True)
     flag = models.CharField(max_length=64)
 
@@ -67,3 +68,12 @@ class Article(models.Model):
         a = ArticleThumbnail()
         a.generateThumbnail(self)
         return super(Article, self).save(*args, **kwargs)
+
+
+class SuggestedArticle(models.Model):
+    article = models.ForeignKey('Article')
+    revision = models.ForeignKey('ArticleRevision')
+    suggested_users = models.ManyToManyField(User, blank=True)
+
+    def __unicode__(self):
+        return self.article.title

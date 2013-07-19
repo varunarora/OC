@@ -1,7 +1,9 @@
 oc_platform/settings_dev.py
 venv
+node_modules
 *.pyc
 *.*~
+*~
 *.sassc
 *.scssc
 *.xcf

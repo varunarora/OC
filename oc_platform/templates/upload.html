@@ -1,0 +1,56 @@
+{% include 'partials/header.html' %}
+
+<div class="center-stage">
+    <div id="key-panel" class="panel-left">
+        <div class="dropzone-manual">
+            <h2>Upload files</h2>
+            <div class="center">
+                <form method="POST" enctype="multipart/form-data" action="/api/fpSubmit/" class="files-upload-rename">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" value="{{ user.id }}"/>
+                    <input type="hidden" name="project_id" value="{{ project.id }}"/>
+                    <div class="upload-drag-drop">
+                    </div>
+                    <div class="upload-drag-drop-message">DRAG AND DROP FILES HERE</div>
+                    <button class="projects-success-button" type="file" name="select-file">UPLOAD FROM COMPUTER</button>
+                    <button class="projects-progress-button hidden" type="submit" name="submit">DONE</button>
+                    <input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
+                    <input type="file" class="manual-upload" />
+                </form>
+                <p>(Maximum size = 5 MB. For larger files, <a href="" class="uploadfiles filepicker-computer-upload>">upload from here</a>)</p>
+                
+                <div id="titles"></div>
+            </div>
+        </div>
+        <div class="vertical-divider"></div>
+        <div class="vertical-divider-shadow"></div>
+    </div>
+    <div id="fill-panel" class="panel-right">
+        <h3>Upload using your favorite cloud apps</h3>
+        Click on the service you want to use to upload files
+        <table class="upload-services">
+            <tr>
+                <td><a href="" class="gdrive-upload">Google Drive</a></td>
+                <td><a href="" class="skydrive-upload">Skydrive</a></td>
+                <td><a href="" class="dropbox-upload">Dropbox</a></td>
+            </tr>
+            <tr>
+                <td><a href="" class="gmail-upload">Gmail</a></td>
+                <td><a href="" class="box-upload">Box</a></td>
+                <td><a href="" class="picasa-upload">Picasa</a></td>
+            </tr>
+            <tr>
+                <td><a href="" class="ftp-upload">FTP</a></td>
+                <td><a href="" class="webdav-upload">WebDAV</a></td>
+                <td><a href="" class="facebook-upload">Facebook</a></td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+<script type="text/javascript" src="http://api.filepicker.io/v1/filepicker.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/dropzone.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/upload-files.js"></script>
+
+{% include 'partials/footer.html' %}

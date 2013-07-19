@@ -1,0 +1,16 @@
+{% include 'partials/header.html' %}
+<div class="center-stage">
+    <header>
+        {% include 'partials/article-header.html' %}
+        <div id="diff-header">
+            <h3>Compare changes between edit #{{ from.id }} and {% if not revision_compare %}the currently published edit: {% endif %}#{{ to.id }}</h3>
+        </div>
+    </header>
+    <article>
+        <table class="diff">
+            <tr class="titles"><td class="diff_next"></td><td class="diff_header"></td><td nowrap="nowrap">#{{ from.id }}: {{ from.log }}</td><td class="diff_next"></td><td class="diff_header"></td><td nowrap="nowrap">#{{ to.id }}: {{ to.log }}</td></tr>
+        </table>
+        {{ diff_table|safe }}
+    </article>
+</div>
+{% include 'partials/footer.html' %}

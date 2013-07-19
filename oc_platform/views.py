@@ -14,30 +14,44 @@ def home(request):
         from user_account.views import user_home
         return user_home(request, request.user.id)
 
-    else:
-        # Get the top 10 articles ordered in descending order of views.
-        top_articles = Article.objects.order_by('title').order_by('-views')[:10]
+    login = request.GET.get('login', False)
+    login_error_message = None
+    source = None
+    
+    if login:
+        login_error = request.GET.get('error', False)
+        if login_error == 'auth':
+            login_error_message = _(settings.STRINGS['user']['AUTHENTICATION_ERROR'])
+        elif login_error == 'inactive':
+            login_error_message = _(settings.STRINGS['user']['INACTIVE_ACCOUNT_ERROR'])
+        source = request.GET.get('source', False)
 
-        # Get the count of the total number of articles in the database.
-        article_count = Article.objects.all().count()
+    # Get the top 10 articles ordered in descending order of views.
+    top_articles = Article.objects.order_by('title').order_by('-views')[:10]
 
-        # Get the sign-in form.
-        import SignupForm
-        form = SignupForm.SignupForm()
+    # Get the count of the total number of articles in the database.
+    article_count = Article.objects.all().count()
 
-        # Fetch context variables by importing and invoking Google Plus function
-        #     in AuthHelper library.
-        from user_account.AuthHelper import AuthHelper
+    # Get the sign-in form.
+    import SignupForm
+    form = SignupForm.SignupForm()
 
-        context = dict(
-            AuthHelper.generateGPlusContext(request).items() + {
-                'top_articles': top_articles,
-                'title': _(settings.STRINGS['global']['TITLE']),
-                'count': article_count,
-                'form': form
-            }.items()
-        )
-        return render(request, 'index.html', context)
+    # Fetch context variables by importing and invoking Google Plus function
+    #     in AuthHelper library.
+    from user_account.AuthHelper import AuthHelper
+
+    context = dict(
+        AuthHelper.generateGPlusContext(request).items() + {
+            'top_articles': top_articles,
+            'title': _(settings.STRINGS['global']['TITLE']),
+            'count': article_count,
+            'form': form,
+            'login': True if login else False,
+            'login_error_message': login_error_message,
+            'source': source
+        }.items()
+    )
+    return render(request, 'index.html', context)
 
 
 def t404(request):
@@ -246,6 +260,3 @@ def email_share(request):
         return HttpResponse(
             json.dumps(status), 401, content_type="application/json")
 
-
-def article_center_registration(request):
-    return render(request, 'article-center-registration.html', {})

@@ -1,0 +1,27 @@
+<nav id="share-menu">
+    <div class="floating-menu-spacer"></div>
+    <ul>
+        <li id="share-on-facebook"><a href="https://www.facebook.com/dialog/feed?app_id=639282532755047&link={{ current_path }}&picture={{ thumbnail }}&name={{ obj.title }}&caption={{ caption }} &lsaquo; OpenCurriculum&description={{ obj.body_markdown_html|striptags|safe|truncatewords_html:40 }}&redirect_uri=http://www.theopencurriculum.org/" target="_blank">Facebook</a></li>
+        <li id="share-on-twitter"><a href="https://twitter.com/share?url={{ current_path }}" class="twitter-share-button" data-lang="en" onclick="javascript:window.open(this.href, '','menubar=no,toolbar=no,height=300,width=650');return false;">Twitter</a></li>
+        <li id="share-on-plus"><a href="https://plus.google.com/share?url={{ current_path }}" onclick="javascript:window.open(this.href, '','menubar=no,toolbar=no,height=600,width=600');return false;">Google+</a></li>
+        <li id="share-on-email"><a href="">Email</a></li>
+    </ul>
+</nav>
+<div id="email-share-dialog" class="dialog" title="Send email">
+    <form id="share-via-email">
+        <div id="email-share-dialog-wrapper">
+            Enter email address (separate with comma for multiple addresses):
+            <p><input type="text" id="email-share-address" class="full-width"/></p>
+            <p><textarea id="email-share-message" class="full-width">Hey!&#10;&#10;I would like to share with you with this resource from OpenCurriculum:&#10;&#10;{{ current_path }}</textarea></p>
+            <p>
+                <table>
+                    <tr><td>Your name:</td><td><input type="text" id="email-from-name"/></td></tr>
+                    <tr><td>Your email address:</td><td><input type="text" id="email-from-address"/></td></tr>
+                </table>
+            </p>
+            <div id="email-share-error" class="form-error"></div>
+            <div id="email-share-success" class="form-success"></div>
+        </div>
+        <div class="form-spinner"></div>
+    </form>
+</div>

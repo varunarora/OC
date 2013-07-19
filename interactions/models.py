@@ -5,10 +5,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.dispatch import Signal
 
-new_comment = Signal(providing_args=['actor_id', "action", "target_id",
-                                     "object_id"])
-
-
 class Comment(models.Model):
     body_markdown = MarkdownTextField()
     created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -19,6 +15,9 @@ class Comment(models.Model):
 
     def __unicode__(self):
         return str(self.parent_type) + ": " + str(self.parent_id)
+
+    comment_created = Signal(providing_args=["comment_id"])
+
 
 """
 class Favorite(models.Model):

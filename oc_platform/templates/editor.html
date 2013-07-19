@@ -1,0 +1,138 @@
+{% include 'partials/header.html' %}
+
+<div id="submission-info-wrapper">
+	<div id="submission-info">
+		<div>
+			<div id="submission-status">{{ message }}</div>
+			<div id="submission-buttons">
+				{% if user.id %}
+				<button class="btn dull-button" data-action="save" type="button">Save draft</button>
+				{% endif %}
+				<button class="btn dull-button" data-action="preview" type="button">Preview</button>
+				<button class="btn success-button" data-action="submit" type="button">Submit</button>
+			</div>
+		</div>
+	</div>
+</div>
+<form id="article-edit-form" method="POST">
+{% csrf_token %}
+	<div class="center-stage">
+		<div id="key-panel" class="panel-left">
+				<input type="hidden" name="action" />
+				<input type="hidden" name="log" />
+				<input type="hidden" name="revision" value="{{ article.id }}" />
+				<input type="hidden" name="owner" value="{{ article.user.id }}" />
+				<input type="hidden" name="user" value="{{ user.id }}" />
+				<input type="hidden" name="status" value="{{ article.flag }}" />
+				<article id="article-edit">
+					<h2 id="article-title"><input type="text" value="{{ article.title }}" name="title" class="browser-edit" /></h2>
+					<section class="breadcrumbs-edit">
+						{% for category in breadcrumb %}
+							{{ category.title }}
+								{% if not forloop.last %}
+									<span class="vertical-caret breadcrumbs-caret"></span>
+								{% endif %}
+						{% endfor %}
+					</section>
+					<section class="drop-edit objectives-edit">
+						<div class="edit-dropdown">Objectives</div>
+						<div class="edit-dropped">
+							<textarea class="medium-textarea" id="objectives-edit-textarea" name="objectives" type="hidden">{{ article.objectives}}</textarea>
+							<div id="objectives-inputs">
+							{% for obj in article.objectives %}
+								<input type="text" value="{{ obj }}" class="browser-edit" />
+							{% endfor %}
+							</div>
+							<p class="right">
+								<button class="btn dull-button" type="button" id="add-objective">Add objective</button>
+							</p>
+						</div>
+					</section>
+					<div id="wmd-button-bar"></div>
+					<textarea class="wmd-input large-textarea" id="wmd-input" name="body_markdown">{{ article.body_markdown }}</textarea>		
+					
+					<section class="drop-edit">
+						<div class="edit-dropdown edit-dropdown-opened">Tags</div>
+						<div class="edit-dropped show-dropped">
+							<ul class="tagit">
+							{% for tag in article.tags.all %}
+								<li>{{ tag }}</li>
+							{% endfor %}
+							</ul>
+						</div>
+					</section>
+				</article>
+		</div>
+		
+		<div id="dialog-message" title="Select a category" class="dialog">
+			<p>
+				<span class="ui-icon ui-icon-circle-check" style="float: left; margin: 0 7px 50px 0;"></span>
+				Select a parent category for this article:
+			</p>
+			<p>
+				<select id="category-selection" name="category">
+					{% for category in categories %}
+						<option value="{{ category.id }}" data-id="{{ category.id }}" {% ifequal category.id article.category.id %}selected{% endifequal %}>{{ category.title }}</option>
+					{% endfor %}
+				</select>
+			</p>
+		</div>
+
+		<div id="log-message" title="Log message" class="dialog">
+			<p>Briefly describe your edits:</p>
+			<input type="text" name="log_message" />
+		</div>
+		
+		<div title="Image upload" class="dialog" id="image-upload">
+			<div class="article-image-uploader">
+				<nav class="article-image-uploader-tabs">
+					<ul>
+						<li><a href=".upload-new">Upload new</a></li>
+						<li><a href=".show-image-history">My Images</a></li>
+					</ul>
+				</nav>
+				<div class="article-image-uploader-content oc-tabs-content">
+					<div class="upload-new">
+						<div class="upload-drag-drop">
+						</div>
+						<div class="upload-drag-drop-message">
+							DRAG AND DROP YOUR IMAGES HERE
+						</div>
+					</div>
+					<div class="show-image-history">
+						<div class="image-history-set">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="fill-panel" class="panel-right">
+			<aside id="support">
+				<h3>Recent activity</h3>
+				{% for revision in article.revisions.all %}
+					{% include 'partials/revision.html' %}
+				{% empty %}
+					No resources have been linked to this article yet.
+				{% endfor %}
+				
+				<h3>Tips &amp; Help</h3>
+			</aside>
+		</div>
+	</div>
+</form>
+
+<div id="floating-blocks">
+
+</div>
+
+<script type="text/javascript" src="{{ STATIC_URL }}js/pagedown/Markdown.Converter.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/pagedown/Markdown.Sanitizer.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/pagedown/Markdown.Editor.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/textext.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/tag-it.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/dropzone.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/editor.js"></script>
+
+
+{% include 'partials/footer.html' %}

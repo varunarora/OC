@@ -1,0 +1,61 @@
+{% include 'partials/header.html' %}
+
+<div class="center-stage">
+    <div id="fill-panel" class="panel-left">
+        <nav class="article-center-categories">
+            <ul>
+                <li><a href="{% url article_center %}"{% if category == None %} class="selected"{% endif %}><span class="all-categories"></span>All</a></li>
+                <li><a href="{% url article_center %}?category=english"{% if category == 'english' %} class="selected"{% endif %}><span class="english-category"></span>English Language / Literature</a></li>
+                <li><a href="{% url article_center %}?category=mathematics"{% if category == 'mathematics' %} class="selected"{% endif %}><span class="mathematics-category"></span>Mathematics</a></li>
+                <li><a href="{% url article_center %}?category=social-studies"{% if category == 'social-studies' %} class="selected"{% endif %}><span class="social-studies-category"></span>Social Studies</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div id="key-panel" class="panel-right">
+        {% for article in articles %}
+        <div class="article">
+            <div class="article-suggestion-wrapper">
+                {% if article.suggested %}
+                <div class="article-suggestion">
+                    <div>SUGGESTED FOR YOU</div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="article-info">
+                <div class="article-title"><a href="{% url articles:reader category_slug=article.breadcrumb.url %}?q={{ article.article.slug }}">{{ article.article.title }}</a></div>
+                <div class="article-contributors">Current contributors:
+                    {% for contributor in article.contributors %}
+                        <a href="{% url user:user_profile username=contributor.username %}" target="_blank">{{ contributor.first_name }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="article-objectives">
+                    <div class="article-objectives-title">ARTICLE OBJECTIVES</div>
+                    <div class="objectives-list">
+                        <ol>
+                        {% for objectives in article.revision.objectives %}
+                            <li>{{ objectives }}</li>
+                        {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+                <div class="article-labels">
+                    {% for issue in article.revision.issues.all %}
+                    <span title="{{ issue.label }}" class="{{ issue.tag.title|slugify }}-issue">{{ issue.tag.title }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="article-actions">
+                <a target="_blank" href="{% url articles:reader category_slug=article.breadcrumb.url %}?q={{ article.article.slug }}&view=edit">
+                    <button class="btn dull-button">Open in editor<span class="editor-window"></span></button>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+            No articles in this category.
+        {% endfor %}
+    </div>
+</div>
+
+
+{% include 'partials/footer.html' %}

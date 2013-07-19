@@ -1,0 +1,26 @@
+<div id="chief-panel-container" class="project-home">
+    <div id="chief-panel">
+        <header id="project-header" style="background: url('{{ MEDIA_URL }}{{ project.cover_pic }}')">
+            <hgroup id="project-info-wrapper">
+                <div id="project-info">
+                    <h2>{{ project.title|title }}</h2>
+                    <p id="project-info-description">{{ project.short_description }}</p>
+                </div>
+            </hgroup>
+        </header>
+        <!--
+        <div class="edit-profile-picture">
+            <span class="edit-picture-icon"></span>Change picture...
+        </div>
+        -->
+        <nav class="project-navigation">
+            <ul>
+                <li><a href="{% url projects:project_home project_slug=project.slug %}"{% if page == "home" %} class="current-page"{% endif %}>{{ project.title }}</a></li>
+                <li><a href="{% url projects:project_about project_slug=project.slug %}"{% if page == "about" %} class="current-page"{% endif %}>About</a></li>
+                <li><a href="{% url projects:project_browse project_slug=project.slug %}"{% if page == "browse" %} class="current-page"{% endif %}>Browse...</a></li>
+                <li><a href=""{% if page == "discussions" %} class="current-page"{% endif %}>Discussion board</a></li>
+                <li><a href="{% url projects:project_members project_slug=project.slug %}"{% if page == "members" %} class="current-page"{% endif %}>Members</a></li>
+            </ul>
+        </nav>
+    </div>
+</div>

@@ -1,6 +1,7 @@
 from django.db.models import TextField
 from markdown import *
 
+
 class MarkdownTextField (TextField):
     """
     A TextField that automatically implements DB-cached Markdown translation.
@@ -20,22 +21,22 @@ class MarkdownTextField (TextField):
     database duplicate column error will be raised.
 
     """
-    def __init__ (self, *args, **kwargs):
+
+    def __init__(self, *args, **kwargs):
         self._markdown_safe = not kwargs.pop('allow_html', True)
         self._html_field_suffix = kwargs.pop('html_field_suffix', '_html')
         super(MarkdownTextField, self).__init__(*args, **kwargs)
 
-    def contribute_to_class (self, cls, name):
+    def contribute_to_class(self, cls, name):
         self._html_field = "%s%s" % (name, self._html_field_suffix)
         TextField(editable=False).contribute_to_class(cls, self._html_field)
         super(MarkdownTextField, self).contribute_to_class(cls, name)
 
-    def pre_save (self, model_instance, add):
+    def pre_save(self, model_instance, add):
         value = getattr(model_instance, self.attname)
         html = markdown(value, ['extra'], safe_mode=self._markdown_safe)
         setattr(model_instance, self._html_field, html)
         return value
 
-    def __unicode__ (self):
+    def __unicode__(self):
         return self.attname
-

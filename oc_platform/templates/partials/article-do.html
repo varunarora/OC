@@ -1,0 +1,13 @@
+<section id="article-do">
+    <div class="article-actions">
+        <ul>
+            <li class="edit-action"><a href="{{ current_path }}&view=edit"><span class="icon"></span>Edit</a></li>
+            <li class="download-action"><a href=""><span class="icon"></span>Download as... <span class="horizontal-caret-up breadcrumb-caret"></span></li>
+            <li class="history-action"><a href="{{ current_path }}&view=history"><span class="icon"></span>View history</a></li>
+            <li class="share-action"><a href=""><span class="icon"></span>Share <span class="horizontal-caret-up breadcrumb-caret"></span></a></li>
+            {% with obj=article caption=article.category %}
+                {% include 'partials/share.html' %}
+            {% endwith %}
+        </ul>       
+    </div>
+</section>

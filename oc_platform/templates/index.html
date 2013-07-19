@@ -3,6 +3,88 @@
 			<div id="chief-panel-wrapper">
 							<img src="{{ STATIC_URL }}images/cloud.png" id="cloud" />
 			</div>
+			{% if login %}
+			<div id="chief-panel" class="sign-up">
+				<div id="key-panel" class="panel-left">
+					<h1 class="strong">Connect to your learning world.</h1>
+					<p>We bring the newest features, tools and updates so that your world continues to grow.</p>
+					
+					<div class="row-set">
+						<div class="row-item">
+							<div class="row-item-thumbnail">
+								<img src="{{ STATIC_URL }}images/resources.png" />
+							</div>
+							<div class="row-item-description">
+								<div class="bold">Resource collections and sharing</div>
+								<div class="row-item-description-detail">Create or upload resources and organize in collections before you share. Free 2GB of learning resource storage when you sign up</div>
+							</div>
+						</div>
+
+						<div class="row-item">
+							<div class="row-item-thumbnail">
+								<img src="{{ STATIC_URL }}images/social.png" />
+							</div>
+							<div class="row-item-description">					
+								<div class="bold">Get a little social</div>
+								<div class="row-item-description-detail">Comment, vote and participate in user discussions with an identity worth bragging about</div>
+								</div>
+						</div>
+					
+						<div class="row-item">
+							<div class="row-item-thumbnail">
+								<img src="{{ STATIC_URL }}images/notifications.png" />
+							</div>
+							<div class="row-item-description">
+								<div class="bold">Stay up-to-date</div>
+								<div class="row-item-description-detail">Customize preferences and receive notifications on all your contributions and general community updates</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="fill-panel" class="panel-right">
+					<div class="register-box">New to OpenCurriculum? <a href="{% url register %}">Sign up here</a></div>
+					<form method="POST" action="/authenticate/" id="sign-in-form">
+						{% if source %}
+						<input type="hidden" name="redirect_to" value="{{ source }}" />
+						{% endif %}
+						{% csrf_token %}
+						<div>Username or Email address</div>
+						<div><input type="text" name="username" placeholder="Username or Email address"/></div>
+						<div>Password</div>
+						<div><input type="password" name="password" placeholder="Password" /></div>
+						<div class="login-authentication-failure">{% if login_error_message %}{{ login_error_message }}{% endif %}</div>
+						<div id="loggedin-button">
+							<input type="checkbox" name="stay-logged-in" />Keep me logged in
+							<button class="btn success-button">Log in<span class="vertical-caret"></span></button>
+						</div>
+						<div id="forgot-username-password">Forgot username or password? <a href="{% url register %}">Click here</a></div>
+						<table id="signup-or">
+							<tr><td class="signup-or-flank"></td><td>OR</td><td class="signup-or-flank"></td></tr>
+						</table>
+						<div data-state="{{ state }}" id="session-state"></div>
+						<div id="signinButton">
+							<span class="g-signin"
+								data-scope="https://www.googleapis.com/auth/plus.login"
+								data-clientid="{{ client_id }}"
+								data-redirecturi="postmessage"
+								data-accesstype="offline"
+								data-cookiepolicy="single_host_origin"
+								data-callback="gPlusSignInCallback"
+								data-theme="dark"
+								data-width="wide">
+							</span>
+						</div>
+						<form id="google-plus-login">
+							<input type="hidden" name="google_id" />
+							<input type="hidden" name="redirect_to" value={{ source}} />
+						</form>
+						<div id="result"></div>
+					
+					</form>
+				</div>
+			</div>
+			
+			{% else %}
 			<div id="chief-panel">
 			
 				<div id="left-panel">
@@ -34,6 +116,7 @@
 					</ul>
 				</div>
 			</div>
+			{% endif %}
 		</div>
 
 		<div id="chief-panel-footer">

@@ -259,8 +259,8 @@ def read_article(request, article):
     context = {
         'article': articleRevision, 'breadcrumb': breadcrumb, 'title': title,
         'siblings': siblings,
-        'current_path': 'http://' + 'www.theopencurriculum.org' + request.get_full_path(),  # request.get_host()
-        'thumbnail': 'http://' + 'www.theopencurriculum.org' + '/static/images/thumbnails/' + str(article.id) + '-thumb.jpg'
+        'current_path': 'http://' + request.get_host() + request.get_full_path(),  # request.get_host()
+        'thumbnail': 'http://' + request.get_host() + '/static/images/thumbnails/' + str(article.id) + '-thumb.jpg'
     }
     return render(request, 'article.html', context)
 
@@ -319,10 +319,11 @@ def edit_article(request, article):
             # Add the m2m field tags and save
             #     Cannot do this earlier as there is no primary key associated
             #     with the object
+            """
             for tag in article_form.tags:
                 new_revision.tags.add(tag.id)
             new_revision.save()
-
+            """
             if action == "save":
                 return save_article(request, new_revision, article)
             elif action == "submit":
@@ -332,6 +333,9 @@ def edit_article(request, article):
 
         elif action == "preview":
             return preview_article(request, article_form, article)
+
+    if not request.user.is_authenticated():
+        context['message'] = _(settings.STRINGS['articles']['messages']['ANONYMOUS_EDITING'])
 
     return render(request, 'editor.html', context)
 
@@ -385,7 +389,7 @@ def _prepare_edit_context(articleRevision, article):
     title = _get_title_from_breadcrumb(breadcrumb, article)
 
     # Get all article revisions with the article ID.
-    revisions = ArticleRevision.objects.filter(article=article)
+    revisions = ArticleRevision.objects.filter(article=article).order_by('-created')
 
     # HACK(Varun): For now, pass only 2 revisions, until JavaScript support for
     #     condensed view.
@@ -651,9 +655,9 @@ def category_catalog(request, category):
     # Build a dictionary of immediate child categories mapped to the number of
     #     articles in their entire descendant nodes.
     setCounts = {}
-    for article in top_articles:
-        if article.category in flatCategories:
-            if len(childCategories) > 0:
+    if len(childCategories) > 0:
+        for article in top_articles:
+            if article.category in flatCategories:
                 # Find parent category among children
                 immediateChildren = list(
                     itertools.chain.from_iterable(childCategories.values()))
@@ -663,16 +667,23 @@ def category_catalog(request, category):
                 immediateChildrenFlattened = list(
                     itertools.chain.from_iterable(immediateChildrenFiltered)
                 )
-                parentCategory = _getParentSet(
-                    article.category, immediateChildrenFlattened)
+                if article.category == category:
+                    parentCategory = category
+                else:
+                    parentCategory = _getParentSet(
+                        article.category, immediateChildrenFlattened)
                 # Based on where the category has been added as key before or
                 #      not to the ancestor category (that is an immediate child)
                 #      to the category whose catalog is request, increment the
                 #      set count.
                 if parentCategory in setCounts:
-                    setCounts[parentCategory] += 1
+                    setCounts[parentCategory].append(article)
                 else:
-                    setCounts[parentCategory] = 1
+                    setCounts[parentCategory] = [article]
+    else:
+        setCounts[category] = []
+        for article in top_articles:
+            setCounts[category].append(article)
 
     # Build the URL slugs for the breadcrumb categories
     for key, value in setCounts.items():
@@ -916,6 +927,48 @@ def _testCategoryUniqueness(category, parent_slug):
 def articleURLResolver():
     # TODO(Varun): Write this function!
     pass
+
+
+def _getContributorFromRevisions(revision):
+    return revision.user
+
+
+def article_center(request):
+    if not request.user.is_authenticated():
+        return redirect('/?login=true&source=%s' % request.path)
+
+    category_slug = request.GET.get('category', None)
+
+    from articles.models import SuggestedArticle
+
+    if category_slug:
+        # Get all unpublished articles whose ancestor category is the slug
+        # category
+        category = Category.objects.get(slug=category_slug)
+        suggested_articles = SuggestedArticle.objects.filter(article__category=category)
+    else:
+        suggested_articles = SuggestedArticle.objects.all()
+
+    for article in suggested_articles:
+        revisions = ArticleRevision.objects.filter(
+            article=article.article)
+        article.contributors = map(_getContributorFromRevisions, revisions)
+        category_breadcrumb = ArticleUtilities.buildBreadcrumb(article.article.category)
+
+        # The category of the first breadcrumb category is the article category
+        article.breadcrumb = category_breadcrumb[0]
+
+        if request.user in article.suggested_users.all():
+            article.suggested = True
+        else:
+            article.suggested = False
+
+    context = {
+        'articles': suggested_articles,
+        'category': category_slug,
+        'title': _(settings.STRINGS['article_center']['TITLE'])
+    }
+    return render(request, 'article_center.html', context)
 
 
 class CatalogCategory():

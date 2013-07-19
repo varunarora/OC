@@ -1,0 +1,17 @@
+{% include 'partials/header.html' %}
+{% include 'project/header.html' with page="browse" %}
+
+<div class="center-stage">
+    <div id="fill-panel" class="panel-left">
+    </div>
+    <div id="key-panel" class="panel-right">
+    {% for collection in collections %}
+        <a href="{% url projects:list_collection project_slug=project.slug collection_slug=collection.slug %}">{{ collection }}</a>
+    {% endfor %}
+    {% for asset in assets.all %}
+        <a href="">{{ asset }}</a>
+    {% endfor %}
+    </div>
+</div>
+
+{% include 'partials/footer.html' %}

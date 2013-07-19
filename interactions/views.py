@@ -15,6 +15,10 @@ def post_comment(request):
             new_comment.send(sender='post_comment', actor_id=comment.user.id,
                              action='comment', object_id=comment.parent_id)
 
+            from interactions.models import Comment
+            Comment.comment_created.send(
+                sender="Comments", comment_id=comment.id)
+
             serialized_comment = {'user': comment.user.id, 'body': comment.body_markdown_html}
 
             response['status'] = 'success'

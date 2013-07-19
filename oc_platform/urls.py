@@ -20,6 +20,9 @@ urlpatterns = patterns(
 
     url(r'^resources/', include('oer.urls', namespace='resource')),
 
+    # Interactions
+    url(r'^interactions/', include('interactions.urls', namespace='interactions')),
+
     url(r'^contact/', 'oc_platform.views.contact', name='contact'),
 
     url(r'^developers/', 'oc_platform.views.developers', name='developers'),
@@ -38,6 +41,7 @@ urlpatterns = patterns(
 
     url(r'^license/', 'oc_platform.views.license', name='license'),
 
+    url(r'^upload/', 'oer.views.upload_page', name='upload'),
 
     # User stuff
     url(r'^signup-invite/', 'oc_platform.views.signup_invite', name='signupinvite'),
@@ -47,20 +51,28 @@ urlpatterns = patterns(
     url(r'^confirm-account/', 'user_account.views.confirm_account', name='confirm_account'),
     url(r'^logout/', 'user_account.views.logout_view', name='logout'),
     url(r'^gauth/', 'user_account.views.googleplus_login', name='gplus_login'),
+    url(r'^glogin/', 'user_account.views.glogin', name='glogin'),
     url(r'^404testing/', 'oc_platform.views.t404'),
     url(r'^500testing/', 'oc_platform.views.t500'),
-
 
     # Initialize API stuff
     url(r'^api/getBreadcrumb/', 'oc_platform.views.get_breadcrumb', name='api-get-breadcrumb'),
     url(r'^api/emailShare/', 'oc_platform.views.email_share', name='api-email-share'),
     url(r'^api/subscribe/', 'user_account.views.add_subscription', name='api-subscribe'),
+    url(r'^api/fpUpload/', 'oer.views.fp_upload', name='api-fp-upload'),
+    url(r'^api/fpSubmit/', 'oer.views.fp_submit', name='api-fp-submit'),
+    url(r'^api/file-upload/', 'oer.views.file_upload', name='api-file-upload'),
+    url(r'^api/image-upload/', 'media.views.upload_image', name='api-image-upload'),
+    url(r'^api/list-user-images/(?P<user_id>\d+)/$', 'media.views.list_user_images', name='api-list-user-images'),
 
-    # Interactions
-    url(r'^interactions/', include('interactions.urls', namespace='interactions')),
+    # Labs stuff
+    url(r'^labs/article-center/$', 'articles.views.article_center', name='article_center'),
 
     # Article Center Registration
     url(r'^contributor-registration/', 'user_account.views.contributor_registration', name='contributor_registration'),
+
+    # Article Center Introduction
+    url(r'^contributor-introduction/', 'user_account.views.contributor_introduction', name='contributor_introduction'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -72,7 +84,6 @@ urlpatterns = patterns(
     url(r'^feeds/(?P<user_id>\d+)/$', 'user_account.views.user_home', name='feed'),
     url(r'^users/(?P<user_id>\d+)/$', 'user_account.views.profile', name='profile'),
 
-
 )
 
 if settings.DEBUG:
@@ -81,3 +92,4 @@ if settings.DEBUG:
         (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
         (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
     )
+

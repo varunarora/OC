@@ -1,13 +1,130 @@
 {% include 'partials/header.html' %}
-
     <h3>
         {{ name }}'s profile page.
     </h3>
 
-    {% for item in feed %}
-        <div class="activity">
-            {{ item.id }}
-        </div>
-    {% endfor %}
+<div class="center-stage">
+    <div id="key-panel" class="panel-left">
+    {{ popup_message }}
+        <div class="user-info">
+            <div class="user-profile-picture">
+                <!--
+                <img src="{{ MEDIA_URL }}profile/{{ user_profile.id }}-profile.jpg" />-->
+                <div style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}')" class="user-picture-cover"></div>
+                <div class="edit-profile-picture">
+                    <span class="edit-picture-icon"></span>Change...
+                </div>
+            </div>
+            <div class="user-profile-info">
+                <div class="profile-name">
+                    <h2>{{ user_profile.get_full_name }}</h2>
+                </div>
+                <div class="profile-headline-wrapper">
+                    <form>
+                        <input type="hidden" name="user_id" value="{{ user_profile.id }}"/>
+                        <input type="text" class="profile-headline" value="{{ user_profile.get_profile.headline }}" />
+                    </form>
+                    <span class="headline-edit"></span>
+                </div>
+                <div class="profile-subscribe">
+                    <button class="btn dull-button">SUBSCRIBE</button><span class="profile-subscriber-count">23 subscribers (3 mutual)</span>
+                </div>
 
+            </div>
+        </div>
+    </div>
+    <div id="fill-panel" class="panel-right">
+    </div>
+</div>
+<div class="profile-background-wrapper"></div>
+<div class="center-stage profile-details">
+    <div id="key-panel" class="panel-left">
+        <div class="profile-contributions">
+            {% if contributions %}
+            <h3>My Contributions</h3>
+            <div class="profile-contributions-list">
+                {% for contribution in contributions %}
+                    <div class="profile-contribution">
+                        <span class="contribution-icon"></span>
+                        <a href="{% url articles:reader category_slug=contribution.article.category.slug %}?q={{ contribution.article.slug }}&revision={{ contribution.id }}">{{ contribution.title }}</a>
+                        <a href="{% url articles:reader category_slug=contribution.article.category.slug %}" class="category-label">{{ contribution.article.category.title }}</a>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% if projects %}
+        <div class="profile-projects">
+            <h3>Projects</h3>
+            {% for project in projects %}
+                <div class="profile-projects-item">
+                    <a href="{% url projects:project_home project_slug=project.slug %}">
+                        <div style="background-image: url('{{ MEDIA_URL }}{{ project.cover_pic }}');" class="profile-projects-item-description-wrapper">
+                            <div class="profile-projects-item-description">
+                                <div class="profile-projects-item-title bold">
+                                        {{ project.title }}
+                                </div>
+                                {{ project.short_description }}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if resources or edits %}
+        <div class="profile-resources">
+            <h3>My Resources</h3>
+            {% if edits %}
+            <h4>Forks</h4>
+            {% for edit in edits %}
+            <div>
+                <a href="{% url articles:reader category_slug=edit.article.category.slug %}?q={{ edit.article.slug }}&revision={{ edit.id }}">{{ edit.created }}</a>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% if resources %}
+            <div class="profile-resources-added">
+                <div class="profile-subheading">Resources added</div>
+                <div class="profile-resources-added-list">
+                    {% for resource in resources %}
+                        <div class="profile-resource">
+                            {% if resource.type == "url" %}
+                                <span class="url-icon"></span>
+                            {% elif resource.type == "video" %}
+                                <span class="video-icon"></span>
+                            {% elif resource.type == "attachment" %}
+                                <span class="attachment-icon"></span>
+                            {% elif resource.type == "article" %}
+                                <span class="article-icon"></span>
+                            {% endif %}
+                            <a href="{% url resource:read resource_id=resource.id %}">{{ resource.title }}</a><span class="resource-created">on {{ resource.created|date:"N jS" }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if favorites %}
+        <div class="profile-favorites">
+            <h3>Favorites</h3>
+        </div>
+        {% endif %}
+    </div>
+    <div id="fill-panel" class="panel-right">
+        <h3>Updates</h3>
+    </div>
+</div>
+<div class="picture-upload-dialog dialog">
+    <form method="POST" action="/user/{{ user_profile.username }}/change-picture/" enctype="multipart/form-data">
+        {% csrf_token %}
+        Choose a new profile picture from your computer (less than 2 MB in size):<p/>
+        <input type="file" name="new_profile_picture" id="id_new_profile_picture"/>
+    </form>
+</div>
 {% include 'partials/footer.html' %}
+

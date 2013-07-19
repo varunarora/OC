@@ -3,8 +3,31 @@
 	<head>
 		<meta charset="utf-8">
 		<title>{{ title|safe }}</title>
+		<script type="text/javascript">
+			// Initialize WebFont from typography website.
+			var WebFontConfig = {
+			    fontdeck: { id: '25967' },
+			    fontactive: function(familyName, fvd) {
+			        OC.setupUserMenu();
+			    }
+			};
+			(function(){
+				document.getElementsByTagName("html")[0].setAttribute("class","wf-loading")
+  				//  NEEDED to push the wf-loading class to your head
+  				document.getElementsByTagName("html")[0].setAttribute("className","wf-loading")
+        		// for IE…
+
+			    var wf = document.createElement('script'),
+			        s = document.getElementsByTagName('script')[0];
+			    wf.src = ('https:' === document.location.protocol ? 'https' : 'http') +
+			        '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+			    wf.type = 'text/javascript';
+			    wf.async = 'false';
+			    s.parentNode.insertBefore(wf, s);
+			})();
+		</script>
 		<link href='http://fonts.googleapis.com/css?family=PT+Sans:700,700italic,400italic,400' rel='stylesheet' type='text/css'>
-		<link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui-1.9.2.custom.css" type="text/css" />
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui-1.10.3.custom.css" type="text/css" />
 		<!--[if lt IE 9]>
 			<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ie.css" />
 		<![endif]-->
@@ -12,27 +35,12 @@
 		<!--[if lt IE 9]>
 			<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ie-override.css" />
 		<![endif]-->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
-		<script src="{{ STATIC_URL }}js/jquery-ui-1.9.2.custom.min.js" type="text/javascript"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>	
+		<script src="{{ STATIC_URL }}js/jquery-ui-1.10.3.custom.min.js" type="text/javascript"></script>
 		<script src="{{ STATIC_URL }}js/underscore-min.js" type="text/javascript"></script>
-		<script src="{{ STATIC_URL }}js/backbone-min.js" type="text/javascript"></script>
-		<script src="{{ STATIC_URL }}js/quicksilver.js" type="text/javascript"></script>
 		<script src="{{ STATIC_URL }}js/modernizr.js" type="text/javascript"></script>
-		<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 		<script src="{{ STATIC_URL }}js/jquery.tipsy.js" type="text/javascript"></script>
 		<script src="{{ STATIC_URL }}js/core.js" type="text/javascript"></script>
-		<script type="text/javascript">
-			  var _gaq = _gaq || [];
-			  _gaq.push(['_setAccount', 'UA-23974225-1']);
-			  _gaq.push(['_setDomainName', 'theopencurriculum.org']);
-			  _gaq.push(['_trackPageview']);
-
-			  (function() {
-				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-			  })();
-		</script>
 		<link rel="icon" href="{{ STATIC_URL }}favicon.ico" type="image/x-icon"/>
 	</head>
 	<body>
@@ -51,11 +59,18 @@
 						</div>
 					</hgroup>
 					<hgroup id="header-right">
-						<!--
 						<nav id="user-buttons">
 							<ul>
 							{% if user.is_authenticated %}
-								<li><a href="{# url register #}" id="user-dropdown">{# user.first_name #} <span class="horizontal-caret username-caret"></span></a>				
+								<li class="user-firstname-wrapper"><a href="{% url user:user_profile username=user.username %}" id="user-dropdown">
+									<img src="{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}" class="header-user-picture"/>
+									<div class="user-firstname">{{ user.first_name }}</div> 
+									<div class="horizontal-caret username-caret user-firstname-assistant"></div>
+									</a>
+
+								</li>
+								<li class="user-notification-count {% if notification_count > 0 %}unread-notifications {% else %}no-notifications{% endif %}">
+									<a href="">{% if notification_count > 0 %}{{ notification_count }}{% endif %}</a>
 								</li>
 								<nav id="user-menu">
 									<div class="floating-menu-spacer"></div>
@@ -63,18 +78,25 @@
 										<li><a href="/logout/">Logout</a></li>
 									</ul>
 								</nav>
-
+								<nav id="notifications-menu">
+									<div class="floating-menu-spacer"></div>
+									<ul>
+										<form id="user-info"><input type="hidden" value="{{ user.id }}" name="user_id" /></form>
+										{% for notification in top_notifications %}
+											<li><a {% if not notification.read %} class="new-notification" {% endif %}id="notification-{{ notification.id }}" href="{{ notification.url }}">{{ notification.description }}</a></li>
+										{% endfor %}
+									</ul>
+								</nav>
 							</ul>
 						</nav>
 					{% else %}
 						<nav id="authenticate-buttons">
 							<ul>
-								<li id="sign-up-button"><a href="{# url register #}">Sign up</a></li>
-								<li id="login"><a href="{# url home #}">Login</a></li>
+								<li id="sign-up-button"><a href="{% url register %}">Sign up</a></li>
+								<li id="login"><a href="{% url home %}?login=true">Login</a></li>
 							</ul>
 						</nav>
 					{% endif %}
-					-->
 					</hgroup>
 			</hgroup>
 		</header>
