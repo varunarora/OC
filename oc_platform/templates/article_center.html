@@ -40,7 +40,7 @@
                     </div>
                 </div>
                 <div class="article-labels">
-                    {% for issue in article.revision.issues %}
+                    {% for issue in article.revision.issues.all %}
                     <span title="{{ issue.label }}" class="{{ issue.tag.title|slugify }}-issue">{{ issue.tag.title }}</span>
                     {% endfor %}
                 </div>
