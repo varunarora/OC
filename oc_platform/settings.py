@@ -9,7 +9,7 @@ SIGNUPS_ADMINS = ['info@theopencurriculum.org']
 CONTRIBUTOR_SIGNUPS_ADMINS = ['info@theopencurriculum.org', 'zeinab@theopencurriculum.org', 'duncan@theopencurriculum.org']
 HELP_EMAIL = 'hello@theopencurriculum.org'
 
-EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST = "smtp.sendgrid.net"
 EMAIL_PORT = "587"
 EMAIL_HOST_USER = ""  # This needs to filled in
 EMAIL_HOST_PASSWORD = ""  # This needs to filled in
@@ -39,6 +39,12 @@ TIME_ZONE = 'America/New_York'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
+# Location of AWS S3 bucket for static content
+AWS_STATIC_BUCKET = str('http://ocstatic.s3.amazonaws.com/')
+S3_BUCKET_NAME = str('ocstatic')
+AWS_ACCESS_KEY = str('AKIAJNPJU26BJC5LW6MA')
+AWS_SECRET_KEY = str('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')
+
 HAYSTACK_SITECONF = 'search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
 HAYSTACK_SOLR_URL = 'http://54.235.197.234:8983/solr'
@@ -61,28 +67,30 @@ import os.path
 TEMPLATE_DIR = os.path.dirname(__file__)
 ABSOLUTE_PATH = lambda x: os.path.join(os.path.abspath(TEMPLATE_DIR), x)
 
-# Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ABSOLUTE_PATH('media_content/')
-
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = '/media/'
+MEDIA_URL = '/static/media/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = '/home/django/OC/static/'
+STATIC_MOUNT_POINT = '/home/django/OC/static/'
+
+STATIC_ROOT = STATIC_MOUNT_POINT + 'assets/'
 
 STATIC_ASSETS_ROOT = STATIC_ROOT
+
+# Absolute filesystem path to the directory that will hold user-uploaded files.
+# Example: "/home/media/media.lawrence.com/media/"
+MEDIA_ROOT = STATIC_MOUNT_POINT + 'media/'
 
 TEMP_IMAGE_DIR = STATIC_ROOT + 'images/tmp/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+STATIC_URL = '/static/assets/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -108,6 +116,16 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
     # 'django.template.loaders.eggs.Loader',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'user_account.context_processors.notifications',
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.contrib.messages.context_processors.messages'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -201,10 +219,10 @@ STRINGS = {
     'about': {
         'TITLE': 'About OpenCurriculum',
         'team': {
-            'TITLE': 'OpenCurriculum\'s Team'
+            'TITLE': 'Leadership &lsaquo; OpenCurriculum'
         },
         'press': {
-            'TITLE': 'OpenCurriculum\'s Team'
+            'TITLE': 'Press &lsaquo; OpenCurriculum'
         },
     },
     'jobs': {
@@ -232,12 +250,15 @@ STRINGS = {
         'HISTORY_TITLE': 'Edit history for %s &lsaquo; OpenCurriculum',
         'messages': {
             'SUBMIT_REVIEW': 'Your edits have been successfully submitted for review',
-            'EDITS_SAVE': 'Successfully saved edits at %s'
+            'EDITS_SAVE': 'Successfully saved edits at %s',
+            'ANONYMOUS_EDITING': 'Editing as anonymous.'
         }
     },
     'user': {
         'REGISTER_TITLE': 'Sign up for a new account &lsaquo; OpenCurriculum',
         'CONTRIBUTOR_REGISTER_TITLE': 'Register as an Early contributor',
+        'AUTHENTICATION_ERROR': 'Your username or password is incorrect. Please try again.',
+        'INACTIVE_ACCOUNT_ERROR': 'You need to activate your account before you login.',
         'register': {
             'professions': {
                 'STUDENT': 'Student',
@@ -268,7 +289,7 @@ STRINGS = {
                 'DOB_INCORRECT': 'The date of birth is incorrect',
                 'RECAPTCHA_VALIDATION_FAILURE': 'reCaptcha validation failed. Please try again or contact us for support',
                 'PASSWORD_MISMATCH': 'The two passwords did not match',
-                'USERNAME_VALIDATION_ERROR': 'Username should be all lowercase, and must only have letters, digits, and underscores.',
+                'USERNAME_VALIDATION_ERROR': 'Username should be all lowercase, and must only have letters and digits and/or underscores.',
                 'PASSWORD_VALIDATION_ERROR': 'Password must contain at least 6 characters, with atleast one lowercase and one uppercase character and atleast one digit or symbol.',
                 'NAME_VALIDATION_ERROR': 'This field must only have letters.'
             }
@@ -277,10 +298,16 @@ STRINGS = {
     'projects': {
         'TITLE': 'OpenCurriculum Projects: The easiest way to share your learning content',
         'MEMBERS_TITLE': 'Members',
+        'ABOUT_TITLE': 'About',
+        'BROWSE_TITLE': 'Browse...',
         'invite': {
             'SUCCESS_TITLE': 'Successfully received your projects invite',
             'FAILURE': 'Failed to submit form'
         }
+    },
+    'article_center': {
+        'INTRODUCTION_TITLE': 'Hi - nice to meet you!',
+        'TITLE': 'Article Center: Your private guide into article contributions'
     }
 }
 
