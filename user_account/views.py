@@ -893,12 +893,16 @@ def profile(request, user_id):
     return render(request, 'profile.html', c)
 
 
-def get_subscribers_from_profile(profile):
-    """Return the user objects (not profiles) subscribed to a given profile.
+def get_user_from_profile(profile):
+    return profile.user
 
-    The lambda method returns a user corresponding to a profile.
+
+def get_subscribers_from_profile(profile):
+    """Return the list of user objects of a given profile's subscribers.
+
+    List of subscriber profiles => list of subscriber user objects.
     """
-    return map(lambda subscriber: subscriber.user, profile.subscribers.all())
+    return map(get_user_from_profile, profile.subscribers.all())
 
 
 def find_recipients(**kwargs):
