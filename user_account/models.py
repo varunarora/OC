@@ -14,7 +14,7 @@ class UserProfile(models.Model):
     profession = models.CharField(max_length=256)
     profile_pic = models.ImageField(upload_to='images/users', blank=True)
     interests = models.ManyToManyField(Tag, null=True, blank=True)
-    social_id = models.CharField(max_length=32)
+    social_id = models.CharField(max_length=32, null=True, blank=True)
 
     def __unicode__(self):
         return self.user.username
