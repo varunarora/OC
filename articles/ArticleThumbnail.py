@@ -15,35 +15,46 @@ class ArticleThumbnail:
 
     def generateThumbnail(self, article):
         # Get all the images from the article
-        articleImages = self.getArticleImages(article.revision.body_markdown_html)
+        articleImages = self.getArticleImages(
+            article.revision.body_markdown_html)
 
         from subprocess import call
-        thumbnail = settings.STATIC_ROOT + "images/thumbnails/" + str(article.id) + "-thumb"
+        #thumbnail = settings.STATIC_ROOT + "images/thumbnails/" + str(article.id) + "-thumb"
+        thumbnail = settings.MEDIA_ROOT + "article/tmp/" + str(
+            article.id) + "-thumb"
 
         if articleImages:
             # Figure out largest image among list of images
             img = self.getLargestImage(articleImages)
 
+            # If there is atleast one large enough image in the article
             if img is not None:
-                call(["convert", "-size", str(self.THUMBNAIL_HEIGHT)+"x"+str(self.THUMBNAIL_WIDTH),
-                     "xc:white", thumbnail + self.THUMBNAIL_EXT])
+                # Create a JPG copy with the white background
+                call(["convert", "-size", str(
+                    self.THUMBNAIL_HEIGHT)+"x"+str(self.THUMBNAIL_WIDTH),
+                    "xc:white", thumbnail + self.THUMBNAIL_EXT])
 
                 imgWidth = img.size[0]
                 imgHeight = img.size[1]
 
+                # If both width and height are larger than ideal height
+                #     requirement
                 if imgWidth >= self.THUMBNAIL_WIDTH and imgHeight >= self.THUMBNAIL_HEIGHT:
                     imgMidpoint = [imgWidth/2, imgHeight/2]
                     imgTopLeft = [imgMidpoint[0] - self.THUMBNAIL_WIDTH/2,
                                   imgMidpoint[1] - self.THUMBNAIL_HEIGHT/2]
 
+                    # Create a thumbnail with the center of the image as anchor
                     call(["composite", "-geometry", "-" + str(imgTopLeft[0]) + "-" + str(imgTopLeft[1]),
                          img.path, thumbnail + self.THUMBNAIL_EXT, thumbnail + self.THUMBNAIL_EXT])
 
+                # If both width and height are larger than the thumbnail height
                 elif imgWidth >= self.MIN_THUMBNAIL_WIDTH and imgHeight >= self.MIN_THUMBNAIL_HEIGHT:
-
                     scaledForegroundImageHeight = int(self.THUMBNAIL_HEIGHT*self.THUMBNAIL_IMG_RATIO)
                     scaledForegroundImageWidth = int(self.THUMBNAIL_WIDTH*self.THUMBNAIL_IMG_RATIO)
 
+                    # Resize the image to be its original size multiplied by a
+                    #     factor
                     call(["convert", img.path, "-resize", str(scaledForegroundImageWidth) + "x" +
                          str(scaledForegroundImageHeight),
                          "-size", str(self.THUMBNAIL_WIDTH) + "x" + str(self.THUMBNAIL_HEIGHT),
@@ -57,17 +68,27 @@ class ArticleThumbnail:
                     call(["rm", thumbnail + "-tmp" + ".png"])
                 else:
                     thumbnailSrc = self.setRandomTexture(article)
-                    call(["cp", thumbnailSrc, thumbnail + ".jpg"])
+                    call(["cp", thumbnailSrc, thumbnail + self.THUMBNAIL_EXT])
 
             else:
                 thumbnailSrc = self.setRandomTexture(article)
-                call(["cp", thumbnailSrc, thumbnail + ".jpg"])
+                call(["cp", thumbnailSrc, thumbnail + self.THUMBNAIL_EXT])
 
         # If no image has been found
         else:
             # Return article thumbnail to be a generated random texture
             thumbnailSrc = self.setRandomTexture(article)
-            call(["cp", thumbnailSrc, thumbnail + ".jpg"])
+            call(["cp", thumbnailSrc, thumbnail + self.THUMBNAIL_EXT])
+
+        from django.core.files.images import ImageFile
+        thumbnail_to_assign = ImageFile(open(thumbnail + self.THUMBNAIL_EXT))
+        # NOTE(Varun): It's really important to keep the save as false, to avoid
+        #     a recursion here
+        article.image.save(
+            thumbnail_to_assign.name, thumbnail_to_assign, save=False)
+
+        # Now delete the temporary image thumbnail
+        call(["rm", thumbnail + self.THUMBNAIL_EXT])
 
     def getArticleImages(self, body):
         soup = BeautifulSoup(body)
@@ -81,7 +102,7 @@ class ArticleThumbnail:
     def setRandomTexture(self, article):
         import random
         txtr = random.randint(1, 5)
-        return settings.STATIC_ROOT + "images/thumbnails/txtrs/" + str(txtr) + ".jpg"
+        return settings.MEDIA_ROOT + "article/textures/" + str(txtr) + ".jpg"
 
     def getLargestImage(self, images):
         maxWidthImage = None
@@ -99,7 +120,8 @@ class ArticleThumbnail:
             imgWidth = 0
 
             try:
-                path = settings.STATIC_ASSETS_ROOT + '/' + image.replace(settings.STATIC_URL, '')
+                path = settings.MEDIA_ROOT + '/' + image.replace(
+                    settings.MEDIA_URL, '')
                 imageFile = Image.open(path)
                 imgWidth = imageFile.size[0]
                 imgHeight = imageFile.size[1]

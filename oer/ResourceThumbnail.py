@@ -2,6 +2,7 @@ from VideoHelper import VideoHelper
 #from webkit2pngInit import WebKit2PNG, WebKit2PNGOptions
 import json
 from subprocess import call
+from django.conf import settings
 
 
 class ResourceThumbnail:
@@ -15,8 +16,8 @@ class ResourceThumbnail:
 
     @staticmethod
     def generateThumbnail(resource):
-        thumbnailDir = "static/images/oer_thumbnails/"
-        thumbnail = thumbnailDir + str(resource.id) + "-thumb"
+        thumbnailDir = settings.MEDIA_ROOT + 'resource_thumbnail/tmp/'
+        thumbnail = thumbnailDir + str(resource.id)
 
         if resource.type == "video":
 
@@ -42,7 +43,7 @@ class ResourceThumbnail:
             call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
 
         elif resource.type == "article":
-            call(["cp", thumbnailDir + "rsrcs/" + "article.jpg", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
+            call(["cp", thumbnailDir + "defaults/" + "article.jpg", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
         elif resource.type == "url":
 
@@ -87,8 +88,18 @@ class ResourceThumbnail:
                 thumbnailSrcName = "blank.jpg"
 
             call(
-                ["cp", thumbnailDir + "rsrcs/" + thumbnailSrcName,
+                ["cp", thumbnailDir + "defaults/" + thumbnailSrcName,
                     thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
+
+        from django.core.files.images import ImageFile
+        thumbnail_to_assign = ImageFile(open(thumbnail + ResourceThumbnail.THUMBNAIL_EXT))
+        # NOTE(Varun): It's really important to keep the save as false, to avoid
+        #     a recursion here
+        resource.image.save(
+            thumbnail_to_assign.name, thumbnail_to_assign, save=False)
+
+        # Now delete the temporary image thumbnail
+        call(["rm", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
     @staticmethod
     def getThumbnailFromProvider(video_tag, provider):

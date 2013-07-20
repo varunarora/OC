@@ -51,8 +51,7 @@ class Article(models.Model):
     changed = models.DateTimeField(auto_now=True, editable=False)
     title = models.CharField(max_length=256)
     resources = models.ManyToManyField('oer.Resource', blank=True)
-    # TODO: Articles should have only one image, this is wrongly done
-    image = models.ManyToManyField('media.Image', blank=True)
+    image = models.ImageField(upload_to='article', blank=True)
     views = models.IntegerField(editable=False, default=0)
     license = models.ForeignKey('license.License', default=get_default_license)
     slug = models.SlugField(max_length=256)

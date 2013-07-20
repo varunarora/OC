@@ -24,6 +24,7 @@ class Resource(models.Model):
     views = models.IntegerField(editable=False, default=0)
     user = models.ForeignKey(User)
     file = models.FileField(upload_to='resources')
+    image = models.ImageField(upload_to='resource_thumbnail', blank=True)
 
     def save(self, *args, **kwargs):
         newResource = super(Resource, self).save(*args, **kwargs)
