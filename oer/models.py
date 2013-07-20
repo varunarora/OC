@@ -27,8 +27,8 @@ class Resource(models.Model):
     image = models.ImageField(upload_to='resource_thumbnail', blank=True)
 
     def save(self, *args, **kwargs):
-        newResource = super(Resource, self).save(*args, **kwargs)
         ResourceThumbnail.generateThumbnail(self)
+        newResource = super(Resource, self).save(*args, **kwargs)
         return newResource
 
     def __unicode__(self):
