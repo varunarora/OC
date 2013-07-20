@@ -40,8 +40,8 @@ TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-us'
 
 # Location of AWS S3 bucket for static content
-AWS_STATIC_BUCKET = str('http://ocstatic.s3.amazonaws.com/')
-S3_BUCKET_NAME = str('ocstatic')
+AWS_STATIC_BUCKET = str('http://ocfilepicker.s3.amazonaws.com/')
+S3_BUCKET_NAME = str('ocfilepicker')
 AWS_ACCESS_KEY = str('AKIAJNPJU26BJC5LW6MA')
 AWS_SECRET_KEY = str('MA9eg98F0FOgZ6kInys+oo4uZ4WchY3bUDSR55y0')
 
@@ -86,7 +86,7 @@ STATIC_ASSETS_ROOT = STATIC_ROOT
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = STATIC_MOUNT_POINT + 'media/'
 
-TEMP_IMAGE_DIR = STATIC_ROOT + 'images/tmp/'
+TEMP_IMAGE_DIR = MEDIA_ROOT + 'profile/tmp/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
