@@ -541,7 +541,7 @@ def _set_profile_picture(profile, profile_form):
 def authenticate(request):
     """Authenticates the user and redirects to previous page being surfed"""
     # Determine redirect-to path, if any
-    redirect_to = request.POST.get('redirect_to', None)
+    redirect_to = request.POST.get('redirect_to', None) is 'True'
 
     from django.contrib.auth import authenticate, login
 
