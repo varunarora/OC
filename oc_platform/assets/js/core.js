@@ -466,9 +466,15 @@ var OC = {
     /*jslint nomen: true */
     expediteGLogin: function(profile) {
         var first_name = profile.name.givenName || "",
-            last_name = profile.name.familyName || "",
-            place = _.where(profile.placesLived, {primary : true})[0],
+            last_name = profile.name.familyName || "";
+
+        var location;
+        if (profile.placesLived) {
+            var place = _.where(profile.placesLived, {primary : true})[0];
             location = place.value || "";
+        } else {
+            location = '';
+        }
 
         // Fill editable inputs
         $(OC.config.registration.fields.first_name).attr(
