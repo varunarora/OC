@@ -22,7 +22,8 @@
 			</aside>
 		<p id="or-fill-form" class="social-login-hide"><span class="bold">OR</span> fill the form below:</p>
 		<form method="POST" action="/signup/" id="signup-form">
-			<input type="hidden" name="social_login" value={{ social_login }} />
+			<input type="hidden" name="social_login" value="{{ social_login }}" />
+			<input type="hidden" name="social_id" value="{{ social_id }}" />
 			<input type="hidden" name="profile_pic" />
 			{% csrf_token %}
 			<table id="signup-form-table">

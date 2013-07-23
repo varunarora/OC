@@ -531,8 +531,8 @@ var OC = {
                     //     redirect the page.
                     if (response.status === "true"){
                         var redirect_to = $(
-                            '.google-plus-login input[name=redirect_to]');
-                        if (redirect_to.length > 0){
+                            '.google-plus-login input[name=redirect_to]').val();
+                        if (redirect_to !== 'False'){
                             window.location.href = redirect_to;
                         } else {
                             window.location.href = '/';

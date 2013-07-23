@@ -207,7 +207,7 @@ class NewUserProfileForm(ModelForm):
 
             newRequest.__setitem__('collection', root_collection.id)
             newRequest.__setitem__(
-                'collection', social_id if social_login else None)
+                'social_id', social_id if social_login else None)
 
             self.profile_pic_tmp = profile_pic
 

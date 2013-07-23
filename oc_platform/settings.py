@@ -137,6 +137,11 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+AUTHENTICATION_BACKENDS = (
+    'user_account.backends.SocialModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
 ROOT_URLCONF = 'oc_platform.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -206,8 +211,6 @@ AUTH_PROFILE_MODULE = 'user_account.UserProfile'
 
 RECAPTCHA_PRIVATE_KEY = '6LeG_8USAAAAALqEAEupYoiLIsguhIruYa0QmIVK'
 
-GAUTH_CLIENT_SECRETS = '{"web":{"auth_uri":"https://accounts.google.com/o/oauth2/auth","client_secret":"8Pbf28JnbRl1Uh57-vx6Qot4","token_uri":"https://accounts.google.com/o/oauth2/token","client_email":"747453362533@developer.gserviceaccount.com","client_x509_cert_url":"https://www.googleapis.com/robot/v1/metadata/x509/747453362533@developer.gserviceaccount.com","client_id":"747453362533.apps.googleusercontent.com","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs", "redirect_uris":[], "javascript_origins":["http://localhost:8000","http://salty-wildwood-5054.herokuapp.com","http://theopencurriculum.org","http://www.theopencurriculum.org"]}}'
-
 STRINGS = {
     'global': {
         'TITLE': 'OpenCurriculum: A K-12 Learning Content Hub',
@@ -250,7 +253,7 @@ STRINGS = {
         'HISTORY_TITLE': 'Edit history for %s &lsaquo; OpenCurriculum',
         'messages': {
             'SUBMIT_REVIEW': 'Your edits have been successfully submitted for review',
-            'EDITS_SAVE': 'Successfully saved edits at %s',
+            'SAVE': 'Successfully saved edits at %s',
             'ANONYMOUS_EDITING': 'Editing as anonymous.'
         }
     },

@@ -50,7 +50,7 @@ def register(request):
         form_fields_to_return = [
             'first_name', 'last_name', 'email', 'dob_month', 'dob_date',
             'dob_year', 'profile_pic', 'social_login', 'location',
-            'profession', 'username', 'gender'
+            'profession', 'username', 'gender', 'social_id'
         ]
         # TODO(Varun): Turn this into a non-short statement.
         original_form_inputs = _get_original_form_values(
@@ -154,6 +154,9 @@ def _create_user(request):
 
         password_success = _check_password(request, user_form)
 
+    # If social login, get social ID
+    social_id = request.POST.get('social_id') if social_login else None
+
     # Only if passwords match, reCaptcha is successful and DoB is created,
     #     move forward with creating a user and connected Profile model.
     if password_success and recaptcha_success and dob_success:
@@ -173,7 +176,8 @@ def _create_user(request):
                     # Proceed with creation of the profile object.
                     profile_form = NewUserForm.NewUserProfileForm(
                         request.POST, social_login,
-                        new_user, profile_form.dob
+                        new_user, profile_form.dob,
+                        social_id
                     )
 
                     if profile_form.is_valid():
@@ -212,6 +216,7 @@ def _create_user(request):
                         new_user.delete()
             except:
                 new_user.delete()
+                print user_form.errors
                 # TODO(Varun): Create a django error notication.
                 print "User object failed to be created"
         else:
@@ -220,7 +225,8 @@ def _create_user(request):
 
     return ({
         'user_form': user_form, 'profile_form': profile_form,
-        'social_login': social_login
+        'social_login': social_login,
+        'social_id': social_id
     }, False)
 
 
@@ -594,7 +600,8 @@ def googleplus_login(request):
         process.
     """
     # Get OpenCurriculum's client ID to make API requests through G+.
-    CLIENT_ID = json.loads(settings.GAUTH_CLIENT_SECRETS)['web']['client_id']
+    CLIENT_ID = json.loads(
+        open(settings.TEMPLATE_DIR + '/' + 'client_secrets.json', 'r').read())['web']['client_id']
 
     # If the state isn't the same as the one set when loading the page, return
     #     failure message.
@@ -669,25 +676,23 @@ def googleplus_login(request):
 def glogin(request):
     google_id = request.POST.get('google_id')
 
-    try:
-        # Look for Google ID in the user profiles.
-        from user_account.models import UserProfile
-        user_profile = UserProfile.objects.get(social_id=int(google_id))
-        user = user_profile.user
+    #try:
+    # Look for Google ID in the user profiles.
+    from django.contrib.auth import authenticate, login
+    auth_user = authenticate(social_id=int(google_id))
+    login(request, auth_user)
 
-        from django.contrib.auth import login
-        login(request, user)
-
-        response = {"status": "true"}
-        return HttpResponse(json.dumps(
-            response), 200, content_type="application/json"
-        )
-
+    response = {"status": "true"}
+    return HttpResponse(json.dumps(
+        response), 200, content_type="application/json"
+    )
+    """
     except:
         response = {"status": "false"}
         return HttpResponse(json.dumps(
             response), 401, content_type="application/json"
         )
+    """
 
 
 def user_profile(request, username):
