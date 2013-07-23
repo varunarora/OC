@@ -541,7 +541,9 @@ def _set_profile_picture(profile, profile_form):
 def authenticate(request):
     """Authenticates the user and redirects to previous page being surfed"""
     # Determine redirect-to path, if any
-    redirect_to = request.POST.get('redirect_to', None) is 'True'
+    redirect_to = request.POST.get('redirect_to', None)
+    if redirect_to == 'False':
+        redirect_to = False
 
     from django.contrib.auth import authenticate, login
 
@@ -592,8 +594,7 @@ def googleplus_login(request):
         process.
     """
     # Get OpenCurriculum's client ID to make API requests through G+.
-    CLIENT_ID = json.loads(
-        open('client_secrets.json', 'r').read())['web']['client_id']
+    CLIENT_ID = json.loads(settings.GAUTH_CLIENT_SECRETS)['web']['client_id']
 
     # If the state isn't the same as the one set when loading the page, return
     #     failure message.

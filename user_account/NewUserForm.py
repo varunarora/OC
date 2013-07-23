@@ -163,10 +163,10 @@ class NewUserProfileForm(ModelForm):
             picture.
         gender: '1' for Male or '0' for Female.
     """
-    profile_pic_tmp = open(settings.TEMP_IMAGE_DIR + 'default.jpg')
+    profile_pic_tmp = open(settings.MEDIA_ROOT + 'profile/' + 'default.jpg')
     # gender = forms.BooleanField(required=True)
 
-    def __init__(self, request, social_login, new_user, dob):
+    def __init__(self, request, social_login, new_user, dob, social_id):
         """Initializes the profile form object after setting a profile picture,
         date of birth, and the User object it is associated with.
 
@@ -195,6 +195,20 @@ class NewUserProfileForm(ModelForm):
             newRequest.__setitem__('location', request.get('location').strip())
             newRequest.__setitem__('gender', request.get('gender') == '1')
 
+            from oer.models import Collection
+            # Create a new root collection for the user
+            root_collection = Collection(
+                title=new_user.username + "_root",
+                host=new_user,
+                visibility='public',
+                slug=new_user.username
+            )
+            root_collection.save()
+
+            newRequest.__setitem__('collection', root_collection.id)
+            newRequest.__setitem__(
+                'collection', social_id if social_login else None)
+
             self.profile_pic_tmp = profile_pic
 
         # Invoke the superclass with this new QueryDict object.
@@ -217,7 +231,7 @@ class NewUserProfileForm(ModelForm):
         img_web = urllib2.urlopen(profile_pic_url).read()
 
         # Write the image to disk.
-        image_path = settings.TEMP_IMAGE_DIR + str(user_id) + "-profile.jpg"
+        image_path = settings.MEDIA_ROOT + 'profile/' + str(user_id) + "-profile.jpg"
         localImage = open(image_path, 'w')
         localImage.write(img_web)
         localImage.close()
@@ -233,7 +247,7 @@ class NewUserProfileForm(ModelForm):
         """
         # TODO(Varun): Move method to UserProfile class
         # Return a reference to the profile pic associated with new users.
-        default_image = open(settings.TEMP_IMAGE_DIR + "default.jpg")
+        default_image = open(settings.MEDIA_ROOT + 'profile/' + "default.jpg")
 
         from django.core.files import File
         return File(default_image)

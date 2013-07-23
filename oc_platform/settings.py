@@ -86,8 +86,6 @@ STATIC_ASSETS_ROOT = STATIC_ROOT
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = STATIC_MOUNT_POINT + 'media/'
 
-TEMP_IMAGE_DIR = MEDIA_ROOT + 'profile/tmp/'
-
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/assets/'
@@ -208,6 +206,8 @@ AUTH_PROFILE_MODULE = 'user_account.UserProfile'
 
 RECAPTCHA_PRIVATE_KEY = '6LeG_8USAAAAALqEAEupYoiLIsguhIruYa0QmIVK'
 
+GAUTH_CLIENT_SECRETS = '{"web":{"auth_uri":"https://accounts.google.com/o/oauth2/auth","client_secret":"8Pbf28JnbRl1Uh57-vx6Qot4","token_uri":"https://accounts.google.com/o/oauth2/token","client_email":"747453362533@developer.gserviceaccount.com","client_x509_cert_url":"https://www.googleapis.com/robot/v1/metadata/x509/747453362533@developer.gserviceaccount.com","client_id":"747453362533.apps.googleusercontent.com","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs", "redirect_uris":[], "javascript_origins":["http://localhost:8000","http://salty-wildwood-5054.herokuapp.com","http://theopencurriculum.org","http://www.theopencurriculum.org"]}}'
+
 STRINGS = {
     'global': {
         'TITLE': 'OpenCurriculum: A K-12 Learning Content Hub',
@@ -297,13 +297,21 @@ STRINGS = {
     },
     'projects': {
         'TITLE': 'OpenCurriculum Projects: The easiest way to share your learning content',
+        'NEW_PROJECT_TITLE': 'Create a new project',
         'MEMBERS_TITLE': 'Members',
         'ABOUT_TITLE': 'About',
         'BROWSE_TITLE': 'Browse...',
+        'DISCUSSION_BOARD_TITLE': 'Discussion Board',
         'invite': {
             'SUCCESS_TITLE': 'Successfully received your projects invite',
             'FAILURE': 'Failed to submit form'
         }
+    },
+    'resources': {
+        'UPLOAD_TITLE': 'Upload files',
+        'ADD_VIDEO_TITLE': 'Add video',
+        'ADD_URL_TITLE': 'Add website URL',
+        'NEW_DOCUMENT_TITLE': 'New document'
     },
     'article_center': {
         'INTRODUCTION_TITLE': 'Hi - nice to meet you!',
