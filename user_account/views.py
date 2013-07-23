@@ -613,7 +613,7 @@ def googleplus_login(request):
     try:
         # Upgrade the authorization code into a credentials object.
         oauth_flow = client.flow_from_clientsecrets(
-            'client_secrets.json', scope='')
+            settings.TEMPLATE_DIR + '/' + 'client_secrets.json', scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except client.FlowExchangeError:
