@@ -1,4 +1,5 @@
 venv
+settings_dev.*
 *.pyc
 *.*~
 *.sassc
