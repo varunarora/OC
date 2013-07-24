@@ -5,7 +5,7 @@ def notifications(request):
     try:
         user = request.user.id
         unread_notifications_count = Notification.objects.filter(user=user, read=False).count
-        top_notifications = Notification.objects.filter(user=user)[:10]
+        top_notifications = Notification.objects.filter(user=user).order_by('-id')[:10]
 
         context = {
             'notification_count': unread_notifications_count,
