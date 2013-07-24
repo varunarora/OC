@@ -21,10 +21,6 @@ def get_default_license():
     return License.objects.get(pk=1)
 
 
-class Node(models.Model):
-    pass
-
-
 class ArticleRevision(models.Model):
     article = models.ForeignKey('Article', null=True, blank=True)
     title = models.CharField(max_length=256)
