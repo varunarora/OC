@@ -84,6 +84,8 @@
 										<form id="user-info"><input type="hidden" value="{{ user.id }}" name="user_id" /></form>
 										{% for notification in top_notifications %}
 											<li><a {% if not notification.read %} class="new-notification" {% endif %}id="notification-{{ notification.id }}" href="{{ notification.url }}">{{ notification.description }}</a></li>
+										{% empty %}
+											<li class="no-notification-contents">You have no notifications.</li>
 										{% endfor %}
 									</ul>
 								</nav>
