@@ -115,7 +115,7 @@
         </div>
         {% endif %}
 
-        {% if not favorites or not resources or not edits %}
+        {% if not favorites and not resources and not edits %}
             {% if user == user_profile %}
                 You haven't created any content or participated in any projects. Get started by <a href="{% url articles:catalog %}">editing articles</a>, creating / uploading a resource or project.
             {% else %}
