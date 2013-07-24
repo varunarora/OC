@@ -76,7 +76,7 @@ class ResourceThumbnail:
             pdf = [".pdf"]
             image = [".jpg", ".jpeg", ".png", ".bmp", ".eps", ".ps", ".gif", ".tiff"]
 
-            ext = str.lower(resource.extension)
+            ext = str.lower(str(resource.extension))
 
             if ext in ms:
                 thumbnailSrcName = "ms.jpg"
