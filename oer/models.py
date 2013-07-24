@@ -5,7 +5,6 @@ from articles.MarkdownTextField import MarkdownTextField
 from ResourceThumbnail import ResourceThumbnail
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-from articles.models import Node
 
 
 def get_default_license():
@@ -16,8 +15,8 @@ class Resource(models.Model):
     title = models.CharField(max_length=256)
     type = models.CharField(max_length=40, default='url')
     license = models.ForeignKey('license.License', default=get_default_license)
-    url = models.URLField(blank=True)
-    body_markdown = MarkdownTextField()
+    url = models.URLField(null=True, blank=True)
+    body_markdown = MarkdownTextField(null=True, blank=True)
     tags = models.ManyToManyField('meta.Tag', blank=True)
     created = models.DateTimeField(auto_now_add=True, editable=False)
     cost = models.FloatField()
@@ -41,7 +40,7 @@ class Collection(models.Model):
     host_type = models.ForeignKey(ContentType)
     host_id = models.PositiveIntegerField()
     host = generic.GenericForeignKey('host_type', 'host_id')
-    nodes = models.ManyToManyField(Node, blank=True)
+    resources = models.ManyToManyField(Resource, blank=True)
     visibility = models.CharField(max_length=256)
     changed = models.DateTimeField(auto_now=True, editable=False)
     slug = models.SlugField(max_length=256)
