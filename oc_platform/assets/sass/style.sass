@@ -727,10 +727,16 @@ nav#authenticate-buttons, nav#user-buttons
 .horizontal-caret-hover
 	border-color: $link-hover transparent transparent
 					
-nav#user-menu.showMenu, nav#share-menu.showMenu, , nav#notifications-menu.showMenu
+nav#user-menu.showMenu,
+nav#share-menu.showMenu,
+nav#notifications-menu.showMenu,
+nav#add-resource-menu.showMenu
 	display: block
 
-nav#user-menu, nav#share-menu, nav#notifications-menu
+nav#user-menu,
+nav#share-menu,
+nav#notifications-menu,
+nav#add-resource-menu
 	display: none
 	position: absolute
 
@@ -770,7 +776,6 @@ nav#user-menu
 		background-position: 145px bottom
 		z-index: 10
 
-
 nav#share-menu
 	z-index: 5
 	width: 120px
@@ -787,9 +792,34 @@ nav#share-menu
 		li
 			height: 20px
 
+nav#add-resource-menu
+	z-index: 5
+	width: 140px
+
+	.floating-menu-spacer
+		width: 140px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		background-position: 15px bottom
+		z-index: 10
+
+	ul
+		padding-bottom: 8px
+
+		li
+			height: 20px
+
 nav#notifications-menu
 	z-index: 4
 	width: 300px
+
+	ul
+		padding-bottom: 10px
+
+		li
+			height: auto
+
+			a
+				height: auto
 
 	.floating-menu-spacer
 		width: 300px
@@ -798,7 +828,10 @@ nav#notifications-menu
 		z-index: 10
 
 	.new-notification
-		background-color: #EFEFEF
+		background-color: #efefef
+
+	.no-notification-contents
+		padding-left: 12px
 
 #forgot-username-password
 	text-align: right
@@ -1470,3 +1503,119 @@ table
 
 .login-authentication-failure
 	color: #B94A48
+
+.project-browse-item
+	a
+		display: block
+		padding: 10px
+		padding-left: 32px
+		border-bottom: 1px solid #efefef
+		outline: 0 none
+
+		.project-browse-item-date
+			color: $light-font
+
+		.project-browse-item-visibility
+			display: inline-block
+			float: right
+			height: 12px
+			width: 12px
+
+			&.visibility-public
+				background-image: url('../images/social-studies.png')
+				background-repeat: no-repeat
+				background-position: center center
+
+		&:hover
+			background-color: #efefef
+			text-decoration: none
+
+	&.directory
+		a
+			background-image: url('../images/folder.png')
+			background-repeat: no-repeat
+			background-position: 10px center
+
+.add-resource
+	background-color: #D14836
+	padding: 10px
+	width: 120px
+	color: #fff
+	@include sans-bold
+	cursor: pointer
+	float: left
+
+.new-collection
+	padding: 10px
+	color: #fff
+	background-color: #557799
+	float: left
+	@include sans-bold
+	margin-left: 6px
+	cursor: pointer
+
+	&:hover
+		text-decoration: none
+		background-color: #2D6699
+
+nav#add-resource-menu
+	.add-document, .add-link, .add-video, .add-upload
+		a
+			padding-left: 34px
+			background-position: 12px 5px
+			@include sans-bold
+			background-repeat: no-repeat
+
+	.add-document a
+		background-image: url('../images/document.png')
+
+		&:hover
+			background-image: url('../images/document-hover.png')
+
+	.add-link a
+		background-image: url('../images/link.png')
+
+		&:hover
+			background-image: url('../images/link-hover.png')
+
+	.add-video a
+		background-image: url('../images/video.png')
+
+		&:hover
+			background-image: url('../images/video-hover.png')
+
+	.add-upload a
+		background-image: url('../images/upload.png')
+
+		&:hover
+			background-image: url('../images/upload-hover.png')
+
+.browse-page
+	min-height: 100px
+
+nav.collections-navigation
+	margin-top: 20px
+
+	ul
+		display: block
+
+		li
+			padding-left: 16px
+			background-image: url('../images/arrow-right.png')
+			background-position: 0px 2px
+			background-repeat: no-repeat
+			cursor: pointer
+
+			ul
+				padding-left: 10px
+				display: none
+
+	a
+		color: $body-color
+
+		&:hover
+			color: $link-hover
+			text-decoration: none
+
+.add-collection-resource-wrapper
+	overflow: hidden
