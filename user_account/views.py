@@ -850,7 +850,7 @@ def _email_contributor_admins(original_form_inputs):
 
 def add_subscription(request):
     """Subscribes the requester to the user"""
-    subscribee_id = request.POST['subscribee_id']
+    subscribee_id = request.POST['id']
 
     from django.contrib.auth.models import User
     subscribee_profile = User.objects.get(id=subscribee_id).profile
@@ -885,8 +885,9 @@ def profile(request, user_id):
 
     from django.template import Context
     c = Context({
-        'user': user,
+        'user_profile': user,
         'name': user.get_full_name(),
+        'id': user_id,
         'feed': user_feed,
     })
 

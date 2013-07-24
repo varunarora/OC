@@ -10,10 +10,5 @@ urlpatterns = patterns(
     url(r'^api/notifications/dismiss/(?P<user_id>\d+)/$', views.dismiss_notifications, name='dismiss_notifications'),
     url(r'^(?P<username>\w+)/change-picture/$', views.change_profile_picture, name='change_profile_picture'),
     url(r'^(?P<username>\w+)/$', views.user_profile, name='user_profile'),
-    url(r'^api/subscribe/', 'user_account.views.add_subscription', name='api-subscribe'),
-
-    # User feed
-    url(r'^feeds/(?P<user_id>\d+)/$', 'user_account.views.user_home', name='feed'),
-    url(r'^users/(?P<user_id>\d+)/$', 'user_account.views.profile', name='profile'),
 
 )
