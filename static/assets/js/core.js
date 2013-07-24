@@ -1068,6 +1068,43 @@ var OC = {
         });
     },
 
+    initAddResource: function(){
+        OC.setUpMenuPositioning('nav#add-resource-menu', '.add-resource');
+
+        $(window).resize(function () {
+            OC.setUpMenuPositioning('nav#add-resource-menu', '.add-resource');
+        });
+
+        OC.setupResourceMenu();
+    },
+
+    setupResourceMenu: function(){
+        $('.add-resource, nav#add-resource-menu').mouseenter(function () {
+            $('#add-resource-menu').addClass('showMenu');
+        }).mouseleave(function () {
+            $('#add-resource-menu').removeClass('showMenu');
+        });
+    },
+
+    initCreateCollection: function(){
+        $('.new-collection').click(function(){
+            $('.new-collection-dialog').dialog({
+                modal: true,
+                open: false,
+                width: 500,
+                buttons: {
+                    Ok: function () {
+                        $(this).dialog("close");
+                        $('form#new-collection-form').submit();
+                    },
+                    Cancel: function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        });
+    },
+
     articleCenter: {
         registrationInit: function(){
             $(window).bind('scroll', function(e){
@@ -1170,6 +1207,11 @@ jQuery(document).ready(function ($) {
     });
 
     /* Other initializers/renderers/handlers */
+
+    OC.initAddResource();
+
+    OC.initCreateCollection();
+
 
     OC.renderShowMore();
 
