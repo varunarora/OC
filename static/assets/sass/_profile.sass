@@ -49,6 +49,9 @@
             padding-left: 4px
 
         .profile-headline-wrapper
+            overflow: hidden
+            margin-bottom: 20px
+
             form
                 float: left
 
@@ -58,8 +61,8 @@
                 width: 340px
 
                 &:focus
-                    border: 1px solid #b2b2b2
-                    @include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
+                    // HACK(Varun): To undo the effect of the input shadow site-wide
+                    @include box-shadow(0px 0px)
                 
             .headline-edit
                 visibility: hidden
@@ -76,6 +79,21 @@
                     background-position: center center
                     visibility: visible
 
+        .profile-subscribe
+            margin: 6px 0px
+            margin-top: 12px
+
+            .profile-subscriber-count
+                color: $light-font
+                margin-left: 10px
+
+.user-info.my-profile
+    .user-profile-info
+        .profile-headline-wrapper
+            .profile-headline
+                &:focus
+                    border: 1px solid #b2b2b2
+                    @include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
             &:hover, &:focus
                 .profile-headline
                     border: 1px solid #b2b2b2
@@ -84,13 +102,6 @@
                 .headline-edit
                     visibility: visible
 
-        .profile-subscribe
-            margin: 6px 0px
-            margin-top: 12px
-
-            .profile-subscriber-count
-                color: $light-font
-                margin-left: 10px
 
 .profile-background-wrapper
     background-image: url('../images/profile-header-bg.png')

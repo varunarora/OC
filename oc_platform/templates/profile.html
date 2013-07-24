@@ -2,14 +2,14 @@
 <div class="center-stage">
     <div id="key-panel" class="panel-left">
     {{ popup_message }}
-        <div class="user-info">
+        <div class="user-info{% if user == user_profile %} my-profile{% endif %}">
             <div class="user-profile-picture">
-                <!--
-                <img src="{{ MEDIA_URL }}profile/{{ user_profile.id }}-profile.jpg" />-->
                 <div style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}')" class="user-picture-cover"></div>
+                {% if user == user_profile %}
                 <div class="edit-profile-picture">
                     <span class="edit-picture-icon"></span>Change...
                 </div>
+                {% endif %}
             </div>
             <div class="user-profile-info">
                 <div class="profile-name">
@@ -18,14 +18,18 @@
                 <div class="profile-headline-wrapper">
                     <form>
                         <input type="hidden" name="user_id" value="{{ user_profile.id }}"/>
-                        <input type="text" class="profile-headline" value="{{ user_profile.get_profile.headline }}" />
+                        <input type="text" class="profile-headline" value="{{ user_profile.get_profile.headline }}" {% if user != user_profile %} readonly{% endif %}/>
                     </form>
                     <span class="headline-edit"></span>
                 </div>
+                {% if user == user_profile %}
+                    {# include 'partials/create-resource-collection.html' #}
+                {% endif %}
+                <!--
                 <div class="profile-subscribe">
                     <button class="btn dull-button">SUBSCRIBE</button><span class="profile-subscriber-count">23 subscribers (3 mutual)</span>
                 </div>
-
+                -->
             </div>
         </div>
     </div>
@@ -35,9 +39,9 @@
 <div class="profile-background-wrapper"></div>
 <div class="center-stage profile-details">
     <div id="key-panel" class="panel-left">
+        {% if contributions %}
         <div class="profile-contributions">
-            {% if contributions %}
-            <h3>My Contributions</h3>
+            <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Contributions</h3>
             <div class="profile-contributions-list">
                 {% for contribution in contributions %}
                     <div class="profile-contribution">
@@ -47,11 +51,11 @@
                     </div>
                 {% endfor %}
             </div>
-            {% endif %}
         </div>
+        {% endif %}
         {% if projects %}
         <div class="profile-projects">
-            <h3>Projects</h3>
+            <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Projects</h3>
             {% for project in projects %}
                 <div class="profile-projects-item">
                     <a href="{% url projects:project_home project_slug=project.slug %}">
@@ -71,7 +75,7 @@
 
         {% if resources or edits %}
         <div class="profile-resources">
-            <h3>My Resources</h3>
+            <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Resources</h3>
             {% if edits %}
             <h4>Forks</h4>
             {% for edit in edits %}
@@ -109,6 +113,14 @@
         <div class="profile-favorites">
             <h3>Favorites</h3>
         </div>
+        {% endif %}
+
+        {% if not favorites or not resources or not edits %}
+            {% if user == user_profile %}
+                You haven't created any content or participated in any projects. Get started by <a href="{% url articles:catalog %}">editing articles</a>, creating / uploading a resource or project.
+            {% else %}
+                {{ user_profile.first_name }} hasn't shared any content.
+            {% endif %}
         {% endif %}
     </div>
     <div id="fill-panel" class="panel-right">
