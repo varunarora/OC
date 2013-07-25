@@ -14,7 +14,7 @@ $(document).ready(function() {
 
         /* When the server responds, change the text */
         $.post('/api/subscribe/', data, function() {
-            alert('success!');
+            $('.subscribe').text('✔ Subscribed');
         });
     });
 });
