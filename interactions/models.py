@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.dispatch import Signal
 
+
 class Comment(models.Model):
     body_markdown = MarkdownTextField()
     created = models.DateTimeField(auto_now_add=True, editable=False)

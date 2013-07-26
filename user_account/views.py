@@ -858,6 +858,11 @@ def add_subscription(request):
 
     subscribee_profile.subscribers.add(subscriber_profile)
 
+    # Send the signal, so the activity will be created in the feed.
+    from user_account.signals import new_subscription
+    new_subscription.send(sender='add_subscription', actor_id=request.user.id,
+                          action='subscribe', target_id=subscribee_id)
+
     status = {'status': 'true'}
 
     return HttpResponse(
@@ -985,12 +990,6 @@ def add_activity(sender, **kwargs):
     item.save()
     item.recipients.add(*recipients)
     item.save()
-
-
-new_subscription = Signal(providing_args=['actor_id', "action", "target_id"])
-new_upload = Signal(providing_args=['actor_id', "action", "object_id"])
-new_subscription.connect(add_activity)
-new_upload.connect(add_activity)
 
 
 def contributor_introduction(request):

@@ -76,4 +76,3 @@ class Notification(models.Model):
         notification.description = "%s commented on %s: \"%s\"" % (
             comment.user.get_full_name(), asset.title, comment.body_markdown[:100])
         notification.save()
-
