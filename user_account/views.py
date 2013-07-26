@@ -3,7 +3,6 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 from user_account.models import Activity
 from interactions.models import Comment
-from django.template import Context
 from django.dispatch import Signal
 from django.conf import settings
 import json
@@ -874,11 +873,11 @@ def user_home(request, user_id):
     user = User.objects.get(id=user_id)
     user_feed = user.feed.all()
 
-    c = Context({
+    c = {
         'user': user,
         'name': user.get_full_name(),
         'feed': user_feed,
-    })
+    }
 
     return render(request, 'home.html', c)
 
@@ -888,13 +887,12 @@ def profile(request, user_id):
     user = User.objects.get(id=user_id)
     user_feed = Activity.objects.filter(actor=user)
 
-    from django.template import Context
-    c = Context({
+    c = {
         'user_profile': user,
         'name': user.get_full_name(),
         'id': user_id,
         'feed': user_feed,
-    })
+    }
 
     return render(request, 'profile.html', c)
 
