@@ -980,13 +980,13 @@ def add_activity(sender, **kwargs):
     args_dict['actor'] = User.objects.get(id=kwargs['actor_id'])
     args_dict['action'] = kwargs['action']
     args_dict['target'] = User.objects.get(id=kwargs['target_id'])
-    action_object = Comment.objects.get(id=kwargs['object_id'])
+    #action_object = Comment.objects.get(id=kwargs['object_id'])
     recipients = find_recipients(**args_dict)
     item = Activity()
     item.actor = args_dict['actor']
     item.action = args_dict['action']
     item.target = args_dict['target']
-    item.action_object = action_object
+    #item.action_object = action_object
     item.save()
     item.recipients.add(*recipients)
     item.save()
