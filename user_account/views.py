@@ -871,7 +871,13 @@ def contributor_introduction(request):
         getRequest = urllib2.urlopen(
             'http://maps.googleapis.com/maps/api/geocode/json?%s' % params)
         response = json.loads(getRequest.read())
-        contributor_locations[contributor] = response['results'][0]['geometry']['location']
+        try:
+            contributor_locations[contributor] = response['results'][0]['geometry']['location']
+        except IndexError:
+            contributor_locations[contributor] = {
+                'lat': 0.0,
+                'lng': 0.0
+            }
 
     context = {
         'title': _(settings.STRINGS['article_center']['INTRODUCTION_TITLE']),
