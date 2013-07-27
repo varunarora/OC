@@ -676,23 +676,22 @@ def googleplus_login(request):
 def glogin(request):
     google_id = request.POST.get('google_id')
 
-    #try:
-    # Look for Google ID in the user profiles.
-    from django.contrib.auth import authenticate, login
-    auth_user = authenticate(social_id=int(google_id))
-    login(request, auth_user)
+    try:
+        # Look for Google ID in the user profiles.
+        from django.contrib.auth import authenticate, login
+        auth_user = authenticate(social_id=int(google_id))
+        login(request, auth_user)
 
-    response = {"status": "true"}
-    return HttpResponse(json.dumps(
-        response), 200, content_type="application/json"
-    )
-    """
+        response = {"status": "true"}
+        return HttpResponse(json.dumps(
+            response), 200, content_type="application/json"
+        )
+
     except:
         response = {"status": "false"}
         return HttpResponse(json.dumps(
             response), 401, content_type="application/json"
         )
-    """
 
 
 def user_profile(request, username):
