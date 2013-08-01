@@ -139,7 +139,7 @@ class Revision(models.Model):
     body_markdown_html = models.TextField()
     objectives = models.TextField()
     log = models.CharField(max_length=256)
-    article_id = models.IntegerField(max_length=11)
+    article_id = models.ForeignKey('Article', db_column='article_id', related_name='articles')
     flag = models.CharField(max_length=64)
 
     class Meta:
@@ -152,7 +152,28 @@ class Revision(models.Model):
 
 class User(models.Model):
     id = models.AutoField(primary_key=True)
-    user_id = models.IntegerField(max_length=11, unique=True)
+    username = models.CharField(max_length=30, unique=True)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    email = models.CharField(max_length=75)
+    password = models.CharField(max_length=128)
+    is_staff = models.BooleanField()
+    is_active = models.BooleanField()
+    is_superuser = models.BooleanField()
+    last_login = models.DateTimeField()
+    date_joined = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'auth_user'
+
+    def __unicode__(self):
+        return self.username
+
+
+class UserProfile(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_id = models.ForeignKey('User', db_column='user_id', related_name='user', unique=True)
     dob = models.DateTimeField()
     location = models.CharField(max_length=256)
     profession = models.CharField(max_length=256)
@@ -165,28 +186,3 @@ class User(models.Model):
 
     def __unicode__(self):
         return self.title
-
-
-# class Language(models.Model):
-#     title = models.CharField()
-#     encoding = models.CharField()
-
-#     class Meta:
-#         managed = False
-#         db_table = 'meta_language'
-
-#     def __unicode__(self):
-#         return self.title
-
-
-# class Article(models.Model):
-#     revision_id = models.IntegerField()
-#     category_id = models.IntegerField()
-#     language = models.ForeignKey(Language)
-
-#     class Meta:
-#         managed = False
-#         db_table = 'articles_article'
-
-#     def __unicode__(self):
-#         return self.title

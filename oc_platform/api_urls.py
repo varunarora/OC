@@ -9,6 +9,7 @@ from oc_platform.api import ProjectResource
 from oc_platform.api import ResourceResource
 from oc_platform.api import RevisionResource
 from oc_platform.api import UserResource
+from oc_platform.api import UserProfileResource
 
 v1_api = Api(api_name='v1')
 v1_api.register(ArticleResource())
@@ -20,6 +21,7 @@ v1_api.register(ProjectResource())
 v1_api.register(ResourceResource())
 v1_api.register(RevisionResource())
 v1_api.register(UserResource())
+v1_api.register(UserProfileResource())
 
 urlpatterns = patterns(
     '',
