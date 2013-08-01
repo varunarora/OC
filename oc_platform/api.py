@@ -90,13 +90,18 @@ class CollectionResource(ModelResource):
 
 
 class CommentResource(ModelResource):
+    user = fields.ForeignKey('oc_platform.api.UserResource', 'user_id')
+
     class Meta:
         queryset = Comment.objects.all()
         resource_name = 'comments'
         allowed_methods = ['get']
-        fields = ['id', 'body_markdown', 'created', 'user_id', 'parent_type_id', 'parent_id', 'body_markdown_html']
-        ordering = ['id', 'body_markdown', 'created', 'user_id', 'parent_type_id', 'parent_id', 'body_markdown_html']
+        fields = ['id', 'body_markdown', 'created', 'parent_type_id', 'parent_id', 'body_markdown_html']
+        ordering = ['id', 'body_markdown', 'created', 'parent_type_id', 'parent_id', 'body_markdown_html']
         serializer = CamelCaseJSONSerializer()
+
+    def dehydrate_user(self, bundle):
+        return {'resourceUri': bundle.data['user']}
 
 
 class LicenseResource(ModelResource):
@@ -121,29 +126,34 @@ class ProjectResource(ModelResource):
 
 class ResourceResource(ModelResource):
     license = fields.ForeignKey('oc_platform.api.LicenseResource', 'license_id')
+    user = fields.ForeignKey('oc_platform.api.UserResource', 'user_id')
 
     class Meta:
         queryset = Resource.objects.all()
         resource_name = 'resources'
         allowed_methods = ['get']
-        fields = ['id', 'title', 'type', 'license', 'url', 'body_markdown', 'created', 'cost', 'views', 'user_id', 'file', 'body_markdown_html']
-        ordering = ['id', 'title', 'type', 'license', 'url', 'body_markdown', 'created', 'cost', 'views', 'user_id', 'file', 'body_markdown_html']
+        fields = ['id', 'title', 'type', 'license', 'url', 'body_markdown', 'created', 'cost', 'views', 'file', 'body_markdown_html']
+        ordering = ['id', 'title', 'type', 'license', 'url', 'body_markdown', 'created', 'cost', 'views', 'file', 'body_markdown_html']
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_license(self, bundle):
         return {'resourceUri': bundle.data['license']}
 
+    def dehydrate_user(self, bundle):
+        return {'resourceUri': bundle.data['user']}
+
 
 class RevisionResource(ModelResource):
     category = fields.ForeignKey('oc_platform.api.CategoryResource', 'category_id')
     article = fields.ForeignKey('oc_platform.api.ArticleResource', 'article_id')
+    user = fields.ForeignKey('oc_platform.api.UserResource', 'user_id')
 
     class Meta:
         queryset = Revision.objects.all()
         resource_name = 'revisions'
         allowed_methods = ['get']
-        fields = ['id', 'title', 'category', 'created', 'body_markdown', 'user_id', 'body_markdown_html', 'objectives', 'log', 'article', 'flag']
-        ordering = ['id', 'title', 'category', 'created', 'body_markdown', 'user_id', 'body_markdown_html', 'objectives', 'log', 'article', 'flag']
+        fields = ['id', 'title', 'category', 'created', 'body_markdown', 'body_markdown_html', 'objectives', 'log', 'article', 'flag']
+        ordering = ['id', 'title', 'category', 'created', 'body_markdown', 'body_markdown_html', 'objectives', 'log', 'article', 'flag']
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_category(self, bundle):
@@ -151,6 +161,9 @@ class RevisionResource(ModelResource):
 
     def dehydrate_article(self, bundle):
         return {'resourceUri': bundle.data['article']}
+
+    def dehydrate_user(self, bundle):
+        return {'resourceUri': bundle.data['user']}
 
 
 class UserResource(ModelResource):
