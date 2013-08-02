@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class ArticleResource(ModelResource):
-    most_recent_revsion = fields.ForeignKey('oc_platform.api.RevisionResource', 'revision_id')
+    most_recent_revision = fields.ForeignKey('oc_platform.api.RevisionResource', 'revision_id')
     category = fields.ForeignKey('oc_platform.api.CategoryResource', 'category_id')
     license = fields.ForeignKey('oc_platform.api.LicenseResource', 'license_id')
     revisions = fields.ToManyField('oc_platform.api.RevisionResource', 'articles')
@@ -31,12 +31,12 @@ class ArticleResource(ModelResource):
         queryset = Article.objects.all()
         resource_name = 'articles'
         allowed_methods = ['get']
-        fields = ['id', 'most_recent_revsion', 'category', 'language_id', 'created', 'changed', 'title', 'views', 'license', 'slug', 'difficulty', 'published', 'citation']
-        ordering = ['id', 'most_recent_revsion', 'category', 'language_id', 'created', 'changed', 'title', 'views', 'license', 'slug', 'difficulty', 'published', 'citation']
+        fields = ['id', 'most_recent_revision', 'category', 'language_id', 'created', 'changed', 'title', 'views', 'license', 'slug', 'difficulty', 'published', 'citation']
+        ordering = ['id', 'most_recent_revision', 'category', 'language_id', 'created', 'changed', 'title', 'views', 'license', 'slug', 'difficulty', 'published', 'citation']
         serializer = CamelCaseJSONSerializer()
 
-    def dehydrate_revision(self, bundle):
-        return {'self': bundle.data['revision']}
+    def dehydrate_most_recent_revision(self, bundle):
+        return {'self': bundle.data['most_recent_revision']}
 
     def dehydrate_category(self, bundle):
         return {'self': bundle.data['category']}
