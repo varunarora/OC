@@ -223,7 +223,13 @@ class UserResource(ModelResource):
 
     def dehydrate_profile(self, bundle):
         # This is a hack. Fix profile to be a OneToOne field instead!
-        return {'self': bundle.data['profile'][0]}
+        if (len(bundle.data['profile']) == 0):
+            return 'null'
+        elif (len(bundle.data['profile']) == 1):
+            return {'self': bundle.data['profile'][0]}
+        else:
+            logging.error('Too many profiles for user %s' % bundle.data['user_id'])
+            return 'null'
 
     def dehydrate(self, bundle):
         # Uncomment to rename resourceUri to be href
@@ -250,7 +256,7 @@ class UserProfileResource(ModelResource):
         elif bundle.data['gender'] == 1:
             return 'Male'
         else:
-            logging.error("Unknown gender for user %s" % bundle.data['user_id'])
+            logging.error('Unknown gender for user %s' % bundle.data['user_id'])
             return 'Unknown'
 
     def dehydrate_user(self, bundle):
