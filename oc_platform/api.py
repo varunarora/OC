@@ -12,7 +12,8 @@ from oc_platform.models import Revision
 from oc_platform.models import User
 from oc_platform.models import UserProfile
 from oc_platform.api_serializer import CamelCaseJSONSerializer
-
+#from tastypie.utils import trailing_slash
+#from django.conf.urls import url
 
 logger = logging.getLogger(__name__)
 
@@ -35,18 +36,18 @@ class ArticleResource(ModelResource):
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_revision(self, bundle):
-        return {'resourceUri': bundle.data['revision']}
+        return {'self': bundle.data['revision']}
 
     def dehydrate_category(self, bundle):
-        return {'resourceUri': bundle.data['category']}
+        return {'self': bundle.data['category']}
 
     def dehydrate_license(self, bundle):
-        return {'resourceUri': bundle.data['license']}
+        return {'self': bundle.data['license']}
 
     def dehydrate(self, bundle):
         # Uncomment to rename resourceUri to be href
-        #bundle.data['href'] = bundle.data['resource_uri']
-        #del bundle.data['resource_uri']
+        bundle.data['self'] = bundle.data['resource_uri']
+        del bundle.data['resource_uri']
         return bundle
 
 
@@ -62,7 +63,13 @@ class CategoryResource(ModelResource):
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_parent(self, bundle):
-        return {'resourceUri': bundle.data['parent']}
+        return {'self': bundle.data['parent']}
+
+    def dehydrate(self, bundle):
+        # Uncomment to rename resourceUri to be href
+        bundle.data['self'] = bundle.data['resource_uri']
+        del bundle.data['resource_uri']
+        return bundle
 
     # Uncomment to remove parent in the case where parent = self
     # def dehydrate(self, bundle):
@@ -88,6 +95,12 @@ class CollectionResource(ModelResource):
         ordering = ['id', 'title', 'created', 'owner_type_id', 'owner_id', 'visibility', 'changed', 'slug']
         serializer = CamelCaseJSONSerializer()
 
+    def dehydrate(self, bundle):
+        # Uncomment to rename resourceUri to be href
+        bundle.data['self'] = bundle.data['resource_uri']
+        del bundle.data['resource_uri']
+        return bundle
+
 
 class CommentResource(ModelResource):
     user = fields.ForeignKey('oc_platform.api.UserResource', 'user_id')
@@ -101,7 +114,13 @@ class CommentResource(ModelResource):
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_user(self, bundle):
-        return {'resourceUri': bundle.data['user']}
+        return {'self': bundle.data['user']}
+
+    def dehydrate(self, bundle):
+        # Uncomment to rename resourceUri to be href
+        bundle.data['self'] = bundle.data['resource_uri']
+        del bundle.data['resource_uri']
+        return bundle
 
 
 class LicenseResource(ModelResource):
@@ -113,6 +132,12 @@ class LicenseResource(ModelResource):
         ordering = ['id', 'title', 'description', 'custom']
         serializer = CamelCaseJSONSerializer()
 
+    def dehydrate(self, bundle):
+        # Uncomment to rename resourceUri to be href
+        bundle.data['self'] = bundle.data['resource_uri']
+        del bundle.data['resource_uri']
+        return bundle
+
 
 class ProjectResource(ModelResource):
     class Meta:
@@ -122,6 +147,12 @@ class ProjectResource(ModelResource):
         fields = ['id', 'title', 'created', 'description', 'cover_pic', 'visibility', 'meta', 'slug']
         ordering = ['id', 'title', 'created', 'description', 'cover_pic', 'visibility', 'meta', 'slug']
         serializer = CamelCaseJSONSerializer()
+
+    def dehydrate(self, bundle):
+        # Uncomment to rename resourceUri to be href
+        bundle.data['self'] = bundle.data['resource_uri']
+        del bundle.data['resource_uri']
+        return bundle
 
 
 class ResourceResource(ModelResource):
@@ -137,10 +168,16 @@ class ResourceResource(ModelResource):
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_license(self, bundle):
-        return {'resourceUri': bundle.data['license']}
+        return {'self': bundle.data['license']}
 
     def dehydrate_user(self, bundle):
-        return {'resourceUri': bundle.data['user']}
+        return {'self': bundle.data['user']}
+
+    def dehydrate(self, bundle):
+        # Uncomment to rename resourceUri to be href
+        bundle.data['self'] = bundle.data['resource_uri']
+        del bundle.data['resource_uri']
+        return bundle
 
 
 class RevisionResource(ModelResource):
@@ -157,13 +194,19 @@ class RevisionResource(ModelResource):
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_category(self, bundle):
-        return {'resourceUri': bundle.data['category']}
+        return {'self': bundle.data['category']}
 
     def dehydrate_article(self, bundle):
-        return {'resourceUri': bundle.data['article']}
+        return {'self': bundle.data['article']}
 
     def dehydrate_user(self, bundle):
-        return {'resourceUri': bundle.data['user']}
+        return {'self': bundle.data['user']}
+
+    def dehydrate(self, bundle):
+        # Uncomment to rename resourceUri to be href
+        bundle.data['self'] = bundle.data['resource_uri']
+        del bundle.data['resource_uri']
+        return bundle
 
 
 class UserResource(ModelResource):
@@ -180,7 +223,13 @@ class UserResource(ModelResource):
 
     def dehydrate_profile(self, bundle):
         # This is a hack. Fix profile to be a OneToOne field instead!
-        return {'resourceUri': bundle.data['profile'][0]}
+        return {'self': bundle.data['profile'][0]}
+
+    def dehydrate(self, bundle):
+        # Uncomment to rename resourceUri to be href
+        bundle.data['self'] = bundle.data['resource_uri']
+        del bundle.data['resource_uri']
+        return bundle
 
 
 class UserProfileResource(ModelResource):
@@ -205,4 +254,10 @@ class UserProfileResource(ModelResource):
             return 'Unknown'
 
     def dehydrate_user(self, bundle):
-        return {'resourceUri': bundle.data['user']}
+        return {'self': bundle.data['user']}
+
+    def dehydrate(self, bundle):
+        # Uncomment to rename resourceUri to be href
+        bundle.data['self'] = bundle.data['resource_uri']
+        del bundle.data['resource_uri']
+        return bundle
