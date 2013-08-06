@@ -260,7 +260,7 @@ def read_article(request, article):
         'article': articleRevision, 'breadcrumb': breadcrumb, 'title': title,
         'siblings': siblings,
         'current_path': 'http://' + request.get_host() + request.get_full_path(),  # request.get_host()
-        'thumbnail': 'http://' + request.get_host() + '/static/images/thumbnails/' + str(article.id) + '-thumb.jpg'
+        'thumbnail': 'http://' + request.get_host() + settings.MEDIA_URL + article.image.name
     }
     return render(request, 'article.html', context)
 
