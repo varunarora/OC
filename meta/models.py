@@ -1,5 +1,7 @@
 from django.db import models
 
+def get_default_tagcategory():
+    return TagCategory.objects.get(pk=1)
 
 class Category(models.Model):
     title = models.CharField(max_length=256)
@@ -15,7 +17,7 @@ class Category(models.Model):
 class Tag(models.Model):
     title = models.CharField(max_length=256)
     description = models.TextField(blank=True)
-    category = models.ForeignKey('meta.TagCategory')
+    category = models.ForeignKey('meta.TagCategory', default=get_default_tagcategory)
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
     def __unicode__(self):
@@ -27,6 +29,9 @@ class TagCategory(models.Model):
     description = models.TextField(blank=True)
     parent = models.ForeignKey('self', null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def __unicode__(self):
+        return self.title
 
 
 class TagLabel(models.Model):
