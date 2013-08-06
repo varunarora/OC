@@ -296,6 +296,19 @@ STRINGS = {
                 'PASSWORD_VALIDATION_ERROR': 'Password must contain at least 6 characters, with atleast one lowercase and one uppercase character and atleast one digit or symbol.',
                 'NAME_VALIDATION_ERROR': 'This field must only have letters.'
             }
+        },
+        'reset_password': {
+            'EMAIL_RESET_MSG': (
+                'Dear %s,\n\nWe have received a message from our site to reset your '
+                'password on your OpenCurriculum account. We have successfully reset the '
+                'same. Your temporary login details are below: \n\n'
+                'Username: %s\nPassword: %s\n\n'
+                'To successfully reset and re-activate your account, open the link below:\n\n%s\n\n'
+                'If you are experiencing any problems with resetting your password, '
+                'do not hesitate to get in touch with us by writing to us at %s. \n\n'
+                'Thank you,\nUser satisfaction team @ OpenCurriculum'
+            ),
+            'RESET_PASSWORD_REQUESTED': 'Reset your account password'
         }
     },
     'projects': {
