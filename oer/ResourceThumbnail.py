@@ -21,50 +21,37 @@ class ResourceThumbnail:
 
         if resource.type == "video":
 
-            provider = VideoHelper.getVideoProvider(resource.url)
-            video_tag = VideoHelper.getVideoID(resource.url, provider)
+            try:
+                provider = VideoHelper.getVideoProvider(resource.url)
+                video_tag = VideoHelper.getVideoID(resource.url, provider)
 
-            thumbnailUrl = ResourceThumbnail.getThumbnailFromProvider(video_tag, provider)
+                thumbnailUrl = ResourceThumbnail.getThumbnailFromProvider(video_tag, provider)
 
-            import urllib
+                import urllib
 
-            # Returns a 120x90 image
-            urllib.urlretrieve(thumbnailUrl, thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT)
+                # Returns a 120x90 image
+                urllib.urlretrieve(thumbnailUrl, thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT)
 
-            call(
-                ["convert", "-size", str(ResourceThumbnail.THUMBNAIL_HEIGHT) + "x"
-                    + str(ResourceThumbnail.THUMBNAIL_WIDTH), "xc:white", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
+                call(
+                    ["convert", "-size", str(ResourceThumbnail.THUMBNAIL_HEIGHT) + "x"
+                        + str(ResourceThumbnail.THUMBNAIL_WIDTH), "xc:white", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
-            call(
-                ["composite", "-geometry", "-30-15", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT,
-                    thumbnail + ResourceThumbnail.THUMBNAIL_EXT, thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
+                call(
+                    ["composite", "-geometry", "-30-15", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT,
+                        thumbnail + ResourceThumbnail.THUMBNAIL_EXT, thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
-            # Now delete the temporary retrived image thumbnail
-            call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
+                # Now delete the temporary retrived image thumbnail
+                call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
+
+            except:
+                resource.type = 'url'
+                ResourceThumbnail.generateURLThumbnail(resource, thumbnail)
 
         elif resource.type == "article":
             call(["cp", thumbnailDir + "defaults/" + "article.jpg", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
         elif resource.type == "url":
-
-            # NOTE: This method did not work due to multithreading challenges
-            # Set options for the screenshot
-            # options = WebKit2PNGOptions()
-            # options.url = resource.url
-
-            #if __name__ == "__main__":
-                #webkit2png = WebKit2PNG.generatePng(resource.url, options)
-
-            call(
-                ["phantomjs", "oer/takeScreenshot.js", resource.url, thumbnail + "-tmp"
-                    + ResourceThumbnail.THUMBNAIL_EXT])
-
-            call(
-                ["convert", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT, "-resize",
-                    "200x200", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
-
-            # Now delete the temporary retrived image thumbnail
-            call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
+            ResourceThumbnail.generateURLThumbnail(resource, thumbnail)
 
         elif resource.type == "attachment":
 
@@ -88,11 +75,12 @@ class ResourceThumbnail:
                 thumbnailSrcName = "blank.jpg"
 
             call(
-                ["cp", thumbnailDir + "defaults/" + thumbnailSrcName,
+                ["cp", settings.MEDIA_ROOT + 'resource_thumbnail/defaults/' + thumbnailSrcName,
                     thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
         from django.core.files.images import ImageFile
-        thumbnail_to_assign = ImageFile(open(thumbnail + ResourceThumbnail.THUMBNAIL_EXT))
+        thumbnail_to_assign = ImageFile(
+            open(thumbnail + ResourceThumbnail.THUMBNAIL_EXT))
         # NOTE(Varun): It's really important to keep the save as false, to avoid
         #     a recursion here
         resource.image.save(
@@ -116,3 +104,24 @@ class ResourceThumbnail:
         responseJSON = json.loads(response.read())
 
         return responseJSON['data']['thumbnail']['sqDefault']
+
+    @staticmethod
+    def generateURLThumbnail(resource, thumbnail):
+        # NOTE: This method did not work due to multithreading challenges
+        # Set options for the screenshot
+        # options = WebKit2PNGOptions()
+        # options.url = resource.url
+
+        #if __name__ == "__main__":
+            #webkit2png = WebKit2PNG.generatePng(resource.url, options)
+
+        call(
+            ["phantomjs", "oer/takeScreenshot.js", resource.url, thumbnail + "-tmp"
+                + ResourceThumbnail.THUMBNAIL_EXT])
+
+        call(
+            ["convert", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT, "-resize",
+                "200x200", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
+
+        # Now delete the temporary retrived image thumbnail
+        call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
