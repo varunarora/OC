@@ -5,13 +5,6 @@ from django.conf import settings
 import json
 
 
-def register_tmp(request):
-    # TODO(Varun): Remove this temp function.
-    from django.contrib.auth.forms import UserCreationForm
-    context = {'form': UserCreationForm().as_p()}
-    return render(request, "registration-success.html", context)
-
-
 def register(request):
     """Renders the register page for a new user, and performs validation upon
     submissions.
@@ -234,11 +227,7 @@ def _check_password(request, user_form):
     password1 = request.POST.get('password')
     password2 = request.POST.get('password2')
 
-    # If the password does not match the simple regex pattern of only
-    #     atleast letters, numbers, and special characters from the list,
-    #     @#$%^&+=, raise validation error.
-    import re
-    if re.match(r'^.*(?=.{6,})(?=.*[a-z])(?=.*[A-Z])(?=.*[\d\W]).*$', password1) is None:
+    if _check_password_regex(password1) is None:
         user_form.password.errors = _(
             settings.STRINGS['user']['register']['form']['PASSWORD_VALIDATION_ERROR'])
         return False
@@ -253,6 +242,14 @@ def _check_password(request, user_form):
         return False
 
     return True
+
+
+def _check_password_regex(password):
+    # If the password does not match the simple regex pattern of only
+    #     atleast letters, numbers, and special characters from the list,
+    #     @#$%^&+=, raise validation error.
+    import re
+    return re.match(r'^.*(?=.{6,})(?=.*[a-z])(?=.*[A-Z])(?=.*[\d\W]).*$', password)
 
 
 def _generate_confirmation_code(user):
@@ -555,7 +552,12 @@ def authenticate(request):
 
     username = request.POST['username']
     password = request.POST['password']
-    user = authenticate(username=username, password=password)
+
+    if '@' in username:
+        user_object = User.objects.get(email=username)
+        user = authenticate(username=user_object.username, password=password)
+    else:        
+        user = authenticate(username=username, password=password)
 
     if user is not None:
         if user.is_active:
@@ -715,14 +717,26 @@ def user_profile(request, username):
         from articles.models import ArticleRevision
         contributions = ArticleRevision.objects.filter(
             user=user.id, flag="submit").order_by("-created")
+        from articles.ArticleUtilities import ArticleUtilities
+
+        # Set URLs of the category pages using its breadcrumb
+        for contribution in contributions:
+            contribution.category.url = ArticleUtilities.buildBreadcrumb(
+                contribution.category)[0].url
 
         # Get all the projects that the user is a part of.
         from projects.models import Project
         projects = Project.objects.filter(members__id__contains=user.id)
 
+        # Get user profile.
+        user_profile = user.get_profile()
+
         # Get all the resources that the user has created.
-        from oer.models import Resource
-        resources = Resource.objects.filter(user=user)
+        resources = user_profile.collection.resources.all().order_by('-created')
+
+        # Get all the collections that have the user's root collection as parent.
+        import oer.CollectionUtilities as cu
+        child_collections = cu._get_child_collections(user_profile.collection)
 
         from forms import UploadProfilePicture
         form = UploadProfilePicture(request.POST, request.FILES)
@@ -730,8 +744,35 @@ def user_profile(request, username):
         context = {
             'user_profile': user, 'edits': forks, 'projects': projects,
             'resources': resources, 'contributions': contributions, 'form': form,
+            'collection': user_profile.collection,
+            'collections': child_collections,
             'title': user.first_name + ' ' + user.last_name + " &lsaquo; OpenCurriculum"
         }
+        return render(request, 'profile.html', context)
+
+    except User.DoesNotExist:
+        raise Http404
+
+
+def list_collection(request, username, collection_slug):
+    try:
+        user = User.objects.get(username=username)
+        user_profile = user.get_profile()
+
+        # Get user collection.
+        from oer.models import Collection
+        collection = Collection.objects.get(slug=collection_slug)
+
+        import oer.CollectionUtilities as cu
+        collection_context = cu.list_collection(
+            collection, user_profile.collection)
+
+        context = dict({
+            'user_profile': user,
+            'collection': collection,
+            # TODO(Varun): Make this a custom title.
+            'title': collection.title + ' &lsaquo; ' + user.get_full_name()
+        }.items() + collection_context.items())
         return render(request, 'profile.html', context)
 
     except User.DoesNotExist:
@@ -885,6 +926,111 @@ def contributor_introduction(request):
         'contributor_locations': contributor_locations
     }
     return render(request, 'contributor-introduction.html', context)
+
+
+def reset_password(request):
+    from django.contrib import messages
+    try:    
+        email = request.POST.get('email', None)
+
+        # Get the user.
+        user = User.objects.get(email=email)
+        temporary_password = User.objects.make_random_password()
+        user.set_password(temporary_password)
+
+        # Make the user inactive.
+        user.is_active = False
+
+        user.save()
+
+        try:
+            # Send an email to the user with the temporary password.
+
+            from django.core.urlresolvers import reverse
+            host = 'http://' + request.META.get('HTTP_HOST')
+            reset_password_url = host + str(reverse(
+                'user:reset_password_set', kwargs={
+                    'username': user.username
+                }
+            ))
+
+            reset_message = _(
+                settings.STRINGS['user']['reset_password']['EMAIL_RESET_MSG']) % (
+                    user.first_name, 
+                    user.username,
+                    temporary_password,
+                    reset_password_url,
+                    settings.HELP_EMAIL
+                )
+
+            # Send the email with the fields prepared above.
+            from django.core.mail import send_mail
+            send_mail(
+                _(settings.STRINGS['user']['reset_password']['RESET_PASSWORD_REQUESTED']),
+                reset_message, 'OpenCurriculum <%s>' % settings.SERVER_EMAIL,
+                [user.email], fail_silently=False
+            )
+            # Set Django message of email sending.
+            messages.success(request, 'Successfully sent password reset email.')
+
+        except:
+            messages.error(request, 'Failed to send password reset email.')
+
+    except:
+        # Set Django message of failed ability to find user
+        messages.error(request, 'Could not find user with that email address')
+
+    # Redirect to login page
+    return redirect('/?login=true')
+
+
+def reset_password_set(request, username):
+    user = User.objects.get(username=username)
+    errors = []
+
+    if request.method == 'POST':
+        temporary_password = request.POST.get('temporary_password', None)
+        new_password = request.POST.get('new_password', None)
+        repeat_password = request.POST.get('repeat_password', None)
+
+        if temporary_password and new_password and repeat_password:
+            if not user.check_password(temporary_password):
+                errors.append('The temporary password you entered is incorrect')
+
+            if new_password != repeat_password:
+                errors.append('The two passwords did not match')
+
+            if not _check_password_regex(new_password):
+                errors.append(_(settings.STRINGS['user']['register']['form']['PASSWORD_VALIDATION_ERROR']))
+
+            # If there are no errors in the list.
+            if not errors:
+                try:
+                    # Set the new password & activate user
+                    user.set_password(new_password)
+                    user.is_active = True
+                    user.save()
+
+                    from django.contrib.auth import authenticate, login
+
+                    logged_in_user = authenticate(username=username, password=new_password)
+                    if logged_in_user.is_active:
+                        login(request, logged_in_user)
+                    
+                    from django.contrib import messages
+                    messages.success(request, 'Successfully set new password.')
+
+                    return redirect('user:user_profile', username=username)
+                except:
+                    errors.append('Something went wrong. Try again or contact us.')
+        else:
+            errors.append('Please fill out all fields')
+
+    context = {
+        'title': 'Reset your password',
+        'errors': errors
+    }
+    return render(request, 'reset-password.html', context)
 
 
 # API Stuff below #/
