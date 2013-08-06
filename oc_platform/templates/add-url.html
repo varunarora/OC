@@ -1,0 +1,50 @@
+{% include 'partials/header.html' %}
+
+<div class="center-stage">
+    <div id="key-panel" class="panel-left">
+        <h2>Add link</h2>
+        <form method="POST" action="/resources/create-link/">
+            {% csrf_token %}
+            {% if project %}
+            <input type="hidden" name="project_id" value="{{ project.id }}" />
+            {% endif %}
+            <input type="hidden" name="user_id" value="{{ user.id }}" />
+            {% if collection %}
+            <input type="hidden" name="collection_id" value="{{ collection.id }}" />
+            {% endif %}
+            <table class="add-url-inputs">
+                <tr><td>Title</td><td><input type="textbox" name="title" class="new-resource-url"></td></tr>
+                <tr><td>URL (Website address)</td><td><input type="textbox" name="url" class="new-resource-url"></td></tr>
+                <tr><td>Who can see this?</td><td>
+                    <label>
+                        <input type="radio" name="visibility" value="project" checked />
+                        Everyone (Public)
+                    </label>
+                    <label>
+                        <input type="radio" name="visibility" value="private"/>
+                        Only people I choose (Private)
+                    </label>
+                </td></tr>
+                <tr><td>License</td><td>
+                    <select name="license">
+                        {% for license in licenses %}
+                        <option value="{{ license.id }}">{{ license.title }}</option>
+                        {% endfor %}
+                    </select>
+                </td></tr>
+                <tr><td>Description</td><td><textarea name="body_markdown" class="new-resource-description"></textarea></td></tr>
+                <tr><td>Tags</td><td>
+                    <ul class="new-resource-tags"></ul>
+                </textarea></td></tr>
+                <tr><td colspan="2" class="right">
+                    <button class="btn success-button">Submit</button>
+                </td></tr>
+            </table>
+        </form>
+    </div>
+    <div id="fill-panel" class="panel-right">
+        <div class="new-url-placeholder"></div>
+    </div>    
+</div>
+
+{% include 'partials/footer.html' %}
