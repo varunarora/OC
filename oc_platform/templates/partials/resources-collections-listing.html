@@ -1,0 +1,28 @@
+{% if resources or collections %}
+<div class="profile-resources-added">
+    <div class="profile-collections-added-list">
+        {% for collection in collections %}
+        <div class="project-browse-item directory">
+            <a href="{% url user:list_collection username=user_profile.username collection_slug=collection.slug %}"><!--<input type="checkbox" />--> {{ collection }} <span class="project-browse-item-date">{{ collection.created|date:"M nS, 'y P"}}</span> <span class="project-browse-item-visibility visibility-{{ collection.visibility }}"></span></a>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="profile-resources-added-list">
+        {% for resource in resources %}
+            <div class="profile-resource">
+                {% if resource.type == "url" %}
+                    <span class="url-icon"></span>
+                {% elif resource.type == "video" %}
+                    <span class="video-icon"></span>
+                {% elif resource.type == "attachment" %}
+                    <span class="attachment-icon"></span>
+                {% elif resource.type == "article" %}
+                    <span class="article-icon"></span>
+                {% endif %}
+                <a href="{% url resource:read resource_id=resource.id %}">{{ resource.title }}</a><span class="resource-created">on {{ resource.created|date:"N jS" }}</span>
+                {% if user == user_profile %}<div class="profile-resource-delete" id="resource-{{ resource.id }}"></div>{% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

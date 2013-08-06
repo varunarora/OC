@@ -1,5 +1,8 @@
 {% include 'partials/header.html' %}
 <div class="center-stage">
+    <div class="login-messages">
+        {% for message in messages %}<span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>{% endfor %}
+    </div>
     <div id="key-panel" class="panel-left">
     {{ popup_message }}
         <div class="user-info{% if user == user_profile %} my-profile{% endif %}">
@@ -18,12 +21,12 @@
                 <div class="profile-headline-wrapper">
                     <form>
                         <input type="hidden" name="user_id" value="{{ user_profile.id }}"/>
-                        <input type="text" class="profile-headline" value="{{ user_profile.get_profile.headline }}" {% if user != user_profile %} readonly{% endif %}/>
+                        <input type="text" title='{{ user_profile.get_profile.headline }}' class="profile-headline" value="{% if user == user_profile %}{% if user_profile.get_profile.headline %}{{ user_profile.get_profile.headline }}{% else %}(edit headline){% endif %}{% else %}{{ user_profile.get_profile.headline }}{% endif %}" autocomplete="off"  {% if user != user_profile %} readonly{% endif %}/>
                     </form>
                     <span class="headline-edit"></span>
                 </div>
                 {% if user == user_profile %}
-                    {# include 'partials/create-resource-collection.html' #}
+                    {% include 'partials/create-resource-collection.html' with host='profile' %}
                 {% endif %}
                 <!--
                 <div class="profile-subscribe">
@@ -38,94 +41,30 @@
 </div>
 <div class="profile-background-wrapper"></div>
 <div class="center-stage profile-details">
+    {% if collection != user_profile.get_profile.collection %}
+    <div id="fill-panel" class="panel-left">
+        <h3>{{ collection.title }}</h3>
+        <nav class="collections-navigation">
+            {% load project_tags %}
+            {{ browse_tree|user_navigation_tree|safe }}
+        </nav>
+    </div>
+    <div id="key-panel" class="panel-right">
+        {% if resources %}
+        {% include 'partials/resources-collections-listing.html' %}
+        {% else %}
+        No resources in this collection.
+        {% endif %}
+    </div>
+    {% else %}
+
     <div id="key-panel" class="panel-left">
-        {% if contributions %}
-        <div class="profile-contributions">
-            <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Contributions</h3>
-            <div class="profile-contributions-list">
-                {% for contribution in contributions %}
-                    <div class="profile-contribution">
-                        <span class="contribution-icon"></span>
-                        <a href="{% url articles:reader category_slug=contribution.article.category.slug %}?q={{ contribution.article.slug }}&revision={{ contribution.id }}">{{ contribution.title }}</a>
-                        <a href="{% url articles:reader category_slug=contribution.article.category.slug %}" class="category-label">{{ contribution.article.category.title }}</a>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-        {% if projects %}
-        <div class="profile-projects">
-            <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Projects</h3>
-            {% for project in projects %}
-                <div class="profile-projects-item">
-                    <a href="{% url projects:project_home project_slug=project.slug %}">
-                        <div style="background-image: url('{{ MEDIA_URL }}{{ project.cover_pic }}');" class="profile-projects-item-description-wrapper">
-                            <div class="profile-projects-item-description">
-                                <div class="profile-projects-item-title bold">
-                                        {{ project.title }}
-                                </div>
-                                {{ project.short_description }}
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if resources or edits %}
-        <div class="profile-resources">
-            <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Resources</h3>
-            {% if edits %}
-            <h4>Forks</h4>
-            {% for edit in edits %}
-            <div>
-                <a href="{% url articles:reader category_slug=edit.article.category.slug %}?q={{ edit.article.slug }}&revision={{ edit.id }}">{{ edit.created }}</a>
-            </div>
-            {% endfor %}
-            {% endif %}
-
-            {% if resources %}
-            <div class="profile-resources-added">
-                <div class="profile-subheading">Resources added</div>
-                <div class="profile-resources-added-list">
-                    {% for resource in resources %}
-                        <div class="profile-resource">
-                            {% if resource.type == "url" %}
-                                <span class="url-icon"></span>
-                            {% elif resource.type == "video" %}
-                                <span class="video-icon"></span>
-                            {% elif resource.type == "attachment" %}
-                                <span class="attachment-icon"></span>
-                            {% elif resource.type == "article" %}
-                                <span class="article-icon"></span>
-                            {% endif %}
-                            <a href="{% url resource:read resource_id=resource.id %}">{{ resource.title }}</a><span class="resource-created">on {{ resource.created|date:"N jS" }}</span>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-        </div>
-        {% endif %}
-
-        {% if favorites %}
-        <div class="profile-favorites">
-            <h3>Favorites</h3>
-        </div>
-        {% endif %}
-
-        {% if not favorites and not resources and not edits %}
-            {% if user == user_profile %}
-                You haven't created any content or participated in any projects. Get started by <a href="{% url articles:catalog %}">editing articles</a>, creating / uploading a resource or project.
-            {% else %}
-                {{ user_profile.first_name }} hasn't shared any content.
-            {% endif %}
-        {% endif %}
+        {% include 'partials/profile-content.html' %}
     </div>
     <div id="fill-panel" class="panel-right">
-        <h3>Updates</h3>
+        {% include 'partials/profile-updates.html' %}
     </div>
+    {% endif %}
 </div>
 <div class="picture-upload-dialog dialog">
     <form method="POST" action="/user/{{ user_profile.username }}/change-picture/" enctype="multipart/form-data">
@@ -133,5 +72,9 @@
         Choose a new profile picture from your computer (less than 2 MB in size):<p/>
         <input type="file" name="new_profile_picture" id="id_new_profile_picture"/>
     </form>
+</div>
+
+<div class="delete-resource-dialog dialog" title="Delete resource">
+    Are you sure you want to delete this resource?
 </div>
 {% include 'partials/footer.html' %}
