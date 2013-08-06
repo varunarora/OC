@@ -67,6 +67,11 @@ urlpatterns = patterns(
     # Labs stuff
     url(r'^labs/article-center/$', 'articles.views.article_center', name='article_center'),
 
+    # User feed
+    url(r'^feeds/(?P<user_id>\d+)/$', 'user_account.views.user_home', name='feed'),
+    url(r'^users/(?P<user_id>\d+)/$', 'user_account.views.profile', name='profile'),
+    url(r'^api/subscribe/', 'user_account.views.add_subscription', name='api-subscribe'),
+
     # Article Center Registration
     url(r'^contributor-registration/', 'user_account.views.contributor_registration', name='contributor_registration'),
 
@@ -78,7 +83,6 @@ urlpatterns = patterns(
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-
 
 )
 

@@ -6,14 +6,18 @@ import json
 
 
 def home(request):
-    """Fetches the top articles, a count and the sign-in form"""
-    login = request.GET.get('login', False)
+    """Display either the homepage or the user home based on login status.
 
+    If not logged in, fetch the top articles, count, and sign-in form.
+    """
     if request.user.is_authenticated():
-        login = False
+        from user_account.views import user_home
+        return user_home(request, request.user.id)
 
+    login = request.GET.get('login', False)
     login_error_message = None
     source = None
+    
     if login:
         login_error = request.GET.get('error', False)
         if login_error == 'auth':
@@ -255,3 +259,4 @@ def email_share(request):
 
         return HttpResponse(
             json.dumps(status), 401, content_type="application/json")
+

@@ -6,12 +6,15 @@ from interactions.models import Comment
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, related_name='profile')
     headline = models.CharField(max_length=256, null=True, blank=True)
     dob = models.DateTimeField()
     gender = models.NullBooleanField()
     location = models.CharField(max_length=256)
     profession = models.CharField(max_length=256)
+    subscribers = models.ManyToManyField('self', symmetrical=False,
+                                         related_name="subscribees",
+                                         blank=True, null=True)
     profile_pic = models.ImageField(upload_to='images/users', blank=True)
     interests = models.ManyToManyField(Tag, null=True, blank=True)
     social_id = models.CharField(max_length=32, null=True, blank=True)
@@ -19,6 +22,18 @@ class UserProfile(models.Model):
 
     def __unicode__(self):
         return self.user.username
+
+
+class Activity(models.Model):
+    actor = models.ForeignKey(User, related_name='actor')
+    action = models.CharField(max_length=30)
+    target = models.ForeignKey(User, null=True, blank=True,
+                               related_name='target')
+    action_object = models.CharField(max_length=30, blank=True, null=True)
+    recipients = models.ManyToManyField(User, related_name="feed")
+
+    def __unicode__(self):
+        return unicode(self.action)
 
 
 class Cohort(models.Model):

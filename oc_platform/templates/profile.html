@@ -1,4 +1,12 @@
 {% include 'partials/header.html' %}
+
+<script type="text/javascript" src="{{ STATIC_URL }}js/profile.js"></script>
+<script type="text/javascript">
+    OC.profile = {
+        id: {{ id }},
+    };
+</script>
+
 <div class="center-stage">
     <div id="key-panel" class="panel-left">
     {{ popup_message }}
@@ -27,7 +35,7 @@
                 {% endif %}
                 <!--
                 <div class="profile-subscribe">
-                    <button class="btn dull-button">SUBSCRIBE</button><span class="profile-subscriber-count">23 subscribers (3 mutual)</span>
+                    <button class="btn dull-button subscribe">SUBSCRIBE</button><span class="profile-subscriber-count">23 subscribers (3 mutual)</span>
                 </div>
                 -->
             </div>
@@ -134,4 +142,6 @@
         <input type="file" name="new_profile_picture" id="id_new_profile_picture"/>
     </form>
 </div>
+
 {% include 'partials/footer.html' %}
+

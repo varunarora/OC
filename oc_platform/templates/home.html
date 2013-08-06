@@ -1,0 +1,13 @@
+{% include 'partials/header.html' %}
+
+    <h3>
+        {{ name }}'s homepage (News Feed)
+    </h3>
+
+    {% for item in feed %}
+        <div class="activity">
+            {{ item.id }}
+        </div>
+    {% endfor %}
+
+{% include 'partials/footer.html' %}

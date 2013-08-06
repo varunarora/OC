@@ -1,6 +1,9 @@
 from django.shortcuts import render, HttpResponse, redirect, Http404
-from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
+from django.contrib.auth.models import User
+from user_account.models import Activity
+from interactions.models import Comment
+from django.dispatch import Signal
 from django.conf import settings
 import json
 
@@ -847,6 +850,157 @@ def _email_contributor_admins(original_form_inputs):
         signup_message, 'OpenCurriculum <%s>' % settings.SERVER_EMAIL,
         settings.CONTRIBUTOR_SIGNUPS_ADMINS, fail_silently=False
     )
+
+
+def add_subscription(request):
+    """Subscribes the requester to the user"""
+    subscribee_id = request.POST['id']
+
+    from django.contrib.auth.models import User
+    subscribee_profile = User.objects.get(id=subscribee_id).profile
+    subscriber_profile = User.objects.get(id=request.user.id).profile
+
+    subscribee_profile.subscribers.add(subscriber_profile)
+
+    # Send the signal, so the activity will be created in the feed.
+    from user_account.signals import new_subscription
+    new_subscription.send(sender='add_subscription', actor_id=request.user.id,
+                          action='subscribe', target_id=subscribee_id)
+
+    status = {'status': 'true'}
+
+    return HttpResponse(
+        json.dumps(status), 200, content_type="application/json")
+
+
+def user_home(request, user_id):
+    """Show every activity for which this user is a recipient."""
+    user = User.objects.get(id=user_id)
+    user_feed = user.feed.all()
+
+    c = {
+        'user': user,
+        'name': user.get_full_name(),
+        'feed': user_feed,
+    }
+
+    return render(request, 'home.html', c)
+
+
+def profile(request, user_id):
+    """Show every activity where this user was the actor."""
+    user = User.objects.get(id=user_id)
+    user_feed = Activity.objects.filter(actor=user)
+
+    c = {
+        'user_profile': user,
+        'name': user.get_full_name(),
+        'id': user_id,
+        'feed': user_feed,
+    }
+
+    return render(request, 'profile.html', c)
+
+
+def get_user_from_profile(profile):
+    return profile.user
+
+
+def get_subscribers_from_profile(profile):
+    """Return the list of user objects of a given profile's subscribers.
+
+    List of subscriber profiles => list of subscriber user objects.
+    """
+    return map(get_user_from_profile, profile.subscribers.all())
+
+
+def find_recipients(**kwargs):
+    """Given an actor and action (including its target), finds the users
+    on whose feed this action would appear.
+
+    Parameters:
+        actor: a user object.
+        action: a string (one word) about what the actor did.
+        target: the user on whom the action is performed. (optional)
+
+    Examples:
+        [Varun] [subscribed] to [Zeenab]                        # no object
+        [Varun] [uploaded] a new resource: [resource_name]     # no target
+        [Varun] [commented] on [Zeenab]'s resource: [comment_text]
+
+    Returns:
+        a set of recipients.
+    """
+    recipients = set()
+    actor = kwargs['actor']
+    action = kwargs['action']
+
+    # Build the set of recipients
+    if (action == 'subscribe'):
+        target = kwargs['target']
+        # I'm subscribed to Zuck, I'm also interested in similar cool people.
+        # If Zuck subscribes to x, I might be interested in x's coolness.
+        recipients.update(get_subscribers_from_profile(actor.profile))
+
+        # Also, obviously x would want to know that Zuck is now stalking her.
+        recipients.add(target)
+
+    elif (action == 'upload'):
+        # No targets involved. Only subscribers need know.
+        recipients.update(get_subscribers_from_profile(actor.profile))
+
+    elif (action == 'comment'):
+        target = kwargs['target']
+        # Hmm, this guy I'm subscribed to commented about Zuck, interesting.
+        recipients.update(get_subscribers_from_profile(actor.profile))
+
+        # Wow, someone finally commented on my stuff!! :excited:
+        recipients.add(target)
+
+        # If I commented on my own stuff, don't tell me.
+        recipients.discard(actor)      # Removes iff present.
+
+    return recipients
+
+
+def add_activity(sender, **kwargs):
+    """Finds recipients, creates an Activity object, and returns it.
+
+    TODO: Change this to accept objects rather than IDs.
+
+    Parameters:
+        actor_id: id to a user object.
+        action: a string (one word) about what the actor did.
+        target_id: id to the user on whom the action is performed.
+        object_id: id to the resource involved if any.
+
+    Examples:
+        [Varun] [subscribed] to [Zeenab]                        # no object
+        [Varun] [uploaded] a new resource: [resource_name]     # no target
+        [Varun] [commented] on [Zeenab]'s resource: [comment_text]
+    """
+    args_dict = dict()
+    args_dict['actor'] = User.objects.get(id=kwargs['actor_id'])
+    args_dict['action'] = kwargs['action']
+    args_dict['target'] = User.objects.get(id=kwargs['target_id'])
+    recipients = find_recipients(**args_dict)
+    item = Activity()
+    item.actor = args_dict['actor']
+    item.action = args_dict['action']
+    item.target = args_dict['target']
+
+    # Subscriptions do not have associated objects
+    if item.action == "comment":
+        item.action_object = Comment.objects.get(id=kwargs['object_id'])
+    elif item.action == "upload":
+        # Uploading not in master yet afaik. 
+        # TODO: uncomment line below, and remove pass statement
+        # item.action_object = Upload.objects.get(id=kwargs['object_id'])
+        pass
+
+    item.save()
+    item.recipients.add(*recipients)
+    item.save()
 
 
 def contributor_introduction(request):

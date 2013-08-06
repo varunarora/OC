@@ -11,6 +11,9 @@ def post_comment(request):
 
         if comment_form.is_valid():
             comment = comment_form.save()
+            from interactions.models import new_comment
+            new_comment.send(sender='post_comment', actor_id=comment.user.id,
+                             action='comment', object_id=comment.parent_id)
 
             from interactions.models import Comment
             Comment.comment_created.send(
