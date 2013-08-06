@@ -9,13 +9,14 @@
                     {% csrf_token %}
                     <input type="hidden" name="user_id" value="{{ user.id }}"/>
                     <input type="hidden" name="project_id" value="{{ project.id }}"/>
+                    <input type="hidden" name="collection_id" value="{{ collection.id }}"/>
                     <div class="upload-drag-drop">
                     </div>
                     <div class="upload-drag-drop-message">DRAG AND DROP FILES HERE</div>
                     <button class="projects-success-button" type="file" name="select-file">UPLOAD FROM COMPUTER</button>
                     <button class="projects-progress-button hidden" type="submit" name="submit">DONE</button>
                     <input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
-                    <input type="file" class="manual-upload" />
+                    <input type="file" class="manual-upload" name="file" />
                 </form>
                 <p>(Maximum size = 5 MB. For larger files, <a href="" class="uploadfiles filepicker-computer-upload>">upload from here</a>)</p>
                 
