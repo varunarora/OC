@@ -1,6 +1,9 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
-from oer.models import Resource
+from django.utils.translation import ugettext as _
+from django.conf import settings
+from django.core.exceptions import PermissionDenied
+from oer.models import Resource, Collection
 from django.core.files import File
 import json
 
@@ -59,9 +62,9 @@ def view_resource(request, resource_id):
         if resource.type == "attachment":
             #TODO: Replace with |filesizeformat template tag
             filesize = resource.file.size
-            if filesize >= 104856:
+            if filesize >= 1048576:
                 resource.filesize = str(
-                    _filesizeFormat(float(filesize) / 104856)) + " MB"
+                    _filesizeFormat(float(filesize) / 1048576)) + " MB"
             elif filesize >= 1024:
                 resource.filesize = str(
                     _filesizeFormat(float(filesize) / 1024)) + " KB"
@@ -107,8 +110,8 @@ def view_resource(request, resource_id):
             'resource': resource,
             'title': resource.title + " &lsaquo; OpenCurriculum",
             'related': related, "user_resource_count": userResourceCount,
-            'current_path': 'http://' + 'www.theopencurriculum.org' + request.get_full_path(),  # request.get_host()
-            'thumbnail': 'http://' + 'www.theopencurriculum.org' + '/static/images/oer-thumbnails/' + str(resource.id) + '-thumb.jpg'
+            'current_path': 'http://' + request.get_host() + request.get_full_path(),  # request.get_host()
+            'thumbnail': 'http://' + request.get_host() + settings.MEDIA_URL + resource.image.name
         }
         return render(request, 'resource.html', context)
     except ObjectDoesNotExist:
@@ -145,13 +148,96 @@ def download(request, resource_id):
     return response
 
 
+def _prepare_add_resource_context(request):
+    username = request.GET.get('user', None)
+    project_slug = request.GET.get('project', None)
+    collection_slug = request.GET.get('collection', None)
+
+    if collection_slug:
+        collection = Collection.objects.get(slug=collection_slug)
+        
+    # Check if the project exists and if the user is allowed to submit anything
+    #     project_slug the project
+    if project_slug:
+        from projects.models import Project
+        project = Project.objects.get(slug=project_slug)
+        if request.user not in project.members.all():
+            raise PermissionDenied
+        user = request.user
+        if not collection_slug:
+            from projects.models import Project
+            project = Project.objects.get(slug=project_slug)
+            collection = Collection.objects.get(pk=project.collection.id)
+    elif username:
+        from django.contrib.auth.models import User
+        user = User.objects.get(username=username)
+        if request.user != user:
+            raise PermissionDenied
+        if not collection_slug:
+            collection = user.get_profile().collection
+    else:
+        project = None
+        user = request.user
+        if not collection_slug:
+            collection = user.get_profile().collection
+
+    # Get all licenses
+    from license.models import License
+    licenses = License.objects.all()
+
+    title_extension = ''
+    if project:
+        title_extension = ' &lsaquo; ' + project.title
+
+    return {
+        'project': project,
+        'user': user,
+        'collection': collection,
+        'licenses': licenses,
+        'title_extension': title_extension
+    }
+
+
+def add_video(request):
+    resource_context = _prepare_add_resource_context(request)
+
+    context = dict({
+        'title': _(settings.STRINGS['resources']['ADD_VIDEO_TITLE']) + resource_context['title_extension']
+    }.items() + resource_context.items())
+
+    return render(request, 'add-video.html', context)
+
+
+def add_url(request):
+    resource_context = _prepare_add_resource_context(request)
+
+    context = dict({
+        'title': _(settings.STRINGS['resources']['ADD_URL_TITLE']) + resource_context['title_extension']
+    }.items() + resource_context.items())
+
+    return render(request, 'add-url.html', context)
+
+
+def new_document(request):
+    resource_context = _prepare_add_resource_context(request)
+
+    context = dict({
+        'title': _(settings.STRINGS['resources']['NEW_DOCUMENT_TITLE']) + resource_context['title_extension']
+    }.items() + resource_context.items())
+
+    return render(request, 'editor.html', context)
+
+
 def upload_page(request):
     """Renders the upload page, with user and project objects in context."""
+    if not request.user.is_authenticated():
+        return redirect('/?login=true&source=%s' % request.path)
 
-    context = {
-        "user": request.user,
-        "project": {"id": "7"}      # TODO
-    }
+    resource_context = _prepare_add_resource_context(request)
+
+    context = dict({
+        'title': _(settings.STRINGS['resources']['UPLOAD_TITLE']) + resource_context['title_extension']
+    }.items() + resource_context.items())
 
     return render(request, 'upload.html', context)
 
@@ -246,65 +332,313 @@ def fp_submit(request):
     Then, any changed titles in post_data are persisted.
 
     Parameters:
-        Request contaiing list of ResourceID-title pairs.
+        Request containing list of ResourceID-title pairs.
 
     Returns:
         Redirect to project slug.
     """
-    from oer.models import Resource
-    post_data = request.POST.copy()
-    project_id = post_data['project_id']
-    del post_data["csrfmiddlewaretoken"]
-    del post_data['user_id']
-    del post_data['project_id']
+    if request.method == "POST":
+        ###########################################################
+        # First, handle all the manually uploaded files
 
+        # Build a mapping from original file names to new file names
+        file_names = {}
+        for new_name, original_file in request.FILES.items():
+            file_names[new_name] = original_file.name
+
+        # Change file-naming to follow form-0-file format
+        modified_request_files = request.FILES.copy()
+
+        file_counter = 0
+        for key, value in modified_request_files.items():
+            modified_request_files['form-' + str(file_counter) + '-file'] = value
+            del modified_request_files[key]
+            file_counter += 1
+
+        # Add management form data to process as a formset factory object
+        modified_post_request = request.POST.copy()
+
+        modified_post_request.setdefault('form-TOTAL_FORMS', unicode(file_counter))
+        modified_post_request.setdefault('form-INITIAL_FORMS', u'0')
+        modified_post_request.setdefault('form-NUM_FORMS', u'')
+
+        from django.forms.formsets import formset_factory
+        from forms import UploadResource
+        UploadResourceSet = formset_factory(UploadResource)
+
+        resource_formset = UploadResourceSet(modified_post_request, modified_request_files)
+
+        (user, collection) = _get_user_collection(request)
+
+        if resource_formset.is_valid():
+            for file_name, original_file in request.FILES.items():
+                create_resource(original_file, user, collection, file_name)
+
+        ###########################################################
+        # Now, handle name changes for pre-uploaded files
+
+        from oer.models import Resource
+        post_data = request.POST.copy()
+        project_id = post_data['project_id']
+        user_id = post_data['user_id']
+        collection_id = post_data['collection_id']
+
+        del post_data["csrfmiddlewaretoken"]
+        del post_data['user_id']
+        del post_data['project_id']
+
+        try:
+            for id in post_data:
+                resource = Resource.objects.get(pk=id)
+                # If the title has changed, persist it
+                if (resource.id != post_data[id]):
+                    resource.title = post_data[id]
+                    resource.save()
+        except:
+            # TODO: Django message thingy
+            k = True
+            k = not k
+
+        return redirect_to_collection(user_id, project_id, collection_id)            
+
+    else:
+        return Http404
+
+
+def _get_user_collection(request):
+    user_id = request.POST.get('user_id', None)
+    project_id = request.POST.get('project_id', None)
+    collection_id = request.POST.get('collection_id', None)
+
+    from django.contrib.auth.models import User
+    user = User.objects.get(pk=int(user_id))
+
+    if project_id:
+        if collection_id:
+            collection = Collection.objects.get(pk=collection_id)
+        else:
+            from projects.models import Project
+            project = Project.objects.get(collection=collection_id)
+            collection = Collection.objects.get(pk=project.collection.id)
+    else:
+        from user_account.models import UserProfile
+        collection = UserProfile.objects.get(
+            user=request.user).collection
+
+    return (user, collection)
+
+
+def create_resource(uploaded_file, user, collection, new_filename=None):
+    default_cost = 0
+
+    # Create a new resource
+    new_resource = Resource(
+        title=new_filename if new_filename else uploaded_file.name,
+        cost=default_cost,
+        user=user,
+        file=uploaded_file,
+        type='attachment',
+        body_markdown=''
+    )
+
+    new_resource.save()
+
+    # Now add this resource to the collection it belongs to
+    collection.resources.add(new_resource)
+    collection.save()
+
+    return new_resource
+
+
+def create_video(request):
+    from oer import forms
+    new_video = forms.NewVideoForm(request.POST, request.user)
+    video = new_video.save()
+
+    project_id = request.POST.get('project_id')
+    user_id = request.POST.get('user_id')
+    collection_id = request.POST.get('collection_id')
+
+    # Add to the necessary collection.
+    add_resource_to_collection(video, collection_id)
+
+    return redirect_to_collection(user_id, project_id, collection_id)
+
+
+def create_url(request):
+    from oer import forms
+    new_url = forms.NewURLForm(request.POST, request.user)
+    url = new_url.save()
+
+    project_id = request.POST.get('project_id')
+    user_id = request.POST.get('user_id')
+    collection_id = request.POST.get('collection_id')
+
+    # Add to the necessary collection.
+    add_resource_to_collection(url, collection_id)
+
+    return redirect_to_collection(user_id, project_id, collection_id)
+
+
+def add_resource_to_collection(resource, collection_id):
+    from oer.models import Collection
+    collection = Collection.objects.get(pk=int(collection_id))
+    collection.resources.add(resource)
+    collection.save()
+
+
+def redirect_to_collection(user_id, project_id=None, collection_id=None):
+    if collection_id:
+        from oer.models import Collection
+        collection = Collection.objects.get(pk=int(collection_id))
+
+    if project_id:
+        from projects.models import Project
+        project_slug = Project.objects.get(pk=int(project_id)).slug
+        if collection:
+            return redirect('projects:list_collection', project_slug=project_slug, collection_slug=collection.slug)
+        else:
+            return redirect('projects:project_browse', project_slug=project_slug)
+    else:
+        from django.contrib.auth.models import User
+        username = User.objects.get(pk=int(user_id)).username 
+        if collection:
+            return redirect('user:list_collection', username=username, collection_slug=collection.slug)
+        else:            
+            return redirect('user:user_profile', username=username)
+
+
+def delete_resource(request, resource_id):
     try:
-        for id in post_data:
-            resource = Resource.objects.get(pk=id)
-            # If the title has changed, persist it
-            if (resource.id != post_data[id]):
-                resource.title = post_data[id]
-                resource.save()
+        resource = Resource.objects.get(pk=resource_id)
+        
+        if request.user != resource.user:
+            return HttpResponse(json.dumps(
+                {'status': 'false'}), 403, content_type="application/json")
+        
+        resource.delete()
+        return HttpResponse(json.dumps(
+            {'status': 'true'}), 200, content_type="application/json")
     except:
-        # TODO: Django message thingy
-        k = True
-        k = not k
+        return HttpResponse(json.dumps(
+            {'status': 'false'}), 401, content_type="application/json")
 
-    from projects.views import project_home
+
+def new_project_collection(request, project_slug):
+    collection_slug = request.POST.get('parent_collection')
+    collection = Collection.objects.get(slug=collection_slug)
+
     from projects.models import Project
-    slug = Project.objects.get(pk=project_id).slug
-    return redirect(project_home(request, slug))
+    project = Project.objects.get(slug=project_slug)
+
+    new_collection = Collection()
+    new_collection.title = request.POST.get('new_collection_name')
+
+    from django.contrib.contenttypes.models import ContentType
+    collection_content_type = ContentType.objects.get_for_model(Collection)
+
+    new_collection.host = collection
+    new_collection.visibility = request.POST.get('collection_visibility')
+    new_collection.slug = _get_fresh_collection_slug(
+        request.POST.get('new_collection_name'), collection, collection_content_type)
+    new_collection.save()
+
+    # TODO(Varun):Set Django message on creation of collection
+
+    if project.collection == collection:
+        return redirect(
+            'projects:project_browse',
+            project_slug=project.slug,
+        )
+    else:
+        return redirect(
+            'projects:list_collection',
+            project_slug=project.slug,
+            collection_slug=collection.slug
+        )
+
+
+def new_user_collection(request, username):
+    from oer.models import Collection
+
+    collection_slug = request.POST.get('parent_collection')
+    collection = Collection.objects.get(slug=collection_slug)
+
+    from django.contrib.auth.models import User
+    user = User.objects.get(username=username)
+
+    new_collection = Collection()
+    new_collection.title = request.POST.get('new_collection_name')
+
+    from django.contrib.contenttypes.models import ContentType
+    collection_content_type = ContentType.objects.get_for_model(Collection)
+
+    new_collection.host = collection
+    new_collection.visibility = request.POST.get('collection_visibility')
+    new_collection.slug = _get_fresh_collection_slug(
+        request.POST.get('new_collection_name'), collection, collection_content_type)
+    new_collection.save()
+
+    # TODO(Varun):Set Django message on creation of collection
+
+    if user.get_profile().collection == collection:
+        return redirect(
+            'user:user_profile',
+            username=username,
+        )
+    else:
+        return redirect(
+            'user:list_collection',
+            username=username,
+            collection_slug=collection.slug
+        )
+
+
+def _get_fresh_collection_slug(title, collection, content_type):
+    from django.template.defaultfilters import slugify
+    slug = slugify(title)
+
+    # Check if this slug has already been taken by another project
+    collections_with_slug = Collection.objects.filter(
+        slug=slug, host_id=collection.id, host_type=content_type
+    )
+    num_projects_with_slug = collections_with_slug.count()
+    if num_projects_with_slug != 0:
+        slug = _apply_additional_collection_slug(slug, 1, collection, content_type)
+
+    return slug
+
+
+def _apply_additional_collection_slug(slug, depth, collection, content_type):
+    attempted_slug = slug + "-" + str(depth)
+    collections = Collection.objects.filter(
+        slug=slug + "-" + str(depth),
+        host_id=collection.id,
+        host_type=content_type
+    )
+    if collections.count() == 0:
+        return attempted_slug
+    else:
+        return _apply_additional_collection_slug(slug, depth + 1, collection, content_type)
 
 
 def file_upload(request):
-    import pdb
-    pdb.set_trace()
     if request.method == "POST":
         from forms import UploadResource
         form = UploadResource(request.POST, request.FILES)
 
+        (user, collection) = _get_user_collection(request)
+
         if form.is_valid():
             # Get the Project ID / User ID & Collection name from the URL / form
-            import pdb
-            pdb.set_trace()
 
-            return HttpResponse(json.dumps(
-                {'400': 'cool_filename.jpg'}), 200, content_type="application/json")
-            resource_owner = ''
-
-            # Create a new resource
-            from django.core.files.base import ContentFile
-            resource = ContentFile(request.FILES['field_name'].read())  # write_pic(request.FILES['new_profile_picture'])
-
-            new_resource = Resource()
-            new_resource.title = title
-            new_resource.cost = default_cost
-            new_resource.user_id = user_id
-            new_resource.file = resource
-            new_resource.save()
+            new_resource = create_resource(request.FILES['file'], user, collection)
 
         return HttpResponse(json.dumps(
-            {'400': 'cool_filename.jpg'}), 200, content_type="application/json")
+            {
+                new_resource.id: new_resource.file.name
+            }
+        ), 200, content_type="application/json")
     else:
         return HttpResponse(json.dumps(
             {'status': 'false'}), 401, content_type="application/json")
