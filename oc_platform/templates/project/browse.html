@@ -1,17 +1,28 @@
 {% include 'partials/header.html' %}
 {% include 'project/header.html' with page="browse" %}
 
-<div class="center-stage">
+<div class="center-stage browse-page">
     <div id="fill-panel" class="panel-left">
+        {% include 'partials/create-resource-collection.html' with host='project' %}
+
+        <nav class="collections-navigation">
+            {% load project_tags %}
+            {{ browse_tree|project_navigation_tree|safe }}
+        </nav>
     </div>
     <div id="key-panel" class="panel-right">
     {% for collection in collections %}
-        <a href="{% url projects:list_collection project_slug=project.slug collection_slug=collection.slug %}">{{ collection }}</a>
+        <div class="project-browse-item directory">
+            <a href="{% url projects:list_collection project_slug=project.slug collection_slug=collection.slug %}"><!--<input type="checkbox" />--> {{ collection }} <span class="project-browse-item-date">{{ collection.created|date:"M nS, 'y P"}}</span> <span class="project-browse-item-visibility visibility-{{ collection.visibility }}"></span></a>
+        </div>
     {% endfor %}
     {% for asset in assets.all %}
-        <a href="">{{ asset }}</a>
+        <div class="project-browse-item">
+            <a href="{% url resource:read resource_id=asset.id %}">{{ asset }} <span class="project-browse-item-date">{{ asset.created|date:"M nS, 'y P"}}</span></a>
+        </div>
     {% endfor %}
     </div>
 </div>
 
+{% include 'project/footer.html' %}
 {% include 'partials/footer.html' %}
