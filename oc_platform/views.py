@@ -28,6 +28,14 @@ def home(request):
     # Get the count of the total number of articles in the database.
     article_count = Article.objects.all().count()
 
+    # Get the top 10 resources ordered in descending order of views.
+    from oer.models import Resource
+    top_resources = Resource.objects.order_by('title').order_by('-views')[:10]
+
+    # Get the top 10 projects ordered in descending order of views.
+    from projects.models import Project
+    top_projects = Project.objects.filter(visibility='public').order_by('title').order_by('-created')[:10]
+
     # Get the sign-in form.
     import SignupForm
     form = SignupForm.SignupForm()
@@ -39,6 +47,8 @@ def home(request):
     context = dict(
         AuthHelper.generateGPlusContext(request).items() + {
             'top_articles': top_articles,
+            'top_resources': top_resources,
+            'top_projects': top_projects,
             'title': _(settings.STRINGS['global']['TITLE']),
             'count': article_count,
             'form': form,
