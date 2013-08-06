@@ -8,9 +8,9 @@
 				<section id="article-do">
 					{% with obj=resource caption=resource.user.first_name|add:" "|add:resource.user.last_name %}
 						{% if resource.type == "text" %}
-							{# include 'partials/oer-do.html' #}
+							{% include 'partials/oer-do.html' %}
 						{% else %}
-							{# include 'partials/oer-foreign-do.html' #}
+							{% include 'partials/oer-foreign-do.html' %}
 						{% endif %}
 					{% endwith %}
 				</section>
