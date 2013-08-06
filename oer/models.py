@@ -19,19 +19,28 @@ class Resource(models.Model):
     body_markdown = MarkdownTextField(null=True, blank=True)
     tags = models.ManyToManyField('meta.Tag', blank=True)
     created = models.DateTimeField(auto_now_add=True, editable=False)
+    visibility = models.CharField(max_length=256)
     cost = models.FloatField()
     views = models.IntegerField(editable=False, default=0)
     user = models.ForeignKey(User)
-    file = models.FileField(upload_to='resources')
+    file = models.FileField(upload_to='resources', null=True, blank=True)
     image = models.ImageField(upload_to='resource_thumbnail', blank=True)
-
-    def save(self, *args, **kwargs):
-        ResourceThumbnail.generateThumbnail(self)
-        newResource = super(Resource, self).save(*args, **kwargs)
-        return newResource
 
     def __unicode__(self):
         return self.title
+
+
+def generate_thumnbnail(sender, instance, created, raw, **kwargs):
+    ResourceThumbnail.generateThumbnail(instance)
+    # Now disconnect the dispatcher
+    post_save.disconnect(generate_thumnbnail, sender=Resource)
+    instance.save()
+    # Connect it again
+    post_save.connect(generate_thumnbnail, sender=Resource)
+
+
+from django.db.models.signals import post_save
+post_save.connect(generate_thumnbnail, sender=Resource)
 
 
 class Collection(models.Model):
