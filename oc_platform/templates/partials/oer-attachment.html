@@ -5,7 +5,7 @@
 		</div>
 		<div id="oer-thumbnail">
 			<div id="thumbnail-wrapper">
-				<div id="thumbnail-image" style="background-image: url('{{ STATIC_URL }}images/oer_thumbnails/{{ resource.id }}-thumb.jpg');>
+				<div id="thumbnail-image" style="background-image: url('{{ MEDIA_URL }}{{ resource.image.name }}');">
 				</div>
 				<div id="thumbnail-info">{{ resource.extension|upper }}</div>
 			</div>
@@ -15,7 +15,7 @@
 		<div id="oer-details">
 			<ul>
 				<li><span class="oer-info-caption">File size</span>: <span class="oer-info-detail">{{ resource.filesize }}</span></li>
-				<li><span class="oer-info-caption">Opens with</span>: <span class="oer-info-detail">Office productiity software</span></li>
+				<li><span class="oer-info-caption">Opens with</span>: <span class="oer-info-detail">Office productity software</span></li>
 				<li><span class="oer-info-caption">Uploaded on</span>: <span class="oer-info-detail">{{ resource.created|date }}</span></li>
 			</ul>
 		</div>
