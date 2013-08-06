@@ -4,6 +4,7 @@ from django.conf import settings
 from projects.models import Project
 from oer.models import Collection
 import json
+import itertools
 
 
 def project_home(request, project_slug):
@@ -109,7 +110,9 @@ def new_project(request):
             print new_project_form.errors
             print "The form had errors"
 
-    context = {}
+    context = {
+        'title': _(settings.STRINGS['projects']['NEW_PROJECT_TITLE'])
+    }
     return render(request, 'new-project.html', context)
 
 
@@ -158,48 +161,115 @@ def browse(request, project_slug):
     root_collection = project.collection
 
     # Get all the assets of the root collection.
-    root_assets = root_collection.nodes
+    root_assets = root_collection.resources
 
-    child_collections = _get_child_collections(root_collection)
+    import oer.CollectionUtilities as cu
+    child_collections = cu._get_child_collections(root_collection)
+
+    (browse_tree, flattened_tree) = _get_browse_tree(root_collection)
 
     context = {
         'project': project,
         'assets': root_assets, 'collections': child_collections,
+        'collection': root_collection,
+        'browse_tree': browse_tree,
         'title': (_(settings.STRINGS['projects']['BROWSE_TITLE']) +
                   ' &lsaquo; ' + project.title)
     }
     return render(request, 'project/browse.html', context)
+
+
+def _get_browse_tree(collection):
+    return buildChildCollections({'root': [collection]}, [])
+
+
+def buildChildCollections(collectionModel, flattenedDescendants):
+    """Adapted from buildChildCategories() in articles.views"""
+    # Get the child collections of this collection recursively
+    if len(collectionModel) == 0:
+        return (None, flattenedDescendants)
+    else:
+        # Get all child collections whose children need to be found
+        colValues = collectionModel.values()
+
+        # Chain all the contents of the values
+        childCollections = list(itertools.chain.from_iterable(colValues))
+
+        # Create a master list [] of all { parent : [child, child] } mapping
+        children = map(_hasImmediateChildren, childCollections)
+
+        # Flatten the {} objects in the master list into one new dict
+        collectionModel = {}
+        for child in children:
+            try:
+                for k, v in child.iteritems():
+                    collectionModel[k] = v
+            except:
+                pass
+
+        # Call this function recursively to obtain the current models'
+        #     descendant child categories
+        (descendantsTree, descendantsFlattened) = buildChildCollections(
+            collectionModel, childCollections
+        )
+
+        # Append "my" descendants to the descendants of "my" children
+        flattenedDescendants += descendantsFlattened
+
+        if descendantsTree is not None:
+            # Iterate through all the dictionary keys, and replace the collection
+            #     model items, and return the collection model
+            for val in collectionModel.itervalues():
+                for v in val:
+                    for a, b in descendantsTree.iteritems():
+                        if a == v:
+                            val[val.index(v)] = {a: b}
+            return (collectionModel, flattenedDescendants)
+        else:
+            return (collectionModel, flattenedDescendants)
+
+
+def _hasImmediateChildren(collection):
+    """Adapted from _hasImmediateChildren() in articles.views"""
+    import oer.CollectionUtilities as cu
+    childCollections = list(cu._get_child_collections(collection))
+    if len(childCollections) > 0:
+        return {collection: childCollections}
+    else:
+        return None
+
+
+def discussions(request, project_slug):
+    project = Project.objects.get(slug=project_slug)
+    context = {
+        'project': project,
+        'title': (_(settings.STRINGS['projects']['DISCUSSION_BOARD_TITLE']) +
+                  ' &lsaquo; ' + project.title)
+    }
+    return render(request, 'project/discussion-board.html', context)
 
 
 def list_collection(request, project_slug, collection_slug):
     project = Project.objects.get(slug=project_slug)
 
     collection = Collection.objects.get(slug=collection_slug)
-    root_assets = collection.nodes
+    root_assets = collection.resources
 
-    child_collections = _get_child_collections(collection)
+    import oer.CollectionUtilities as cu
+    child_collections = cu._get_child_collections(collection)
 
-    print child_collections
+    (browse_tree, flattened_tree) = _get_browse_tree(project.collection)
 
     context = {
         'project': project,
         'assets': root_assets, 'collections': child_collections,
+        'collection': collection,
+        'browse_tree': browse_tree,
         # TODO(Varun): Make this a custom title.
         'title': (_(settings.STRINGS['projects']['BROWSE_TITLE']) +
                   ' &lsaquo; ' + project.title)
     }
     return render(request, 'project/browse.html', context)
-
-
-def _get_child_collections(collection):
-
-    # Get all the collections whose parent is the root collection.
-    from django.contrib.contenttypes.models import ContentType
-    collections_type = ContentType.objects.get_for_model(Collection)
-    child_collections = Collection.objects.filter(
-        host_id=collection.id, host_type=collections_type)
-
-    return child_collections
 
 
 # Projects-specific API below
