@@ -1,6 +1,7 @@
 from django.forms import ModelForm
 from projects.models import Project
 from oer.models import Collection
+from django.template.defaultfilters import slugify
 
 
 class ProjectForm(ModelForm):
@@ -14,7 +15,8 @@ class ProjectForm(ModelForm):
         root_collection = Collection(
             title=title + "_root",
             owner=user,
-            visibility=request.get('visibility')
+            visibility=request.get('visibility'),
+            slug=slugify(title)
         )
         root_collection.save()
 
@@ -29,7 +31,6 @@ class ProjectForm(ModelForm):
         super(ModelForm, self).__init__(newRequest)
 
     def _get_fresh_slug(self, title):
-        from django.template.defaultfilters import slugify
         slug = slugify(title)
 
         # Check if this slug has already been taken by another project
