@@ -1,179 +1,215 @@
 {% include 'partials/header.html' %}
-		<div id="chief-panel-container" class="home">
-			<div id="chief-panel-wrapper">
-							<img src="{{ STATIC_URL }}images/cloud.png" id="cloud" />
-			</div>
-			{% if login %}
-			<div id="chief-panel" class="sign-up">
-				<div id="key-panel" class="panel-left">
-					<h1 class="strong">Connect to your learning world.</h1>
-					<p>We bring the newest features, tools and updates so that your world continues to grow.</p>
-					
-					<div class="row-set">
-						<div class="row-item">
-							<div class="row-item-thumbnail">
-								<img src="{{ STATIC_URL }}images/resources.png" />
-							</div>
-							<div class="row-item-description">
-								<div class="bold">Resource collections and sharing</div>
-								<div class="row-item-description-detail">Create or upload resources and organize in collections before you share. Free 2GB of learning resource storage when you sign up</div>
-							</div>
-						</div>
 
-						<div class="row-item">
-							<div class="row-item-thumbnail">
-								<img src="{{ STATIC_URL }}images/social.png" />
-							</div>
-							<div class="row-item-description">					
-								<div class="bold">Get a little social</div>
-								<div class="row-item-description-detail">Comment, vote and participate in user discussions with an identity worth bragging about</div>
-								</div>
-						</div>
-					
-						<div class="row-item">
-							<div class="row-item-thumbnail">
-								<img src="{{ STATIC_URL }}images/notifications.png" />
-							</div>
-							<div class="row-item-description">
-								<div class="bold">Stay up-to-date</div>
-								<div class="row-item-description-detail">Customize preferences and receive notifications on all your contributions and general community updates</div>
-							</div>
-						</div>
+{% if login %}
+<div id="chief-panel-container" class="sign-up">
+	<div id="chief-panel-wrapper"></div>
+	<div id="chief-panel">
+	<div class="login-messages">
+	    {% for message in messages %}<span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>{% endfor %}
+	</div>
+		<div id="key-panel" class="panel-left">
+			<h1 class="strong">Connect to your learning world.</h1>
+			<p>We bring the newest features, tools and updates so that your world continues to grow.</p>
+			
+			<div class="row-set">
+				<div class="row-item">
+					<div class="row-item-thumbnail">
+						<img src="{{ STATIC_URL }}images/resources.png" />
+					</div>
+					<div class="row-item-description">
+						<div class="bold">Resource collections and sharing</div>
+						<div class="row-item-description-detail">Create or upload resources and organize in collections before you share. Free 2GB of learning resource storage when you sign up</div>
 					</div>
 				</div>
-				<div id="fill-panel" class="panel-right">
-					<div class="register-box">New to OpenCurriculum? <a href="{% url register %}">Sign up here</a></div>
-					<form method="POST" action="/authenticate/" id="sign-in-form">
-						{% if source %}
-						<input type="hidden" name="redirect_to" value="{{ source }}" />
-						{% endif %}
-						{% csrf_token %}
-						<div>Username or Email address</div>
-						<div><input type="text" name="username" placeholder="Username or Email address"/></div>
-						<div>Password</div>
-						<div><input type="password" name="password" placeholder="Password" /></div>
-						<div class="login-authentication-failure">{% if login_error_message %}{{ login_error_message }}{% endif %}</div>
-						<div id="loggedin-button">
-							<input type="checkbox" name="stay-logged-in" />Keep me logged in
-							<button class="btn success-button">Log in<span class="vertical-caret"></span></button>
+
+				<div class="row-item">
+					<div class="row-item-thumbnail">
+						<img src="{{ STATIC_URL }}images/social.png" />
+					</div>
+					<div class="row-item-description">					
+						<div class="bold">Get a little social</div>
+						<div class="row-item-description-detail">Comment, vote and participate in user discussions with an identity worth bragging about</div>
 						</div>
-						<div id="forgot-username-password">Forgot username or password? <a href="{% url register %}">Click here</a></div>
-						<table id="signup-or">
-							<tr><td class="signup-or-flank"></td><td>OR</td><td class="signup-or-flank"></td></tr>
-						</table>
-						<div data-state="{{ state }}" id="session-state"></div>
-						<div id="signinButton">
-							<span class="g-signin"
-								data-scope="https://www.googleapis.com/auth/plus.login"
-								data-clientid="{{ client_id }}"
-								data-redirecturi="postmessage"
-								data-accesstype="offline"
-								data-cookiepolicy="single_host_origin"
-								data-callback="gPlusSignInCallback"
-								data-theme="dark"
-								data-width="wide">
-							</span>
-						</div>
-						<div id="result"></div>
-					</form>
-					<form class="google-plus-login">
-						<input type="hidden" name="google_id" />
-						<input type="hidden" name="redirect_to" value={{ source}} />
-					</form>
 				</div>
-			</div>
 			
-			{% else %}
-			<div id="chief-panel">
-			
-				<div id="left-panel">
-					<h1>High-quality K-12 textbook content, <span class="bold-italic">created by you</span></h1>
-					<span class="bold">{{ count }}</span> textbook articles along with 100s of related videos, audio, worksheets, documents, etc. produced and curated by the community!
-					
-					<div class="actions-wrapper">
-						<a href="articles" onclick="javascript:window.location=this.href"><button class="success-button btn">Get more FREE content <span class="vertical-caret"></span></button></a>
-						<!--<button class="dull-button btn">Learn more</button>-->
-						<div class="fine-print">No sign-up or log-in required.</div>
+				<div class="row-item">
+					<div class="row-item-thumbnail">
+						<img src="{{ STATIC_URL }}images/notifications.png" />
+					</div>
+					<div class="row-item-description">
+						<div class="bold">Stay up-to-date</div>
+						<div class="row-item-description-detail">Customize preferences and receive notifications on all your contributions and general community updates</div>
 					</div>
 				</div>
-				
-				
-				<div id="right-panel">
-					<ul id="article-panel">
-						{% for article in top_articles %}
-						<li>
-							<div class="chapter-thumbnail-wrapper">
-								{% include 'partials/article_image.html' %}
-							</div>
-							
-							<a href="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }}" title="{{ article.title }}" alt="{{ article.title }}"><div class="chapter-info">
-								<div class="chapter-info-title">{{ article.title }}</div>
-								<div class="chapter-info-caption">{{ article.views }} views</div> 
-							</div></a>
-						</li>
-						{% endfor %}
-					</ul>
-				</div>
 			</div>
-			{% endif %}
 		</div>
+		<div id="fill-panel" class="panel-right">
+			<div class="register-box">New to OpenCurriculum? <a href="{% url register %}">Sign up here</a></div>
+			<form method="POST" action="/authenticate/" id="sign-in-form">
+				{% if source %}
+				<input type="hidden" name="redirect_to" value="{{ source }}" />
+				{% endif %}
+				{% csrf_token %}
+				<div>Username or Email address</div>
+				<div><input type="text" name="username" placeholder="Username or Email address"/></div>
+				<div>Password</div>
+				<div><input type="password" name="password" placeholder="Password" /></div>
+				<div class="login-authentication-failure">{% if login_error_message %}{{ login_error_message }}{% endif %}</div>
+				<div id="loggedin-button">
+					<input type="checkbox" name="stay-logged-in" />Keep me logged in
+					<button class="btn success-button">Log in<span class="vertical-caret"></span></button>
+				</div>
+				<div id="forgot-username-password">Forgot username or password? <a href="">Click here</a></div>
+				<table id="signup-or">
+					<tr><td class="signup-or-flank"></td><td>OR</td><td class="signup-or-flank"></td></tr>
+				</table>
+				<div data-state="{{ state }}" id="session-state"></div>
+				<div id="signinButton">
+					<span class="g-signin"
+						data-scope="https://www.googleapis.com/auth/plus.login"
+						data-clientid="{{ client_id }}"
+						data-redirecturi="postmessage"
+						data-accesstype="offline"
+						data-cookiepolicy="single_host_origin"
+						data-callback="gPlusSignInCallback"
+						data-theme="dark"
+						data-width="wide">
+					</span>
+				</div>
+				<div id="result"></div>
+			</form>
+			<form class="google-plus-login">
+				<input type="hidden" name="google_id" />
+				<input type="hidden" name="redirect_to" value={{ source}} />
+			</form>
+		</div>
+	</div>
+</div>
+<div id="chief-panel-footer">
+	<img src="{{ STATIC_URL }}images/plant.png" id="plant" />
+</div>
 
-		<div id="chief-panel-footer">
-			<img src="{{ STATIC_URL }}images/plant.png" id="plant" />
+<div class="forgot-username-password-dialog dialog" title="Forgot username or password">
+	<form method="POST" class="forgot-username-password-form" action="user/reset-password/">
+		{% csrf_token %}
+		Enter your email address below, and we will send you a link to reset your password:
+		<p>Email address: <input type="textbox" name="email" /></p>
+	</form>
+</div>
+
+{% else %}
+<div id="chief-panel-container" class="home">
+	<div id="chief-panel-wrapper"></div>
+	<div id="chief-panel">
+		<div id="key-panel" class="panel-left">
+			<h2>Open K-12 educational content, <br/>created by you</h2>
+			<div class="home-title-caption">Thousands of open educational articles, related videos, audio, worksheets, documents, etc. produced and curated by the community!
+
+				<div class="actions-wrapper">
+					<a href="articles" onclick="javascript:window.location=this.href"><button class="success-button btn">Get more FREE content <span class="vertical-caret"></span></button></a>
+					<div class="fine-print">No sign-up or log-in required.</div>
+				</div>
+			</div>
 		</div>
 		
-		<div class="center-stage">
-			<div id="key-panel" class="panel-left moe-audience">
-				<h2>Are you a teacher?</h2>
-				<div id="mini-key-panel" class="panel-left mini">
-					<p>Do you have what it takes to be a core contributor on our content team? We, led by Moe, are looking for the smartest, sharpest and most versatile education minds to lead our content efforts as volunteers.</p>
-					<p>If you think you have what it takes to be a core contributor, sign-up below and we will reach out to you with further details.</p>
-					<p>
-						<div id="contributor-invite-error" class="form-error"></div>
-						<div id="contributor-invite-success" class="form-success"></div>
-						<form id="contributor-invite" action="/signup-invite/" class="signup">
-							{% csrf_token %}
-							<table>
-								<tr><td class="input-description">Name</td><td><input type="text" name="name" id="id_name" max_length="100" placeholder="Your name"/><br/>							
-								<div class="name-error form-error"></div></td></tr>
-								<tr><td class="input-description">Email</td><td><input type="text" name="email" id="id_email" placeholder="Your email address" /><br/>							
-								<div class="email-error form-error"></div></td></tr>
-							</table>
-							<p class="center"><button class="btn dull-button">Submit</button></p>
-							<input type="hidden" name="purpose" id="id_purpose" value="Contribute" /> 
-							<div class="form-spinner"></div>
-						</form>
-					</p>
-				</div>
-				<div id="mini-fill-panel" class="panel-right mini">
-				</div>
-			</div>
-			<div id="fill-panel" class="panel-right">
-				<aside id="support">
-					<h3>Sign up for updates</h3>
-					<p>To get one of our first private invites to sign up as a user on OpenCurriculum in a couple of weeks, sign up below so we can package it up and send it to you just right:</p>						
+		
+		<div id="fill-panel" class="panel-right">
+			<ul id="article-panel">
+				{% for article in top_articles %}
+				<li>
+					<div class="chapter-thumbnail-wrapper">
+						{% include 'partials/article_image.html' %}
+					</div>
 					
-					<br/>
-					<div id="general-invite-error" class="form-error"></div>
-					<div id="general-invite-success" class="form-success"></div>
-					<form id="general-invite" action="/signup-invite/" class="signup">
-						{% csrf_token %}
-						<div class="center">
-							<table>
-								<tr><td class="input-description">Name</td><td><input type="text" name="name" id="id_name" max_length="100" placeholder="Your name"/><br/>
-								<div class="name-error form-error"></div></td></tr>
-								<tr><td class="input-description">Organization</td><td><input type="text" name="organization" id="id_organization" placeholder="Organization you are affiliated with" /><br/>
-								<div class="organization-error form-error"></div></td></tr>
-								<input type="hidden" name="purpose" id="id_purpose" value="Invite" />
-								<tr><td class="input-description">Email</td><td><input type="text" name="email" id="id_email" placeholder="Your email address" />
-								<div class="email-error form-error"></div></td></tr>
-							</table>
-						</div>
-						<p class="center"><button class="btn dull-button">Sign up</button>
-						<div class="form-spinner"></div>
-						</p>
-					</form>
-				</aside>
+					<a href="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }}" title="{{ article.title }}" alt="{{ article.title }}"><div class="chapter-info">
+						<div class="chapter-info-title">{{ article.title }}</div>
+						<div class="chapter-info-caption">{{ article.views }} views</div> 
+					</div></a>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div class="chief-panel-container-cover"></div>
+</div>
+
+	{% endif %}
+
+
+
+<div class="center-stage">
+    <div class="home-tripanel">
+        <div id="locally-relevant">
+        	<div class="tripanel-image"></div>
+            <span class="bold">LOCALLY RELEVANT</span>
+            <p>Resources aligned by community to local education standards around the world.
+            </p>
+        </div>
+        <div id="high-quality-content">
+            <div class="tripanel-image"></div>
+            <span class="bold">HIGH QUALITY</span>
+            <p>Peer reviewed and moderated content to ensure that you get only the best.</p>
+        </div>
+        <div id="social">
+            <div class="tripanel-image"></div>
+            <span class="bold">SOCIAL</span>
+            <p>Create and share with friends and education communities, easier than ever before.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="center-stage">
+	<div id="key-panel" class="panel-left">
+		<div class="content-gallery">
+			<h3>Featured <a href="{% url projects:invite %}">Projects</a></h3>
+			<div class="projects-listing">
+				{% include 'partials/project-item.html' with projects=top_projects %}
 			</div>
 		</div>
+
+		<div class="content-gallery">
+			<h3>Featured Resources</h3>
+			<ul class="resource-panel">
+			{% for resource in top_resources %}
+				<li>
+					<a href="{% url resource:read resource_id=resource.id %}">
+						<div class="resource-panel-thumbnail" style="background-image: url('{{ MEDIA_URL}}{{ resource.image.name }}')" ></div>
+					<div class="resource-title-wrapper">{{ resource.title }}</div></a>
+				</li>
+			{% endfor %}
+			</ul>
+		</div>
+
+	</div>
+		
+	<div id="fill-panel" class="panel-right moe-audience">
+		<aside id="support" class="teacher-contributor-invite">
+			<h2>Are you a teacher?</h2>
+			<img src="{{ STATIC_URL }}images/moe.png" class="moe-teachers" />
+			<div id="mini-key-panel" class="panel-left mini">
+				<p>Do you have what it takes to be a core contributor on our content team? We, led by Moe, are looking for the smartest, sharpest and most versatile education minds to lead our content efforts as volunteers.</p>
+				<p>If you think you have what it takes to be a core contributor, sign-up below and we will reach out to you with further details.</p>
+				<p>
+					<div id="contributor-invite-error" class="form-error"></div>
+					<div id="contributor-invite-success" class="form-success"></div>
+					<form id="contributor-invite" action="/signup-invite/" class="signup">
+						{% csrf_token %}
+						<table>
+							<tr><td class="input-description">Name</td><td><input type="text" name="name" id="id_name" max_length="100" placeholder="Your name"/><br/>							
+							<div class="name-error form-error"></div></td></tr>
+							<tr><td class="input-description">Email</td><td><input type="text" name="email" id="id_email" placeholder="Your email address" /><br/>							
+							<div class="email-error form-error"></div></td></tr>
+						</table>
+						<p class="center"><button class="btn dull-button">Submit</button></p>
+						<input type="hidden" name="purpose" id="id_purpose" value="Contribute" /> 
+						<div class="form-spinner"></div>
+					</form>
+				</p>
+			</div>
+			<div id="mini-fill-panel" class="panel-right mini">
+			</div>
+		</aside>
+	</div>
+</div>
 {% include 'partials/footer.html' %}
