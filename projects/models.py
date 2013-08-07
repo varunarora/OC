@@ -11,7 +11,7 @@ class Project(models.Model):
     description = MarkdownTextField()
     admins = models.ManyToManyField(User, related_name="admins")
     members = models.ManyToManyField(User, blank=True, related_name="members")
-    cover_pic = models.ImageField(upload_to='images/project', blank=True)
+    cover_pic = models.ImageField(upload_to='project', blank=True)
     visibility = models.CharField(max_length=256)
     meta = models.TextField(blank=True)
     slug = models.SlugField(max_length=256)
