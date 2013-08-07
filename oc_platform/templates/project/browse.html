@@ -3,7 +3,9 @@
 
 <div class="center-stage browse-page">
     <div id="fill-panel" class="panel-left">
-        {% include 'partials/create-resource-collection.html' with host='project' %}
+        {% if user in project.members.all %}
+            {% include 'partials/create-resource-collection.html' with host='project' %}
+        {% endif %}
 
         <nav class="collections-navigation">
             {% load project_tags %}
