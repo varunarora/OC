@@ -25,6 +25,9 @@ $link-hover: #1155cc
 
 $light-font: #666666
 
+$key-panel-width: 573px
+$fill-panel-width: 367px
+
 body
 	font-family: "Proxima Nova Regular", 'Helvetica Neue', Arial, Helvetica, sans-serif
 	font-size-adjust: 0.488
@@ -38,7 +41,7 @@ body
 		background-color: #efefef
 		display: block
 		height: $header-height
-		z-index: 1
+		z-index: 3
 		position: relative
 		
 #header-prebanner
@@ -155,7 +158,7 @@ a
 .fine-print
 	font-size: 0.7em
 	margin-top: 8px
-	color: #666
+	color: #bababa
 
 .dull-button, .ui-button
 	/* Custom IE styling in ie.sass */
@@ -748,7 +751,7 @@ nav#add-resource-menu
 		background-color: #ffffff
 		@include border-radius(4px)
 		@include box-shadow(0 0 4px rgba(0, 0, 0, 0.4))
-		z-index: 4
+		z-index: 6
 		
 		li
 			height: 44px
@@ -1407,7 +1410,7 @@ nav#user-buttons > ul > li.user-notification-count
 
 	&.no-notifications
 		a
-			background-image: url('../images/zero-notifications.png')
+			background-image: url('../images/oc-notifications.png')
 			background-repeat: no-repeat
 			background-position: center center
 			width: 25px
@@ -1619,3 +1622,194 @@ nav.collections-navigation
 
 .add-collection-resource-wrapper
 	overflow: hidden
+
+.home-title-caption
+	color: #bababa
+	margin-top: 20px
+	width: 475px
+
+aside#support.teacher-contributor-invite
+	font-size: 1em
+
+.content-gallery
+	border-bottom: 1px solid #efefef
+	margin-bottom: 20px
+	padding-bottom: 20px
+
+.moe-teachers
+	width: 100%
+
+.home-tripanel
+	> div
+		width: 180px
+		padding: 20px
+		padding-top: 0px
+		display: inline-block
+		margin: 10px 35px
+		text-align: center
+		vertical-align: top
+		color: $light-font
+		margin: 10px 47px
+
+		.tripanel-image
+			margin-bottom: 10px
+			background-repeat: no-repeat
+			background-position: center center
+			height: 60px
+
+
+	#locally-relevant
+		.tripanel-image
+			background-image: url('../images/earth.png')
+
+			&:hover
+				background-image: url('../images/earth-hover.png')
+
+	#high-quality-content
+		.tripanel-image
+			background-image: url('../images/quality.png')
+
+			&:hover
+				background-image: url('../images/quality-hover.png')
+
+	#social
+		.tripanel-image
+			background-image: url('../images/social-home.png')
+
+			&:hover
+				background-image: url('../images/social-home-hover.png')
+
+.add-video-inputs, .add-url-inputs
+
+	margin-top: 20px
+
+	input[type=textbox], textarea
+		border: 1px solid #ddd
+		padding: 4px
+
+		&:hover, &:focus
+			border: 1px solid #b2b2b2
+			@include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
+
+.new-resource-description
+	width: 400px
+	height: 100px
+
+.new-resource-url
+	width: 100%
+
+.new-video-placeholder, .new-url-placeholder
+	background-repeat: no-repeat
+	background-position: center center
+	height: 190px
+	margin-top: 45px
+
+.new-video-placeholder
+	background-image: url('../images/new-video.png')
+
+.new-url-placeholder
+	background-image: url('../images/new-hyperlink.png')
+
+.profile-resource
+	
+	.profile-resource-delete
+		width: 14px
+		height: 14px
+		display: inline-block
+		float: right
+		cursor: pointer		
+		background-image: url('../images/delete-resource.png')
+		background-repeat: no-repeat
+		background-position: center center
+		border: 1px solid #ffffff
+
+		&:hover
+			background-color: #efefef
+			border-color: #bababa
+
+	&:hover
+
+		.profile-resource-delete
+			background-image: url('../images/delete-resource-hover.png')
+
+.projects-listing
+	color: #fff
+	padding-top: 10px
+
+	.projects-item
+		.profile-projects-item-description-wrapper
+			background-size: 100%
+
+		.profile-projects-item-title
+			font-size: 1.4em
+
+		a
+			color: #fff
+
+		a:hover
+			text-decoration: none
+
+			.profile-projects-item-title
+				text-decoration: underline
+
+	.profile-projects-item-description
+		position: relative
+		padding-left: 20px
+		height: 88px
+		padding-top: 12px
+		/* Custom IE styling in ie.sass */
+		@include background-image(linear-gradient(top, rgba(0,0,0,0.65) 0%, rgba(150,150,150,0.25) 100%))
+
+	.profile-projects-item-description:hover
+		background-image: none	
+
+table.reset-password-table
+	margin-top: 20px
+
+.reset-form-errors
+	background-color: #f2dede
+	color: #B94A48
+	border: 1px solid #eed3d7
+	@include border-radius(4px)
+	margin: 6px 0px
+	padding: 8px 8px
+	@include text-shadow(0 1px 0 rgba(255, 255, 255, 0.5))	
+
+.login-messages
+	margin: auto
+	text-align: center
+
+	span
+		display: inline-block
+		padding: 8px 12px
+		background-color: #F9EDBE
+		border: 1px solid #F0C36D
+		@include border-radius(4px)
+
+.resource-panel
+	padding-top: 10px
+
+	li
+		float: left
+		width: 125px
+		margin-right: 15px
+		overflow: hidden
+		min-height: 175px
+		font-size: 0.8em
+
+	a
+		color: #fff
+
+
+	.resource-panel-thumbnail
+		height: 88px
+		width: 125px
+		background-position: center
+		background-size: 100%
+
+	.resource-title-wrapper
+		background-color: #000
+		padding: 4px
+		border-top: 1px solid #666
+
+

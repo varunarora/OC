@@ -1,10 +1,10 @@
-$chief-panel-height: 500px
+$chief-panel-height: 550px
 
-#chief-panel-container.home
-	height: $chief-panel-height
+#chief-panel-container.sign-up
+	height: $chief-panel-height - 50px
 	background-color: #b7dcf7
 	@include background-image(radial-gradient(center, ellipse cover, rgba(210,229,242,1) 0%, rgba(210,229,242,1) 1%, rgba(183,220,247,1) 100%))
-	
+
 	#chief-panel-wrapper
 		background-image: url('../images/sun-flare.png')
 		height: $chief-panel-height
@@ -16,6 +16,20 @@ $chief-panel-height: 500px
 		overflow: hidden
 		height: $chief-panel-height - 60px
 		margin-bottom: -$chief-panel-height
+		padding-top: 20px
+
+		.login-messages
+			min-height: 40px
+			margin: auto
+			text-align: center
+
+			span
+				display: inline-block
+				padding: 8px 12px
+				background-color: #F9EDBE
+				border: 1px solid #F0C36D
+				@include border-radius(4px)
+
 
 #chief-panel-container.developers
 	height: 600px
@@ -148,3 +162,79 @@ $chief-panel-height: 500px
 
 .panel-right
 	float: right
+
+#chief-panel-container.home
+	height: $chief-panel-height
+	background-color: #000
+	background-image: url('../images/home_bg.jpg')
+	background-repeat: no-repeat
+	background-position: center center
+
+	#chief-panel-wrapper
+		background-image: none
+		height: $chief-panel-height
+		background
+		background-position: center 0px
+		background-repeat: no-repeat
+	
+	#chief-panel
+		top: -$chief-panel-height
+		overflow: hidden
+		height: $chief-panel-height - 60px
+		margin-bottom: -$chief-panel-height
+		z-index: 2
+
+		#key-panel
+			h2
+				color: #fff
+				text-shadow: 1px 1px #000
+				font-size: 2.4em
+
+		#fill-panel
+
+.chief-panel-container-cover
+	height: $chief-panel-height
+	background-color: #000
+	position: relative
+	opacity: 0
+	top: -$chief-panel-height
+	margin-bottom: -$chief-panel-height
+	-webkit-animation: fadeIn 2000ms ease both
+	-webkit-animation-play-state: paused
+	-moz-animation: fadeIn 2000ms ease both
+	-moz-animation-play-state: paused
+	-o-animation: fadeIn 2000ms ease both
+	-o-animation-play-state: paused
+	animation: fadeIn 2000ms ease both
+	animation-play-state: paused
+
+.chief-panel-container-cover.play
+	-webkit-animation-play-state: running
+	-moz-animation-play-state: running
+	-o-animation-play-state: running
+	animation-play-state: running	
+
+@-webkit-keyframes fadeIn
+	0%
+		opacity: 0
+	100%
+		opacity: 0.4
+
+@-moz-keyframes fadeIn
+	0%
+		opacity: 0
+	100%
+		opacity: 0.4
+
+@-o-keyframes fadeIn
+	0%
+		opacity: 0
+	100%
+		opacity: 0.4
+
+@keyframes fadeIn
+	0%
+		opacity: 0
+	100%
+		opacity: 0.4
+

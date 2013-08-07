@@ -115,19 +115,26 @@
     width: 1030px
     margin-top: 0px
 
-    #key-panel
+    .panel-left
         background-image: url('../images/profile-header-left.png')
         background-repeat: no-repeat
         padding-left: 45px
         padding-top: 10px
         min-height: 300px
 
-    #fill-panel
+    .panel-right
         background-image: url('../images/profile-header-right.png')
         background-repeat: no-repeat
         background-position: right
+        padding-right: 45px
         padding-top: 10px
         min-height: 300px
+
+    #key-panel
+        width: $key-panel-width - 45px
+
+    #fill-panel
+        width: $fill-panel-width - 45px    
 
 .profile-contributions, .profile-projects, .profile-resources
     margin-bottom: 20px
@@ -158,48 +165,20 @@
             text-decoration: none
             color: #333
 
-.profile-projects
-    color: #fff
-
-    .profile-projects-item
-        .profile-projects-item-description-wrapper
-            background-size: 100%
-
-        .profile-projects-item-title
-            font-size: 1.4em
-
-        a
-            color: #fff
-
-        a:hover
-            text-decoration: none
-
-            .profile-projects-item-title
-                text-decoration: underline
-
-    .profile-projects-item-description
-        position: relative
-        padding-left: 20px
-        height: 88px
-        padding-top: 12px
-        /* Custom IE styling in ie.sass */
-        @include background-image(linear-gradient(top, rgba(0,0,0,0.65) 0%, rgba(150,150,150,0.25) 100%))
-
-    .profile-projects-item-description:hover
-        background-image: none
-
-
 .profile-resources-added-list, .profile-contributions-list
     &.compressed
         height: 200px
         overflow: hidden
 
 .profile-resources-added
+    margin-bottom: 10px
+
     .profile-subheading
         margin: 6px 0px
         font-size: 1.15em
         @include sans-bold
 
+.profile-resources-added
     .profile-resources-added-list
         .url-icon, .video-icon, .attachment-icon, .oer-article-icon
             background-image: url("../images/glyphicons-halflings.png")
