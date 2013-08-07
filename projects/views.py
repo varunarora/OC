@@ -13,8 +13,12 @@ def project_home(request, project_slug):
     #     if the requestee of the page is a member of the project. If not,
     #     have a flag that blocks the page contents from being listed, or has
     #     an alternative view.
-    context = {'project': project}
-    return render(request, 'project/project.html', context)
+    context = {
+        'title': project.title + ' &lsaquo; OpenCurriculum',
+        'project': project
+    }
+    #return render(request, 'project/project.html', context)
+    return redirect('projects:project_browse', project_slug=project_slug)
 
 
 def launch(request):
