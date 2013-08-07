@@ -66,7 +66,7 @@ USE_TZ = True
 import os.path
 TEMPLATE_DIR = os.path.dirname(__file__)
 ABSOLUTE_PATH = lambda x: os.path.join(os.path.abspath(TEMPLATE_DIR), x)
-PROJECT_DIR = os.path.abspath(os.path.dirname(__name__))
+PROJECT_PATH = '/home/django/OC/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -77,7 +77,7 @@ MEDIA_URL = '/static/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_MOUNT_POINT = '/home/django/OC/static/'
+STATIC_MOUNT_POINT = PROJECT_PATH + 'static/'
 
 STATIC_ROOT = STATIC_MOUNT_POINT + 'assets/'
 

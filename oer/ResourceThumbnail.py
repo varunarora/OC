@@ -116,7 +116,7 @@ class ResourceThumbnail:
             #webkit2png = WebKit2PNG.generatePng(resource.url, options)
 
         call(
-            ["phantomjs", settings.PROJECT_DIR + "/oer/takeScreenshot.js", resource.url, thumbnail + "-tmp"
+            ["phantomjs", settings.PROJECT_PATH + "/oer/takeScreenshot.js", resource.url, thumbnail + "-tmp"
                 + ResourceThumbnail.THUMBNAIL_EXT])
 
         call(
