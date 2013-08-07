@@ -2,10 +2,10 @@ from django.forms import ModelForm
 from projects.models import Project
 from oer.models import Collection
 from django.template.defaultfilters import slugify
-
+from django.conf import settings
 
 class ProjectForm(ModelForm):
-    cover_pic_tmp = open('static/images/tmp/default-project.jpg')
+    cover_pic_tmp = open(settings.MEDIA_ROOT + 'project/' + 'default-project.jpg')
 
     def __init__(self, request, user):
         newRequest = request.copy()
