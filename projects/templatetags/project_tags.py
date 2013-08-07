@@ -13,13 +13,17 @@ def project_navigation_tree(value):
     # Get the project that owns the root collection
     root_collection = get_root_key(value)
 
-    from projects.models import Project
-    project = Project.objects.get(collection=root_collection)
+    # HACK(Varun): If there are children
+    if root_collection:
+        from projects.models import Project
+        project = Project.objects.get(collection=root_collection)
 
-    child_nodes = build_child_tree(value, project, _get_project_url)
-    for node in child_nodes:
-        root.append(node)
-    return ElementTree.tostring(root)
+        child_nodes = build_child_tree(value, project, _get_project_url)
+        for node in child_nodes:
+            root.append(node)
+        return ElementTree.tostring(root)
+    else:
+        return ''
 
 
 @register.filter(is_safe=True)
@@ -32,10 +36,14 @@ def user_navigation_tree(value):
     from user_account.models import UserProfile
     user_profile = UserProfile.objects.get(collection=root_collection)
 
-    child_nodes = build_child_tree(value, user_profile, _get_user_url)
-    for node in child_nodes:
-        root.append(node)
-    return ElementTree.tostring(root)
+    # HACK(Varun): If there are children
+    if root_collection:
+        child_nodes = build_child_tree(value, user_profile, _get_user_url)
+        for node in child_nodes:
+            root.append(node)
+        return ElementTree.tostring(root)
+    else:
+        return ''
 
 
 def build_child_tree(root_node, collectionOwner, urlCreator):
@@ -79,7 +87,10 @@ def get_root_key(value):
     for root_element in value.keys():
         root_elements.append(root_element)
 
-    return root_elements[0]
+    try:
+        return root_elements[0]
+    except:
+        return None
 
 
 def _get_project_url(project, collection_slug):
