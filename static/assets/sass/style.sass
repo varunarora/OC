@@ -1737,8 +1737,10 @@ aside#support.teacher-contributor-invite
 	padding-top: 10px
 
 	.projects-item
+		margin-bottom: 10px
+
 		.profile-projects-item-description-wrapper
-			background-size: 100%
+			background-size: 100% auto
 
 		.profile-projects-item-title
 			font-size: 1.4em
@@ -1761,7 +1763,11 @@ aside#support.teacher-contributor-invite
 		@include background-image(linear-gradient(top, rgba(0,0,0,0.65) 0%, rgba(150,150,150,0.25) 100%))
 
 	.profile-projects-item-description:hover
-		background-image: none	
+		background-image: none
+
+	&.compressed
+		height: 200px
+		overflow: hidden
 
 table.reset-password-table
 	margin-top: 20px
