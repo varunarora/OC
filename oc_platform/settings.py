@@ -66,6 +66,7 @@ USE_TZ = True
 import os.path
 TEMPLATE_DIR = os.path.dirname(__file__)
 ABSOLUTE_PATH = lambda x: os.path.join(os.path.abspath(TEMPLATE_DIR), x)
+
 PROJECT_PATH = '/home/django/OC/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
