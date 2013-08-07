@@ -28,9 +28,9 @@ def home(request):
     # Get the count of the total number of articles in the database.
     article_count = Article.objects.all().count()
 
-    # Get the top 10 resources ordered in descending order of views.
+    # Get the top 12 resources ordered in descending order of views.
     from oer.models import Resource
-    top_resources = Resource.objects.order_by('title').order_by('-views')[:10]
+    top_resources = Resource.objects.order_by('title').order_by('-views')[:12]
 
     # Get the top 10 projects ordered in descending order of views.
     from projects.models import Project
