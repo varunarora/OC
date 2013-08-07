@@ -803,6 +803,13 @@ var OC = {
         });
     },
 
+    onFontLoad: function(){
+        OC.setupUserMenu();
+        OC.initAddResource();
+
+        $('.chief-panel-container-cover').addClass('play');
+    },
+
     setupUserMenu: function(){
         // Figure out positionining of absolute on hover menus
         OC.setUpMenuPositioning('nav#user-menu', '#user-dropdown');
@@ -837,7 +844,8 @@ var OC = {
     initShowMoreBlock: function(){
         var blocksToCompress = [
             '.profile-resources-added-list',
-            '.profile-contributions-list'
+            '.profile-contributions-list',
+            '.projects-listing'
         ];
 
         // Compress all blocks.
@@ -959,7 +967,7 @@ var OC = {
 
                 // Compare with previous headline, only if different, call POST
                 //     request.
-                var old_headline = '';
+                var old_headline = $('.profile-headline').attr('title');
 
                 // Get the user ID.
                 var user_id = $('.profile-headline').parent('form').children(
@@ -1105,6 +1113,70 @@ var OC = {
         });
     },
 
+    bindDeleteHandler: function(){
+        $('.profile-resource-delete').click(function(){
+            var deleteElement = $(this);
+            // NOTE(Varun): Given the ID of the resource is of the format
+            //     'resource-x', where x is the ID as stored by the server
+            var resourceID = deleteElement.attr('id').substring(9);
+            $('.delete-resource-dialog').dialog({
+                modal: true,
+                open: false,
+                width: 500,
+                buttons: {
+                    'Yes, delete': function () {
+                        $(this).dialog("close");
+                        $.post('/resources/delete-resource/' + resourceID  + '/',
+                            function(response){
+                                // Hide the resource
+                                if (response.status == 'true'){
+                                    $(deleteElement).parent().fadeOut();
+                                }
+                                else {
+                                    OC.popup(
+                                        'Sorry, the resource could not be deleted. Please try again later.');
+                                }
+                            },
+                        'json');
+                    },
+                    Cancel: function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        });
+    },
+
+    initCollectionsTree: function(){
+        $('nav.collections-navigation ul li').click(function(){
+            $('> ul', this).toggle();
+        });
+    },
+
+    initForgotAuth: function(){
+        $('#forgot-username-password a').click(function(event){
+            $('.forgot-username-password-dialog').dialog({
+                modal: true,
+                open: false,
+                width: 500,
+                buttons: {
+                    Submit: function () {
+                        $(this).dialog("close");
+                        $('form.forgot-username-password-form').submit();
+                    },
+                    Cancel: function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+    },
+
+
     articleCenter: {
         registrationInit: function(){
             $(window).bind('scroll', function(e){
@@ -1208,14 +1280,22 @@ jQuery(document).ready(function ($) {
 
     /* Other initializers/renderers/handlers */
 
-    OC.initAddResource();
-
     OC.initCreateCollection();
+
+    OC.bindDeleteHandler();
+
+    OC.initCollectionsTree();
+
+    OC.initForgotAuth();
 
 
     OC.renderShowMore();
 
     OC.initArticleCenter();
+
+    $('.new-resource-tags').tagit({
+        allowSpaces: true
+    });
 });
 
 $(document).ajaxSend(function (event, xhr, settings) {
