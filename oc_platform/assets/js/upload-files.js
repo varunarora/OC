@@ -137,8 +137,8 @@ OC.upload = {
         var formatted_filesize;
 
         // Based on the size of the file, prepare a formatted string of file size
-        if (size >= 104856){
-            formatted_filesize = (size / 104856).toFixed(2) + " MB";
+        if (size >= 1048576){
+            formatted_filesize = (size / 1048576).toFixed(2) + " MB";
         } else if (size >= 1024){
             formatted_filesize = (size / 1024).toFixed(2) + " KB";
         } else {
@@ -184,12 +184,15 @@ OC.upload = {
             // Capture manual file renames and update {} before passing to
             //     form
             else if ($(file_item).hasClass('manual-item')) {
-                if (element_value !=  element_key){
-                    for (j = 0; j < formFiles.length; j++){
-                        if ($(formFiles[j]).val() == element_key) {
-                            $(formFiles[j]).attr('name', element_value);
-                        }
+                for (j = 0; j < formFiles.length; j++){
+                    // NOTE(Varun): Originally, name on input element was being
+                    //     added only in the case when the file name had
+                    //     changed,
+                    //if (element_value !=  element_key){
+                    if ($(formFiles[j]).val() == element_key) {
+                        $(formFiles[j]).attr('name', element_value);
                     }
+                    //}
                 }
             }
 
@@ -335,7 +338,18 @@ $(document).ready(function() {
         if (sameOrigin(url)) {
             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
         }
+
+        // Append the values of user, project and collection ID
+        formData.append('user_id', $(
+            'form.files-upload-rename input[name=user_id]').val());
+        formData.append('project_id', $(
+            'form.files-upload-rename input[name=project_id]').val());
+        formData.append('collection_id', $(
+            'form.files-upload-rename input[name=collection_id]').val());
     });
+
+    // TODO(Varun): Add the project/user + collection ID to the Dropzone request
+
 
     Dropzone.forElement('.upload-drag-drop').on("success", function(file, response){
         var key;
