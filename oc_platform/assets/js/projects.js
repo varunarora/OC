@@ -120,12 +120,6 @@ OC.projects = {
         });
     },
 
-    initCollectionsTree: function(){
-        $('nav.collections-navigation ul li').click(function(){
-            $('> ul', this).toggle();
-        });
-    },
-
     launch: {
         init: function(){
             this.bindClickScrolls();
@@ -231,6 +225,4 @@ jQuery(document).ready(function ($) {
 
     // Setup autocomplete for add member functionality.
     OC.projects.initAddMemberAutocomplete();
-
-    OC.projects.initCollectionsTree();
 });

@@ -120,49 +120,6 @@ OC.projects = {
         });
     },
 
-    initAddResource: function(){
-        OC.setUpMenuPositioning('nav#add-resource-menu', '.add-resource');
-
-        $(window).resize(function () {
-            OC.setUpMenuPositioning('nav#add-resource-menu', '.add-resource');
-        });
-
-        OC.projects.setupResourceMenu();
-    },
-
-    setupResourceMenu: function(){
-        $('.add-resource, nav#add-resource-menu').mouseenter(function () {
-            $('#add-resource-menu').addClass('showMenu');
-        }).mouseleave(function () {
-            $('#add-resource-menu').removeClass('showMenu');
-        });
-    },
-
-    initCreateCollection: function(){
-        $('.new-collection').click(function(){
-            $('.new-collection-dialog').dialog({
-                modal: true,
-                open: false,
-                width: 500,
-                buttons: {
-                    Ok: function () {
-                        $(this).dialog("close");
-                        $('form#new-collection-form').submit();
-                    },
-                    Cancel: function () {
-                        $(this).dialog("close");
-                    }
-                }
-            });
-        });
-    },
-
-    initCollectionsTree: function(){
-        $('nav.collections-navigation ul li').click(function(){
-            $('> ul', this).toggle();
-        });
-    },
-
     launch: {
         init: function(){
             this.bindClickScrolls();
@@ -268,10 +225,4 @@ jQuery(document).ready(function ($) {
 
     // Setup autocomplete for add member functionality.
     OC.projects.initAddMemberAutocomplete();
-
-    OC.projects.initAddResource();
-
-    OC.projects.initCreateCollection();
-
-    OC.projects.initCollectionsTree();
 });
