@@ -239,9 +239,7 @@ def email_share(request):
     email_addresses = request.POST.get('email')
     message = request.POST.get('message')
     from_name = request.POST.get('from_name')
-
-    # TODO(Varun): Do something with the user provided email address.
-    # from_address = request.POST.get('from_address')
+    from_address = request.POST.get('from_address')
 
     try:
         # Build a list of email addresses, if multiple comma-separated values
@@ -251,7 +249,7 @@ def email_share(request):
         from django.core.mail import send_mail
         send_mail(
             from_name + ' ' + _(settings.STRINGS['share']['SUBJECT_APPEND']),
-            message, from_name + ' <%s>' % settings.SERVER_EMAIL,
+            message, from_name + ' <%s>' % from_address.strip(),
             email_addresses, fail_silently=False
         )
 
