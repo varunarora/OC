@@ -286,8 +286,11 @@ def fp_upload(request):
             file_path = settings.FILEPICKER_ROOT + key
 
             # Set readable permissions for the file just uploaded through Fp.
-            from subprocess import call
-            call(['chmod', '644', file_path])
+            import os
+            import stat
+            st = os.stat(file_path)
+            os.chmod(file_path, st.st_mode | stat.S_IREAD)
+
             static_file = open(file_path)
 
             new_resource = Resource()
@@ -304,11 +307,7 @@ def fp_upload(request):
             # Add the resource created to the collection.
             add_resource_to_collection(new_resource, collection)
         
-        except Exception, e:
-            # Log the exception
-            import logging
-            logging.error(e)
-            
+        except Exception:          
             # Delete this file from S3, and add it to the failure list
             from boto.s3.connection import S3Connection
             from boto.s3.bucket import Bucket
