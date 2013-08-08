@@ -88,6 +88,8 @@ STATIC_ASSETS_ROOT = STATIC_ROOT
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = STATIC_MOUNT_POINT + 'media/'
 
+FILEPICKER_ROOT = STATIC_MOUNT_POINT + 'files/'
+
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/assets/'

@@ -155,6 +155,8 @@ def _prepare_add_resource_context(request):
 
     if collection_slug:
         collection = Collection.objects.get(slug=collection_slug)
+    else:
+        collection = None
         
     # Check if the project exists and if the user is allowed to submit anything
     #     project_slug the project
@@ -164,22 +166,14 @@ def _prepare_add_resource_context(request):
         if request.user not in project.members.all():
             raise PermissionDenied
         user = request.user
-        if not collection_slug:
-            from projects.models import Project
-            project = Project.objects.get(slug=project_slug)
-            collection = Collection.objects.get(pk=project.collection.id)
     elif username:
         from django.contrib.auth.models import User
         user = User.objects.get(username=username)
         if request.user != user:
             raise PermissionDenied
-        if not collection_slug:
-            collection = user.get_profile().collection
     else:
         project = None
         user = request.user
-        if not collection_slug:
-            collection = user.get_profile().collection
 
     # Get all licenses
     from license.models import License
@@ -251,12 +245,7 @@ def fp_upload(request):
     Returns:
         Response containing JSON with ResourceID-title pairs.
     """
-    import urllib2
-    import os
-
     # Constants
-    from django.conf import settings
-    s3_main_addr = settings.AWS_STATIC_BUCKET
     default_cost = 0
 
     # Make a copy of the request.POST object, extract user and project IDs
@@ -264,9 +253,17 @@ def fp_upload(request):
     post_data = request.POST.copy()
 
     user_id = post_data['user_id']
-    project_id = post_data['project_id']
+    project_id = post_data.get('project_id', None)
+    collection_id = post_data.get('collection_id', None)
+
     del post_data['user_id']
-    del post_data['project_id']
+
+    if project_id:
+        del post_data['project_id']
+    if collection_id:
+        del post_data['collection_id']
+
+    collection = get_collection(user_id, project_id, collection_id)
 
     # Fetch keys and filenames from post_data, and build a list of
     # (url, title) tuples.
@@ -284,25 +281,22 @@ def fp_upload(request):
 
     for (key, title) in file_list:
         try:
-            # For each file, download it to local.
             # Create Resource objects for each file uploaded.
             # And generate the list for the response.
-            s3_file = urllib2.urlopen(s3_main_addr + key)
-
-            fname = key.rsplit('/', 1)[-1]      # fname can't have slashes
-            static_file = open(fname, 'w+')
-            static_file.write(s3_file.read())
+            static_file = open(settings.FILEPICKER_ROOT + key)
 
             new_resource = Resource()
             new_resource.title = title
-            new_resource.url = s3_main_addr + key
+            new_resource.type = 'attachment'
             new_resource.cost = default_cost
             new_resource.user_id = user_id
             new_resource.file = File(static_file)
             new_resource.save()
             response_dict[new_resource.id] = new_resource.title
             static_file.close()
-            os.remove(fname)
+
+            # Add the resource created to the collection.
+            add_resource_to_collection(new_resource, collection)
 
         except Exception:
             # Delete this file from S3, and add it to the failure list
@@ -338,6 +332,10 @@ def fp_submit(request):
         Redirect to project slug.
     """
     if request.method == "POST":
+        user_id = request.POST.get('user_id', None)
+        project_id = request.POST.get('project_id', None)
+        collection_id = request.POST.get('collection_id', None)
+
         ###########################################################
         # First, handle all the manually uploaded files
 
@@ -368,24 +366,24 @@ def fp_submit(request):
 
         resource_formset = UploadResourceSet(modified_post_request, modified_request_files)
 
-        (user, collection) = _get_user_collection(request)
+        collection = get_collection(user_id, project_id, collection_id)
 
         if resource_formset.is_valid():
             for file_name, original_file in request.FILES.items():
-                create_resource(original_file, user, collection, file_name)
+                create_resource(original_file, request.user, collection, file_name)
 
         ###########################################################
         # Now, handle name changes for pre-uploaded files
 
         from oer.models import Resource
         post_data = request.POST.copy()
-        project_id = post_data['project_id']
-        user_id = post_data['user_id']
-        collection_id = post_data['collection_id']
 
         del post_data["csrfmiddlewaretoken"]
         del post_data['user_id']
-        del post_data['project_id']
+        if project_id:
+            del post_data['project_id']
+        if collection_id:
+            del post_data['collection_id']
 
         try:
             for id in post_data:
@@ -403,29 +401,6 @@ def fp_submit(request):
 
     else:
         return Http404
-
-
-def _get_user_collection(request):
-    user_id = request.POST.get('user_id', None)
-    project_id = request.POST.get('project_id', None)
-    collection_id = request.POST.get('collection_id', None)
-
-    from django.contrib.auth.models import User
-    user = User.objects.get(pk=int(user_id))
-
-    if project_id:
-        if collection_id:
-            collection = Collection.objects.get(pk=collection_id)
-        else:
-            from projects.models import Project
-            project = Project.objects.get(collection=collection_id)
-            collection = Collection.objects.get(pk=project.collection.id)
-    else:
-        from user_account.models import UserProfile
-        collection = UserProfile.objects.get(
-            user=request.user).collection
-
-    return (user, collection)
 
 
 def create_resource(uploaded_file, user, collection, new_filename=None):
@@ -455,12 +430,14 @@ def create_video(request):
     new_video = forms.NewVideoForm(request.POST, request.user)
     video = new_video.save()
 
-    project_id = request.POST.get('project_id')
-    user_id = request.POST.get('user_id')
-    collection_id = request.POST.get('collection_id')
+    user_id = request.POST.get('user_id', None)
+    project_id = request.POST.get('project_id', None)
+    collection_id = request.POST.get('collection_id', None)
+
+    collection = get_collection(user_id, project_id, collection_id)
 
     # Add to the necessary collection.
-    add_resource_to_collection(video, collection_id)
+    add_resource_to_collection(video, collection)
 
     return redirect_to_collection(user_id, project_id, collection_id)
 
@@ -470,21 +447,38 @@ def create_url(request):
     new_url = forms.NewURLForm(request.POST, request.user)
     url = new_url.save()
 
-    project_id = request.POST.get('project_id')
-    user_id = request.POST.get('user_id')
-    collection_id = request.POST.get('collection_id')
+    user_id = request.POST.get('user_id', None)
+    project_id = request.POST.get('project_id', None)
+    collection_id = request.POST.get('collection_id', None)
 
     # Add to the necessary collection.
-    add_resource_to_collection(url, collection_id)
+    collection = get_collection(user_id, project_id, collection_id)
+
+    # Add to the necessary collection.
+    add_resource_to_collection(url, collection)
 
     return redirect_to_collection(user_id, project_id, collection_id)
 
 
-def add_resource_to_collection(resource, collection_id):
-    from oer.models import Collection
-    collection = Collection.objects.get(pk=int(collection_id))
+def add_resource_to_collection(resource, collection):
     collection.resources.add(resource)
     collection.save()
+
+
+def get_collection(user_id, project_id, collection_id):
+    if collection_id:
+        from oer.models import Collection
+        return Collection.objects.get(pk=int(collection_id))
+
+    if project_id:
+        from projects.models import Project
+        project = Project.objects.get(pk=int(project_id))
+        return project.collection
+
+    else:
+        from django.contrib.auth.models import User
+        user = User.objects.get(pk=int(user_id))
+        return user.get_profile().collection
 
 
 def redirect_to_collection(user_id, project_id=None, collection_id=None):
@@ -495,14 +489,14 @@ def redirect_to_collection(user_id, project_id=None, collection_id=None):
     if project_id:
         from projects.models import Project
         project_slug = Project.objects.get(pk=int(project_id)).slug
-        if collection:
+        if collection_id:
             return redirect('projects:list_collection', project_slug=project_slug, collection_slug=collection.slug)
         else:
             return redirect('projects:project_browse', project_slug=project_slug)
     else:
         from django.contrib.auth.models import User
         username = User.objects.get(pk=int(user_id)).username 
-        if collection:
+        if collection_id:
             return redirect('user:list_collection', username=username, collection_slug=collection.slug)
         else:            
             return redirect('user:user_profile', username=username)
