@@ -765,7 +765,7 @@ def list_collection(request, username, collection_slug):
 
         import oer.CollectionUtilities as cu
         collection_context = cu.list_collection(
-            collection, user_profile.collection)
+            collection.slug, user_profile.collection)
 
         context = dict({
             'user_profile': user,
