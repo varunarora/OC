@@ -281,8 +281,8 @@ def fp_upload(request):
 
     for (key, title) in file_list:
         try:
-            # Create Resource objects for each file uploaded.
-            # And generate the list for the response.
+        # Create Resource objects for each file uploaded.
+        # And generate the list for the response.
             static_file = open(settings.FILEPICKER_ROOT + key)
 
             new_resource = Resource()
@@ -290,6 +290,7 @@ def fp_upload(request):
             new_resource.type = 'attachment'
             new_resource.cost = default_cost
             new_resource.user_id = user_id
+            new_resource.body_markdown = ''
             new_resource.file = File(static_file)
             new_resource.save()
             response_dict[new_resource.id] = new_resource.title
@@ -297,7 +298,7 @@ def fp_upload(request):
 
             # Add the resource created to the collection.
             add_resource_to_collection(new_resource, collection)
-
+        
         except Exception:
             # Delete this file from S3, and add it to the failure list
             from boto.s3.connection import S3Connection
