@@ -283,7 +283,12 @@ def fp_upload(request):
         try:
         # Create Resource objects for each file uploaded.
         # And generate the list for the response.
-            static_file = open(settings.FILEPICKER_ROOT + key)
+            file_path = settings.FILEPICKER_ROOT + key
+
+            # Set readable permissions for the file just uploaded through Fp.
+            from subprocess import call
+            call(['chmod', '644', file_path])
+            static_file = open(file_path)
 
             new_resource = Resource()
             new_resource.title = title
