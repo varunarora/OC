@@ -304,7 +304,11 @@ def fp_upload(request):
             # Add the resource created to the collection.
             add_resource_to_collection(new_resource, collection)
         
-        except Exception:
+        except Exception, e:
+            # Log the exception
+            import logging
+            logging.error(e)
+            
             # Delete this file from S3, and add it to the failure list
             from boto.s3.connection import S3Connection
             from boto.s3.bucket import Bucket
