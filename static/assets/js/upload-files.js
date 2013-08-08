@@ -22,7 +22,7 @@ OC.upload = {
     launchFilepickerDialog: function(event, service) {
         // Allow multiple files at once, store to S3, and the callback is fpPost
         filepicker.pickAndStore({multiple: true, openTo: service},
-            {location: 'S3', path: '/attachments/', access: 'public'},
+            {location: 'S3', path: '/', access: 'public'},
              OC.upload.fpPost, OC.upload.fpError);
         event.preventDefault();
         event.stopPropagation();
@@ -77,7 +77,14 @@ OC.upload = {
         }
 
         data['user_id'] = $('form input[name=user_id]').val();
-        data['project_id'] = $('form input[name=project_id]').val();
+        
+        if ($('form input[name=project_id]').length > 0){
+            data['project_id'] = $('form input[name=project_id]').val();
+        }
+
+        if ($('form input[name=collection_id]').length > 0){
+            data['collection_id'] = $('form input[name=collection_id]').val();
+        }
 
         $.post('/api/fpUpload/', data, OC.upload.uploadCallback, 'json');
     },
@@ -342,10 +349,14 @@ $(document).ready(function() {
         // Append the values of user, project and collection ID
         formData.append('user_id', $(
             'form.files-upload-rename input[name=user_id]').val());
-        formData.append('project_id', $(
+        if ($('form input[name=project_id]').length > 0){
+            formData.append('project_id', $(
             'form.files-upload-rename input[name=project_id]').val());
-        formData.append('collection_id', $(
-            'form.files-upload-rename input[name=collection_id]').val());
+        }
+        if ($('form input[name=collection_id]').length > 0) {
+            formData.append('collection_id', $(
+                'form.files-upload-rename input[name=collection_id]').val());
+        }
     });
 
     // TODO(Varun): Add the project/user + collection ID to the Dropzone request
