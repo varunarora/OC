@@ -8,8 +8,12 @@
                 <form method="POST" enctype="multipart/form-data" action="/api/fpSubmit/" class="files-upload-rename">
                     {% csrf_token %}
                     <input type="hidden" name="user_id" value="{{ user.id }}"/>
+                    {% if project %}
                     <input type="hidden" name="project_id" value="{{ project.id }}"/>
+                    {% endif %}
+                    {% if collection %}
                     <input type="hidden" name="collection_id" value="{{ collection.id }}"/>
+                    {% endif %}
                     <div class="upload-drag-drop">
                     </div>
                     <div class="upload-drag-drop-message">DRAG AND DROP FILES HERE</div>
