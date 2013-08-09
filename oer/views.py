@@ -192,34 +192,130 @@ def _prepare_add_resource_context(request):
     }
 
 
-def add_video(request):
+def build_return_resource_form_context(request, form, form_context):
+    # Preserve field inputs from previous form submission.
+    form_fields_to_return = [
+        'title', 'url', 'visibility', 'body_markdown', 'tags', 'license'
+    ]
+
+    import oc_platform.FormUtilities as fu
+    form_context['original'] = fu._get_original_form_values(request, form_fields_to_return)
+
+    # Clean for tags
+    # HACK(Varun): The fu function returns a string if not a list
+    try:
+        original_tags = form_context['original']['tags']
+        if isinstance(original_tags, basestring):
+            form_context['original']['tags'] = [original_tags]
+    except:
+        pass
+
+    form_context['form'] = form
+
+
+def add_video(request, submission_context=None):
+    if not request.user.is_authenticated():
+        return redirect('/?login=true&source=%s' % request.path)
+
     resource_context = _prepare_add_resource_context(request)
+
+    form_context = {}
+    if request.method == 'POST':
+        user_id = request.POST.get('user', None)
+        project_id = request.POST.get('project', None)
+        collection_id = request.POST.get('collection', None)
+
+        from oer import forms
+        new_video = forms.NewVideoForm(request.POST, request.user)
+
+        if new_video.is_valid():
+            url = new_video.save()
+
+            # Add to the necessary collection.
+            collection = get_collection(user_id, project_id, collection_id)
+
+            # Add to the necessary collection.
+            add_resource_to_collection(url, collection)
+
+            return redirect_to_collection(user_id, project_id, collection_id)
+        else:
+            build_return_resource_form_context(request, new_video, form_context)
 
     context = dict({
         'title': _(settings.STRINGS['resources']['ADD_VIDEO_TITLE']) + resource_context['title_extension']
-    }.items() + resource_context.items())
+    }.items() + resource_context.items() + form_context.items())
 
     return render(request, 'add-video.html', context)
 
 
 def add_url(request):
+    if not request.user.is_authenticated():
+        return redirect('/?login=true&source=%s' % request.path)
+
     resource_context = _prepare_add_resource_context(request)
+    
+    form_context = {}
+    if request.method == 'POST':
+        user_id = request.POST.get('user', None)
+        project_id = request.POST.get('project', None)
+        collection_id = request.POST.get('collection', None)
+
+        from oer import forms
+        new_url = forms.NewURLForm(request.POST, request.user)
+
+        if new_url.is_valid():
+            url = new_url.save()
+
+            # Add to the necessary collection.
+            collection = get_collection(user_id, project_id, collection_id)
+
+            # Add to the necessary collection.
+            add_resource_to_collection(url, collection)
+
+            return redirect_to_collection(user_id, project_id, collection_id)
+        else:
+            build_return_resource_form_context(request, new_url, form_context)
 
     context = dict({
         'title': _(settings.STRINGS['resources']['ADD_URL_TITLE']) + resource_context['title_extension']
-    }.items() + resource_context.items())
+    }.items() + resource_context.items() + form_context.items())
 
     return render(request, 'add-url.html', context)
 
 
 def new_document(request):
+    if not request.user.is_authenticated():
+        return redirect('/?login=true&source=%s' % request.path)
+
     resource_context = _prepare_add_resource_context(request)
+
+    form_context = {}
+    if request.method == 'POST':
+        user_id = request.POST.get('user', None)
+        project_id = request.POST.get('project', None)
+        collection_id = request.POST.get('collection', None)
+
+        from oer import forms
+        new_document = forms.NewDocumentForm(request.POST, request.user)
+
+        if new_document.is_valid():
+            document = new_document.save()
+
+            # Add to the necessary collection.
+            collection = get_collection(user_id, project_id, collection_id)
+
+            # Add to the necessary collection.
+            add_resource_to_collection(document, collection)
+
+            return redirect_to_collection(user_id, project_id, collection_id)
+        else:
+            build_return_resource_form_context(request, new_document, form_context)
 
     context = dict({
         'title': _(settings.STRINGS['resources']['NEW_DOCUMENT_TITLE']) + resource_context['title_extension']
-    }.items() + resource_context.items())
+    }.items() + resource_context.items() + form_context.items())
 
-    return render(request, 'editor.html', context)
+    return render(request, 'document.html', context)
 
 
 def upload_page(request):
@@ -252,9 +348,9 @@ def fp_upload(request):
     # And remove them from the copy.
     post_data = request.POST.copy()
 
-    user_id = post_data['user_id']
-    project_id = post_data.get('project_id', None)
-    collection_id = post_data.get('collection_id', None)
+    user_id = post_data['user']
+    project_id = post_data.get('project', None)
+    collection_id = post_data.get('collection', None)
 
     del post_data['user_id']
 
@@ -341,9 +437,9 @@ def fp_submit(request):
         Redirect to project slug.
     """
     if request.method == "POST":
-        user_id = request.POST.get('user_id', None)
-        project_id = request.POST.get('project_id', None)
-        collection_id = request.POST.get('collection_id', None)
+        user_id = request.POST.get('user', None)
+        project_id = request.POST.get('project', None)
+        collection_id = request.POST.get('collection', None)
 
         ###########################################################
         # First, handle all the manually uploaded files
@@ -434,41 +530,6 @@ def create_resource(uploaded_file, user, collection, new_filename=None):
     return new_resource
 
 
-def create_video(request):
-    from oer import forms
-    new_video = forms.NewVideoForm(request.POST, request.user)
-    video = new_video.save()
-
-    user_id = request.POST.get('user_id', None)
-    project_id = request.POST.get('project_id', None)
-    collection_id = request.POST.get('collection_id', None)
-
-    collection = get_collection(user_id, project_id, collection_id)
-
-    # Add to the necessary collection.
-    add_resource_to_collection(video, collection)
-
-    return redirect_to_collection(user_id, project_id, collection_id)
-
-
-def create_url(request):
-    from oer import forms
-    new_url = forms.NewURLForm(request.POST, request.user)
-    url = new_url.save()
-
-    user_id = request.POST.get('user_id', None)
-    project_id = request.POST.get('project_id', None)
-    collection_id = request.POST.get('collection_id', None)
-
-    # Add to the necessary collection.
-    collection = get_collection(user_id, project_id, collection_id)
-
-    # Add to the necessary collection.
-    add_resource_to_collection(url, collection)
-
-    return redirect_to_collection(user_id, project_id, collection_id)
-
-
 def add_resource_to_collection(resource, collection):
     collection.resources.add(resource)
     collection.save()
@@ -492,7 +553,6 @@ def get_collection(user_id, project_id, collection_id):
 
 def redirect_to_collection(user_id, project_id=None, collection_id=None):
     if collection_id:
-        from oer.models import Collection
         collection = Collection.objects.get(pk=int(collection_id))
 
     if project_id:
