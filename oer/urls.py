@@ -9,9 +9,6 @@ urlpatterns = patterns(
     url(r'^add-link/$', views.add_url, name='add_url'),
     url(r'^new-document/$', views.new_document, name='new_document'),
 
-    url(r'^create-video/$', views.create_video, name='create_video'),
-    url(r'^create-link/$', views.create_url, name='create_url'),
-
     # Collections
     url(r'^new-collection/project/(?P<project_slug>[\w\-]+)/', views.new_project_collection, name='new_project_collection'),
     url(r'^new-collection/user/(?P<username>\w+)/', views.new_user_collection, name='new_user_collection'),
