@@ -1,0 +1,7 @@
+<input type="hidden" name="user" value="{{ user.id }}"/>
+{% if project %}
+<input type="hidden" name="project" value="{{ project.id }}"/>
+{% endif %}
+{% if collection %}
+<input type="hidden" name="collection" value="{{ collection.id }}"/>
+{% endif %}
