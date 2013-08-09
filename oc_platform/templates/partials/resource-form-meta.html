@@ -1,0 +1,34 @@
+<tr><td>Who can see this?</td><td>
+    <label>
+        <input type="radio" name="visibility" value="public" {% ifequal original.visibility "public" %}checked{% endifequal %} />
+        Everyone (Public)
+    </label>
+    <label>
+        <input type="radio" name="visibility" value="private" {% ifequal original.visibility "private" %}checked{% endifequal %}/>
+        Only people I choose (Private)
+    </label>
+</td></tr>
+<tr><td></td><td><span class="resource-form-error">{{ form.errors.visibility }}</span></td></tr>
+<tr><td>License</td><td>
+    <select name="license">
+        {% for license in licenses %}
+        <option value="{{ license.id }}" {% ifequal original.license license %}selected{% endifequal %}>{{ license.title }}</option>
+        {% endfor %}
+    </select>
+</td></tr>
+<tr><td></td><td><span class="resource-form-error">{{ form.errors.license }}</span></td></tr>
+<tr><td>Description</td><td><textarea name="body_markdown" class="new-resource-description">{{ original.body_markdown }}</textarea></td></tr>
+<tr><td></td><td><span class="resource-form-error">{{ form.errors.body_markdown }}</span></td></tr>
+<tr><td>Tags</td><td>
+    <ul class="new-resource-tags">
+        {% if original.tags %}
+        {% for tag in original.tags %}
+        <li>{{ tag }}</li>
+        {% endfor %}
+        {% endif %}
+    </ul>
+</textarea></td></tr>
+<tr><td colspan="2" class="right">
+    <button class="btn success-button">Submit</button>
+</td></tr>
+<tr><td></td><td><span class="resource-form-error">{{ form.errors.tags }}</span></td></tr>
