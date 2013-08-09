@@ -48,7 +48,7 @@ class ResourceThumbnail:
                 ResourceThumbnail.generateURLThumbnail(resource, thumbnail)
 
         elif resource.type == "article":
-            call(["cp", thumbnailDir + "resource_thumbnail/defaults/" + "article.jpg", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
+            call(["cp", settings.MEDIA_ROOT + "resource_thumbnail/defaults/" + "article.jpg", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
         elif resource.type == "url":
             ResourceThumbnail.generateURLThumbnail(resource, thumbnail)
