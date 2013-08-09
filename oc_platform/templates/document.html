@@ -1,0 +1,72 @@
+{% include 'partials/header.html' %}
+
+<form id="new-resource-document-form" class="document-edit-form" method="POST">
+    {% csrf_token %}
+    <div id="submission-info-wrapper">
+        <div id="submission-info">
+            <div>
+                <div id="submission-status">{{ message }}</div>
+                <div id="submission-buttons">
+                    <button class="btn success-button" type="submit">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <article id="article-edit" class="resource-article-edit">
+        <div class="center-stage">
+            {% include 'partials/resource-meta.html' %}
+            <div id="key-panel" class="panel-left">
+                <h2 id="article-title"><input type="text" value="{{ original.title }}" name="title" class="browser-edit" placeholder="(Document title)" /></h2>
+                <p><span class="resource-form-error">{{ form.errors.title }}</span></p>
+            </div>
+            <div id="fill-panel" class="panel-right">
+                <table>
+                    <tr><td><span class="bold">License</span></td><td>
+                        <select name="license">
+                            {% for license in licenses %}
+                            <option value="{{ license.id }}">{{ license.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </td></tr>
+                    <tr><td></td><td><span class="resource-form-error">{{ form.errors.license }}</span></td></tr>
+                    <tr><td><span class="bold">Who can see this?</span></td><td>
+                        <label>
+                            <input type="radio" name="visibility" value="public" {% ifequal original.visibility "public" %}checked{% endifequal %} />
+                                Everyone (Public)
+                        </label>
+                        <label>
+                            <input type="radio" name="visibility" value="private" {% ifequal original.visibility "private" %}checked{% endifequal %} />
+                        Only people I choose (Private)
+                        </label>
+                    </td></tr>
+                    <tr><td></td><td><span class="resource-form-error">{{ form.errors.visibility }}</span></td></tr>
+                </table>
+
+            </div>
+        </div>
+        <div class="center-stage">
+            <div id="wmd-button-bar"></div>
+            <textarea class="wmd-input large-textarea" id="wmd-input" name="body_markdown">{{ original.body_markdown }}</textarea>       
+            <tr><td></td><td><span class="resource-form-error">{{ form.errors.body_markdown }}</span></td></tr>
+            <section class="drop-edit">
+                <div class="edit-dropdown edit-dropdown-opened">Tags</div>
+                <div class="edit-dropped show-dropped">
+                    <ul class="tagit">
+                        {% if original.tags %}
+                        {% for tag in original.tags %}
+                        <li>{{ tag }}</li>
+                        {% endfor %}
+                        {% endif %}                   
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </article>
+</form>
+
+{% include 'partials/image-upload.html' %}
+
+{% include 'partials/editor-imports.html' %}
+
+{% include 'partials/footer.html' %}
