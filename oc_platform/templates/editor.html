@@ -1,21 +1,21 @@
 {% include 'partials/header.html' %}
 
-<div id="submission-info-wrapper">
-	<div id="submission-info">
-		<div>
-			<div id="submission-status">{{ message }}</div>
-			<div id="submission-buttons">
-				{% if user.id %}
-				<button class="btn dull-button" data-action="save" type="button">Save draft</button>
-				{% endif %}
-				<button class="btn dull-button" data-action="preview" type="button">Preview</button>
-				<button class="btn success-button" data-action="submit" type="button">Submit</button>
+<form id="article-edit-form" class="document-edit-form" method="POST">
+	{% csrf_token %}
+	<div id="submission-info-wrapper">
+		<div id="submission-info">
+			<div>
+				<div id="submission-status">{{ message }}</div>
+				<div id="submission-buttons">
+					{% if user.id %}
+					<button class="btn dull-button" data-action="save" type="button">Save draft</button>
+					{% endif %}
+					<button class="btn dull-button" data-action="preview" type="button">Preview</button>
+					<button class="btn success-button" data-action="submit" type="button">Submit</button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
-<form id="article-edit-form" method="POST">
-{% csrf_token %}
 	<div class="center-stage">
 		<div id="key-panel" class="panel-left">
 				<input type="hidden" name="action" />
@@ -83,29 +83,7 @@
 			<input type="text" name="log_message" />
 		</div>
 		
-		<div title="Image upload" class="dialog" id="image-upload">
-			<div class="article-image-uploader">
-				<nav class="article-image-uploader-tabs">
-					<ul>
-						<li><a href=".upload-new">Upload new</a></li>
-						<li><a href=".show-image-history">My Images</a></li>
-					</ul>
-				</nav>
-				<div class="article-image-uploader-content oc-tabs-content">
-					<div class="upload-new">
-						<div class="upload-drag-drop">
-						</div>
-						<div class="upload-drag-drop-message">
-							DRAG AND DROP YOUR IMAGES HERE
-						</div>
-					</div>
-					<div class="show-image-history">
-						<div class="image-history-set">
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+		{% include 'partials/image-upload.html' %}
 
 		<div id="fill-panel" class="panel-right">
 			<aside id="support">
@@ -126,12 +104,6 @@
 
 </div>
 
-<script type="text/javascript" src="{{ STATIC_URL }}js/pagedown/Markdown.Converter.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/pagedown/Markdown.Sanitizer.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/pagedown/Markdown.Editor.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/textext.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/dropzone.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/editor.js"></script>
-
+{% include 'partials/editor-imports.html' %}
 
 {% include 'partials/footer.html' %}
