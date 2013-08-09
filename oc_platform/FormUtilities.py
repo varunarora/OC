@@ -28,3 +28,15 @@ def convert_to_tag_array(tag_array, tag_category):
             tags.append(new_tag.id)
 
     return tags
+
+
+def _get_original_form_values(request, form_fields_to_return):
+    original_form_values = {}
+
+    form_dict = dict(request.POST.copy())
+
+    for k, v in form_dict.iteritems():
+        if k in form_fields_to_return:
+            original_form_values[k] = v[0] if len(v) <= 1 else v
+
+    return original_form_values
