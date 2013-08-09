@@ -17,7 +17,7 @@ OC.editor = {
         // API to get a list of user images
         if (OC.editor.myImages.length === 0) {
             // Get User ID from editor
-            var userID = $('#article-edit-form input[name=user]').val();
+            var userID = $('.document-edit-form input[name=user]').val();
 
             var imageHistoryWrapper = $('.show-image-history .image-history-set');
 
@@ -143,7 +143,7 @@ $(function() {
         });
     });
 
-    $('#submission-buttons button').click(function (e) {
+    $('article-edit-form #submission-buttons button').click(function (e) {
         var action = $(this).attr('data-action');
 
         // Populate textarea
