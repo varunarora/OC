@@ -11,19 +11,19 @@ from oc_platform.api import RevisionResource
 from oc_platform.api import UserResource
 from oc_platform.api import UserProfileResource
 
-v1_api = Api(api_name='v1')
-v1_api.register(ArticleResource())
-v1_api.register(CategoryResource())
-v1_api.register(CollectionResource())
-v1_api.register(CommentResource())
-v1_api.register(LicenseResource())
-v1_api.register(ProjectResource())
-v1_api.register(ResourceResource())
-v1_api.register(RevisionResource())
-v1_api.register(UserResource())
-v1_api.register(UserProfileResource())
+v0_api = Api(api_name='v0')
+v0_api.register(ArticleResource())
+v0_api.register(CategoryResource())
+v0_api.register(CollectionResource())
+v0_api.register(CommentResource())
+v0_api.register(LicenseResource())
+v0_api.register(ProjectResource())
+v0_api.register(ResourceResource())
+v0_api.register(RevisionResource())
+v0_api.register(UserResource())
+v0_api.register(UserProfileResource())
 
 urlpatterns = patterns(
     '',
-    (r'^', include(v1_api.urls)),
+    (r'^', include(v0_api.urls)),
 )
