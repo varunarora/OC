@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
 
 
 class Article(models.Model):
@@ -45,7 +46,7 @@ class Collection(models.Model):
     title = models.CharField(max_length=256)
     created = models.DateTimeField()
     owner_type_id = models.IntegerField(max_length=11)
-    owner_id = models.PositiveIntegerField(max_length=10)
+    owner_id = models.ForeignKey(ContentType)
     visibility = models.CharField(max_length=256)
     changed = models.DateTimeField()
     slug = models.CharField(256)
@@ -173,11 +174,11 @@ class User(models.Model):
 
 class UserProfile(models.Model):
     id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey('User', db_column='user_id', related_name='user', unique=True)
-    dob = models.DateTimeField()
+    user = models.OneToOneField('User', db_column='user_id', related_name='profile', unique=True)
+    date_of_birth = models.DateTimeField(db_column='dob')
     location = models.CharField(max_length=256)
     profession = models.CharField(max_length=256)
-    profile_pic = models.CharField(max_length=100)
+    profile_pic = models.CharField(max_length=100, null=True)
     gender = models.BooleanField()
 
     class Meta:

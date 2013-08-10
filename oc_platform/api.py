@@ -1,4 +1,5 @@
 import logging
+from django.conf import settings
 from tastypie import fields
 from tastypie.resources import ModelResource
 from oc_platform.models import Article
@@ -12,8 +13,6 @@ from oc_platform.models import Revision
 from oc_platform.models import User
 from oc_platform.models import UserProfile
 from oc_platform.api_serializer import CamelCaseJSONSerializer
-#from tastypie.utils import trailing_slash
-#from django.conf.urls import url
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +27,11 @@ class ArticleResource(ModelResource):
     revisions = fields.ToManyField('oc_platform.api.RevisionResource', 'articles')
 
     class Meta:
-        queryset = Article.objects.all()
+        queryset = Article.objects.filter(published=True)
         resource_name = 'articles'
         allowed_methods = ['get']
-        fields = ['id', 'most_recent_revision', 'category', 'language_id', 'created', 'changed', 'title', 'views', 'license', 'slug', 'difficulty', 'published', 'citation']
-        ordering = ['id', 'most_recent_revision', 'category', 'language_id', 'created', 'changed', 'title', 'views', 'license', 'slug', 'difficulty', 'published', 'citation']
+        fields = ['most_recent_revision', 'category', 'language_id', 'created', 'changed', 'title', 'license', 'slug', 'difficulty', 'citation']
+        ordering = ['most_recent_revision', 'category', 'language_id', 'created', 'changed', 'title', 'license', 'slug', 'difficulty', 'citation']
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_most_recent_revision(self, bundle):
@@ -58,8 +57,8 @@ class CategoryResource(ModelResource):
         queryset = Category.objects.all()
         resource_name = 'categories'
         allowed_methods = ['get']
-        fields = ['id', 'title', 'project', 'created', 'slug', 'parent']
-        ordering = ['id', 'title', 'project', 'created', 'slug', 'parent']
+        fields = ['title', 'project', 'created', 'slug', 'parent']
+        ordering = ['title', 'project', 'created', 'slug', 'parent']
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_parent(self, bundle):
@@ -91,8 +90,8 @@ class CollectionResource(ModelResource):
         queryset = Collection.objects.all()
         resource_name = 'collections'
         allowed_methods = ['get']
-        fields = ['id', 'title', 'created', 'owner_type_id', 'owner_id', 'visibility', 'changed', 'slug']
-        ordering = ['id', 'title', 'created', 'owner_type_id', 'owner_id', 'visibility', 'changed', 'slug']
+        fields = ['title', 'created', 'owner_type_id', 'owner_id', 'visibility', 'changed', 'slug']
+        ordering = ['title', 'created', 'owner_type_id', 'owner_id', 'visibility', 'changed', 'slug']
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate(self, bundle):
@@ -109,8 +108,8 @@ class CommentResource(ModelResource):
         queryset = Comment.objects.all()
         resource_name = 'comments'
         allowed_methods = ['get']
-        fields = ['id', 'body_markdown', 'created', 'parent_type_id', 'parent_id', 'body_markdown_html']
-        ordering = ['id', 'body_markdown', 'created', 'parent_type_id', 'parent_id', 'body_markdown_html']
+        fields = ['body_markdown', 'created', 'parent_type_id', 'parent_id', 'body_markdown_html']
+        ordering = ['body_markdown', 'created', 'parent_type_id', 'parent_id', 'body_markdown_html']
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_user(self, bundle):
@@ -128,8 +127,8 @@ class LicenseResource(ModelResource):
         queryset = License.objects.all()
         resource_name = 'licenses'
         allowed_methods = ['get']
-        fields = ['id', 'title', 'description', 'custom']
-        ordering = ['id', 'title', 'description', 'custom']
+        fields = ['title', 'description', 'custom']
+        ordering = ['title', 'description', 'custom']
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate(self, bundle):
@@ -144,8 +143,8 @@ class ProjectResource(ModelResource):
         queryset = Project.objects.all()
         resource_name = 'projects'
         allowed_methods = ['get']
-        fields = ['id', 'title', 'created', 'description', 'cover_pic', 'visibility', 'meta', 'slug']
-        ordering = ['id', 'title', 'created', 'description', 'cover_pic', 'visibility', 'meta', 'slug']
+        fields = ['title', 'created', 'description', 'cover_pic', 'visibility', 'meta', 'slug']
+        ordering = ['title', 'created', 'description', 'cover_pic', 'visibility', 'meta', 'slug']
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate(self, bundle):
@@ -163,8 +162,8 @@ class ResourceResource(ModelResource):
         queryset = Resource.objects.all()
         resource_name = 'resources'
         allowed_methods = ['get']
-        fields = ['id', 'title', 'type', 'license', 'url', 'body_markdown', 'created', 'cost', 'views', 'file', 'body_markdown_html']
-        ordering = ['id', 'title', 'type', 'license', 'url', 'body_markdown', 'created', 'cost', 'views', 'file', 'body_markdown_html']
+        fields = ['title', 'type', 'license', 'url', 'body_markdown', 'created', 'cost', 'file', 'body_markdown_html']
+        ordering = ['title', 'type', 'license', 'url', 'body_markdown', 'created', 'cost', 'file', 'body_markdown_html']
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_license(self, bundle):
@@ -189,8 +188,8 @@ class RevisionResource(ModelResource):
         queryset = Revision.objects.all()
         resource_name = 'revisions'
         allowed_methods = ['get']
-        fields = ['id', 'title', 'category', 'created', 'body_markdown', 'body_markdown_html', 'objectives', 'log', 'article', 'flag']
-        ordering = ['id', 'title', 'category', 'created', 'body_markdown', 'body_markdown_html', 'objectives', 'log', 'article', 'flag']
+        fields = ['title', 'category', 'created', 'body_markdown', 'body_markdown_html', 'objectives', 'log', 'article', 'flag']
+        ordering = ['title', 'category', 'created', 'body_markdown', 'body_markdown_html', 'objectives', 'log', 'article', 'flag']
         serializer = CamelCaseJSONSerializer()
 
     def dehydrate_category(self, bundle):
@@ -210,60 +209,49 @@ class RevisionResource(ModelResource):
 
 
 class UserResource(ModelResource):
-    profile = fields.ToManyField('oc_platform.api.UserProfileResource', 'user', null=True)
+    #Uncomment this line to embed the profile as a resource
+    profile = fields.ToOneField('oc_platform.api.UserProfileResource', 'profile', null=True, full=True)
+    #Uncomment these lines to embed individual profile values. The profile must exist!
+    #try
+    #location = fields.CharField('profile__location', null=True)
+    #profession = fields.CharField('profile__profession', null=True)
+    #profile_pic = fields.CharField('profile__profile_pic', null=True)
+    #except ???
 
     class Meta:
         queryset = User.objects.all()
         resource_name = 'users'
         allowed_methods = ['get']
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'is_superuser', 'last_login', 'date_joined']
-        excludes = ['password']
-        ordering = ['id', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'is_superuser', 'last_login', 'date_joined']
+        fields = ['username', 'first_name', 'last_name']
+        ordering = ['username', 'first_name', 'last_name']
         serializer = CamelCaseJSONSerializer()
 
-    def dehydrate_profile(self, bundle):
-        # This is a hack. Fix profile to be a OneToOne field instead!
-        if (len(bundle.data['profile']) == 0):
-            return 'null'
-        elif (len(bundle.data['profile']) == 1):
-            return {'self': bundle.data['profile'][0]}
-        else:
-            logging.error('Too many profiles for user %s' % bundle.data['user_id'])
-            return 'null'
-
     def dehydrate(self, bundle):
-        # Uncomment to rename resourceUri to be href
         bundle.data['self'] = bundle.data['resource_uri']
         del bundle.data['resource_uri']
         return bundle
 
 
 class UserProfileResource(ModelResource):
-    user = fields.ForeignKey('oc_platform.api.UserResource', 'user_id')
-    date_of_birth = fields.DateTimeField(attribute='dob')
+    user = fields.ToOneField('oc_platform.api.UserResource', 'user')
 
     class Meta:
         queryset = UserProfile.objects.all()
         resource_name = 'userProfiles'
         allowed_methods = ['get']
-        fields = ['id', 'location', 'profession', 'profile_pic', 'gender']
-        ordering = ['id', 'location', 'profession', 'profile_pic', 'gender']
+        fields = ['location', 'profession', 'profile_pic']
+        ordering = ['location', 'profession', 'profile_pic']
         serializer = CamelCaseJSONSerializer()
 
-    def dehydrate_gender(self, bundle):
-        if bundle.data['gender'] == 0:
-            return 'Female'
-        elif bundle.data['gender'] == 1:
-            return 'Male'
-        else:
-            logging.error('Unknown gender for user %s' % bundle.data['user_id'])
-            return 'Unknown'
+    def dehydrate_profile_pic(self, bundle):
+        if bundle.data['profile_pic'] == '':
+            return ''
+        return '%s%s' % (settings.MEDIA_URL, bundle.data['profile_pic'])
 
     def dehydrate_user(self, bundle):
         return {'self': bundle.data['user']}
 
     def dehydrate(self, bundle):
-        # Uncomment to rename resourceUri to be href
         bundle.data['self'] = bundle.data['resource_uri']
         del bundle.data['resource_uri']
         return bundle
