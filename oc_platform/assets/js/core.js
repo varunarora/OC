@@ -687,7 +687,7 @@ var OC = {
                 'email': emailAddress,
                 'message': message,
                 'from_name': from_name,
-                'fromAddress': fromAddress
+                'from_address': fromAddress
             },
             success: function (result) {
                 spinner.hide();
@@ -704,7 +704,7 @@ var OC = {
                     $('#email-share-error').html(
                         'Your message could not be sent. Kindly check the above fields again'
                     );
-                    $('#email-share-success').fadeIn('fast');
+                    $('#email-share-error').fadeIn('fast');
                 }
             }
         });
