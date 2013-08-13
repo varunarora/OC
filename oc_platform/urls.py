@@ -29,6 +29,7 @@ urlpatterns = patterns(
 
     url(r'^about/team/', 'oc_platform.views.team', name='team'),
     url(r'^about/press/', 'oc_platform.views.press', name='press'),
+    url(r'^press/', 'oc_platform.views.press', name='press_duplicate'),
     url(r'^about/', 'oc_platform.views.about', name='about'),
 
     url(r'^help/', 'oc_platform.views.help', name='help'),
