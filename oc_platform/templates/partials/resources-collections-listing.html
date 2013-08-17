@@ -3,7 +3,7 @@
     <div class="profile-collections-added-list">
         {% for collection_item in collections %}
         <div class="project-browse-item directory">
-            <a href="{% url user:list_collection username=user_profile.username collection_slug=collection_item.slug %}"><!--<input type="checkbox" />--> {{ collection }} <span class="project-browse-item-date">{{ collection_item.created|date:"M nS, 'y P"}}</span> <span class="project-browse-item-visibility visibility-{{ collection_item.visibility }}"></span></a>
+            <a href="{% url user:list_collection username=user_profile.username collection_slug=collection_item.slug %}"><!--<input type="checkbox" />--> {{ collection_item.title }} <span class="project-browse-item-date">{{ collection_item.created|date:"M nS, 'y P"}}</span> <span class="project-browse-item-visibility visibility-{{ collection_item.visibility }}"></span></a>
         </div>
         {% endfor %}
     </div>
