@@ -315,15 +315,20 @@ def confirm_account(request):
     username = request.GET.get('username', None)
     confirmation_code = request.GET.get('confirmation_key', None)
 
-    # Fetch the user that exists but isn't activated, from the database.
-    user = User.objects.get(username=username)
+    user_found = True
+    try:
+        # Fetch the user that exists but isn't activated, from the database.
+        user = User.objects.get(username=username)
 
-    # Generate a new confirmation code from user fields.
-    generated_confirmation_code = _generate_confirmation_code(user)
+        # Generate a new confirmation code from user fields.
+        generated_confirmation_code = _generate_confirmation_code(user)
+
+    except:
+        user_found = False
 
     # TODO(Varun); Account for case where account is already active.
 
-    if (generated_confirmation_code == confirmation_code):
+    if (generated_confirmation_code == confirmation_code and user_found):
         # Mark the user account as active.
         user.is_active = True
         user.save()
@@ -554,9 +559,12 @@ def authenticate(request):
     password = request.POST['password']
 
     if '@' in username:
-        user_object = User.objects.get(email=username)
-        user = authenticate(username=user_object.username, password=password)
-    else:        
+        try:
+            user_object = User.objects.get(email=username)
+            user = authenticate(username=user_object.username, password=password)
+        except:
+            pass
+    else:
         user = authenticate(username=username, password=password)
 
     if user is not None:
@@ -905,27 +913,30 @@ def contributor_introduction(request):
     import urllib
     import urllib2
 
-    contributor_locations = {}
-    for contributor in cohort.members.all():
-        params = urllib.urlencode(
-            {'address': contributor.get_profile().location, 'sensor': 'true'})
-        getRequest = urllib2.urlopen(
-            'http://maps.googleapis.com/maps/api/geocode/json?%s' % params)
-        response = json.loads(getRequest.read())
-        try:
-            contributor_locations[contributor] = response['results'][0]['geometry']['location']
-        except IndexError:
-            contributor_locations[contributor] = {
-                'lat': 0.0,
-                'lng': 0.0
-            }
+    if cohort:
+        contributor_locations = {}
+        for contributor in cohort.members.all():
+            params = urllib.urlencode(
+                {'address': contributor.get_profile().location, 'sensor': 'true'})
+            getRequest = urllib2.urlopen(
+                'http://maps.googleapis.com/maps/api/geocode/json?%s' % params)
+            response = json.loads(getRequest.read())
+            try:
+                contributor_locations[contributor] = response['results'][0]['geometry']['location']
+            except IndexError:
+                contributor_locations[contributor] = {
+                    'lat': 0.0,
+                    'lng': 0.0
+                }
 
-    context = {
-        'title': _(settings.STRINGS['article_center']['INTRODUCTION_TITLE']),
-        'cohort': cohort,
-        'contributor_locations': contributor_locations
-    }
-    return render(request, 'contributor-introduction.html', context)
+        context = {
+            'title': _(settings.STRINGS['article_center']['INTRODUCTION_TITLE']),
+            'cohort': cohort,
+            'contributor_locations': contributor_locations
+        }
+        return render(request, 'contributor-introduction.html', context)
+    else:
+        raise 404
 
 
 def reset_password(request):
