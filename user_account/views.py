@@ -567,7 +567,7 @@ def authenticate(request):
     else:
         user = authenticate(username=username, password=password)
 
-    if user is not None:
+    if not user:
         if user.is_active:
             login(request, user)
             if redirect_to:
