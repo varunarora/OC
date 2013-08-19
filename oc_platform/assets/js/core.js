@@ -834,6 +834,13 @@ var OC = {
     },
 
     setupShareMenu: function(){
+        // Do not treat the click action as a regular href click
+        $('li.share-action > a').click(function(event){
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+
         $('li.share-action, nav#share-menu').mouseenter(function () {
             $('#share-menu').addClass('showMenu');
         }).mouseleave(function () {
@@ -1102,8 +1109,15 @@ var OC = {
                 width: 500,
                 buttons: {
                     Ok: function () {
-                        $(this).dialog("close");
-                        $('form#new-collection-form').submit();
+                        var newCollectionName = $(
+                            'form#new-collection-form input[name=new_collection_name]');
+
+                        if (newCollectionName.val() === ""){
+                            newCollectionName.addClass('form-input-error');
+                        } else {
+                            $(this).dialog("close");
+                            $('form#new-collection-form').submit();
+                        }
                     },
                     Cancel: function () {
                         $(this).dialog("close");
@@ -1114,7 +1128,7 @@ var OC = {
     },
 
     bindDeleteHandler: function(){
-        $('.profile-resource-delete').click(function(){
+        $('.profile-resource-delete, .project-resource-delete').click(function(event){
             var deleteElement = $(this);
             // NOTE(Varun): Given the ID of the resource is of the format
             //     'resource-x', where x is the ID as stored by the server
@@ -1144,6 +1158,10 @@ var OC = {
                     }
                 }
             });
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
         });
     },
 
