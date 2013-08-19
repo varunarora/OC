@@ -106,6 +106,15 @@ OC.editor = {
 
     initImageUploaderTabs: function(){
         OC.tabs('.article-image-uploader');
+    },
+
+    objectiveDeleteHandler: function(){
+        // Get delete button and the block
+        var deleteButton = $(this);
+        var objectiveBlock = deleteButton.parents('.objective-input');
+
+        // Remove the entire block from the DOM
+        objectiveBlock.remove();
     }
 };
 
@@ -197,11 +206,26 @@ $(function() {
     $('button#add-objective').click(function (e) {
         var inputs_wrapper = $(this).parents(
             '.edit-dropped').find('#objectives-inputs');
+        var newObjective = $('<div />', {
+            'class': 'objective-input'
+        });
+
         var newInput = $('<input />', {
             'type': 'text',
             'class': 'browser-edit'
         });
-        inputs_wrapper.append(newInput);
+        var deleteButton = $('<span />', {
+            'class': 'delete-objective'
+        });
+        // Associate delete handler with button
+        $(deleteButton).click(OC.editor.objectiveDeleteHandler);
+
+        // Add the input and the delete button to the new objective block
+        newObjective.append(newInput);
+        newObjective.append(deleteButton);
+
+        // Add the new objective block to the objectives list
+        inputs_wrapper.append(newObjective);
         newInput.focus();
     });
 });
@@ -298,5 +322,7 @@ $(document).ready(function(){
     $('.tagit').tagit({
         allowSpaces: true
     });
+
+    $('span.delete-objective').click(OC.editor.objectiveDeleteHandler);
 
 });

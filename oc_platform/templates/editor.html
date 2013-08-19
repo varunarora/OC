@@ -38,9 +38,11 @@
 						<div class="edit-dropdown">Objectives</div>
 						<div class="edit-dropped">
 							<textarea class="medium-textarea" id="objectives-edit-textarea" name="objectives" type="hidden">{{ article.objectives}}</textarea>
-							<div id="objectives-inputs">
+							<div id="objectives-inputs">	
 							{% for obj in article.objectives %}
-								<input type="text" value="{{ obj }}" class="browser-edit" />
+								<div class="objective-input">
+									<input type="text" value="{{ obj }}" class="browser-edit" /><span class="delete-objective"></span>
+								</div>
 							{% endfor %}
 							</div>
 							<p class="right">
