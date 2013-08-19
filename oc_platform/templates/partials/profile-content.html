@@ -23,7 +23,7 @@
     <div class="profile-resources">
         <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Resources</h3>
 
-        {% include 'partials/resources-collections-listing.html' %}
+        {% include 'partials/resources-collections-listing.html' with host='profile' %}
 
         {% if edits %}
         <h4>Forks</h4>

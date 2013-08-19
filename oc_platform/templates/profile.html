@@ -51,7 +51,7 @@
     </div>
     <div id="key-panel" class="panel-right">
         {% if resources %}
-        {% include 'partials/resources-collections-listing.html' %}
+        {% include 'partials/resources-collections-listing.html' with host='profile' %}
         {% else %}
         No resources in this collection.
         {% endif %}
@@ -74,7 +74,4 @@
     </form>
 </div>
 
-<div class="delete-resource-dialog dialog" title="Delete resource">
-    Are you sure you want to delete this resource?
-</div>
 {% include 'partials/footer.html' %}

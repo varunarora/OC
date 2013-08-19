@@ -13,16 +13,7 @@
         </nav>
     </div>
     <div id="key-panel" class="panel-right">
-    {% for collection in collections %}
-        <div class="project-browse-item directory">
-            <a href="{% url projects:list_collection project_slug=project.slug collection_slug=collection.slug %}"><!--<input type="checkbox" />--> {{ collection }} <span class="project-browse-item-date">{{ collection.created|date:"M nS, 'y P"}}</span> <span class="project-browse-item-visibility visibility-{{ collection.visibility }}"></span></a>
-        </div>
-    {% endfor %}
-    {% for asset in assets.all %}
-        <div class="project-browse-item">
-            <a href="{% url resource:read resource_id=asset.id %}">{{ asset }} <span class="project-browse-item-date">{{ asset.created|date:"M nS, 'y P"}}</span></a>
-        </div>
-    {% endfor %}
+        {% include 'partials/resources-collections-listing.html' with host='project' %}
     </div>
 </div>
 

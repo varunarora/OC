@@ -1507,38 +1507,6 @@ table
 .login-authentication-failure
 	color: #B94A48
 
-.project-browse-item
-	a
-		display: block
-		padding: 10px
-		padding-left: 32px
-		border-bottom: 1px solid #efefef
-		outline: 0 none
-
-		.project-browse-item-date
-			color: $light-font
-
-		.project-browse-item-visibility
-			display: inline-block
-			float: right
-			height: 12px
-			width: 12px
-
-			&.visibility-public
-				background-image: url('../images/social-studies.png')
-				background-repeat: no-repeat
-				background-position: center center
-
-		&:hover
-			background-color: #efefef
-			text-decoration: none
-
-	&.directory
-		a
-			background-image: url('../images/folder.png')
-			background-repeat: no-repeat
-			background-position: 10px center
-
 .add-resource
 	background-color: #D14836
 	padding: 10px
@@ -1710,9 +1678,58 @@ aside#support.teacher-contributor-invite
 .new-url-placeholder
 	background-image: url('../images/new-hyperlink.png')
 
-.profile-resource
-	
-	.profile-resource-delete
+.project-browse-item, .profile-browse-item
+	a
+		display: block
+		padding: 10px
+		padding-left: 32px
+		border-bottom: 1px solid #efefef
+		outline: 0 none
+
+		.project-browse-item-date, .profile-browse-item-date
+			color: $light-font
+
+		.project-browse-item-visibility, .profile-browse-item-visibility
+			display: inline-block
+			float: right
+			height: 12px
+			width: 12px
+
+			&.visibility-public
+				background-image: url('../images/social-studies.png')
+				background-repeat: no-repeat
+				background-position: center center
+
+		&:hover
+			background-color: #efefef
+			text-decoration: none
+
+	&.directory, &.attachment-resource, &.url-resource, &.video-resource, &.article-resource
+		a
+			background-position: 10px center
+			background-repeat: no-repeat
+
+	&.directory
+		a
+			background-image: url('../images/folder.png')
+
+	&.attachment-resource
+		a
+			background-image: url("../images/upload.png")
+
+	&.url-resource
+		a
+			background-image: url("../images/link.png")
+
+	&.video-resource
+		a
+			background-image: url("../images/video.png")
+
+	&.article-resource
+		a
+			background-image: url("../images/document.png")
+
+	.profile-resource-delete, .project-resource-delete
 		width: 14px
 		height: 14px
 		display: inline-block
@@ -1729,7 +1746,7 @@ aside#support.teacher-contributor-invite
 
 	&:hover
 
-		.profile-resource-delete
+		.profile-resource-delete, .project-resource-delete
 			background-image: url('../images/delete-resource-hover.png')
 
 .projects-listing

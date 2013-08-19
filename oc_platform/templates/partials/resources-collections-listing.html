@@ -1,28 +1,41 @@
 {% if resources or collections %}
-<div class="profile-resources-added">
-    <div class="profile-collections-added-list">
+<div class="{{ host }}-resources-added">
+    <div class="{{ host }}-collections-added-list">
         {% for collection_item in collections %}
         <div class="project-browse-item directory">
-            <a href="{% url user:list_collection username=user_profile.username collection_slug=collection_item.slug %}"><!--<input type="checkbox" />--> {{ collection_item.title }} <span class="project-browse-item-date">{{ collection_item.created|date:"M nS, 'y P"}}</span> <span class="project-browse-item-visibility visibility-{{ collection_item.visibility }}"></span></a>
+        {% if collection_item.visibility == 'public' %}
+            {% include 'partials/collection-item.html' %}
+        {% elif host == 'profile' %}
+            {% if user == user_profile %}
+                {% include 'partials/collection-item.html' %}
+            {% endif %}
+        {% elif host == 'project' %}
+            {% if user in project.members.all %}
+                {% include 'partials/collection-item.html' %}
+            {% endif %}
+        {% endif %}
         </div>
         {% endfor %}
     </div>
-    <div class="profile-resources-added-list">
+    <div class="{{ host }}-resources-added-list">
         {% for resource in resources %}
-            <div class="profile-resource">
-                {% if resource.type == "url" %}
-                    <span class="url-icon"></span>
-                {% elif resource.type == "video" %}
-                    <span class="video-icon"></span>
-                {% elif resource.type == "attachment" %}
-                    <span class="attachment-icon"></span>
-                {% elif resource.type == "article" %}
-                    <span class="article-icon"></span>
-                {% endif %}
-                <a href="{% url resource:read resource_id=resource.id %}">{{ resource.title }}</a><span class="resource-created">on {{ resource.created|date:"N jS" }}</span>
-                {% if user == user_profile %}<div class="profile-resource-delete" id="resource-{{ resource.id }}"></div>{% endif %}
-            </div>
+        {% if resource.visibility == 'public' %}
+            {% include 'partials/resource-item.html' %}
+        {% elif host == 'profile' %}
+            {% if user == user_profile %}
+                {% include 'partials/resource-item.html' %}
+            {% endif %}
+        {% elif host == 'project' %}
+            {% if user in project.members.all %}
+                {% include 'partials/resource-item.html' %}
+            {% endif %}
+        {% endif %}
         {% endfor %}
     </div>
 </div>
+
+<div class="delete-resource-dialog dialog" title="Delete resource">
+    Are you sure you want to delete this resource?
+</div>
+
 {% endif %}
