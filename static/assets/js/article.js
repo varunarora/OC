@@ -161,8 +161,20 @@ OC.article = {
 
         imgWrapper.insertAfter(image);
 
-        if (resizeImage){
-            image.css('width', currentWidth * 0.66);
+        // Get article area width
+        var articleWidth = $('body article').width();
+
+        // Get the width in case the image were 'scaled down'
+        var resizedWidth = currentWidth * 0.66;
+
+        // If the image is not to be resized, but is still larger than the width
+        //     of the article block OR if the image is to be resized, but the
+        //     resized image will be larger than the block anyways 
+        if ((!resizeImage && currentWidth > articleWidth) || (
+            resizeImage && resizedWidth > articleWidth)){
+            image.css('width', articleWidth - 25);
+        } else if (resizeImage){
+            image.css('width', resizedWidth);
         }
 
         image.appendTo(imgWrapper);
