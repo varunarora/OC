@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import render, redirect, HttpResponse
 from django.utils.translation import ugettext as _
 from django.conf import settings
@@ -8,17 +9,20 @@ import itertools
 
 
 def project_home(request, project_slug):
-    project = Project.objects.get(slug=project_slug)
-    # TODO(Varun): Check if this is a private project, and if it is, check
-    #     if the requestee of the page is a member of the project. If not,
-    #     have a flag that blocks the page contents from being listed, or has
-    #     an alternative view.
-    context = {
-        'title': project.title + ' &lsaquo; OpenCurriculum',
-        'project': project
-    }
-    #return render(request, 'project/project.html', context)
-    return redirect('projects:project_browse', project_slug=project_slug)
+    try:
+        project = Project.objects.get(slug=project_slug)
+        # TODO(Varun): Check if this is a private project, and if it is, check
+        #     if the requestee of the page is a member of the project. If not,
+        #     have a flag that blocks the page contents from being listed, or has
+        #     an alternative view.
+        context = {
+            'title': project.title + ' &lsaquo; OpenCurriculum',
+            'project': project
+        }
+        #return render(request, 'project/project.html', context)
+        return redirect('projects:project_browse', project_slug=project_slug)
+    except:
+        raise Http404
 
 
 def launch(request):
@@ -139,27 +143,36 @@ def _set_cover_picture(project, project_form):
 
 
 def members(request, project_slug):
-    project = Project.objects.get(slug=project_slug)
-    context = {
-        'project': project,
-        'title': (_(settings.STRINGS['projects']['MEMBERS_TITLE']) +
-                  ' &lsaquo; ' + project.title)
-    }
-    return render(request, 'project/members.html', context)
+    try:
+        project = Project.objects.get(slug=project_slug)
+        context = {
+            'project': project,
+            'title': (_(settings.STRINGS['projects']['MEMBERS_TITLE']) +
+                      ' &lsaquo; ' + project.title)
+        }
+        return render(request, 'project/members.html', context)
+    except:
+        raise Http404
 
 
 def about(request, project_slug):
-    project = Project.objects.get(slug=project_slug)
-    context = {
-        'project': project,
-        'title': (_(settings.STRINGS['projects']['ABOUT_TITLE']) +
-                  ' &lsaquo; ' + project.title)
-    }
-    return render(request, 'project/about.html', context)
+    try:
+        project = Project.objects.get(slug=project_slug)
+        context = {
+            'project': project,
+            'title': (_(settings.STRINGS['projects']['ABOUT_TITLE']) +
+                      ' &lsaquo; ' + project.title)
+        }
+        return render(request, 'project/about.html', context)
+    except:
+        raise Http404
 
 
 def browse(request, project_slug):
-    project = Project.objects.get(slug=project_slug)
+    try:
+        project = Project.objects.get(slug=project_slug)
+    except:
+        raise Http404
 
     # Get the root collection of the project.
     root_collection = project.collection
@@ -174,7 +187,7 @@ def browse(request, project_slug):
 
     context = {
         'project': project,
-        'assets': root_assets, 'collections': child_collections,
+        'resources': root_assets.all, 'collections': child_collections,
         'collection': root_collection,
         'browse_tree': browse_tree,
         'title': (_(settings.STRINGS['projects']['BROWSE_TITLE']) +
