@@ -27,6 +27,7 @@ def view_resource(request, resource_id):
         ObjectDoesNotExist: Error when resource cannot be found in the database.
     """
     from django.core.exceptions import ObjectDoesNotExist
+
     try:
         # Fetch the resource from its ID using the QuerySet API.
         resource = Resource.objects.get(pk=resource_id)
@@ -348,9 +349,9 @@ def fp_upload(request):
     # And remove them from the copy.
     post_data = request.POST.copy()
 
-    user_id = post_data['user']
-    project_id = post_data.get('project', None)
-    collection_id = post_data.get('collection', None)
+    user_id = post_data['user_id']
+    project_id = post_data.get('project_id', None)
+    collection_id = post_data.get('collection_id', None)
 
     del post_data['user_id']
 
@@ -683,28 +684,6 @@ def _apply_additional_collection_slug(slug, depth, collection, content_type):
         return attempted_slug
     else:
         return _apply_additional_collection_slug(slug, depth + 1, collection, content_type)
-
-
-def file_upload(request):
-    if request.method == "POST":
-        from forms import UploadResource
-        form = UploadResource(request.POST, request.FILES)
-
-        (user, collection) = _get_user_collection(request)
-
-        if form.is_valid():
-            # Get the Project ID / User ID & Collection name from the URL / form
-
-            new_resource = create_resource(request.FILES['file'], user, collection)
-
-        return HttpResponse(json.dumps(
-            {
-                new_resource.id: new_resource.file.name
-            }
-        ), 200, content_type="application/json")
-    else:
-        return HttpResponse(json.dumps(
-            {'status': 'false'}), 401, content_type="application/json")
 
 
 def article_center_registration(request):
