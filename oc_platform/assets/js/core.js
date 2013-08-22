@@ -647,6 +647,9 @@ var OC = {
     },
 
     initRegistrationForm: function() {
+        // Setup tipsy info on username and password
+        $('#signup-form input[title]').tipsy({trigger: 'focus', gravity: 'w'});
+
         $(OC.config.registration.ToS).change(function () {
             $('#' + OC.config.registration.signUpButtonID).toggleClass(
                 'disabled');

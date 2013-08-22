@@ -30,8 +30,8 @@
 				<tr><td>First name*</td><td class="field"><input type="text" name="first_name" placeholder="First name" value="{{ form.first_name }}"><div id="first-name-error" class="form-error">{{ user_form.first_name.errors }}</div></td></tr>
 				<tr><td>Last name*</td><td class="field"><input type="text" name="last_name" placeholder="Last name" value="{{ form.last_name }}"><div id="last-name-error" class="form-error">{{ user_form.last_name.errors }}</div></td></tr>
 				<tr><td>Email address*</td><td class="field"><input type="text" name="email" placeholder="Email address" value="{{ form.email }}"><div id="email-error" class="form-error">{{ user_form.email.errors }}</div></td></tr>
-				<tr><td>Username*</td><td class="field"><input type="text" name="username" placeholder="Username" value="{{ form.username }}"><div id="username-error" class="form-error">{{ user_form.username.errors }}</div></td></tr>
-				<tr class="social-login-hide"><td>Password*</td><td class="field"><input type="password" name="password"><div id="password-error" class="form-error">{{ user_form.password.errors }}</div></td></tr>
+				<tr><td>Username*</td><td class="field"><input type="text" name="username" placeholder="Username" value="{{ form.username }}" title="Username should be all lowercase, and must only have letters and digits and/or underscores."><div id="username-error" class="form-error">{{ user_form.username.errors }}</div></td></tr>
+				<tr class="social-login-hide"><td>Password*</td><td class="field"><input type="password" name="password" title="Password must contain at least 6 characters, with atleast one lowercase and one uppercase character and atleast one digit or symbol."><div id="password-error" class="form-error">{{ user_form.password.errors }}</div></td></tr>
 				<tr class="social-login-hide"><td>Confirm Password*</td><td class="field"><input type="password" name="password2"></td></tr>
 				<tr><td>Date of birth*</td><td class="field">
 						<select name="dob_month" placeholder="Month">
