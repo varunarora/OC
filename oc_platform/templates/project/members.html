@@ -3,8 +3,8 @@
 
 <div class="center-stage">
     <div class="panel-left" id="fill-panel">
-        <aside id="support">
-        </aside>
+        <!--<aside id="support">
+        </aside>-->
     </div>
     <div class="panel-right" id="key-panel">
         <h3>Members</h3>
@@ -21,26 +21,33 @@
         {% for member in project.members.all %}
             <div class="member">
                 <div class="member-info">
-                    <div class="member-photo">
-                        <img src="{{ MEDIA_URL }}{{ member.get_profile.profile_pic.name }}" />
+                    <div class="member-photo" style="background-image: url('{{ MEDIA_URL }}{{ member.get_profile.profile_pic.name }}');">
                     </div>
                     <div class="member-description">
                         <a href="{% url user:user_profile username=member.username %}">{{ member.get_full_name }}</a>
+                        {% if member in project.admins.all %}<span class="admin-label">ADMINISTRATOR</span>{% endif %}
                     </div>
                 </div>
                 <div class="member-actions">
-                {% if member in project.admins.all and member != user %}
-                    <form>
-                        <input type="hidden" name="user_id" value="{{ member.id }}" />
-                        <input type="hidden" name="project_id" value="{{ project.id }}" />
-                        <button class="btn dull-button admin-toggle remove-admin">Remove admin</button>
-                    </form>
-                {% else %}
-                    <form>
-                        <input type="hidden" name="user_id" value="{{ member.id }}" />
-                        <input type="hidden" name="project_id" value="{{ project.id }}" />
-                        <button class="btn dull-button admin-toggle make-admin">Make admin</button>
-                    </form>
+                {% if user in project.members.all %}
+                    {% if member in project.admins.all %}
+                        {% if member != user %}
+                        <form>
+                            <input type="hidden" name="user_id" value="{{ member.id }}" />
+                            <input type="hidden" name="project_id" value="{{ project.id }}" />
+                            <button class="btn dull-button admin-toggle remove-admin">Remove admin</button>
+                        </form>
+                        {% endif %}
+                    {% else %}
+                        <form>
+                            <input type="hidden" name="user_id" value="{{ member.id }}" />
+                            <input type="hidden" name="project_id" value="{{ project.id }}" />
+                            <button class="btn dull-button admin-toggle make-admin">Make admin</button>
+                        </form>
+                    {% endif %}
+                    {% if user in project.admins.all %}
+                        <span class="delete-member delete-button" id="project-{{ project.id }}-user-{{ member.id }}" title="Remove member"></span>
+                    {% endif %}
                 {% endif %}
                 </div>
             </div>
@@ -50,4 +57,5 @@
     </div>
 </div>
 
+{% include 'project/footer.html' %}
 {% include 'partials/footer.html' %}
