@@ -13,7 +13,11 @@
         </nav>
     </div>
     <div id="key-panel" class="panel-right">
+        {% if resources or collections %}
         {% include 'partials/resources-collections-listing.html' with host='project' %}
+        {% else %}
+        Sorry, there is nothing in this collection.
+        {% endif %}
     </div>
 </div>
 

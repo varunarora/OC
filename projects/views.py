@@ -279,7 +279,7 @@ def list_collection(request, project_slug, collection_slug):
 
     context = {
         'project': project,
-        'assets': root_assets, 'collections': child_collections,
+        'resources': root_assets.all(), 'collections': child_collections,
         'collection': collection,
         'browse_tree': browse_tree,
         # TODO(Varun): Make this a custom title.
