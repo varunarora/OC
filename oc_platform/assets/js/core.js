@@ -1127,7 +1127,7 @@ var OC = {
         });
     },
 
-    bindDeleteHandler: function(){
+    bindDeleteResourceHandler: function(){
         $('.profile-resource-delete, .project-resource-delete').click(function(event){
             var deleteElement = $(this);
             // NOTE(Varun): Given the ID of the resource is of the format
@@ -1144,11 +1144,49 @@ var OC = {
                             function(response){
                                 // Hide the resource
                                 if (response.status == 'true'){
-                                    $(deleteElement).parent().fadeOut();
+                                    $(deleteElement).parents('.resource-collection-item').fadeOut();
                                 }
                                 else {
                                     OC.popup(
                                         'Sorry, the resource could not be deleted. Please try again later.');
+                                }
+                            },
+                        'json');
+                    },
+                    Cancel: function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+    },
+
+    bindDeleteCollectionHandler: function(){
+        $('.profile-collection-delete, .project-collection-delete').click(function(event){
+            var deleteElement = $(this);
+            // NOTE(Varun): Given the ID of the resource is of the format
+            //     'resource-x', where x is the ID as stored by the server
+            var collectionID = deleteElement.attr('id').substring(11);
+            $('.delete-collection-dialog').dialog({
+                modal: true,
+                open: false,
+                width: 500,
+                buttons: {
+                    'Yes, delete': function () {
+                        $(this).dialog("close");
+                        $.post('/resources/delete-collection/' + collectionID  + '/',
+                            function(response){
+                                // Hide the resource
+                                if (response.status == 'true'){
+                                    $(deleteElement).parents('.resource-collection-item').fadeOut();
+                                }
+                                else {
+                                    OC.popup(
+                                        'Sorry, the collection could not be deleted. Please try again later.');
                                 }
                             },
                         'json');
@@ -1300,7 +1338,9 @@ jQuery(document).ready(function ($) {
 
     OC.initCreateCollection();
 
-    OC.bindDeleteHandler();
+    OC.bindDeleteResourceHandler();
+
+    OC.bindDeleteCollectionHandler();
 
     OC.initCollectionsTree();
 

@@ -588,6 +588,39 @@ def delete_resource(request, resource_id):
             {'status': 'false'}), 401, content_type="application/json")
 
 
+def delete_collection(request, collection_id):
+    try:
+        collection = Collection.objects.get(pk=collection_id)
+        
+        # TODO(Varun): Delete all child collections & resources
+
+        project_permissions = False
+        (collection_root_type, collection_root) = get_collection_root(collection)
+        if collection_root_type.name == 'project':
+            from projects.models import Project
+            project = Project.objects.get(pk=collection_root.id)
+            if request.user in project.admins.all():
+                project_permissions = True
+
+        if request.user != collection.creator and not project_permissions:
+            return HttpResponse(json.dumps(
+                {'status': 'false'}), 403, content_type="application/json")
+        
+        collection.delete()
+        return HttpResponse(json.dumps(
+            {'status': 'true'}), 200, content_type="application/json")
+    except:
+        return HttpResponse(json.dumps(
+            {'status': 'false'}), 401, content_type="application/json")
+
+
+def get_collection_root(collection):
+    if collection.host_type.name != 'collection':
+        return (collection.host_type, collection.host)
+    else:
+        return get_collection_root(collection.host)
+
+
 def new_project_collection(request, project_slug):
     collection_slug = request.POST.get('parent_collection')
     collection = Collection.objects.get(slug=collection_slug)

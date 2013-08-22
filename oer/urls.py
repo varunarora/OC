@@ -15,6 +15,7 @@ urlpatterns = patterns(
 
     # Resources API
     url(r'^delete-resource/(?P<resource_id>.+)/', views.delete_resource, name='delete_resource'),
+    url(r'^delete-collection/(?P<collection_id>.+)/', views.delete_collection, name='delete_collection'),
 
     url(r'^(?P<resource_id>\d+)/$', views.view_resource, name='read'),
 

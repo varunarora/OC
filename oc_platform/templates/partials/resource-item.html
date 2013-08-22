@@ -1,4 +1,4 @@
-<div class="{{ host }}-browse-item {{ resource.type }}-resource">
+<div class="{{ host }}-browse-item resource-collection-item {{ resource.type }}-resource">
     <a href="{% url resource:read resource_id=resource.id %}">{{ resource }} <span class="project-browse-item-date">{{ resource.created|date:"M nS, 'y P"}}</span>
-    {% if user == resource.user %}<div class="{{ host }}-resource-delete" id="resource-{{ resource.id }}"></div>{% endif %}</a>
+    <div class="resource-collection-actions">{% if user == resource.user %}<div class="{{ host }}-resource-delete" id="resource-{{ resource.id }}"></div>{% endif %}</div></a>
 </div>

@@ -2,7 +2,7 @@
 <div class="{{ host }}-resources-added">
     <div class="{{ host }}-collections-added-list">
         {% for collection_item in collections %}
-        <div class="project-browse-item directory">
+        <div class="{{ host }}-browse-item resource-collection-item directory">
         {% if collection_item.visibility == 'public' %}
             {% include 'partials/collection-item.html' %}
         {% elif host == 'profile' %}
@@ -36,6 +36,10 @@
 
 <div class="delete-resource-dialog dialog" title="Delete resource">
     Are you sure you want to delete this resource?
+</div>
+
+<div class="delete-collection-dialog dialog" title="Delete resource">
+    Are you sure you want to delete this collection? This will delete all the collections and resources within this collection
 </div>
 
 {% endif %}
