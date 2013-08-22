@@ -490,11 +490,11 @@ def fp_submit(request):
         post_data = request.POST.copy()
 
         del post_data["csrfmiddlewaretoken"]
-        del post_data['user_id']
+        del post_data['user']
         if project_id:
-            del post_data['project_id']
+            del post_data['project']
         if collection_id:
-            del post_data['collection_id']
+            del post_data['collection']
 
         try:
             for id in post_data:
@@ -898,6 +898,31 @@ def _apply_additional_collection_slug(slug, depth, collection, content_type):
         return attempted_slug
     else:
         return _apply_additional_collection_slug(slug, depth + 1, collection, content_type)
+
+
+def file_upload(request):
+    if request.method == "POST":
+        from forms import UploadResource
+        form = UploadResource(request.POST, request.FILES)
+
+        user_id = request.POST.get('user', None)
+        project_id = request.POST.get('project', None)
+        collection_id = request.POST.get('collection', None)
+
+        collection = get_collection(user_id, project_id, collection_id)
+
+        if form.is_valid():
+            # Get the Project ID / User ID & Collection name from the URL / form
+            new_resource = create_resource(request.FILES['file'], request.user, collection)
+
+        return HttpResponse(json.dumps(
+            {
+                new_resource.id: new_resource.file.name
+            }
+        ), 200, content_type="application/json")
+    else:
+        return HttpResponse(json.dumps(
+            {'status': 'false'}), 401, content_type="application/json")
 
 
 def article_center_registration(request):
