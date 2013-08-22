@@ -1083,12 +1083,18 @@ textarea[name=objectives]
 		.member-photo
 			float: left
 			margin-right: 16px
+			width: 60px
+			height: 60px
+			background-position: center center
 
 		.member-description
 			float: left
 
 	.member-actions
 		float: right
+
+		form
+			float: left
 
 /* jQuery UI stuff */
 
@@ -1194,6 +1200,9 @@ form#contributor-registration
 	background-image: url('../images/upload/upload-background.png')
 	background-position: center center
 	background-repeat: no-repeat
+	overflow: auto
+	position: relative
+	z-index: 2
 
 .upload-drag-drop-message
 	color: #BCBCBC
@@ -1230,6 +1239,7 @@ input.manual-upload
 				width: 100%
 				cursor: text
 				@include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
+				background-color: #fff
 
 		.dz-size
 			padding-top: 4px
@@ -1243,18 +1253,18 @@ input.manual-upload
 		display: none
 
 	.dz-progress
-		padding-top: 4px
 		background-color: #bcbcbc
 		@include border-radius(4px)
 		float: left
 		height: 20px
 		margin-left: 10px
 		width: 100px
+		margin-top: 4px
 
 		.dz-upload
 			background-color: #557799
 			padding-top: 4px
-			height: 20px
+			height: 16px
 			float: left
 			@include border-radius(4px)
 
@@ -1647,7 +1657,7 @@ aside#support.teacher-contributor-invite
 			&:hover
 				background-image: url('../images/social-home-hover.png')
 
-.add-video-inputs, .add-url-inputs
+.add-video-inputs, .add-url-inputs, .add-attachment-inputs
 
 	margin-top: 20px
 
@@ -1691,9 +1701,9 @@ aside#support.teacher-contributor-invite
 
 		.project-browse-item-visibility, .profile-browse-item-visibility
 			display: inline-block
-			float: right
-			height: 12px
-			width: 12px
+			float: left
+			height: 14px
+			width: 14px
 
 			&.visibility-public
 				background-image: url('../images/social-studies.png')
@@ -1729,16 +1739,18 @@ aside#support.teacher-contributor-invite
 		a
 			background-image: url("../images/document.png")
 
-	.profile-resource-delete, .project-resource-delete
+	.profile-resource-delete, .project-resource-delete,
+	.profile-collection-delete, .project-collection-delete
 		width: 14px
 		height: 14px
 		display: inline-block
-		float: right
+		float: left
 		cursor: pointer		
 		background-image: url('../images/delete-resource.png')
 		background-repeat: no-repeat
 		background-position: center center
 		border: 1px solid #ffffff
+		margin-left: 4px
 
 		&:hover
 			background-color: #efefef
@@ -1746,7 +1758,8 @@ aside#support.teacher-contributor-invite
 
 	&:hover
 
-		.profile-resource-delete, .project-resource-delete
+		.profile-resource-delete, .project-resource-delete,
+		.profile-collection-delete, .project-collection-delete
 			background-image: url('../images/delete-resource-hover.png')
 
 .projects-listing
@@ -1809,6 +1822,9 @@ table.reset-password-table
 		border: 1px solid #F0C36D
 		@include border-radius(4px)
 
+.login-messages-wrapper
+	margin-top: 10px
+
 .resource-panel
 	padding-top: 10px
 
@@ -1837,3 +1853,32 @@ table.reset-password-table
 
 .resource-form-error
 	color: #B94A48
+
+.resource-collection-actions
+	float: right
+
+.delete-button
+	width: 26px
+	height: 36px
+	display: inline-block
+	background-image: url('../images/delete-resource.png')
+	background-position: center center
+	background-repeat: no-repeat
+	float: left
+	cursor: pointer
+
+	&:hover
+		background-image: url('../images/delete-resource-hover.png')
+		background-color: #efefef
+
+.delete-member
+	margin-left: 4px
+	height: 30px
+
+.admin-label
+	padding: 4px 8px
+	@include border-radius(2px)
+	background-color: #B6C3DB
+	font-size: 0.8em
+	margin-left: 6px
+	color: $light-font
