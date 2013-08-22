@@ -53,6 +53,7 @@ class Collection(models.Model):
     visibility = models.CharField(max_length=256)
     changed = models.DateTimeField(auto_now=True, editable=False)
     slug = models.SlugField(max_length=256)
+    creator = models.ForeignKey(User)
 
     def __unicode__(self):
         return self.title

@@ -891,6 +891,7 @@ def new_project_collection(request, project_slug):
     new_collection.visibility = request.POST.get('collection_visibility')
     new_collection.slug = _get_fresh_collection_slug(
         request.POST.get('new_collection_name'), collection, collection_content_type)
+    new_collection.creator = request.user    
     new_collection.save()
 
     # TODO(Varun):Set Django message on creation of collection
@@ -927,6 +928,7 @@ def new_user_collection(request, username):
     new_collection.visibility = request.POST.get('collection_visibility')
     new_collection.slug = _get_fresh_collection_slug(
         request.POST.get('new_collection_name'), collection, collection_content_type)
+    new_collection.creator = user
     new_collection.save()
 
     # TODO(Varun):Set Django message on creation of collection

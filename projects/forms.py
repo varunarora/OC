@@ -16,7 +16,8 @@ class ProjectForm(ModelForm):
             title=title + "_root",
             owner=user,
             visibility=request.get('visibility'),
-            slug=slugify(title)
+            slug=slugify(title),
+            creator=user
         )
         root_collection.save()
 

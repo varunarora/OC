@@ -201,7 +201,8 @@ class NewUserProfileForm(ModelForm):
                 title=new_user.username + "_root",
                 host=new_user,
                 visibility='public',
-                slug=new_user.username
+                slug=new_user.username,
+                creator=new_user
             )
             root_collection.save()
 
