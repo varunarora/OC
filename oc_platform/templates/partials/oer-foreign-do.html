@@ -1,5 +1,8 @@
 <div class="article-actions">
 	<ul>
+		{% if user == resource.user %}
+        <li class="edit-action"><a href="edit/"><span class="icon"></span>Edit</a></li>
+        {% endif %}
 		<li class="share-action"><a href=""><span class="icon"></span>Share <span class="horizontal-caret-up breadcrumb-caret"></span></a></li>
         {% include 'partials/share.html' %}
 	</ul>
