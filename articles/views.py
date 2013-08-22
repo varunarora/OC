@@ -507,32 +507,35 @@ def read_article_revision(request, revision):
         An HttpResponse object which can render the flushed article revision
         along with its comments.
     """
-    # Fetch the unique article revision with this ID as its primary key.
-    articleRevision = ArticleRevision.objects.get(pk=revision)
+    try:
+        # Fetch the unique article revision with this ID as its primary key.
+        articleRevision = ArticleRevision.objects.get(pk=revision)
 
-    # Fetch cached revision view and breadcrumb
-    ar = fetch_cached_article_revision(articleRevision)
-    breadcrumb = fetch_cached_breadcrumb(articleRevision)
+        # Fetch cached revision view and breadcrumb
+        ar = fetch_cached_article_revision(articleRevision)
+        breadcrumb = fetch_cached_breadcrumb(articleRevision)
 
-    # Construct the page tiel from the breadcrumb
-    title = _get_title_from_breadcrumb(breadcrumb, articleRevision)
+        # Construct the page tiel from the breadcrumb
+        title = _get_title_from_breadcrumb(breadcrumb, articleRevision)
 
-    breadcrumb.reverse()
-    breadcrumb.pop()
+        breadcrumb.reverse()
+        breadcrumb.pop()
 
-    # Fetch all the comments associated with this articlle revision, and sort
-    #     them in reverse order of their creation timestan[]
-    from django.contrib.contenttypes.models import ContentType
-    articleRevision_ct = ContentType.objects.get_for_model(ArticleRevision)
-    comments = Comment.objects.filter(
-        parent_id=ar.id, parent_type=articleRevision_ct).order_by('-created')
+        # Fetch all the comments associated with this articlle revision, and sort
+        #     them in reverse order of their creation timestan[]
+        from django.contrib.contenttypes.models import ContentType
+        articleRevision_ct = ContentType.objects.get_for_model(ArticleRevision)
+        comments = Comment.objects.filter(
+            parent_id=ar.id, parent_type=articleRevision_ct).order_by('-created')
 
-    context = {
-        'article': ar, 'breadcrumb': breadcrumb,
-        'title': '[#' + str(ar.id) + '] ' + title,
-        'comments': comments, 'content_type': articleRevision_ct
-    }
-    return render(request, 'article-revision.html', context)
+        context = {
+            'article': ar, 'breadcrumb': breadcrumb,
+            'title': '[#' + str(ar.id) + '] ' + title,
+            'comments': comments, 'content_type': articleRevision_ct
+        }
+        return render(request, 'article-revision.html', context)
+    except:
+        raise Http404
 
 
 def get_breadcrumb(category):
@@ -694,7 +697,7 @@ def category_catalog(request, category):
         setBreadcrumb.pop()
         setBreadcrumb.reverse()
 
-        # Iterate through the reversed breadcrumb. amd append the category slug
+        # Iterate through the reversed breadcrumb. and append the category slug
         # HACK(Varun): So dirty. So hackish. This is not good
         newSlug = ""
         for bc_category in setBreadcrumb:
@@ -760,7 +763,8 @@ def catalog(request):
 
     articles = CatalogCategorySet()
     articles.categories = []
-    articles.resources = Resource.objects.order_by('views')[:8]
+    articles.resources = Resource.objects.filter(
+        visibility='public').order_by('-views')[:8]
 
     for category in page_categories:
         catalog_category = CatalogCategory()
