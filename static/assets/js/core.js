@@ -282,7 +282,7 @@ var OC = {
     },
 
     initCategoryLiveFilter: function(){
-        $(OC.config.catalog.filterInput).liveUpdate(
+        $(OC.config.catalog.filterInput).fastLiveFilter(
             OC.config.catalog.filterList).focus();
     },
 
@@ -1453,45 +1453,61 @@ jQuery.fn.selectRange = function (start, end) {
 };
 
 /**
-    Live search filter written by the great John Resig, himself. See
-        http://ejohn.org/blog/jquery-livesearch/
-*/
-jQuery.fn.liveUpdate = function (list) {
+ * fastLiveFilter jQuery plugin 1.0.3
+ * 
+ * Copyright (c) 2011, Anthony Bush
+ * License: <http://www.opensource.org/licenses/bsd-license.php>
+ * Project Website: http://anthonybush.com/projects/jquery_fast_live_filter/
+ **/
+
+jQuery.fn.fastLiveFilter = function(list, options) {
+    // Options: input, list, timeout, callback
+    options = options || {};
     list = jQuery(list);
-
-    if (list.length) {
-        var rows = list.children('li'),
-            cache = rows.map(function () {
-                return this.innerHTML.toLowerCase();
-            });
-        this
-            .keyup(filter).keyup()
-            .parents('form').submit(function () {
-                return false;
-            });
-    }
-
-    return this;
-
-    function filter() {
-        var term = jQuery.trim(jQuery(this).val().toLowerCase()), scores = [];
-
-        if (!term) {
-            rows.show();
-        } else {
-            rows.hide();
-
-            cache.each(function(i){
-                var score = this.score(term);
-                if (score > 0) { scores.push([score, i]); }
-            });
-
-            jQuery.each(
-                scores.sort(function(a, b){return b[0] - a[0];}), function(){
-                jQuery(rows[ this[1] ]).show();
-            });
+    var input = this;
+    var timeout = options.timeout || 0;
+    var callback = options.callback || function() {};
+    
+    var keyTimeout;
+    
+    // NOTE: because we cache lis & len here, users would need to re-init the plugin
+    // if they modify the list in the DOM later.  This doesn't give us that much speed
+    // boost, so perhaps it's not worth putting it here.
+    var lis = list.children();
+    var len = lis.length;
+    var oldDisplay = len > 0 ? lis[0].style.display : "block";
+    callback(len); // do a one-time callback on initialization to make sure everything's in sync
+    
+    input.change(function() {
+        // var startTime = new Date().getTime();
+        var filter = input.val().toLowerCase();
+        var li;
+        var numShown = 0;
+        for (var i = 0; i < len; i++) {
+            li = lis[i];
+            if ((li.textContent || li.innerText || "").toLowerCase().indexOf(filter) >= 0) {
+                if (li.style.display == "none") {
+                    li.style.display = oldDisplay;
+                }
+                numShown++;
+            } else {
+                if (li.style.display != "none") {
+                    li.style.display = "none";
+                }
+            }
         }
-    }
+        callback(numShown);
+        // var endTime = new Date().getTime();
+        // console.log('Search for ' + filter + ' took: ' + (endTime - startTime) + ' (' + numShown + ' results)');
+        return false;
+    }).keydown(function() {
+        // TODO: one point of improvement could be in here: currently the change event is
+        // invoked even if a change does not occur (e.g. by pressing a modifier key or
+        // something)
+        clearTimeout(keyTimeout);
+        keyTimeout = setTimeout(function() { input.change(); }, timeout);
+    });
+    return this; // maintain jQuery chainability
 };
 
 /* Global functions that can't be replaced with modules */
