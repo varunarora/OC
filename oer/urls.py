@@ -17,6 +17,7 @@ urlpatterns = patterns(
     url(r'^delete-resource/(?P<resource_id>.+)/', views.delete_resource, name='delete_resource'),
     url(r'^delete-collection/(?P<collection_id>.+)/', views.delete_collection, name='delete_collection'),
 
+    url(r'^(?P<resource_id>\d+)/edit/$', views.edit_resource, name='edit_resource'),
     url(r'^(?P<resource_id>\d+)/$', views.view_resource, name='read'),
 
     url(r'^$', views.resource_center, name='resource_center'),

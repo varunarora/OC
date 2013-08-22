@@ -54,7 +54,7 @@
                 <div class="edit-dropped show-dropped">
                     <ul class="tagit">
                         {% if original.tags %}
-                        {% for tag in original.tags %}
+                        {% for tag in original.tags.all %}
                         <li>{{ tag }}</li>
                         {% endfor %}
                         {% endif %}                   

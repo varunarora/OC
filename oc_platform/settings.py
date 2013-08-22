@@ -331,7 +331,10 @@ STRINGS = {
         'UPLOAD_TITLE': 'Upload files',
         'ADD_VIDEO_TITLE': 'Add video',
         'ADD_URL_TITLE': 'Add website URL',
-        'NEW_DOCUMENT_TITLE': 'New document'
+        'NEW_DOCUMENT_TITLE': 'New document',
+        'EDIT_VIDEO_TITLE': 'Edit video',
+        'EDIT_URL_TITLE': 'Edit website URL',
+        'EDIT_DOCUMENT_TITLE': 'Edit document'
     },
     'article_center': {
         'INTRODUCTION_TITLE': 'Hi - nice to meet you!',

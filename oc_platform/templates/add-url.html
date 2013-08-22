@@ -2,7 +2,11 @@
 
 <div class="center-stage">
     <div id="key-panel" class="panel-left">
+        {% if act == 'add' %}
         <h2>Add link</h2>
+        {% else %}
+        <h2>Edit link</h2>
+        {% endif %}
         <form method="POST">
             {% csrf_token %}
             {% include 'partials/resource-meta.html' %}

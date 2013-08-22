@@ -189,14 +189,16 @@ def _prepare_add_resource_context(request):
         'user': user,
         'collection': collection,
         'licenses': licenses,
-        'title_extension': title_extension
+        'title_extension': title_extension,
+        'act': 'add'
     }
 
 
 def build_return_resource_form_context(request, form, form_context):
     # Preserve field inputs from previous form submission.
     form_fields_to_return = [
-        'title', 'url', 'visibility', 'body_markdown', 'tags', 'license'
+        'title', 'url', 'visibility', 'body_markdown', 'tags', 'license',
+        'project_id', 'collection_id', 'type', 'user', 'cost'
     ]
 
     import oc_platform.FormUtilities as fu
@@ -205,9 +207,12 @@ def build_return_resource_form_context(request, form, form_context):
     # Clean for tags
     # HACK(Varun): The fu function returns a string if not a list
     try:
+        from oc_platform.ModelUtilities import DummyM2M
         original_tags = form_context['original']['tags']
         if isinstance(original_tags, basestring):
-            form_context['original']['tags'] = [original_tags]
+            form_context['original']['tags'] = DummyM2M([original_tags])
+        else:
+            form_context['original']['tags'] = DummyM2M(original_tags)
     except:
         pass
 
@@ -570,6 +575,182 @@ def redirect_to_collection(user_id, project_id=None, collection_id=None):
             return redirect('user:list_collection', username=username, collection_slug=collection.slug)
         else:            
             return redirect('user:user_profile', username=username)
+
+
+def edit_resource(request, resource_id):
+    if not request.user.is_authenticated():
+        return redirect('/?login=true&source=%s' % request.path)
+
+    from django.core.exceptions import ObjectDoesNotExist
+
+    try:
+        # Fetch the resource from its ID using the QuerySet API.
+        resource = Resource.objects.get(pk=resource_id)
+    
+        if request.user == resource.user:
+            if resource.type == 'url':
+                return edit_url(request, resource)
+            elif resource.type == 'video':
+                return edit_video(request, resource)
+            elif resource.type == 'article':
+                return edit_document(request, resource)
+            elif resource.type == 'attachment':
+                return edit_attachment(request, resource)
+        else:
+            raise PermissionDenied
+
+    except ObjectDoesNotExist:
+        raise Http404        
+
+
+def _prepare_edit_resource_context(resource):
+    # Get all licenses
+    from license.models import License
+    licenses = License.objects.all()
+
+    # Figure out if this resource belongs to a project or user profile
+    resource_collection = Collection.objects.get(resources__id=resource.id)
+    host = resource_collection.host_type.name
+
+    if resource.user.get_profile().collection == resource_collection:
+        collection = resource_collection
+    else:
+        collection = None
+
+    if host == 'project':
+        from projects.models import Project
+        project = Project.objects.get(pk=collection.host_id)
+    else:
+        project = None
+
+    return {
+        'licenses': licenses,
+        'host': host,
+        'collection': collection,
+        'project': project,
+        'act': 'edit'
+    }
+
+
+def edit_url(request, resource):
+    edit_resource_context = _prepare_edit_resource_context(resource)
+
+    form_context = {}
+    if request.method == 'POST':
+        from oer import forms
+        url_edit = forms.URLEditForm(request.POST, instance=resource)
+
+        if url_edit.is_valid():
+            url_edit.save()
+
+            # Add Django message on success of save.
+            from django.contrib import messages
+            messages.success(request, 'Link was saved succesfully.')
+
+            return redirect('resource:read', resource_id=resource.id)
+            
+            """
+            # Redirect to collection with resource, if redirected from collection
+            return redirect_to_collection(
+                resource.user_id,
+                edit_resource_context['project'].id,
+                edit_resource_context['collection'].id
+            )
+            """
+        else:
+            build_return_resource_form_context(request, url_edit, form_context)
+    else:
+        form_context['original'] = resource
+
+    context = dict({
+        'title': _(settings.STRINGS['resources']['EDIT_URL_TITLE'])}.items()
+            + form_context.items() + edit_resource_context.items())
+
+    return render(request, 'add-url.html', context)
+
+
+def edit_video(request, resource):
+    edit_resource_context = _prepare_edit_resource_context(resource)
+
+    form_context = {}
+    if request.method == 'POST':
+        from oer import forms
+        video_edit = forms.VideoEditForm(request.POST, instance=resource)
+
+        if video_edit.is_valid():
+            video_edit.save()
+
+            # Add Django message on success of save.
+            from django.contrib import messages
+            messages.success(request, 'Video was saved succesfully.')
+
+            return redirect('resource:read', resource_id=resource.id)
+        else:
+            build_return_resource_form_context(request, video_edit, form_context)
+    else:
+        form_context['original'] = resource
+
+    context = dict({
+        'title': _(settings.STRINGS['resources']['EDIT_VIDEO_TITLE'])}.items()
+            + form_context.items() + edit_resource_context.items())
+
+    return render(request, 'add-video.html', context)
+
+
+def edit_document(request, resource):
+    edit_resource_context = _prepare_edit_resource_context(resource)
+
+    form_context = {}
+    if request.method == 'POST':
+        from oer import forms
+        document_edit = forms.DocumentEditForm(request.POST, instance=resource)
+
+        if document_edit.is_valid():
+            document_edit.save()
+
+            # Add Django message on success of save.
+            from django.contrib import messages
+            messages.success(request, 'Document was saved succesfully.')
+
+            return redirect('resource:read', resource_id=resource.id)
+        else:
+            build_return_resource_form_context(request, document_edit, form_context)
+    else:
+        form_context['original'] = resource
+
+    context = dict({
+        'title': _(settings.STRINGS['resources']['EDIT_DOCUMENT_TITLE'])}.items()
+            + form_context.items() + edit_resource_context.items())
+
+    return render(request, 'document.html', context)
+
+
+def edit_attachment(request, resource):
+    edit_resource_context = _prepare_edit_resource_context(resource)
+
+    form_context = {}
+    if request.method == 'POST':
+        from oer import forms
+        attachment_edit = forms.AttachmentEditForm(request.POST, instance=resource)
+
+        if attachment_edit.is_valid():
+            attachment_edit.save()
+
+            # Add Django message on success of save.
+            from django.contrib import messages
+            messages.success(request, 'File resource was saved succesfully.')
+
+            return redirect('resource:read', resource_id=resource.id)
+        else:
+            build_return_resource_form_context(request, attachment_edit, form_context)
+    else:
+        form_context['original'] = resource
+
+    context = dict({
+        'title': _(settings.STRINGS['resources']['EDIT_DOCUMENT_TITLE'])}.items()
+            + form_context.items() + edit_resource_context.items())
+
+    return render(request, 'edit-attachment.html', context)
 
 
 def delete_resource(request, resource_id):
