@@ -154,9 +154,11 @@ OC.article = {
         var isFigure = !imageParent.hasClass('no-figure');
 
         if (isFigure) {
-            imgCaption.text("Figure " + imgNum);
+            // Some cool JS short-circuiting there
+            imgCaption.text("Figure " + imgNum + (
+                image.attr('alt') && ": " + image.attr('alt')));
         } else {
-            imgCaption.text('');
+            imgCaption.text(image.attr('alt'));
         }
 
         imgWrapper.insertAfter(image);
