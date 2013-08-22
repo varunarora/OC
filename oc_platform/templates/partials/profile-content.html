@@ -19,7 +19,7 @@
     </div>
     {% endif %}
 
-    {% if resources or edits %}
+    {% if resources or collections or edits %}
     <div class="profile-resources">
         <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Resources</h3>
 
@@ -43,7 +43,7 @@
     </div>
     {% endif %}
 
-    {% if not favorites and not resources and not edits %}
+    {% if not favorites and not resources and not edits and not collection %}
         {% if user == user_profile %}
             You haven't created any content or participated in any projects. Get started by <a href="{% url articles:catalog %}">editing articles</a>, creating / uploading a resource or project.
         {% else %}
