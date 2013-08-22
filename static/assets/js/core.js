@@ -717,7 +717,7 @@ var OC = {
                 resourceThumbnail = $('<div/>', {
                     'class': 'resource-thumbnail',
                     style: 'background-image:' +
-                        'url(\'{{ MEDIA_URL }}profile/' + response.message.user + '-profile.jpg\')'
+                        'url(' + response.message.profile_pic + ')'
                 }),
                 description = $('<div/>', { 'class': 'description' });
 
