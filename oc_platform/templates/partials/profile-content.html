@@ -6,7 +6,7 @@
             <div class="profile-contribution">
                 <span class="contribution-icon"></span>
                 <a href="{% url articles:reader category_slug=contribution.article.category.slug %}?q={{ contribution.article.slug }}&revision={{ contribution.id }}">{{ contribution.title }}</a>
-                <a href="{{ contribution.category.url }}" class="category-label">{{ contribution.article.category.title }}</a>
+                <a href="{% url articles:reader category_slug=contribution.category.url %}" class="category-label">{{ contribution.article.category.title }}</a>
             </div>
         {% endfor %}
     </div>
