@@ -347,15 +347,15 @@ $(document).ready(function() {
         }
 
         // Append the values of user, project and collection ID
-        formData.append('user_id', $(
-            'form.files-upload-rename input[name=user_id]').val());
-        if ($('form input[name=project_id]').length > 0){
-            formData.append('project_id', $(
-            'form.files-upload-rename input[name=project_id]').val());
+        formData.append('user', $(
+            'form.files-upload-rename input[name=user]').val());
+        if ($('form input[name=project]').length > 0){
+            formData.append('project', $(
+            'form.files-upload-rename input[name=project]').val());
         }
-        if ($('form input[name=collection_id]').length > 0) {
-            formData.append('collection_id', $(
-                'form.files-upload-rename input[name=collection_id]').val());
+        if ($('form input[name=collection]').length > 0) {
+            formData.append('collection', $(
+                'form.files-upload-rename input[name=collection]').val());
         }
     });
 
