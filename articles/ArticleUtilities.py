@@ -19,11 +19,11 @@ class ArticleUtilities():
 
     @staticmethod
     def urlize(breadcrumb):
-        current_parent = '/articles/'
+        current_parent = ''
 
         for cat in reversed(breadcrumb):
             if cat.title == "OpenCurriculum":
-                cat.url = '/articles'
+                cat.url = 'opencurriculum'
             else:
                 current_parent += cat.slug + '/'
                 cat.url = current_parent

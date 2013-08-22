@@ -22,7 +22,7 @@
 				<section class="breadcrumb">
 					<div class="links">
 						{% for category in breadcrumb %}
-							<a href="{{ category.url }}">{{ category.title }}</a> 
+							<a href="{% url articles:reader category_slug=category.url %}">{{ category.title }}</a> 
 							{% if not forloop.last %}
 							<span class="vertical-caret breadcrumbs-caret"></span> 
 							{% endif %}
