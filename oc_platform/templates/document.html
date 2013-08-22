@@ -24,7 +24,7 @@
                 <table>
                     <tr><td><span class="bold">License</span></td><td>
                         <select name="license">
-                            {% for license in licenses %}
+                            {% for license in licenses.all %}
                             <option value="{{ license.id }}">{{ license.title }}</option>
                             {% endfor %}
                         </select>
