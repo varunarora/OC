@@ -563,7 +563,7 @@ def authenticate(request):
             user_object = User.objects.get(email=username)
             user = authenticate(username=user_object.username, password=password)
         except:
-            pass
+            user = None
     else:
         user = authenticate(username=username, password=password)
 
