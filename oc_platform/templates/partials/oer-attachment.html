@@ -1,7 +1,7 @@
 <div class="oer-external">
 	<div id="oer-preview">
 		<div id="oer-description" class="summary-text">
-			{{ resource.body_markdown_html|safe }}
+			{{ resource.body_markdown_html|safe|default:"(No description found)" }}
 		</div>
 		<div id="oer-thumbnail">
 			<div id="thumbnail-wrapper">

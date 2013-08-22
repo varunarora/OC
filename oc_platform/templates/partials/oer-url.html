@@ -1,8 +1,12 @@
 <div class="oer-external">
 	<div id="oer-preview">
 		<div id="oer-description" class="summary-text">
+			{% if resource.url_title or resource.body %}
 			<div class="bold oer-url-title">{{ resource.url_title }}</div>
 			{{ resource.body }}
+			{% else %}
+			(No description found)
+			{% endif %}
 		</div>
 		<div id="oer-thumbnail">
 			<div id="thumbnail-wrapper">
