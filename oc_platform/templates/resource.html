@@ -5,6 +5,14 @@
 		<article>
 			<header>
 				<h2>{{ resource.title }}</h2>
+				<section class="breadcrumb">
+					{% for collection in breadcrumb %}
+					<a href="{{ collection.url }}">{{ collection.title }}</a> 
+					{% if not forloop.last %}
+					<span class="vertical-caret breadcrumbs-caret"></span> 
+					{% endif %}
+				{% endfor %}
+				</section>
 				<section id="article-do">
 					{% with obj=resource caption=resource.user.first_name|add:" "|add:resource.user.last_name %}
 						{% if resource.type == "text" %}

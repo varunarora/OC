@@ -1,5 +1,6 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -28,95 +29,166 @@ def view_resource(request, resource_id):
     """
     from django.core.exceptions import ObjectDoesNotExist
 
-    try:
-        # Fetch the resource from its ID using the QuerySet API.
-        resource = Resource.objects.get(pk=resource_id)
-        # TODO(Varun): Change this to actually get the top 5 best resources.
-        related = Resource.objects.all()[:5]
+    #try:
+    # Fetch the resource from its ID using the QuerySet API.
+    resource = Resource.objects.get(pk=resource_id)
+    # TODO(Varun): Change this to actually get the top 5 best resources.
+    related = Resource.objects.all()[:5]
 
-        # If this resource is a URL, fetch its page by making Http requests
-        #     using BeautifulSoup, and find meta tags in the DOM.
-        if resource.type == "url":
-            from BeautifulSoup import BeautifulSoup
-            from urllib import urlopen
+    # If this resource is a URL, fetch its page by making Http requests
+    #     using BeautifulSoup, and find meta tags in the DOM.
+    if resource.type == "url":
+        from BeautifulSoup import BeautifulSoup
+        from urllib import urlopen
 
-            try:
-                # Open the resource and build its DOM into a BeautifulSoup
-                #     object.
-                source = urlopen(resource.url)
-                soup = BeautifulSoup(source)
+        try:
+            # Open the resource and build its DOM into a BeautifulSoup
+            #     object.
+            source = urlopen(resource.url)
+            soup = BeautifulSoup(source)
 
-                # Extract the page title, and the description from its meta
-                #     tags in <head>
-                resource.url_title = soup.find('title').text
-                description = soup.findAll(
-                    'meta', attrs={'name': "description"}
-                )[0]
+            # Extract the page title, and the description from its meta
+            #     tags in <head>
+            resource.url_title = soup.find('title').text
+            description = soup.findAll(
+                'meta', attrs={'name': "description"}
+            )[0]
 
-                # If a description was found, set it on the resource.
-                if description:
-                    resource.body = description['content']
-            except:
-                pass
+            # If a description was found, set it on the resource.
+            if description:
+                resource.body = description['content']
+        except:
+            pass
 
-        # If the resource is a kind of attachment, format its metadata.
-        if resource.type == "attachment":
-            #TODO: Replace with |filesizeformat template tag
-            filesize = resource.file.size
-            if filesize >= 1048576:
-                resource.filesize = str(
-                    _filesizeFormat(float(filesize) / 1048576)) + " MB"
-            elif filesize >= 1024:
-                resource.filesize = str(
-                    _filesizeFormat(float(filesize) / 1024)) + " KB"
-            else:
-                resource.filesize = str(
-                    _filesizeFormat(float(filesize))) + " B"
+    # If the resource is a kind of attachment, format its metadata.
+    if resource.type == "attachment":
+        #TODO: Replace with |filesizeformat template tag
+        filesize = resource.file.size
+        if filesize >= 1048576:
+            resource.filesize = str(
+                _filesizeFormat(float(filesize) / 1048576)) + " MB"
+        elif filesize >= 1024:
+            resource.filesize = str(
+                _filesizeFormat(float(filesize) / 1024)) + " KB"
+        else:
+            resource.filesize = str(
+                _filesizeFormat(float(filesize))) + " B"
 
-            # Determine the extension of the attachment.
-            from os.path import splitext
-            name, resource.extension = splitext(resource.file.name)
+        # Determine the extension of the attachment.
+        from os.path import splitext
+        name, resource.extension = splitext(resource.file.name)
 
-        # If the resource is a video, determine whether or not it is a YouTube
-        #     Vimeo video, and obtain the video ID (as determined by the
-        #     service provider), so that it can be plugged into its player.
-        if resource.type == "video":
-            import urlparse
-            url_data = urlparse.urlparse(resource.url)
+    # If the resource is a video, determine whether or not it is a YouTube
+    #     Vimeo video, and obtain the video ID (as determined by the
+    #     service provider), so that it can be plugged into its player.
+    if resource.type == "video":
+        import urlparse
+        url_data = urlparse.urlparse(resource.url)
 
-            # Figure out the entire domain the specific hostname (eg. "vimeo")
-            domain = url_data.hostname
-            hostname = domain.split(".")[:-1]
+        # Figure out the entire domain the specific hostname (eg. "vimeo")
+        domain = url_data.hostname
+        hostname = domain.split(".")[:-1]
 
-            # In either case, use an appropriate pattern matching to obtain the
-            #     video #.
-            if "youtube" in hostname:
-                query = urlparse.parse_qs(url_data.query)
-                video = query["v"][0]
-                resource.video_tag = video
-                resource.provider = "youtube"
+        # In either case, use an appropriate pattern matching to obtain the
+        #     video #.
+        if "youtube" in hostname:
+            query = urlparse.parse_qs(url_data.query)
+            video = query["v"][0]
+            resource.video_tag = video
+            resource.provider = "youtube"
 
-            elif "vimeo" in hostname:
-                resource.video_tag = url_data.path.split('/')[1]
-                resource.provider = "vimeo"
+        elif "vimeo" in hostname:
+            resource.video_tag = url_data.path.split('/')[1]
+            resource.provider = "vimeo"
 
-        # Fetch the number of resources that have been uploaded by the user who
-        #     has created this resource.
-        userResourceCount = Resource.objects.filter(user=resource.user).count()
+    # Fetch the number of resources that have been uploaded by the user who
+    #     has created this resource.
+    userResourceCount = Resource.objects.filter(user=resource.user).count()
 
-        # Increment page views (always remains -1 based on current view).
-        Resource.objects.filter(id=resource_id).update(views=resource.views+1)
+    # Increment page views (always remains -1 based on current view).
+    Resource.objects.filter(id=resource_id).update(views=resource.views+1)
 
-        context = {
-            'resource': resource,
-            'title': resource.title + " &lsaquo; OpenCurriculum",
-            'related': related, "user_resource_count": userResourceCount,
-            'current_path': 'http://' + request.get_host() + request.get_full_path(),  # request.get_host()
-            'thumbnail': 'http://' + request.get_host() + settings.MEDIA_URL + resource.image.name
-        }
-        return render(request, 'resource.html', context)
-    except ObjectDoesNotExist:
-        raise Http404
+    # Build breadcrumb for the resource
+    collection = Collection.objects.get(resources__id=resource.id)
+    breadcrumb = build_collection_breadcrumb(collection)
+
+    context = {
+        'resource': resource,
+        'title': resource.title + " &lsaquo; OpenCurriculum",
+        'breadcrumb': breadcrumb,
+        'related': related, "user_resource_count": userResourceCount,
+        'current_path': 'http://' + request.get_host() + request.get_full_path(),  # request.get_host()
+        'thumbnail': 'http://' + request.get_host() + settings.MEDIA_URL + resource.image.name
+    }
+    return render(request, 'resource.html', context)
+    #except ObjectDoesNotExist:
+    #    raise Http404
+
+
+def build_collection_breadcrumb(collection):
+    # Get the root of this collection ('project' or 'user profile')
+    (collection_root_type, collection_root) = get_collection_root(collection)
+
+    # Create breadcrumb list
+    breadcrumb = []
+
+    while True:
+        if collection.host_type.name == 'collection':
+            breadcrumb.append(host_urlize(
+                collection, collection_root, collection_root_type))
+            collection = collection.host
+        else:
+            breadcrumb.append(host_urlize(
+                collection.host, collection_root, collection_root_type))
+            break
+
+    if collection_root_type.name == 'user profile':
+        breadcrumb[-1].title = breadcrumb[-1].user.get_full_name() + '\'s profile'
+
+    # Reverse breadcrumb and return
+    breadcrumb.reverse()
+
+    return breadcrumb
+
+
+def host_urlize(host, collection_root, collection_root_type):
+    if collection_root_type.name == 'user profile':
+        # If this collection is a descendant of the user
+        user = collection_root.user
+
+        if host == collection_root:
+            host.url = reverse(
+                'user:user_profile', kwargs={
+                    'username': user.username
+                }
+            )
+        else:
+            host.url = reverse(
+                'user:list_collection', kwargs={
+                    'username': user.username,
+                    'collection_slug': host.slug
+                }
+            )
+
+    elif collection_root_type.name == 'project':
+        # If this collection is a descendant of a project
+        project = collection_root
+
+        if host == collection_root:
+            host.url = reverse(
+                'projects:project_home', kwargs={
+                    'project_slug': project.slug
+                }
+            )
+        else:
+            host.url = reverse(
+                'projects:list_collection', kwargs={
+                    'project_slug': project.slug,
+                    'collection_slug': host.slug
+                }
+            )            
+
+    return host
 
 
 def _filesizeFormat(size):
