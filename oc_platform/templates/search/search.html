@@ -56,7 +56,7 @@
 		    			cost: 'free',
 		    			license: '{{ result.object.license }}',
 		    			type: 'article',
-		    			thumbnail: '{{ STATIC_URL }}images/thumbnails/{{ result.object.id }}-thumb.jpg'
+		    			thumbnail: '{{ MEDIA_URL }}{{ result.object.image.name }}'
 		    		});
 		    		{% endif %}
 					{% if result.content_type == "oer.resource" %}
@@ -72,7 +72,7 @@
 		    			cost: 'free',
 		    			license: '{{ result.object.license }}',
 		    			type: '{{ result.object.type }}',
-		    			thumbnail: '{{ STATIC_URL }}images/oer_thumbnails/{{ result.object.id }}-thumb.jpg'
+		    			thumbnail: '{{ MEDIA_URL }}{{ result.object.image.name }}'
 		    		});
 					{% endif %}
 					resultSet.add(result);
