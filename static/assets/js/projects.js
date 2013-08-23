@@ -28,7 +28,7 @@ OC.projects = {
                 OC.projects.deleteMemberHandler(event);
             });
         } else {
-            popup(response.message, response.title);
+            OC.popup(response.message, response.title);
         }
     },
 
@@ -44,7 +44,7 @@ OC.projects = {
             target.parents('.member').find('.member-description').append(
                 '<span class="admin-label">ADMINISTRATOR</span>');
         } else {
-            popup(response.message, response.title);
+            OC.popup(response.message, response.title);
         }
     },
 
@@ -60,7 +60,7 @@ OC.projects = {
             target.parents('.member').find(
                 '.member-description .admin-label').remove();
         } else {
-            popup(response.message, response.title);
+            OC.popup(response.message, response.title);
         }
     },
 
@@ -133,7 +133,7 @@ OC.projects = {
             var memberContainer = $(target).parents('.member');
             memberContainer.remove();
         } else {
-            popup(response.message, response.title);
+            OC.popup(response.message, response.title);
         }
     },
 
