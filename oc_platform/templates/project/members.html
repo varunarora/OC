@@ -9,12 +9,14 @@
     <div class="panel-right" id="key-panel">
         <h3>Members</h3>
 
+        {% if user in project.admins.all %}
         <form id="project-add-member">
             <input type="hidden" name="project_id" value="{{ project.id }}" />
             <label>Invite a user</label><input type="text" name="add-member" />
             <button name="add" class="btn success-button">Add</button>
             <div class="form-spinner"></div>
         </form>
+        {% endif %}
 
         <!-- If this changes, make changes to the associated JavaScript as well -->
         <div id="member-list">
