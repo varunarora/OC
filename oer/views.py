@@ -239,14 +239,17 @@ def _prepare_add_resource_context(request):
         if request.user not in project.members.all():
             raise PermissionDenied
         user = request.user
+        host = 'project'
     elif username:
         from django.contrib.auth.models import User
         user = User.objects.get(username=username)
         if request.user != user:
             raise PermissionDenied
+        host = 'user profile'
     else:
         project = None
         user = request.user
+        host = 'user profile'
 
     # Get all licenses
     from license.models import License
@@ -259,6 +262,7 @@ def _prepare_add_resource_context(request):
     return {
         'project': project,
         'user': user,
+        'host': host,
         'collection': collection,
         'licenses': licenses,
         'title_extension': title_extension,
