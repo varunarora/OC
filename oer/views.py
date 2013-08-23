@@ -684,22 +684,9 @@ def _prepare_edit_resource_context(resource):
     resource_collection = Collection.objects.get(resources__id=resource.id)
     host = resource_collection.host_type.name
 
-    if resource.user.get_profile().collection == resource_collection:
-        collection = resource_collection
-    else:
-        collection = None
-
-    if host == 'project':
-        from projects.models import Project
-        project = Project.objects.get(pk=collection.host_id)
-    else:
-        project = None
-
     return {
         'licenses': licenses,
         'host': host,
-        'collection': collection,
-        'project': project,
         'act': 'edit'
     }
 
