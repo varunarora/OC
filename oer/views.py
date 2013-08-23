@@ -430,16 +430,16 @@ def fp_upload(request):
     # And remove them from the copy.
     post_data = request.POST.copy()
 
-    user_id = post_data['user_id']
-    project_id = post_data.get('project_id', None)
-    collection_id = post_data.get('collection_id', None)
+    user_id = post_data['user']
+    project_id = post_data.get('project', None)
+    collection_id = post_data.get('collection', None)
 
-    del post_data['user_id']
+    del post_data['user']
 
     if project_id:
-        del post_data['project_id']
+        del post_data['project']
     if collection_id:
-        del post_data['collection_id']
+        del post_data['collection']
 
     collection = get_collection(user_id, project_id, collection_id)
 
@@ -475,6 +475,7 @@ def fp_upload(request):
             new_resource.title = title
             new_resource.type = 'attachment'
             new_resource.cost = default_cost
+            new_resource.visibility = 'public'
             new_resource.user_id = user_id
             new_resource.body_markdown = ''
             new_resource.file = File(static_file)

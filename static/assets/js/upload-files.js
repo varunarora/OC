@@ -76,14 +76,14 @@ OC.upload = {
             data[key] = filename;
         }
 
-        data['user_id'] = $('form input[name=user_id]').val();
+        data['user'] = $('form input[name=user]').val();
         
-        if ($('form input[name=project_id]').length > 0){
-            data['project_id'] = $('form input[name=project_id]').val();
+        if ($('form input[name=project]').length > 0){
+            data['project'] = $('form input[name=project]').val();
         }
 
-        if ($('form input[name=collection_id]').length > 0){
-            data['collection_id'] = $('form input[name=collection_id]').val();
+        if ($('form input[name=collection]').length > 0){
+            data['collection'] = $('form input[name=collection]').val();
         }
 
         $.post('/api/fpUpload/', data, OC.upload.uploadCallback, 'json');
