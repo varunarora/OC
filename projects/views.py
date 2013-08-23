@@ -423,7 +423,7 @@ def add_admin(request, project_id, user_id):
                 'id': user.id,
                 'name': user.get_full_name(),
                 'username': user.username,
-                'profile_pic': user.get_profile().profile_pic.path,
+                'profile_pic': user.get_profile().profile_pic.name
             }
         }
 
