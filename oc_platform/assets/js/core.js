@@ -722,15 +722,20 @@ var OC = {
                     style: 'background-image:' +
                         'url(' + response.message.profile_pic + ')'
                 }),
-                description = $('<div/>', { 'class': 'description' });
+                description = $('<div/>', { 'class': 'description' }),
+                commentor = $('<span/>', {'class': 'bold', 'text': response.message.name });
 
-            description.html(response.message.body);
+            description.append(commentor);
+            description.append(' on ' + response.message.created);
+            description.append(response.message.body);
 
             // Build and append the object to the document
             resourceThumbnail.appendTo(resource);
             description.appendTo(resource);
 
+            // Now empty the comment box
             comment_input.text('');
+            comment_input.val('');
 
             $('#comments').prepend(resource);
         } else {

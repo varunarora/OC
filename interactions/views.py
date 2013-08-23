@@ -17,9 +17,12 @@ def post_comment(request):
             Comment.comment_created.send(
                 sender="Comments", comment_id=comment.id)
 
+            import datetime
             serialized_comment = {
-                'user': comment.user.id,
-                'profile_pic': settings.MEDIA_URL + comment.user.get_profile.profile_pic.name,
+                'user_id': comment.user.id,
+                'name': str(comment.user.get_full_name()),
+                'created': datetime.datetime.strftime(comment.created, '%b. %d, %Y, %I:%M %P'),
+                'profile_pic': settings.MEDIA_URL + comment.user.get_profile().profile_pic.name,
                 'body': comment.body_markdown_html
             }
 
