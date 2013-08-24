@@ -12,27 +12,38 @@
     </div>
 </div>
 {% endif %}
-    {% if projects %}
-    <div class="profile-projects projects-listing">
+
+{% if edits %}
+<div class="profile-edits">
+
+    <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Drafts</h3>
+    
+    <div class="profile-edits-list">
+    {% for edit in edits %}
+        <div class="profile-edit">
+            <span class="contribution-icon"></span>
+            <a href="{% url articles:reader category_slug=edit.article.category.slug %}?q={{ edit.article.slug }}&revision={{ edit.id }}">{{ edit.title }}</a>
+            <a href="{% url articles:reader category_slug=edit.article.category.url %}" class="category-label">{{ edit.article.category.title }}</a>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if projects %}
+<div class="profile-projects">
+    <div class="projects-listing">
         <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Projects</h3>
         {% include 'partials/project-item.html' %}
     </div>
-    {% endif %}
+</div>
+{% endif %}
 
-    {% if resources or collections or edits %}
+    {% if resources or collections %}
     <div class="profile-resources">
         <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Resources</h3>
 
         {% include 'partials/resources-collections-listing.html' with host='profile' %}
-
-        {% if edits %}
-        <h4>Forks</h4>
-        {% for edit in edits %}
-        <div>
-            <a href="{% url articles:reader category_slug=edit.article.category.slug %}?q={{ edit.article.slug }}&revision={{ edit.id }}">{{ edit.created }}</a>
-        </div>
-        {% endfor %}
-        {% endif %}
 
     </div>
     {% endif %}
