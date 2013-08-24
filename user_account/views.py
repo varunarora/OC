@@ -721,11 +721,16 @@ def user_profile(request, username):
         forks = ArticleRevision.objects.filter(
             user=user.id, flag="fork").order_by("-created")
 
+        from articles.ArticleUtilities import ArticleUtilities
+        # Set URLs of the forks using its breadcrumb
+        for fork in forks:
+            fork.article.category.url = ArticleUtilities.buildBreadcrumb(
+                fork.article.category)[0].url
+
         # Get all the articles the user has submitted.
         from articles.models import ArticleRevision
         contributions = ArticleRevision.objects.filter(
             user=user.id, flag="submit").order_by("-created")
-        from articles.ArticleUtilities import ArticleUtilities
 
         # Set URLs of the category pages using its breadcrumb
         for contribution in contributions:
