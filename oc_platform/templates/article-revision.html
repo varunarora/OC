@@ -4,6 +4,7 @@
     <div id="key-panel" class="panel-left">
         <header>
             {% include 'partials/article-header.html' %}
+            {% include 'partials/article-do.html' %}
             {% if messages %}
                 {% for message in messages %}
                 <section class="revision-message">
@@ -25,6 +26,8 @@
                 <div  class="revision-user-log">
                 {% if article.log %}
                     <h4>[#{{ article.id }}] {{ article.log|safe }}</h4>
+                {% else %}
+                    <h4>[#{{ article.id }}] (no description of edits)</h4>
                 {% endif %}
                 <br/>
                 On {{ article.created }}
