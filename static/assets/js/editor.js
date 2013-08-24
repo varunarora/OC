@@ -152,7 +152,7 @@ $(function() {
         });
     });
 
-    $('article-edit-form #submission-buttons button').click(function (e) {
+    $('#article-edit-form #submission-buttons button').click(function (e) {
         var action = $(this).attr('data-action');
 
         // Populate textarea
