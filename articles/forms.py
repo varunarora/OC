@@ -3,7 +3,7 @@ from articles.models import ArticleRevision
 from oc_platform import FormUtilities
 
 
-class EditArticleForm(ModelForm):
+class NewArticleRevision(ModelForm):
     def __init__(self, request, user, article, flag):
         newRequest = request.copy()
 
@@ -23,7 +23,27 @@ class EditArticleForm(ModelForm):
         newRequest.setlist('tags', FormUtilities.get_taglist(
             newRequest.getlist('tags'), tag_category))
 
-        super(EditArticleForm, self).__init__(newRequest)
+        super(NewArticleRevision, self).__init__(newRequest)
+
+    class Meta:
+        model = ArticleRevision
+
+
+class EditArticleRevisionForm(ModelForm):
+    def __init__(self, request, instance):
+        newRequest = request.copy()
+
+        newRequest.__setitem__('log', instance.log)
+        newRequest.__setitem__('user', instance.user.id)
+        newRequest.__setitem__('article', instance.article.id)
+        newRequest.__setitem__('flag', instance.flag)
+
+        from meta.models import TagCategory
+        tag_category = TagCategory.objects.get(title='Article')
+        newRequest.setlist('tags', FormUtilities.get_taglist(
+            newRequest.getlist('tags'), tag_category))
+
+        super(EditArticleRevisionForm, self).__init__(newRequest, instance=instance)
 
     class Meta:
         model = ArticleRevision

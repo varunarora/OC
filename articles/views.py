@@ -92,7 +92,7 @@ def process_article(request, article, view, revision):
         invoked
     """
     if view == "edit":
-        return edit_article(request, article)
+        return edit_article(request, article, revision)
     elif view == "history":
         return view_article_history(request, article)
     else:
@@ -265,7 +265,7 @@ def read_article(request, article):
     return render(request, 'article.html', context)
 
 
-def edit_article(request, article):
+def edit_article(request, article, revision_id):
     """Builds editor page and also responds to revision saves/submissions.
 
     In the case of a POST request, accepts the fields and determines whether
@@ -281,8 +281,16 @@ def edit_article(request, article):
     Returns:
         The editor HttpResponse page with the article fields populated.
     """
-    # Edit the current revision of the article.
-    articleRevision = build_article_revision_view(article, article.revision)
+    if not revision_id:
+        # Edit the current revision of the article.
+        articleRevision = build_article_revision_view(article, article.revision)
+    else:
+        try:
+            # Edit the revision of the article that has been provided.
+            revision = ArticleRevision.objects.get(pk=revision_id)
+            articleRevision = build_article_revision_view(article, revision)
+        except ArticleRevision.DoesNotExist:
+            raise Http404
 
     # Build editor specific context.
     context = _prepare_edit_context(articleRevision, article)
@@ -300,12 +308,13 @@ def edit_article(request, article):
         #     do not need to create a new revision, but rather overwrite this
         #     existing revision - until we support revisioning on forked
         #     content
-        if flag == "fork" and owner == request.user.id:
+        if flag == "fork" and int(owner) == request.user.id:
             original_revision = ArticleRevision.objects.get(
-                request.POST.get('revision'))
-            article_form = forms.EditArticleForm(instance=original_revision)
+                pk=int(request.POST.get('revision')))
+            article_form = forms.EditArticleRevisionForm(
+                request.POST, instance=original_revision)
         else:
-            article_form = forms.EditArticleForm(
+            article_form = forms.NewArticleRevision(
                 request.POST, request.user, article, flag
             )
 
@@ -531,7 +540,9 @@ def read_article_revision(request, revision):
         context = {
             'article': ar, 'breadcrumb': breadcrumb,
             'title': '[#' + str(ar.id) + '] ' + title,
-            'comments': comments, 'content_type': articleRevision_ct
+            'comments': comments, 'content_type': articleRevision_ct,
+            'current_path': 'http://' + request.get_host() + request.get_full_path(),
+            'thumbnail': 'http://' + request.get_host() + settings.MEDIA_URL + articleRevision.article.image.name
         }
         return render(request, 'article-revision.html', context)
     except:
