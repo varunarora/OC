@@ -103,7 +103,7 @@ class ResourceThumbnail:
 
         responseJSON = json.loads(response.read())
 
-        return responseJSON['data']['thumbnail']['sqDefault']
+        return responseJSON['data']['thumbnail']['hqDefault']
 
     @staticmethod
     def generateURLThumbnail(resource, thumbnail):
