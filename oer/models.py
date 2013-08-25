@@ -25,6 +25,7 @@ class Resource(models.Model):
     user = models.ForeignKey(User)
     file = models.FileField(upload_to='resources', null=True, blank=True)
     image = models.ImageField(upload_to='resource_thumbnail', blank=True)
+    source = models.CharField(max_length=256, null=True, blank=True)
 
     def __unicode__(self):
         return self.title
