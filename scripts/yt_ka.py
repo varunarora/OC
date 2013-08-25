@@ -92,7 +92,7 @@ def enterDatabase(videos):
             r.title = videos[x][0]
             r.type = 'video'
             # NC-ND
-            r.license = License.objects.get(title='CC-NC-ND')
+            r.license = License.objects.get(title='CC-BY-NC-ND')
             # Get description
             if str(videos[x][1]) != '':
                 r.body_markdown = str(videos[x][1])
