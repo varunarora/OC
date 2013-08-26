@@ -39,6 +39,8 @@ var OC = {
                 first_name: 'input[name=first_name]',
                 last_name: 'input[name=last_name]',
                 location: 'input[name=location]',
+                email: 'input[name=email]',
+                username: 'input[name=username]',
                 socialLogin: '.social-login-hide',
                 profilePicture: 'input[name=profile_pic]',
                 socialFlag: 'form#signup-form input[name=social_login]',
@@ -465,6 +467,7 @@ var OC = {
 
     /*jslint nomen: true */
     expediteGLogin: function(profile) {
+        console.log(profile);
         var first_name = profile.name.givenName || "",
             last_name = profile.name.familyName || "";
 
@@ -490,6 +493,11 @@ var OC = {
         // Set the hidden field value for profile picture with the URL from gapi
         $(OC.config.registration.fields.profilePicture).attr(
             'value', profile.image.url);
+
+        // Set the user email address & username
+        $(OC.config.registration.fields.email).attr('value', profile.email);
+        $(OC.config.registration.fields.username).attr(
+            'value', profile.email.substring(0, profile.email.indexOf('@')));
 
         // Set a new hidden form item to communicate to the server that no
         //    reCaptcha verification is required
@@ -555,6 +563,15 @@ var OC = {
         if (authResult.code) {
             authResult.state = $('#session-state').attr('data-state');
 
+            // Get the user's email address from another OAuth2 request
+            var userEmail;
+            gapi.client.load('oauth2', 'v2', function(){
+                var emailRequest = gapi.client.oauth2.userinfo.get();
+                emailRequest.execute(function (profile) {
+                    userEmail = profile.email;
+                });
+            });
+
             gapi.client.load('plus', 'v1', function () {
                 var request = gapi.client.plus.people.get({'userId' : 'me'});
 
@@ -563,6 +580,9 @@ var OC = {
                         code : authResult.code,
                         state : authResult.state, gplus_id : profile.id
                     };
+
+                    // Add the user email address to the profile object
+                    profile.email = userEmail;
 
                     // Send the code to the server
                     $.ajax({
