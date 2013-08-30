@@ -1,4 +1,5 @@
 <div title="Image upload" class="dialog" id="image-upload">
+    {% if user.is_authenticated  %}
     <div class="article-image-uploader">
         <nav class="article-image-uploader-tabs">
             <ul>
@@ -20,4 +21,7 @@
             </div>
         </div>
     </div>
+    {% else %}
+    You must be logged in to upload images and add them here.
+    {% endif %}
 </div>
