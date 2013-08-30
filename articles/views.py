@@ -326,30 +326,26 @@ def edit_article(request, article, revision_id):
                 request.POST, request.user, article, flag
             )
 
-        new_revision = article_form.save(commit=False)
+        if article_form.is_valid():
+            new_revision = article_form.save(commit=False)
 
-        if action == "save" or action == "submit":
+            if action == "save" or action == "submit":
 
-            # Create a new article revision from submission
-            new_revision.save()
+                # Create a new article revision from submission
+                new_revision.save()
 
-            # Add the m2m field tags and save
-            #     Cannot do this earlier as there is no primary key associated
-            #     with the object
-            """
-            for tag in article_form.tags:
-                new_revision.tags.add(tag.id)
-            new_revision.save()
-            """
-            if action == "save":
-                return save_article(request, new_revision, article)
-            elif action == "submit":
-                return submit_article(
-                    request, new_revision, article, context['breadcrumb']
-                )
+                if action == "save":
+                    return save_article(request, new_revision, article)
+                elif action == "submit":
+                    return submit_article(
+                        request, new_revision, article, context['breadcrumb']
+                    )
 
-        elif action == "preview":
-            return preview_article(request, article_form, article)
+            elif action == "preview":
+                return preview_article(request, article_form, article)
+        else:
+            from django.http import HttpResponseBadRequest
+            return HttpResponseBadRequest()
 
     if not request.user.is_authenticated():
         context['message'] = _(settings.STRINGS['articles']['messages']['ANONYMOUS_EDITING'])
