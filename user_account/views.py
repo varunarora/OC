@@ -941,7 +941,7 @@ def contributor_introduction(request):
         }
         return render(request, 'contributor-introduction.html', context)
     else:
-        raise 404
+        raise Http404
 
 
 def reset_password(request):
