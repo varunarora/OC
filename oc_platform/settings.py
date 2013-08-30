@@ -173,6 +173,7 @@ INSTALLED_APPS = (
     'articles',
     'haystack',
     'user_account',
+    'discussions',
     'interactions',
     'projects',
     # Uncomment the next line to enable the admin:

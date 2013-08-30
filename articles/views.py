@@ -129,8 +129,12 @@ def diff_revisions(request, article, from_id, to_id):
     LINE_LENGTH = 60
     revision_compare = True
 
-    # Fetch "from" revision
-    from_revision_object = ArticleRevision.objects.get(id=from_id)
+    try:
+        # Fetch "from" revision
+        from_revision_object = ArticleRevision.objects.get(id=from_id)
+    except:
+        raise Http404
+
     from_revision = fetch_cached_article_revision(from_revision_object)
     from_revision_html = split_len(
         from_revision.body_markdown_html, LINE_LENGTH
@@ -138,8 +142,12 @@ def diff_revisions(request, article, from_id, to_id):
 
     # If there is a 'to_id' parameter provided, fetch the specific revision.
     if to_id:
-        # Fetch "to" revision
-        to_revision_object = ArticleRevision.objects.get(id=to_id)
+        try:
+            # Fetch "to" revision
+            to_revision_object = ArticleRevision.objects.get(id=to_id)
+        except:
+            raise Http404
+
         to_revision = fetch_cached_article_revision(to_revision_object)
         to_revision_html = split_len(
             to_revision.body_markdown_html, LINE_LENGTH
