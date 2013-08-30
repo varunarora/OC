@@ -554,9 +554,13 @@ def authenticate(request):
         redirect_to = False
 
     from django.contrib.auth import authenticate, login
-
-    username = request.POST['username']
-    password = request.POST['password']
+    
+    try:
+        username = request.POST['username']
+        password = request.POST['password']
+    except:
+        from django.http import HttpResponseBadRequest
+        return HttpResponseBadRequest()
 
     if '@' in username:
         try:
