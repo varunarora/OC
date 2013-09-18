@@ -21,7 +21,7 @@ def upload_image(request):
             new_image.save()
 
             from django.conf import settings
-            url = settings.STATIC_URL + new_image.path.name
+            url = settings.MEDIA_URL + new_image.path.name
 
             response = {
                 'status': 'true',
