@@ -325,6 +325,7 @@ def confirm_account(request):
 
     except:
         user_found = False
+        generated_confirmation_code = None
 
     # TODO(Varun); Account for case where account is already active.
 
