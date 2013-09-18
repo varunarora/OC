@@ -46,7 +46,7 @@
         <h3>{{ collection.title }}</h3>
         <nav class="collections-navigation">
             {% load project_tags %}
-            {{ browse_tree|user_navigation_tree|safe }}
+            {{ browse_tree|user_navigation_tree:user|safe }}
         </nav>
     </div>
     <div id="key-panel" class="panel-right">
