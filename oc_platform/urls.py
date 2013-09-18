@@ -87,4 +87,6 @@ if settings.DEBUG:
         '',
         (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
         (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
+
+        url(r'^test/', 'oc_platform.views.jstests', name='jstests'),
     )

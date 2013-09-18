@@ -263,3 +263,7 @@ def email_share(request):
 
         return HttpResponse(
             json.dumps(status), 401, content_type="application/json")
+
+
+def jstests(request):
+    return render(request, 'testjs.html', {})
