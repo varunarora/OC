@@ -227,11 +227,9 @@ def _prepare_add_resource_context(request):
     project_slug = request.GET.get('project', None)
     collection_slug = request.GET.get('collection', None)
 
-    if collection_slug:
-        collection = Collection.objects.get(slug=collection_slug)
-    else:
-        collection = None
-        
+    import oer.CollectionUtilities as cu
+    collection = None
+
     # Check if the project exists and if the user is allowed to submit anything
     #     project_slug the project
     if project_slug:
@@ -241,12 +239,25 @@ def _prepare_add_resource_context(request):
             raise PermissionDenied
         user = request.user
         host = 'project'
+
+        if collection_slug:
+            (browse_tree, flattened_tree) = cu._get_browse_tree(project.collection)
+            collection = next(
+                tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
+
     elif username:
         from django.contrib.auth.models import User
         user = User.objects.get(username=username)
         if request.user != user:
             raise PermissionDenied
         host = 'user profile'
+
+        if collection_slug:
+            (browse_tree, flattened_tree) = cu._get_browse_tree(
+                user.get_profile().collection)
+            collection = next(
+                tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
+
     else:
         project = None
         user = request.user
