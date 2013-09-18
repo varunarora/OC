@@ -11,9 +11,9 @@
             {% csrf_token %}
             {% include 'partials/resource-meta.html' %}
             <table class="add-video-inputs">
-                <tr><td><span class="bold">Title*</span></td><td><input type="textbox" name="title" class="new-resource-url" value="{{ original.title }}"></td></tr>
+                <tr><td><span class="bold">Title*</span></td><td><input type="text" name="title" class="new-resource-url" value="{{ original.title }}"></td></tr>
                 <tr><td></td><td><span class="resource-form-error">{{ form.errors.title }}</span></td></tr>
-                <tr><td><span class="bold">YouTube or Vimeo link*</span></td><td><input type="textbox" name="url" class="new-resource-url" value="{{ original.url }}"></td></tr>
+                <tr><td><span class="bold">YouTube or Vimeo link*</span></td><td><input type="text" name="url" class="new-resource-url" value="{{ original.url }}"></td></tr>
                 <tr><td></td><td><span class="resource-form-error">{{ form.errors.url }}</span></td></tr>
 
                 {% include 'partials/resource-form-meta.html' %}
