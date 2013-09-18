@@ -258,12 +258,103 @@ def _hasImmediateChildren(collection):
 
 def discussions(request, project_slug):
     project = Project.objects.get(slug=project_slug)
+
+    if request.user not in project.members.all():
+        raise PermissionDenied
+
+    # Get all the comments whose parent is the project (in order of newest first)
+    from django.contrib.contenttypes.models import ContentType
+    project_ct = ContentType.objects.get_for_model(Project)
+    posts = Comment.objects.filter(
+        parent_id=project.id, parent_type=project_ct).order_by('-created')
+
+    # For each of the comments, get its child comments recursively
+    comments_ct = ContentType.objects.get_for_model(Comment)
+
+    build_posts_social(posts, request.user)
+
     context = {
+        'posts': posts,
+        'comments_content_type': comments_ct,
         'project': project,
         'title': (_(settings.STRINGS['projects']['DISCUSSION_BOARD_TITLE']) +
                   ' &lsaquo; ' + project.title)
     }
     return render(request, 'project/discussion-board.html', context)
+
+
+def discussion(request, project_slug, discussion_id):
+    from django.contrib.contenttypes.models import ContentType
+
+    try:
+        project_ct = ContentType.objects.get_for_model(Project)
+        post = Comment.objects.get(pk=discussion_id, parent_type=project_ct)
+        project = Project.objects.get(slug=project_slug)
+    except:
+        raise Http404
+
+    if request.user not in project.members.all():
+        raise PermissionDenied
+
+    build_posts_social([post], request.user)
+    
+    from oer.BeautifulSoup import BeautifulSoup
+    soup = BeautifulSoup(post.body_markdown_html)
+    post_title_short = soup.text[:200] + "..."
+
+    # For each of the comments, get its child comments recursively
+    from django.contrib.contenttypes.models import ContentType
+    comments_ct = ContentType.objects.get_for_model(Comment)
+
+    context = {
+        'post': post,
+        'comments_content_type': comments_ct,
+        'project': project,
+        'title': post_title_short + ' &lsaquo; ' + project.title
+    }
+
+    return render(request, 'project/discussion.html', context)
+
+
+def build_posts_social(posts, user):
+    for post in posts:
+        from interactions.CommentUtilities import CommentUtilities
+        (post.comments, flatted_post_descendants) = CommentUtilities.build_comment_tree(
+            {'root': [post]}, []
+        )
+        # Set post upvotes & downvotes
+        from interactions.VoteUtilities import VoteUtilities
+        post.upvotes = VoteUtilities.get_upvotes_of(post)
+        post.downvotes = VoteUtilities.get_downvotes_of(post)
+
+        post.user_in_upvotes = False
+        for vote in post.upvotes.all():
+            if user == vote.user:
+                post.user_in_upvotes = True
+                break
+
+        post.user_in_downvotes = False
+        for vote in post.downvotes.all():
+            if user == vote.user:
+                post.user_in_downvotes = True
+                break
+
+
+def post_discussion(request, project_slug):
+    # Validate request through new discussion post form
+    from forms import NewDiscussionPost
+    new_post = NewDiscussionPost(request.POST, request.user)
+
+    # Save the post
+    if new_post.is_valid():
+        comment_created = new_post.save()
+
+        # Send notifications for the new post.
+        Project.discussion_post_created.send(
+            sender="Projects", comment_id=comment_created.id)
+
+    # Redirect to discussions page
+    return redirect('projects:project_discussions', project_slug=project_slug)
 
 
 def list_collection(request, project_slug, collection_slug):

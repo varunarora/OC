@@ -1,0 +1,45 @@
+<div class="discussion-item" id="discussion-{{ post.id }}">
+    <div id="fill-panel" class="panel-left">
+        <div style="background-image: url('{{ MEDIA_URL }}{{ post.user.get_profile.profile_pic.name }}')" class="discussion-user-thumbnail"></div>
+        <div class="discussion-user-info">
+            <div class="user-post-info">
+                <a href="{% url user:user_profile username=post.user.username %}" class="bold user-post-info-name">{{ post.user.get_full_name }}</a><span class="post-datetime"> on {{ post.created }}</span>
+            </div>
+            <div class="user-headline">
+                {{ post.user.get_profile.headline }}
+            </div>
+        </div>
+    </div>
+    <div id="key-panel" class="panel-right">
+        <div class="post-body-wrapper">
+            <div class="delete-button" title="Delete post"></div>
+            <div class="post-body">
+                {% load comments_tags %}
+                {{ post.body_markdown_html|safe }}
+                <div class="post-actions">
+                    <div class="upvote-post {% if post.user_in_upvotes %}user-upvoted{% endif %}">{{ post.upvotes.count }}</div>
+                    <div class="downvote-post {% if post.user_in_downvotes %}user-downvoted{% endif %}">{{ post.downvotes.count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="post-comments">
+            {{ post.comments|nested_comment_tree:user|safe }}
+            <div class="post-comment">
+                <div class="post-comment-user-thumbnail">
+                    <div style="background-image: url('{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}')" class="discussion-response-thumbnail"></div>
+                </div>
+                <div class="post-comment-body">
+                    <form>
+                        <input type="hidden" name="user" value="{{ user.id }}" />
+                        <input type="hidden" name="parent_type" value="{{ comments_content_type.id }}" />
+                        <input type="hidden" name="parent_id" value="{{ post.id }}" />
+                        <textarea name="body_markdown" placeholder="Say something..."></textarea>
+                        <div class="post-comment-button-wrapper">
+                            <div class="action-button post-comment-button">Post comment</div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

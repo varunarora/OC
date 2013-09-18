@@ -1,5 +1,21 @@
 {% include 'partials/header.html' %}
 {% include 'project/header.html' with page="discussions" %}
 
+{% if user in project.members.all %}
+<div class="center-stage discussion-board-actions">
+    <div class="discussion-actions">
+        <div class="page-action-button new-discussion-post-button">+ NEW POST</div>
+    </div>
+</div>
+{% endif %}
 
+<div class="center-stage discussion-board">
+    {% for post in posts %}
+    {% include 'project/partials/discussion.html' %}
+    {% endfor %}
+</div>
+
+{% include 'project/partials/discussion-footer.html' %}
+
+{% include 'project/footer.html' %}
 {% include 'partials/footer.html' %}

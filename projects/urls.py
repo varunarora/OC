@@ -8,9 +8,10 @@ urlpatterns = patterns(
     url(r'^launch/', views.launch, name='launch'),
     url(r'^invite/', views.invite, name='invite'),
     url(r'^(?P<project_slug>[\w\-]+)/$', views.project_home, name='project_home'),
-    url(r'^(?P<project_slug>[\w\-]+)/members/', views.members, name='project_members'),
-    url(r'^(?P<project_slug>[\w\-]+)/about/', views.about, name='project_about'),
-    url(r'^(?P<project_slug>[\w\-]+)/discussions/', views.discussions, name='project_discussions'),
+    url(r'^(?P<project_slug>[\w\-]+)/discussion/(?P<discussion_id>\d+)/$', views.discussion, name='project_discussion'),
+    url(r'^(?P<project_slug>[\w\-]+)/discussions/$', views.discussions, name='project_discussions'),
+    url(r'^(?P<project_slug>[\w\-]+)/discussions/post/$', views.post_discussion, name='post_discussion'),
+
     url(r'^(?P<project_slug>[\w\-]+)/browse/(?P<collection_slug>.+)/$', views.list_collection, name='list_collection'),
     url(r'^(?P<project_slug>[\w\-]+)/browse/', views.browse, name='project_browse'),
     #url(r'^(?P<project_slug>[\w\-]+)/new-collection/', views.new_collection, name='new_collection'),
