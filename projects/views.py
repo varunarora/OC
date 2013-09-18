@@ -397,13 +397,15 @@ def post_discussion(request, project_slug):
 def list_collection(request, project_slug, collection_slug):
     project = Project.objects.get(slug=project_slug)
 
-    collection = Collection.objects.get(slug=collection_slug)
+    (browse_tree, flattened_tree) = _get_browse_tree(project.collection)
+
+    collection = next(
+        tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
+
     root_assets = collection.resources
 
     import oer.CollectionUtilities as cu
     child_collections = cu._get_child_collections(collection)
-
-    (browse_tree, flattened_tree) = _get_browse_tree(project.collection)
 
     context = {
         'project': project,
@@ -676,6 +678,310 @@ def remove_admin(request, project_id, user_id):
             + 'center to look for a solution.'
         }
         return _api_failure(context)
+
+
+def request_invite(request, project_id):
+    project = Project.objects.get(pk=project_id)
+
+    try:
+        # Check to see if the user already exists as a member.
+        Membership.objects.get(
+            user=request.user, project=project)
+
+        context = {
+            'title': 'Cannot complete the request invite.',
+            'message': 'We failed to make a request invite on your behalf '
+            + 'because you either have already sent an invite request or are a '
+            + 'current member.'
+        }
+        return _api_failure(context)
+
+    except Membership.DoesNotExist:
+        new_membership = Membership(
+            user=request.user, project=project, confirmed=False)
+        new_membership.save()
+
+        # Create a notification for the admins about this request.
+        Membership.new_invite_request.send(
+            sender="Projects", membership_id=new_membership.id)
+
+        return _api_success()
+
+
+def accept_request(request, request_id):
+    try:
+        membership_request = Membership.objects.get(pk=request_id)
+        membership_request.confirmed = True
+        membership_request.save()
+
+        # Generate notification for user just accepted into the project to notify.
+        Membership.invite_request_accepted.send(
+            sender="Projects", membership_id=membership_request.id)
+
+        return _api_success()
+    except:
+        context = {
+            'title': 'Could not accept the request.',
+            'message': 'We failed to make a accept the invite request into the project '
+            + 'due to an internal problem. Please contact us if this problem persists.'
+        }
+        return _api_failure(context)        
+
+
+def decline_request(request, request_id):
+    try:
+        membership_request = Membership.objects.get(pk=request_id)
+        membership_request.delete()
+
+        return _api_success()
+    except:
+        context = {
+            'title': 'Could not accept the request.',
+            'message': 'We failed to make a decline the invite request into the project '
+            + 'due to an internal problem. Please contact us if this problem persists.'
+        }
+        return _api_failure(context)
+
+
+def add_user_to_collection(request, collection_id, user_id):
+    try:
+        collection = Collection.objects.get(pk=collection_id)
+
+        from django.contrib.auth.models import User
+        user = User.objects.get(pk=user_id)
+
+        if request.user != collection.creator and request.user not in collection.collaborators.all():
+            return _api_unauthorized_failure()
+
+        collection.collaborators.add(user)
+
+        # Notify user of being added to collection through a notification.
+        Collection.collaborator_added.send(
+            sender="Projects", collection=collection, user=user)        
+
+        context = {
+            'user': {
+                'id': user.id,
+                'name': user.get_full_name(),
+                'username': user.username,
+                'profile_pic': settings.MEDIA_URL + user.get_profile().profile_pic.name
+            }
+        }
+
+        return _api_success(context)
+
+    except:
+        context = {
+            'title': 'Could not add the user to the collection.',
+            'message': 'We failed to add the user as a collaborator in the collection '
+            + 'as we were unable to find the user or collection. Please contact us if '
+            + 'the problem persists.'
+        }
+        return _api_failure(context)
+
+
+def remove_user_from_collection(request, collection_id, user_id):
+    try:
+        collection = Collection.objects.get(pk=collection_id)
+
+        from django.contrib.auth.models import User
+        user = User.objects.get(pk=user_id)
+
+        if request.user != collection.creator and request.user not in collection.collaborators.all():
+            return _api_unauthorized_failure()
+
+        collection.collaborators.remove(user)
+
+        return _api_success()
+
+    except:
+        context = {
+            'title': 'Could not remove the user from the collection.',
+            'message': 'We failed to remove the user from this collection '
+            + 'as we were unable to find the user or collection. Please contact us if '
+            + 'the problem persists.'
+        }
+        return _api_failure(context)
+
+
+def list_collection_collaborators(request, collection_id):
+    try:
+        collection = Collection.objects.get(pk=collection_id)
+
+        if request.user != collection.creator and request.user not in collection.collaborators.all():
+            return _api_unauthorized_failure()
+
+        # Add the collection collaborators into a list.
+        serialized_collaborators = []
+        for collaborator in collection.collaborators.all():
+            user = {}
+            user['id'] = collaborator.id
+            user['name'] = collaborator.get_full_name()
+            user['username'] = collaborator.username
+            user['profile_pic'] = settings.MEDIA_URL + collaborator.get_profile().profile_pic.name
+            serialized_collaborators.append(user)
+
+        # Add the collection creator to the list.
+        serialized_collaborators.append({
+            'id': collection.creator.id,
+            'name': collection.creator.get_full_name(),
+            'username': collection.creator.username,
+            'profile_pic': settings.MEDIA_URL + collection.creator.get_profile().profile_pic.name
+        })
+
+        serialized_collaborators.reverse()
+
+        return _api_success({'users': serialized_collaborators})
+
+    except:
+        context = {
+            'title': 'Could not fetch the collaborators on this collection.',
+            'message': 'We failed to fetch and construct a list of collaborators for '
+            + 'this collection. Please contact us if the problem persists.'
+        }
+        return _api_failure(context)
+
+
+def change_collection_visibility(request, collection_id, visibility):
+    try:
+        collection = Collection.objects.get(pk=collection_id)
+
+        if request.user != collection.creator:
+            return _api_unauthorized_failure()
+
+        collection.visibility = visibility
+        collection.save()
+
+        return _api_success()
+
+    except:
+        context = {
+            'title': 'Could not change the visibility of this collection.',
+            'message': 'We failed to change the visibility of '
+            + 'this collection. Please contact us if the problem persists.'
+        }
+        return _api_failure(context)        
+
+
+def get_project_visibility(request, project_id):
+    try:
+        project = Project.objects.get(pk=project_id)
+
+        if not request.user:
+            return _api_unauthorized_failure()
+
+        context = {
+            'visibility': project.visibility
+        }
+
+        return _api_success(context)
+
+    except:
+        context = {
+            'title': 'Could not get the visibility of this project.',
+            'message': 'We failed to retrieve the visibility of '
+            + 'this project. Please contact us if the problem persists.'
+        }
+        return _api_failure(context)
+
+
+def move_resource_to_collection(request, resource_id, from_collection_id, to_collection_id):
+    try:
+        from_collection = Collection.objects.get(pk=from_collection_id)
+        to_collection = Collection.objects.get(pk=to_collection_id)
+        resource = Resource.objects.get(pk=resource_id)
+
+        # Get the project this collection belongs to.
+        import oer.CollectionUtilities as cu 
+        (collection_root_type, collection_root) = cu.get_collection_root(to_collection)
+
+        # If this is a project.
+        if collection_root_type.name == 'project':
+            # Break if the requestor is the administrator of the project.
+            if request.user in collection_root.admins.all():
+                pass
+
+            # If this collection belongs to the project.
+            elif to_collection.visibility == 'project':
+                # If the resource hasn't been been created by the requestor, and the
+                # requestor isn't a member of the project.
+                if request.user not in collection_root.confirmed_members and request.user != resource.user:
+                    return _api_unauthorized_failure()
+
+            elif to_collection.visibility == 'private':
+                # If the resource hasn't been been created by the requestor and requestor
+                # isn't a collaborator on the collection.
+                if request.user != resource.user and request.user not in to_collection.collaborators.all():
+                    return _api_unauthorized_failure()
+
+        to_collection.resources.add(resource)
+        from_collection.resources.remove(resource)
+
+        return _api_success()
+
+    except:
+        context = {
+            'title': 'Could not change the move the resource.',
+            'message': 'We failed to the resource into the new collection. '
+            + 'Please contact us if the problem persists.'
+        }
+        return _api_failure(context)
+
+
+def move_collection_to_collection(request, collection_id, from_collection_id, to_collection_id):
+    try:
+        collection = Collection.objects.get(pk=collection_id)
+        to_collection = Collection.objects.get(pk=to_collection_id)
+
+        # Get the project this collection belongs to.
+        import oer.CollectionUtilities as cu 
+        (collection_root_type, collection_root) = cu.get_collection_root(to_collection)
+
+        # If this is a project.
+        if collection_root_type.name == 'project':
+            # Break if the requestor is the administrator of the project.
+            if request.user in collection_root.admins.all():
+                pass
+
+            # If this collection belongs to the project.
+            elif to_collection.visibility == 'project':
+                # If the requestor is not a member of the project and did not create the collection to be moved.
+                if request.user not in collection_root.confirmed_members and request.user != collection.creator:
+                    return _api_unauthorized_failure()
+
+            elif to_collection.visibility == 'private':
+                # If the collection hasn't been been created by the requestor and requestor
+                # isn't a collaborator on the collection.
+                if request.user != collection.creator and request.user not in to_collection.collaborators.all():
+                    return _api_unauthorized_failure()
+
+        collection.host = to_collection
+        collection.save()
+
+        return _api_success()
+
+    except:
+        context = {
+            'title': 'Could not change the move the collection.',
+            'message': 'We failed to the original collection into its new collection. '
+            + 'Please contact us if the problem persists.'
+        }
+        return _api_failure(context)
+
+
+def collection_tree(request, collection_id):
+    import oer.CollectionUtilities as cu
+    current_collection = Collection.objects.get(pk=collection_id)
+    (root_host_type, root) = cu.get_collection_root(
+        current_collection)
+
+    (browse_tree, flattened_tree) = _get_browse_tree(root.collection)
+
+    context = {
+        'tree': cu.build_project_collection_navigation(
+            browse_tree, request.user)
+    }
+    return _api_success(context)
 
 
 def _api_success(context={}):

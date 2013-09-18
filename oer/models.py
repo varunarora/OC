@@ -5,6 +5,7 @@ from articles.MarkdownTextField import MarkdownTextField
 from ResourceThumbnail import ResourceThumbnail
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from django.dispatch import Signal
 
 
 def get_default_license():
@@ -50,7 +51,9 @@ class Collection(models.Model):
     host_type = models.ForeignKey(ContentType)
     host_id = models.PositiveIntegerField()
     host = generic.GenericForeignKey('host_type', 'host_id')
-    resources = models.ManyToManyField(Resource, blank=True)
+    resources = models.ManyToManyField(Resource, blank=True, null=True)
+    collaborators = models.ManyToManyField(User, blank=True, null=True,
+        related_name='collaborators')
     visibility = models.CharField(max_length=256)
     changed = models.DateTimeField(auto_now=True, editable=False)
     slug = models.SlugField(max_length=256)
@@ -58,3 +61,5 @@ class Collection(models.Model):
 
     def __unicode__(self):
         return self.title
+    
+    collaborator_added = Signal(providing_args=["collection", "user"])

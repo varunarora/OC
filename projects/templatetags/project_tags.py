@@ -7,46 +7,18 @@ register = template.Library()
 
 
 @register.filter(is_safe=True)
-def project_navigation_tree(value):
-    root = ElementTree.Element('ul')
-
-    # Get the project that owns the root collection
-    root_collection = get_root_key(value)
-
-    # HACK(Varun): If there are children
-    if root_collection:
-        from projects.models import Project
-        project = Project.objects.get(collection=root_collection)
-
-        child_nodes = build_child_tree(value, project, _get_project_url)
-        for node in child_nodes:
-            root.append(node)
-        return ElementTree.tostring(root)
-    else:
-        return ''
+def project_navigation_tree(value, user):
+    import oer.CollectionUtilities as cu
+    return cu.build_project_collection_navigation(value, user)
 
 
 @register.filter(is_safe=True)
-def user_navigation_tree(value):
-    root = ElementTree.Element('ul')
-
-    # Get the project that owns the root collection
-    root_collection = get_root_key(value)
-
-    from user_account.models import UserProfile
-    user_profile = UserProfile.objects.get(collection=root_collection)
-
-    # HACK(Varun): If there are children
-    if root_collection:
-        child_nodes = build_child_tree(value, user_profile, _get_user_url)
-        for node in child_nodes:
-            root.append(node)
-        return ElementTree.tostring(root)
-    else:
-        return ''
+def user_navigation_tree(value, user):
+    import oer.CollectionUtilities as cu
+    return cu.build_user_collection_navigation(value, user)
 
 
-def build_child_tree(root_node, collectionOwner, urlCreator):
+def build_child_tree(root_node, collectionOwner, urlCreator, user, host_type):
     # Get the list of child of this node.
     nodes = list(itertools.chain.from_iterable(root_node.values()))
     nodeElements = []
@@ -54,6 +26,16 @@ def build_child_tree(root_node, collectionOwner, urlCreator):
     # Create <li> nodes for each.
     for node in nodes:
         nodeElement = ElementTree.Element('li')
+
+        if host_type == 'project':
+            if type(node) is dict:
+                node_visibility = get_root_key(node).visibility          
+            else:
+                node_visibility = node.visibility
+
+            # Get the root project
+            if node_visibility != 'public' and user not in collectionOwner.confirmed_members:
+                continue
 
         # If this child has other children, build child tree.
         if type(node) is dict:
@@ -65,7 +47,8 @@ def build_child_tree(root_node, collectionOwner, urlCreator):
 
             nodeList = ElementTree.SubElement(nodeElement, 'ul')
 
-            child_nodes = build_child_tree(node, collectionOwner, urlCreator)
+            child_nodes = build_child_tree(
+                node, collectionOwner, urlCreator, user, 'collection')
             for child_node in child_nodes:
                 nodeList.append(child_node)
 

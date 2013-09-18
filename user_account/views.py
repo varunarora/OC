@@ -776,20 +776,26 @@ def list_collection(request, username, collection_slug):
         user = User.objects.get(username=username)
         user_profile = user.get_profile()
 
-        # Get user collection.
-        from oer.models import Collection
-        collection = Collection.objects.get(slug=collection_slug)
-
         import oer.CollectionUtilities as cu
-        collection_context = cu.list_collection(
-            collection.slug, user_profile.collection)
+        (browse_tree, flattened_tree) = cu._get_browse_tree(
+            user_profile.collection)
 
-        context = dict({
+        # Get user collection.
+        collection = next(
+            tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
+
+        root_assets = collection.resources
+        child_collections = cu._get_child_collections(collection)        
+
+        context = {
             'user_profile': user,
             'collection': collection,
             # TODO(Varun): Make this a custom title.
-            'title': collection.title + ' &lsaquo; ' + user.get_full_name()
-        }.items() + collection_context.items())
+            'title': collection.title + ' &lsaquo; ' + user.get_full_name(),
+            'browse_tree': browse_tree,
+            'resources': root_assets.all(),
+            'collections': child_collections,
+        }
         return render(request, 'profile.html', context)
 
     except User.DoesNotExist:

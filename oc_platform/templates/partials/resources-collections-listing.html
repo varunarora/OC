@@ -1,8 +1,13 @@
 {% if resources or collections %}
-<div class="{{ host }}-resources-added">
+{% if host == 'project' %}
+<div class="collection-actions">
+    <div class="collection-button move-button">Move to..</div>
+</div>
+{% endif %}
+<div class="{{ host }}-resources-added" id="collection-{{ collection.id }}">
     <div class="{{ host }}-collections-added-list">
         {% for collection_item in collections %}
-        <div class="{{ host }}-browse-item resource-collection-item directory">
+        <div class="{{ host }}-browse-item resource-collection-item directory" id="collection-{{ collection_item.id }}">
         {% if collection_item.visibility == 'public' %}
             {% include 'partials/collection-item.html' %}
         {% elif host == 'profile' %}
@@ -10,8 +15,14 @@
                 {% include 'partials/collection-item.html' %}
             {% endif %}
         {% elif host == 'project' %}
-            {% if user in project.members.all %}
-                {% include 'partials/collection-item.html' %}
+            {% if collection_item.visibility == 'project' %}
+                {% if user in project.confirmed_members %}
+                    {% include 'partials/collection-item.html' %}
+                {% endif %}
+            {% elif collection_item.visibility == 'private' %}
+                {% if user == collection_item.creator or user in collection_item.collaborators.all %}
+                    {% include 'partials/collection-item.html' %}
+                {% endif %}
             {% endif %}
         {% endif %}
         </div>
@@ -26,7 +37,7 @@
                 {% include 'partials/resource-item.html' %}
             {% endif %}
         {% elif host == 'project' %}
-            {% if user in project.members.all %}
+            {% if user in project.confirmed_members %}
                 {% include 'partials/resource-item.html' %}
             {% endif %}
         {% endif %}
@@ -42,4 +53,63 @@
     Are you sure you want to delete this collection? This will delete all the collections and resources within this collection
 </div>
 
+<div class="move-resource-collection-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Move to...</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        Select a collection from the following project collections:
+        <div class="move-resource-collection-browser loading-browser">
+        </div>
+        <div class="move-resource-collection-submit-wrapper">
+            <button class="action-button move-resource-collection-submit-button">Done</button>
+        </div>
+    </div>
+</div>
+
+<div class="resource-collection-visibility-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Add / remove collaborators</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <div class="collection-visibility-form">
+            <nav class="collection-visibility-form-tabs">
+                <ul>
+                    <li><a href=".project-access">Everyone accessing the project</a></li>
+                    <li><a href=".private-access">Only people I choose (private)</a></li>
+                </ul>
+            </nav>
+            <div class="collection-visibility-form-content oc-tabs-content">
+                <div class="project-access"></div>
+                <div class="private-access">
+                    <p>Add a collaborator:</p>
+                    <form id="add-collection-collaborator-form">
+                        <input type="hidden" name="collection_id" value="" />
+                        {% if host == 'project' %}
+                        <input type="hidden" name="project_id" value="{{ project.id }}" />
+                        {% endif %}
+                        <div class="add-collaborator-wrapper">
+                            <div class="add-collaborator-input">
+                                <input type="text" name="add-collaborator" placeholder="Type the name of the user you wish to add as a collaborator..." />
+                            </div>
+                            <div class="add-collaborator-button">
+                                <button class="action-button mini-action-button">Add</button>
+                            </div>
+                        </div>
+                    <p>Who can see and use this resource/collection:</p>
+                    <ul class="collaborators user-list">
+                    </ul>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="popup-background"></div>
+{% else %}
+<div class="{{ host }}-resources-added" id="collection-{{ collection.id }}">
+    Sorry, there is nothing in this collection.
+</div>
 {% endif %}

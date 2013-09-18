@@ -127,7 +127,8 @@ def view_resource(request, resource_id):
 
 def build_collection_breadcrumb(collection):
     # Get the root of this collection ('project' or 'user profile')
-    (collection_root_type, collection_root) = get_collection_root(collection)
+    import oer.CollectionUtilities as cu 
+    (collection_root_type, collection_root) = cu.get_collection_root(collection)
 
     # Create breadcrumb list
     breadcrumb = []
@@ -687,11 +688,13 @@ def _prepare_edit_resource_context(resource):
 
     # Figure out if this resource belongs to a project or user profile
     resource_collection = Collection.objects.get(resources__id=resource.id)
-    host = resource_collection.host_type.name
+
+    import oer.CollectionUtilities as cu
+    (host_type, host) = cu.get_collection_root(resource_collection.host)
 
     return {
         'licenses': licenses,
-        'host': host,
+        'host': host_type.name,
         'act': 'edit'
     }
 
@@ -840,7 +843,8 @@ def delete_collection(request, collection_id):
         # TODO(Varun): Delete all child collections & resources
 
         project_permissions = False
-        (collection_root_type, collection_root) = get_collection_root(collection)
+        import oer.CollectionUtilities as cu
+        (collection_root_type, collection_root) = cu.get_collection_root(collection)
         if collection_root_type.name == 'project':
             from projects.models import Project
             project = Project.objects.get(pk=collection_root.id)
@@ -857,13 +861,6 @@ def delete_collection(request, collection_id):
     except:
         return HttpResponse(json.dumps(
             {'status': 'false'}), 401, content_type="application/json")
-
-
-def get_collection_root(collection):
-    if collection.host_type.name != 'collection':
-        return (collection.host_type, collection.host)
-    else:
-        return get_collection_root(collection.host)
 
 
 def new_project_collection(request, project_slug):

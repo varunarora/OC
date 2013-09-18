@@ -1,7 +1,8 @@
-<div class="{{ host }}-browse-item resource-collection-item {{ resource.type }}-resource">
+<div class="{{ host }}-browse-item resource-collection-item {{ resource.type }}-resource" id="resource-{{ resource.id }}">
+    <input type="checkbox" name="resource_id" value="{{ resource.id }}"/>
     <a href="{% url resource:read resource_id=resource.id %}">{{ resource }} <span class="project-browse-item-date">{{ resource.created|date:"M nS, 'y P"}}</span>
     
-    <div class="resource-collection-actions">
-        <span class="{{ host }}-browse-item-visibility visibility-{{ resource.visibility }}"></span>{% if host == 'profile' %}{% if user == user_profile %}<div class="{{ host }}-resource-delete" id="resource-{{ resource.id }}"></div>{% endif %}{% elif user in project.admins.all or user == resource.user %}<div class="{{ host }}-resource-delete" id="resource-{{ resource.id }}"></div>{% endif %}
+    <div class="resource-collection-actions{% if host == 'profile' %}{% if user == user_profile %} profile-resource is-owner{% endif %}{% elif user in project.admins.all or user == resource.user %} is-owner{% endif %}">
+        <span class="{{ host }}-browse-item-visibility visibility-{{ resource.visibility }}" title="Who has access: {{ resource.visibility|title }}"></span><div class="{{ host }}-resource-delete resource-collection-delete" id="resource-{{ resource.id }}" title="Delete"></div>
     </div></a>
 </div>
