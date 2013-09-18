@@ -14,7 +14,9 @@ $content-width: 960px
 	font-size: 0.85em
 	@include sans-bold
 	padding: 4px 0px
-	@include border-radius(4px)
+
+@mixin sans-font-family
+	font-family: "Proxima Nova Regular", 'Helvetica Neue', Arial, Helvetica, sans-serif
 	
 $header-height: 55px
 $header-prebanner-height: 4px
@@ -29,7 +31,7 @@ $key-panel-width: 573px
 $fill-panel-width: 367px
 
 body
-	font-family: "Proxima Nova Regular", 'Helvetica Neue', Arial, Helvetica, sans-serif
+	@include sans-font-family
 	font-size-adjust: 0.488
 	font-weight: normal
 	font-style: normal
@@ -535,7 +537,7 @@ h1.developers-title
 			box-shadow: none 
 
 .bulleted-list
-	padding-left: 15px
+	padding-left: 18px
 	margin: 10px 0px
 
 	li
@@ -595,16 +597,13 @@ h1.developers-title
 // TODO: All this form non-sense needs a lot of cleaning up
 
 form input[type=text], form input[type=password], textarea
-	&:focus
-		background-color: #ffffff
-		font-style: normal
-		font-weight: normal
-		@include box-shadow(0 0 5px rgba(82, 168, 236, 0.8))
-		outline: 0 none
 
 	&.form-input-error
 		border-color: #E9322D
 		@include box-shadow(0 0 6px #F8B9B7)
+
+		&:hover, &:focus
+			border-color: #E9322D
 
 form#signup-form,
 form#new-project-form,
@@ -616,11 +615,7 @@ form#contributor-registration,
 form#project-add-member
 	input[type=text], input[type=password], textarea
 		background-color: #f5f5f5
-		border: 1px solid #b2b2b2
-		@include border-radius(5px)
-		height: 16px
 		width: 200px
-		padding: 4px
 		font-size: 0.9em
 
 		&:focus
@@ -813,21 +808,26 @@ nav#add-resource-menu
 
 nav#notifications-menu
 	z-index: 4
-	width: 300px
+	width: 400px
 
 	ul
-		padding-bottom: 10px
+		padding: 10px 0px
 
 		li
 			height: auto
+			padding-top: 0px
+			border-bottom: 1px solid #efefef
 
 			a
 				height: auto
+				font-size: 0.9em
+				padding-top: 6px
+				padding-bottom: 6px
 
 	.floating-menu-spacer
-		width: 300px
+		width: 400px
 		background: url('../images/user-nav-pointer.png') no-repeat
-		background-position: 265px bottom
+		background-position: 360px bottom
 		z-index: 10
 
 	.new-notification
@@ -1011,6 +1011,9 @@ table#project-form-table
 			width: 350px
 			font-family: "Arial"
 
+		textarea
+			height: 100px
+
 header#project-header
 	height: 150px
 
@@ -1026,6 +1029,11 @@ header#project-header
 
 			#project-info-description
 				color: #b2b2b2
+
+	&:hover
+		.edit-cover-picture
+			display: block
+			cursor: pointer
 
 textarea[name=objectives]
 	display: none
@@ -1073,28 +1081,35 @@ textarea[name=objectives]
 	button
 		margin: 10px 0px
 
-.member
-	padding: 10px 0px
-	overflow: hidden
+.user-list
+	.user
+		padding: 10px 0px
+		overflow: hidden
 
-	.member-info
-		float: left
-
-		.member-photo
-			float: left
-			margin-right: 16px
-			width: 60px
-			height: 60px
-			background-position: center center
-
-		.member-description
+		.user-info
 			float: left
 
-	.member-actions
-		float: right
+			.user-photo
+				float: left
+				margin-right: 16px
+				width: 60px
+				height: 60px
+				background-position: center center
 
-		form
-			float: left
+			.user-description
+				float: left
+
+		.user-actions
+			float: right
+
+			form
+				float: left
+
+		&.user-success
+			background-color: #E4F7D2
+
+		&.user-failure
+			background-color: #FFDEB5
 
 /* jQuery UI stuff */
 
@@ -1433,15 +1448,11 @@ nav#user-buttons > ul > li.user-notification-count
 	height: 36px
 	float: left
 
-nav.project-navigation
+nav.project-navigation, nav.settings-navigation
 	background-color: #EFEFEF
-	height: 50px
 
 	ul
 		li
-			float: left
-			padding: 16px 0px
-
 			a
 				padding: 16px 20px
 				color: $light-font
@@ -1451,8 +1462,33 @@ nav.project-navigation
 					text-decoration: none
 					background-color: #E0E0E0
 
+nav.project-navigation
+	height: 50px
+
+	ul
+		float: left
+
+		li
+			float: left
+			padding: 16px 0px
+
+			a
 				&.current-page
 					color: $link-hover
+
+	ul.project-administration-menu
+		float: right
+
+nav,settings-navigation
+	ul.settings-submenu
+		li
+			a
+				display: block
+
+		li.selected-submenu-item
+			a
+				color: $link-hover
+				background-color: #fff
 
 .project-about-body
 	padding: 10px
@@ -1509,6 +1545,9 @@ table
 						background-color: #fff
 						color: $link-hover
 
+		&.hide-tabs
+			display: none
+
 	.oc-tabs-content
 		border-top: 1px solid #bcbcbc
 
@@ -1518,26 +1557,47 @@ table
 	color: #B94A48
 
 .add-resource
-	background-color: #D14836
-	padding: 10px
 	width: 120px
-	color: #fff
-	@include sans-bold
-	cursor: pointer
-	float: left
 
-.new-collection
+.page-action-button, .action-button, .collection-button
 	padding: 10px
 	color: #fff
-	background-color: #557799
-	float: left
 	@include sans-bold
-	margin-left: 6px
 	cursor: pointer
+	float: left
+	border-width: 0px
+
+.page-action-button
+	background-color: #D14836
+
+.action-button
+	background-color: #557799
+	margin-left: 6px
 
 	&:hover
 		text-decoration: none
 		background-color: #2D6699
+
+	&.mini-action-button
+		padding: 5px 12px
+
+.disabled-action-button
+	background-color: #A5BACF
+	cursor: default
+
+	&:hover
+		background-color: #A5BACF		
+
+.collection-button
+	background-color: #efefef
+	color: $light-font
+
+	&.disabled-collection-button
+		color: #bababa
+
+.new-discussion-post-button
+	padding-left: 20px
+	padding-right: 20px
 
 nav#add-resource-menu
 	.add-document, .add-link, .add-video, .add-upload
@@ -1580,16 +1640,29 @@ nav.collections-navigation
 	ul
 		display: block
 
+nav.collections-navigation, .move-resource-collection-browser
+	ul
 		li
-			padding-left: 16px
-			background-image: url('../images/arrow-right.png')
-			background-position: 0px 2px
-			background-repeat: no-repeat
-			cursor: pointer
-
 			ul
-				padding-left: 10px
+				padding-left: 16px
 				display: none
+	> ul
+		> li
+			background-image: none
+			padding-left: 0px
+
+			&.opened-collection
+				background-image: none
+
+			> a
+				text-transform: uppercase
+				@include sans-bold
+				color: $light-font
+
+			> ul
+				padding-left: 6px
+				margin-top: 10px
+				display: block
 
 	a
 		color: $body-color
@@ -1597,6 +1670,47 @@ nav.collections-navigation
 		&:hover
 			color: $link-hover
 			text-decoration: none
+
+		&.current-collection
+			@include sans-bold
+			background-color: #efefef
+			color: $light-font
+
+.current-navigation-collection
+	@include sans-bold
+
+.toggle-collection
+	width: 10px
+	height: 16px
+	background-repeat: no-repeat
+	cursor: pointer
+	display: inline-block
+	float: left
+	padding-right: 10px
+
+.empty-collection .toggle-collection
+	background-image: url('../images/empty-collection.png')
+	background-position: 2px 5px
+
+.parent-collection > .toggle-collection
+	background-image: url('../images/arrow-right-small.png')
+	background-position: 5px 4px
+
+.opened-collection > .toggle-collection
+	background-image: url('../images/arrow-bottom-small.png')				
+	background-position: 3px 6px
+
+
+.move-resource-collection-browser
+	margin-top: 10px
+	ul
+		li
+			margin: 2px 0px
+			//padding-left: 14px
+
+	a
+		padding: 2px 6px
+		outline: 0px
 
 .add-collection-resource-wrapper
 	overflow: hidden
@@ -1661,7 +1775,7 @@ aside#support.teacher-contributor-invite
 
 	margin-top: 20px
 
-	input[type=textbox], textarea
+	input[type=text], textarea
 		border: 1px solid #ddd
 		padding: 4px
 
@@ -1689,34 +1803,60 @@ aside#support.teacher-contributor-invite
 	background-image: url('../images/new-hyperlink.png')
 
 .project-browse-item, .profile-browse-item
+	input[type=checkbox]
+		float: left
+		margin: 10px
+
 	a
 		display: block
 		padding: 10px
-		padding-left: 32px
+		padding-left: 62px
 		border-bottom: 1px solid #efefef
 		outline: 0 none
 
 		.project-browse-item-date, .profile-browse-item-date
-			color: $light-font
+			color: #bababa
 
 		.project-browse-item-visibility, .profile-browse-item-visibility
 			display: inline-block
 			float: left
-			height: 14px
-			width: 14px
+			height: 16px
+			width: 16px
+			background-repeat: no-repeat
+			background-position: center center
 
 			&.visibility-public
-				background-image: url('../images/social-studies.png')
-				background-repeat: no-repeat
-				background-position: center center
+				background-image: url('../images/public-visibility.png')
+
+				&:hover
+					background-image: url('../images/public-visibility-hover.png')
+
+			&.visibility-project
+				background-image: url('../images/project-visibility.png')
+
+				&:hover
+					background-image: url('../images/project-visibility-hover.png')
+
+
+			&.visibility-private
+				background-image: url('../images/private-visibility.png')
+
+				&:hover
+					background-image: url('../images/private-visibility-hover.png')
 
 		&:hover
-			background-color: #efefef
 			text-decoration: none
+
+	&:hover
+		background-color: #efefef
+
+	&.droppable
+		background-color: #E9EFFA
+
 
 	&.directory, &.attachment-resource, &.url-resource, &.video-resource, &.article-resource
 		a
-			background-position: 10px center
+			background-position: 40px center
 			background-repeat: no-repeat
 
 	&.directory
@@ -1750,7 +1890,7 @@ aside#support.teacher-contributor-invite
 		background-repeat: no-repeat
 		background-position: center center
 		border: 1px solid #ffffff
-		margin-left: 4px
+		margin-left: 8px
 
 		&:hover
 			background-color: #efefef
@@ -1825,6 +1965,16 @@ table.reset-password-table
 .login-messages-wrapper
 	margin-top: 10px
 
+.project-messages
+	position: relative
+	display: none
+	height: 35px
+
+	&.show-messages
+		display: block
+		top: -130px
+		margin-bottom: -35px
+
 .resource-panel
 	padding-top: 10px
 
@@ -1857,6 +2007,13 @@ table.reset-password-table
 .resource-collection-actions
 	float: right
 
+	.resource-collection-delete
+		display: none
+
+	&.is-owner
+		.resource-collection-delete
+			display: inline-block
+
 .delete-button
 	width: 26px
 	height: 36px
@@ -1876,9 +2033,526 @@ table.reset-password-table
 	height: 30px
 
 .admin-label
-	padding: 4px 8px
-	@include border-radius(2px)
 	background-color: #B6C3DB
-	font-size: 0.8em
 	margin-left: 6px
 	color: $light-font
+
+.label
+	font-size: 0.8em
+	padding: 4px 8px
+	@include border-radius(2px)
+
+/* Discussion board specific styling */
+
+@mixin display-post-inline
+	display: inline
+	margin-top: 0px
+
+.discussion-actions
+	float: right
+
+.discussion-board
+	margin-top: 10px
+
+	.discussion-item
+		border: 1px
+		border-bottom: 1px solid #ddd
+		padding: 15px 0px
+		overflow: hidden
+
+		.discussion-user-thumbnail
+			background-size: cover
+			height: 50px
+			width: 50px
+			float: left
+
+		.discussion-user-info
+			float: left
+			margin-left: 15px
+			width: 302px 
+
+			.user-post-info
+				.post-datetime
+					color: #bababa
+
+		.user-headline
+			color: $light-font
+			margin-top: 10px
+			font-size: 0.85em
+
+		.post-body
+			p:first-child
+				margin-top: 0px
+
+			.post-actions
+				overflow: hidden
+				margin-top: 10px
+
+				.upvote-post, .downvote-post
+					padding-left: 15px
+					background-position: 0px 0px
+
+		.post-comments
+			margin-top: 10px
+			background-color: #efefef
+			padding: 10px
+
+			.post-comment
+				overflow: hidden
+				margin-top: 3px
+
+				.post-comment-user-thumbnail
+					.discussion-response-thumbnail
+						background-size: cover
+						height: 30px
+						width: 30px
+						float: left
+
+				ul
+					margin-left: 38px
+					clear: both
+
+				.post-comment-body
+					margin-left: 10px
+					float: left
+					width: 84%
+					border-top: 1px solid #e2e2e2
+					padding-bottom: 3px
+					min-height: 30px
+
+					&.new-post-comment-body
+						border-top: 0px
+
+					p:nth-child(2)
+						@include display-post-inline
+						margin-left: 6px
+
+					form textarea
+						width: 500px
+						height: 20px
+
+						&.expanded
+							height: 80px
+
+					.post-comment-button-wrapper
+						padding: 6px 0px
+
+						.action-button
+							float: right
+
+				.comment-actions
+					overflow: hidden
+
+					.reply-to-comment, .downvote-comment, .upvote-comment
+						background-position: 0px 2px
+						padding-left: 16px
+
+					.reply-to-comment
+						background-image: url('../images/reply.png')
+
+			.post-comment:first-child
+				.post-comment-body
+					border-width: 0px
+
+		.reply-to-comment, .upvote-comment, .downvote-comment,
+		.upvote-post, .downvote-post
+			float: left
+			color: $light-font
+			margin: 0px 6px
+			font-size: 0.85em
+			cursor: pointer
+			background-repeat: no-repeat
+
+		.downvote-comment, .downvote-post
+			background-image: url('../images/downvote.png')
+
+			&.user-downvoted
+				background-image: url('../images/user-downvoted.png')
+				color: #D14836
+
+		.upvote-comment, .upvote-post
+			background-image: url('../images/upvote.png')
+
+			&.user-upvoted
+				background-image: url('../images/user-upvoted.png')
+				color: #5ABD02
+
+		.delete-button
+			float: right
+			visibility: hidden
+
+		.post-body-wrapper:hover, .post-comment:hover
+			> .delete-button
+				visibility: visible
+
+.individual-discussion
+	margin-top: 20px
+
+form
+	input[type=text], input[type=password], textarea
+		border: 1px solid #ddd
+		padding: 4px
+		@include sans-font-family
+
+		&:hover, &:focus
+			border: 1px solid #b2b2b2
+			@include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
+
+.new-discussion-post-dialog, .new-comment-reply-dialog
+	width: 550px
+	height: 350px
+
+	form textarea
+		margin-top: 10px
+		width: 98%
+
+	.new-discussion-post-prompt, .new-comment-reply-prompt
+		margin-left: 8px
+
+	.new-discussion-post-prompt, .new-comment-reply-prompt, .new-comment-reply-original-prompt	
+
+		.new-discussion-post-prompt-suggest, .new-comment-reply-prompt-suggest,
+		.new-comment-original-prompt-suggest
+			color: $light-font
+
+
+.new-discussion-post-dialog
+	.new-discussion-post-prompt
+		float: left
+
+.new-discussion-post-submit, .new-comment-reply-submit
+	margin: 10px 0px
+	float: right
+
+.new-comment-reply-dialog
+	.new-comment-original-reply
+		overflow: hidden
+
+		.new-comment-original-reply-wrapper
+			float: left
+			margin-left: 8px
+			width: 90%
+			margin-bottom: 15px
+
+			.new-comment-original-reply-body
+				padding: 6px
+				border: 1px solid #ddd
+				margin-top: 6px
+				width: 80%
+				height: 70px
+				overflow: auto
+				background-color: #efefef
+
+				p:first-child
+					@include display-post-inline
+
+	.new-comment-reply-response
+		text-align: right
+
+		.new-comment-reply-response-user
+			float: right
+
+		.new-comment-reply-prompt
+			float: left
+
+		form textarea
+			height: 100px
+			width: 80%
+
+/* End of discussion board styling */
+
+.oc-popup
+	background: none repeat scroll 0 0 #FFFFFF
+	@include box-shadow(0 0 8px rgba(0, 0, 0, 0.4))
+	display: none
+	margin: auto
+	z-index: 20
+	position: fixed
+	padding: 20px
+
+	&.show-popup
+		display: block
+
+	.close-oc-popup
+		position: relative
+		float: right
+		height: 20px
+		width: 20px
+		bottom: -20px
+		margin-top: -20px
+		background-image: url("../images/escape.png")
+		background-repeat: no-repeat
+		background-position: center center
+		cursor: pointer
+		z-index: 25
+		background-color: #000
+		margin-right: 10px
+		opacity: 0
+
+		&.show-close-oc-popup, &:hover
+			opacity: 0.8
+
+.popup-background
+	z-index: 10
+	position: fixed
+	display: none
+	height: 100%
+	width: 100%
+	background: #000000
+	top: 0px
+	left: 0px
+	opacity: 0.8
+
+	&.show-popup-background
+		display: block
+
+.oc-popup-title-bar
+	overflow: hidden
+
+	.oc-popup-title
+		float: left
+
+	.oc-popup-exit
+		float: right
+		height: 26px
+
+.oc-popup-body
+	margin-top: 10px
+
+.user-thumbnail-xsmall
+	background-size: cover
+	height: 20px
+	width: 20px
+	float: left
+
+.request-to-join
+	margin: 0px 6px
+	margin-top: 6px
+	padding: 20px
+	background-color: #efefef
+	overflow: hidden
+	@include box-shadow(0 0 6px #b2b2b2)
+
+	.request-button-wrapper
+		margin-top: 15px
+
+		.request-button
+			float: right
+
+.project-about-box
+	background-color: #efefef
+	margin: 10px 0px
+
+	.project-about-box-title
+		background-color: #e4f7d2
+		padding: 5px 10px
+		color: $light-font
+
+	.project-about-box-body
+		padding: 10px
+		overflow: hidden
+
+.project-about-box:first-child
+	margin-top: 0px
+
+.project-datetimestamp
+	color: $light-font
+
+.project-admins
+	overflow: hidden
+
+	.project-admin-thumbnail
+		width: 60px
+		height: 60px
+		background-size: cover
+		float: left
+		margin-right: 10px
+
+.project-about-members
+	text-align: right
+	margin-top: 6px
+	margin-right: 10px
+
+.project-about-member-count
+	float: left
+
+.project-about-visibility
+	float: right
+	margin: 0px 5px
+
+	.project-about-visibility-public, .project-about-visibility-private
+		width: 35px
+		height: 35px
+		background-size: cover
+		background-position: center center
+		margin-bottom: 1px
+
+	.project-about-visibility-public
+		background-image: url('../images/earth.png')
+
+	.project-about-visibility-private
+		background-image: url('../images/social-home.png')
+
+	.project-visibility-support
+		color: $light-font
+
+.edit-picture
+	background-color: #fff
+	font-size: 0.85em
+	padding: 4px
+	display: none
+	background-color: #efefef
+	border: 1px solid #b2b2b2
+
+	&:hover
+		background-color: #ddd
+
+.project-home
+	.edit-cover-picture
+		position: relative
+		top: 110px
+		left: 20px
+		width: 144px
+
+		.edit-picture-icon
+			background-position: -456px -48px
+			width: 12px
+			height: 12px
+
+.edit-picture-icon
+	background-image: url("../images/glyphicons-halflings.png")
+	background-position: -168px 0
+	background-repeat: no-repeat
+	width: 10px
+	height: 10px
+	display: inline-block
+	margin-right: 6px
+
+.page-submit-button
+	float: right
+
+form#project-settings-form, .requestor-list
+	margin-top: 20px
+
+form#project-settings-form
+	input[type="text"], input[type="password"], textarea
+		width: 95%
+
+	table
+		width: 100%
+
+aside.page-menu-wrapper
+	min-height: 450px
+	background-color: #efefef
+
+.accepted-label, .declined-label
+	margin-right: 6px
+
+.accepted-label
+	background-color: #B7D086
+	color: #427E53
+
+.declined-label
+	background-color: #D14836
+	color: #fff
+
+.success-message, .error-message
+	@include border-radius(2px)
+	padding: 8px
+	margin: 4px 0px
+	border-width: 1px
+	border-style: solid
+
+.success-message
+	background-color: #dff0d8
+	color: #468847
+	border-color: #d6epc6
+
+.error-message
+	background-color: #f2dede
+	color: #B94A48
+	border-color: #eed3d7
+
+.resource-collection-visibility-dialog
+	width: 600px
+	min-height: 125px
+
+.add-collaborator-wrapper
+	overflow: hidden
+	margin-top: 6px
+	margin-bottom: 15px
+
+	.add-collaborator-input
+		float: left
+		width: 85%
+
+		input
+			width: 100%
+
+			&.waiting
+				background: url('../images/spinner.gif') no-repeat right
+
+	.add-collaborator-button
+		float: right
+
+ul.collaborators
+	border: 1px solid #ddd
+	overflow-y: auto
+	margin-top: 10px
+	padding: 0px 10px
+	height: 250px
+
+	&.waiting
+		background: url('../images/spinner.gif') no-repeat center center
+
+.collection-visibility-form
+	nav.collection-visibility-form-tabs
+		ul
+			li:first-child
+				margin: 0px
+
+			li
+				a
+					@include border-radius(0px)
+					border-color: #EFEFEF
+					background-image: url('../images/unchecked-radio-button.png')
+					background-repeat: no-repeat
+					background-position: 6px 10px
+					padding-left: 26px
+
+					&.selected
+						border-width: 1px
+						border-color: #BCBCBC
+						background-image: url('../images/checked-radio-button.png')
+
+	.collection-visibility-form-content
+		border-top-width: 0px
+		margin-top: 10px
+
+.collection-actions
+	margin-bottom: 20px
+	overflow: hidden
+
+.move-resource-collection-dialog
+	width: 400px
+	height: 360px
+
+	.move-resource-collection-browser
+		height: 230px
+		border: 1px solid #ddd
+		padding: 10px
+		overflow: auto
+
+		&.loading-browser
+			background: url('../images/spinner.gif') no-repeat center center
+
+		.selected-destination-collection
+			background-color: $link-hover
+			color: #fff
+
+	.move-resource-collection-submit-wrapper
+		margin-top: 10px
+		overflow: hidden
+
+		.move-resource-collection-submit-button
+			float: right
