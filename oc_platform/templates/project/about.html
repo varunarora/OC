@@ -3,32 +3,71 @@
 
 <div class="center-stage">
     <div id="fill-panel" class="panel-left">
-        <p>
-            <h1>{{ project.members.count }}</h1>
-            member(s)
-        </p>
-        <p>
-            <h1>{{ project.visibility|title }}</h1>
-            project
-        </p>
-        <p>
-            Created on
-            <h1>{{ project.created }}</h1>
-        </p>
-        <p>
-            Tagline<br/>
-            <span class="bold">{{ project.short_description }}</span>
-        </p>
-        <p>
-            URL<br/>
-            <span class="bold"><a href="{% url projects:project_home project_slug=project.slug %}">theopencurriculum.org{% url projects:project_home project_slug=project.slug %}</a></span>
-        </p>
-        <p>
-            Administrator(s)<br/>
-            {% for admin in project.admins.all %}
-                <a href="{% url user:user_profile username=admin.username %}" class="bold">{{ admin.get_full_name }}</a>
-            {% endfor %}
-        </p>
+    {% if user.is_authenticated %}
+
+        {% if user not in project.confirmed_members %}
+            {% if user not in project.members.all %}
+            <div class="request-to-join">
+                Want to become a member of this project?
+                <div class="request-button-wrapper">
+                    <form>
+                        <input type="hidden" name="project_id" value="{{ project.id }}">
+                        <button class="request-button action-button">Request to join</button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="request-to-join">
+                Your request to join this project has been sent.
+            </div>
+            {% endif %}     
+        {% endif %}
+
+    {% else %}
+        <div class="request-to-join">
+            You must be logged in to request an invite to this project.
+        </div>
+    {% endif %}
+
+        <div class="project-about-box">
+            <div class="project-about-box-title">Highlights</div>
+            <div class="project-about-box-body">
+                <div class="project-about-member-count">
+                    <h1>{{ project.members.count }}</h1>
+                    member(s)
+                </div>
+                <div class="project-about-visibility">
+                    <div class="project-about-visibility-{{ project.visibility }}"></div>
+                    <span class="project-visibility-support">{{ project.visibility|title }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="project-about-box">
+            <div class="project-about-box-title">Tagline</div>
+            <div class="project-about-box-body">
+                {{ project.short_description }}
+            </div>
+        </div>
+        <div class="project-about-box">
+            <div class="project-about-box-title">URL</div>
+            <div class="project-about-box-body">
+                <a href="{% url projects:project_home project_slug=project.slug %}">theopencurriculum.org{% url projects:project_home project_slug=project.slug %}</a>
+            </div>
+        </div>
+        <div class="project-about-box">
+            <div class="project-about-box-title">Administrator(s)</div>
+            <div class="project-about-box-body">
+                <div class="project-admins">
+                {% for admin in project.admins.all %}
+                    <a href="{% url user:user_profile username=admin.username %}"><div class="project-admin-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ admin.get_profile.profile_pic.name }}'); " title="{{ admin.get_full_name }}"></div></a>
+                {% endfor %}
+                </div>
+                <div class="project-about-members"><a href="{% url projects:project_members project_slug=project.slug %}">View all members &rsaquo;</a></div>
+            </div>
+        </div>
+        <div class="project-datetimestamp">
+            Created on {{ project.created }}
+        </div>
     </div>
     <div id="key-panel" class="panel-right">
         <h3>About {{ project.title }}</h3>
@@ -36,4 +75,5 @@
     </div>
 </div>
 
+{% include 'project/footer.html' %}
 {% include 'partials/footer.html' %}

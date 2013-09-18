@@ -7,20 +7,32 @@
                     <p id="project-info-description">{{ project.short_description }}</p>
                 </div>
             </hgroup>
+            {% if user in project.admins.all %}
+            <div class="edit-cover-picture edit-picture">
+                <span class="edit-picture-icon"></span>Change cover picture...
+            </div>
+            {% endif %}
         </header>
-        <!--
-        <div class="edit-profile-picture">
-            <span class="edit-picture-icon"></span>Change picture...
+        <div class="login-messages project-messages">
+            <span>Center center me center all the way</span>
         </div>
-        -->
+
         <nav class="project-navigation">
             <ul>
                 <!--<li><a href="{% url projects:project_home project_slug=project.slug %}"{% if page == "home" %} class="current-page"{% endif %}>{{ project.title }}</a></li>-->
                 <li><a href="{% url projects:project_about project_slug=project.slug %}"{% if page == "about" %} class="current-page"{% endif %}>About</a></li>
                 <li><a href="{% url projects:project_browse project_slug=project.slug %}"{% if page == "browse" %} class="current-page"{% endif %}>Browse...</a></li>
-                <!--<li><a href="{% url projects:project_discussions project_slug=project.slug %}"{% if page == "discussions" %} class="current-page"{% endif %}>Discussion board</a></li>-->
+                {% if user in project.confirmed_members %}
+                <li><a href="{% url projects:project_discussions project_slug=project.slug %}"{% if page == "discussions" %} class="current-page"{% endif %}>Discussion board</a></li>
+                {% endif %}
                 <li><a href="{% url projects:project_members project_slug=project.slug %}"{% if page == "members" %} class="current-page"{% endif %}>Members</a></li>
             </ul>
+
+            {% if user in project.admins.all %}
+            <ul class="project-administration-menu">
+                <li><a href="{% url projects:project_settings project_slug=project.slug %}"{% if page == "settings" %} class="current-page"{% endif %}>Settings</a></li>
+            </ul>
+            {% endif %}
         </nav>
     </div>
 </div>

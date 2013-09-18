@@ -322,6 +322,8 @@ STRINGS = {
         'ABOUT_TITLE': 'About',
         'BROWSE_TITLE': 'Browse...',
         'DISCUSSION_BOARD_TITLE': 'Discussion Board',
+        'SETTINGS_TITLE': 'Settings',
+        'REQUESTS_TITLE': 'Pending requests',
         'invite': {
             'SUCCESS_TITLE': 'Successfully received your projects invite',
             'FAILURE': 'Failed to submit form'
@@ -339,6 +341,9 @@ STRINGS = {
     'article_center': {
         'INTRODUCTION_TITLE': 'Hi - nice to meet you!',
         'TITLE': 'Article Center: Your private guide into article contributions'
+    },
+    'comments': {
+        'REPLY': 'Reply'
     }
 }
 

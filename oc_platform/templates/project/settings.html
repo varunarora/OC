@@ -1,0 +1,31 @@
+{% include 'partials/header.html' %}
+{% include 'project/header.html' with page="settings" %}
+
+<div class="center-stage">
+    <div id="fill-panel" class="panel-left">
+        {% include 'project/partials/settings-submenu.html' with submenu='general' %}
+    </div>
+    <div id="key-panel" class="panel-right">
+        <h2>General settings</h2>
+        <form action="/project/{{ project.slug }}/settings/" method="POST" id="project-settings-form">
+            {% if success %}
+                <div class="success-message">{{ success }}</div>
+            {% elif error %}
+                <div class="error-message">{{ error }}</div>
+            {% endif %}
+            {% csrf_token %}
+            <table>
+                <tr><td>Project name</td><td><input type="text" value="{{ project.title }}" name="title" /></td></tr>
+                <tr><td>Tagline</td><td><input type="text" value="{{ project.short_description }}" name="short_description" /></td></tr>
+                <tr><td>Description</td><td><textarea name="description">{{ project.description }}</textarea></td></tr>
+                <tr><td>Visibility</td><td>
+                    {% include 'project/partials/project-form-visibility.html' %}
+                </td></tr>
+                <tr><td colspan="2"><p><input type="submit" class="action-button page-submit-button" value="Save" /></p></td></tr>
+            </table>
+        </form>
+    </div>    
+</div>
+
+{% include 'project/footer.html' %}
+{% include 'partials/footer.html' %}

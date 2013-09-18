@@ -19,19 +19,19 @@
         {% endif %}
 
         <!-- If this changes, make changes to the associated JavaScript as well -->
-        <div id="member-list">
-        {% for member in project.members.all %}
-            <div class="member">
-                <div class="member-info">
-                    <div class="member-photo" style="background-image: url('{{ MEDIA_URL }}{{ member.get_profile.profile_pic.name }}');">
+        <div id="member-list" class="user-list">
+        {% for member in project.confirmed_members %}
+            <div class="member user">
+                <div class="member-info user-info">
+                    <div class="member-photo user-photo" style="background-image: url('{{ MEDIA_URL }}{{ member.get_profile.profile_pic.name }}');">
                     </div>
-                    <div class="member-description">
+                    <div class="member-description user-description">
                         <a href="{% url user:user_profile username=member.username %}">{{ member.get_full_name }}</a>
-                        {% if member in project.admins.all %}<span class="admin-label">ADMINISTRATOR</span>{% endif %}
+                        {% if member in project.admins.all %}<span class="admin-label label">ADMINISTRATOR</span>{% endif %}
                     </div>
                 </div>
-                <div class="member-actions">
-                {% if user in project.members.all %}
+                <div class="member-actions user-actions">
+                {% if user in project.confirmed_members %}
                     {% if member in project.admins.all %}
                         {% if member != user %}
                         <form>

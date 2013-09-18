@@ -2,8 +2,11 @@ from django.http import Http404
 from django.shortcuts import render, redirect, HttpResponse
 from django.utils.translation import ugettext as _
 from django.conf import settings
-from projects.models import Project
-from oer.models import Collection
+from projects.models import Project, Membership
+from oer.models import Resource, Collection
+from interactions.models import Comment
+from django.core.exceptions import PermissionDenied
+
 import json
 import itertools
 
@@ -101,8 +104,25 @@ def new_project(request):
                 # Try creating a new project with the form inputs
                 new_project = new_project_form.save()
 
-                # Assign this project as owner to the collection created earlier
-                new_project.collection.owner = new_project
+                # Add the creator to the project members.
+                project_creator = Membership(
+                    user=request.user, project=new_project, confirmed=True)
+                project_creator.save()
+
+                # Create a new root collection for the project
+                from django.template.defaultfilters import slugify
+                title = request.POST.get('title')
+                root_collection = Collection(
+                    title=title + "_root",
+                    host=new_project,
+                    visibility=request.POST.get('visibility'),
+                    slug=slugify(title),
+                    creator=request.user
+                )
+                root_collection.save()
+                new_project.collection = root_collection
+
+                new_project.save()
 
                 # Set default cover pic if not uploaded by user
                 if not new_project.cover_pic:
@@ -140,6 +160,23 @@ def _set_cover_picture(project, project_form):
         # TODO(Varun): Django notification for failure to create and assign
         #     profile picture
         print "Cover picture failed to be created"
+
+
+def change_cover_picture(request, project_id):
+    if request.method == "POST":
+        # TODO(Varun): Get rid of this after setting the right form.
+        from forms import UploadCoverPicture
+        form = UploadCoverPicture(request.POST, request.FILES)
+
+        project = Project.objects.get(pk=int(project_id))
+
+        if form.is_valid():
+            from django.core.files.base import ContentFile
+            cover_pic = ContentFile(request.FILES['new_cover_picture'].read())  # write_pic(request.FILES['new_profile_picture'])
+            project.cover_pic.save(
+                str(project.id) + '-cover.jpg', cover_pic)
+
+    return redirect(request.META.get('HTTP_REFERER'))
 
 
 def members(request, project_slug):
@@ -380,6 +417,49 @@ def list_collection(request, project_slug, collection_slug):
     return render(request, 'project/browse.html', context)
 
 
+def project_settings(request, project_slug):
+    project = Project.objects.get(slug=project_slug)
+
+    submit_context = {}
+
+    if request.method == "POST":
+        from forms import ProjectSettings
+        settings_form = ProjectSettings(request.POST, project)
+
+        if settings_form.is_valid():
+            settings_form.save()
+            submit_context = {
+                'success': 'Successfully saved your changes.'
+            }            
+        else:
+            print settings_form.errors
+            submit_context = {
+                'error': 'There were errors with your submission.'
+            }
+
+    context = dict({
+        'project': project,
+        'title': (_(settings.STRINGS['projects']['SETTINGS_TITLE']) +
+                  ' &lsaquo; ' + project.title)
+    }.items() + submit_context.items())
+    return render(request, 'project/settings.html', context)
+
+
+def requests(request, project_slug):
+    project = Project.objects.get(slug=project_slug)
+
+    membership_requestors = Membership.objects.filter(
+        project=project, confirmed=False)
+
+    context = {
+        'project': project,
+        'membership_requestors': membership_requestors,
+        'title': (_(settings.STRINGS['projects']['REQUESTS_TITLE']) +
+                  ' &lsaquo; ' + project.title)
+    }
+    return render(request, 'project/pending-invites.html', context)
+
+
 # Projects-specific API below
 
 def add_member(request, project_id, user_id):
@@ -404,10 +484,21 @@ def add_member(request, project_id, user_id):
     from django.contrib.auth.models import User
     user = User.objects.get(pk=user_id)
 
+    if Membership.objects.filter(user=user, project=project).count() != 0:
+        context = {
+            'title': 'Member is already added',
+            'message': 'This member is already a part of the project.'
+        }
+        return _api_failure(context)        
+
     try:
         # Add the user to the project members.
-        project.members.add(user)
-        project.save()
+        new_member = Membership(user=user, project=project, confirmed=True)
+        new_member.save()
+
+        # Notify the member about being added.
+        Membership.new_member_added.send(
+            sender="Projects", membership_id=new_member.id)
 
         # Prepare (serialize) user object be sent through the response.
         context = {
@@ -455,8 +546,11 @@ def remove_member(request, project_id, user_id):
     user = User.objects.get(pk=user_id)
 
     try:
-        # Add the user to the project members.
-        project.members.remove(user)
+        # Remove the user from the project members and admins.
+        member = Membership.objects.get(user=user, project=project)
+        member.delete()
+
+        project.admins.remove(user)
         project.save()
 
         return _api_success()
@@ -507,6 +601,10 @@ def add_admin(request, project_id, user_id):
         # Add the user to the project members.
         project.admins.add(user)
         project.save()
+
+        # Notify the member about being assigned an admin.
+        Membership.member_turned_admin.send(
+            sender="Projects", project=project, user=user)
 
         # Prepare (serialize) user object be sent through the response.
         context = {
@@ -590,6 +688,15 @@ def _api_success(context={}):
 
 
 def _api_failure(context={}):
+    # TODO(Varun): Move this to an independant universal util class.
+    status = dict({'status': 'false'}.items() + context.items())
+    return HttpResponse(
+        json.dumps(status), 400,
+        content_type="application/json"
+    )
+
+
+def _api_unauthorized_failure(context={}):
     # TODO(Varun): Move this to an independant universal util class.
     status = dict({'status': 'false'}.items() + context.items())
     return HttpResponse(
