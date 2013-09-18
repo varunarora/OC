@@ -9,7 +9,7 @@
             <div class="user-profile-picture">
                 <div style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}')" class="user-picture-cover"></div>
                 {% if user == user_profile %}
-                <div class="edit-profile-picture">
+                <div class="edit-profile-picture edit-picture">
                     <span class="edit-picture-icon"></span>Change...
                 </div>
                 {% endif %}
