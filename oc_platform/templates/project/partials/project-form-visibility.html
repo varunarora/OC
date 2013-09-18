@@ -1,0 +1,8 @@
+<label>
+    <input type="radio" name="visibility" value="public" {% ifequal project.visibility "public" %}checked{% endifequal %} />
+    Everyone (Public)
+</label>
+<label>
+    <input type="radio" name="visibility" value="project" {% ifequal project.visibility "project" %}checked{% endifequal %} />
+    Only people I invite as members
+</label>
