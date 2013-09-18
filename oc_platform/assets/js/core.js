@@ -169,10 +169,70 @@ var OC = {
         });
     },
 
-    tabs: function(tabsWrapperClass){
+    customPopup: function(blockToPopup){
+        // Launch popup on init.
+        launchPopup($(blockToPopup));
+
+        // Attach handler to close popup.
+        attachEscapePopupHandler($(blockToPopup));
+
+        return {
+            close: closePopup
+        };
+
+        function launchPopup(blockToPopup){
+            $('.popup-background').addClass('show-popup-background');
+            blockToPopup.addClass('show-popup');
+
+            adjustPopupPosition(blockToPopup);
+
+            // On window resize, adjust the position of the theater
+            $(window).resize(function(){
+                adjustPopupPosition(blockToPopup);
+            });
+
+            $('.popup-background').click(closePopup);
+        }
+
+        function adjustPopupPosition(popup) {
+            var windowWidth = $(window).width();
+            var windowHeight = $(window).height();
+
+            // With an assumption that the block is smaller than the window size
+            $('.oc-popup').css('left', (windowWidth - popup.width()) / 2);
+            $('.oc-popup').css('top', (windowHeight - popup.height()) / 2.5);
+        }
+
+        function attachEscapePopupHandler(popup){
+            $('.oc-popup-exit', popup).click(function(){
+                closePopup();
+            });
+
+            $(document).keyup(function(event) {
+                if ($('.oc-popup').hasClass('show-popup')){
+                    if (event.which == 27) { // 'Esc' on keyboard
+                        closePopup();
+                    }
+                }
+            });
+        }
+
+        function closePopup(){
+            $('.oc-popup').removeClass('show-popup');
+            $('.popup-background').removeClass('show-popup-background');
+        }
+    },
+
+    tabs: function(tabsWrapperClass, options){
         /**
          *  Tab and click handler for everything tabs
          */
+        var tabNumber = 0, showOnly = null;
+        if (options){
+            tabNumber = options.tab || tabNumber;
+            showOnly = options.showOnly || showOnly;
+        }
+
         var tabbedUploader = $(tabsWrapperClass);
         tabbedUploader.addClass('oc-tabs');
 
@@ -206,8 +266,12 @@ var OC = {
 
         });
 
+        if (showOnly){
+            $('> nav', tabbedUploader).addClass('hide-tabs');
+        }
+
         // Set the selected tab as the first one
-        $(tabs[0]).click();
+        $(tabs[tabNumber]).click();
     },
 
     /* Beginning of functionality that may be moved into modules */
@@ -454,15 +518,6 @@ var OC = {
         $(OC.config.about.jobsCarousel).animate({
             left: "-1950px"
         }, 200000);
-
-        /* 
-        // The setInterval-timeout callback way
-        position = 0;
-        var init = setInterval(function(){
-            position -= 1;
-            $('.jobs-image-rotator').css("left", position + "px");
-        }, 200);
-        */
     },
 
     /*jslint nomen: true */
@@ -974,7 +1029,7 @@ var OC = {
     },
 
     bindEditHandlers: function(){
-        $('.edit-profile-picture').click(function(){
+        $('.edit-picture').click(function(){
             $('.picture-upload-dialog').dialog({
                 modal: true,
                 open: false,
@@ -1232,9 +1287,25 @@ var OC = {
     },
 
     initCollectionsTree: function(){
-        $('nav.collections-navigation ul li').click(function(){
-            $('> ul', this).toggle();
-        });
+        $('nav.collections-navigation ul li.parent-collection > .toggle-collection').click(
+            OC.parentCollectionClickHandler);
+
+        // Tipsy the collections/resources visibility.
+        $('.project-browse-item-visibility').tipsy({gravity: 'n'});
+
+        // Tipsy the collections/resources item delete button.
+        $('.resource-collection-delete').tipsy({gravity: 'n'});
+    },
+
+    parentCollectionClickHandler: function(event){
+        var listItem = $(event.target).closest('li');
+
+        listItem.toggleClass('opened-collection');
+        $('> ul', listItem).toggle();
+
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
     },
 
     initForgotAuth: function(){
@@ -1374,7 +1445,6 @@ jQuery(document).ready(function ($) {
 
     OC.initForgotAuth();
 
-
     OC.renderShowMore();
 
     OC.initArticleCenter();
@@ -1461,7 +1531,7 @@ _gaq.push(['_trackPageview']);
 jQuery.fn.shuffleElements = function () {
     var o = $(this), j, x, i;
     for (j, x, i = o.length; i; j = parseInt(Math.random() * i,
-            10), x = o[--i], o[i] = o[j], o[j] = x) {};
+            10), x = o[--i], o[i] = o[j], o[j] = x) {}
     return o;
 };
 
@@ -1478,6 +1548,19 @@ jQuery.fn.selectRange = function (start, end) {
             range.select();
         }
     });
+};
+
+jQuery.fn.hasClickEventListener = function(eventListener) {
+    elementClickEvents = $._data(this[0], "events").click;
+
+    var i = 0;
+    for (i; i < elementClickEvents.length; i++){
+        if (elementClickEvents[i].handler == eventListener){
+            return true;
+        }
+    }
+
+    return false;
 };
 
 /**
