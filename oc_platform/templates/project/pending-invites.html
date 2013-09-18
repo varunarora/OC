@@ -1,0 +1,36 @@
+{% include 'partials/header.html' %}
+{% include 'project/header.html' with page="settings" %}
+
+<div class="center-stage">
+    <div id="fill-panel" class="panel-left">
+        {% include 'project/partials/settings-submenu.html' with submenu='requests' %}
+    </div>
+    <div id="key-panel" class="panel-right">
+        <h2>Pending requests</h2>
+        <div class="requestor-list user-list">
+        {% for requestor in membership_requestors %}
+            <div class="requestor user">
+                <div class="requestor-info user-info">
+                    <div class="requestor-photo user-photo" style="background-image: url('{{ MEDIA_URL }}{{ requestor.user.get_profile.profile_pic.name }}');">
+                    </div>
+                    <div class="requestor-description user-description">
+                        <a href="{% url user:user_profile username=requestor.user.username %}">{{ requestor.user.get_full_name }}</a>
+                    </div>
+                </div>
+                <div class="requestor-actions user-actions">
+                    <form>
+                        <input type="hidden" name="request_id" value="{{ requestor.id }}" />
+                        <button class="btn dull-button accept-member">Accept</button>
+                        <button class="btn dull-button decline-member">Decline</button>
+                    </form>
+                </div>
+            </div>
+        {% empty %}
+        There are no pending requests at this time.
+        {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% include 'project/footer.html' %}
+{% include 'partials/footer.html' %}
