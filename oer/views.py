@@ -864,11 +864,16 @@ def delete_collection(request, collection_id):
 
 
 def new_project_collection(request, project_slug):
-    collection_slug = request.POST.get('parent_collection')
-    collection = Collection.objects.get(slug=collection_slug)
-
     from projects.models import Project
     project = Project.objects.get(slug=project_slug)
+
+    collection_slug = request.POST.get('parent_collection')
+
+    # Find the current collection through the project collection tree.
+    import oer.CollectionUtilities as cu
+    (browse_tree, flattened_tree) = cu._get_browse_tree(project.collection)
+    collection = next(
+        tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
 
     new_collection = Collection()
     new_collection.title = request.POST.get('new_collection_name')
