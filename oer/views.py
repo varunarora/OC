@@ -915,13 +915,16 @@ def new_project_collection(request, project_slug):
 
 
 def new_user_collection(request, username):
-    from oer.models import Collection
-
-    collection_slug = request.POST.get('parent_collection')
-    collection = Collection.objects.get(slug=collection_slug)
-
     from django.contrib.auth.models import User
     user = User.objects.get(username=username)
+
+    collection_slug = request.POST.get('parent_collection')
+
+    # Find the current collection through the project collection tree.
+    import oer.CollectionUtilities as cu
+    (browse_tree, flattened_tree) = cu._get_browse_tree(user.get_profile().collection)
+    collection = next(
+        tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
 
     new_collection = Collection()
     new_collection.title = request.POST.get('new_collection_name')
