@@ -39,3 +39,6 @@ class Membership(models.Model):
 
     new_member_added = Signal(providing_args=["membership_id"])
     member_turned_admin = Signal(providing_args=["project", "user"])
+
+    def __unicode__(self):
+        return str(self.project.title) + ":" + str(self.user.id)
