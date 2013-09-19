@@ -1,8 +1,10 @@
 {% if resources or collections %}
 {% if host == 'project' %}
+{% if user in project.confirmed_members %}
 <div class="collection-actions">
     <div class="collection-button move-button">Move to..</div>
 </div>
+{% endif %}
 {% endif %}
 <div class="{{ host }}-resources-added" id="collection-{{ collection.id }}">
     <div class="{{ host }}-collections-added-list">
