@@ -103,7 +103,7 @@ def view_resource(request, resource_id):
 
         # Fetch the number of resources that have been uploaded by the user who
         #     has created this resource.
-        userResourceCount = Resource.objects.filter(user=resource.user).count()
+        userResourceCount = resource.user.get_profile().collection.resources.count()
 
         # Increment page views (always remains -1 based on current view).
         Resource.objects.filter(id=resource_id).update(views=resource.views+1)
