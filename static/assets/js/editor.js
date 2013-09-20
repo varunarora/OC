@@ -234,6 +234,10 @@ $(document).ready(function(){
     $('.upload-drag-drop').dropzone({
         url: '/api/image-upload/',
         createImageThumbnails: false
+        /*previewTemplate: '<div class="dz-preview">' +
+            '<img data-dz-thumbnail /><input type="text" data-dz-name />' +
+            '<div class="dz-upload" data-dz-uploadprogress></div></div>' +
+            '<div data-dz-errormessage></div>',*/
     });
 
     OC.editor.initImageUploaderTabs();
@@ -244,6 +248,10 @@ $(document).ready(function(){
 
     Dropzone.forElement('.upload-drag-drop').on('success', function(file, response){
         if (response.status !== "false") {
+            // Make the name of the file content editable.
+            $('.dz-filename span', file.previewElement).attr(
+                'contenteditable', true);
+
             var newFileElement = $(this.element).children().last();
             var insertImageWrapper = $('<div/>', {
                 'class': 'image-insert-button'

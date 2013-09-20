@@ -363,6 +363,10 @@ $(document).ready(function() {
 
 
     Dropzone.forElement('.upload-drag-drop').on("success", function(file, response){
+        // Make the name of the file content editable.
+        $('.dz-filename span', file.previewElement).attr(
+            'contenteditable', true);
+
         var key;
         var response_object = JSON.parse(response);
         for (key in response_object) {
