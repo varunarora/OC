@@ -144,9 +144,9 @@ def build_user_collection_navigation(browse_tree, user):
         userRootElement = ElementTree.Element('li')
 
         profileHref = ElementTree.SubElement(userRootElement, 'a')
-        profileHref.set('href', _get_user_profile(user))
+        profileHref.set('href', _get_user_profile(user_profile))
         profileHref.set('id', 'collection-' + str(root_collection.id))
-        profileHref.text = user.get_full_name()
+        profileHref.text = user_profile.user.get_full_name()
 
         userRootList = ElementTree.Element('ul')
 
@@ -263,9 +263,9 @@ def _get_user_url(user_profile, collection_slug):
     )
 
 
-def _get_user_profile(user):
+def _get_user_profile(user_profile):
     return reverse(
         'user:user_profile', kwargs={
-            'username': user.username,
+            'username': user_profile.user.username,
         }
     )    
