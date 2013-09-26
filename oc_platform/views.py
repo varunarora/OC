@@ -97,7 +97,7 @@ def press(request):
     return render(request, 'press.html', context)
 
 
-def help(request):
+def feedback(request):
     return redirect('http://opencurriculum.uservoice.com')
 
 

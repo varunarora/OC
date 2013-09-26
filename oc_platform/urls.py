@@ -32,7 +32,7 @@ urlpatterns = patterns(
     url(r'^press/', 'oc_platform.views.press', name='press_duplicate'),
     url(r'^about/', 'oc_platform.views.about', name='about'),
 
-    url(r'^help/', 'oc_platform.views.help', name='help'),
+    url(r'^feedback/', 'oc_platform.views.feedback', name='feedback'),
 
     url(r'^jobs/', 'oc_platform.views.jobs', name='jobs'),
 
