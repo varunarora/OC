@@ -245,23 +245,23 @@ def _prepare_add_resource_context(request):
             collection = next(
                 tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
 
-    elif username:
-        from django.contrib.auth.models import User
-        user = User.objects.get(username=username)
-        if request.user != user:
-            raise PermissionDenied
+    else:
+        project = None
         host = 'user profile'
+
+        if username:
+            from django.contrib.auth.models import User
+            user = User.objects.get(username=username)
+            if request.user != user:
+                raise PermissionDenied
+        else:
+            user = request.user
 
         if collection_slug:
             (browse_tree, flattened_tree) = cu._get_browse_tree(
                 user.get_profile().collection)
             collection = next(
                 tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
-
-    else:
-        project = None
-        user = request.user
-        host = 'user profile'
 
     # Get all licenses
     from license.models import License
@@ -701,7 +701,7 @@ def _prepare_edit_resource_context(resource):
     resource_collection = Collection.objects.get(resources__id=resource.id)
 
     import oer.CollectionUtilities as cu
-    (host_type, host) = cu.get_collection_root(resource_collection.host)
+    (host_type, host) = cu.get_collection_root(resource_collection)
 
     return {
         'licenses': licenses,
