@@ -1,4 +1,4 @@
-<div class="{{ host }}-browse-item resource-collection-item {{ resource.type }}-resource" id="resource-{{ resource.id }}">
+<div class="{{ host }}-browse-item resource-collection-item resource {{ resource.type }}-resource" id="resource-{{ resource.id }}">
     <input type="checkbox" name="resource_id" value="{{ resource.id }}"/>
     <a href="{% url resource:read resource_id=resource.id %}">{{ resource }} <span class="project-browse-item-date">{{ resource.created|date:"M nS, 'y P"}}</span>
     
