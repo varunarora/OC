@@ -265,5 +265,25 @@ def email_share(request):
             json.dumps(status), 401, content_type="application/json")
 
 
+def list_articles(request):
+    limit = request.GET.get('limit', False)
+
+    from articles.models import Article
+    articles = Article.objects.filter(published=True).order_by('-views')[:limit]
+
+    serialized_articles = {}
+    for article in articles:
+        serialized_articles[str(article.id)] = {
+                'id': article.id,
+                'title': article.title,
+                'views': article.views,
+                'slug': article.slug,
+                'citation': article.citation
+            }
+
+    return HttpResponse(
+        json.dumps(serialized_articles), 401, content_type="application/json")
+
+
 def jstests(request):
     return render(request, 'testjs.html', {})

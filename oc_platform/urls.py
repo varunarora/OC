@@ -64,6 +64,8 @@ urlpatterns = patterns(
     url(r'^api/image-upload/', 'media.views.upload_image', name='api-image-upload'),
     url(r'^api/list-user-images/(?P<user_id>\d+)/$', 'media.views.list_user_images', name='api-list-user-images'),
 
+    url(r'^api/articles/list/$', 'oc_platform.views.list_articles', name='list_articles'),
+
     # Labs stuff
     url(r'^labs/article-center/$', 'articles.views.article_center', name='article_center'),
 
