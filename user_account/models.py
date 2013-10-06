@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from meta.models import Tag
 from django.db import models
 from django.dispatch import receiver
-from interactions.models import Comment, Vote
+from interactions.models import Comment, Vote, Favorite
 from projects.models import Project, Membership
 from oer.models import Collection
 from django.core.urlresolvers import reverse
@@ -264,3 +264,38 @@ class Notification(models.Model):
 
         notification.save()
 
+
+    @receiver(Favorite.resource_favorited)
+    def my_resource_favorited_notification(sender, **kwargs):
+        favorite = kwargs.get('favorite', None)
+
+        notification = Notification()
+        notification.user = favorite.resource.user
+        notification.url = reverse(
+            'resource:read', kwargs={
+                'resource_id': favorite.resource.id
+            }
+        )
+
+        notification.description = '%s favorited your resource "%s"' % (
+            favorite.user.get_full_name(), favorite.resource.title)
+
+        notification.save()
+
+
+    @receiver(Vote.resource_vote_casted)
+    def my_resource_upvoted_notification(sender, **kwargs):
+        vote = kwargs.get('vote', None)
+
+        notification = Notification()
+        notification.user = vote.parent.user
+        notification.url = reverse(
+            'resource:read', kwargs={
+                'resource_id': vote.parent.id
+            }
+        )
+
+        notification.description = '%s upvoted your resource "%s"' % (
+            vote.user.get_full_name(), vote.parent.title)
+
+        notification.save()
