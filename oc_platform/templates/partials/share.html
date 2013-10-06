@@ -15,8 +15,8 @@
             <p><textarea id="email-share-message" class="full-width">Hey!&#10;&#10;I would like to share with you with this resource from OpenCurriculum:&#10;&#10;{{ current_path }}</textarea></p>
             <p>
                 <table>
-                    <tr><td>Your name:</td><td><input type="text" id="email-from-name"/></td></tr>
-                    <tr><td>Your email address:</td><td><input type="text" id="email-from-address"/></td></tr>
+                    <tr><td>Your name:</td><td><input type="text" id="email-from-name"  value="{{ user.get_full_name }}"/></td></tr>
+                    <tr><td>Your email address:</td><td><input type="text" id="email-from-address" value="{{ user.email }}" /></td></tr>
                 </table>
             </p>
             <div id="email-share-error" class="form-error"></div>
