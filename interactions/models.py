@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from oer.models import Resource
 from articles.MarkdownTextField import MarkdownTextField
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
@@ -16,6 +17,7 @@ class Vote(models.Model):
     positive = models.NullBooleanField(null=True, blank=True, default=None)
 
     vote_casted = Signal(providing_args=["vote"])
+    resource_vote_casted = Signal(providing_args=["vote"])
 
 
 class Comment(models.Model):
