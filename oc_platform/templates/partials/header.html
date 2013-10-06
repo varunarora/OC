@@ -103,3 +103,7 @@
 					</hgroup>
 			</hgroup>
 		</header>
+	    <div class="login-messages-wrapper">
+	        {% for message in messages %}<span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>{% endfor %}
+	        <span class="login-messages"></span><span class="close-message-box"></span>
+	    </div>

@@ -1,11 +1,5 @@
 {% include 'partials/header.html' %}
 
-<div class="login-messages-wrapper">
-	<div class="login-messages">
-	    {% for message in messages %}<span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>{% endfor %}
-	</div>
-</div>
-
 <div class="center-stage">
 	<div id="key-panel" class="panel-left">
 		<article>
