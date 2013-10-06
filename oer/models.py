@@ -27,18 +27,23 @@ class Resource(models.Model):
     file = models.FileField(upload_to='resources', null=True, blank=True)
     image = models.ImageField(upload_to='resource_thumbnail', blank=True)
     source = models.CharField(max_length=256, null=True, blank=True)
+    collaborators = models.ManyToManyField(User, blank=True, null=True,
+        related_name='collabs')
 
     def __unicode__(self):
         return self.title
 
+    collaborator_added = Signal(providing_args=["resource", "user"])
+
 
 def generate_thumnbnail(sender, instance, created, raw, **kwargs):
-    ResourceThumbnail.generateThumbnail(instance)
-    # Now disconnect the dispatcher
-    post_save.disconnect(generate_thumnbnail, sender=Resource)
-    instance.save()
-    # Connect it again
-    post_save.connect(generate_thumnbnail, sender=Resource)
+    if created:
+        ResourceThumbnail.generateThumbnail(instance)
+        # Now disconnect the dispatcher
+        post_save.disconnect(generate_thumnbnail, sender=Resource)
+        instance.save()
+        # Connect it again
+        post_save.connect(generate_thumnbnail, sender=Resource)
 
 
 from django.db.models.signals import post_save

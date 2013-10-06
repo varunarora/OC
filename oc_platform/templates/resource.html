@@ -3,6 +3,10 @@
 <div class="center-stage">
 	<div id="key-panel" class="panel-left">
 		<article>
+			<form id="resource-form">
+				<input type="hidden" name="resource_id" value="{{ resource.id }}" />
+				<input type="hidden" name="user_id" value="{{ user.id }}" />
+			</form>
 			<header>
 				<h2>{{ resource.title }}</h2>
 				<section class="breadcrumb">
