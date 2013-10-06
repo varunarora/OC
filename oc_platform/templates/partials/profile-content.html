@@ -41,7 +41,7 @@
 
 {% if projects %}
 <div class="profile-projects">
-    <div class="projects-listing">
+    <div class="profile-projects-listing">
         <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Projects</h3>
         {% include 'partials/project-item.html' %}
     </div>
