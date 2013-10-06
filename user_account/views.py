@@ -597,7 +597,10 @@ def logout_view(request):
     from django.contrib.auth import logout
     logout(request)
 
-    return redirect(request.META.get('HTTP_REFERER'))
+    try:
+        return redirect(request.META.get('HTTP_REFERER'))
+    except:
+        return redirect('home')
 
 
 def googleplus_login(request):
