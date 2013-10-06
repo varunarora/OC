@@ -1568,7 +1568,7 @@ table
 	color: #B94A48
 
 .add-resource
-	width: 120px
+	width: 125px
 
 .page-action-button, .action-button, .collection-button
 	padding: 10px
@@ -1591,6 +1591,9 @@ table
 
 	&.mini-action-button
 		padding: 5px 12px
+
+	&.large-action-button
+		font-size: 1.6em
 
 .disabled-action-button
 	background-color: #A5BACF
@@ -1874,6 +1877,8 @@ aside#support.teacher-contributor-invite
 		a
 			background-image: url('../images/folder.png')
 
+
+.project-browse-item, .profile-browse-item, .favorite-resource-item
 	&.attachment-resource
 		a
 			background-image: url("../images/upload.png")
@@ -1913,7 +1918,24 @@ aside#support.teacher-contributor-invite
 		.profile-collection-delete, .project-collection-delete
 			background-image: url('../images/delete-resource-hover.png')
 
-.projects-listing
+.project-listing
+	&.project-visibility-public
+		.project-browse-item-visibility
+			&.visibility-project
+				background-image: url('../images/public-visibility.png')
+
+				&:hover
+					background-image: url('../images/public-visibility-hover.png')
+
+	&.collection-visibility-private
+		.project-browse-item-visibility
+			&.visibility-project, &.visibility-public
+				background-image: url('../images/private-visibility.png')
+
+				&:hover
+					background-image: url('../images/private-visibility-hover.png')
+
+.profile-projects-listing, .home-projects-listing
 	color: #fff
 	padding-top: 10px
 
@@ -1950,6 +1972,8 @@ aside#support.teacher-contributor-invite
 		height: 200px
 		overflow: hidden
 
+
+
 table.reset-password-table
 	margin-top: 20px
 
@@ -1962,29 +1986,34 @@ table.reset-password-table
 	padding: 8px 8px
 	@include text-shadow(0 1px 0 rgba(255, 255, 255, 0.5))	
 
-.login-messages
-	margin: auto
-	text-align: center
-
-	span
-		display: inline-block
-		padding: 8px 12px
-		background-color: #F9EDBE
-		border: 1px solid #F0C36D
-		@include border-radius(4px)
-
 .login-messages-wrapper
-	margin-top: 10px
-
-.project-messages
-	position: relative
+	position: fixed
+	text-align: center
 	display: none
-	height: 35px
+	padding: 8px 12px
+	top: 45px
+	background-color: #F9EDBE
+	border: 1px solid #F0C36D
+	left: 50%
+	@include border-radius(4px)
+	z-index: 100
+
+	span.close-message-box
+		width: 14px
+		height: 14px
+		display: inline-block
+		background-image: url("../images/delete-resource.png")
+		background-repeat: no-repeat
+		background-position: center center
+		margin-left: 10px
+		vertical-align: middle
+		cursor: pointer
+
+		&:hover
+			background-image: url("../images/delete-resource-hover.png")
 
 	&.show-messages
-		display: block
-		top: -130px
-		margin-bottom: -35px
+		display: inline-block
 
 .resource-panel
 	padding-top: 10px
@@ -2516,8 +2545,8 @@ ul.collaborators
 	&.waiting
 		background: url('../images/spinner.gif') no-repeat center center
 
-.collection-visibility-form
-	nav.collection-visibility-form-tabs
+.resource-collection-visibility-form
+	nav.resource-collection-visibility-form-tabs
 		ul
 			li:first-child
 				margin: 0px
@@ -2536,7 +2565,7 @@ ul.collaborators
 						border-color: #BCBCBC
 						background-image: url('../images/checked-radio-button.png')
 
-	.collection-visibility-form-content
+	.resource-collection-visibility-form-content
 		border-top-width: 0px
 		margin-top: 10px
 
@@ -2567,3 +2596,112 @@ ul.collaborators
 
 		.move-resource-collection-submit-button
 			float: right
+
+.favorite-resource-item
+	overflow: hidden
+	padding: 6px 0px
+
+	a
+		background-position: 2px center
+		background-repeat: no-repeat
+		padding-left: 25px
+
+	.favorite-resource-actions
+		float: right
+		display: none
+
+		&.is-owner
+			display: block
+
+		.profile-favorite-action
+			width: 16px
+			height: 16px
+			display: inline-block
+			cursor: pointer
+			background-image: url("../images/favorite.png")
+
+			&:hover
+				background-image: url("../images/favorite-hover.png")
+
+			&.favorited
+				background-image: url("../images/favorited.png")
+
+.easy-signup
+	.row-set
+		margin-top: 40px
+		background-color: #efefef
+		padding: 20px
+		padding-top: 40px
+
+	.easy-signup-form
+		margin: auto
+		margin-top: 60px
+		
+		.google-signin
+			#signinButton
+				text-align: center
+
+		table#signup-form-table
+			width: 80%
+			margin: auto
+			margin-bottom: 20px
+
+			input[type="text"], input[type="password"], select
+				height: 36px
+				padding-left: 8px
+				font-size: 1.8em
+
+			select
+				height: 46px
+
+			td.email-address-input-wrapper
+				input
+					width: 95%
+
+			.action-button
+				float: right
+
+			select[name="profession"]
+				width: 360px
+				margin-left: 15px
+
+			.form-info-text
+				font-size: 1.8em
+
+			tr.extra-information
+				padding-top: 10px
+
+			label
+				float: left
+				font-size: 1.6em
+				padding-left: 16px
+
+				input[type="radio"]
+					vertical-align: middle
+
+			label:nth-child(1)
+				padding-left: 4px
+
+			.dob-inputs-wrapper
+				float: left
+
+				select[name=dob_month]
+					width: 120px
+
+				input[name=dob_date]
+					width: 60px
+
+				input[name=dob_year]
+					width: 80px
+
+.or-wrapper
+	background-image: url("../images/signup-flank.png")
+	height: 15px
+	text-align: center
+	width: 80%
+	margin: 20px auto
+
+	.or-text
+		background-color: #fff
+		color: #666
+		padding: 6px
