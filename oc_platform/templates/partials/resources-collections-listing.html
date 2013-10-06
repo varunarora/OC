@@ -1,12 +1,12 @@
 {% if resources or collections %}
 {% if host == 'project' %}
 {% if user in project.confirmed_members %}
-<div class="collection-actions">
-    <div class="collection-button move-button">Move to..</div>
-</div>
+{% include 'partials/collection-actions.html' %}
 {% endif %}
+{% elif user == user_profile %}
+{% include 'partials/collection-actions.html' %}
 {% endif %}
-<div class="{{ host }}-resources-added" id="collection-{{ collection.id }}">
+<div class="{{ host }}-resources-collections resources-collections-added collection-visibility-{{ collection.visibility }}{% if host == 'project' %} project-listing project-visibility-{{ project.visibility }}{% endif %}" id="collection-{{ collection.id }}">
     <div class="{{ host }}-collections-added-list">
         {% for collection_item in collections %}
         <div class="{{ host }}-browse-item resource-collection-item directory" id="collection-{{ collection_item.id }}">
@@ -76,19 +76,27 @@
         <div class="delete-button oc-popup-exit"></div>
     </div>
     <div class="oc-popup-body">
-        <div class="collection-visibility-form">
-            <nav class="collection-visibility-form-tabs">
+        <div class="resource-collection-visibility-form">
+            <nav class="resource-collection-visibility-form-tabs">
                 <ul>
+                    {% if host == 'project' %}
                     <li><a href=".project-access">Everyone accessing the project</a></li>
+                    {% else %}
+                    <li><a href=".profile-access">Everyone accessing the profile</a></li>
+                    {% endif %}
                     <li><a href=".private-access">Only people I choose (private)</a></li>
                 </ul>
             </nav>
-            <div class="collection-visibility-form-content oc-tabs-content">
+            <div class="resource-collection-visibility-form-content oc-tabs-content">
                 <div class="project-access"></div>
+                <div class="profile-access">
+                    {% if host == 'profile' %}Your profile is public, so everyone can see this.{% endif %}
+                </div>
                 <div class="private-access">
                     <p>Add a collaborator:</p>
                     <form id="add-collection-collaborator-form">
                         <input type="hidden" name="collection_id" value="" />
+                        <input type="hidden" name="resource_id" value="" />
                         {% if host == 'project' %}
                         <input type="hidden" name="project_id" value="{{ project.id }}" />
                         {% endif %}
