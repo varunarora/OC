@@ -57,8 +57,25 @@ ul li span.icon
 .share-action span.icon
 	background-position: -120px -72px
 
-.favorite-action span.icon
-	background-position: -120px 0px
+.article-community > ul > li.favorite-action
+	&:hover
+		border: 1px solid #fff
+		background-color: #fff
+
+		span.icon
+			background-image: url("../images/favorite-hover.png")
+
+	&.favorited
+		span.icon
+			background-image: url("../images/favorited.png")
+
+	a
+		outline: none
+
+		span.icon
+			background-image: url("../images/favorite.png")
+			background-position: center center
+			background-repeat: no-repeat
 
 .thumbs-up-action span.icon
 	background-position: -96px -144px

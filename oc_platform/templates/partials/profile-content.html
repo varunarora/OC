@@ -1,3 +1,12 @@
+{% if favorites %}
+<div class="profile-favorites">
+    <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Favorites</h3>
+    {% for favorite in favorites %}
+        {% include 'partials/favorite-resource-item.html' %}
+    {% endfor %}
+</div>
+{% endif %}
+
 {% if contributions %}
 <div class="profile-contributions">
     <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Contributions</h3>
@@ -39,25 +48,19 @@
 </div>
 {% endif %}
 
-    {% if resources or collections %}
-    <div class="profile-resources">
-        <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Resources</h3>
+{% if resources or collections %}
+<div class="profile-resources">
+    <h3>{% if user == user_profile %}My{% else %}{{ user_profile.first_name }}'s{% endif %} Resources</h3>
 
-        {% include 'partials/resources-collections-listing.html' with host='profile' %}
+    {% include 'partials/resources-collections-listing.html' with host='profile' %}
 
-    </div>
+</div>
+{% endif %}
+
+{% if not favorites and not resources and not edits and not collection %}
+    {% if user == user_profile %}
+        You haven't created any content or participated in any projects. Get started by <a href="{% url articles:catalog %}">editing articles</a>, creating / uploading a resource or project.
+    {% else %}
+        {{ user_profile.first_name }} hasn't shared any content.
     {% endif %}
-
-    {% if favorites %}
-    <div class="profile-favorites">
-        <h3>Favorites</h3>
-    </div>
-    {% endif %}
-
-    {% if not favorites and not resources and not edits and not collection %}
-        {% if user == user_profile %}
-            You haven't created any content or participated in any projects. Get started by <a href="{% url articles:catalog %}">editing articles</a>, creating / uploading a resource or project.
-        {% else %}
-            {{ user_profile.first_name }} hasn't shared any content.
-        {% endif %}
-    {% endif %}
+{% endif %}

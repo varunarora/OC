@@ -1,7 +1,9 @@
 from django.shortcuts import HttpResponse
 from django.conf import settings
-from interactions.models import Comment, Vote
+from interactions.models import Comment, Vote, Favorite
 from django.contrib.contenttypes.models import ContentType
+from oc_platform import APIUtilities
+
 import json
 
 
@@ -82,15 +84,11 @@ def cast_vote(request, comment_id, positive):
             if positive:
                 # Send out a notification to the person who originally wrote
                 # the comment, if a positive vote is casted.
-                Vote.vote_casted.send(sender="Comments", vote=new_vote)            
+                Vote.vote_casted.send(sender="Comments", vote=new_vote)
 
-            response = {'status': 'true'}
-            return HttpResponse(
-                json.dumps(response), 200, content_type="application/json")
+            return APIUtilities._api_success()
         except:
-            response = {'status': 'false'}
-            return HttpResponse(
-                json.dumps(response), 401, content_type="application/json")
+            return APIUtilities._api_failure()
 
 
 def delete_comment(request, comment_id):
@@ -124,15 +122,164 @@ def delete_comment(request, comment_id):
                     for vote in votes:
                         vote.delete()
 
-                response = {'status': 'true'}
-                return HttpResponse(
-                    json.dumps(response), 200, content_type="application/json")
+                return APIUtilities._api_success()
 
-        response = {'status': 'false'}
-        return HttpResponse(
-            json.dumps(response), 401, content_type="application/json")
+        return APIUtilities._api_failure()
 
     except Comment.DoesNotExist:
-        response = {'status': 'false'}
+        return APIUtilities._api_not_found()    
+
+
+def get_favorite_state(request, resource_id, user_id):
+    try:
+        from oer.models import Resource
+        resource = Resource.objects.get(pk=resource_id)
+
+        from django.contrib.auth.models import User
+        user = User.objects.get(pk=user_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        favorite = Favorite.objects.get(user=user, resource=resource)
+
+        context = {
+            'favorite': {
+                'state': 'true',
+                'created': str(favorite.created)
+            }
+        }
+        return APIUtilities._api_success(context)
+
+    except:
+        context = {
+            'favorite': {
+                'state': 'false'
+            }
+        }
+        return APIUtilities._api_success(context)
+
+
+def favorite_resource(request, resource_id, user_id):
+    try:
+        from oer.models import Resource
+        resource = Resource.objects.get(pk=resource_id)
+
+        from django.contrib.auth.models import User
+        user = User.objects.get(pk=user_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    # Check if the favorite already exists
+    try:
+        existing_favorite = Favorite.objects.get(
+            user=user, resource=resource)
+
+        existing_favorite.delete()
+
+        response = {'status': 'unfavorite success'}
         return HttpResponse(
-            json.dumps(response), 404, content_type="application/json")        
+            json.dumps(response), 200, content_type="application/json")
+
+    except Favorite.DoesNotExist:
+        try:
+            if request.user != user:
+                return APIUtilities._api_unauthorized_failure()
+
+            # Create the favorite and save it
+            new_favorite = Favorite(user=user, resource=resource)
+            new_favorite.save()
+
+            if resource.user != user:
+                # Send out a notification to the person who originally made
+                # the resource.
+                Favorite.resource_favorited.send(sender="Favorite", favorite=new_favorite)
+
+            return APIUtilities._api_success()
+        except:
+            return APIUtilities._api_failure()
+
+
+def get_resource_vote_count(request, resource_id):
+    try:
+        from oer.models import Resource
+        resource = Resource.objects.get(pk=resource_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        from django.contrib.contenttypes.models import ContentType
+        resource_ct = ContentType.objects.get_for_model(Resource)
+
+        upvotes = Vote.objects.filter(
+            parent_id=resource.id, parent_type=resource_ct, positive=1)
+        downvotes = Vote.objects.filter(
+            parent_id=resource.id, parent_type=resource_ct, positive=0)
+
+        user_upvoted = False
+        user_downvoted = False
+        
+        if upvotes.filter(user=request.user).count() > 0:
+            user_upvoted = True
+
+        if downvotes.filter(user=request.user).count() > 0:
+            user_downvoted = True
+
+        context = {
+            'upvote_count': upvotes.count(),
+            'downvote_count': downvotes.count(),
+            'user_upvoted': 'true' if user_upvoted else 'false',
+            'user_downvoted': 'true' if user_downvoted else 'false'
+        }
+        return APIUtilities._api_success(context)
+    except:
+        return APIUtilities._api_failure()
+
+
+def upvote_resource(request, resource_id):
+    return cast_resource_vote(request, resource_id, True)
+
+
+def downvote_resource(request, resource_id):
+    return cast_resource_vote(request, resource_id, False)
+
+
+def cast_resource_vote(request, resource_id, positive):
+    try:
+        from oer.models import Resource
+        resource = Resource.objects.get(pk=resource_id)
+    except:
+        return APIUtilities._api_not_found()    
+
+    # Check if the vote already exists.
+    try:
+        from django.contrib.contenttypes.models import ContentType
+        resource_ct = ContentType.objects.get_for_model(Resource)
+
+        existing_vote = Vote.objects.get(
+            user=request.user, parent_type=resource_ct, parent_id=resource.id,
+            positive=positive)
+
+        existing_vote.delete()
+
+        response = {'status': 'unvote success'}
+        return HttpResponse(
+            json.dumps(response), 200, content_type="application/json")
+
+    except Vote.DoesNotExist:
+        try:
+            # Create the vote and save it
+            new_vote = Vote()
+            new_vote.user = request.user
+            new_vote.positive = positive
+            new_vote.parent = resource
+            new_vote.save()
+
+            if positive and resource.user != request.user:
+                Vote.resource_vote_casted.send(sender="Resource", vote=new_vote)
+
+            return APIUtilities._api_success()
+        except:
+            return APIUtilities._api_failure()
+
+

@@ -33,9 +33,15 @@ class Comment(models.Model):
     comment_created = Signal(providing_args=["comment_id", "parent_type"])
 
 
-"""
 class Favorite(models.Model):
+    user = models.ForeignKey(User)
+    created = models.DateTimeField(auto_now_add=True, editable=False)    
+    resource = models.ForeignKey(Resource)
 
+    resource_favorited = Signal(providing_args=["favorite"])
+
+
+"""
 
 class Rating(models.Model):
 

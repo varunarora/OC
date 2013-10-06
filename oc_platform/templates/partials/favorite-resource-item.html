@@ -1,0 +1,11 @@
+<div class="favorite-resource-item {{ favorite.resource.type }}-resource" id="resource-{{ favorite.resource.id }}">
+    <a href="{% url resource:read resource_id=favorite.resource.id %}">{{ favorite.resource.title }}</a>
+    
+    <div class="favorite-resource-actions{% if user == user_profile %} is-owner{% endif %}">
+        <span class="profile-favorite-action favorited" title="Unfavorite"></span>
+    </div>
+    <form class="profile-favorite-form">
+        <input type="hidden" name="resource_id" value="{{ favorite.resource.id }}" />
+        <input type="hidden" name="user_id" value="{{ user.id }}" />
+    </form>
+</div>

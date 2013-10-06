@@ -746,6 +746,10 @@ def user_profile(request, username):
         from projects.models import Project
         projects = Project.objects.filter(members__id__contains=user.id)
 
+        # Get all the resources the user has favorited.
+        from interactions.models import Favorite
+        favorites = Favorite.objects.filter(user=user)
+
         # Get user profile.
         user_profile = user.get_profile()
 
@@ -761,7 +765,8 @@ def user_profile(request, username):
 
         context = {
             'user_profile': user, 'edits': forks, 'projects': projects,
-            'resources': resources, 'contributions': contributions, 'form': form,
+            'resources': resources, 'contributions': contributions, 'favorites': favorites,
+            'form': form,
             'collection': user_profile.collection,
             'collections': child_collections,
             'title': user.first_name + ' ' + user.last_name + " &lsaquo; OpenCurriculum"
