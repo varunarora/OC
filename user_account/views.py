@@ -747,7 +747,7 @@ def user_profile(request, username):
 
         # Get all the projects that the user is a part of.
         from projects.models import Project
-        projects = Project.objects.filter(members__id__contains=user.id)
+        projects = Project.objects.filter(membership__user__id=user.id)
 
         # Get all the resources the user has favorited.
         from interactions.models import Favorite
