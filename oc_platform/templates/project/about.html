@@ -70,8 +70,10 @@
         </div>
     </div>
     <div id="key-panel" class="panel-right">
-        <h3>About {{ project.title }}</h3>
-        {{ project.description_html|safe }}
+        <article>
+            <h3>About {{ project.title }}</h3>
+            {{ project.description_html|safe }}
+        </article>
     </div>
 </div>
 
