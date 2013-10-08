@@ -113,6 +113,8 @@ def new_project(request):
                 # Create a new root collection for the project
                 from django.template.defaultfilters import slugify
                 title = request.POST.get('title')
+
+                from oer.models import Collection
                 root_collection = Collection(
                     title=title + "_root",
                     host=new_project,
