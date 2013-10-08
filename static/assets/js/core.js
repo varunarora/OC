@@ -951,7 +951,8 @@ var OC = {
         var blocksToCompress = [
             '.profile-resources-added-list',
             '.profile-contributions-list',
-            '.profile-projects-listing'
+            '.profile-projects-listing',
+            '.home-projects-listing'
         ];
 
         // Compress all blocks.
