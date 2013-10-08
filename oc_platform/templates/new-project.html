@@ -7,7 +7,7 @@
             {% csrf_token %}
             <table id="project-form-table">
                 <tr><td>Title*</td><td class="inputs"><input type="text" name="title" /></td></tr>
-                <tr><td>Short description (in less than 200 characters)*</td><td class="inputs"><textarea name="short_description"></textarea></td></tr>
+                <tr><td>Short description (in less than 200 characters)*</td><td class="inputs"><textarea name="short_description" maxlength="200"></textarea></td></tr>
                 <tr><td>Who can see its contents?*</td><td class="inputs">
                     {% include 'project/partials/project-form-visibility.html' %}
                 </td></tr>
