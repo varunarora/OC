@@ -5,16 +5,19 @@ ADMINS = (
     ('Varun Arora', 'varun@theopencurriculum.org'),
 )
 
-SIGNUPS_ADMINS = ['info@theopencurriculum.org']
-CONTRIBUTOR_SIGNUPS_ADMINS = ['info@theopencurriculum.org', 'zeinab@theopencurriculum.org', 'duncan@theopencurriculum.org']
+SIGNUPS_ADMINS = ['hello@theopencurriculum.org']
+CONTRIBUTOR_SIGNUPS_ADMINS = ['hello@theopencurriculum.org', 'zeinab@theopencurriculum.org', 'duncan@theopencurriculum.org']
 HELP_EMAIL = 'hello@theopencurriculum.org'
 
 EMAIL_HOST = "smtp.sendgrid.net"
 EMAIL_PORT = "587"
 EMAIL_HOST_USER = ""  # This needs to filled in
 EMAIL_HOST_PASSWORD = ""  # This needs to filled in
-SERVER_EMAIL = "info@theopencurriculum.org"  # This needs to filled in
+SERVER_EMAIL = "hello@theopencurriculum.org"  # This needs to filled in
 EMAIL_USE_TLS = True
+
+MAILCHIMP_API_KEY = 'f8cfcc0cca3214a9894a8c8a58d733f5-us7'
+MAILCHIMP_MASTER_LIST_ID = '461b507c12'
 
 MANAGERS = ADMINS
 
