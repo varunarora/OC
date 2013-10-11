@@ -5,7 +5,7 @@
 		<article>
 			<form id="resource-form">
 				<input type="hidden" name="resource_id" value="{{ resource.id }}" />
-				<input type="hidden" name="user_id" value="{{ user.id }}" />
+				<input type="hidden" name="user_id" value="{% if user.id %}{{ user.id }}{% endif %}" />
 			</form>
 			<header>
 				<h2>{{ resource.title }}</h2>
