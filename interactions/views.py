@@ -219,11 +219,12 @@ def get_resource_vote_count(request, resource_id):
         user_upvoted = False
         user_downvoted = False
         
-        if upvotes.filter(user=request.user).count() > 0:
-            user_upvoted = True
+        if (request.user.is_authenticated()):
+            if upvotes.filter(user=request.user).count() > 0:
+                user_upvoted = True
 
-        if downvotes.filter(user=request.user).count() > 0:
-            user_downvoted = True
+            if downvotes.filter(user=request.user).count() > 0:
+                user_downvoted = True
 
         context = {
             'upvote_count': upvotes.count(),
