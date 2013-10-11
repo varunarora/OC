@@ -2145,27 +2145,22 @@ var OC = {
                 'json');
 
                 resourceFavoriteButton.click(function(event){
-                    if (userID.length > 0) {
-                        $.get('/interactions/favorite/resource/' + resourceID + '/user/' + userID + '/',
-                            function(response){
-                                if (response.status == 'true'){
-                                    resourceFavoriteWrapper.addClass('favorited');
-                                    resourceFavoriteButton.attr('title', 'Unfavorite');
-                                }
-                                else if (response.status == 'unfavorite success'){
-                                    resourceFavoriteWrapper.removeClass('favorited');
-                                    resourceFavoriteButton.attr('title', 'Favorite');
-                                }
-                            },
-                        'json');
+                    $.get('/interactions/favorite/resource/' + resourceID + '/user/' + userID + '/',
+                        function(response){
+                            if (response.status == 'true'){
+                                resourceFavoriteWrapper.addClass('favorited');
+                                resourceFavoriteButton.attr('title', 'Unfavorite');
+                            }
+                            else if (response.status == 'unfavorite success'){
+                                resourceFavoriteWrapper.removeClass('favorited');
+                                resourceFavoriteButton.attr('title', 'Favorite');
+                            }
+                        },
+                    'json');
 
-                        event.preventDefault();
-                        event.stopPropagation();
-                        return false;
-                    } else {
-                        OC.popup('You must be logged in to favorite a resource',
-                            'Log in to favorite resource');
-                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
                 });
 
             // Tipsy the favorite button.
@@ -2193,6 +2188,15 @@ var OC = {
 
             // Tipsy the favorite button.
             profileFavoriteButton.tipsy({ gravity: 's'});
+        } else {
+            resourceFavoriteButton.click(function(event){
+                OC.popup('You must be logged in to favorite a resource',
+                    'Log in to favorite resource');
+
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+            });
         }
     },
 
@@ -2205,77 +2209,85 @@ var OC = {
             downvoteContainter = $('.article-community li.thumbs-down-action'),
             upvoteCountElement = $('.count', upvoteContainter),
             downvoteCountElement = $('.count', downvoteContainter);
+        
+        $.get('/interactions/votes/count/resource/' + resourceID + '/',
+            function(response){
+                if (response.status == 'true'){
+                    upvoteCountElement.text(response.upvote_count);
+                    downvoteCountElement.text(response.downvote_count);
+                
+                    if (response.user_upvoted == 'true'){
+                        downvoteContainter.addClass('user-upvoted');
+                    }
+                    if (response.user_downvoted == 'true'){
+                        downvoteContainter.addClass('user-downvoted');
+                    }
+                }
+            },
+        'json');
 
         if (userID){
-            $.get('/interactions/votes/count/resource/' + resourceID + '/',
-                function(response){
-                    if (response.status == 'true'){
-                        upvoteCountElement.text(response.upvote_count);
-                        downvoteCountElement.text(response.downvote_count);
-                    
-                        if (response.user_upvoted == 'true'){
-                            downvoteContainter.addClass('user-upvoted');
-                        }
-                        if (response.user_downvoted == 'true'){
-                            downvoteContainter.addClass('user-downvoted');
-                        }
-                    }
-                },
-            'json');
-
             $('a', upvoteContainter).click(function(event){
-                if (userID.length > 0) {
-                    $.get('/interactions/vote/up/resource/' + resourceID + '/',
-                        function(response){
-                            if (response.status == 'true'){
-                                upvoteContainter.addClass('user-upvoted');
+                $.get('/interactions/vote/up/resource/' + resourceID + '/',
+                    function(response){
+                        if (response.status == 'true'){
+                            upvoteContainter.addClass('user-upvoted');
 
-                                upvoteCountElement.text(
-                                    parseInt(upvoteCountElement.text(), 10) + 1);
-                            } else if (response.status == 'unvote success'){
-                                upvoteContainter.removeClass('user-upvoted');
+                            upvoteCountElement.text(
+                                parseInt(upvoteCountElement.text(), 10) + 1);
+                        } else if (response.status == 'unvote success'){
+                            upvoteContainter.removeClass('user-upvoted');
 
-                                upvoteCountElement.text(
-                                    parseInt(upvoteCountElement.text(), 10) - 1);
-                            }
-                        },
-                    'json');
+                            upvoteCountElement.text(
+                                parseInt(upvoteCountElement.text(), 10) - 1);
+                        }
+                    },
+                'json');
 
-                    event.preventDefault();
-                    event.stopPropagation();
-                    return false;
-                } else {
-                    OC.popup('You must be logged in to upvote a resource',
-                        'Log in to upvote resource');
-                }
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
             });
 
             $('a', downvoteContainter).click(function(event){
-                if (userID.length > 0) {
-                    $.get('/interactions/vote/down/resource/' + resourceID + '/',
-                        function(response){
-                            if (response.status == 'true'){
-                                downvoteContainter.addClass('user-downvoted');
+                $.get('/interactions/vote/down/resource/' + resourceID + '/',
+                    function(response){
+                        if (response.status == 'true'){
+                            downvoteContainter.addClass('user-downvoted');
 
-                                downvoteCountElement.text(
-                                    parseInt(downvoteCountElement.text(), 10) + 1);
-                            } else if (response.status == 'unvote success'){
-                                downvoteContainter.removeClass('user-downvoted');
+                            downvoteCountElement.text(
+                                parseInt(downvoteCountElement.text(), 10) + 1);
+                        } else if (response.status == 'unvote success'){
+                            downvoteContainter.removeClass('user-downvoted');
 
-                                downvoteCountElement.text(
-                                    parseInt(downvoteCountElement.text(), 10) - 1);
-                            }
-                        },
-                    'json');
+                            downvoteCountElement.text(
+                                parseInt(downvoteCountElement.text(), 10) - 1);
+                        }
+                    },
+                'json');
 
-                    event.preventDefault();
-                    event.stopPropagation();
-                    return false;
-                } else {
-                    OC.popup('You must be logged in to downvote a resource',
-                        'Log in to downvote resource');
-                }
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
             });
+        } else {
+             $('a', upvoteContainter).click(function(event){
+                OC.popup('You must be logged in to upvote a resource',
+                    'Log in to upvote resource');
+
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+             });
+
+            $('a', downvoteContainter).click(function(event){
+                OC.popup('You must be logged in to downvote a resource',
+                    'Log in to downvote resource');
+
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+             });
         }
     },
 
