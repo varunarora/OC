@@ -23,6 +23,22 @@ class UserProfile(models.Model):
         return self.user.username
 
 
+def add_to_mailing_list(sender, instance, created, raw, **kwargs):
+    if created:
+        import mailchimp
+        from django.conf import settings
+        mailchimp = mailchimp.Mailchimp(settings.MAILCHIMP_API_KEY)
+        mailchimp.lists.subscribe(
+            settings.MAILCHIMP_MASTER_LIST_ID,
+            {'email': instance.user.email },
+            None, None,
+            False
+        )
+
+from django.db.models.signals import post_save
+post_save.connect(add_to_mailing_list, sender=UserProfile)
+
+
 class Cohort(models.Model):
     members = models.ManyToManyField(User)
 
@@ -221,6 +237,8 @@ class Notification(models.Model):
         # Get the discussion post.
         from interactions.CommentUtilities import CommentUtilities
         (host_type, host, discussion) = CommentUtilities.get_comment_root(vote.parent)
+
+        # TODO(Varun): Don't notify if the parent creator and vote creator are the same.
 
         notification.url = reverse(
             'projects:project_discussion', kwargs={
