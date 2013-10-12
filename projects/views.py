@@ -297,7 +297,10 @@ def _hasImmediateChildren(collection):
 
 
 def discussions(request, project_slug):
-    project = Project.objects.get(slug=project_slug)
+    try:
+        project = Project.objects.get(slug=project_slug)
+    except:
+        raise Http404
 
     if request.user not in project.members.all():
         raise PermissionDenied
