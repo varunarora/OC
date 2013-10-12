@@ -28,12 +28,15 @@ def add_to_mailing_list(sender, instance, created, raw, **kwargs):
         import mailchimp
         from django.conf import settings
         mailchimp = mailchimp.Mailchimp(settings.MAILCHIMP_API_KEY)
-        mailchimp.lists.subscribe(
-            settings.MAILCHIMP_MASTER_LIST_ID,
-            {'email': instance.user.email },
-            None, None,
-            False
-        )
+        try:
+            mailchimp.lists.subscribe(
+                settings.MAILCHIMP_MASTER_LIST_ID,
+                {'email': instance.user.email },
+                None, None,
+                False
+            )
+        except:
+            pass
 
 from django.db.models.signals import post_save
 post_save.connect(add_to_mailing_list, sender=UserProfile)
