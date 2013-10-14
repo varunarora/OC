@@ -72,7 +72,7 @@
 <div class="picture-upload-dialog dialog">
     <form method="POST" action="/user/{{ user_profile.username }}/change-picture/" enctype="multipart/form-data">
         {% csrf_token %}
-        Choose a new profile picture from your computer (less than 2 MB in size):<p/>
+        Choose a new profile picture from your computer (&lt;2 MB in size &amp; suggested &gt; 200x200px in dimensions):<p/>
         <input type="file" name="new_profile_picture" id="id_new_profile_picture"/>
     </form>
 </div>
