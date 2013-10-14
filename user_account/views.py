@@ -1155,7 +1155,7 @@ def resize_user_image(user_profile, widthHeight):
 
     # Throw a white background in the case of a transparent image.
     background = Image.new("RGB", imagefit.size, (255, 255, 255))
-    background.paste(imagefit, mask=imagefit.split()[3]) # 3 is the alpha channel
+    background.paste(imagefit, imagefit)
 
     imagefit.save(resized_image_path, 'JPEG', quality=90)
     
