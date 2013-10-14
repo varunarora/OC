@@ -13,7 +13,7 @@
                 <div class="edit {% ifequal article.revision revision %}current{% endifequal %}">
                     <div class="edit-thumbnail">
                         {% if revision.user %}
-                        <img src="{{ MEDIA_URL }}{{ revision.user.get_profile.profile_pic.name }}" />
+                        <div class="edit-thumbnail-image" style="background-image: url('{{ MEDIA_URL }}{{ revision.user.get_profile.profile_pic.name }}')"></div>
                         {% endif %}
                     </div>
                     <div class="description">
