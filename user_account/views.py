@@ -781,6 +781,12 @@ def user_profile(request, username):
 
 
 def list_collection(request, username, collection_slug):
+    from oer.models import Collection
+    try:
+        Collection.objects.get(slug=collection_slug)
+    except Collection.DoesNotExist:
+        raise Http404
+
     try:
         user = User.objects.get(username=username)
         user_profile = user.get_profile()
@@ -1068,6 +1074,12 @@ def reset_password_set(request, username):
     return render(request, 'reset-password.html', context)
 
 
+def easy_register(request):
+    context = {}
+    return render(request, 'event-register.html', context)
+
+
+
 # API Stuff below #/
 
 def list_users(request, query):
@@ -1102,10 +1114,37 @@ def change_profile_picture(request, username):
             user = User.objects.get(username=str(username))
             user_profile = user.get_profile()
 
+            # TODO(Varun): Reset profile picture position.
+
             from django.core.files.base import ContentFile
             profile_pic = ContentFile(request.FILES['new_profile_picture'].read())  # write_pic(request.FILES['new_profile_picture'])
+            
             user_profile.profile_pic.save(
                 str(user.id) + '-profile.jpg', profile_pic)
+
+            # Now resize the image and resave
+            from PIL import Image
+            image = Image.open(user_profile.profile_pic.path)
+            (original_width, original_height) = image.size
+
+            if original_width > original_height:
+                new_height = 200
+                new_width = (original_width / float(original_height)) * 200
+            else:
+                new_height = (original_height / float(original_width)) * 200
+                new_width = 200
+
+            imagefit = image.resize((int(new_width), int(new_height)), Image.ANTIALIAS)
+            resized_image_path = settings.MEDIA_ROOT + 'profile/200x200/' + str(user.id) + '-profile200x200.jpg'
+
+            imagefit.save(resized_image_path, 'JPEG', quality=90)
+            
+            from django.core.files.images import ImageFile
+            user_profile.profile_pic.save(
+                str(user.id) + '-profile200x200.jpg', ImageFile(open(resized_image_path)))
+
+            from django.contrib import messages
+            messages.success(request, 'New picture uploaded. Drag and save for your ideal fit.')
 
     return redirect('user:user_profile', username=username)
 
