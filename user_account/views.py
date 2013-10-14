@@ -1153,9 +1153,12 @@ def resize_user_image(user_profile, widthHeight):
         str(widthHeight) + '/' + str(user_profile.user.id) + '-profile' + str(widthHeight) + 'x' +
         str(widthHeight) + '.jpg')
 
-    # Throw a white background in the case of a transparent image.
-    background = Image.new("RGBA", imagefit.size, (255, 255, 255))
-    background.paste(imagefit, None, imagefit.split()[-1])
+    try:
+        # Throw a white background in the case of a transparent image.
+        background = Image.new("RGBA", imagefit.size, (255, 255, 255))
+        background.paste(imagefit, None, imagefit.split()[-1])
+    except:
+        pass
 
     imagefit.save(resized_image_path, 'JPEG', quality=90)
     
