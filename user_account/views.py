@@ -1207,18 +1207,9 @@ def edit_headline(request, user_id):
         user_profile.headline = new_headline
         user_profile.save()
 
-        status = {'status': 'true'}
-        return HttpResponse(
-            json.dumps(status), 200,
-            content_type="application/json"
-        )
-
+        return APIUtilities._api_success()
     except:
-        status = {'status': 'false'}
-        return HttpResponse(
-            json.dumps(status), 401,
-            content_type="application/json"
-        )
+        return APIUtilities._api_failure()
 
 
 def dismiss_notifications(request, user_id):
@@ -1228,15 +1219,6 @@ def dismiss_notifications(request, user_id):
         from user_account.models import Notification
         Notification.objects.filter(id__in=notification_ids).update(read=True)
 
-        status = {'status': 'true'}
-        return HttpResponse(
-            json.dumps(status), 200,
-            content_type="application/json"
-        )
-
+        return APIUtilities._api_success()
     except:
-        status = {'status': 'false'}
-        return HttpResponse(
-            json.dumps(status), 401,
-            content_type="application/json"
-        )
+        return APIUtilities._api_failure()
