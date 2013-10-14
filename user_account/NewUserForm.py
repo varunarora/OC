@@ -210,6 +210,13 @@ class NewUserProfileForm(ModelForm):
             newRequest.__setitem__(
                 'social_id', social_id if social_login else None)
 
+            # Set profile picture default position.
+            from media.models import ImagePosition
+            new_user_image_position = ImagePosition(top=0, left=0)
+            new_user_image_position.save()
+
+            newRequest.__setitem__('profile_pic_position', new_user_image_position.id)
+
             self.profile_pic_tmp = profile_pic
 
         # Invoke the superclass with this new QueryDict object.

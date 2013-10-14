@@ -1455,6 +1455,7 @@ nav#user-buttons > ul > li.user-notification-count
 		outline: 0
 
 .header-user-picture
+	background-size: cover
 	width: 36px
 	height: 36px
 	float: left
@@ -2705,3 +2706,17 @@ ul.collaborators
 		background-color: #fff
 		color: #666
 		padding: 6px
+
+.reposition-overlay
+	z-index: 2
+	position: fixed
+	display: none
+	height: 100%
+	width: 100%
+	background: #fff
+	top: 0px
+	left: 0px
+	opacity: 0
+
+	&.show
+		display: block

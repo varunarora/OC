@@ -4,25 +4,79 @@
     .user-profile-picture
         float: left
         margin-right: 40px
+        width: 150px
+        height: 150px
 
         div.user-picture-cover
             width: 150px
             height: 150px
-            background-size: cover
+            background-repeat: no-repeat
+            
+            &.reposition-mode
+                position: absolute
+                z-index: 5
+        
+            &:hover
+                .edit-profile-picture
+                    display: block
+                    cursor: pointer
+                    z-index: 50            
+
+        div.user-picture-repositioner
+            width: 150px
+            height: 150px
+            position: relative
+            z-index: 25
+            display: none
+
+            &:hover
+                cursor: move
+
+            &.show
+                display: block
+
+        div.user-picture-repositioner-container
+            position: absolute
+            display: none
+
+            &.show
+                display: block
+
+        .user-profile-picture-copy
+            display: none
+
+        .reposition-floating-actions
+            height: 50px
+            width: 150px
+            position: absolute
+            z-index: 5
+            display: none
+
+            &.show
+                display: block
 
         .edit-profile-picture
             position: relative
-            top: -8px
-            margin-top: -22px
-            left: 60px
-            width: 72px
+            top: 8px
+            left: 90px
+            display: none
 
-        &:hover
-            cursor: move
+            .change-picture, .reposition-picture
+                background-position: center center
+                background-repeat: no-repeat
+                width: 16px
+                height: 16px
+                background-color: #000
+                padding: 4px
+                float: left
 
-            .edit-profile-picture
-                display: block
-                cursor: pointer
+            .change-picture
+                background-image: url('../images/edit.png')
+                margin-right: 4px
+
+            .reposition-picture
+                background-image: url('../images/crosshair.png')
+
 
     .user-profile-info
         float: left

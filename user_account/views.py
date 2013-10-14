@@ -2,6 +2,8 @@ from django.shortcuts import render, HttpResponse, redirect, Http404
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 from django.conf import settings
+from oc_platform import APIUtilities
+
 import json
 
 
@@ -1114,7 +1116,10 @@ def change_profile_picture(request, username):
             user = User.objects.get(username=str(username))
             user_profile = user.get_profile()
 
-            # TODO(Varun): Reset profile picture position.
+            # Reset profile picture position.
+            user_profile.profile_pic_position.top = 0
+            user_profile.profile_pic_position.left = 0
+            user_profile.profile_pic_position.save()
 
             from django.core.files.base import ContentFile
             profile_pic = ContentFile(request.FILES['new_profile_picture'].read())  # write_pic(request.FILES['new_profile_picture'])
@@ -1122,31 +1127,67 @@ def change_profile_picture(request, username):
             user_profile.profile_pic.save(
                 str(user.id) + '-profile.jpg', profile_pic)
 
-            # Now resize the image and resave
-            from PIL import Image
-            image = Image.open(user_profile.profile_pic.path)
-            (original_width, original_height) = image.size
-
-            if original_width > original_height:
-                new_height = 200
-                new_width = (original_width / float(original_height)) * 200
-            else:
-                new_height = (original_height / float(original_width)) * 200
-                new_width = 200
-
-            imagefit = image.resize((int(new_width), int(new_height)), Image.ANTIALIAS)
-            resized_image_path = settings.MEDIA_ROOT + 'profile/200x200/' + str(user.id) + '-profile200x200.jpg'
-
-            imagefit.save(resized_image_path, 'JPEG', quality=90)
-            
-            from django.core.files.images import ImageFile
-            user_profile.profile_pic.save(
-                str(user.id) + '-profile200x200.jpg', ImageFile(open(resized_image_path)))
+            resize_user_image(user_profile, 200)
 
             from django.contrib import messages
             messages.success(request, 'New picture uploaded. Drag and save for your ideal fit.')
 
     return redirect('user:user_profile', username=username)
+
+
+def resize_user_image(user_profile, widthHeight):
+    # Now resize the image and resave
+    from PIL import Image
+    image = Image.open(user_profile.profile_pic.path)
+    (original_width, original_height) = image.size
+
+    if original_width > original_height:
+        new_height = widthHeight
+        new_width = (original_width / float(original_height)) * widthHeight
+    else:
+        new_height = (original_height / float(original_width)) * widthHeight
+        new_width = widthHeight
+
+    imagefit = image.resize((int(new_width), int(new_height)), Image.ANTIALIAS)
+    resized_image_path = (settings.MEDIA_ROOT + 'profile/' + str(widthHeight) + 'x' +
+        str(widthHeight) + '/' + str(user_profile.user.id) + '-profile' + str(widthHeight) + 'x' +
+        str(widthHeight) + '.jpg')
+
+    imagefit.save(resized_image_path, 'JPEG', quality=90)
+    
+    from django.core.files.images import ImageFile
+    user_profile.profile_pic.save(
+        str(user_profile.user.id) + '-profile' + str(widthHeight) + 'x' +
+        str(widthHeight) + '.jpg', ImageFile(open(resized_image_path)))
+
+
+def reposition_profile_picture(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except:
+        raise Http404
+
+    if request.user != user:
+        return APIUtilities._api_unauthorized_failure()
+    
+    left = request.GET.get('left', None)
+    top = request.GET.get('top', None)
+
+    user_profile = user.get_profile()
+
+    try:
+        user_profile.profile_pic_position.top = int(top)
+        user_profile.profile_pic_position.left = int(left)
+        user_profile.profile_pic_position.save()
+
+        return APIUtilities._api_success()
+    except:
+        context = {
+            'title': 'Cannot reposition your profile picture.',
+            'message': 'We failed to reposition your profile picture. Please ' +
+                'contact us if this problem persists.'
+        }
+        return APIUtilities._api_failure(context)
 
 
 def edit_headline(request, user_id):

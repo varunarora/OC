@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from interactions.models import Comment, Vote, Favorite
 from projects.models import Project, Membership
 from oer.models import Collection
+from media.models import ImagePosition
 from django.core.urlresolvers import reverse
 
 class UserProfile(models.Model):
@@ -15,6 +16,7 @@ class UserProfile(models.Model):
     location = models.CharField(max_length=256)
     profession = models.CharField(max_length=256)
     profile_pic = models.ImageField(upload_to='images/users', blank=True)
+    profile_pic_position = models.ForeignKey(ImagePosition)
     interests = models.ManyToManyField(Tag, null=True, blank=True)
     social_id = models.CharField(max_length=32, null=True, blank=True)
     collection = models.ForeignKey('oer.Collection')

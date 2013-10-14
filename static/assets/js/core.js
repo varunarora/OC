@@ -1045,22 +1045,6 @@ var OC = {
 
     },
 
-    bindEditHandlers: function(){
-        $('.edit-picture').click(function(){
-            $('.picture-upload-dialog').dialog({
-                modal: true,
-                open: false,
-                width: OC.config.popup.width,
-                buttons: {
-                    Upload: function () {
-                        $('.picture-upload-dialog form').submit();
-                        $(this).dialog("close");
-                    }
-                }
-            });
-        });
-    },
-
     bindEditHeadlineHandler: function(){
         $('.profile-headline').keypress(function(event) {
             if (event.which == 13){
@@ -2210,21 +2194,23 @@ var OC = {
             upvoteCountElement = $('.count', upvoteContainter),
             downvoteCountElement = $('.count', downvoteContainter);
         
-        $.get('/interactions/votes/count/resource/' + resourceID + '/',
-            function(response){
-                if (response.status == 'true'){
-                    upvoteCountElement.text(response.upvote_count);
-                    downvoteCountElement.text(response.downvote_count);
-                
-                    if (response.user_upvoted == 'true'){
-                        downvoteContainter.addClass('user-upvoted');
+        if (resourceID){
+            $.get('/interactions/votes/count/resource/' + resourceID + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        upvoteCountElement.text(response.upvote_count);
+                        downvoteCountElement.text(response.downvote_count);
+                    
+                        if (response.user_upvoted == 'true'){
+                            downvoteContainter.addClass('user-upvoted');
+                        }
+                        if (response.user_downvoted == 'true'){
+                            downvoteContainter.addClass('user-downvoted');
+                        }
                     }
-                    if (response.user_downvoted == 'true'){
-                        downvoteContainter.addClass('user-downvoted');
-                    }
-                }
-            },
-        'json');
+                },
+            'json');
+        }
 
         if (userID){
             $('a', upvoteContainter).click(function(event){
@@ -2291,6 +2277,278 @@ var OC = {
         }
     },
 
+    initPictureManipulation: function(){
+        OC.initEditHandlers();
+
+        OC.repositionPictures.initRepositionPictures();
+    },
+
+    initEditHandlers: function(){
+        $('.edit-picture, .change-picture').click(function(){
+            $('.picture-upload-dialog').dialog({
+                modal: true,
+                open: false,
+                width: OC.config.popup.width,
+                buttons: {
+                    Upload: function () {
+                        $('.picture-upload-dialog form').submit();
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        });
+
+        $('.edit-picture, .change-picture').tipsy({gravity: 's'});
+    },
+
+    repositionPictures: {
+        originalRepositionableTop: 0,
+        originalRepositionableLeft: 0,
+
+        repositionSetup: false,
+
+        userPictureSelector: '.user-picture-cover',
+        userPicturePositionerSelector: '.user-picture-repositioner',
+        userPictureWrapperSelector: '.user-profile-picture',
+
+        initRepositionPictures: function(){
+            // Check to see if this is a user profile page.
+            if ($('form#profile-picture-reposition-form').length > 0){
+                // Bind the repositioning click to a handler.
+                $('.reposition-picture').click(OC.repositionPictures.repositionClickHandler);
+
+                $('.reposition-picture').tipsy({gravity: 's'});
+
+                // Set current position of image.
+                backgroundPosition = OC.repositionPictures.getProfilePictureBackgroundPosition();
+
+                OC.repositionPictures.originalRepositionableTop = backgroundPosition.top;
+                OC.repositionPictures.originalRepositionableLeft = backgroundPosition.left;
+            }
+        },
+
+        getProfilePictureBackgroundPosition: function(){
+            var userPicture = $(OC.repositionPictures.userPictureSelector),
+                userPictureCopy = $('.user-profile-picture-copy');
+            profilePictureRawBackgroundPosition = userPicture.css('background-position');
+            
+            positions = profilePictureRawBackgroundPosition.split(" ");
+
+            if (positions[0].indexOf('%') === -1){
+                leftPxIndex = positions[0].indexOf('px');
+                leftPx = parseInt(positions[0].substring(0, leftPxIndex), 10);
+
+                topPxIndex = positions[1].indexOf('px');
+                topPx = parseInt(positions[1].substring(0, topPxIndex), 10);
+
+                leftPercentage = parseInt((Math.abs(leftPx) / (
+                    userPictureCopy.width() - userPicture.width())) * 100, 10);
+                topPercentage = parseInt((Math.abs(topPx) / (
+                    userPictureCopy.height() - userPicture.height())) * 100, 10);
+            } else {
+                leftPercentageIndex = positions[0].indexOf('%');
+                leftPercentage = parseInt(positions[0].substring(0, leftPercentageIndex), 10);
+
+                topPercentageIndex = positions[1].indexOf('%');
+                topPercentage = parseInt(positions[1].substring(0, topPercentageIndex), 10);
+            }
+
+            return {
+                left: leftPercentage,
+                top: topPercentage
+            };
+        },
+
+        repositionClickHandler: function(){
+            if (!OC.repositionPictures.repositionSetup){
+                OC.repositionPictures.setupReposition();
+                OC.repositionPictures.repositionSetup = true;
+            }
+
+            $('.reposition-overlay').addClass('show');
+
+            // Show the subtle overlay.
+            $('.reposition-overlay').animate({
+                'opacity': 0.5,
+            }, 500);
+
+            // Pop the image container out.
+            var userPicture = $(OC.repositionPictures.userPictureSelector);
+            userPicture.addClass('reposition-mode');
+
+            // Show the repositioner.
+            OC.repositionPictures.showRepositioner();
+
+            // Show the repositioner container.
+            $('.user-picture-repositioner-container').addClass('show');
+
+            // Show the floating actions.
+            $('.reposition-floating-actions').addClass('show');
+
+            userPicture.tipsy('show');
+        },
+
+        setupReposition: function(){
+            // Set repositioner width and height as the image width/height.
+            var userPicturePositioner = $(
+                    OC.repositionPictures.userPicturePositionerSelector),
+                userPicture = $(OC.repositionPictures.userPictureSelector),
+                userPictureWrapper = $(
+                    OC.repositionPictures.userPictureWrapperSelector);
+
+            // First, fetch the image width and height
+            profilePictureBackgroundImage = userPicture.css('background-image');
+            var profilePictureCopy = $('<img/>', {
+                'src': profilePictureBackgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, ''),
+                'class': 'user-profile-picture-copy'
+            });
+
+            userPictureWrapper.append(profilePictureCopy);
+
+            userPicturePositioner.height(profilePictureCopy.height());
+            userPicturePositioner.width(profilePictureCopy.width());
+
+            // Build a container element and position it.
+            var containerElementClass = 'user-picture-repositioner-container';
+            var containerElement = $('<div/>', {
+                'class': containerElementClass + " show"
+            });
+            userPictureWrapper.append(containerElement);
+            containerElement.height(userPicture.height() + (
+                profilePictureCopy.height() - userPicture.height())*2);
+            containerElement.width(userPicture.width() + (
+                profilePictureCopy.width() - userPicture.width())*2);
+
+            containerElement.css('left', userPicture.offset().left -
+                (containerElement.width()/2 - userPicture.width()/2));
+            containerElement.css('top', userPicture.offset().top -
+                (containerElement.height()/2 - userPicture.height()/2));
+
+            // Make the repositioner draggable.
+            $('.user-picture-repositioner').draggable({
+                containment: '.' + containerElementClass,
+                drag: OC.repositionPictures.movePicture,
+                start: OC.repositionPictures.onDragStart,
+                stop: OC.repositionPictures.onDragComplete
+            });
+
+            // Hide the container until it is in reposition mode.
+            containerElement.removeClass('show');
+
+            // Prepare page view overlay.
+            var repositionOverlay = $('<div/>', {'class': 'reposition-overlay'});
+            $('body').append(repositionOverlay);
+
+            // Add and show floating "save"/"cancel" button.
+            var repositionFloatingActions = $('<div/>', {'class': 'reposition-floating-actions'}),
+                repositionSave = $('<button/>', {
+                    'class': 'action-button mini-action-button', 'text': 'Save'}),
+                repositionCancel = $('<button/>', {
+                    'class': 'action-button mini-action-button', 'text': 'Cancel'});
+
+            repositionFloatingActions.css('top',
+                userPicture.position().top + userPicture.height() + 10);
+            repositionFloatingActions.css('left',
+                userPicture.position().left + 10);
+
+            repositionFloatingActions.append(repositionSave);
+            repositionFloatingActions.append(repositionCancel);
+            $('.user-profile-picture').append(repositionFloatingActions);
+
+            // Give tipsy for dragability of the image.
+            userPicture.tipsy({
+                gravity: 's',
+                trigger: 'manual',
+                fade: 'true'
+            });
+
+            // Attach dismiss handler.
+            repositionCancel.click(OC.repositionPictures.dismissRepositionMode);
+
+            // Attach save handler.
+            repositionSave.click(OC.repositionPictures.savePosition);
+        },
+
+        showRepositioner: function(){
+            $('.user-picture-repositioner').addClass('show');
+        },
+
+        hideRepositioner: function(){
+            $('.user-picture-repositioner').removeClass('show');
+        },
+
+        movePicture: function(event, ui){
+            $('.user-picture-cover').css('background-position',
+                ui.position.left + "px " + ui.position.top+ "px");
+        },
+
+        onDragStart: function(event, ui){
+            $('.user-picture-cover').tipsy('hide');
+        },
+
+        onDragComplete: function(event, ui){},
+
+        dismissRepositionMode: function(){
+            // Hide the overlay.
+            $('.reposition-overlay').animate({
+                'opacity': 0,
+            }, 500, function(){
+                $(this).removeClass('show');
+
+                // Remove repositioner mode from the image.
+                var userPicture = $(OC.repositionPictures.userPictureSelector);
+                userPicture.removeClass('reposition-mode');
+            });
+
+            $('.reposition-floating-actions').removeClass('show');
+
+            // Delete/hide the repositioner.
+            OC.repositionPictures.hideRepositioner();
+
+            // Hide the repositioner container.
+            $('.user-picture-repositioner-container').removeClass('show');
+
+            // Hide tipsy, incase the image wasn't repositioned.
+            $('.user-picture-cover').tipsy('hide');
+        },
+
+        savePosition: function(){
+            // Compare to see if the position has changed from where it originally was.
+            originalBackgroundPosition = {
+                left: OC.repositionPictures.originalRepositionableLeft,
+                top: OC.repositionPictures.originalRepositionableTop
+            };
+
+            newBackgroundPosition = OC.repositionPictures.getProfilePictureBackgroundPosition();
+
+            // If position changed
+            if (originalBackgroundPosition.left !== newBackgroundPosition.left ||
+                originalBackgroundPosition.top !== newBackgroundPosition.top){
+
+                // Get the username.
+                var username = $(
+                    '#profile-picture-reposition-form input[name=username]').val();
+
+                // Push the new background position in a GET request.
+                $.get('/user/' + username + '/reposition-picture/?left=' +
+                    newBackgroundPosition.left + '&top=' + newBackgroundPosition.top,
+                    function(response){
+                        if (response.status == 'true'){
+                            // Clear the reposition mode. 
+                            OC.repositionPictures.dismissRepositionMode();
+                        } else {
+                            OC.popup(response.message, response.title);
+                        }
+                    },
+                'json');
+            } else {
+                // Clear the reposition mode. 
+                OC.repositionPictures.dismissRepositionMode();
+            }
+        }
+
+    },
+
     articleCenter: {
         registrationInit: function(){
             $(window).bind('scroll', function(e){
@@ -2335,7 +2593,7 @@ jQuery(document).ready(function ($) {
 
     /* Profile specific initializers and other functions */
 
-    OC.bindEditHandlers();
+    OC.initPictureManipulation();
 
     // Set up flashing (liffect) article panel.
     OC.renderArticlePanel();

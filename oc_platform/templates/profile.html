@@ -4,12 +4,18 @@
     {{ popup_message }}
         <div class="user-info{% if user == user_profile %} my-profile{% endif %}">
             <div class="user-profile-picture">
-                <div style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}')" class="user-picture-cover"></div>
+                <form id="profile-picture-reposition-form">
+                    <input type="hidden" name="username" value="{{ user_profile.username }}"/>
+                </form>
+                <div style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}'); background-position: {{ user_profile.get_profile.profile_pic_position.left }}% {{ user_profile.get_profile.profile_pic_position.top }}%" class="user-picture-cover" title="Hold and drag to reposition image">
                 {% if user == user_profile %}
-                <div class="edit-profile-picture edit-picture">
-                    <span class="edit-picture-icon"></span>Change...
+                <div class="edit-profile-picture">
+                    <div class="change-picture" title="Change picture"></div>
+                    <div class="reposition-picture" title="Reposition picture"></div>
                 </div>
                 {% endif %}
+                </div>
+                <div class="user-picture-repositioner"></div>
             </div>
             <div class="user-profile-info">
                 <div class="profile-name">

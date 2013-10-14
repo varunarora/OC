@@ -11,3 +11,8 @@ class Image(models.Model):
 
     def __unicode__(self):
         return self.path.name
+
+
+class ImagePosition(models.Model):
+    top = models.IntegerField(default=0)
+    left = models.IntegerField(default=0)

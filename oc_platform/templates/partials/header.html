@@ -64,7 +64,7 @@
 							<ul>
 							{% if user.is_authenticated %}
 								<li class="user-firstname-wrapper"><a href="{% url user:user_profile username=user.username %}" id="user-dropdown">
-									<img src="{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}" class="header-user-picture"/>
+									<div style="background-image: url('{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}')" class="header-user-picture"></div>
 									<div class="user-firstname">{{ user.first_name }}</div> 
 									<div class="horizontal-caret username-caret user-firstname-assistant"></div>
 									</a>
@@ -104,6 +104,5 @@
 			</hgroup>
 		</header>
 	    <div class="login-messages-wrapper">
-	        {% for message in messages %}<span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>{% endfor %}
-	        <span class="login-messages"></span><span class="close-message-box"></span>
+	        {% for message in messages %}<span{% if message.tags %} class="login-messages {{ message.tags }}"{% endif %}>{{ message }}</span>{% endfor %}<span class="close-message-box"></span>
 	    </div>
