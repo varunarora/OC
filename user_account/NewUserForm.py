@@ -212,7 +212,7 @@ class NewUserProfileForm(ModelForm):
 
             # Set profile picture default position.
             from media.models import ImagePosition
-            new_user_image_position = ImagePosition(top=0, left=0)
+            new_user_image_position = ImagePosition(top=50, left=50)
             new_user_image_position.save()
 
             newRequest.__setitem__('profile_pic_position', new_user_image_position.id)

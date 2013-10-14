@@ -1117,8 +1117,8 @@ def change_profile_picture(request, username):
             user_profile = user.get_profile()
 
             # Reset profile picture position.
-            user_profile.profile_pic_position.top = 0
-            user_profile.profile_pic_position.left = 0
+            user_profile.profile_pic_position.top = 50
+            user_profile.profile_pic_position.left = 50
             user_profile.profile_pic_position.save()
 
             from django.core.files.base import ContentFile
