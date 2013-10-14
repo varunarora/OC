@@ -1153,6 +1153,10 @@ def resize_user_image(user_profile, widthHeight):
         str(widthHeight) + '/' + str(user_profile.user.id) + '-profile' + str(widthHeight) + 'x' +
         str(widthHeight) + '.jpg')
 
+    # Throw a white background in the case of a transparent image.
+    background = Image.new("RGB", imagefit.size, (255, 255, 255))
+    background.paste(imagefit, mask=imagefit.split()[3]) # 3 is the alpha channel
+
     imagefit.save(resized_image_path, 'JPEG', quality=90)
     
     from django.core.files.images import ImageFile
