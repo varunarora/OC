@@ -1016,26 +1016,69 @@ table#project-form-table
 		textarea
 			height: 100px
 
-header#project-header
+header
 	height: 150px
+	overflow: hidden
 
-	hgroup#project-info-wrapper
-		background: rgba(0,0,0,0.6)
-		width: 375px
-		float: right
-		height: 100%
+	#project-header
+		height: 150px
+		width: $content-width
+		background-repeat: no-repeat
 
-		#project-info
-			padding: 20px
-			color: #fff
+		hgroup#project-info-wrapper
+			background: rgba(0,0,0,0.6)
+			width: 375px
+			float: right
+			height: 100%
 
-			#project-info-description
-				color: #b2b2b2
+			#project-info
+				padding: 20px
+				color: #fff
 
-	&:hover
-		.edit-cover-picture
+				#project-info-description
+					color: #b2b2b2
+
+		&.reposition-mode
+			position: absolute
+			z-index: 5
+
+		&:hover
+			.edit-cover-picture
+				display: block
+				cursor: pointer
+
+	div.project-header-repositioner
+		width: 960px
+		height: 150px
+		position: relative
+		z-index: 6
+		display: none
+
+		&:hover
+			cursor: move
+
+		&.show
 			display: block
-			cursor: pointer
+
+	div.project-header-repositioner-container
+		position: absolute
+		display: none
+
+		&.show
+			display: block
+
+	.project-header-picture-copy
+		display: none
+
+.reposition-floating-actions
+	height: 30px
+	width: 150px
+	position: absolute
+	z-index: 7
+	display: none
+
+	&.show
+		display: block
 
 textarea[name=objectives]
 	display: none
@@ -1947,7 +1990,7 @@ aside#support.teacher-contributor-invite
 		margin-bottom: 10px
 
 		.profile-projects-item-description-wrapper
-			background-size: auto 100%
+			background-size: cover
 
 		.profile-projects-item-title
 			font-size: 1.4em
@@ -2441,36 +2484,29 @@ form
 		color: $light-font
 
 .edit-picture
-	background-color: #fff
-	font-size: 0.85em
-	padding: 4px
+	position: relative
 	display: none
-	background-color: #efefef
-	border: 1px solid #b2b2b2
 
-	&:hover
-		background-color: #ddd
+	.change-picture, .reposition-picture
+		background-position: center center
+		background-repeat: no-repeat
+		width: 16px
+		height: 16px
+		background-color: #000
+		padding: 4px
+		float: left
+
+.change-picture
+	background-image: url('../images/edit.png')
+	margin-right: 4px
+
+.reposition-picture
+	background-image: url('../images/crosshair.png')
 
 .project-home
 	.edit-cover-picture
-		position: relative
 		top: 110px
 		left: 20px
-		width: 144px
-
-		.edit-picture-icon
-			background-position: -456px -48px
-			width: 12px
-			height: 12px
-
-.edit-picture-icon
-	background-image: url("../images/glyphicons-halflings.png")
-	background-position: -168px 0
-	background-repeat: no-repeat
-	width: 10px
-	height: 10px
-	display: inline-block
-	margin-right: 6px
 
 .page-submit-button
 	float: right

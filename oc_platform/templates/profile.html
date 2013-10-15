@@ -7,9 +7,9 @@
                 <form id="profile-picture-reposition-form">
                     <input type="hidden" name="username" value="{{ user_profile.username }}"/>
                 </form>
-                <div style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}'); background-position: {{ user_profile.get_profile.profile_pic_position.left }}% {{ user_profile.get_profile.profile_pic_position.top }}%" class="user-picture-cover" title="Hold and drag to reposition image">
+                <div style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}'); background-position: {{ user_profile.get_profile.profile_pic_position.left }}% {{ user_profile.get_profile.profile_pic_position.top }}%;" class="user-picture-cover" title="Hold and drag to reposition image">
                 {% if user == user_profile %}
-                <div class="edit-profile-picture">
+                <div class="edit-picture edit-profile-picture">
                     <div class="change-picture" title="Change picture"></div>
                     <div class="reposition-picture" title="Reposition picture"></div>
                 </div>

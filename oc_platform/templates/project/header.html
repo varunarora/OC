@@ -1,17 +1,24 @@
 <div id="chief-panel-container" class="project-home">
     <div id="chief-panel">
-        <header id="project-header" style="background: url('{{ MEDIA_URL }}{{ project.cover_pic }}')">
-            <hgroup id="project-info-wrapper">
-                <div id="project-info">
-                    <h2>{{ project.title }}</h2>
-                    <p id="project-info-description">{{ project.short_description }}</p>
+        <header class="project-header-wrapper">
+            <form id="project-cover-reposition-form">
+                <input type="hidden" name="project_id" value="{{ project.id }}"/>
+            </form>
+            <hgroup id="project-header" style="background: url('{{ MEDIA_URL }}{{ project.cover_pic }}'); background-position: {{ project.cover_pic_position.left }}% {{ project.cover_pic_position.top }}%;">
+                <hgroup id="project-info-wrapper">
+                    <div id="project-info">
+                        <h2>{{ project.title }}</h2>
+                        <p id="project-info-description">{{ project.short_description }}</p>
+                    </div>
+                </hgroup>
+                {% if user in project.admins.all %}
+                <div class="edit-picture edit-cover-picture">
+                    <div class="change-picture" title="Change picture"></div>
+                    <div class="reposition-picture" title="Reposition picture"></div>
                 </div>
             </hgroup>
-            {% if user in project.admins.all %}
-            <div class="edit-cover-picture edit-picture">
-                <span class="edit-picture-icon"></span>Change cover picture...
-            </div>
             {% endif %}
+            <div class="project-header-repositioner"></div>
         </header>
 
         <nav class="project-navigation">

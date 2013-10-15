@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from media.models import ImagePosition
 from articles.MarkdownTextField import MarkdownTextField
 from django.dispatch import Signal
 
@@ -14,6 +15,7 @@ class Project(models.Model):
     members = models.ManyToManyField(
         User, blank=True, related_name='members', through='Membership')
     cover_pic = models.ImageField(upload_to='project', blank=True)
+    cover_pic_position = models.ForeignKey(ImagePosition)
     visibility = models.CharField(max_length=256)
     meta = models.TextField(blank=True)
     slug = models.SlugField(max_length=256)

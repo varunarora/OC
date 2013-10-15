@@ -1763,6 +1763,7 @@ var OC = {
             $('.resource-collection-item').draggable({ revert: "invalid" });
             $('.resource-collection-item.directory').droppable({
                 hoverClass: 'droppable',
+                accept: ".directory, .resource",
                 drop: function(event, ui){
                     if (ui.draggable.hasClass('directory')){
                         OC.resourcesCollectionsActions.moveCollectionIntoCollection(
@@ -2284,7 +2285,7 @@ var OC = {
     },
 
     initEditHandlers: function(){
-        $('.edit-picture, .change-picture').click(function(){
+        $('.change-picture').click(function(){
             $('.picture-upload-dialog').dialog({
                 modal: true,
                 open: false,
@@ -2298,7 +2299,7 @@ var OC = {
             });
         });
 
-        $('.edit-picture, .change-picture').tipsy({gravity: 's'});
+        $('.change-picture').tipsy({gravity: 's'});
     },
 
     repositionPictures: {
@@ -2307,32 +2308,56 @@ var OC = {
 
         repositionSetup: false,
 
-        userPictureSelector: '.user-picture-cover',
-        userPicturePositionerSelector: '.user-picture-repositioner',
-        userPictureWrapperSelector: '.user-profile-picture',
+        userProfile: {
+            selector: '.user-picture-cover',
+            positionerSelector: '.user-picture-repositioner',
+            container: 'user-picture-repositioner-container',
+            wrapperSelector: '.user-profile-picture',
+            copy: 'user-profile-picture-copy'
+        },
+
+        projectCover: {
+            selector: '#project-header',
+            positionerSelector: '.project-header-repositioner',
+            container: 'project-header-repositioner-container',
+            wrapperSelector: '.project-header-wrapper',
+            copy: 'project-header-picture-copy'
+        },
+
+        image: null,
 
         initRepositionPictures: function(){
+            $('.reposition-picture').tipsy({gravity: 's'});
+
             // Check to see if this is a user profile page.
             if ($('form#profile-picture-reposition-form').length > 0){
+                OC.repositionPictures.image = OC.repositionPictures.userProfile;
+            }
+
+            // Check to see if this is a projects page.
+            if ($('form#project-cover-reposition-form').length > 0){
+                OC.repositionPictures.image = OC.repositionPictures.projectCover;
+            }
+
+            if (OC.repositionPictures.image){
                 // Bind the repositioning click to a handler.
                 $('.reposition-picture').click(OC.repositionPictures.repositionClickHandler);
 
-                $('.reposition-picture').tipsy({gravity: 's'});
-
                 // Set current position of image.
-                backgroundPosition = OC.repositionPictures.getProfilePictureBackgroundPosition();
+                backgroundPosition = OC.repositionPictures.getPictureBackgroundPosition();
 
                 OC.repositionPictures.originalRepositionableTop = backgroundPosition.top;
                 OC.repositionPictures.originalRepositionableLeft = backgroundPosition.left;
             }
+
         },
 
-        getProfilePictureBackgroundPosition: function(){
-            var userPicture = $(OC.repositionPictures.userPictureSelector),
-                userPictureCopy = $('.user-profile-picture-copy');
-            profilePictureRawBackgroundPosition = userPicture.css('background-position');
+        getPictureBackgroundPosition: function(){
+            var picture = $(OC.repositionPictures.image.selector),
+                pictureCopy = $('.' + OC.repositionPictures.image.copy);
+            pictureRawBackgroundPosition = picture.css('background-position');
             
-            positions = profilePictureRawBackgroundPosition.split(" ");
+            positions = pictureRawBackgroundPosition.split(" ");
 
             if (positions[0].indexOf('%') === -1){
                 leftPxIndex = positions[0].indexOf('px');
@@ -2341,10 +2366,20 @@ var OC = {
                 topPxIndex = positions[1].indexOf('px');
                 topPx = parseInt(positions[1].substring(0, topPxIndex), 10);
 
-                leftPercentage = parseInt((Math.abs(leftPx) / (
-                    userPictureCopy.width() - userPicture.width())) * 100, 10);
-                topPercentage = parseInt((Math.abs(topPx) / (
-                    userPictureCopy.height() - userPicture.height())) * 100, 10);
+                // Avoid division by zero or Infinity value issues.
+                if (pictureCopy.width() === picture.width()){
+                    leftPercentage = 0;
+                } else {
+                    leftPercentage = parseInt((Math.abs(leftPx) / (
+                        pictureCopy.width() - picture.width())) * 100, 10);
+                }
+
+                if (pictureCopy.height() === picture.height()){
+                    topPercentage = 0;
+                } else {
+                    topPercentage = parseInt((Math.abs(topPx) / (
+                        pictureCopy.height() - picture.height())) * 100, 10);
+                }
             } else {
                 leftPercentageIndex = positions[0].indexOf('%');
                 leftPercentage = parseInt(positions[0].substring(0, leftPercentageIndex), 10);
@@ -2373,60 +2408,59 @@ var OC = {
             }, 500);
 
             // Pop the image container out.
-            var userPicture = $(OC.repositionPictures.userPictureSelector);
-            userPicture.addClass('reposition-mode');
+            var picture = $(OC.repositionPictures.image.selector);
+            picture.addClass('reposition-mode');
 
             // Show the repositioner.
             OC.repositionPictures.showRepositioner();
 
             // Show the repositioner container.
-            $('.user-picture-repositioner-container').addClass('show');
+            $('.' + OC.repositionPictures.image.container).addClass('show');
 
             // Show the floating actions.
             $('.reposition-floating-actions').addClass('show');
 
-            userPicture.tipsy('show');
+            picture.tipsy('show');
         },
 
         setupReposition: function(){
             // Set repositioner width and height as the image width/height.
-            var userPicturePositioner = $(
-                    OC.repositionPictures.userPicturePositionerSelector),
-                userPicture = $(OC.repositionPictures.userPictureSelector),
-                userPictureWrapper = $(
-                    OC.repositionPictures.userPictureWrapperSelector);
+            var picturePositioner = $(
+                    OC.repositionPictures.image.positionerSelector),
+                picture = $(OC.repositionPictures.image.selector),
+                pictureWrapper = $(
+                    OC.repositionPictures.image.wrapperSelector);
 
             // First, fetch the image width and height
-            profilePictureBackgroundImage = userPicture.css('background-image');
-            var profilePictureCopy = $('<img/>', {
-                'src': profilePictureBackgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, ''),
-                'class': 'user-profile-picture-copy'
+            pictureBackgroundImage = picture.css('background-image');
+            var pictureCopy = $('<img/>', {
+                'src': pictureBackgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, ''),
+                'class': OC.repositionPictures.image.copy
             });
 
-            userPictureWrapper.append(profilePictureCopy);
+            pictureWrapper.append(pictureCopy);
 
-            userPicturePositioner.height(profilePictureCopy.height());
-            userPicturePositioner.width(profilePictureCopy.width());
+            picturePositioner.height(pictureCopy.height());
+            picturePositioner.width(pictureCopy.width());
 
             // Build a container element and position it.
-            var containerElementClass = 'user-picture-repositioner-container';
             var containerElement = $('<div/>', {
-                'class': containerElementClass + " show"
+                'class': OC.repositionPictures.image.container + " show"
             });
-            userPictureWrapper.append(containerElement);
-            containerElement.height(userPicture.height() + (
-                profilePictureCopy.height() - userPicture.height())*2);
-            containerElement.width(userPicture.width() + (
-                profilePictureCopy.width() - userPicture.width())*2);
+            pictureWrapper.append(containerElement);
+            containerElement.height(picture.height() + (
+                pictureCopy.height() - picture.height())*2);
+            containerElement.width(picture.width() + (
+                pictureCopy.width() - picture.width())*2);
 
-            containerElement.css('left', userPicture.offset().left -
-                (containerElement.width()/2 - userPicture.width()/2));
-            containerElement.css('top', userPicture.offset().top -
-                (containerElement.height()/2 - userPicture.height()/2));
+            containerElement.css('left', picture.position().left -
+                (containerElement.width()/2 - picture.width()/2));
+            containerElement.css('top', picture.position().top -
+                (containerElement.height()/2 - picture.height()/2));
 
             // Make the repositioner draggable.
-            $('.user-picture-repositioner').draggable({
-                containment: '.' + containerElementClass,
+            $(OC.repositionPictures.image.positionerSelector).draggable({
+                containment: '.' + OC.repositionPictures.image.container,
                 drag: OC.repositionPictures.movePicture,
                 start: OC.repositionPictures.onDragStart,
                 stop: OC.repositionPictures.onDragComplete
@@ -2446,17 +2480,25 @@ var OC = {
                 repositionCancel = $('<button/>', {
                     'class': 'action-button mini-action-button', 'text': 'Cancel'});
 
-            repositionFloatingActions.css('top',
-                userPicture.position().top + userPicture.height() + 10);
+            // In the case of positioning the action in projects, make them appear
+            //     over the project cover picture and not under it.
+            if (OC.repositionPictures.image === OC.repositionPictures.projectCover){
+                repositionFloatingActions.css('top',
+                    picture.position().top + picture.height() - 40);
+            } else {
+                repositionFloatingActions.css('top',
+                    picture.position().top + picture.height() + 10);
+            }
+
             repositionFloatingActions.css('left',
-                userPicture.position().left + 10);
+                picture.position().left + 10);
 
             repositionFloatingActions.append(repositionSave);
             repositionFloatingActions.append(repositionCancel);
-            $('.user-profile-picture').append(repositionFloatingActions);
+            $(OC.repositionPictures.image.wrapperSelector).append(repositionFloatingActions);
 
             // Give tipsy for dragability of the image.
-            userPicture.tipsy({
+            picture.tipsy({
                 gravity: 's',
                 trigger: 'manual',
                 fade: 'true'
@@ -2470,20 +2512,20 @@ var OC = {
         },
 
         showRepositioner: function(){
-            $('.user-picture-repositioner').addClass('show');
+            $(OC.repositionPictures.image.positionerSelector).addClass('show');
         },
 
         hideRepositioner: function(){
-            $('.user-picture-repositioner').removeClass('show');
+            $(OC.repositionPictures.image.positionerSelector).removeClass('show');
         },
 
         movePicture: function(event, ui){
-            $('.user-picture-cover').css('background-position',
+            $(OC.repositionPictures.image.selector).css('background-position',
                 ui.position.left + "px " + ui.position.top+ "px");
         },
 
         onDragStart: function(event, ui){
-            $('.user-picture-cover').tipsy('hide');
+            $(OC.repositionPictures.image.selector).tipsy('hide');
         },
 
         onDragComplete: function(event, ui){},
@@ -2496,8 +2538,8 @@ var OC = {
                 $(this).removeClass('show');
 
                 // Remove repositioner mode from the image.
-                var userPicture = $(OC.repositionPictures.userPictureSelector);
-                userPicture.removeClass('reposition-mode');
+                var picture = $(OC.repositionPictures.image.selector);
+                picture.removeClass('reposition-mode');
             });
 
             $('.reposition-floating-actions').removeClass('show');
@@ -2506,10 +2548,10 @@ var OC = {
             OC.repositionPictures.hideRepositioner();
 
             // Hide the repositioner container.
-            $('.user-picture-repositioner-container').removeClass('show');
+            $('.' + OC.repositionPictures.image.container).removeClass('show');
 
             // Hide tipsy, incase the image wasn't repositioned.
-            $('.user-picture-cover').tipsy('hide');
+            $(OC.repositionPictures.image.selector).tipsy('hide');
         },
 
         savePosition: function(){
@@ -2519,28 +2561,42 @@ var OC = {
                 top: OC.repositionPictures.originalRepositionableTop
             };
 
-            newBackgroundPosition = OC.repositionPictures.getProfilePictureBackgroundPosition();
+            newBackgroundPosition = OC.repositionPictures.getPictureBackgroundPosition();
 
             // If position changed
             if (originalBackgroundPosition.left !== newBackgroundPosition.left ||
                 originalBackgroundPosition.top !== newBackgroundPosition.top){
-
+                // Push the new background position in a GET request.
+                if (OC.repositionPictures.image === OC.repositionPictures.userProfile){
                 // Get the username.
                 var username = $(
                     '#profile-picture-reposition-form input[name=username]').val();
-
-                // Push the new background position in a GET request.
-                $.get('/user/' + username + '/reposition-picture/?left=' +
-                    newBackgroundPosition.left + '&top=' + newBackgroundPosition.top,
-                    function(response){
-                        if (response.status == 'true'){
-                            // Clear the reposition mode. 
-                            OC.repositionPictures.dismissRepositionMode();
-                        } else {
-                            OC.popup(response.message, response.title);
-                        }
-                    },
-                'json');
+                    $.get('/user/' + username + '/reposition-picture/?left=' +
+                        newBackgroundPosition.left + '&top=' + newBackgroundPosition.top,
+                        function(response){
+                            if (response.status == 'true'){
+                                // Clear the reposition mode. 
+                                OC.repositionPictures.dismissRepositionMode();
+                            } else {
+                                OC.popup(response.message, response.title);
+                            }
+                        },
+                    'json');
+                } else if (OC.repositionPictures.image === OC.repositionPictures.projectCover){
+                    var project_id = $(
+                        '#project-cover-reposition-form input[name=project_id]').val();
+                    $.get('/project/' + project_id + '/reposition-cover/?left=' +
+                        newBackgroundPosition.left + '&top=' + newBackgroundPosition.top,
+                        function(response){
+                            if (response.status == 'true'){
+                                // Clear the reposition mode. 
+                                OC.repositionPictures.dismissRepositionMode();
+                            } else {
+                                OC.popup(response.message, response.title);
+                            }
+                        },
+                    'json');
+                }
             } else {
                 // Clear the reposition mode. 
                 OC.repositionPictures.dismissRepositionMode();
