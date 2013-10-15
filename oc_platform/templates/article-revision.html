@@ -21,7 +21,7 @@
         <aside id="social-panel">
             <section class="revision-user">
                 <div class="revision-user-thumbnail">
-                    <img src="{{ MEDIA_URL }}{{ article.user.get_profile.profile_pic.name }}" />
+                    <div class="revision-user-thumbnail-image" style="background-image: url('{{ MEDIA_URL }}{{ article.user.get_profile.profile_pic.name }}')"></div>
                 </div>
                 <div  class="revision-user-log">
                 {% if article.log %}
