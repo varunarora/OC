@@ -179,7 +179,40 @@ def change_cover_picture(request, project_id):
             project.cover_pic.save(
                 str(project.id) + '-cover.jpg', cover_pic)
 
+            resize_project_cover(project, 960)
+
+            from django.contrib import messages
+            messages.success(request,
+                'New cover picture uploaded. You may reposition the picture for your perfect fit.')
+
     return redirect(request.META.get('HTTP_REFERER'))
+
+
+def resize_project_cover(project, width):
+    # Now resize the image and resave
+    from PIL import Image
+    image = Image.open(project.cover_pic.path)
+    (original_width, original_height) = image.size
+
+    new_height = int((original_height / float(original_width)) * width)
+
+    imagefit = image.resize((width, new_height), Image.ANTIALIAS)
+    resized_image_path = (settings.MEDIA_ROOT + 'project/tmp/' + str(project.id) +
+        '-cover' + str(width) + 'x' + str(new_height) + '.jpg')
+
+    try:
+        # Throw a white background in the case of a transparent image.
+        background = Image.new("RGBA", imagefit.size, (255, 255, 255))
+        background.paste(imagefit, None, imagefit.split()[-1])
+    except:
+        pass
+
+    imagefit.save(resized_image_path, 'JPEG', quality=85)
+    
+    from django.core.files.images import ImageFile
+    project.cover_pic.save(
+        str(project.id) + '-profile' + str(width) + 'x' +
+        str(new_height) + '.jpg', ImageFile(open(resized_image_path)))
 
 
 def members(request, project_slug):
@@ -769,3 +802,30 @@ def get_project_visibility(request, project_id):
             + 'this project. Please contact us if the problem persists.'
         }
         return APIUtilities._api_failure(context)
+
+
+def reposition_cover_picture(request, project_id):
+    try:
+        project = Project.objects.get(pk=project_id)
+    except:
+        raise Http404
+
+    if request.user not in project.admins.all():
+        return APIUtilities._api_unauthorized_failure()
+
+    left = request.GET.get('left', None)
+    top = request.GET.get('top', None)
+
+    try:
+        project.cover_pic_position.top = int(top)
+        project.cover_pic_position.left = int(left)
+        project.cover_pic_position.save()
+
+        return APIUtilities._api_success()
+    except:
+        context = {
+            'title': 'Cannot reposition project cover picture.',
+            'message': 'We failed to reposition the project cover picture. Please ' +
+                'contact us if this problem persists.'
+        }
+        return APIUtilities._api_failure(context)    
