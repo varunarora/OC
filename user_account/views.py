@@ -184,7 +184,11 @@ def _create_user(request):
                             #    before saving.
                             profile = profile_form.save()
 
+                            # Give the user a profile pic and a root collection.
                             _set_profile_picture(profile, profile_form)
+                            _set_profile_collection(profile)
+
+                            profile.save()
 
                             # Send confirmation email with confirmation
                             #     code.
@@ -211,6 +215,7 @@ def _create_user(request):
                         new_user.delete()
             except:
                 new_user.delete()
+
                 print user_form.errors
                 # TODO(Varun): Create a django error notication.
                 print "User object failed to be created"
@@ -538,15 +543,31 @@ def _set_profile_picture(profile, profile_form):
         #     profile object.
         profile_pic_filename = os.path.basename(
             profile_form.profile_pic_tmp.name)
-        profile.profile_pic.save(
-            profile_pic_filename,
-            ContentFile(profile_form.profile_pic_tmp.read())
-        )
-        profile.save()
+        profile_pic_file = ContentFile(profile_form.profile_pic_tmp.read())
+        profile_pic_file.name = profile_pic_filename
+        profile.profile_pic = profile_pic_file
     except:
         # TODO(Varun): Django notification for failure to create and assign
         #     profile picture.
         print "User Profile picture failed to be created"
+
+
+def _set_profile_collection(profile):
+    from oer.models import Collection
+    # Create a new root collection for the user
+    root_collection = Collection(
+        title=profile.user.username + "_root",
+        host=profile,
+        visibility='public',
+        slug=profile.user.username,
+        creator=profile.user
+    )
+    root_collection.save()
+
+    profile.collection = root_collection
+    profile.save()
+
+    return root_collection
 
 
 def authenticate(request):

@@ -195,18 +195,6 @@ class NewUserProfileForm(ModelForm):
             newRequest.__setitem__('location', request.get('location').strip())
             newRequest.__setitem__('gender', request.get('gender') == '1')
 
-            from oer.models import Collection
-            # Create a new root collection for the user
-            root_collection = Collection(
-                title=new_user.username + "_root",
-                host=new_user,
-                visibility='public',
-                slug=new_user.username,
-                creator=new_user
-            )
-            root_collection.save()
-
-            newRequest.__setitem__('collection', root_collection.id)
             newRequest.__setitem__(
                 'social_id', social_id if social_login else None)
 
