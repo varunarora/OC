@@ -30,6 +30,7 @@ urlpatterns = patterns(
     url(r'^(?P<project_id>\d+)/remove-admin/(?P<user_id>\d+)/$', views.remove_admin, name='remove_admin'),
 
     url(r'^(?P<project_id>\d+)/change-cover/$', views.change_cover_picture, name='change_cover_picture'),
+    url(r'^(?P<project_id>\d+)/reposition-cover/$', views.reposition_cover_picture, name='reposition_cover_picture'),
     url(r'^(?P<project_id>\d+)/request-invite/$', views.request_invite, name='request_invite'),
 
     url(r'^(?P<project_slug>[\w\-]+)/settings/requests/', views.requests, name='project_requests'),
