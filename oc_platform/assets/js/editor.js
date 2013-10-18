@@ -243,7 +243,7 @@ $(document).ready(function(){
     OC.editor.initImageUploaderTabs();
 
     Dropzone.forElement('.upload-drag-drop').on('sending', function(file, xhr, formData){
-        formData.append('user_id', $('form#article-edit-form input[name=user]').val());
+        formData.append('user_id', $('form.document-edit-form input[name=user]').val());
     });
 
     Dropzone.forElement('.upload-drag-drop').on('success', function(file, response){

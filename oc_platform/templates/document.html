@@ -17,6 +17,7 @@
         <div class="center-stage">
             {% include 'partials/resource-meta.html' %}
             <div id="key-panel" class="panel-left">
+                <input type="hidden" name="user" value="{{ user.id }}" />
                 <h2 id="article-title"><input type="text" value="{{ original.title }}" name="title" class="browser-edit" placeholder="(Document title)" /></h2>
                 <p><span class="resource-form-error">{{ form.errors.title }}</span></p>
             </div>
