@@ -14,5 +14,5 @@ class Image(models.Model):
 
 
 class ImagePosition(models.Model):
-    top = models.IntegerField(default=0)
-    left = models.IntegerField(default=0)
+    top = models.IntegerField(default=50)
+    left = models.IntegerField(default=50)
