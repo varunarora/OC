@@ -104,5 +104,5 @@
 			</hgroup>
 		</header>
 	    <div class="login-messages-wrapper">
-	        {% for message in messages %}<span{% if message.tags %} class="login-messages {{ message.tags }}"{% endif %}>{{ message }}</span>{% endfor %}<span class="close-message-box"></span>
+	        <span class="login-messages{% if message.tags %} {{ message.tags }}{% endif %}">{% for message in messages %}{{ message }}{% endfor %}</span><span class="close-message-box"></span>
 	    </div>
