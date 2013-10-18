@@ -1016,7 +1016,7 @@ table#project-form-table
 		textarea
 			height: 100px
 
-header
+header.project-header-wrapper
 	height: 150px
 	overflow: hidden
 
@@ -1647,14 +1647,20 @@ table
 	cursor: default
 
 	&:hover
-		background-color: #A5BACF		
+		background-color: #A5BACF
 
 .collection-button
 	background-color: #efefef
 	color: $light-font
 
+	&:hover
+		background-color: #E0E0E0
+
 	&.disabled-collection-button
 		color: #bababa
+
+		&:hover
+			background-color: #efefef
 
 .new-discussion-post-button
 	padding-left: 20px
@@ -2612,6 +2618,9 @@ ul.collaborators
 .collection-actions
 	margin-bottom: 20px
 	overflow: hidden
+
+	.collection-button
+		margin-right: 4px
 
 .move-resource-collection-dialog
 	width: 400px
