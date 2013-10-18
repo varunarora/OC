@@ -931,9 +931,6 @@ def new_user_collection(request, username):
         new_collection = Collection()
         new_collection.title = request.POST.get('new_collection_name')
 
-    from django.contrib.contenttypes.models import ContentType
-    collection_content_type = ContentType.objects.get_for_model(Collection)
-
         new_collection.host = collection
         new_collection.visibility = request.POST.get('collection_visibility')
         new_collection.slug = _get_fresh_collection_slug(
