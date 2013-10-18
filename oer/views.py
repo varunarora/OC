@@ -919,40 +919,50 @@ def new_user_collection(request, username):
     from django.contrib.auth.models import User
     user = User.objects.get(username=username)
 
-    collection_slug = request.POST.get('parent_collection')
+    collection_slug = request.POST.get('parent_collection', None)
 
-    # Find the current collection through the project collection tree.
-    import oer.CollectionUtilities as cu
-    (browse_tree, flattened_tree) = cu._get_browse_tree(user.get_profile().collection)
-    collection = next(
-        tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
+    try:
+        # Find the current collection through the project collection tree.
+        import oer.CollectionUtilities as cu
+        (browse_tree, flattened_tree) = cu._get_browse_tree(user.get_profile().collection)
+        collection = next(
+            tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
 
-    new_collection = Collection()
-    new_collection.title = request.POST.get('new_collection_name')
+        new_collection = Collection()
+        new_collection.title = request.POST.get('new_collection_name')
 
     from django.contrib.contenttypes.models import ContentType
     collection_content_type = ContentType.objects.get_for_model(Collection)
 
-    new_collection.host = collection
-    new_collection.visibility = request.POST.get('collection_visibility')
-    new_collection.slug = _get_fresh_collection_slug(
-        request.POST.get('new_collection_name'), collection, collection_content_type)
-    new_collection.creator = user
-    new_collection.save()
+        new_collection.host = collection
+        new_collection.visibility = request.POST.get('collection_visibility')
+        new_collection.slug = _get_fresh_collection_slug(
+            request.POST.get('new_collection_name'), collection)
+        new_collection.creator = user
+        new_collection.save()
 
-    # TODO(Varun):Set Django message on creation of collection
+        # TODO(Varun):Set Django message on creation of collection
 
-    if user.get_profile().collection == collection:
+        if user.get_profile().collection == collection:
+            return redirect(
+                'user:user_profile',
+                username=username,
+            )
+        else:
+            return redirect(
+                'user:list_collection',
+                username=username,
+                collection_slug=collection.slug
+            )
+    except:
+        from django.contrib import messages
+        messages.error(request,
+            'Oops! We were unable to create the collection. Please try again.')
         return redirect(
-            'user:user_profile',
-            username=username,
-        )
-    else:
-        return redirect(
-            'user:list_collection',
-            username=username,
-            collection_slug=collection.slug
-        )
+                'user:user_profile',
+                username=username,
+            ) 
+
 
 
 def _get_fresh_collection_slug(title, collection, content_type):
