@@ -19,7 +19,7 @@ class UserProfile(models.Model):
     profile_pic_position = models.ForeignKey(ImagePosition)
     interests = models.ManyToManyField(Tag, null=True, blank=True)
     social_id = models.CharField(max_length=32, null=True, blank=True)
-    collection = models.ForeignKey('oer.Collection')
+    collection = models.ForeignKey('oer.Collection', null=True, blank=True)
 
     def __unicode__(self):
         return self.user.username
