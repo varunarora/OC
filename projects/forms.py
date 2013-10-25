@@ -83,6 +83,7 @@ class ProjectSettings(forms.ModelForm):
         new_request.setlist('admins', admins)
         new_request.__setitem__('collection', instance.collection.id)
         new_request.__setitem__('slug', instance.slug)
+        new_request.__setitem__('cover_pic_position', instance.cover_pic_position.id)
 
         super(ProjectSettings, self).__init__(new_request, instance=instance)
 
