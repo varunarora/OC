@@ -15,6 +15,13 @@ class ProjectForm(forms.ModelForm):
 
         newRequest.__setitem__('description', request.get('short_description'))
 
+        # Set profile picture default position.
+        from media.models import ImagePosition
+        new_cover_image_position = ImagePosition(top=50, left=50)
+        new_cover_image_position.save()
+
+        newRequest.__setitem__('cover_pic_position', new_cover_image_position.id)
+
         slug = self._get_fresh_slug(title)
         newRequest.__setitem__('slug', slug)
 
