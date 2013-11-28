@@ -962,11 +962,15 @@ def new_user_collection(request, username):
 
 
 
-def _get_fresh_collection_slug(title, collection, content_type):
+def _get_fresh_collection_slug(title, collection, content_type=None):
     from django.template.defaultfilters import slugify
     slug = slugify(title)
 
-    # Check if this slug has already been taken by another project
+    if not content_type:
+        from django.contrib.contenttypes.models import ContentType
+        content_type = ContentType.objects.get_for_model(Collection)
+
+    # Check if this slug has already been taken by another project.
     collections_with_slug = Collection.objects.filter(
         slug=slug, host_id=collection.id, host_type=content_type
     )
