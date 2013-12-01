@@ -810,9 +810,9 @@ def user_profile(request, username):
 
 def list_collection(request, username, collection_slug):
     from oer.models import Collection
-    try:
-        Collection.objects.filter(slug=collection_slug)
-    except Collection.DoesNotExist:
+    match_collections = Collection.objects.filter(slug=collection_slug)
+
+    if match_collections.count() == 0:
         raise Http404
 
     try:
