@@ -644,13 +644,18 @@ def googleplus_login(request):
     CLIENT_ID = json.loads(
         open(settings.TEMPLATE_DIR + '/' + 'client_secrets.json', 'r').read())['web']['client_id']
 
-    # If the state isn't the same as the one set when loading the page, return
-    #     failure message.
-    if request.POST.get('state') != request.session['state']:
+    try:
+        # If the state isn't the same as the one set when loading the page, return
+        # failure message.
+        if request.POST.get('state') != request.session['state']:
+            return HttpResponse(
+                json.dumps('Invalid state parameter.'), 401,
+                content_type="application/json"
+            )
+    except KeyError:
         return HttpResponse(
-            json.dumps('Invalid state parameter.'), 401,
-            content_type="application/json"
-        )
+            json.dumps('Failed to retrieve your Google ID state'),
+            401, content_type="application/json")        
 
     gplus_id = request.POST.get('gplus_id')
     code = request.POST.get('code')
