@@ -1359,17 +1359,47 @@ def move_collection_to_collection(request, collection_id, from_collection_id, to
 
 def collection_tree(request, collection_id, host):
     import oer.CollectionUtilities as cu
-    current_collection = Collection.objects.get(pk=collection_id)
-    (root_host_type, root) = cu.get_collection_root(
-        current_collection)
+    tree = None
 
-    (browse_tree, flattened_tree) = cu._get_browse_tree(root.collection)
+    if host == 'projects':
+        from projects.models import Membership
 
-    context = {
-        'tree': cu.build_project_collection_navigation(
-            browse_tree, request.user) if host == 'project' else cu.build_user_collection_navigation(
-            browse_tree, request.user)
-    }
+        # Get all the "memberships" the user is belongs to.
+        memberships = Membership.objects.filter(user=request.user, confirmed=True)
+
+        browse_trees = []
+
+        for membership in memberships:
+            (browse_tree, flattened_tree) = cu._get_browse_tree(
+                membership.project.collection)            
+            browse_trees.append(browse_tree)
+
+        tree = cu.build_projects_collection_navigation(
+            browse_trees, request.user)
+
+    else:
+        current_collection = Collection.objects.get(pk=collection_id)
+
+        (root_host_type, root) = cu.get_collection_root(
+            current_collection)
+
+        (browse_tree, flattened_tree) = cu._get_browse_tree(root.collection)
+
+        # If there are no collections associated with the host, return error.
+        if len(browse_tree) == 0:
+            context = {
+                'title': 'Cannot move to another collection',
+                'message': 'There is no other collection to where this resource or collection '
+                + ' may be moved to. Kindly create a new collection before moving this.'
+            }
+            return APIUtilities._api_failure(context)
+
+        else:
+            tree = cu.build_project_collection_navigation(
+                browse_tree, request.user) if host == 'project' else cu.build_user_collection_navigation(
+                browse_tree, request.user)
+
+    context = { 'tree': tree }
     return APIUtilities._api_success(context)
 
 
