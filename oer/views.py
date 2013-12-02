@@ -537,68 +537,73 @@ def fp_submit(request):
         project_id = request.POST.get('project', None)
         collection_id = request.POST.get('collection', None)
 
-        ###########################################################
-        # First, handle all the manually uploaded files
-
-        # Build a mapping from original file names to new file names
-        file_names = {}
-        for new_name, original_file in request.FILES.items():
-            file_names[new_name] = original_file.name
-
-        # Change file-naming to follow form-0-file format
-        modified_request_files = request.FILES.copy()
-
-        file_counter = 0
-        for key, value in modified_request_files.items():
-            modified_request_files['form-' + str(file_counter) + '-file'] = value
-            del modified_request_files[key]
-            file_counter += 1
-
-        # Add management form data to process as a formset factory object
-        modified_post_request = request.POST.copy()
-
-        modified_post_request.setdefault('form-TOTAL_FORMS', unicode(file_counter))
-        modified_post_request.setdefault('form-INITIAL_FORMS', u'0')
-        modified_post_request.setdefault('form-NUM_FORMS', u'')
-
-        from django.forms.formsets import formset_factory
-        from forms import UploadResource
-        UploadResourceSet = formset_factory(UploadResource)
-
-        resource_formset = UploadResourceSet(modified_post_request, modified_request_files)
-
-        collection = get_collection(user_id, project_id, collection_id)
-
-        if resource_formset.is_valid():
-            for file_name, original_file in request.FILES.items():
-                create_resource(original_file, request.user, collection, file_name)
-
-        ###########################################################
-        # Now, handle name changes for pre-uploaded files
-
-        from oer.models import Resource
-        post_data = request.POST.copy()
-
-        del post_data["csrfmiddlewaretoken"]
-        del post_data['user']
-        if project_id:
-            del post_data['project']
-        if collection_id:
-            del post_data['collection']
-
         try:
-            for id in post_data:
-                resource = Resource.objects.get(pk=id)
-                # If the title has changed, persist it
-                if (resource.id != post_data[id]):
-                    resource.title = post_data[id]
-                    resource.save()
-        except:
-            # TODO: Django message thingy
-            k = True
-            k = not k
+            ###########################################################
+            # First, handle all the manually uploaded files
 
-        return redirect_to_collection(user_id, project_id, collection_id)            
+            # Build a mapping from original file names to new file names
+            file_names = {}
+            for new_name, original_file in request.FILES.items():
+                file_names[new_name] = original_file.name
+
+            # Change file-naming to follow form-0-file format
+            modified_request_files = request.FILES.copy()
+
+            file_counter = 0
+            for key, value in modified_request_files.items():
+                modified_request_files['form-' + str(file_counter) + '-file'] = value
+                del modified_request_files[key]
+                file_counter += 1
+
+            # Add management form data to process as a formset factory object
+            modified_post_request = request.POST.copy()
+
+            modified_post_request.setdefault('form-TOTAL_FORMS', unicode(file_counter))
+            modified_post_request.setdefault('form-INITIAL_FORMS', u'0')
+            modified_post_request.setdefault('form-NUM_FORMS', u'')
+
+            from django.forms.formsets import formset_factory
+            from forms import UploadResource
+            UploadResourceSet = formset_factory(UploadResource)
+
+            resource_formset = UploadResourceSet(modified_post_request, modified_request_files)
+
+            collection = get_collection(user_id, project_id, collection_id)
+
+            if resource_formset.is_valid():
+                for file_name, original_file in request.FILES.items():
+                    create_resource(original_file, request.user, collection, file_name)
+
+            ###########################################################
+            # Now, handle name changes for pre-uploaded files
+
+            from oer.models import Resource
+            post_data = request.POST.copy()
+
+            del post_data["csrfmiddlewaretoken"]
+            del post_data['user']
+            if project_id:
+                del post_data['project']
+            if collection_id:
+                del post_data['collection']
+
+            try:
+                for id in post_data:
+                    resource = Resource.objects.get(pk=id)
+                    # If the title has changed, persist it
+                    if (resource.id != post_data[id]):
+                        resource.title = post_data[id]
+                        resource.save()
+            except:
+                # TODO: Django message thingy
+                k = True
+                k = not k
+
+        except:
+            from django.contrib import messages
+            messages.error(request, 'Files were unable to be uploaded. Please try again.')
+        
+        return redirect_to_collection(user_id, project_id, collection_id)
 
     else:
         return Http404
