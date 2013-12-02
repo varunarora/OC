@@ -101,7 +101,7 @@ def delete_comment(request, comment_id):
         (host_type, host, root) = CommentUtilities.get_comment_root(comment)
 
         if host_type.name == 'project':
-            if request.user == comment.user or root.admins.all():
+            if request.user == comment.user or request.user in host.admins.all():
                 # Delete all descendant elements of this comment.
 
                 # Get a flat list of all descendant comment, including itself.
