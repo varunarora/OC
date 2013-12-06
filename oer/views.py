@@ -1095,8 +1095,19 @@ def list_collection_collaborators(request, collection_id):
     try:
         collection = Collection.objects.get(pk=collection_id)
 
-        if request.user != collection.creator and request.user not in collection.collaborators.all():
-            return APIUtilities._api_unauthorized_failure()
+        # Get the project this collection belongs to, if that is the case.
+        import oer.CollectionUtilities as cu 
+        (collection_root_type, collection_root) = cu.get_collection_root(collection)
+
+        # If this is a project.
+        if collection_root_type.name == 'project':
+            if (request.user != collection.creator and request.user not in collection.collaborators.all()) and (
+                request.user not in collection_root.admins.all()):
+                    return APIUtilities._api_unauthorized_failure()            
+
+        else:
+            if request.user != collection.creator and request.user not in collection.collaborators.all():
+                return APIUtilities._api_unauthorized_failure()
 
         # Add the collection collaborators into a list.
         serialized_collaborators = []
