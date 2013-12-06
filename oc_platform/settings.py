@@ -216,7 +216,7 @@ LOGGING = {
 
 AUTH_PROFILE_MODULE = 'user_account.UserProfile'
 
-RECAPTCHA_PRIVATE_KEY = '6LeG_8USAAAAALqEAEupYoiLIsguhIruYa0QmIVK'
+RECAPTCHA_PRIVATE_KEY = '6LdyZOsSAAAAAI5o9s7tozx0lAab6mnkfcfLyoav'
 
 STRINGS = {
     'global': {
