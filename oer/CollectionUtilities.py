@@ -151,7 +151,7 @@ def build_user_collection_navigation(browse_tree, user):
         userRootList = ElementTree.Element('ul')
 
         child_nodes = build_child_tree(
-            browse_tree, user_profile, _get_user_url, user, 'user')
+            browse_tree, user_profile, _get_user_url, user, 'profile')
         for node in child_nodes:
             userRootList.append(node)
 
@@ -163,65 +163,77 @@ def build_user_collection_navigation(browse_tree, user):
         return ''
 
 
-def build_child_tree(root_node, collectionOwner, urlCreator, user, host_type):
+def build_child_tree(root_node, collection_owner, url_creator, user, host_type):
     # Get the list of child of this node.
     nodes = list(itertools.chain.from_iterable(root_node.values()))
-    nodeElements = []
+    node_elements = []
 
     # Create <li> nodes for each.
     for node in nodes:
-        nodeElement = ElementTree.Element('li')
+        node_element = ElementTree.Element('li')
 
         if host_type == 'project':
-            if type(node) is dict:
-                node_visibility = get_root_key(node).visibility          
-            else:
-                node_visibility = node.visibility
+        if type(node) is dict:
+            current_node = get_root_key(node)
+        else:
+            current_node = node
 
-            # Get the root project
-            if node_visibility != 'public' and user not in collectionOwner.confirmed_members:
-                continue
+        node_visibility = current_node.visibility
+
+        if host_type == 'profile':
+            if node_visibility != 'public':
+                if user not in current_node.collaborators.all() and user != current_node.creator:
+                    continue
+
+        if host_type == 'project':
+            if node_visibility == 'project':
+                if user not in collection_owner.confirmed_members:
+                    continue
+
+            if node_visibility == 'private':
+                if user not in current_node.collaborators.all() and user != current_node.creator:
+                    continue
 
         # If this child has other children, build child tree.
         if type(node) is dict:
             # Set a class to indicate that this element has child collections.
-            nodeElement.set('class', 'parent-collection')
+            node_element.set('class', 'parent-collection')
 
-            nodeToggler = ElementTree.SubElement(nodeElement, 'span')
-            nodeToggler.set('class', 'toggle-collection')
-            nodeToggler.text = ' '
+            node_toggler = ElementTree.SubElement(node_element, 'span')
+            node_toggler.set('class', 'toggle-collection')
+            node_toggler.text = ' '
 
-            nodeHref = ElementTree.SubElement(nodeElement, 'a')
+            node_href = ElementTree.SubElement(node_element, 'a')
             root_node = get_root_key(node)
 
-            nodeHref.set('href', urlCreator(collectionOwner, root_node.slug))
-            nodeHref.set('id', 'collection-' + str(root_node.id))
-            nodeHref.text = root_node.title
+            node_href.set('href', url_creator(collection_owner, current_node.slug))
+            node_href.set('id', 'collection-' + str(current_node.id))
+            node_href.text = current_node.title
 
-            nodeList = ElementTree.SubElement(nodeElement, 'ul')
+            nodeList = ElementTree.SubElement(node_element, 'ul')
 
             child_nodes = build_child_tree(
-                node, collectionOwner, urlCreator, user, 'collection')
+                node, collection_owner, url_creator, user, 'collection')
             for child_node in child_nodes:
                 nodeList.append(child_node)
 
         # Otherwise, append a child <a> element as is.
         else:
             # Set a class to indicate that this element does not have child collections.
-            nodeElement.set('class', 'empty-collection')
+            node_element.set('class', 'empty-collection')
 
-            nodeToggler = ElementTree.SubElement(nodeElement, 'span')
-            nodeToggler.set('class', 'toggle-collection')
-            nodeToggler.text = ' '
+            node_toggler = ElementTree.SubElement(node_element, 'span')
+            node_toggler.set('class', 'toggle-collection')
+            node_toggler.text = ' '
 
-            nodeHref = ElementTree.SubElement(nodeElement, 'a')
-            nodeHref.set('href', urlCreator(collectionOwner, node.slug))
-            nodeHref.set('id', 'collection-' + str(node.id))
-            nodeHref.text = node.title
+            node_href = ElementTree.SubElement(node_element, 'a')
+            node_href.set('href', url_creator(collection_owner, node.slug))
+            node_href.set('id', 'collection-' + str(node.id))
+            node_href.text = node.title
 
-        nodeElements.append(nodeElement)
+        node_elements.append(node_element)
 
-    return nodeElements
+    return node_elements
 
 
 def get_root_key(value):
