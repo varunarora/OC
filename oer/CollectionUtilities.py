@@ -172,7 +172,6 @@ def build_child_tree(root_node, collection_owner, url_creator, user, host_type):
     for node in nodes:
         node_element = ElementTree.Element('li')
 
-        if host_type == 'project':
         if type(node) is dict:
             current_node = get_root_key(node)
         else:
@@ -204,7 +203,6 @@ def build_child_tree(root_node, collection_owner, url_creator, user, host_type):
             node_toggler.text = ' '
 
             node_href = ElementTree.SubElement(node_element, 'a')
-            root_node = get_root_key(node)
 
             node_href.set('href', url_creator(collection_owner, current_node.slug))
             node_href.set('id', 'collection-' + str(current_node.id))
