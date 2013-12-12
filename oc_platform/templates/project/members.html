@@ -31,7 +31,7 @@
                     </div>
                 </div>
                 <div class="member-actions user-actions">
-                {% if user in project.confirmed_members %}
+                {% if user in project.admins.all %}
                     {% if member in project.admins.all %}
                         {% if member != user %}
                         <form>
