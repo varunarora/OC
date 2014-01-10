@@ -1000,15 +1000,12 @@ def delete_collection(request, collection_id):
                 project_permissions = True
 
         if request.user != collection.creator and not project_permissions:
-            return HttpResponse(json.dumps(
-                {'status': 'false'}), 403, content_type="application/json")
+            return APIUtilities._api_unauthorized_failure()
         
         collection.delete()
-        return HttpResponse(json.dumps(
-            {'status': 'true'}), 200, content_type="application/json")
+        return APIUtilities._api_success()
     except:
-        return HttpResponse(json.dumps(
-            {'status': 'false'}), 401, content_type="application/json")
+        return APIUtilities._api_failure()
 
 
 def new_project_collection(request, project_slug):
