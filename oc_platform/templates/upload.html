@@ -5,7 +5,7 @@
         <div class="dropzone-manual">
             <h2>Upload files</h2>
             <div class="center">
-                <form method="POST" enctype="multipart/form-data" action="/api/fpSubmit/" class="files-upload-rename">
+                <form method="POST" enctype="multipart/form-data" action="/api/file-upload-submit/" class="files-upload-rename">
                     {% csrf_token %}
                     {% include 'partials/resource-meta.html' %}
                     <div class="upload-drag-drop">

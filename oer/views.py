@@ -576,7 +576,7 @@ def fp_upload(request):
         response), 200, content_type="application/json")
 
 
-def fp_submit(request):
+def file_upload_submit(request):
     """Accepts final file titles from client and persists any changed titles.
 
     Before database operations, the project_id is extracted from post_data,
@@ -654,7 +654,7 @@ def fp_submit(request):
                         resource.title = post_data[id]
                         resource.save()
             except:
-                # TODO: Django message thingy
+                # TODO(Sri): Django message thingy
                 k = True
                 k = not k
 
