@@ -15,6 +15,11 @@ $content-width: 960px
 	@include sans-bold
 	padding: 4px 0px
 
+@mixin popout-box
+	background-color: #ffffff
+	@include border-radius(4px)
+	@include box-shadow(0 0 4px rgba(0, 0, 0, 0.4))
+
 @mixin sans-font-family
 	font-family: "Proxima Nova Regular", 'Helvetica Neue', Arial, Helvetica, sans-serif
 	
@@ -90,7 +95,7 @@ footer
 	margin: auto
 	width: $content-width
 	text-align: right
-	margin-top: 15px
+	margin-top: 40px
 	font-size: 0.95em
 	color: #666666
 	margin-bottom: 20px
@@ -358,22 +363,19 @@ p
 	padding: 0px 18px
 
 #author-panel
-	height: 100px
-	background-color: #444
-	color: #fff
+	height: 60px
 	padding: 18px
 
 	a
-		color: #fff
-
+		color: $light-font
 		&:hover
-			color: #b2b2b2
+			color: $body-color
 			text-decoration: none
 
 #author-thumbnail
 	background-color: #b2b2b2
-	width: 100px
-	height: 100px
+	width: 60px
+	height: 60px
 	float: left
 	margin-right: 15px
 	background-size: cover
@@ -487,17 +489,6 @@ em
 	width: 120px
 	margin: auto
 	background-position: center
-
-#thumbnail-info
-	margin: auto
-	text-align: center
-	width: 120px
-	color: #fff
-	background-color: #444
-	padding: 4px 0px
-	position: relative
-	bottom: 28px
-	height: 20px
 
 h1.developers-title
 	margin-bottom: 20px
@@ -743,9 +734,7 @@ nav#add-resource-menu
 		position: relative
 
 	ul
-		background-color: #ffffff
-		@include border-radius(4px)
-		@include box-shadow(0 0 4px rgba(0, 0, 0, 0.4))
+		@include popout-box
 		z-index: 6
 		
 		li
@@ -1707,13 +1696,22 @@ nav.collections-navigation
 	ul
 		display: block
 
-nav.collections-navigation, .move-resource-collection-browser
+nav.collections-navigation,
+.move-resource-collection-browser,
+.add-resource-profile-browser,
+.add-resource-project-browser
 	ul
 		li
 			ul
 				padding-left: 16px
 				display: none
+
+	> ul:first-child
+		margin-top: 0px
+
 	> ul
+		margin-top: 16px
+
 		> li
 			background-image: none
 			padding-left: 0px
@@ -1768,12 +1766,13 @@ nav.collections-navigation, .move-resource-collection-browser
 	background-position: 3px 6px
 
 
-.move-resource-collection-browser
+.move-resource-collection-browser,
+.add-resource-profile-browser,
+.add-resource-project-browser
 	margin-top: 10px
 	ul
 		li
 			margin: 2px 0px
-			//padding-left: 14px
 
 	a
 		padding: 2px 6px
@@ -2185,111 +2184,120 @@ table.reset-password-table
 					padding-left: 15px
 					background-position: 0px 0px
 
-		.post-comments
-			margin-top: 10px
-			background-color: #efefef
-			padding: 10px
+.discussion-item, .resource-comments
+	.reply-to-comment, .upvote-comment, .downvote-comment,
+	.upvote-post, .downvote-post
+		float: left
+		color: $light-font
+		margin: 0px 6px
+		font-size: 0.85em
+		cursor: pointer
+		background-repeat: no-repeat
 
-			.post-comment
-				overflow: hidden
-				margin-top: 3px
+	.downvote-comment, .downvote-post
+		background-image: url('../images/downvote.png')
 
-				.post-comment-user-thumbnail
-					.discussion-response-thumbnail
-						background-size: cover
-						height: 30px
-						width: 30px
-						float: left
+		&.user-downvoted
+			background-image: url('../images/user-downvoted.png')
+			color: #D14836
 
-				ul
-					margin-left: 38px
-					clear: both
+	.upvote-comment, .upvote-post
+		background-image: url('../images/upvote.png')
 
-				.post-comment-body
-					margin-left: 10px
-					float: left
-					width: 84%
-					border-top: 1px solid #e2e2e2
-					padding-bottom: 3px
-					min-height: 30px
+		&.user-upvoted
+			background-image: url('../images/user-upvoted.png')
+			color: #5ABD02
 
-					&.new-post-comment-body
-						border-top: 0px
+	.delete-button
+		float: right
+		visibility: hidden
 
-					p:nth-child(2)
-						@include display-post-inline
-						margin-left: 6px
+	.post-body-wrapper:hover, .post-comment:hover
+		> .delete-button
+			visibility: visible
 
-					form textarea
-						width: 500px
-						height: 20px
+.comment-thread
+	margin-top: 10px
+	background-color: #efefef
+	padding: 10px
 
-						&.expanded
-							height: 80px
+	.post-comment
+		overflow: hidden
+		margin-top: 3px
 
-					.post-comment-button-wrapper
-						padding: 6px 0px
+		.post-comment-user-thumbnail
+			.discussion-response-thumbnail
+				background-size: cover
+				height: 30px
+				width: 30px
+				float: left
 
-						.action-button
-							float: right
+		ul
+			margin-left: 38px
+			clear: both
 
-				.comment-actions
-					overflow: hidden
-
-					.reply-to-comment, .downvote-comment, .upvote-comment
-						background-position: 0px 2px
-						padding-left: 16px
-
-					.reply-to-comment
-						background-image: url('../images/reply.png')
-
-			.post-comment:first-child
-				.post-comment-body
-					border-width: 0px
-
-		.reply-to-comment, .upvote-comment, .downvote-comment,
-		.upvote-post, .downvote-post
+		.post-comment-body
+			margin-left: 10px
 			float: left
-			color: $light-font
-			margin: 0px 6px
-			font-size: 0.85em
-			cursor: pointer
-			background-repeat: no-repeat
+			width: 84%
+			border-top: 1px solid #e2e2e2
+			padding-bottom: 3px
+			min-height: 30px
 
-		.downvote-comment, .downvote-post
-			background-image: url('../images/downvote.png')
+			&.new-post-comment-body
+				border-top: 0px
 
-			&.user-downvoted
-				background-image: url('../images/user-downvoted.png')
-				color: #D14836
+			p:nth-child(2)
+				@include display-post-inline
+				margin-left: 6px
 
-		.upvote-comment, .upvote-post
-			background-image: url('../images/upvote.png')
+			form textarea
+				width: 500px
+				height: 20px
 
-			&.user-upvoted
-				background-image: url('../images/user-upvoted.png')
-				color: #5ABD02
+				&.expanded
+					height: 80px
 
-		.delete-button
-			float: right
-			visibility: hidden
+			.post-comment-button-wrapper
+				padding: 6px 0px
 
-		.post-body-wrapper:hover, .post-comment:hover
-			> .delete-button
-				visibility: visible
+				.action-button
+					float: right
+
+		.comment-actions
+			overflow: hidden
+
+			.reply-to-comment, .downvote-comment, .upvote-comment
+				background-position: 0px 2px
+				padding-left: 16px
+
+			.reply-to-comment
+				background-image: url('../images/reply.png')
+
+	.post-comment:first-child
+		.post-comment-body
+			border-width: 0px
 
 .individual-discussion
 	margin-top: 20px
 
+@mixin form-inputs
+	border: 1px solid #ddd
+	padding: 4px
+	@include sans-font-family
+
+	&:hover, &:focus
+		border: 1px solid #b2b2b2
+		@include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))	
+
+
 form
 	input[type=text], input[type=password], textarea
-		border: 1px solid #ddd
-		padding: 4px
-		@include sans-font-family
+		@include form-inputs
 
-		&:hover, &:focus
-			border: 1px solid #b2b2b2
-			@include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
+ul.tagit
+	@include form-inputs
+
 
 .new-discussion-post-dialog, .new-comment-reply-dialog
 	width: 550px
@@ -2626,25 +2634,29 @@ ul.collaborators
 	width: 400px
 	height: 360px
 
-	.move-resource-collection-browser
-		height: 230px
-		border: 1px solid #ddd
-		padding: 10px
-		overflow: auto
+.add-resource-collection-dialog
+	width: 400px
+	height: 360px
 
-		&.loading-browser
-			background: url('../images/spinner.gif') no-repeat center center
+.oc-popup-dialog-browser
+	height: 230px
+	border: 1px solid #ddd
+	padding: 10px
+	overflow: auto
 
-		.selected-destination-collection
-			background-color: $link-hover
-			color: #fff
+	&.loading-browser
+		background: url('../images/spinner.gif') no-repeat center center
 
-	.move-resource-collection-submit-wrapper
-		margin-top: 10px
-		overflow: hidden
+	.selected-destination-collection
+		background-color: $link-hover
+		color: #fff
 
-		.move-resource-collection-submit-button
-			float: right
+.oc-popup-submit-wrapper
+	margin-top: 10px
+	overflow: hidden
+
+	.oc-popup-submit-button
+		float: right
 
 .favorite-resource-item
 	overflow: hidden
@@ -2768,3 +2780,61 @@ ul.collaborators
 
 	&.show
 		display: block
+
+
+.document-cell-comment-button
+	position: relative
+	left: 100px
+	width: 16px
+	height: 16px
+	top: 2px
+	margin-top: -20px
+	background-image: url('../images/document-comment.png')
+	background-position: center center
+	background-repeat: no-repeat
+	cursor: pointer
+
+	&:hover, &.comments-open
+		background-image: url('../images/document-comment-hover.png')
+
+.document-cell-comments
+	padding: 6px
+	@include popout-box
+	z-index: 5
+	width: 250px
+	min-height: 75px
+	position: absolute
+	display: none
+
+	&.show-popout
+		display: block
+
+	.document-comment
+		font-size: 0.85em
+		overflow: hidden
+		margin-bottom: 6px
+
+		.document-comment-thumbnail
+			width: 36px
+			height: 36px
+			float: left
+			background-size: cover
+			margin-right: 6px
+
+		.document-comment-body
+			a.document-comment-user
+				padding-right: 4px
+
+			textarea
+				height: 28px
+				width: 196px
+				resize: vertical
+
+			p:nth-child(2)
+				@include display-post-inline
+
+	.document-element-comment-post-wrapper
+		overflow: hidden
+
+		button.document-element-comment-post
+			float: right

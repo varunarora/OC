@@ -947,6 +947,158 @@ var OC = {
         });
     },
 
+    setupAddTo: function(){
+        // Bind add action click to popup.
+        $('li.add-action a').click(function(event){
+            // Setup the tabs the add-to popup.
+            OC.tabs('.add-resource-browser');
+
+            var addToPopup = OC.customPopup('.add-resource-dialog'),
+                profileCollectionBrowser = $('.add-resource-profile-browser'),
+                projectsCollectionBrowser = $('.add-resource-project-browser'),
+                collectionID = $('form#resource-form input[name=collection_id]').val();
+
+            profileCollectionBrowser.addClass('loading-browser');
+            projectsCollectionBrowser.addClass('loading-browser');
+
+            // Bind Done button on custom popup.
+            $('.add-resource-submit-button').click(function(event){
+                // Capture the actively selected tab.
+                var activeTab = $('.add-resource-tabs li a.selected', addToPopup);
+
+                var toCollection;
+
+                // If the active tab is projects.
+                if (activeTab.attr('href') === '.my-projects'){
+                    // Capture currently selected collection.
+                    toCollection = projectsCollectionBrowser.find(
+                        '.selected-destination-collection');
+                } else {
+                    toCollection = profileCollectionBrowser.find(
+                        '.selected-destination-collection');
+                }
+
+                addToPopup.close();
+
+                if (toCollection){
+                    // Launch popup asking the user to choose between copying the
+                    //    resource or linking to it.
+                    var addActionPopup = OC.customPopup('.add-resource-action-dialog');
+
+                    // Bind Done button on custom popup.
+                    $('.add-resource-action-submit-button').click(function(event){
+                        addActionPopup.close();
+
+                        // Get the current selected option.
+                        var selectedOption = $(
+                            '.add-resource-action-form input[name=add-action]:checked');
+
+                        var toCollectionID = toCollection.attr('id').substring(11),
+                            currentCollectionID = $('form#resource-form input[name="collection_id"]').val(),
+                            resourceID = $('form#resource-form input[name="resource_id"]').val();
+
+                        if (selectedOption.val() === "copy"){
+                            OC.resource.copy(
+                                currentCollectionID, resourceID,
+                                toCollectionID, OC.resource.successfullyCopied
+                            );
+                        } else {
+                            OC.resource.link(
+                                currentCollectionID, resourceID,
+                                toCollectionID, OC.resource.successfullyLinked
+                            );
+                        }
+
+                        event.preventDefault();
+                        event.stopPropagation();
+                        return false;
+                    });
+                }
+            });
+
+            if (profileCollectionBrowser.children().length === 0){
+                $.get('/resources/collection/' + collectionID + '/tree/user/',
+                    function(response){
+                        if (response.status == 'true'){
+                            OC.renderBrowser(response.tree, profileCollectionBrowser);
+                            profileCollectionBrowser.removeClass('loading-browser');
+                        }
+                        else {
+                            OC.popup(response.message, response.title);
+                        }
+                    },
+                'json');
+            }
+
+            var projectBrowserTab = $('.add-resource-tabs li a[href=".my-projects"]');
+
+            if (!projectBrowserTab.hasClickEventListener()){
+                projectBrowserTab.click(OC.addToProjectsTabClickHandler);
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+    },
+
+    renderBrowser: function(tree, parentElement, collectionID){
+        parentElement.html(tree);
+
+        // Bold the current collection.
+        parentElement.find('a#collection-' + collectionID).addClass(
+            'current-collection');
+
+        // When clicking in whitespace in the move browser, unselect current selection.
+        parentElement.click(function(event){
+            parentElement.find('a.selected-destination-collection').removeClass(
+                    'selected-destination-collection');
+        });
+
+        // Bind collection click with selection of collection.
+        parentElement.find('a').click(function(event){
+            // Remove any other selections previously made.
+            var currentlySelectedCollection = parentElement.find(
+                'a.selected-destination-collection');
+
+            if (!$(event.target).hasClass('current-collection')){
+                currentlySelectedCollection.removeClass(
+                    'selected-destination-collection');
+
+                if (currentlySelectedCollection[0] !== event.target){
+                    $(event.target).toggleClass('selected-destination-collection');
+                }
+            }
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+
+        // Toggle collections if it has child collections.
+        $('ul li.parent-collection > .toggle-collection', parentElement).click(
+            OC.parentCollectionClickHandler);
+    },
+
+    addToProjectsTabClickHandler: function(event){
+        var projectsCollectionBrowser = $('.add-resource-project-browser'),
+            collectionID = $('form#resource-form input[name=collection_id]').val();
+
+        if (projectsCollectionBrowser.children().length === 0){
+            $.get('/resources/collection/' + collectionID + '/tree/projects/',
+                function(response){
+                    if (response.status == 'true'){
+                        OC.renderBrowser(response.tree, projectsCollectionBrowser);
+                        projectsCollectionBrowser.removeClass('loading-browser');
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        }
+    },
+
     initShowMoreBlock: function(){
         var blocksToCompress = [
             '.profile-resources-added-list',
@@ -1090,6 +1242,9 @@ var OC = {
         });
 
         OC.setupNotificationsMenu();
+
+        // Set a tooltip to indicate the purpose of the notifications box.
+        $('.user-notification-count').tipsy({gravity:'w'});
     },
 
     setupNotificationsMenu: function(){
@@ -1132,7 +1287,7 @@ var OC = {
         // Get logged in user's ID.
         var userID = $('#user-info input[name=user_id]').val();
         $.get(
-            '/user/api/notifications/dismiss/' + userID + '?ids=' + unreadNotificationIDs.join(','),
+            '/user/api/notifications/dismiss/' + userID + '/?ids=' + unreadNotificationIDs.join(','),
                 function (response) {}, 'json'
         );
     },
@@ -1166,7 +1321,6 @@ var OC = {
             $(this).parent().toggleClass('show-objectives');
         });
     },
-
     initAddResource: function(){
         OC.setUpMenuPositioning('nav#add-resource-menu', '.add-resource');
 
@@ -1293,741 +1447,18 @@ var OC = {
     },
 
     initResourcesCollections: function(){
-        // Tipsy the collections/resources visibility.
-        $('.project-browse-item-visibility, .profile-browse-item-visibility').tipsy(
-            {gravity: 'n'});
+        if ($('.resources-collections-added').length >= 1){
+            // Tipsy the collections/resources visibility.
+            $('.project-browse-item-visibility, .profile-browse-item-visibility').tipsy(
+                {gravity: 'n'});
 
-        // Tipsy the collections/resources item delete button.
-        $('.resource-collection-delete').tipsy({gravity: 'n'});
+            // Tipsy the collections/resources item delete button.
+            $('.resource-collection-delete').tipsy({gravity: 'n'});
 
-        OC.resourcesCollections.bindItemVisibilityButton();
+            OC.resourcesCollections.bindItemVisibilityButton();
 
-        OC.resourcesCollectionsActions.initResourcesCollectionsActions();
-    },
-
-    resourcesCollections: {
-        resourceCollectionCollaboratorTemplate: _.template('<li class="collaborator-item user" id="user-<%= id %>">' +
-                '<div class="collaborator-info user-info">' +
-                '<div class="collaborator-photo user-photo" style="background-image: url(\'<%= profile_pic %>\')"></div>' +
-                '<div class="collaborator-description user-description">' +
-                '<a href="/user/<%= username %>"><%= name %></a></div></div>' +
-                '<div class="collaborator-actions user-actions">' +
-                '<span class="delete-member delete-button" title="Remove collaborator"></span>' +
-                '</div></li>'),
-
-        currentResourceCollectionVisibility: '',
-
-        bindItemVisibilityButton: function(){
-            $('.collection-visibility-public .browse-item-visibility, ' +
-                '.collection-visibility-project .browse-item-visibility').click(function(event){
-                // Check to see if the user is allow to change to visibility or members.
-                var actionsWrapper = $(event.target).closest('.resource-collection-actions');
-
-                if (actionsWrapper.hasClass('is-owner') || actionsWrapper.hasClass(
-                    'is-collaborator')){
-
-                    // Is this resource/collection a part of a project or not.
-                    var isProject = $(event.target).hasClass('project-browse-item-visibility');
-
-                    // Get wrapping resource/collection element.
-                    var resourceCollectionItem = $(event.target).closest('.resource-collection-item');
-
-                    OC.customPopup('.resource-collection-visibility-dialog', {
-                        closeCallback: OC.resourcesCollections.closeCollaboratorPopupCallback
-                    });
-
-                    var isOwner = actionsWrapper.hasClass('is-owner');
-
-                    var collaboratorForm = $('#add-collection-collaborator-form');
-                    var collaboratorInput = $('input[name=add-collaborator]', collaboratorForm);
-                    collaboratorInput.focus();
-
-                    // Nested if/else to figure out the visibility of the resource/collection.
-                    OC.resourcesCollections.currentResourceCollectionVisibility = OC.resourcesCollections.getResourceCollectionVisibility(
-                        $(event.target), isProject);
-
-                    // Empty contents of collaborator input.
-                    collaboratorInput.val('');
-
-                    // Get the list of current collaborators and place in popup list.
-                    var userList = $('ul.collaborators', collaboratorForm);
-
-                    // Clear current list.
-                    userList.children().remove();
-
-                    // Unbind all previously registered events from tabs.
-                    $('.resource-collection-visibility-form-tabs li a').unbind('click');
-
-                    if (resourceCollectionItem.hasClass('directory')){
-                        // Setup the popup.
-                        var collectionID = resourceCollectionItem.attr('id').substring(11);
-                        $('input[name=collection_id]', collaboratorForm).val(collectionID);
-
-                        // Re-initiate autocomplete add-a-collaborator-to-collection
-                        //     functionality.
-                        OC.resourcesCollections.addCollaborator(true);
-
-                        userList.addClass('waiting');
-                        $.get('/resources/collection/' + collectionID + '/list-collaborators/',
-                            function (response) {
-                                if (response.status === 'true'){
-                                    OC.resourcesCollections.listCollaboratorsHandler(response);
-                                } else {
-                                    OC.popup(response.message, response.title);
-                                }
-
-                                // Clear spinner from the user listing.
-                                userList.removeClass('waiting');
-                            },
-                        'json');
-
-                        // Make requests everytime the user clicks on a visibility button.
-                        OC.resourcesCollections.collectionVisibility.setupToggler(
-                            collectionID, isProject);
-                    } else {
-                        // Setup the popup.
-                        var resourceID = resourceCollectionItem.attr('id').substring(9);
-                        $('input[name=resource_id]', collaboratorForm).val(resourceID);
-
-                        // Re-initiate autocomplete add-a-collaborator-to-a-resource
-                        //     functionality.
-                        OC.resourcesCollections.addCollaborator(false);
-
-                        userList.addClass('waiting');
-                        $.get('/resources/resource/' + resourceID + '/list-collaborators/',
-                            function (response) {
-                                if (response.status === 'true'){
-                                    OC.resourcesCollections.listCollaboratorsHandler(response);
-                                } else {
-                                    OC.popup(response.message, response.title);
-                                }
-
-                                // Clear spinner from the user listing.
-                                userList.removeClass('waiting');
-                            },
-                        'json');
-
-                        // Make requests everytime the user clicks on a visibility button.
-                        OC.resourcesCollections.resourceVisibility.setupToggler(
-                            resourceID, isProject);
-                    }
-
-                    if (isProject){
-                        // Get current visibility of the project.
-                        // TODO(Varun): Make projectID retrieval less hackish.
-                        var projectID = $('#add-collection-collaborator-form input[name=project_id]').val();
-                        $.get('/project/' + projectID + '/visibility/',
-                            function (response) {
-                                if (response.status === 'true'){
-                                    // Set the body of the project visibility tab accordingly.
-                                    var projectAccessWrapper = $(
-                                        '.resource-collection-visibility-form-content .project-access');
-                                    if (response.visibility === 'private'){
-                                        projectAccessWrapper.text('This project is private, so only ' +
-                                            'the members of this project can see this.');
-                                    } else if (response.visibility === 'public'){
-                                        projectAccessWrapper.text('This project is public, so ' +
-                                            'everyone can see this.');
-                                    }
-                                } else {
-                                    OC.popup(response.message, response.title);
-                                }
-                            },
-                        'json');
-                    }
-
-                    OC.tabs('.resource-collection-visibility-form', {
-                        // Select the second tab (with index starting at 0)
-                        tab: OC.resourcesCollections.currentResourceCollectionVisibility == 'private' ? 1:0,
-                        showOnly: isOwner ? null : 1,
-                    });
-                }
-
-                event.stopPropagation();
-                event.preventDefault();
-                return false;
-            });
-        },
-
-        addCollaborator: function(isCollection){
-            var collaboratorForm = $('#add-collection-collaborator-form');
-            var addCollaboratorInput = $('input[name=add-collaborator]', collaboratorForm);
-            var collectionID = $('input[name=collection_id]', collaboratorForm).val();
-            var resourceID = $('input[name=resource_id]', collaboratorForm).val();
-
-            addCollaboratorInput.autocomplete({
-                source: function(request, response){
-                    $.get('/user/api/list/' + request.term,
-                        function (data){
-                            response($.map(data, function(item){
-                                // TODO (Varun): Remove existing users.
-                                return {
-                                    label: item.name,
-                                    value: item.username,
-                                    id: item.id
-                                };
-                            }));
-                        }, 'json');
-                },
-                minLength: 2,
-                select: function(event, ui){
-                    // Show the spinner as soon as the 'Add' button is clicked.
-                    addCollaboratorInput.addClass('waiting');
-
-                    if (isCollection){
-                        // Submit the add request through the project API        
-                        $.get('/resources/collection/' + collectionID + '/add/' + ui.item.id + '/',
-                            function (response) {
-                                var userList = $('#add-collection-collaborator-form ul.collaborators');
-                                OC.resourcesCollections.addCollaboratorHandler(response.user, userList);
-                            
-                                // Clear contents from the input box
-                                addCollaboratorInput.val('');
-                                addCollaboratorInput.removeClass('waiting');
-                            },
-                        'json');
-                    } else {
-                        // Submit the add request through the project API        
-                        $.get('/resources/resource/' + resourceID + '/add/' + ui.item.id + '/',
-                            function (response) {
-                                var userList = $('#add-collection-collaborator-form ul.collaborators');
-                                OC.resourcesCollections.addCollaboratorHandler(response.user, userList, isCollection);
-                            
-                                // Clear contents from the input box
-                                addCollaboratorInput.val('');
-                                addCollaboratorInput.removeClass('waiting');
-                            },
-                        'json');
-                    }
-
-                }
-            });
-        },
-
-        addCollaboratorHandler: function(user, userList, isCollection){
-            collaborator = OC.resourcesCollections.resourceCollectionCollaboratorTemplate(user);
-            userList.append(collaborator);
-
-            // Bind delete action with each user.
-            var newUserDeleteButton = userList.find(
-                'li.collaborator-item:last .delete-button');
-            newUserDeleteButton.click(function(event){
-                OC.resourcesCollections.removeCollaboratorHandler(event, isCollection);
-            });
-
-            // Tipsy the collaborator.
-            newUserDeleteButton.tipsy({gravity: 'n'});
-        },
-
-        listCollaboratorsHandler: function(response){
-            var userList = $('#add-collection-collaborator-form ul.collaborators');
-
-            var i, collaborator;
-            for (i = 0; i < response.users.length; i++){
-                OC.resourcesCollections.addCollaboratorHandler(response.users[i], userList);
-            }
-        },
-
-        getResourceCollectionVisibility: function(element, isProject){
-            return element.hasClass(
-                'visibility-private') ? 'private' : (isProject ? 'project' : 'public');
-        },
-
-        collectionVisibility: {
-            setupToggler: function(collectionID, isProject){
-                var collectionVisibility = $('.resources-collections-added #collection-' +
-                        collectionID + ' .browse-item-visibility');
-
-                if (isProject){
-                    var projectVisibilityTab = $(
-                        '.resource-collection-visibility-form-tabs li a[href=".project-access"]');
-
-                    projectVisibilityTab.click(function(){
-                        OC.resourcesCollections.collectionVisibility.setProjectVisibility(collectionVisibility, collectionID);
-                    });
-                } else {
-                    var publicVisibilityTab = $(
-                        '.resource-collection-visibility-form-tabs li a[href=".profile-access"]');
-
-                    publicVisibilityTab.click(function(){
-                        OC.resourcesCollections.collectionVisibility.setPublicVisibility(collectionVisibility, collectionID);
-                    });
-                }
-
-                var privateVisibilityTab = $(
-                    '.resource-collection-visibility-form-tabs li a[href=".private-access"]');
-
-                privateVisibilityTab.click(function(){
-                    OC.resourcesCollections.collectionVisibility.setPrivateVisibility(collectionVisibility, collectionID);
-                });
-            },
-
-            setProjectVisibility: function(collectionVisibility, collectionID){
-                $.get('/resources/collection/' + collectionID + '/visibility/project/');
-
-                // Remove the private visibility class on the collection.
-                collectionVisibility.removeClass('visibility-private');
-
-                // Add the project visibility class on the collection.
-                collectionVisibility.addClass('visibility-project');
-            },
-
-            setPrivateVisibility: function(collectionVisibility, collectionID){
-                $.get('/resources/collection/' + collectionID + '/visibility/private/');
-
-                // Remove the private & public visibility class on the collection.
-                collectionVisibility.removeClass('visibility-project');
-                collectionVisibility.removeClass('visibility-public');
-
-                // Add the project visibility class on the collection.
-                collectionVisibility.addClass('visibility-private');
-            },
-
-            setPublicVisibility: function(collectionVisibility, collectionID){
-                $.get('/resources/collection/' + collectionID + '/visibility/public/');
-
-                // Remove the private visibility class on the collection.
-                collectionVisibility.removeClass('visibility-private');
-
-                // Add the public visibility class on the collection.
-                collectionVisibility.addClass('visibility-public');
-            }
-        },
-
-        resourceVisibility: {
-            setupToggler: function(resourceID, isProject){
-                var resourceVisibility = $('.resources-collections-added #resource-' +
-                        resourceID + ' .project-browse-item-visibility');
-
-                if (isProject){
-                    var projectVisibilityTab = $(
-                        '.resource-collection-visibility-form-tabs li a[href=".project-access"]');
-
-                    projectVisibilityTab.click(function(){
-                        OC.resourcesCollections.resourceVisibility.setProjectVisibility(resourceVisibility, resourceID);
-                    });
-                } else {
-                    var publicVisibilityTab = $(
-                        '.resource-collection-visibility-form-tabs li a[href=".profile-access"]');
-
-                    publicVisibilityTab.click(function(){
-                        OC.resourcesCollections.resourceVisibility.setPublicVisibility(resourceVisibility, resourceID);
-                    });
-                }
-
-                var privateVisibilityTab = $(
-                    '.resource-collection-visibility-form-tabs li a[href=".private-access"]');
-
-                privateVisibilityTab.click(function(){
-                    OC.resourcesCollections.resourceVisibility.setPrivateVisibility(resourceVisibility, resourceID);
-                });
-            },
-
-            setProjectVisibility: function(resourceVisibility, resourceID){
-                $.get('/resources/resource/' + resourceID + '/visibility/project/');
-
-                // Remove the private visibility class on the collection.
-                resourceVisibility.removeClass('visibility-private');
-
-                // Add the project & public visibility class on the collection.
-                resourceVisibility.addClass('visibility-project');
-            },
-
-            setPrivateVisibility: function(resourceVisibility, resourceID){
-                $.get('/resources/resource/' + resourceID + '/visibility/private/');
-
-                // Remove the private visibility class on the collection.
-                resourceVisibility.removeClass('visibility-project');
-                resourceVisibility.removeClass('visibility-public');
-
-                // Add the project visibility class on the collection.
-                resourceVisibility.addClass('visibility-private');
-            },
-
-            setPublicVisibility: function(resourceVisibility, resourceID){
-                $.get('/resources/resource/' + resourceID + '/visibility/public/');
-
-                // Remove the private visibility class on the collection.
-                resourceVisibility.removeClass('visibility-private');
-
-                // Add the public visibility class on the collection.
-                resourceVisibility.addClass('visibility-public');
-            }
-        },
-
-        removeCollaboratorHandler: function(event, isCollection){
-            // From event target, get the collectionID/resourceID and userID.
-            var collaboratorForm = $('#add-collection-collaborator-form'),
-                collectionID = $('input[name=collection_id]', collaboratorForm).val(),
-                resourceID = $('input[name=resource_id]', collaboratorForm).val(),
-                target = $(event.target),
-                userID = target.closest('li.collaborator-item').attr('id').substring(5);
-
-            if (isCollection){
-                // Submit the remove member request through the project API.
-                $.get('/resources/collection/' + collectionID + '/remove/' + userID + '/',
-                    function (response) {
-                        if (response.status === 'true') {
-                            OC.resourcesCollections.removeCollaborator(target);
-                        } else {
-                            OC.popup(response.message, response.title);
-                        }
-                    },
-                'json');
-            } else {
-                // Submit the remove member request through the project API.
-                $.get('/resources/resource/' + resourceID + '/remove/' + userID + '/',
-                    function (response) {
-                        if (response.status === 'true') {
-                            OC.resourcesCollections.removeCollaborator(target);
-                        } else {
-                            OC.popup(response.message, response.title);
-                        }
-                    },
-                'json');
-            }
-        },
-
-        removeCollaborator: function(target){
-            var collaboratorContainer = $(target).parents('li.collaborator-item');
-
-            // Hide the tipsy on the 'delete' target.
-            $(target).tipsy('hide');
-
-            collaboratorContainer.remove();
-        },
-
-        closeCollaboratorPopupCallback: function(){
-            var collectionID = $(
-                'form#add-collection-collaborator-form input[name=collection_id]').val(),
-                resourceID = $(
-                    'form#add-collection-collaborator-form input[name=resource_id]').val();
-
-            var resourceCollection = collectionID === '' ?
-                'resource-' + resourceID : 'collection-' + collectionID;
-
-            // Is this resource/collection a part of a project.
-            var isProject = $('.resources-collections-added').hasClass(
-                'project-resources-collections');
-
-            var resourceCollectionElement = $(
-                '.resources-collections-added #' + resourceCollection  + ' .browse-item-visibility');
-            var resourceCollectionNewVisibility = OC.resourcesCollections.getResourceCollectionVisibility(
-                resourceCollectionElement, isProject);
-
-            if (resourceCollectionNewVisibility !== OC.resourcesCollections.currentResourceCollectionVisibility){
-                OC.setMessageBoxMessage(
-                    'Changing access control of resources and collections inside...');
-                OC.showMessageBox();
-                if (collectionID !== ''){
-                    OC.resourcesCollections.collectionVisibilityChangePropagation(collectionID);
-                }
-            }
-        },
-
-        collectionVisibilityChangePropagation: function(collectionID){
-            $.get('/resources/collection/' + collectionID + '/visibility/propagate-changes/',
-                function (response) {
-                    if (response.status === 'true') {
-                        OC.resourcesCollections.collectionVisibilityPropagationSuccess();
-                    } else {
-                        OC.popup(response.message, response.title);
-                    }
-                },
-            'json');
-        },
-
-        collectionVisibilityPropagationSuccess: function(){
-            OC.dismissMessageBox();
+            OC.resourcesCollectionsActions.initResourcesCollectionsActions();
         }
-    },
-
-    resourcesCollectionsActions: {
-        initResourcesCollectionsActions: function(){
-            // Check if there are resources/collections on this page.
-            var currentCollection = $('.resources-collections-added');
-
-            if (currentCollection.length > 0){
-                // Initialize navigation panel for the collections.
-                OC.resourcesCollectionsActions.initBrowseNavigation();
-
-                // Initialize ability to move and reorganize resources and collections.
-                OC.resourcesCollectionsActions.initMoveResourcesCollections();
-
-                // Initialize action buttons for collection and resource manipulation.
-                OC.resourcesCollectionsActions.initResourceCollectionActions();
-            }
-        },
-
-        initMoveResourcesCollections: function(){
-            $('.resource-collection-item').draggable({ revert: "invalid" });
-            $('.resource-collection-item.directory').droppable({
-                hoverClass: 'droppable',
-                accept: ".directory, .resource",
-                drop: function(event, ui){
-                    if (ui.draggable.hasClass('directory')){
-                        OC.resourcesCollectionsActions.moveCollectionIntoCollection(
-                            ui.draggable.attr('id').substring(11),
-                            $(event.target).attr('id').substring(11)
-                        );
-
-                        // Set confirmation message
-                        OC.resourcesCollectionsActions.movedIntoCollection([], [ui.draggable]);
-                    } else {
-                        OC.resourcesCollectionsActions.moveResourceIntoCollection(
-                            ui.draggable.attr('id').substring(9),
-                            $(event.target).attr('id').substring(11)
-                        );
-
-                        // Set confirmation message
-                        OC.resourcesCollectionsActions.movedIntoCollection([ui.draggable], []);
-                    }
-                }
-            });
-        },
-
-        moveResourceIntoCollection: function(resourceID, toCollectionID){
-            var currentCollectionID = $('.resources-collections-added').attr('id').substring(11);
-
-            $.get('/resources/move/resource/' + resourceID + '/from/' +
-                currentCollectionID + '/to/' + toCollectionID + '/',
-                function(response){
-                    if (response.status == 'true'){
-                        OC.resourcesCollectionsActions.resourceCollectionMovedSuccess(
-                            '.resource-collection-item#resource-' + resourceID);
-                    }
-                    else {
-                        OC.popup(response.message, response.title);
-                    }
-                },
-            'json');
-        },
-
-        moveCollectionIntoCollection: function(fromCollectionID, toCollectionID){
-            var currentCollectionID = $('.resources-collections-added').attr('id').substring(11);
-
-            $.get('/resources/move/collection/' + fromCollectionID + '/from/' +
-                currentCollectionID + '/to/' + toCollectionID + '/',
-                function(response){
-                    if (response.status == 'true'){
-                        OC.resourcesCollectionsActions.resourceCollectionMovedSuccess(
-                            '.resource-collection-item#collection-' + fromCollectionID);
-                    } else {
-                        OC.popup(response.message, response.title);
-                    }
-                },
-            'json');
-        },
-
-        resourceCollectionMovedSuccess: function(movedResourceCollectionID){
-            // Fade out the resource/collection.
-            $(movedResourceCollectionID).fadeOut('fast');
-        },
-
-        movedIntoCollection: function(resources, collections){
-            var movedResources = resources || [];
-            var movedCollections = collections || [];
-
-            // Generate message over project header.
-            if (movedResources.length >= 1 && movedCollections.length >= 1) {
-                OC.setMessageBoxMessage(
-                    'Moved resources and collections successfully');
-            } else if (movedResources.length >= 1) {
-                OC.setMessageBoxMessage(
-                    'Moved resource(s) into the collection successfully');
-            } else if (movedCollections.length >= 1) {
-                OC.setMessageBoxMessage(
-                    'Moved collection(s) successfully');
-            }
-
-            OC.showMessageBox();
-        },
-
-        initResourceCollectionActions: function(){
-            OC.resourcesCollectionsActions.bindResourceCollectionSelectors();
-
-            OC.resourcesCollectionsActions.actionButtonsClickHandler();
-
-            var checkedResourceCollections = $(
-                '.resource-collection-item input[type=checkbox]:checked');
-            if (checkedResourceCollections.length >= 1){
-                var i;
-                for (i = 0; i < checkedResourceCollections.length; i++){
-                    OC.resourcesCollectionsActions.selectedResourcesCollections.push(
-                        checkedResourceCollections[i]);
-                }
-            } else {
-                var moveButton = $('.collection-actions .move-button');
-                OC.resourcesCollectionsActions.disableActionButton(moveButton);
-            }
-        },
-
-        actionButtonsClickHandler: function(){
-            var moveButton = $('.collection-actions .move-button');
-
-            moveButton.click(function(event){
-                var movePopup = OC.customPopup('.move-resource-collection-dialog'),
-                    collectionBrowser = $('.move-resource-collection-browser'),
-                    collectionID = $('.resources-collections-added').attr('id').substring(11);
-
-                // Clear contents from previous tree popup and set loading class.
-                collectionBrowser.children().remove();
-                collectionBrowser.addClass('loading-browser');
-
-                // Bind the 'Done' button on the popup.
-                $('.move-resource-collection-submit-button').click(function(event){
-                    // Capture currently selected collection.
-                    var toCollection = collectionBrowser.find(
-                        '.selected-destination-collection');
-
-                    movePopup.close();
-
-                    if (toCollection){
-                        var toCollectionID = toCollection.attr('id').substring(11);
-
-                        // Loop through all selected resources.
-                        var i, resourcesMoved = [], collectionsMoved = [];
-                        for (i = 0; i < OC.resourcesCollectionsActions.selectedResourcesCollections.length; i++){
-                            var resourceCollectionItem = $(OC.resourcesCollectionsActions.selectedResourcesCollections[i]).closest(
-                                '.resource-collection-item');
-                            if (resourceCollectionItem.hasClass('directory')){
-                                OC.resourcesCollectionsActions.moveCollectionIntoCollection(
-                                    resourceCollectionItem.attr('id').substring(11), toCollectionID);
-                                collectionsMoved.push(OC.resourcesCollectionsActions.selectedResourcesCollections[i]);
-                            } else {
-                                OC.resourcesCollectionsActions.moveResourceIntoCollection(
-                                    resourceCollectionItem.attr('id').substring(9), toCollectionID);
-                                resourcesMoved.push(OC.resourcesCollectionsActions.selectedResourcesCollections[i]);
-                            }
-                        }
-                        // Set confirmation message
-                        OC.resourcesCollectionsActions.movedIntoCollection(resourcesMoved, collectionsMoved);
-                    }
-                });
-
-                var isProject = $('.resources-collections-added').hasClass(
-                    'project-resources-collections');
-
-                if (isProject){
-                    $.get('/resources/collection/' + collectionID + '/tree/project/',
-                        function(response){
-                            if (response.status == 'true'){
-                                OC.resourcesCollectionsActions.renderBrowser(response.tree, collectionBrowser);
-                                collectionBrowser.removeClass('loading-browser');
-                            }
-                            else {
-                                OC.popup(response.message, response.title);
-                            }
-                        },
-                    'json');
-                } else {
-                    $.get('/resources/collection/' + collectionID + '/tree/user/',
-                        function(response){
-                            if (response.status == 'true'){
-                                OC.resourcesCollectionsActions.renderBrowser(response.tree, collectionBrowser);
-                                collectionBrowser.removeClass('loading-browser');
-                            }
-                            else {
-                                OC.popup(response.message, response.title);
-                            }
-                        },
-                    'json');
-                }
-            });
-        },
-
-        renderBrowser: function(tree, parentElement){
-            parentElement.html(tree);
-
-            // Bold the current collection.
-            var currentCollectionID = $('.resources-collections-added').attr('id').substring(11);
-            parentElement.find('a#collection-' + currentCollectionID).addClass(
-                'current-collection');
-
-            // When clicking in whitespace in the move browser, unselect current selection.
-            parentElement.click(function(event){
-                parentElement.find('a.selected-destination-collection').removeClass(
-                        'selected-destination-collection');
-            });
-
-            // Bind collection click with selection of collection.
-            parentElement.find('a').click(function(event){
-                // Remove any other selections previously made.
-                var currentlySelectedCollection = parentElement.find(
-                    'a.selected-destination-collection');
-
-                if (!$(event.target).hasClass('current-collection')){
-                    currentlySelectedCollection.removeClass(
-                        'selected-destination-collection');
-
-                    if (currentlySelectedCollection[0] !== event.target){
-                        $(event.target).toggleClass('selected-destination-collection');
-                    }
-                }
-
-                event.stopPropagation();
-                event.preventDefault();
-                return false;
-            });
-
-            // Toggle collections if it has child collections.
-            $('ul li.parent-collection > .toggle-collection', parentElement).click(
-                OC.parentCollectionClickHandler);
-        },
-
-        bindResourceCollectionSelectors: function(){
-            $('.resource-collection-item input[type=checkbox]').click(
-                OC.resourcesCollectionsActions.resourceCollectionCheckboxHandler);
-        },
-
-        selectedResourcesCollections: [],
-
-        resourceCollectionCheckboxHandler: function(event){
-            var resourceCollectionItem = $(event.target).closest('.resource-collection-item');
-            if (event.target.checked === false){
-                var elementPosition = OC.resourcesCollectionsActions.selectedResourcesCollections.indexOf(
-                    resourceCollectionItem);
-                OC.resourcesCollectionsActions.selectedResourcesCollections.splice(elementPosition, 1);
-            } else {
-                OC.resourcesCollectionsActions.selectedResourcesCollections.push(resourceCollectionItem);
-            }
-            
-            OC.resourcesCollectionsActions.selectedResourcesCollectionsChangeListener();
-        },
-
-        selectedResourcesCollectionsChangeListener: function(){
-            var moveButton = $('.collection-actions .move-button');
-            if (OC.resourcesCollectionsActions.selectedResourcesCollections.length >= 1){
-                OC.resourcesCollectionsActions.enableActionButton(moveButton);
-                OC.resourcesCollectionsActions.actionButtonsClickHandler();
-            } else {
-                OC.resourcesCollectionsActions.disableActionButton(moveButton);
-            }
-        },
-
-        enableActionButton: function(actionButton){
-            actionButton.removeClass('disabled-collection-button');
-            actionButton.disabled = false;
-        },
-
-        disableActionButton: function(actionButton){
-            actionButton.addClass('disabled-collection-button');
-            actionButton.disabled = true;
-            actionButton.unbind('click');
-        },
-
-        initBrowseNavigation: function(){
-            // Bold the current collection.
-            var currentCollectionID = $('.resources-collections-added').attr('id').substring(11);
-            var collectionInNavigation = $('nav.collections-navigation').find(
-                'a#collection-' + currentCollectionID);
-            collectionInNavigation.addClass('current-navigation-collection');
-
-            // Toggle open all the ancestors.
-            collectionInNavigation.parents('.parent-collection').each(function(){
-                $(this).find('.toggle-collection:first').click();
-            });
-        },
     },
 
     initMessageBox: function(){
@@ -2188,7 +1619,8 @@ var OC = {
     initUpvoteDownvoteResource: function(){
         // Get the user and resource ID for this resource.
         var resourceID = $('form#resource-form input[name=resource_id]').val(),
-            userID = $('form#resource-form input[name=user_id]').val();
+            userID = $('form#resource-form input[name=user_id]').val(),
+            revisionID = $('form#resource-form input[name=revision_id]').val();
 
         var upvoteContainter = $('.article-community li.thumbs-up-action'),
             downvoteContainter = $('.article-community li.thumbs-down-action'),
@@ -2196,8 +1628,17 @@ var OC = {
             downvoteCountElement = $('.count', downvoteContainter);
         
         if (resourceID){
-            $.get('/interactions/votes/count/resource/' + resourceID + '/',
-                function(response){
+            var voteCountEndpoint;
+
+            if (revisionID){
+                voteCountEndpoint = '/interactions/votes/count/resource/' +
+                    resourceID + '/revision/' + revisionID + '/';
+            } else {
+                voteCountEndpoint = '/interactions/votes/count/resource/' +
+                    resourceID + '/';
+            }
+
+            $.get(voteCountEndpoint, function(response){
                     if (response.status == 'true'){
                         upvoteCountElement.text(response.upvote_count);
                         downvoteCountElement.text(response.downvote_count);
@@ -2208,25 +1649,40 @@ var OC = {
                         if (response.user_downvoted == 'true'){
                             downvoteContainter.addClass('user-downvoted');
                         }
+                    } else {
+                        // TODO(Varun): Deprecate vote count load.
                     }
                 },
             'json');
         }
 
         if (userID){
+            var voteEndpoint;
+
             $('a', upvoteContainter).click(function(event){
-                $.get('/interactions/vote/up/resource/' + resourceID + '/',
-                    function(response){
+                if (revisionID){
+                    voteEndpoint = '/interactions/vote/up/resource/' +
+                        resourceID + '/revision/' + revisionID + '/';
+                } else {
+                    voteEndpoint = '/interactions/vote/up/resource/' +
+                        resourceID + '/';
+                }
+
+                $.get(voteEndpoint, function(response){
                         if (response.status == 'true'){
-                            upvoteContainter.addClass('user-upvoted');
+                            if (response.action == 'unvote'){
+                                upvoteContainter.removeClass('user-upvoted');
 
-                            upvoteCountElement.text(
-                                parseInt(upvoteCountElement.text(), 10) + 1);
-                        } else if (response.status == 'unvote success'){
-                            upvoteContainter.removeClass('user-upvoted');
+                                upvoteCountElement.text(
+                                    parseInt(upvoteCountElement.text(), 10) - 1);
+                            } else {
+                                upvoteContainter.addClass('user-upvoted');
 
-                            upvoteCountElement.text(
-                                parseInt(upvoteCountElement.text(), 10) - 1);
+                                upvoteCountElement.text(
+                                    parseInt(upvoteCountElement.text(), 10) + 1);
+                            }
+                        } else {
+                            OC.popup(response.message, response.title);
                         }
                     },
                 'json');
@@ -2237,18 +1693,29 @@ var OC = {
             });
 
             $('a', downvoteContainter).click(function(event){
-                $.get('/interactions/vote/down/resource/' + resourceID + '/',
-                    function(response){
+                if (revisionID){
+                    voteEndpoint = '/interactions/vote/down/resource/' +
+                        resourceID + '/revision/' + revisionID + '/';
+                } else {
+                    voteEndpoint = '/interactions/vote/down/resource/' +
+                        resourceID + '/';
+                }
+
+                $.get(voteEndpoint, function(response){
                         if (response.status == 'true'){
-                            downvoteContainter.addClass('user-downvoted');
+                            if (response.action == 'unvote'){
+                                downvoteContainter.removeClass('user-downvoted');
 
-                            downvoteCountElement.text(
-                                parseInt(downvoteCountElement.text(), 10) + 1);
-                        } else if (response.status == 'unvote success'){
-                            downvoteContainter.removeClass('user-downvoted');
+                                downvoteCountElement.text(
+                                    parseInt(downvoteCountElement.text(), 10) - 1);
+                            } else {
+                                downvoteContainter.addClass('user-downvoted');
 
-                            downvoteCountElement.text(
-                                parseInt(downvoteCountElement.text(), 10) - 1);
+                                downvoteCountElement.text(
+                                    parseInt(downvoteCountElement.text(), 10) + 1);
+                            }
+                        } else {
+                            OC.popup(response.message, response.title);
                         }
                     },
                 'json');
@@ -2276,6 +1743,43 @@ var OC = {
                 return false;
              });
         }
+    },
+
+    initEditResource: function(){
+        $('form.resource-create-edit-form #submission-buttons button[type=submit]').click(
+            function(event){
+        
+                if (action === "save") {
+                    $('#article-edit-form').submit();
+                } else {
+                        // Launch log prompt dialog box
+                        $("#log-message").dialog({
+                            modal: true,
+                            open: false,
+                            buttons: {
+                                Ok: function() {
+                                    $(this).dialog( "close" );
+                                    // HACK: Because fields in display:none aren't passed in the
+                                    //    POST requests, manually copy log field value to a hidden
+                                    //    attribute
+                                    $('input[name=log]').attr('value', $(
+                                        'input[name=log_message]').attr('value'));
+
+                                    $('#article-edit-form').submit();
+                                },
+                                Cancel: function() {
+                                    $(this).dialog( "close" );
+                                    return false;
+                                }
+                            }
+                        });
+                }
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            }
+        );
     },
 
     initPictureManipulation: function(){
@@ -2605,6 +2109,626 @@ var OC = {
 
     },
 
+    comments: {
+        newCommentTemplate: _.template('<li class="post-comment" id="comment-<%= id %>">' +
+            '<div class="post-comment-user-thumbnail">' +
+            '<div style="background-image: url(\'<%= profile_pic %>\')" class="discussion-response-thumbnail"></div>' +
+            '</div><div class="delete-button" title="Delete comment"></div>' +
+            '<div class="post-comment-body">' +
+            '<a href="/user/<%= username %>"><%= name %></a><%= body %>' +
+            '<form><input type="hidden" name="user" value="<%= user_id %>" />' +
+            '<input type="hidden" name="parent_type" value="<%= content_type %>" />' +
+            '<input type="hidden" name="parent_id" value="<%= id %>" /></form>' +
+            '<div class="comment-actions"><div class="reply-to-comment">Reply</div>' +
+            '<div class="upvote-comment">0</div><div class="downvote-comment">0</div>' +
+            '</div></div></li>'),
+
+        initRenderComments: function(){
+            // If this is a resource, render after async load.
+            if ($('form#resource-form').length > 0){
+                OC.renderDocumentComments();
+                
+                OC.comments.renderResourceComments(
+                    OC.comments.resourceCommentsSuccess);
+
+            }
+            // If this is a discussion board, render now.
+            else if ($('.discussion-board').length > 0){
+                OC.comments.resourceCommentsSuccess();
+            }
+
+            var commentInput = 'textarea[name=body_markdown]';
+
+            $(commentInput).on('focus', function(){
+                $(this).addClass('expanded');
+            });
+
+            $(commentInput).on('blur', function(){
+                if ($(this).val() === ''){
+                    $(this).removeClass('expanded');
+                }
+            });
+        },
+
+        resourceCommentsSuccess: function(){
+            // Bind comment post button on each post to handler.
+            OC.comments.bindNewCommentButton();
+
+            OC.comments.bindCommentReplyButton();
+
+            OC.comments.bindVotingButtons('.comment-thread');
+
+            OC.comments.bindCommentDeleteButtons();
+        },
+
+        renderResourceComments: function(callback){
+            // Get the resourceID.
+            // TODO(Varun): Make a getFunction for getting resourceID on the resource page.
+            var resourceID = $('form#resource-form input[name="resource_id"]').val();
+
+            // GET the comment thread from the server.
+            var serializedComments;
+            $.get('/resources/resource-comments/' + resourceID + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        // Put the HTML of the serialized comment thread on
+                        //     the page.
+                        $('.resource-comments').prepend(response.comments);
+                        callback();
+                    } else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        },
+
+        bindNewCommentButton: function(){
+            $('.post-comment-button-wrapper .post-comment-button').click(function(event){
+                var commentTextarea = $(event.target).parents('.post-comments').find('textarea[name=body_markdown]');
+
+                if (commentTextarea.val() !== ''){
+                    $.post('/interactions/comment/',  $(this).parents('form').serialize(),
+                        function(response){
+                            // Hide the resource
+                            if (response.status == 'success'){
+                                OC.comments.newCommentSuccessHandler(response, event.target);
+                            }
+                            else {
+                                OC.popup(
+                                    'Sorry, the comment could not be posted. Please try again later.');
+                            }
+                        },
+                    'json');
+                } else {
+                    commentTextarea.focus();
+                }
+            });
+        },
+
+        bindCommentReplyButton: function(){
+            $('.reply-to-comment').click(OC.comments.commentReplyButtonClickHandler);
+        },
+
+        bindVotingButtons: function(targetParent){
+            var commentID;
+            $('.upvote-post', targetParent).click(function(event){
+                commentID = OC.projects.getDiscussionID(event.target);
+                OC.comments.newVote(commentID, true, event.target);
+            });
+            $('.downvote-post', targetParent).click(function(event){
+                commentID = OC.projects.getDiscussionID(event.target);
+                OC.comments.newVote(commentID, false, event.target);
+            });
+            $('.upvote-comment', targetParent).click(function(event){
+                commentID = OC.comments.getCommentID(event.target);
+                OC.comments.newVote(commentID, true, event.target);
+            });
+            $('.downvote-comment', targetParent).click(function(event){
+                commentID = OC.comments.getCommentID(event.target);
+                OC.comments.newVote(commentID, false, event.target);
+            });
+        },
+
+        getCommentID: function(target){
+            return $(target).closest(
+                '.post-comment').attr('id').substring(8);
+        },
+
+        bindCommentDeleteButtons: function(){
+            $('.comment-thread .delete-button').click(
+                OC.comments.commentDeleteButtonClickHandler);
+        },
+
+        commentDeleteButtonClickHandler: function(event){
+            var commentID = OC.comments.getCommentID(event.target);
+                
+            $.get('/interactions/comment/' + commentID + '/delete/',
+                function(response){
+                    if (response.status == 'true'){
+                        OC.comments.commentDeleteHandler(event.target);
+                    } else {
+                        OC.popup(
+                            'Sorry, your comment could not be deleted. ' +
+                            'Please try again later.');
+                    }
+                },
+            'json');
+        },
+
+        commentDeleteHandler: function(target){
+            var commentWrapper = $(target).closest('.post-comment');
+            var siblingCount = commentWrapper.siblings('.post-comment').length;
+
+            // Hide the tipsy on the 'delete' target.
+            $(target).tipsy('hide');
+
+            if (siblingCount === 0){
+                commentWrapper.closest('ul').remove();
+            } else {
+                commentWrapper.remove();
+            }
+        },
+
+        newVote: function(commentID, upvote, target){
+            if (upvote){
+                endpoint = '/interactions/comment/' + commentID + '/upvote/';
+            } else {
+                endpoint = '/interactions/comment/' + commentID + '/downvote/';
+            }
+
+            // Submit the form via ajax and submit response to handler
+            $.get(endpoint,
+                function(response){
+                    if (response.status == 'true'){
+                        OC.comments.newVoteHandler(target, upvote);
+                    } else if (response.status == 'unvote success'){
+                        OC.comments.newVoteHandler(target, upvote, true);
+                    }
+                    else {
+                        OC.popup(
+                            'Sorry, your vote could not be posted. ' +
+                            'Please try again later.');
+                    }
+                },
+            'json');
+        },
+
+        newVoteHandler: function(target, upvote, undoAction){
+            undoAction = undoAction || false;
+
+            var currentVotes = $(target).text();
+
+            if (undoAction) {
+                $(target).text(parseInt(currentVotes, 10) - 1);
+                $(target).removeClass('user-upvoted');
+                $(target).removeClass('user-downvoted');
+            } else {
+                $(target).text(parseInt(currentVotes, 10) + 1);
+
+                if (upvote){
+                    $(target).addClass('user-upvoted');
+                } else {
+                    $(target).addClass('user-downvoted');
+                }
+            }
+        },
+
+        addDeleteButtonTooltip: function(deleteParent){
+            $('.delete-button', deleteParent).tipsy({gravity: 'n'});
+        },
+
+        commentReplyButtonClickHandler: function(event){
+            console.log('mai idhar aaya');
+
+            var originalComment = $(event.target).closest('.post-comment');
+            var commentBodyClone = originalComment.find('.post-comment-body:first').clone();
+
+            // TODO(Varun): Give the element a class and lookup that way
+            var userName = commentBodyClone.find('a:first').clone();
+
+            // Remove username, comment actions from comment body clone
+            commentBodyClone.find('a:first').remove();
+            commentBodyClone.find('.comment-actions').remove();
+            commentBodyClone.find('ul').remove();
+
+            // Set the title of what needs to popup
+            strippedTitle = '"' + commentBodyClone.text().substring(0, 40);
+            if (commentBodyClone.text().length > 40){
+                strippedTitle += '..."';
+            } else {
+                strippedTitle += '"';
+            }
+            $('.new-comment-reply-dialog .new-comment-reply-title').text(
+                 strippedTitle
+            );
+
+            // Set the body of original comment in the popup
+            $('.new-comment-reply-dialog .new-comment-original-reply-body').html(
+                commentBodyClone.html()
+            );
+
+            // Set the user thumbnail of the original comment in the popup
+            var originalCommentUserThumbnail = originalComment.find(
+                '.discussion-response-thumbnail').css('background-image');
+
+            $('.new-comment-reply-dialog .new-comment-original-commentor-thumbnail').css(
+                'background-image', originalCommentUserThumbnail
+            );
+
+            // Set the name of the original commentor
+            $('.new-comment-reply-dialog .new-comment-original-reply-user-name').html(
+                userName
+            );
+
+            // Clear no body error classes, if they exist.
+            $('.new-comment-reply-body').removeClass('form-input-error');
+
+            // Set comment ID in the input field of the new comment form
+            // Given that the format of the ID of the comment <li> is 'comment-xx'.
+            originalCommentID = originalComment.attr('id').substring(8);
+            $('.new-comment-reply-dialog input[name=parent_id]').val(originalCommentID);
+
+            newCommentReplyPopup = OC.customPopup('.new-comment-reply-dialog');
+
+            $('.new-comment-reply-submit').click(function(event){
+                if ($('.new-comment-reply-body').val() !== ''){
+                    // Get the form.
+                    var commentReplyForm = $(event.target).parents(
+                        '.new-comment-reply-dialog').find('form#new-comment-reply-form');
+
+                    // Submit the form via ajax and submit response to handler.
+                    $.post('/interactions/comment/',  commentReplyForm.serialize(),
+                        function(response){
+                            if (response.status == 'success'){
+                                OC.comments.newCommentReplySuccessHandler(response, originalComment);
+
+                                // Close the popup
+                                newCommentReplyPopup.close();
+                            }
+                            else {
+                                OC.popup(
+                                    'Sorry, the comment reply could not be posted.' +
+                                    'Please try again later.');
+                            }
+                        },
+                    'json');
+
+                } else {
+                    $('.new-comment-reply-body').addClass('form-input-error');
+                }
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+        },
+
+        newCommentSuccessHandler: function(response, button){
+            var newCommentTemplate = OC.comments.newCommentTemplate;
+            var newComment = newCommentTemplate(response.message);
+
+            var postComments = $(button).parents('.comment-thread'),
+                postCommentList = postComments.children('ul');
+
+            if (postCommentList.length === 0){
+                postCommentList = $('<ul/>');
+                // Insert the new comment list BEFORE the input box
+                postComments.prepend(postCommentList);
+            }
+        
+            postCommentList.append(newComment);
+            var insertedComment = postCommentList.find('.post-comment:last');
+
+            // Clear the contents of the input box
+            var commentTextarea = $(button).parents('.comment-thread').find('textarea[name=body_markdown]');
+            commentTextarea.val('');
+
+            // Collapse the textarea
+            commentTextarea.removeClass('expanded');
+            commentTextarea.blur();
+
+            // TODO(Varun): Attach the event handlers to this response.
+            OC.comments.attachNewCommentActions(insertedComment);
+        },
+
+        newCommentReplySuccessHandler: function(response, originalComment){
+            var newCommentTemplate = OC.comments.newCommentTemplate;
+            var newComment = newCommentTemplate(response.message);
+
+            // See if the comment already has a <ul> child, and if so, append
+            //     the new <li> to it. If not, create a new <ul> and append the <ul>
+            //     to it
+            var childCommentList = $('> ul', originalComment);
+
+            if (childCommentList.length === 0){
+                childCommentList = $('<ul/>');
+                originalComment.append(childCommentList);
+            }
+
+            childCommentList.append(newComment);
+            var insertedComment = childCommentList.find('.post-comment:last');
+
+            // TODO(Varun): Attach the event handlers to this response.
+            //     May be consolidate comment generation and assigning handler
+            //     to independent function.
+            OC.comments.attachNewCommentActions(insertedComment);
+
+            // Empty the contents of the reply textarea
+            $('.new-comment-reply-body').val('');
+        },
+
+        attachNewCommentActions: function(newComment){
+            // Tipsy-fy then new comment's delete button.
+            OC.comments.addDeleteButtonTooltip(newComment);
+
+            // Attach the comment delete handler.
+            $('.delete-button', newComment).click(
+                OC.comments.commentDeleteButtonClickHandler);
+
+            // Attach the comment reply handler.
+            $('.reply-to-comment', newComment).click(
+                OC.comments.commentReplyButtonClickHandler);
+
+            // Attach the comment upvote and downvote handlers.
+            OC.comments.bindVotingButtons(newComment);
+        },
+
+    },
+
+    renderDocumentComments: function(){
+        var documentBody = $('.oer-document.document-body');
+
+        var i, j, documentElement, tableCells, cellComments;
+
+        if (documentBody.length >= 1){
+            var documentElements = $('.document-element', documentBody);
+
+            for (i = 0; i < documentElements.length; i++){
+                documentElement = $(documentElements[i]);
+
+                // Fetch the document element comments.
+                var documentElementForm = $('form.document-element-form', documentElement),
+                    documentElementID = $('input[name=document_element_id]', documentElementForm).val();
+
+                OC.getDocumentElementComments(documentElement, documentElementID);
+            }
+        }
+
+        OC.closePopoutsHandler();
+    },
+
+    getDocumentElementComments: function(documentElement, documentElementID){
+        $.get('/resources/document-element/' + documentElementID + '/comments/',
+            function(response){
+                OC.getDocumentElementCommentsResponseHandler(
+                    response, documentElement, documentElementID);
+            },
+        'json');
+    },
+
+    getDocumentElementCommentsResponseHandler: function(response, documentElement, documentElementID) {
+        var documentElementComments =  response.comments;
+        if (documentElement.hasClass('document-table')){
+            tableCells = $('td, th', documentElement);
+
+            for (j = 0; j < tableCells.length; j++){
+                cellCommentButton = $('<div/>', {
+                    'class': 'document-cell-comment-button'});
+                cellCommentsWrapper = $('<div/>', {
+                    'class': 'document-cell-comments'});
+
+                cell = $(tableCells[j]);
+
+                // Attach the floating comment button to the cell.
+                cell.append(cellCommentButton);
+                cell.append(cellCommentsWrapper);
+
+                newCommentButton = $('.document-cell-comment-button', cell);
+                newCommentsBox = $('.document-cell-comments', cell);
+
+                // Fill the comments box with comments.
+                var cellID = cell.attr('id'),
+                    cellRowColumn = cellID.substring(('item-' + documentElementID).length + 1).split('-'),
+                    cellRow = cellRowColumn[0],
+                    cellColumn = cellRowColumn[1];
+                
+                // Find all the commentReferences for this cell, but return a list of
+                //     only their 'comment' sub-objects)
+                cellComments = _.pluck(_.where(documentElementComments, {
+                        'reference': 'row#' + cellRow + ',col#' + cellColumn}), 'comment');
+
+                newCommentsBox.html(
+                    OC.cellCommentsView(cellComments, cell));
+
+                // Bind the comment 'Post' button in the box.
+                $('button.document-element-comment-post', newCommentsBox).click(
+                    OC.documentElementCommentPostHandler);
+
+                // Reposition comment button.
+                newCommentButton.css('left', (
+                    cell.width() - newCommentButton.width()) + 'px');
+
+                // Reposition the comment box.
+                var suggestedCommentBoxLeft = newCommentButton.position().left,
+                    expectedCommentBoxRight = suggestedCommentBoxLeft + newCommentsBox.outerWidth();
+
+                if (expectedCommentBoxRight > ($(window).width() - 10)){
+                    // Change suggested comment left pushing the comment in.
+                    suggestedCommentBoxLeft -= (expectedCommentBoxRight - ($(
+                        window).width() - 10));
+                }
+
+                newCommentsBox.css({'left':
+                    suggestedCommentBoxLeft + 'px',
+                    'top': newCommentButton.position().top + 'px'
+                });
+
+                // Attach click handler with comment button.
+                newCommentButton.click(OC.toggleCellComment);
+
+                // Add a tooltip on the comment.
+            }
+        }
+    },
+
+    toggleCellComment: function(event){
+        var dismissedPopout = $(OC.dismissOpenComment());
+
+        // Find the comment box and toggle 'show' class.
+        var commentContainer = $(event.target).closest('td, th');
+        var commentsBox = commentContainer.find('.document-cell-comments');
+
+        if (dismissedPopout.get(0) !== commentsBox.get(0)){
+            commentsBox.addClass('show-popout');
+            $(event.target).addClass('comments-open');
+
+            // Do not dismiss popout when its contents are clicked on.
+            commentsBox.click(function(event){
+                if (!$(event.target).is("button")){
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return false;
+                }
+            });
+        }
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+    },
+
+    closePopoutsHandler: function(){
+        $('body').on('click', function(){
+            OC.dismissOpenComment();
+        });
+    },
+
+    dismissOpenComment: function(){
+        // Get all menus with the class 'show-popout'.
+        var openPopouts = $('.show-popout');
+
+        var i;
+        for (i = 0; i < openPopouts.length; i++){
+            $(openPopouts[i]).removeClass('show-popout');
+        }
+
+        // Get all target elements with the class 'comments-open'.
+        var highlightedPopoutTargets = $('.comments-open');
+        var j;
+        for (j = 0; j < openPopouts.length; j++){
+            $(highlightedPopoutTargets[j]).removeClass('comments-open');
+        }
+
+        return openPopouts[0];
+    },
+
+    documentCommentTemplate: _.template('<div class="document-comment">' +
+        '<div class="document-comment-thumbnail" style="background-image: url(\'<%= profile_pic %>\');"></div>' +
+        '<div class="document-comment-body"><a href="/user/<%= username %>" class="document-comment-user">' +
+        '<%= name %></a><%= body %></div></div>'
+    ),
+
+    cellCommentsView: function(cellComments, cell){
+        var commentsHTML = '', existingComments = '';
+        var commentsHTMLPre = _.template('<form class="document-element-comments-form">' +
+            '<input type="hidden" name="document-element-item" value="<%= itemID %>" />' +
+            '<input type="hidden" name="user_id" value="<%= userID %>" />'
+        );
+        var commentsHTMLPost = '</form>';
+
+        // Get document element ID and user ID.
+        var documentElementItemID = cell.attr('id'),
+            userID = $('.document-body-form input[name="user_id"]').val(),
+            userProfilePicWrapper = $('.header-user-picture');
+
+        var userProfilePic;
+        if (userProfilePicWrapper.length >= 1)
+            userProfilePic = userProfilePicWrapper.css('background-image').replace('"', '\'');
+
+        var i;
+        for (i = 0; i < cellComments.length; i++){
+            existingComments += OC.documentCommentTemplate(cellComments[i]);
+        }
+
+        if (!userProfilePic){
+            commentsHTML += commentsHTMLPre({
+                itemID: documentElementItemID,
+                userID: userID
+            }) + existingComments + commentsHTMLPost;
+        } else {
+            // Get user URL, name and profile picture.
+            var userTemplate = _.template('<div class="document-comment">' +
+                '<div class="document-comment-thumbnail" style="background-image: <%= profile_pic %>;"></div>' +
+                '<div class="document-comment-body"><textarea name="comment-body" placeholder="Add a comment..."></textarea></div></div>'
+            );
+            var userComment = userTemplate({'profile_pic' : userProfilePic});
+
+            // Add comment 'Post' button.
+            var postButton = _.template(
+                '<div class="document-element-comment-post-wrapper">' +
+                '<button class="document-element-comment-post action-button mini-action-button">' +
+                'Post</button></div>');
+
+            commentsHTML += commentsHTMLPre({
+                itemID: documentElementItemID,
+                userID: userID
+            }) + existingComments + userComment + postButton() + commentsHTMLPost;
+        }
+
+        return commentsHTML;
+    },
+
+    documentElementCommentPostHandler: function(event){
+        var cellCommentsForm = $(event.target).closest('form.document-element-comments-form'),
+            documentElementForm = $(event.target).closest('.document-element').find('form.document-element-form'),
+            documentBodyForm = $('form.document-body-form');
+
+        var commentBody =  $('textarea[name=comment-body]', cellCommentsForm).val().trim();
+
+        // If the comment box is not empty, submit the comment.
+        if (commentBody !== ""){
+            var cellID = $(event.target).closest('td, th').attr('id'),
+                rowColReference = cellID.substring(cellID.indexOf('-', 5) + 1),
+                row = parseInt(rowColReference.substring(
+                    0, rowColReference.indexOf('-')), 10),
+                col = parseInt(rowColReference.substring(
+                    rowColReference.indexOf('-') + 1), 10);
+
+            var data = {
+                'body_markdown': commentBody,
+                'owner_id': $('input[name=document_element_id]', documentElementForm).val(),
+                'owner_type': $('input[name=document_element_type]', documentElementForm).val(),
+                'user': $('input[name=user_id]', documentBodyForm).val(),
+                'reference': 'row#' + row + ',col#' + col
+            };
+
+            // Submit the comment through the interactions API        
+            $.post('/interactions/comment-reference/', data,
+                function (response) {
+                    if (response.status == 'true'){
+                        OC.documentElementCommentSubmissionHandler(
+                            response, cellCommentsForm);
+                    }
+                }, 'json');
+        }
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+    },
+
+    documentElementCommentSubmissionHandler: function(response, cellCommentsForm){
+        var cellComments = $('.document-comment', cellCommentsForm),
+            lastComment = $(cellComments[cellComments.length - 2]);
+        lastComment.after(OC.documentCommentTemplate(response));
+
+        // Empty the contents of the comment.
+        var newCommentInput = $('textarea[name=comment-body]', cellCommentsForm);
+        newCommentInput.val('');
+
+        // TODO(Varun): End any kind of animation to show submission of comment.
+    },
+
     articleCenter: {
         registrationInit: function(){
             $(window).bind('scroll', function(e){
@@ -2626,6 +2750,44 @@ var OC = {
                     moeWrapper.removeClass();
                 }
             };
+        }
+    },
+
+    resource: {
+        copy: function(fromCollectionID, resourceID, toCollectionID, callback){
+            $.get('/resources/resource/' + resourceID + '/copy/from/' +
+                fromCollectionID + '/to/' + toCollectionID + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        callback(response.resource, resourceID);
+                    } else {
+                        OC.popup(response.message, response.title);
+                        OC.dismissMessageBox();
+                    }
+                },
+            'json');
+        },
+
+        link: function(fromCollectionID, resourceID, toCollectionID, callback){
+            $.get('/resources/resource/' + resourceID + '/link/from/' +
+                fromCollectionID + '/to/' + toCollectionID + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        callback(response.resource, resourceID);
+                    } else {
+                        OC.popup(response.message, response.title);
+                        OC.dismissMessageBox();
+                    }
+                },
+            'json');
+        },
+
+        successfullyCopied: function(copiedResource, resourceID){
+            OC.setMessageBoxMessage('Resource has been copied to your collection successfully.');
+        },
+
+        successfullyLinked: function(copiedResource, resourceID){
+            OC.setMessageBoxMessage('Resource has been linked in your collection successfully.');
         }
     }
 };
@@ -2669,6 +2831,8 @@ jQuery(document).ready(function ($) {
     OC.renderThermometer();
 
     OC.setupShareMenu();
+
+    OC.setupAddTo();
 
     $('#submission-info').animate({
         top: "0px"
@@ -2722,7 +2886,11 @@ jQuery(document).ready(function ($) {
 
     OC.initFavoriteResource();
 
+    OC.comments.initRenderComments();
+
     OC.initUpvoteDownvoteResource();
+
+    OC.initEditResource();
 
     OC.initForgotAuth();
 
