@@ -22,7 +22,7 @@ def project_home(request, project_slug):
             'project': project
         }
         #return render(request, 'project/project.html', context)
-        return redirect('projects:project_browse', project_slug=project_slug)
+        return redirect('projects:project_about', project_slug=project_slug)
     except:
         raise Http404
 
@@ -395,10 +395,13 @@ def discussion(request, project_slug, discussion_id):
 
 def build_posts_social(posts, user):
     for post in posts:
-        from interactions.CommentUtilities import CommentUtilities
-        (post.comments, flatted_post_descendants) = CommentUtilities.build_comment_tree(
-            {'root': [post]}, []
-        )
+        from interactions.CommentUtilities import CommentsBuilder
+        from django.contrib.contenttypes.models import ContentType
+        comment_ct = ContentType.objects.get_for_model(Comment)
+        
+        comments_builder = CommentsBuilder(post, comment_ct)
+        (post.comments, flatted_post_descendants) = comments_builder.build_tree()
+
         # Set post upvotes & downvotes
         from interactions.VoteUtilities import VoteUtilities
         post.upvotes = VoteUtilities.get_upvotes_of(post)
