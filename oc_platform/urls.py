@@ -60,7 +60,7 @@ urlpatterns = patterns(
     url(r'^api/emailShare/', 'oc_platform.views.email_share', name='api-email-share'),
     url(r'^api/fpUpload/', 'oer.views.fp_upload', name='api-fp-upload'),
     url(r'^api/file-upload/', 'oer.views.file_upload', name='api-file-upload'),
-    url(r'^api/fpSubmit/', 'oer.views.fp_submit', name='api-fp-submit'),
+    url(r'^api/file-upload-submit/', 'oer.views.file_upload_submit', name='api-file-upload-submit'),
     url(r'^api/image-upload/', 'media.views.upload_image', name='api-image-upload'),
     url(r'^api/list-user-images/(?P<user_id>\d+)/$', 'media.views.list_user_images', name='api-list-user-images'),
 
