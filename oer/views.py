@@ -515,6 +515,14 @@ def fp_upload(request):
     project_id = post_data.get('project', None)
     collection_id = post_data.get('collection', None)
 
+    try:
+        from django.contrib.auth.models import User
+        user = User.objects.get(pk=int(user_id))
+    except:
+        return APIUtilities._api_failure()
+
+    # Clear the meta data so that the request's POST object can be
+    # deserialized as individual uploads. 
     del post_data['user']
 
     if project_id:
