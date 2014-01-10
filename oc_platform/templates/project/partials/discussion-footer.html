@@ -14,33 +14,5 @@
         <div class="action-button new-discussion-post-submit">Post</div>
     </div>
 </div>
-<div class="new-comment-reply-dialog oc-popup">
-    <div class="oc-popup-title-bar">
-        <div class="oc-popup-title"><h3>Reply to <span class="new-comment-reply-title"></span></h3></div>
-        <div class="delete-button oc-popup-exit"></div>
-    </div>
-    <div class="oc-popup-body">
-        <div class="new-comment-original-reply">
-            <div class="new-comment-original-commentor-thumbnail user-thumbnail-xsmall"></div>
-            <div class="new-comment-original-reply-wrapper">
-                <div class="new-comment-reply-original-prompt"><span class="new-comment-original-prompt-suggest"><span class="new-comment-original-reply-user-name"></span> said:</span></div>
-                <div class="new-comment-original-reply-body"></div>
-            </div>
-        </div>
-
-        <div class="new-comment-reply-response">
-            <div class="new-comment-reply-response-user">
-                <div style="background-image: url('{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}')" class="user-thumbnail-xsmall"></div>
-                <div class="new-comment-reply-prompt">{{ user.get_full_name }}<span class="new-comment-reply-prompt-suggest"> says:</span></div>
-            </div>
-            <form id="new-comment-reply-form" action="/project/{{ project.slug }}/discussions/post/" method="POST">
-                <input type="hidden" name="user" value="{{ user.id }}" />
-                <input type="hidden" name="parent_type" value="{{ comments_content_type.id }}" />
-                <input type="hidden" name="parent_id" />
-                <textarea name="body_markdown" class="new-comment-reply-body" placeholder="Say something..."></textarea>
-            </form>
-            <div class="action-button new-comment-reply-submit">Post reply</div>
-        </div>
-    </div>
-</div>
+{% include 'partials/post-new-comment-reply.html' %}
 <div class="popup-background"></div>

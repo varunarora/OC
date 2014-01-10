@@ -22,24 +22,9 @@
                 </div>
             </div>
         </div>
-        <div class="post-comments">
+        <div class="post-comments comment-thread">
             {{ post.comments|nested_comment_tree:user|safe }}
-            <div class="post-comment">
-                <div class="post-comment-user-thumbnail">
-                    <div style="background-image: url('{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}')" class="discussion-response-thumbnail"></div>
-                </div>
-                <div class="post-comment-body">
-                    <form>
-                        <input type="hidden" name="user" value="{{ user.id }}" />
-                        <input type="hidden" name="parent_type" value="{{ comments_content_type.id }}" />
-                        <input type="hidden" name="parent_id" value="{{ post.id }}" />
-                        <textarea name="body_markdown" placeholder="Say something..."></textarea>
-                        <div class="post-comment-button-wrapper">
-                            <div class="action-button post-comment-button">Post comment</div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+            {% include 'partials/post-new-comment.html' %}
         </div>
     </div>
 </div>

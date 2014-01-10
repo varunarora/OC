@@ -29,9 +29,7 @@
 						No description.
 					{% endif %}
 				</section>
-		</article>
 			</div>
-	
 			<div id="fill-panel" class="panel-right">
 				<aside id="author-panel">
 					<div id="author-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ resource.revision.user.get_profile.profile_pic.name }}')" ></div>
@@ -59,14 +57,19 @@
 		</section>
 	</div>
 
-		<aside id="support">
+	<div class="center-stage">
+		<div id="key-panel" class="panel-left">
+			<div class="resource-comments comment-thread">
+            	{% include 'partials/post-new-comment.html' %}
+			</div>
+		</div>
+		<div id="fill-panel" class="panel-right">
 			<h3>Related resources</h3>
-			{% for resource in related %}
-				{% include 'partials/resource.html' %}
-			{% endfor %}
-		</aside>
+			No related resources found.
+		</div>
 	</div>
-</div>
+</article>
 
+{% include 'partials/post-new-comment-reply.html' %}
 
 {% include 'partials/footer.html' %}
