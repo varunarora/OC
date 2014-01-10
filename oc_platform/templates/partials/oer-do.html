@@ -4,6 +4,9 @@
 		{% if user == resource.user %}
         <li class="edit-action"><a href="{% url resource:edit_resource resource_id=resource.id %}"><span class="icon"></span>Edit</a></li>
         {% endif %}
+        {% if user.is_authenticated %}
+        <li class="add-action"><a href=""><span class="icon"></span>Add to...</a></li>
+        {% endif %}
         <li class="history-action"><a href="{% url resource:view_history resource_id=resource.id %}"><span class="icon"></span>View history</a></li>
         <li class="share-action"><a href=""><span class="icon"></span>Share <span class="horizontal-caret-up breadcrumb-caret"></span></a></li>
         {% include 'partials/share.html' %}
@@ -19,3 +22,5 @@
 		<li class="thumbs-down-action"><a href=""><span class="icon"></span><span class="count"></span></a></li>
 	</ul>
 </div>
+
+{% include 'partials/add.html' %}

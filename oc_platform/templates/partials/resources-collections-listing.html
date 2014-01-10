@@ -9,7 +9,6 @@
 <div class="{{ host }}-resources-collections resources-collections-added collection-visibility-{{ collection.visibility }}{% if host == 'project' %} project-listing project-visibility-{{ project.visibility }}{% endif %}" id="collection-{{ collection.id }}">
     <div class="{{ host }}-collections-added-list">
         {% for collection_item in collections %}
-        <div class="{{ host }}-browse-item resource-collection-item directory" id="collection-{{ collection_item.id }}">
         {% if collection_item.visibility == 'public' %}
             {% include 'partials/collection-item.html' %}
         {% elif host == 'profile' %}
@@ -27,7 +26,6 @@
                 {% endif %}
             {% endif %}
         {% endif %}
-        </div>
         {% endfor %}
     </div>
     <div class="{{ host }}-resources-added-list">
@@ -62,10 +60,11 @@
     </div>
     <div class="oc-popup-body">
         Select a collection from the following project collections:
-        <div class="move-resource-collection-browser loading-browser">
+        <div class="move-resource-collection-browser oc-popup-dialog-browser
+ loading-browser">
         </div>
-        <div class="move-resource-collection-submit-wrapper">
-            <button class="action-button move-resource-collection-submit-button">Done</button>
+        <div class="move-resource-collection-submit-wrapper oc-popup-submit-wrapper">
+            <button class="action-button move-resource-collection-submit-button oc-popup-submit-button">Done</button>
         </div>
     </div>
 </div>

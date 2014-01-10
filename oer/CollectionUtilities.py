@@ -11,6 +11,13 @@ def get_collection_root(collection):
         return get_collection_root(collection.host)
 
 
+def get_root_private_collection(collection):
+    if collection.visibility != 'collection':
+        return collection
+    else:
+        return get_collection_root(collection.host)
+
+
 def _get_child_collections(collection):
     # Get all the collections whose parent is the root collection.
     from django.contrib.contenttypes.models import ContentType
@@ -128,6 +135,15 @@ def build_project_collection_navigation(browse_tree, user):
         return ElementTree.tostring(root)
     else:
         return ''
+
+
+def build_projects_collection_navigation(browse_trees, user):
+    navigation_elements = ''
+
+    for browse_tree in browse_trees:
+        navigation_elements += build_project_collection_navigation(browse_tree, user)
+
+    return navigation_elements
 
 
 def build_user_collection_navigation(browse_tree, user):

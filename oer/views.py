@@ -1559,7 +1559,7 @@ def collection_tree(request, collection_id, host):
             context = {
                 'title': 'Cannot move to another collection',
                 'message': 'There is no other collection to where this resource or collection '
-                + ' may be moved to. Kindly create a new collection before moving this.'
+                + 'may be moved to. Kindly create a new collection before moving this.'
             }
             return APIUtilities._api_failure(context)
 
@@ -1602,3 +1602,430 @@ def propagate_collection_visibility(request, collection_id):
             + 'contact us if the problem persists.'
         }
         return APIUtilities._api_failure(context)
+
+
+def copy_resource_to_collection(request, resource_id, from_collection_id, to_collection_id):
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+        from_collection = Collection.objects.get(pk=from_collection_id)
+        to_collection = Collection.objects.get(pk=to_collection_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        # Get the root collection the to collection belongs to.
+        import oer.CollectionUtilities as cu 
+        (to_collection_root_type, to_collection_root) = cu.get_collection_root(to_collection)
+
+        # If the "to collection" belongs to a project.
+        if to_collection_root_type.name == 'project':
+            # Break if the requestor is the administrator of the project.
+            if request.user in to_collection_root.admins.all():
+                pass
+
+            elif to_collection.visibility == 'project':
+                # If the requestor is not a member of the to-project-collection.
+                if request.user not in to_collection_root.confirmed_members:
+                    return APIUtilities._api_unauthorized_failure()
+
+            elif to_collection.visibility == 'private':
+                # If the requestor isn't a collaborator on the "to collection".
+                if request.user not in to_collection.collaborators.all():
+                    return APIUtilities._api_unauthorized_failure()
+
+        # Get the root collection the from resource belongs to.
+        import oer.CollectionUtilities as cu 
+        (from_collection_root_type, from_collection_root) = cu.get_collection_root(from_collection)
+
+        # If this collection has a visibility of collection, look up closest
+        #     ancestor collection which is 'private' visibility.
+        if resource.visibility == 'collection':
+            parent_private_collection = cu.get_root_private_collection(from_collection)
+            if request.user not in parent_private_collection.collaborators.all():
+                APIUtilities._api_unauthorized_failure()
+
+        if not request.user in resource.collaborators.all() or request.user != resource.creator:
+            if from_collection_root_type.name == 'project':
+                # Break if the requestor is the administrator of the project.
+                if request.user in from_collection_root.admins.all():
+                    pass
+
+                elif from_collection.visibility == 'project':
+                    # If the requestor is not a member of the project which hosts the collection.
+                    if request.user not in from_collection_root.confirmed_members:
+                        return APIUtilities._api_unauthorized_failure()
+
+        (new_resource, new_resource_type) = get_resource_copy(
+            resource, request.user, True)
+        to_collection.resources.add(new_resource)
+
+        # Add new resource to fork.
+
+        import datetime
+        context = {
+            'resource': {
+                'id': new_resource.id,
+                'title': new_resource.title,
+                'created': datetime.datetime.strftime(new_resource.created, '%b. %d, %Y, %I:%M %P'),
+                'visibility': new_resource.visibility,
+                'type': new_resource_type,
+                'is_collaborator': request.user in new_resource.collaborators.all(),
+                'url': reverse(
+                    'read', kwargs={
+                        'resource_id': new_resource.id,
+                        'resource_slug': new_resource.slug
+                    }
+                ),
+                'host': 'project' if from_collection_root_type.name == 'project' else 'profile',
+            }
+        }
+
+        return APIUtilities._api_success(context)
+
+    except:
+        context = {
+            'title': 'Could not copy the resource.',
+            'message': 'We failed to make a copy of the resource. Please '
+            + 'contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
+
+
+def link_resource_to_collection(request, resource_id, from_collection_id, to_collection_id):
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+        from_collection = Collection.objects.get(pk=from_collection_id)
+        to_collection = Collection.objects.get(pk=to_collection_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        # Get the root collection the to collection belongs to.
+        import oer.CollectionUtilities as cu 
+        (to_collection_root_type, to_collection_root) = cu.get_collection_root(to_collection)
+
+        # If the "to collection" belongs to a project.
+        if to_collection_root_type.name == 'project':
+            # Break if the requestor is the administrator of the project.
+            if request.user in to_collection_root.admins.all():
+                pass
+
+            elif to_collection.visibility == 'project':
+                # If the requestor is not a member of the to-project-collection.
+                if request.user not in to_collection_root.confirmed_members:
+                    return APIUtilities._api_unauthorized_failure()
+
+            elif to_collection.visibility == 'private':
+                # If the requestor isn't a collaborator on the "to collection".
+                if request.user not in to_collection.collaborators.all():
+                    return APIUtilities._api_unauthorized_failure()
+
+        # Get the root collection the from resource belongs to.
+        import oer.CollectionUtilities as cu 
+        (from_collection_root_type, from_collection_root) = cu.get_collection_root(from_collection)
+
+        # If this collection has a visibility of collection, look up closest
+        #     ancestor collection which is 'private' visibility.
+        if resource.visibility == 'collection':
+            parent_private_collection = cu.get_root_private_collection(from_collection)
+            if request.user not in parent_private_collection.collaborators.all():
+                APIUtilities._api_unauthorized_failure()
+
+        if not request.user in resource.collaborators.all() or request.user != resource.creator:
+            if from_collection_root_type.name == 'project':
+                # Break if the requestor is the administrator of the project.
+                if request.user in from_collection_root.admins.all():
+                    pass
+
+                elif from_collection.visibility == 'project':
+                    # If the requestor is not a member of the project which hosts the collection.
+                    if request.user not in from_collection_root.confirmed_members:
+                        return APIUtilities._api_unauthorized_failure()
+
+        to_collection.resources.add(resource)
+
+        import datetime
+        context = {
+            'resource': {
+                'id': resource.id,
+                'title': resource.title,
+                'created': datetime.datetime.strftime(
+                    datetime.datetime.now(), '%b. %d, %Y, %I:%M %P'),
+                'visibility': resource.visibility,
+                'type': resource.type,
+                'is_collaborator': request.user in resource.collaborators.all(),
+                'url': reverse(
+                    'read', kwargs={
+                        'resource_id': resource.id,
+                        'resource_slug': resource.slug
+                    }
+                ),
+                'host': 'project' if from_collection_root_type.name == 'project' else 'profile',
+            }
+        }
+
+        return APIUtilities._api_success(context)
+
+    except:
+        context = {
+            'title': 'Could not link the resource.',
+            'message': 'We failed to make a link of the resource. Please '
+            + 'contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
+
+
+def get_resource_copy(resource, user, new_name=False):
+    title = resource.title if new_name else resource.title
+
+    # Make a copy of the resource.
+    resource_copy = Resource(
+        title='Copy of ' + title,
+        license=resource.license,
+        description=resource.description,
+        visibility=resource.visibility,
+        cost=resource.cost,
+        user=user,
+        image=resource.image,
+        source=resource.source,
+        category=resource.category
+    )
+
+    # Make a copy of the revision content.
+    from django.contrib.contenttypes.models import ContentType
+    document_content_type = ContentType.objects.get_for_model(Document)
+    link_content_type = ContentType.objects.get_for_model(Link)
+    attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+    if resource.revision.content_type == document_content_type:
+        content = Document()
+        content.save()
+
+        for element in resource.revision.content.elements.all():
+            element_copy = Element(body=element.element.body)
+            element_copy.save()
+
+            document_element_copy = DocumentElement(
+                document=content,
+                element=element_copy,
+                position=element.position
+            )
+            document_element_copy.save()
+
+        resource_type = "document"
+
+    elif resource.revision.content_type == link_content_type:
+        content = Link(url=resource.revision.content.url)
+        content.save()
+
+        resource_type = "url"
+
+    elif resource.revision.content_type == attachment_content_type:
+        content = Attachment(file=resource.revision.content.file)
+        content.save()
+
+        resource_type = "attachment"
+
+    # Create the new revision for the copied resource.
+    resource_revision_copy = ResourceRevision(
+        content=content,
+        log=resource.revision.log
+    )
+    resource_revision_copy.save()
+
+    resource_copy.revision = resource_revision_copy
+    resource_copy.save()
+
+    resource_copy.revision.resource = resource_copy
+    resource_copy.save()
+
+    # Copy all the tags of the resource.
+    for tag in resource_copy.tags.all():
+        resource_copy.tags.add(tag)
+
+    # Add every collaborator to the new resource.
+    for collaborator in resource.collaborators.all():
+        resource_copy.collaborators.add(collaborator)
+    resource_copy.save()
+
+    return (resource_copy, resource_type)
+
+
+def copy_collection(collection, to_collection, user):
+    # Make a copy of the collection.
+    collection_copy = Collection(
+        title='Copy of ' + collection.title,
+        host=to_collection,
+        visibility=collection.visibility,
+        slug=_get_fresh_collection_slug(collection.title, to_collection),
+        creator=user
+    )
+    collection_copy.save()
+
+    # Add every collaborator to the new collection.
+    for collaborator in collection.collaborators.all():
+        collection_copy.collaborators.add(collaborator)
+    collection_copy.save()
+
+    # Make a copy of all the resources in the collection.
+    for resource in collection.resources.all():
+        new_resource = get_resource_copy(resource, user)
+        collection_copy.resources.add(new_resource)
+
+    # Copy all the collections inside this collection.
+    from django.contrib.contenttypes.models import ContentType
+    collection_content_type = ContentType.objects.get_for_model(Collection)   
+ 
+    child_collections = Collection.objects.filter(
+        host_id=collection.id, host_type=collection_content_type)
+
+    for child in child_collections:
+        copy_collection(child, collection_copy, user)
+
+
+def copy_collection_to_collection(request, collection_id, to_collection_id):
+    if collection_id == to_collection_id:
+        context = {
+            'title': 'Could not copy the collection into itself.',
+            'message': 'We failed to copy the collection into itself as this is not '
+            + 'a valid request.'
+        }
+        return APIUtilities._api_failure(context)
+
+    try:
+        collection = Collection.objects.get(pk=collection_id)
+        to_collection = Collection.objects.get(pk=to_collection_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        # Get the root collection the "to collection" belongs to.
+        import oer.CollectionUtilities as cu 
+        (to_collection_root_type, to_collection_root) = cu.get_collection_root(to_collection)
+
+        # If the "to collection" belongs to a project.
+        if to_collection_root_type.name == 'project':
+            # Break if the requestor is the administrator of the project.
+            if request.user in to_collection_root.admins.all():
+                pass
+
+            elif to_collection.visibility == 'project':
+                # If the requestor is not a member of the to-project-collection.
+                if request.user not in to_collection_root.confirmed_members:
+                    return APIUtilities._api_unauthorized_failure()
+
+            elif to_collection.visibility == 'private':
+                # If the requestor isn't a collaborator on the "to collection".
+                if request.user not in to_collection.collaborators.all():
+                    return APIUtilities._api_unauthorized_failure()
+
+        # Get the root collection the collection to be copied belongs to.
+        import oer.CollectionUtilities as cu 
+        (collection_root_type, collection_root) = cu.get_collection_root(collection)
+
+        # If the collection to be copied belongs to a project.
+        if collection_root_type.name == 'project':
+            # Break if the requestor is the administrator of the project.
+            if request.user in to_collection_root.admins.all():
+                pass
+
+            elif collection.visibility == 'project':
+                # If the requestor is not a member of the project which hosts the collection.
+                if request.user not in collection_root.confirmed_members:
+                    return APIUtilities._api_unauthorized_failure()
+
+            elif collection.visibility == 'private':
+                # If the requestor isn't a collaborator on the collection to be copied.
+                if request.user not in collection.collaborators.all():
+                    return APIUtilities._api_unauthorized_failure()
+
+        copy_collection(collection, to_collection, request.user)
+
+    except:
+        context = {
+            'title': 'Could not copy the collection.',
+            'message': 'We failed to make a copy of the collection. Please '
+            + 'contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
+
+
+def get_document_element_comments(request, document_element_id):
+    try:
+        document_element = DocumentElement(pk=document_element_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    # TODO(Varun): Make this request secure.
+
+    try:
+        # Get all comments that have a parent type of DocumentElement.
+        from django.contrib.contenttypes.models import ContentType
+        document_element_content_type = ContentType.objects.get_for_model(DocumentElement)
+
+        from interactions.models import CommentReference
+        comment_references = CommentReference.objects.filter(
+            owner_id=document_element.id, owner_type=document_element_content_type.id)
+
+        serialized_comments = []
+
+        import datetime
+        for comment_reference in comment_references:
+            serialized_comments.append({
+                'reference': comment_reference.reference,
+                'comment': {
+                    'username': comment_reference.comment.user.username,
+                    'name': comment_reference.comment.user.get_full_name(),
+                    'created': datetime.datetime.strftime(comment_reference.comment.created, '%b. %d, %Y, %I:%M %P'),
+                    'profile_pic': settings.MEDIA_URL + comment_reference.comment.user.get_profile().profile_pic.name,
+                    'body': comment_reference.comment.body_markdown_html,
+                    'id': comment_reference.comment.id
+                }
+            })
+
+        context = {
+            'comments': serialized_comments
+        }
+
+        return APIUtilities._api_success(context)
+
+    except:
+        context = {
+            'title': 'Could not fetch the document comments.',
+            'message': 'We failed to fetch some of the comments in elements of this document. '
+            + 'Please contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
+
+
+def get_resource_comments(request, resource_id):
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    from interactions.CommentUtilities import CommentsBuilder
+
+    from django.contrib.contenttypes.models import ContentType
+    resource_ct = ContentType.objects.get_for_model(Resource)
+
+    try:
+        comments_builder = CommentsBuilder(resource, resource_ct)
+        (comments, flatted_post_descendants) = comments_builder.build_tree()
+
+        from interactions.templatetags import comments_tags
+        serialized_comments = comments_tags.nested_comment_tree(comments, request.user)
+
+        context = {
+            'comments': serialized_comments
+        }
+
+        return APIUtilities._api_success(context)
+
+    except:
+        context = {
+            'title': 'Could not fetch the resource comments.',
+            'message': 'We failed to fetch some of the comments of this resources. '
+            + 'Please contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)        

@@ -1,6 +1,8 @@
-<input type="checkbox" name="collection_id" value="{{ collection.id }}"/>
-{% if host == 'profile' %}<a href="{% url user:list_collection username=user_profile.username collection_slug=collection_item.slug %}">{% elif host == 'project' %}<a href="{% url projects:list_collection project_slug=project.slug collection_slug=collection_item.slug %}">{% endif %}<!--<input type="checkbox" />--> {{ collection_item.title }} <span class="{{ host }}-browse-item-date">{{ collection_item.created|date:"M nS, 'y P"}}</span>
+<div class="{{ host }}-browse-item resource-collection-item directory" id="collection-{{ collection_item.id }}">
+    <input type="checkbox" name="collection_id" value="{{ collection.id }}"/>
+    {% if host == 'profile' %}<a href="{% url user:list_collection username=user_profile.username collection_slug=collection_item.slug %}">{% elif host == 'project' %}<a href="{% url projects:list_collection project_slug=project.slug collection_slug=collection_item.slug %}">{% endif %}{{ collection_item.title }} <span class="{{ host }}-browse-item-date">{{ collection_item.created|date:"M nS, 'y P"}}</span>
 
-<div class="resource-collection-actions{% if host == 'profile' %}{% if user == user_profile %} profile-collection is-owner{% endif %}{% elif user in project.admins.all or user == collection_item.creator %} is-owner{% elif collection_item.visibility == 'private' and user in collection_item.collaborators.all %} is-collaborator{% endif %}">
-    <span class="{{ host }}-browse-item-visibility browse-item-visibility visibility-{{ collection_item.visibility }}" title="Who has access: {% if collection.visibility == 'private' %}Private (collection){% else %}{{ collection_item.visibility|title }}{% endif %}"></span><div class="{{ host }}-collection-delete resource-collection-delete" id="collection-{{ collection_item.id }}" title="Delete"></div>
-</div></a>
+    <div class="resource-collection-actions{% if host == 'profile' %}{% if user == user_profile %} profile-collection is-owner{% endif %}{% elif user in project.admins.all or user == collection_item.creator %} is-owner{% elif collection_item.visibility == 'private' and user in collection_item.collaborators.all %} is-collaborator{% endif %}">
+        <span class="{{ host }}-browse-item-visibility browse-item-visibility visibility-{{ collection_item.visibility }}" title="Who has access: {% if collection.visibility == 'private' %}Private (collection){% else %}{{ collection_item.visibility|title }}{% endif %}"></span><div class="{{ host }}-collection-delete resource-collection-delete" id="collection-{{ collection_item.id }}" title="Delete"></div>
+    </div></a>
+</div>

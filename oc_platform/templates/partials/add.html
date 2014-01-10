@@ -1,0 +1,48 @@
+<div class="add-resource-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Add resource to...</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        Select a collection from your profile or projects you are a part of:
+        <div class="add-resource-browser">
+            <nav class="add-resource-tabs">
+                <ul>
+                    <li><a href=".my-profile">My profile</a></li>
+                    <li><a href=".my-projects">My projects</a></li>
+                </ul>
+            </nav>
+            <div class="add-resource-content oc-tabs-content">
+                <div class="my-profile">
+                    <div class="add-resource-profile-browser oc-popup-dialog-browser
+ loading-browser"></div>
+                </div>
+                <div class="my-projects">
+                    <div class="add-resource-project-browser oc-popup-dialog-browser
+ loading-browser"></div>
+                </div>
+            </div>
+        </div>
+        <div class="add-resource-submit-wrapper oc-popup-submit-wrapper">
+            <button class="action-button add-resource-submit-button oc-popup-submit-button">Done</button>
+        </div>
+    </div>
+</div>
+
+<div class="add-resource-action-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Copy or add link?</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <form id="add-resource-action-form">
+            <label><input type="radio" name="add-action" value="copy" checked/> Make a <span class="bold">copy</span> of this resource in the collection</label>
+            <label><input type="radio" name="add-action" value="link" /> Make a <span class="bold">link</span> to this resource in the collection</label>
+            <div class="add-resource-action-submit-wrapper oc-popup-submit-wrapper">
+                <button class="action-button add-resource-action-submit-button oc-popup-submit-button">Done</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="popup-background"></div>
