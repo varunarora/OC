@@ -339,7 +339,10 @@ STRINGS = {
         'NEW_DOCUMENT_TITLE': 'New document',
         'EDIT_VIDEO_TITLE': 'Edit video',
         'EDIT_URL_TITLE': 'Edit website URL',
-        'EDIT_DOCUMENT_TITLE': 'Edit document'
+        'EDIT_DOCUMENT_TITLE': 'Edit document',
+        'EDIT_UPLOAD_TITLE': 'Edit uploaded file',
+        'HISTORY_TITLE': 'Edit history for %s &lsaquo; OpenCurriculum',
+
     },
     'article_center': {
         'INTRODUCTION_TITLE': 'Hi - nice to meet you!',

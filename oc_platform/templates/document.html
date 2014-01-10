@@ -1,6 +1,6 @@
 {% include 'partials/header.html' %}
 
-<form id="new-resource-document-form" class="document-edit-form" method="POST">
+<form id="new-resource-document-form" class="document-edit-form resource-create-edit-form" method="POST">
     {% csrf_token %}
     <div id="submission-info-wrapper">
         <div id="submission-info">
@@ -14,15 +14,24 @@
     </div>
 
     <article id="article-edit" class="resource-article-edit">
+        <span class="document-meta-collapser"></span>
         <div class="center-stage">
             {% include 'partials/resource-meta.html' %}
             <div id="key-panel" class="panel-left">
                 <input type="hidden" name="user" value="{{ user.id }}" />
-                <h2 id="article-title"><input type="text" value="{{ original.title }}" name="title" class="browser-edit" placeholder="(Document title)" /></h2>
-                <p><span class="resource-form-error">{{ form.errors.title }}</span></p>
+                <h2 id="article-title"><input type="text" value="{{ resource.title }}" name="title" class="browser-edit" placeholder="(Document title)" /></h2>
+                <section class="drop-edit document-description-drop-edit">
+                    <div class="edit-dropdown edit-dropdown-opened">Description</div>
+                    <div class="edit-dropped show-dropped">
+                        <textarea name="description" class="document-description"></textarea>
+                    </div>
+                </section>
             </div>
             <div id="fill-panel" class="panel-right">
-                <table>
+                <table class="document-visibility-license">
+                    <tr><td><span class="bold">Who can see this?</span></td><td>
+                        {% include 'partials/resource-form-visibility.html' %}
+                    </td></tr>
                     <tr><td><span class="bold">License</span></td><td>
                         <select name="license">
                             {% for license in licenses.all %}
@@ -31,33 +40,73 @@
                         </select>
                     </td></tr>
                     <tr><td></td><td><span class="resource-form-error">{{ form.errors.license }}</span></td></tr>
-                    <tr><td><span class="bold">Who can see this?</span></td><td>
-                        {% include 'partials/resource-form-visibility.html' %}
-                    </td></tr>
-                    <tr><td></td><td><span class="resource-form-error">{{ form.errors.visibility }}</span></td></tr>
                 </table>
-
+                <section class="drop-edit tags-drop-edit">
+                    <div class="edit-dropdown edit-dropdown-opened">Tags</div>
+                    <div class="edit-dropped show-dropped">
+                        <ul class="tagit document-tags">
+                            {% if original.tags %}
+                            {% for tag in original.tags.all %}
+                            <li>{{ tag }}</li>
+                            {% endfor %}
+                            {% endif %}                   
+                        </ul>
+                    </div>
+                </section>
             </div>
         </div>
-        <div class="center-stage">
+        <div class="center-stage document-body">
+            {% include 'partials/oer-document.html' %}
+        </div>
+        <div class="center-stage document-actions">
+            <!--
             <div id="wmd-button-bar"></div>
             <textarea class="wmd-input large-textarea" id="wmd-input" name="body_markdown">{{ original.body_markdown }}</textarea>       
-            <tr><td></td><td><span class="resource-form-error">{{ form.errors.body_markdown }}</span></td></tr>
-            <section class="drop-edit">
-                <div class="edit-dropdown edit-dropdown-opened">Tags</div>
-                <div class="edit-dropped show-dropped">
-                    <ul class="tagit">
-                        {% if original.tags %}
-                        {% for tag in original.tags.all %}
-                        <li>{{ tag }}</li>
-                        {% endfor %}
-                        {% endif %}                   
-                    </ul>
-                </div>
-            </section>
+            <tr><td></td><td><span class="resource-form-error">{{ form.errors.body_markdown }}</span></td></tr>-->
+            <button class="page-action-button add-widget">Add...</button>
         </div>
     </article>
 </form>
+
+<div id="log-message" title="Log message" class="dialog">
+    <p>Briefly describe your edits:</p>
+    <input type="text" name="log_message" />
+</div>
+
+<div class="add-document-widget-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Add...</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <div class="add-widget-options">
+            <div class="add-widget-option table">
+                <div class="add-widget-thumbnail"></div>
+                <div class="add-widget-description">
+                    <div class="add-widget-description-title">TABLE</div>
+                    <div class="add-widget-description-info">
+                        Upto 3 column and unlimited row table
+                    </div>
+                </div>
+            </div>
+            <div class="add-widget-option text-block">
+                <div class="add-widget-thumbnail"></div>
+                <div class="add-widget-description">
+                    <div class="add-widget-description-title">SINGLE TEXT BLOCK</div>
+                    <div class="add-widget-description-info">
+                        Empty text block with formatting options
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="add-document-widget-submit-wrapper">
+            <button class="action-button add-document-widget-submit-button">Done</button>
+        </div>
+    </div>
+</div>
+<div class="popup-background"></div>
+
 
 {% include 'partials/image-upload.html' %}
 

@@ -169,7 +169,7 @@
 			<ul class="resource-panel">
 			{% for resource in top_resources %}
 				<li>
-					<a href="{% url resource:read resource_id=resource.id %}">
+					<a href="{% url read resource_id=resource.id resource_slug=resource.slug %}">
 						<div class="resource-panel-thumbnail" style="background-image: url('{{ MEDIA_URL}}{{ resource.image.name }}')" ></div>
 					<div class="resource-title-wrapper">{{ resource.title }}</div></a>
 				</li>

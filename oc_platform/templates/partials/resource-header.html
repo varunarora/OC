@@ -1,0 +1,11 @@
+<section class="oer-title">
+    <h2>{{ resource.title }}</h2><span class="oer-title-revision">{% if revision_view %} / Revision #{{ resource.revision.id }}{% endif %}</span>
+</section>
+<section class="breadcrumb">
+{% for collection in breadcrumb %}
+    <a href="{{ collection.url }}">{{ collection.title }}</a> 
+    {% if not forloop.last %}
+    <span class="vertical-caret breadcrumbs-caret"></span> 
+    {% endif %}
+{% endfor %}
+</section>

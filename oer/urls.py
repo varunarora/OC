@@ -33,8 +33,9 @@ urlpatterns = patterns(
     url(r'^move/resource/(?P<resource_id>\d+)/from/(?P<from_collection_id>\d+)/to/(?P<to_collection_id>\d+)/$', views.move_resource_to_collection, name='move_resource_to_collection'),    
     url(r'^move/collection/(?P<collection_id>\d+)/from/(?P<from_collection_id>\d+)/to/(?P<to_collection_id>\d+)/$', views.move_collection_to_collection, name='move_collection_to_collection'),
 
+    url(r'^(?P<resource_id>\d+)/$', views.view_resource_by_id, name='read_by_id_old'),
     url(r'^(?P<resource_id>\d+)/edit/$', views.edit_resource, name='edit_resource'),
-    url(r'^(?P<resource_id>\d+)/$', views.view_resource, name='read'),
+    url(r'^(?P<resource_id>\d+)/history/$', views.view_history, name='view_history'),
 
     url(r'^$', views.resource_center, name='resource_center'),
 )

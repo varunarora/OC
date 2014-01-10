@@ -18,7 +18,7 @@ def get_default_language():
     return Language.objects.get(pk=1)
 
 
-class Resource(models.Model):
+class ResourceOld(models.Model):
     title = models.CharField(max_length=256)
     type = models.CharField(max_length=40, default='url')
     license = models.ForeignKey('license.License', default=get_default_license)
@@ -37,7 +37,7 @@ class Resource(models.Model):
         related_name='collabsy')
 
 
-class ResourceNew(models.Model):
+class Resource(models.Model):
     title = models.CharField(max_length=256)
     license = models.ForeignKey('license.License', default=get_default_license)
     revision = models.ForeignKey('ResourceRevision', related_name="current_revision")

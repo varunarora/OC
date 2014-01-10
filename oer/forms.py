@@ -1,5 +1,5 @@
 from django import forms
-from oer.models import Resource
+from oer.models import Resource, Document, ResourceRevision, Link
 from oc_platform import FormUtilities
 
 class UploadResource(forms.Form):
@@ -12,9 +12,25 @@ class NewVideoForm(forms.ModelForm):
 
         default_cost = 0
 
+        if not newRequest.get('title'):
+            newRequest.__setitem__('title', 'Untitled Video')
+
         newRequest.setdefault('user', user.id)
-        newRequest.setdefault('type', 'video')
         newRequest.setdefault('cost', default_cost)
+
+        from django.template.defaultfilters import slugify
+        newRequest.setdefault('slug', slugify(newRequest.get('title')))
+
+        # Create and save new Link.
+        new_video_link = Link(url=sanitize_url(newRequest.get('url', None)))
+        new_video_link.save()
+
+        new_resource_revision = ResourceRevision()
+        new_resource_revision.content = new_video_link
+        new_resource_revision.user = user
+        new_resource_revision.save()
+
+        newRequest.setdefault('revision', new_resource_revision.id);
 
         from meta.models import TagCategory
         tag_category = TagCategory.objects.get(title='Resources')
@@ -25,6 +41,7 @@ class NewVideoForm(forms.ModelForm):
 
     class Meta:
         model = Resource
+        exclude = ('language',)
 
 
 class NewURLForm(forms.ModelForm):
@@ -34,8 +51,51 @@ class NewURLForm(forms.ModelForm):
         default_cost = 0
 
         newRequest.setdefault('user', user.id)
-        newRequest.setdefault('type', 'url')
         newRequest.setdefault('cost', default_cost)
+
+        title = newRequest.get('title', None)
+
+        # Fetch the URL page by making Http requests
+        # using BeautifulSoup, and find meta tags in the DOM.
+        try:
+            from BeautifulSoup import BeautifulSoup
+            from urllib import urlopen
+            # Open the resource and build its DOM into a BeautifulSoup
+            #     object.
+            source = urlopen(newRequest.get('url'))
+            soup = BeautifulSoup(source)
+
+            # Extract the page title, and the description from its meta
+            #     tags in <head>
+            if not title:
+                title = soup.find('title').text
+
+            description = soup.findAll(
+                'meta', attrs={'name': "description"}
+            )[0]
+
+            # If a description was found, set it on the resource.
+            if description:
+                newRequest.setdefault('description', description['content'])
+        except:
+            if not title:
+                title = 'Untitled website'
+
+        newRequest.__setitem__('title', title)
+
+        from django.template.defaultfilters import slugify
+        newRequest.setdefault('slug', slugify(newRequest.get('title')))
+
+        # Create and save new Link.
+        new_video_link = Link(url=sanitize_url(newRequest.get('url', None)))
+        new_video_link.save()
+
+        new_resource_revision = ResourceRevision()
+        new_resource_revision.content = new_video_link
+        new_resource_revision.user = user
+        new_resource_revision.save()
+
+        newRequest.setdefault('revision', new_resource_revision.id);
 
         from meta.models import TagCategory
         tag_category = TagCategory.objects.get(title='URL')
@@ -46,16 +106,34 @@ class NewURLForm(forms.ModelForm):
 
     class Meta:
         model = Resource
+        exclude = ('language',)
 
 
 class URLEditForm(forms.ModelForm):
-    def __init__(self, request, instance):
+    def __init__(self, request, user, instance):
         newRequest = request.copy()
 
-        # For now, default to the previous values of user, type & cost
+        # For now, default to the previous values of user, slug & cost
         newRequest.setdefault('user', instance.user.id)
-        newRequest.setdefault('type', instance.type)
         newRequest.setdefault('cost', instance.cost)        
+        newRequest.setdefault('slug', instance.slug)
+
+        # Create and save new Link, if the link URL changed.
+        url_submitted = sanitize_url(newRequest.get('url', None))
+        if instance.revision.url == url_submitted:
+            new_link = Link(url=url_submitted)
+            new_link.save()
+            content = new_link
+        else:
+            content = instance.revision.url
+
+        new_resource_revision = ResourceRevision()
+        new_resource_revision.content = content
+        new_resource_revision.resource = instance
+        new_resource_revision.user = user
+        new_resource_revision.save()
+
+        newRequest.setdefault('revision', new_resource_revision.id);
 
         from meta.models import TagCategory
         tag_category = TagCategory.objects.get(title='URL')
@@ -66,16 +144,34 @@ class URLEditForm(forms.ModelForm):
 
     class Meta:
         model = Resource
+        exclude = ('language',)
 
 
 class VideoEditForm(forms.ModelForm):
-    def __init__(self, request, instance):
+    def __init__(self, request, user, instance):
         newRequest = request.copy()
 
-        # For now, default to the previous values of user, type & cost
+        # For now, default to the previous values of user, slug & cost
         newRequest.setdefault('user', instance.user.id)
-        newRequest.setdefault('type', instance.type)
         newRequest.setdefault('cost', instance.cost)        
+        newRequest.setdefault('slug', instance.slug)
+
+        # Create and save new Link, if the link URL changed.
+        url_submitted = sanitize_url(newRequest.get('url', None))
+        if instance.revision.url == url_submitted:
+            new_video_link = Link(url=url_submitted)
+            new_video_link.save()
+            content = new_video_link
+        else:
+            content = instance.revision.url
+
+        new_resource_revision = ResourceRevision()
+        new_resource_revision.content = content
+        new_resource_revision.resource = instance
+        new_resource_revision.user = user        
+        new_resource_revision.save()
+
+        newRequest.setdefault('revision', new_resource_revision.id);
 
         from meta.models import TagCategory
         tag_category = TagCategory.objects.get(title='Resources')
@@ -86,16 +182,29 @@ class VideoEditForm(forms.ModelForm):
 
     class Meta:
         model = Resource
+        exclude = ('language',)
 
 
 class DocumentEditForm(forms.ModelForm):
-    def __init__(self, request, instance):
+    def __init__(self, request, user, instance):
         newRequest = request.copy()
 
-        # For now, default to the previous values of user, type & cost
+        # For now, default to the previous values of user, slug & cost
         newRequest.setdefault('user', instance.user.id)
-        newRequest.setdefault('type', instance.type)
-        newRequest.setdefault('cost', instance.cost)        
+        newRequest.setdefault('cost', instance.cost)
+        newRequest.setdefault('slug', instance.slug)
+
+        # Create and save new Document.
+        new_document = Document()
+        new_document.save()
+
+        new_resource_revision = ResourceRevision()
+        new_resource_revision.content = new_document
+        new_resource_revision.resource = instance
+        new_resource_revision.user = user
+        new_resource_revision.save()
+
+        newRequest.setdefault('revision', new_resource_revision.id);
 
         from meta.models import TagCategory
         tag_category = TagCategory.objects.get(title='Document')
@@ -106,18 +215,20 @@ class DocumentEditForm(forms.ModelForm):
 
     class Meta:
         model = Resource
+        exclude = ('language',)
 
 
 class AttachmentEditForm(forms.ModelForm):
-    def __init__(self, request, instance):
+    def __init__(self, request, user, instance):
         newRequest = request.copy()
 
-        # For now, default to the previous values of user, type & cost
+        # For now, default to the previous values of user, slug & cost
         newRequest.setdefault('user', instance.user.id)
-        newRequest.setdefault('type', instance.type)
         newRequest.setdefault('cost', instance.cost)
-        newRequest.setdefault('file', instance.file)
-        newRequest.setdefault('url', instance.url)
+        newRequest.setdefault('slug', instance.slug)
+
+        # Maintain the original attachment, as a revision.
+        newRequest.setdefault('revision', instance.revision.id);
 
         from meta.models import TagCategory
         tag_category = TagCategory.objects.get(title='Resources')
@@ -128,6 +239,7 @@ class AttachmentEditForm(forms.ModelForm):
 
     class Meta:
         model = Resource
+        exclude = ('language',)
 
 
 class NewDocumentForm(forms.ModelForm):
@@ -136,9 +248,24 @@ class NewDocumentForm(forms.ModelForm):
 
         default_cost = 0
 
+        if not newRequest.get('title'):
+            newRequest.__setitem__('title', 'Untitled Document')
+
         newRequest.setdefault('user', user.id)
-        newRequest.setdefault('type', 'article')
         newRequest.setdefault('cost', default_cost)
+
+        from django.template.defaultfilters import slugify
+        newRequest.setdefault('slug', slugify(newRequest.get('title')))
+
+        # Create and save new Document.
+        new_document = Document()
+        new_document.save()
+
+        new_resource_revision = ResourceRevision()
+        new_resource_revision.content = new_document
+        new_resource_revision.save()
+
+        newRequest.setdefault('revision', new_resource_revision.id);
 
         from meta.models import TagCategory
         tag_category = TagCategory.objects.get(title='Document')
@@ -149,3 +276,12 @@ class NewDocumentForm(forms.ModelForm):
 
     class Meta:
         model = Resource
+        exclude = ('language',)
+
+
+def sanitize_url(user_submitted_url):
+    cleaned_url = user_submitted_url
+    if cleaned_url[:3] != "http":
+        cleaned_url = 'http://' + user_submitted_url
+
+    return cleaned_url

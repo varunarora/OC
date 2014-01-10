@@ -1,0 +1,39 @@
+<div class="document-table document-element">
+    <form class="document-element-form">
+        <input type="hidden" name="document_element_id" value="{{ document_element.id }}" />
+        <input type="hidden" name="document_element_type" value="{{ document_element_content_type.id }}" />
+    </form>
+    <table>
+        {% with table=document_element.element.body.data %}
+        <colgroup>
+            {% for colWidth in table.colWidths %}
+                <col style="width: {{ colWidth }}%"></col>
+            {% endfor %}
+        </colgroup>
+        {% load document_tags %}
+        {% with rows=table.rows|dictsortbykey %}
+
+        {% for th_key, th_row in rows.items|slice:"1" %}
+        <tr>
+                {% with header_columns=th_row|dictsortbykey %}
+                {% for th_col_key, th_col in header_columns.items %}
+                    <th id="item-{{ document_element.id }}-{{ th_key }}-{{ th_col_key }}">{{ th_col|safe }}</th>
+                {% endfor %}
+                {% endwith %}
+        </tr>
+        {% endfor %}
+
+        {% for key, row in rows.items|slice:"1:" %}
+        <tr>
+            {% with columns=row|dictsortbykey %}
+            {% for colKey, col in columns.items %}
+                <td id="item-{{ document_element.id }}-{{ key }}-{{ colKey }}">{{ col|safe }}</td>
+            {% endfor %}
+            {% endwith %}
+        </tr>
+        {% endfor %}
+        {% endwith %}
+
+        {% endwith %}
+    </table>
+</div>

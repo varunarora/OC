@@ -7,7 +7,7 @@
             {% csrf_token %}
             {% include 'partials/resource-meta.html' %}
             <table class="add-attachment-inputs">
-                <tr><td><span class="bold">Title*</span></td><td><input type="textbox" name="title" class="new-resource-url" value="{{ original.title }}"></td></tr>
+                <tr><td><span class="bold">Title*</span></td><td><input type="textbox" name="title" class="new-resource-url" value="{{ resource.title }}"></td></tr>
                 <tr><td></td><td><span class="resource-form-error">{{ form.errors.title }}</span></td></tr>
                 {% include 'partials/resource-form-meta.html' %}
             </table>

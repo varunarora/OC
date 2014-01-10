@@ -1,0 +1,10 @@
+<form class="document-body-form">
+    <input type="hidden" name="user_id" value="{{ user.id }}" />
+</form>
+{% for document_element in resource.data %}
+    {% if document_element.element.body.type == "table" %}
+        {% include 'partials/document-table.html' %}
+    {% elif document_element.element.body.type == "textblock" %}
+        {{ document_element.element.body.data|safe }}
+    {% endif %}
+{% endfor %}

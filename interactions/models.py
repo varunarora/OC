@@ -18,6 +18,7 @@ class Vote(models.Model):
 
     vote_casted = Signal(providing_args=["vote"])
     resource_vote_casted = Signal(providing_args=["vote"])
+    resource_revision_vote_casted = Signal(providing_args=["vote"])
 
 
 class Comment(models.Model):
@@ -33,6 +34,14 @@ class Comment(models.Model):
         return str(self.parent_type) + ": " + str(self.parent_id)
 
     comment_created = Signal(providing_args=["comment_id", "parent_type"])
+
+
+class CommentReference(models.Model):
+    comment = models.ForeignKey('interactions.Comment', null=True, blank=True)
+    reference = models.CharField(max_length=64)
+    owner_type = models.ForeignKey(ContentType)
+    owner_id = models.PositiveIntegerField()
+    owner = generic.GenericForeignKey('owner_type', 'owner_id')    
 
 
 class Favorite(models.Model):

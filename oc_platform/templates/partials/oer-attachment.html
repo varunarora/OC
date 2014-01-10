@@ -1,27 +1,23 @@
-<div class="oer-external">
-	<div id="oer-preview">
-		<div id="oer-description" class="summary-text">
-			{{ resource.body_markdown_html|safe|default:"(No description found)" }}
-		</div>
-		<div id="oer-thumbnail">
-			<div id="thumbnail-wrapper">
-				<div id="thumbnail-image" style="background-image: url('{{ MEDIA_URL }}{{ resource.image.name }}');">
+<div class="center-stage">
+	<div id="key-panel" class="panel-left">
+		<div class="oer-external" style="background-image: url('{{ MEDIA_URL }}{{ resource.image.name }}');">
+			<div id="thumbnail-info">{{ resource.extension|upper }}</div>
+			<div id="oer-info">
+				<div id="oer-details">
+					<ul>
+						<li><span class="oer-info-caption">File size:</span> <span class="oer-info-detail">{{ resource.filesize }}</span></li>
+						<li><span class="oer-info-caption">License:</span> <span class="oer-info-detail"> {{ resource.license.title }}</span></li>
+						<li><span class="oer-info-caption">Uploaded on:</span> <span class="oer-info-detail">{{ resource.created }}</span></li>
+					</ul>
 				</div>
-				<div id="thumbnail-info">{{ resource.extension|upper }}</div>
+				<div id="oer-get">
+					<a href="{% url resource:download resource_id=resource.id %}" target="_blank"><button class="action-button">Download</button></a>
+				</div>
 			</div>
 		</div>
 	</div>
-	<div id="oer-info">
-		<div id="oer-details">
-			<ul>
-				<li><span class="oer-info-caption">File size</span>: <span class="oer-info-detail">{{ resource.filesize }}</span></li>
-				<li><span class="oer-info-caption">License</span>: <span class="oer-info-detail"> {{ resource.license.title }}</span></li>
-				<li><span class="oer-info-caption">Opens with</span>: <span class="oer-info-detail">Office productity software</span></li>
-				<li><span class="oer-info-caption">Uploaded on</span>: <span class="oer-info-detail">{{ resource.created|date }}</span></li>
-			</ul>
-		</div>
-		<div id="oer-get">
-			<a href="{% url resource:download resource_id=resource.id %}" target="_blank"><button class="success-button btn">Download</button></a>
-		</div>
+	<div id="fill-panel" class="panel-right">
 	</div>
 </div>
+
+				

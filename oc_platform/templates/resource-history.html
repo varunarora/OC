@@ -1,0 +1,52 @@
+{% include 'partials/header.html' %}
+
+<div class="center-stage">
+    <div id="key-panel" class="panel-left">
+        <article>
+            <header>
+                <h2>{{ resource.title }}</h2>
+                <section class="breadcrumb">
+                    <a href="{% url read resource_id=resource.id resource_slug=resource.slug %}">&#9666; Back to {{ resource.title }}</a>
+                </section>
+            </header>
+            <section id="history">
+                <h3>History of edits</h3>
+            <div class="history-set">
+            {% for revision in resource.revisions %}
+                <div class="edit {% ifequal resource.revision revision %}current{% endifequal %}">
+                    <div class="edit-thumbnail">
+                        {% if revision.user %}
+                        <div class="edit-thumbnail-image" style="background-image: url('{{ MEDIA_URL }}{{ revision.user.get_profile.profile_pic.name }}')"></div>
+                        {% endif %}
+                    </div>
+                    <div class="description">
+                        {% if revision.flag == "copy" %}
+                        <div class="edit-title">
+                            <a href="{% url user:user_profile username=revision.user.username %}">{{ revision.user.username }}</a> made a <a href="{% url read resource_id=revision.resource.id resource_slug=revision.resource.slug %}">a copy</a> in 
+                            {% ifequal request.get_profile.gender 1 %}his{% else %}her{% endifequal %} collection
+                        </div>
+                        <div class="edit-description">
+                            On {{ revision.created }}
+                        </div>
+                        {% else %}
+                        <div class="edit-title">
+                            <span class="bold"><a href="{% url read resource_id=revision.resource.id resource_slug=revision.resource.slug %}?revision={{ revision.id }}">{% if revision.log %}{{ revision.log }}{% else %}Untitled revision{% endif %}</a></span> by {% if revision.user %}<a href="{% url user:user_profile username=revision.user.username %}">{{ revision.user.username }}</a>{% else %}Anonymous{% endif %}
+                        </div>
+                        <div class="edit-description"> 
+                            On {{ revision.created }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="edit-meta">
+                        <span class="revision-number">#{{ revision.id }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+            </section>
+        </article>
+    </div>
+    <div id="fill-panel" class="panel-right">
+    </div>
+</div>
+
+{% include 'partials/footer.html' %}

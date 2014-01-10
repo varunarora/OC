@@ -35,36 +35,79 @@
 	margin-top: 15px
 
 .oer-external
-	margin-top: 15px
+	margin: 15px 0px
 	@include box-shadow(0px 0px 5px 0px rgba(0,0,0,0.25))
-	padding: 18px
 	margin-left: 5px
 	overflow: hidden
+	height: 250px
+	background-size: 100%
 
 #oer-preview
 	overflow: hidden
 	margin-bottom: 18px
 
-#oer-description, #oer-details
-	float: left
-	width: 320px
-	margin-right: 18px
+#oer
+	.center-stage
+		margin-top: 0px
 
-#oer-details
-	ul
-		li
-			word-wrap: break-word
+#oer-info
+	background: rgba(0,0,0,0.6)
+	padding: 18px
+	position: relative
+	top: 165px
+	height: 50px
 
-#oer-get, #oer-thumbnail
-	float: right
-	width: 194px
+	#oer-details
+		float: left
+		width: 60%
+
+#oer-description
+	padding: 18px
+	font-size: 0.85em
+	height: 30px
+
+.oer-meta
+	margin-top: 10px
+	background-color: #efefef
+	overflow: hidden
 
 #oer-get
 	text-align: center
-	padding-top: 9px
+	overflow: hidden
+
+	a
+		display: inline-block
+
+.oer-title
+	h2
+		display: inline-block
+
+	.oer-title-revision
+		font-size: 1.8em
+		font-family: "PT Sans", sans-serif
+		color: #bababa
+		letter-spacing: -1px
 
 .oer-info-caption
-	color: #666
+	color: #bababa
+
+.oer-info-detail
+	color: #fff
+
+	a
+		color: #fff
 
 .oer-url-title
 	margin-bottom: 10px
+
+#thumbnail-info
+	text-align: center
+	width: 80px
+	color: #fff
+	background-color: #444
+	padding: 4px 0px
+	position: relative
+	height: 20px
+	float: right
+	margin: 10px 10px
+	margin-bottom: -20px

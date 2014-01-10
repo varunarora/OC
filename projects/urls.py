@@ -35,4 +35,7 @@ urlpatterns = patterns(
 
     url(r'^(?P<project_slug>[\w\-]+)/settings/requests/', views.requests, name='project_requests'),
     url(r'^(?P<project_slug>[\w\-]+)/settings/', views.project_settings, name='project_settings'),
+
+    url(r'^(?P<project_slug>[\w\-]+)/(?P<resource_id>\d+)/$', views.view_project_resource_by_id, name='read_project_resource_by_id'),
+    url(r'^(?P<project_slug>[\w\-]+)/(?P<resource_id>\d+)/(?P<resource_slug>.+)/$', views.view_project_resource, name='read_project_resource')
 )

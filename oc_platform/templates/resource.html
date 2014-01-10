@@ -1,56 +1,64 @@
 {% include 'partials/header.html' %}
 
-<div class="center-stage">
-	<div id="key-panel" class="panel-left">
-		<article>
-			<form id="resource-form">
-				<input type="hidden" name="resource_id" value="{{ resource.id }}" />
-				<input type="hidden" name="user_id" value="{% if user.id %}{{ user.id }}{% endif %}" />
-			</form>
-			<header>
-				<h2>{{ resource.title }}</h2>
-				<section class="breadcrumb">
-					{% for collection in breadcrumb %}
-					<a href="{{ collection.url }}">{{ collection.title }}</a> 
-					{% if not forloop.last %}
-					<span class="vertical-caret breadcrumbs-caret"></span> 
-					{% endif %}
-				{% endfor %}
-				</section>
-				<section id="article-do">
-					{% with obj=resource caption=resource.user.first_name|add:" "|add:resource.user.last_name %}
-						{% if resource.type == "text" %}
-							{% include 'partials/oer-do.html' %}
-						{% else %}
-							{% include 'partials/oer-foreign-do.html' %}
-						{% endif %}
-					{% endwith %}
-				</section>
-			</header>
-			<section id="oer">
-				{% if resource.type == "article" %}
-					{{ resource.body_markdown_html|safe }}
-				{% elif resource.type == "video" %}
-					{% include 'partials/oer-video.html' %}
-				{% elif resource.type == "attachment" %}
-					{% include 'partials/oer-attachment.html' %}
-				{% elif resource.type == "url" %}
-					{% include 'partials/oer-url.html' %}
-				{% endif %}
-			</section>
-		</article>
+<article>
+	<div class="center-stage">
+		<header>
+            	{% include 'partials/resource-header.html' %}
+			<section id="article-do">
+				{% with obj=resource caption=resource.user.first_name|add:" "|add:resource.user.last_name %}
+					{% include 'partials/oer-do.html' %}
+				{% endwith %}
+			</section>		
+		</header>
 	</div>
-	
-	<div id="fill-panel" class="panel-right">
-		<aside id="author-panel">
-			<div id="author-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ resource.user.get_profile.profile_pic.name }}')" ></div>
-			<div id="author-info">
-				<div id="author-name"><a href="{% url user:user_profile username=resource.user.username %}">{{ resource.user.first_name }} {{ resource.user.last_name }}</a></div>
-				<div id="author-resources">{{ user_resource_count }} resources</div>
-				<!--<button class="subscribe">SUBSCRIBE</button>-->
+	<div class="center-midstage">
+		<form id="resource-form">
+			<input type="hidden" name="resource_id" value="{{ resource.id }}" />
+			{% if revision_view %}
+			<input type="hidden" name="revision_id" value="{{ resource.revision.id }}" />
+			{% endif %}
+			<input type="hidden" name="collection_id" value="{{ resource_collection.id }}" />
+			<input type="hidden" name="user_id" value="{% if user.id %}{{ user.id }}{% endif %}" />
+		</form>
+		<header class="oer-meta">
+			<div id="key-panel" class="panel-left">
+				<section id="oer-description">
+					{% if resource.description %}
+						{{ resource.description }}
+					{% else %}
+						No description.
+					{% endif %}
+				</section>
+		</article>
 			</div>
-		</aside>
-		
+	
+			<div id="fill-panel" class="panel-right">
+				<aside id="author-panel">
+					<div id="author-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ resource.revision.user.get_profile.profile_pic.name }}')" ></div>
+					<div id="author-info">
+						<div id="author-name">{% if resource.revision.user %}<a href="{% url user:user_profile username=resource.revision.user.username %}">{{ resource.user.get_full_name }}</a>{% else %}Anonymous{% endif %}</div>
+						<div id="author-resources">{% if resource.revision.user %}{{ user_resource_count }} resources{% else %}On {{ resource.revision.created }}{% endif %}</div>
+						<!--<button class="subscribe">SUBSCRIBE</button>-->
+					</div>
+				</aside>
+			</div>
+		</header>
+	</div>
+
+	<div class="center-midstage resource-body">
+		<section id="oer">
+			{% if resource.revision.content_type.name == "document" %}
+				<div class="oer-document document-body">
+					{% include 'partials/oer-document.html' %}
+				</div>
+			{% elif resource.revision.content_type.name == "link" %}
+				{% include 'partials/oer-url.html' %}
+			{% elif resource.revision.content_type.name == "attachment" %}
+				{% include 'partials/oer-attachment.html' %}
+			{% endif %}
+		</section>
+	</div>
+
 		<aside id="support">
 			<h3>Related resources</h3>
 			{% for resource in related %}

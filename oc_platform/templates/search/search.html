@@ -47,7 +47,7 @@
 					var result = new Result({
 						url: '{% url articles:reader category_slug=result.object.category.slug %}?q={{ result.object.slug }}',
 		    			title: '{{ result.object.title }}',
-		    			{% with result.object.revision.body_markdown_html|striptags|escapejs as stripped_result %}
+		    			{% with result.object.description|striptags|escapejs as stripped_result %}
 		    			summary: '{% highlight stripped_result with query %}',
 		    			{% endwith %}
 		    			created: '{{ result.object.created }}',
@@ -61,7 +61,7 @@
 		    		{% endif %}
 					{% if result.content_type == "oer.resource" %}
 					var result = new Result({
-						url: '{% url resource:read resource_id=result.object.id %}',
+						url: '{% url read resource_id=result.object.id resource_slug=resource.slug %}',
 		    			title: '{{ result.object.title }}',
 		    			{% with result.object.body|striptags as stripped_result %}
 		    			summary: '{% highlight stripped_result with query %}',
@@ -80,14 +80,6 @@
 		            //<p>No results found.</p>
 		        {% endfor %}
 				</script>
-				<!--<div class="search-result">
-					<div class="description">
-						<div class="search-result-title"><a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a></div>
-						<div class="search-result-description">{# highlight result.object.revision.body with query #}</div>
-						<div class="search-result-meta">Created on {{ result.object.created }} by {{ result.object.revision.user }}</div>
-					</div>
-					<div class="search-result-thumbnail"></div>
-				</div>-->
 
 			</div>
 				<!--

@@ -115,11 +115,289 @@ OC.editor = {
 
         // Remove the entire block from the DOM
         objectiveBlock.remove();
+    },
+
+    initDocumentMetaCollapser: function(){
+        var documentMetaCollapser = $('.document-meta-collapser');
+
+        OC.editor.repositionDocumentMetaCollapser(documentMetaCollapser);
+        OC.editor.bindDocumentMetaCollapserClick(documentMetaCollapser);
+    },
+
+    repositionDocumentMetaCollapser: function(documentMetaCollapser){
+        var articleTitle = $('#article-edit #article-title');
+
+        documentMetaCollapser.css('left', articleTitle.position().left - 40);
+        documentMetaCollapser.css('top', articleTitle.position().top + 10);
+    },
+
+    bindDocumentMetaCollapserClick: function(documentMetaCollapser){
+        var itemsToCollapse = $(
+            'table.document-visibility-license, .tags-drop-edit, .document-description-drop-edit');
+
+        documentMetaCollapser.click(function(){
+            if (documentMetaCollapser.hasClass('collapsed')){
+                itemsToCollapse.show();
+                documentMetaCollapser.removeClass('collapsed');
+            } else {
+                itemsToCollapse.hide();
+                documentMetaCollapser.addClass('collapsed');
+            }
+        });
+
+        // Temporarily collapse on page load.
+        itemsToCollapse.hide();
+        documentMetaCollapser.addClass('collapsed');
+    },
+
+    initExistingWidgets: function(){
+        var tables =  $('.document-body .document-table');
+
+        var i, j, k, table, columns, cells;
+        for (i = 0; i < tables.length; i++){
+            tableWrapper = $(tables[i]);
+
+            // Set table ID.
+            tableWrapper.find('table').attr('id', 'table-' + i);
+
+            // Allow resize of the columns.
+            tableWrapper.prepend('<div class="column-resize"></div>');
+            columns = $('col', tableWrapper);
+            for (j = 0; j < columns.length; j++){
+                $(columns[j]).attr('id', 'column-' + i + '-' + j);
+            }
+            OC.editor.initTableResize(tableWrapper);
+
+            // Add action row to the table.
+            $('tr:last', tableWrapper).after(OC.editor.widgets.tableActionsRowHTML);
+
+            // Bind table actions with event handlers.
+            OC.editor.bindTableActionHandlers(tableWrapper);
+
+            // Make all cells editable.
+            cells = $('td, th', tableWrapper).not('td.table-actions-wrapper', tableWrapper);
+            for (k = 0; k < cells.length; k++){
+                $(cells[k]).attr('contenteditable', 'true');
+            }
+        }
+    },
+
+    initAddWidget: function(){
+        var addWidgetButton = $('button.add-widget');
+
+        addWidgetButton.click(function(event){
+            var addPopup = OC.customPopup('.add-document-widget-dialog');
+
+            var widgetSubmit = $('.add-document-widget-submit-button');
+            widgetSubmit.unbind('click');
+
+            // Bind the 'Done' button on the popup.
+            widgetSubmit.click(function(event){
+                var selectedOption = $(
+                    '.add-document-widget-dialog .add-widget-option.selected');
+
+                if (selectedOption.length >= 1){
+                    if (selectedOption.hasClass('table')){
+                        var tables =  $('.document-body .document-table');
+
+                        var newTable = OC.editor.widgets.table({'tableID': tables.length});
+                        $('.document-body').append(newTable);
+                        var appendedTableWrapper = $('.document-body .document-table:last');
+
+                        // Make cells CKEditor-able.
+                        //$('td[contenteditable=true], th[contenteditable=true]', appendedTableWrapper).ckeditor();
+
+                        // Focus on the first cell.
+                        $('th:first', appendedTableWrapper).focus();
+
+                        // Allow resize of the columns.
+                        OC.editor.initTableResize(appendedTableWrapper);
+
+                        // Bind table actions with event handlers.
+                        OC.editor.bindTableActionHandlers(appendedTableWrapper);
+
+                    } else if (selectedOption.hasClass('text-block')){
+                        var newTextBlock = OC.editor.widgets.textBlock();
+                        $('.document-body').append(newTextBlock);
+                        $('.document-textblock').ckeditor();
+                    }
+                }
+
+                addPopup.close();
+            });
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+
+        var widgetOption = $('.add-document-widget-dialog .add-widget-option');
+
+        widgetOption.click(function(event){
+            // Remove the 'selected' class from all other widget options.
+            $('.add-document-widget-dialog .add-widget-option').removeClass('selected');
+            $(event.target).closest('.add-widget-option').addClass('selected');
+        });
+    },
+
+    widgets: {
+        tableActionsRowHTML: '<tr><td colspan="3" class="table-actions-wrapper"><a class="table-action table-action-new new-row-action">New row</a>' +
+            '<a class="table-action table-action-new new-column-action">New column</a></td></tr>',
+
+        table: function(inputs){
+            return _.template('<div class="document-table document-element"><div class="column-resize"></div>' +
+            '<table id="table-<%= tableID %>"><colgroup><col id="column-<%= tableID %>-0"/><col id="column-<%= tableID %>-1" /><col id="column-<%= tableID %>-2" /></colgroup>' +
+            '<tr><th contenteditable="true"></th><th contenteditable="true"></th><th contenteditable="true"></th></tr>' +
+            '<tr><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>' +
+            OC.editor.widgets.tableActionsRowHTML + '</table></div>')(inputs);
+        },
+
+        tableRow: _.template('<tr><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>'),
+
+        textBlock: _.template('<textarea class="document-textblock document-element"></textarea>')
+    },
+
+    bindTableActionHandlers: function(tableWrapper){
+        var newRowButton = $('.new-row-action', tableWrapper);
+        var newColumnButton = $('.new-column-action', tableWrapper);
+
+        newRowButton.click(function(){
+            // Add the row.
+            var tableRows = $('tr', tableWrapper);
+            $(tableRows[tableRows.length - 2]).after(OC.editor.widgets.tableRow());
+
+            // Make it editable.
+            tableRows = $('tr', tableWrapper);
+            $('td', tableRows[tableRows.length - 2]).ckeditor();
+        });
+
+        newColumnButton.click(function(){
+            // Add the column.
+            var tableRows = $('tr', tableWrapper);
+            var tableColumns = $('tr:first th', tableWrapper);
+
+            if (tableColumns.length >= 3){
+                OC.popup('We only permit 3 columns per document at this stage. Sorry ' +
+                    'for the inconvenience.', 'Cannot add new column');
+            } else {
+                // Append a 'th' to the header row.
+                newCell = $('<th/>', {'contenteditable': 'true'});
+                $(tableRows[0]).append(newCell);
+                $('th:last', tableRows[0]).ckeditor();
+
+                // TODO(Varun): Append new <col> to the <colgroup>
+                newCol = $('<col/>', {'id': OC.editor.getNewColumnID(tableWrapper) });
+                $('colgroup', tableWrapper).append(newCol);
+
+                // Add a 'td' to each row except for the first & last one.
+                var i, newCell;
+                for (i = 1; i < tableRows.length - 1; i++){
+                    newCell = $('<td/>', {'contenteditable': 'true'});
+                    $(tableRows[i]).append(newCell);
+                     $('td:last', tableRows[i]).ckeditor();
+                }
+
+                // Set the colspan of the bottom row to the new column length.
+                $('tr:last td', table).attr('colspan', tableColumns.length + 1);
+            }
+
+            // Recalculate and set widths of all columns.
+            $('.document-body table col').width((100 / (tableColumns.length + 1)) + '%');
+        });
+    },
+
+    getNewColumnID: function(tableWrapper){
+        var tableID = $('table', tableWrapper).attr('id'),
+            tableNumber = tableID.substring(8);
+
+        var columns = $('col', tableWrapper);
+        return 'column-' + tableID + '-' + (columns.length + 1);
+    },
+
+    initTableResize: function(tableWrapper){
+        // For every column, create a relatively positioned resize handle,
+        //    which is the height of the 'th' row and width of about 4px.
+        var columns = $('tr > th', tableWrapper);
+        var columnResizeWrapper = $('.column-resize', tableWrapper);
+
+        var table = $('table', tableWrapper),
+            tableHeader = $('tr:first', tableWrapper),
+            tableNumber = table.attr('id').substring(6);
+
+        var i;
+        for (i = 0; i < columns.length - 1; i++){
+            var columnHandle = $('<div/>', {
+                'class': 'column-handle', 'id': 'column-' + tableNumber + '-' + i + '-handle'});
+            columnResizeWrapper.append(columnHandle);
+
+            var newColumnHandle = $('.column-handle:last', tableWrapper);
+
+            var currentColumn = $(columns[i]);
+
+            // Reposition the handle by using the th left and top positions.
+
+            // Calculate the offset of the column from the left edge of the table.
+            var tableLeft = tableWrapper.position().left,
+                columnLeft = currentColumn.position().left;
+
+            var top = currentColumn.position().top,
+                left = (columnLeft - tableLeft) + (
+                    currentColumn.outerWidth() - newColumnHandle.width()/2);
+
+            newColumnHandle.css({'left': left + 'px'});
+
+            // Set the handle height.
+            var currentColumnHeight = tableHeader.outerHeight();
+            newColumnHandle.height(currentColumnHeight);
+            newColumnHandle.css('margin-bottom', '-' + currentColumnHeight + 'px');
+        }
+
+        columnResizeWrapper.css('margin-bottom', '-' + (
+            tableHeader.outerHeight() + parseInt(table.css('margin-top'), 10)) + 'px');
+
+        // Make the resize handle draggable on the x-axis, with the constraint
+        //    being the 'th' row width.
+        var handleID, endIndex, columnNumber, column;
+        $('.column-handle', columnResizeWrapper).draggable({
+            axis: 'x',
+            containment: '.column-resize',
+            start: function(event, ui){
+                // Add class to handle.
+                $(event.target).addClass('dragging');
+            },
+
+            stop: function(event, ui){
+                // Remove class from handle.
+                $(event.target).removeClass('dragging');
+            },
+
+            // Make the onDrag function resize the <col> while moved.
+            drag: function(event, ui){
+                // Get the <col> associated with this handle.
+                handleID = $(event.target).attr('id');
+                endIndex = handleID.indexOf('-handle');
+                columnNumber = parseInt(handleID.substring(
+                    handleID.indexOf('-', 7) + 1, endIndex), 10);
+                column = $('#column-' + tableNumber + '-' + columnNumber);
+
+                // Calculate new column width.
+                var newWidth = ui.offset.left - column.position().left;
+
+                // Resize the current (left) column and the right column accordingly.
+                column.width(newWidth);
+
+                var originalWidth = column.width();
+                var rightColumn = $('#column-' + tableNumber + '-' + (columnNumber + 1));
+                rightColumn.width(
+                    ((originalWidth - newWidth) + rightColumn.width()));
+            }
+        });
+
     }
 };
 
 (function () {
-
+/*
     var converter = Markdown.getSanitizingConverter();
     var editor = new Markdown.Editor(converter);
 
@@ -129,7 +407,7 @@ OC.editor = {
     });
 
     editor.run();
-
+*/
 })();
 
 
@@ -159,7 +437,8 @@ $(function() {
         var objectives = [];
         var inputObjs = $('#objectives-inputs input');
 
-        for (var i = 0; i < inputObjs.length; i++){
+        var i;
+        for (i = 0; i < inputObjs.length; i++){
             objectives.push("\"" + $(inputObjs[i]).attr('value') + "\"");
         }
 
@@ -332,5 +611,79 @@ $(document).ready(function(){
     });
 
     $('span.delete-objective').click(OC.editor.objectiveDeleteHandler);
+
+    // Initialize document meta collapser.
+    OC.editor.initDocumentMetaCollapser();
+
+    // Initialize the JS on widgets on page from load, such as in the case of edit.
+    OC.editor.initExistingWidgets();
+
+    // Initialize the add widget functionality.
+    OC.editor.initAddWidget();
+
+    $('#new-resource-document-form #submission-buttons button').click(function(event){
+        // Serialize the widgets on the page.
+        var documentElements = $('.document-body .document-element');
+
+        // TODO(Varun): Add some spinner into the button as we serialize.
+
+        var serializedElements = [];
+        var j, k, l, m, rows, currentRow, currentRowCells, element;
+        for (j = 0; j < documentElements.length; j++){
+            element = {};
+
+            var documentElement = $(documentElements[j]);
+            if (documentElement.hasClass('document-table')){
+                element.type = 'table';
+
+                rows = $('tr', documentElement);
+                cols = $('col', documentElement);
+
+                element['data'] = {};
+                element.data.rowsCount = rows.length;
+                element.data.colsCount = cols.length;
+                element.data.colWidths = [];
+
+                for (k = 0; k < cols.length; k++){
+                    var colWidthPercent = ($(
+                        cols[k]).width() / $(documentElement).width()) * 100;
+                    element.data.colWidths.push(colWidthPercent.toFixed(2));
+                }
+
+                element.data['rows'] = {};
+                for (l = 0; l < rows.length - 1; l++){
+                    currentRow = $(rows[l]);
+                    currentRowCells = currentRow.children();
+
+                    element.data.rows[l] = {};
+                    for (m = 0; m < currentRowCells.length; m++){
+                        element.data.rows[l][m] = $(currentRowCells[m]).html();
+                    }
+                }
+            } else if (documentElement.hasClass('document-textblock')){
+                element.type = 'textblock';
+                element.data = documentElement.html();
+            }
+
+            serializedElements.push(element);
+        }
+
+        // Add all element JSONs into strings.
+        var newDocumentForm = $('#new-resource-document-form');
+
+        var serializedDocumentBody = $('<textarea/>', {
+            'text': JSON.stringify(serializedElements),
+            'name': 'serialized-document-body'
+        });
+        
+        newDocumentForm.append(serializedDocumentBody);
+
+        newDocumentForm.submit();
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+    });
+
 
 });

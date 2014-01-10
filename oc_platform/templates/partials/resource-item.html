@@ -1,8 +1,8 @@
 <div class="{{ host }}-browse-item resource-collection-item resource {{ resource.type }}-resource" id="resource-{{ resource.id }}">
     <input type="checkbox" name="resource_id" value="{{ resource.id }}"/>
-    <a href="{% url resource:read resource_id=resource.id %}">{{ resource }} <span class="project-browse-item-date">{{ resource.created|date:"M nS, 'y P"}}</span>
+    <a href="{% if host == 'profile' %}{% url read resource_id=resource.id  resource_slug=resource.slug %}{% else %}{% url projects:read_project_resource project_slug=project.slug resource_id=resource.id  resource_slug=resource.slug %}{% endif %}">{{ resource }} <span class="{{ host }}-browse-item-date">{{ resource.created|date:"M nS, 'y P"}}</span>
     
-    <div class="resource-collection-actions{% if host == 'profile' %}{% if user == user_profile %} profile-resource is-owner{% endif %}{% elif user in project.admins.all or user == resource.user %} is-owner{% endif %}">
-        <span class="{{ host }}-browse-item-visibility browse-item-visibility visibility-{{ resource.visibility }}" title="Who has access: {% if collection.visibility == 'private' %}Private (collection){% else %}{{ resource.visibility|title }}{% endif %}"></span><div class="{{ host }}-resource-delete resource-collection-delete" id="resource-{{ resource.id }}" title="Delete"></div>
+    <div class="resource-collection-actions{% if host == 'profile' %}{% if user == user_profile %} profile-resource is-owner{% endif %}{% elif user in project.admins.all or user == resource.user %} is-owner{% elif resource.visibility == 'private' and user in resource.collaborators.all %} is-collaborator{% endif %}">
+        <span class="{{ host }}-browse-item-visibility browse-item-visibility visibility-{{ resource.visibility }}" title="Who has access: {% if collection.visibility == 'collection' %}Private (collection){% else %}{{ resource.visibility|title }}{% endif %}"></span><div class="{{ host }}-resource-delete resource-collection-delete" id="resource-{{ resource.id }}" title="Delete"></div>
     </div></a>
 </div>

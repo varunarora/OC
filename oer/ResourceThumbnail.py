@@ -15,11 +15,13 @@ class ResourceThumbnail:
         pass
 
     @staticmethod
-    def generateThumbnail(resource):
+    def generateThumbnail(original_resource):
         thumbnailDir = settings.MEDIA_ROOT + 'resource_thumbnail/tmp/'
-        thumbnail = thumbnailDir + str(resource.id)
+        thumbnail = thumbnailDir + str(original_resource.id)
 
-        if resource.type == "video":
+        (resource, resource_type) = ResourceThumbnail.get_resource_type(original_resource)
+
+        if resource_type == "video":
 
             try:
                 provider = VideoHelper.getVideoProvider(resource.url)
@@ -47,13 +49,13 @@ class ResourceThumbnail:
                 resource.type = 'url'
                 ResourceThumbnail.generateURLThumbnail(resource, thumbnail)
 
-        elif resource.type == "article":
+        elif resource_type == "article":
             call(["cp", settings.MEDIA_ROOT + "resource_thumbnail/defaults/" + "article.jpg", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
-        elif resource.type == "url":
+        elif resource_type == "url":
             ResourceThumbnail.generateURLThumbnail(resource, thumbnail)
 
-        elif resource.type == "attachment":
+        elif resource_type == "attachment":
 
             # Figure out the extension of the attachment
             from os.path import splitext
@@ -125,3 +127,38 @@ class ResourceThumbnail:
 
         # Now delete the temporary retrived image thumbnail
         call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
+
+
+    @staticmethod
+    def get_resource_type(resource):
+        from django.contrib.contenttypes.models import ContentType
+        from oer.models import Document, Link, Attachment
+
+        document_content_type = ContentType.objects.get_for_model(Document)
+        link_content_type = ContentType.objects.get_for_model(Link)
+        attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+        if resource.revision.content_type == document_content_type:
+            return (resource, 'article')
+
+        elif resource.revision.content_type == link_content_type:            
+            import urlparse
+            url_data = urlparse.urlparse(resource.revision.content.url)
+            domain = url_data.hostname
+            hostname = domain.split(".")[:-1]
+
+            resource.url = resource.revision.content.url
+
+            if "youtube" in hostname or "vimeo" in hostname:
+                return (resource, 'video')
+
+            return (resource, 'url')
+
+        elif resource.revision.content_type == attachment_content_type:
+            resource.file = resource.revision.content.file
+            return (resource, 'attachment')
+
+
+
+
+

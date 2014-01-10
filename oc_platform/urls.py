@@ -75,6 +75,9 @@ urlpatterns = patterns(
     # Article Center Introduction
     url(r'^contributor-introduction/', 'user_account.views.contributor_introduction', name='contributor_introduction'),
 
+    url(r'^(?P<resource_id>\d+)/$', 'oer.views.view_resource_by_id', name='read_by_id'),
+    url(r'^(?P<resource_id>\d+)/(?P<resource_slug>.+)/$', 'oer.views.view_resource', name='read'),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

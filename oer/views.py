@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from oer.models import Resource, Collection
+from oer.models import Resource, ResourceRevision, Collection, Document, Element, DocumentElement, Link, Attachment
 from django.core.files import File
 from oc_platform import APIUtilities
 import json
@@ -15,12 +15,26 @@ def resource_center(request):
     return HttpResponse("Page under construction")
 
 
-def view_resource(request, resource_id):
+def view_resource_by_id(request, resource_id):
+    from django.core.exceptions import ObjectDoesNotExist
+
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+        return redirect('read',
+            resource_id=resource_id,
+            resource_slug=resource.slug
+        )
+    except ObjectDoesNotExist:
+        raise Http404
+
+
+def view_resource(request, resource_id, resource_slug):
     """Builds a resource view page from its unique ID.
 
     Args:
         request: The HTTP request object, as passed by django.
         resource_id: The unique key of the resource.
+        resource_id: The human readable and browser-URL friendly resource title.
 
     Returns:
         The HttpResponse resource page after preparing objects.
@@ -33,62 +47,42 @@ def view_resource(request, resource_id):
     try:
         # Fetch the resource from its ID using the QuerySet API.
         resource = Resource.objects.get(pk=resource_id)
+
+        revision = None
+        revision_id = request.GET.get('revision', None)
+
+        if revision_id:
+            try:
+                revision = ResourceRevision.objects.get(pk=revision_id)
+                resource.revision = revision
+            except ObjectDoesNotExist:
+                pass
+
         # TODO(Varun): Change this to actually get the top 5 best resources.
         related = Resource.objects.all()[:5]
 
-        # If this resource is a URL, fetch its page by making Http requests
-        #     using BeautifulSoup, and find meta tags in the DOM.
-        if resource.type == "url":
-            from BeautifulSoup import BeautifulSoup
-            from urllib import urlopen
+        from django.contrib.contenttypes.models import ContentType
+        resource_ct = ContentType.objects.get_for_model(Resource)
+        
+        from interactions.models import Comment
+        comments_ct = ContentType.objects.get_for_model(Comment)
 
-            try:
-                # Open the resource and build its DOM into a BeautifulSoup
-                #     object.
-                source = urlopen(resource.url)
-                soup = BeautifulSoup(source)
+        document_content_type = ContentType.objects.get_for_model(Document)
+        document_element_content_type = ContentType.objects.get_for_model(DocumentElement)
 
-                # Extract the page title, and the description from its meta
-                #     tags in <head>
-                resource.url_title = soup.find('title').text
-                description = soup.findAll(
-                    'meta', attrs={'name': "description"}
-                )[0]
+        link_content_type = ContentType.objects.get_for_model(Link)
+        attachment_content_type = ContentType.objects.get_for_model(Attachment)
 
-                # If a description was found, set it on the resource.
-                if description:
-                    resource.body = description['content']
-            except:
-                pass
+        if resource.revision.content_type == document_content_type:
+            resource.data = build_document_view(resource.revision.content_id)
 
-        # If the resource is a kind of attachment, format its metadata.
-        if resource.type == "attachment":
-            #TODO: Replace with |filesizeformat template tag
-            filesize = resource.file.size
-            if filesize >= 1048576:
-                resource.filesize = str(
-                    _filesizeFormat(float(filesize) / 1048576)) + " MB"
-            elif filesize >= 1024:
-                resource.filesize = str(
-                    _filesizeFormat(float(filesize) / 1024)) + " KB"
-            else:
-                resource.filesize = str(
-                    _filesizeFormat(float(filesize))) + " B"
-
-            # Determine the extension of the attachment.
-            from os.path import splitext
-            name, resource.extension = splitext(resource.file.name)
-
-        # If the resource is a video, determine whether or not it is a YouTube
-        #     Vimeo video, and obtain the video ID (as determined by the
-        #     service provider), so that it can be plugged into its player.
-        if resource.type == "video":
+        elif resource.revision.content_type == link_content_type:
             import urlparse
-            url_data = urlparse.urlparse(resource.url)
+            (hostname, url_data) = get_url_hostname(resource.revision.content.url)
 
-            # Figure out the entire domain the specific hostname (eg. "vimeo")
-            domain = url_data.hostname
-            hostname = domain.split(".")[:-1]
+            # If the resource is a video, determine whether or not it is a YouTube
+            #     Vimeo video, and obtain the video ID (as determined by the
+            #     service provider), so that it can be plugged into its player.
 
             # In either case, use an appropriate pattern matching to obtain the
             #     video #.
@@ -102,9 +96,29 @@ def view_resource(request, resource_id):
                 resource.video_tag = url_data.path.split('/')[1]
                 resource.provider = "vimeo"
 
+        # If the resource is a kind of attachment, format its metadata.
+        elif resource.revision.content_type == attachment_content_type:
+            #TODO: Replace with |filesizeformat template tag
+            filesize = resource.revision.content.file.size
+            if filesize >= 1048576:
+                resource.filesize = str(
+                    _filesizeFormat(float(filesize) / 1048576)) + " MB"
+            elif filesize >= 1024:
+                resource.filesize = str(
+                    _filesizeFormat(float(filesize) / 1024)) + " KB"
+            else:
+                resource.filesize = str(
+                    _filesizeFormat(float(filesize))) + " B"
+
+            # Determine the extension of the attachment.
+            from os.path import splitext
+            name, resource.extension = splitext(resource.revision.content.file.name)
+
         # Fetch the number of resources that have been uploaded by the user who
         #     has created this resource.
-        userResourceCount = resource.user.get_profile().collection.resources.count()
+        user_resource_count = None
+        if resource.revision.user:
+            user_resource_count = resource.revision.user.get_profile().collection.resources.count()
 
         # Increment page views (always remains -1 based on current view).
         Resource.objects.filter(id=resource_id).update(views=resource.views+1)
@@ -115,15 +129,37 @@ def view_resource(request, resource_id):
 
         context = {
             'resource': resource,
+            'host_content_type': resource_ct,
+            'comments_content_type': comments_ct,
+            'document_element_content_type': document_element_content_type,
             'title': resource.title + " &lsaquo; OpenCurriculum",
+            'revision_view': resource.revision == revision,
             'breadcrumb': breadcrumb,
-            'related': related, "user_resource_count": userResourceCount,
+            'resource_collection': collection,
+            'related': related, "user_resource_count": user_resource_count,
             'current_path': 'http://' + request.get_host() + request.get_full_path(),  # request.get_host()
             'thumbnail': 'http://' + request.get_host() + settings.MEDIA_URL + resource.image.name
         }
         return render(request, 'resource.html', context)
+
     except ObjectDoesNotExist:
         raise Http404
+
+
+def get_url_hostname(url):
+    import urlparse
+    url_data = urlparse.urlparse(url)
+
+    # Figure out the entire domain the specific hostname (eg. "vimeo")
+    domain = url_data.hostname
+
+    return (domain.split(".")[:-1], url_data)
+
+
+def build_document_view(document_id):
+    document = Document.objects.get(pk=document_id)
+    return DocumentElement.objects.filter(
+        document=document).order_by('position')
 
 
 def build_collection_breadcrumb(collection):
@@ -214,12 +250,12 @@ def download(request, resource_id):
 
     import magic
     mime = magic.Magic(mime=True)
-    content_type = mime.from_file(resource.file.path)
+    content_type = mime.from_file(resource.revision.content.file.path)
 
     # TODO(Varun): Security risk. Check file name for safeness
-    response = HttpResponse(resource.file, content_type)
+    response = HttpResponse(resource.revision.content.file, content_type)
     response['Content-Disposition'] = (
-        'attachment; filename="%s"' % resource.file.name)
+        'attachment; filename="%s"' % resource.revision.content.file.name)
     return response
 
 
@@ -326,6 +362,10 @@ def add_video(request, submission_context=None):
         if new_video.is_valid():
             url = new_video.save()
 
+            # Assign this URL to the revision created.
+            url.revision.resource = url
+            url.revision.save()
+
             # Add to the necessary collection.
             collection = get_collection(user_id, project_id, collection_id)
 
@@ -361,6 +401,10 @@ def add_url(request):
         if new_url.is_valid():
             url = new_url.save()
 
+            # Assign this URL to the revision created.
+            url.revision.resource = url
+            url.revision.save()
+
             # Add to the necessary collection.
             collection = get_collection(user_id, project_id, collection_id)
 
@@ -394,13 +438,19 @@ def new_document(request):
         new_document = forms.NewDocumentForm(request.POST, request.user)
 
         if new_document.is_valid():
-            document = new_document.save()
+            document_resource = new_document.save()
+
+            # Assign this document to the revision created.
+            document_resource.revision.resource = document_resource
+            document_resource.revision.save()
+
+            create_document_elements(request.POST, document_resource)
 
             # Add to the necessary collection.
             collection = get_collection(user_id, project_id, collection_id)
 
             # Add to the necessary collection.
-            add_resource_to_collection(document, collection)
+            add_resource_to_collection(document_resource, collection)
 
             return redirect_to_collection(user_id, project_id, collection_id)
         else:
@@ -411,6 +461,27 @@ def new_document(request):
     }.items() + resource_context.items() + form_context.items())
 
     return render(request, 'document.html', context)
+
+
+def create_document_elements(post_request, document_resource):
+    # Unserialize the DocumentElement objects.
+    serialized_document_elements = post_request.get('serialized-document-body');
+    document_elements = json.loads(serialized_document_elements)
+
+    for counter, element in enumerate(document_elements):
+        # Create a new document element.
+        new_document_element = DocumentElement()
+
+        new_document_element.document = document_resource.revision.content
+        
+        new_element = Element(body=element)
+        new_element.save()
+        new_document_element.element = new_element
+
+        # Add the document element based on its position to the Document.
+        new_document_element.position = counter
+
+        new_document_element.save()
 
 
 def upload_page(request):
@@ -436,9 +507,6 @@ def fp_upload(request):
     Returns:
         Response containing JSON with ResourceID-title pairs.
     """
-    # Constants
-    default_cost = 0
-
     # Make a copy of the request.POST object, extract user and project IDs
     # And remove them from the copy.
     post_data = request.POST.copy()
@@ -465,10 +533,8 @@ def fp_upload(request):
         title = str(post_data[key])
         file_list.append((key, title))     # Two parens because tuple.
 
-    response_dict = dict()
+    response = {}
     failure_list = []
-
-    from oer.models import Resource
 
     for (key, title) in file_list:
         try:
@@ -484,21 +550,12 @@ def fp_upload(request):
 
             static_file = open(file_path)
 
-            new_resource = Resource()
-            new_resource.title = title
-            new_resource.type = 'attachment'
-            new_resource.cost = default_cost
-            new_resource.visibility = 'public'
-            new_resource.user_id = user_id
-            new_resource.body_markdown = ''
-            new_resource.file = File(static_file)
-            new_resource.save()
-            response_dict[new_resource.id] = new_resource.title
+            new_resource = create_resource(
+                File(static_file), user, collection, title)
+
+            response[new_resource.id] = new_resource.title
             static_file.close()
 
-            # Add the resource created to the collection.
-            add_resource_to_collection(new_resource, collection)
-        
         except Exception:          
             # Delete this file from S3, and add it to the failure list
             from boto.s3.connection import S3Connection
@@ -509,12 +566,14 @@ def fp_upload(request):
             k = Key(b)
             k.key = key
             b.delete_key(k)
+
             failure_list.append(title)
 
     if len(failure_list) > 0:
-        response_dict['failures'] = failure_list
+        response['failures'] = failure_list
+
     return HttpResponse(json.dumps(
-        response_dict), 200, content_type="application/json")
+        response), 200, content_type="application/json")
 
 
 def fp_submit(request):
@@ -610,19 +669,37 @@ def fp_submit(request):
 
 
 def create_resource(uploaded_file, user, collection, new_filename=None):
-    default_cost = 0
+    DEFAULT_COST = 0
+
+    title = new_filename if new_filename else uploaded_file.name
+
+    from django.template.defaultfilters import slugify
 
     # Create a new resource
     new_resource = Resource(
-        title=new_filename if new_filename else uploaded_file.name,
-        cost=default_cost,
+        title=title,
+        cost=DEFAULT_COST,
         user=user,
-        file=uploaded_file,
-        type='attachment',
-        body_markdown=''
+        slug=slugify(title),
+        # TODO(Varun): Build a setting to choose visibility.
+        visibility='public',
+        description=''
     )
 
+    new_attachment = Attachment()
+    new_attachment.file = uploaded_file
+    new_attachment.save()
+
+    new_resource_revision = ResourceRevision()
+    new_resource_revision.content = new_attachment
+    new_resource_revision.save()
+
+    new_resource.revision = new_resource_revision
     new_resource.save()
+
+    # Assign this resource to the revision created.
+    new_resource.revision.resource = new_resource
+    new_resource.revision.save()
 
     # Now add this resource to the collection it belongs to
     collection.resources.add(new_resource)
@@ -681,21 +758,33 @@ def edit_resource(request, resource_id):
     try:
         # Fetch the resource from its ID using the QuerySet API.
         resource = Resource.objects.get(pk=resource_id)
-    
-        if request.user == resource.user:
-            if resource.type == 'url':
-                return edit_url(request, resource)
-            elif resource.type == 'video':
-                return edit_video(request, resource)
-            elif resource.type == 'article':
+
+        if request.user == resource.user or request.user in resource.collaborators.all():
+
+            from django.contrib.contenttypes.models import ContentType
+            document_content_type = ContentType.objects.get_for_model(Document)
+            link_content_type = ContentType.objects.get_for_model(Link)
+            attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+            if resource.revision.content_type == document_content_type:
                 return edit_document(request, resource)
-            elif resource.type == 'attachment':
+
+            elif resource.revision.content_type == link_content_type:
+                (hostname, url_data) = get_url_hostname(resource.revision.content.url)
+
+                if "youtube" in hostname or "vimeo" in hostname:
+                    return edit_video(request, resource)
+                else:
+                    return edit_url(request, resource)
+
+            elif resource.revision.content_type == attachment_content_type:
                 return edit_attachment(request, resource)
+
         else:
             raise PermissionDenied
 
     except ObjectDoesNotExist:
-        raise Http404        
+        raise Http404
 
 
 def _prepare_edit_resource_context(resource):
@@ -722,7 +811,7 @@ def edit_url(request, resource):
     form_context = {}
     if request.method == 'POST':
         from oer import forms
-        url_edit = forms.URLEditForm(request.POST, instance=resource)
+        url_edit = forms.URLEditForm(request.POST, request.user, instance=resource)
 
         if url_edit.is_valid():
             url_edit.save()
@@ -731,20 +820,15 @@ def edit_url(request, resource):
             from django.contrib import messages
             messages.success(request, 'Link was saved succesfully.')
 
-            return redirect('resource:read', resource_id=resource.id)
-            
-            """
-            # Redirect to collection with resource, if redirected from collection
-            return redirect_to_collection(
-                resource.user_id,
-                edit_resource_context['project'].id,
-                edit_resource_context['collection'].id
+            return redirect('read',
+                resource_id=resource.id,
+                resource_slug=resource.slug
             )
-            """
+
         else:
             build_return_resource_form_context(request, url_edit, form_context)
     else:
-        form_context['original'] = resource
+        form_context['resource'] = resource
 
     context = dict({
         'title': _(settings.STRINGS['resources']['EDIT_URL_TITLE'])}.items()
@@ -759,7 +843,7 @@ def edit_video(request, resource):
     form_context = {}
     if request.method == 'POST':
         from oer import forms
-        video_edit = forms.VideoEditForm(request.POST, instance=resource)
+        video_edit = forms.VideoEditForm(request.POST, request.user, instance=resource)
 
         if video_edit.is_valid():
             video_edit.save()
@@ -768,11 +852,15 @@ def edit_video(request, resource):
             from django.contrib import messages
             messages.success(request, 'Video was saved succesfully.')
 
-            return redirect('resource:read', resource_id=resource.id)
+            return redirect('read',
+                resource_id=resource.id,
+                resource_slug=resource.slug
+            )
+
         else:
             build_return_resource_form_context(request, video_edit, form_context)
     else:
-        form_context['original'] = resource
+        form_context['resource'] = resource
 
     context = dict({
         'title': _(settings.STRINGS['resources']['EDIT_VIDEO_TITLE'])}.items()
@@ -787,20 +875,27 @@ def edit_document(request, resource):
     form_context = {}
     if request.method == 'POST':
         from oer import forms
-        document_edit = forms.DocumentEditForm(request.POST, instance=resource)
+        document_edit = forms.DocumentEditForm(request.POST, request.user, instance=resource)
 
         if document_edit.is_valid():
-            document_edit.save()
+            saved_document = document_edit.save()
+
+            create_document_elements(request.POST, saved_document)
 
             # Add Django message on success of save.
             from django.contrib import messages
             messages.success(request, 'Document was saved succesfully.')
 
-            return redirect('resource:read', resource_id=resource.id)
+            return redirect('read',
+                resource_id=resource.id,
+                resource_slug=resource.slug
+            )
+
         else:
             build_return_resource_form_context(request, document_edit, form_context)
     else:
-        form_context['original'] = resource
+        resource.data = build_document_view(resource.revision.content_id)
+        form_context['resource'] = resource
 
     context = dict({
         'title': _(settings.STRINGS['resources']['EDIT_DOCUMENT_TITLE'])}.items()
@@ -815,7 +910,7 @@ def edit_attachment(request, resource):
     form_context = {}
     if request.method == 'POST':
         from oer import forms
-        attachment_edit = forms.AttachmentEditForm(request.POST, instance=resource)
+        attachment_edit = forms.AttachmentEditForm(request.POST, request.user, instance=resource)
 
         if attachment_edit.is_valid():
             attachment_edit.save()
@@ -824,14 +919,18 @@ def edit_attachment(request, resource):
             from django.contrib import messages
             messages.success(request, 'File resource was saved succesfully.')
 
-            return redirect('resource:read', resource_id=resource.id)
+            return redirect('read',
+                resource_id=resource.id,
+                resource_slug=resource.slug
+            )
+
         else:
             build_return_resource_form_context(request, attachment_edit, form_context)
     else:
-        form_context['original'] = resource
+        form_context['resource'] = resource
 
     context = dict({
-        'title': _(settings.STRINGS['resources']['EDIT_DOCUMENT_TITLE'])}.items()
+        'title': _(settings.STRINGS['resources']['EDIT_UPLOAD_TITLE'])}.items()
             + form_context.items() + edit_resource_context.items())
 
     return render(request, 'edit-attachment.html', context)
@@ -842,15 +941,39 @@ def delete_resource(request, resource_id):
         resource = Resource.objects.get(pk=resource_id)
         
         if request.user != resource.user:
-            return HttpResponse(json.dumps(
-                {'status': 'false'}), 403, content_type="application/json")
+            return APIUtilities._api_unauthorized_failure()
         
+        revisions = ResourceRevision.objects.filter(resource=resource)
+
+        from django.contrib.contenttypes.models import ContentType
+
+        document_content_type = ContentType.objects.get_for_model(Document)
+        link_content_type = ContentType.objects.get_for_model(Link)
+        attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+        for revision in revisions:
+            if revision.content_type == document_content_type:
+                document_elements = DocumentElement.objects.filter(
+                    document=revision.content
+                )
+                for element in document_elements:
+                    element.element.delete()
+                    element.delete()
+
+                revision.content.delete()
+
+            elif (revision.content_type == link_content_type or 
+                revision.content_type == attachment_content_type):
+                    revision.content.delete()
+
+            revision.delete()
+
         resource.delete()
-        return HttpResponse(json.dumps(
-            {'status': 'true'}), 200, content_type="application/json")
+
+        return APIUtilities._api_success()
+
     except:
-        return HttpResponse(json.dumps(
-            {'status': 'false'}), 401, content_type="application/json")
+        return APIUtilities._api_failure()
 
 
 def delete_collection(request, collection_id):
@@ -966,7 +1089,6 @@ def new_user_collection(request, username):
             ) 
 
 
-
 def _get_fresh_collection_slug(title, collection, content_type=None):
     from django.template.defaultfilters import slugify
     slug = slugify(title)
@@ -1016,7 +1138,7 @@ def file_upload(request):
 
         return HttpResponse(json.dumps(
             {
-                new_resource.id: new_resource.file.name
+                new_resource.id: new_resource.revision.content.file.name
             }
         ), 200, content_type="application/json")
     else:
@@ -1026,6 +1148,37 @@ def file_upload(request):
 
 def article_center_registration(request):
     return render(request, 'article-center-registration.html', {})
+
+
+def view_history(request, resource_id):
+    from django.core.exceptions import ObjectDoesNotExist
+
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    # Get all revisions of the resources.
+    edits = ResourceRevision.objects.filter(resource=resource)
+    for edit in edits:
+        edit.flag = "edit"
+
+    from oer.models import Forks
+    forks = Forks.objects.filter(fork_of=resource)
+
+    # Put both edits and forks in the same list.
+    unsorted_revisions = list(edits) + list(forks)
+
+    # Sort the list by created.
+    resource.revisions = sorted(
+        unsorted_revisions, key=lambda rev: rev.created)
+
+    context = {
+        'resource': resource,
+        'title': _(settings.STRINGS['resources']['HISTORY_TITLE']) % (
+            resource.title)
+    }
+    return render(request, 'resource-history.html', context)
 
 
 # API Stuff

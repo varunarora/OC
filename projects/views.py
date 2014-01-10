@@ -384,6 +384,7 @@ def discussion(request, project_slug, discussion_id):
 
     context = {
         'post': post,
+        'host_content_type': comments_ct,
         'comments_content_type': comments_ct,
         'project': project,
         'title': post_title_short + ' &lsaquo; ' + project.title
@@ -499,6 +500,27 @@ def requests(request, project_slug):
                   ' &lsaquo; ' + project.title)
     }
     return render(request, 'project/pending-invites.html', context)
+
+
+def view_project_resource_by_id(request, project_slug, resource_id):
+    from django.core.exceptions import ObjectDoesNotExist
+
+    try:
+        from oer.models import Resource
+        resource = Resource.objects.get(pk=resource_id)
+        return redirect('projects:read_project_resource',
+            project_slug=project_slug,
+            resource_id=resource_id,
+            resource_slug=resource.slug
+        )
+    except ObjectDoesNotExist:
+        raise Http404
+
+
+def view_project_resource(request, project_slug, resource_id, resource_slug):
+    from oer.views import view_resource
+
+    return view_resource(request, resource_id, resource_slug)
 
 
 # Projects-specific API below

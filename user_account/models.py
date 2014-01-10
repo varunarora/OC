@@ -63,59 +63,104 @@ class Notification(models.Model):
         parent_type = kwargs.get('parent_type', None)
 
         # Get the commment.
-        from interactions.models import Comment
+        from interactions.models import Comment, CommentReference
         comment = Comment.objects.get(pk=comment_id)
 
-        # Determine whether this is an ArticleRevision, resource, etc. and the
-        #     user who created it.
-        asset = comment.parent
-        user_to_notify = asset.user
+        # Get the type of the parent of the comment
+        from django.contrib.contenttypes.models import ContentType
+        parent_ct = ContentType.objects.get(pk=parent_type)
 
-        # If the commentor is not the same as the creator of the original post
-        if user_to_notify != comment.user:
-            notification = Notification()
-            notification.user = user_to_notify
-
-            # Get the type of the parent of the comment
+        if parent_ct.name == 'comment reference':
+            # Notify a consolidated list of (1) the collaborators on the resource,
+            # (2) the previous commentors on the document element reference item.
+            
+            from oer.models import Document, DocumentElement, ResourceRevision
             from django.contrib.contenttypes.models import ContentType
-            parent_ct = ContentType.objects.get(pk=parent_type)
+            document_content_type = ContentType.objects.get_for_model(Document)
+            document_element_content_type = ContentType.objects.get_for_model(DocumentElement)
 
-            # If this is the child of a comment 
-            if parent_ct.name == 'comment':
-                # Get root parent of the comment
-                from interactions.CommentUtilities import CommentUtilities
-                (root_parent_type, root_parent, root_comment) = CommentUtilities.get_comment_root(comment)
-            else:
-                root_parent = comment.parent
-                root_parent_type = parent_ct
-                root_comment = comment
+            # Get the resource on whose (document element) this comment was created.
+            document = comment.parent.owner.document
+            resourcerevision = ResourceRevision.objects.get(
+                content_id=document.id, content_type=document_content_type)
 
-            if root_parent_type.name == 'article revision':
+            # Get all other comments that have been made on document element reference item.
+            # Exclude the current comment reference (crashed anyways because comment not assigned).
+            comment_references = CommentReference.objects.filter(
+                owner_type=document_element_content_type,
+                owner_id=comment.parent.owner.id,
+                reference=comment.parent.reference
+            ).exclude(pk=comment.parent.id)
 
-                from articles import views
-                breadcrumb = views.fetch_cached_breadcrumb(asset)
-                category_slug = [x.slug for x in breadcrumb[1:]]
+            comment_users = map(lambda x: x.comment.user, comment_references)
+            users_to_notify = set(resourcerevision.resource.collaborators.all()) | set(comment_users)
+
+            # Remove the creator of the comment from the list of users to notify.
+            users_to_notify.remove(comment.user)
+
+            for user in users_to_notify:
+                notification = Notification()
+                notification.user = user
 
                 notification.url = reverse(
-                    'articles:reader', kwargs={'category_slug': '/'.join(category_slug)}
-                ) + "?q=%s&revision=%s" % (asset.article.slug, str(asset.id))
-
-                notification.description = "%s commented on %s: \"%s\"" % (
-                    comment.user.get_full_name(), asset.title, comment.body_markdown[:100])
-
-            elif root_parent_type.name == 'project':
-
-                notification.url = reverse(
-                    'projects:project_discussion', kwargs={
-                        'project_slug': root_parent.slug,
-                        'discussion_id': root_comment.id
+                    'read', kwargs={
+                        'resource_id': resourcerevision.resource.id,
+                        'resource_slug': resourcerevision.resource.slug
                     }
                 )
 
-                notification.description = "%s commented on your post in %s: \"%s\"" % (
-                    comment.user.get_full_name(), root_parent.title, comment.body_markdown[:100])
+                notification.description = "%s commented on the contents of %s: \"%s\"" % (
+                    comment.user.get_full_name(), resourcerevision.resource.title, comment.body_markdown[:100])
 
-            notification.save()
+                notification.save()
+
+        else:
+            # Determine whether this is an ArticleRevision, resource, etc. and the
+            #     user who created it.
+            asset = comment.parent
+            user_to_notify = asset.user
+
+            # If the commentor is not the same as the creator of the original post
+            if user_to_notify != comment.user:
+                notification = Notification()
+                notification.user = user_to_notify
+
+                # If this is the child of a comment 
+                if parent_ct.name == 'comment':
+                    # Get root parent of the comment
+                    from interactions.CommentUtilities import CommentUtilities
+                    (root_parent_type, root_parent, root_comment) = CommentUtilities.get_comment_root(comment)
+                else:
+                    root_parent = comment.parent
+                    root_parent_type = parent_ct
+                    root_comment = comment
+
+                if root_parent_type.name == 'article revision':
+
+                    from articles import views
+                    breadcrumb = views.fetch_cached_breadcrumb(asset)
+                    category_slug = [x.slug for x in breadcrumb[1:]]
+
+                    notification.url = reverse(
+                        'articles:reader', kwargs={'category_slug': '/'.join(category_slug)}
+                    ) + "?q=%s&revision=%s" % (asset.article.slug, str(asset.id))
+
+                    notification.description = "%s commented on %s: \"%s\"" % (
+                        comment.user.get_full_name(), asset.title, comment.body_markdown[:100])
+
+                elif root_parent_type.name == 'project':
+
+                    notification.url = reverse(
+                        'projects:project_discussion', kwargs={
+                            'project_slug': root_parent.slug,
+                            'discussion_id': root_comment.id
+                        }
+                    )
+
+                    notification.description = "%s commented on your post in %s: \"%s\"" % (
+                        comment.user.get_full_name(), root_parent.title, comment.body_markdown[:100])
+
+                notification.save()
 
 
     @receiver(Project.discussion_post_created)
@@ -295,8 +340,9 @@ class Notification(models.Model):
         notification = Notification()
         notification.user = favorite.resource.user
         notification.url = reverse(
-            'resource:read', kwargs={
-                'resource_id': favorite.resource.id
+            'read', kwargs={
+                'resource_id': favorite.resource.id,
+                'resource_slug': favorite.resource.slug
             }
         )
 
@@ -312,11 +358,33 @@ class Notification(models.Model):
 
         notification = Notification()
         notification.user = vote.parent.user
+
         notification.url = reverse(
-            'resource:read', kwargs={
-                'resource_id': vote.parent.id
+            'read', kwargs={
+                'resource_id': vote.parent.id,
+                'resource_slug': vote.parent.slug
             }
         )
+
+        notification.description = '%s upvoted your resource "%s"' % (
+            vote.user.get_full_name(), vote.parent.title)
+
+        notification.save()
+
+
+    @receiver(Vote.resource_revision_vote_casted)
+    def my_resource_revision_upvoted_notification(sender, **kwargs):
+        vote = kwargs.get('vote', None)
+
+        notification = Notification()
+        notification.user = vote.parent.user
+
+        notification.url = reverse(
+            'read', kwargs={
+                'resource_id': vote.parent.resource.id,
+                'resource_slug': vote.parent.resource.slug
+            }
+        ) + "?revision=" + vote.parent.id
 
         notification.description = '%s upvoted your resource "%s"' % (
             vote.user.get_full_name(), vote.parent.title)

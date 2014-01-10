@@ -68,6 +68,9 @@
 		height: 60px
 		margin: 6px 0px
 
+	&.document-description
+		height: 150px
+
 .drop-edit
 	margin: 16px 0px
 
@@ -119,7 +122,7 @@
 		background-image: url('../images/glyphicons-halflings.png')
 		background-position: -312px 0
 
-@import "textext"
+@import "tagit"
 
 .upload-new
 	text-align: center
@@ -151,6 +154,158 @@
 	&.resource-article-edit
 		textarea.large-textarea
 			width: 98%
+
+ul.tagit
+	&.document-tags
+		height: 100px
+
+	input[type=text]:hover, input[type=text]:focus
+		border-width: 0px
+		box-shadow: none
+
+
+.center-stage.document-actions
+	margin-top: 10px
+
+.center-stage.document-body
+	margin-top: 10px
+
+.document-meta-collapser
+	width: 20px
+	height: 20px
+	display: inline-block
+	background-image: url('../images/arrow-mid.png')
+	background-position: center center
+	background-repeat: no-repeat
+	position: absolute
+	cursor: pointer
+
+	&.collapsed
+		background-image: url('../images/arrow-mid-right.png')	
+
+
+.add-document-widget-dialog
+	width: 500px
+	height: 200px
+
+	.add-widget-options
+		.add-widget-option
+			background-position: 6px center
+			background-image: url('../images/unchecked-radio-button.png')
+			background-repeat: no-repeat
+			cursor: pointer
+			padding: 10px 0px
+			padding-left: 40px
+			margin: 10px 0px
+			overflow: hidden
+
+			&.selected
+				background-image: url('../images/checked-radio-button.png')
+				background-color: #efefef
+
+			.add-widget-thumbnail
+				width: 24px
+				height: 28px
+				background-position: center center
+				background-repeat: no-repeat
+				float: left
+
+			.add-widget-description
+				float: left
+				margin-left: 20px
+
+				.add-widget-description-title
+					@include sans-bold
+
+				.add-widget-description-info
+					color: $light-font
+
+			&.table
+				.add-widget-thumbnail
+					background-image: url('../images/table.png')
+
+			&.text-block
+				.add-widget-thumbnail
+					background-image: url('../images/text-block.png')
+
+	.add-document-widget-submit-wrapper
+		margin-top: 10px
+		overflow: hidden
+
+		.add-document-widget-submit-button
+			float: right
+
+
+/* All styling for widgets inside documents.*/
+#article-edit, article
+	.document-body
+		table, textarea.document-textblock
+			margin: 10px 0px
+
+		table
+			width: 100%
+
+			tr:nth-child(1)
+				background-color: #efefef
+
+			.table-action
+				font-size: 0.85em
+				margin-left: 6px
+				background-color: #efefef
+				padding: 2px
+				padding-left: 22px
+				padding-right: 4px
+				@include border-radius(2px)
+				color: $light-font
+				cursor: pointer
+
+				&.table-action-new
+					background-image: url('../images/new.png')
+					background-position: 2px 2px
+					background-repeat: no-repeat
+
+				&:hover
+					color: $body-color
+					text-decoration: none
+
+			td, th
+				height: 20px
+				outline: none
+
+				p:nth-child(1)
+					margin-top: 0px
+
+				p
+					margin-top: 6px
+
+			col
+				width: 33.33%
+
+			td
+				&.table-actions-wrapper
+					text-align: right
+
+		.column-handle
+			cursor: col-resize
+			position: relative
+			width: 4px
+			z-index: 1
+
+			&.dragging
+				background-color: #2980b9
+				opacity: 0.8
+
+
+
+		table, th, td
+			border: 1px solid #ddd
+
+		textarea.document-textblock
+			width: 98%
+
+#new-resource-document-form
+	textarea[name=serialized-document-body]
+		display: none
 
 /** WMD specific styling starts here **/
 
