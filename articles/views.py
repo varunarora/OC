@@ -257,7 +257,7 @@ def read_article(request, article):
 
     # Limit the body size of all resources descriptions to 200 chars.
     for resource in articleRevision.resources.all():
-        resource.body_markdown_html = resource.body_markdown_html[0:200]
+        resource.body_markdown_html = resource.description[0:200]
 
     # Increment page views (always remains -1 based on current view).
     Article.objects.filter(id=article.id).update(views=article.views+1)
