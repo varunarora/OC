@@ -61,7 +61,7 @@
 		    		{% endif %}
 					{% if result.content_type == "oer.resource" %}
 					var result = new Result({
-						url: '{% url read resource_id=result.object.id resource_slug=resource.slug %}',
+						url: '{% url read resource_id=result.object.id resource_slug=result.object.slug %}',
 		    			title: '{{ result.object.title }}',
 		    			{% with result.object.body|striptags as stripped_result %}
 		    			summary: '{% highlight stripped_result with query %}',
