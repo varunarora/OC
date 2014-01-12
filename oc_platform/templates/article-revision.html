@@ -21,7 +21,7 @@
         <aside id="social-panel">
             <section class="revision-user">
                 <div class="revision-user-thumbnail">
-                    <div class="revision-user-thumbnail-image" style="background-image: url('{{ MEDIA_URL }}{{ article.user.get_profile.profile_pic.name }}')"></div>
+                    <a class="revision-user-thumbnail-image" href="{% url user:user_profile username=article.user.username %}" style="background-image: url('{{ MEDIA_URL }}{{ article.user.get_profile.profile_pic.name }}')"></a>
                 </div>
                 <div  class="revision-user-log">
                 {% if article.log %}
@@ -66,7 +66,7 @@
     </div>
 </div>
 
-<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>    
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/article.js"></script>
 
 {% include 'partials/footer.html' %}
