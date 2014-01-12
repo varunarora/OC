@@ -2890,7 +2890,7 @@ jQuery(document).ready(function ($) {
 
     OC.initUpvoteDownvoteResource();
 
-    OC.initEditResource();
+    //OC.initEditResource();
 
     OC.initForgotAuth();
 
