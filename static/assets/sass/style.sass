@@ -22,7 +22,7 @@ $content-width: 960px
 
 @mixin sans-font-family
 	font-family: "Proxima Nova Regular", 'Helvetica Neue', Arial, Helvetica, sans-serif
-	
+
 $header-height: 55px
 $header-prebanner-height: 4px
 
@@ -43,14 +43,14 @@ body
 	line-height: 1
 	font-size: 14px
 	color: #1a1a1a
-	
+
 	> header
 		background-color: #efefef
 		display: block
 		height: $header-height
 		z-index: 3
 		position: relative
-		
+
 #header-prebanner
 	background-color: #5abd02
 	display: block
@@ -64,14 +64,14 @@ body
 	#header-left
 		width: 593px
 		float: left
-		
+
 		#header-brand-wrapper
-			padding-top: 10px			
-		
+			padding-top: 10px
+
 	#header-right
 		float: right
 		width: 337px
-	
+
 #logo
 	height: 25px
 	float: left
@@ -122,7 +122,7 @@ a
 	position: relative
 	float: right
 	right: 75px
-	
+
 @import "article_panels"
 
 .btn, .ui-button
@@ -147,7 +147,7 @@ a
 	&.disabled
 		opacity: 0.65
 		background-image: none
-		cursor: default			
+		cursor: default
 
 .success-button
 	color: #fff
@@ -225,7 +225,7 @@ a
 	width: 100%
 	height: 100%
 	float: right
-	
+
 h1
 	/* NEEDS ATTENTION (and every instance of PT Sans ahead */
 	font-family: 'PT Sans', sans-serif
@@ -255,8 +255,8 @@ article select#chapter-select
 	font-size: 1.8em
 	letter-spacing: -1px
 	width: 540px
-	color: #000		
-		
+	color: #000
+
 	&:hover
 		cursor: pointer
 
@@ -274,7 +274,7 @@ article select#chapter-select
 	top: -2px
 	height: 35px
 	border-bottom: 1px solid #ffffff
-	
+
 	&:hover
 		border-bottom: 1px solid #efefef
 		background: url('../images/arrow-hover.png') no-repeat right
@@ -314,7 +314,7 @@ article select#chapter-select
 	position: relative
 	top: -104px
 	right: -25px
-	
+
 	.thermometer-difficulty
 		height: 5px
 
@@ -338,7 +338,7 @@ article select#chapter-select
 
 	ul
 		padding-left: 0px
-		
+
 	li
 		padding-left: 0px
 		font-size: 0.9em
@@ -525,7 +525,7 @@ h1.developers-title
 		@include box-shadow(inset 0 0 600px #000)
 
 		&:hover
-			box-shadow: none 
+			box-shadow: none
 
 .bulleted-list
 	padding-left: 18px
@@ -563,7 +563,7 @@ h1.developers-title
 	padding: 8px 4px
 	@include text-shadow(0 1px 0 rgba(255, 255, 255, 0.5))
 	display: none
-	
+
 .form-spinner
 	display: none
 	background: url('../images/spinner.gif') no-repeat right
@@ -621,7 +621,7 @@ form#sign-in-form
 	input[type=text], input[type=password]
 		width: 96%
 		margin: 5px 0px
-		
+
 	#signinButton
 		text-align: center
 
@@ -638,17 +638,17 @@ form#share-via-email
 
 .form-error
 	display: none
-		
+
 .form-error-show
 	display: block
-	
+
 .moe-audience
 	background: url('../images/moe-audience.png') no-repeat 250px bottom
-	
+
 td.input-description
 	text-align: right
 	color: #666
-	
+
 th, td
 	padding: 4px
 
@@ -659,13 +659,13 @@ th, td
 .sign-up .row-item-thumbnail img
 	width: 50px
 	height: 50px
-	
+
 .sign-up .row-set
 	margin-top: 40px
-	
+
 .strong
 	font-weight: bold
-	
+
 .sign-up #fill-panel
 	padding-top: 60px
 
@@ -678,19 +678,19 @@ th, td
 
 nav#authenticate-buttons, nav#user-buttons
 	float: right
-	
+
 	> ul
 		> li
 			float: left
 			height: $header-height - $header-prebanner-height
-		
+
 			a
 				padding: 12px 20px 0px 20px
 				color: #666666
 				@include sans-bold
 				display: inline-block
 				height: 36px
-			
+
 				&:hover, &.hover
 					background-color: #f8f8f8
 					border-bottom: 3px solid #006dcc
@@ -712,10 +712,10 @@ nav#authenticate-buttons, nav#user-buttons
 			&.user-firstname-wrapper
 				a
 					padding: 6px 20px
-	
+
 .horizontal-caret-hover
 	border-color: $link-hover transparent transparent
-					
+
 nav#user-menu.showMenu,
 nav#share-menu.showMenu,
 nav#notifications-menu.showMenu,
@@ -736,18 +736,18 @@ nav#add-resource-menu
 	ul
 		@include popout-box
 		z-index: 6
-		
+
 		li
 			height: 44px
 			padding-top: 8px
-		
+
 			a
 				text-align: left
 				height: 20px
 				padding: 2px 12px
 				display: block
 				color: #666666
-		
+
 				&:hover
 					background-color: #006dcc
 					color: #fff
@@ -828,7 +828,7 @@ nav#notifications-menu
 
 #forgot-username-password
 	text-align: right
-	
+
 #signup-or
 	margin: 10px 0px
 
@@ -839,11 +839,11 @@ nav#notifications-menu
 #loggedin-button
 	margin: 10px 0px
 	overflow: hidden
-	
+
 	input[type=checkbox]
 		float: left
 		margin-right: 5px
-	
+
 	button
 		float: right
 
@@ -874,11 +874,11 @@ form#signup-form, form#contributor-registration
 table#signup-form-table
 	margin: 10px 0px
 	width: 100%
-	
+
 	tr
 		padding: 6px 0px
 		height: 40px
-	
+
 	.field
 		width: 445px
 
@@ -937,9 +937,9 @@ table#signup-form-table
 
 			select.revision-selector
 				@include pretty-select
-				
+
 				option
-					padding-right: 10px 
+					padding-right: 10px
 
 .edit-meta
 	float: left
@@ -1091,6 +1091,7 @@ textarea[name=objectives]
 		width: 20%
 
 		.revision-user-thumbnail-image
+			display: block
 			width: 50px
 			height: 50px
 			background-size: cover
@@ -1179,8 +1180,8 @@ form#project-add-member
 
 @import "profile"
 
-form#contributor-registration 
-	span.clarifier-txt 
+form#contributor-registration
+	span.clarifier-txt
 		font-size: 0.8em
 		color: gray
 
@@ -1363,7 +1364,7 @@ input.manual-upload
 
 			&:hover
 				background-image: url('../images/upload/sky_drive-hover.png')
-				color: #34495e			
+				color: #34495e
 
 		.dropbox-upload
 			background-image: url('../images/upload/dropbox.png')
@@ -1417,7 +1418,7 @@ input.manual-upload
 .dropzone-manual
 	float: left
 	width: 564px
-	
+
 .vertical-divider
 	float: left
 	background-image: url('../images/upload/vertical-divider.png')
@@ -1443,7 +1444,7 @@ input.manual-upload
 		border: 1px solid #ddd
 		color: $light-font
 		font-size: 0.85em
-		
+
 		&:hover
 			background-color: #ddd
 			cursor: pointer
@@ -1762,7 +1763,7 @@ nav.collections-navigation,
 	background-position: 5px 4px
 
 .opened-collection > .toggle-collection
-	background-image: url('../images/arrow-bottom-small.png')				
+	background-image: url('../images/arrow-bottom-small.png')
 	background-position: 3px 6px
 
 
@@ -1953,7 +1954,7 @@ aside#support.teacher-contributor-invite
 		height: 14px
 		display: inline-block
 		float: left
-		cursor: pointer		
+		cursor: pointer
 		background-image: url('../images/delete-resource.png')
 		background-repeat: no-repeat
 		background-position: center center
@@ -2036,7 +2037,7 @@ table.reset-password-table
 	@include border-radius(4px)
 	margin: 6px 0px
 	padding: 8px 8px
-	@include text-shadow(0 1px 0 rgba(255, 255, 255, 0.5))	
+	@include text-shadow(0 1px 0 rgba(255, 255, 255, 0.5))
 
 .login-messages-wrapper
 	position: fixed
@@ -2161,7 +2162,7 @@ table.reset-password-table
 		.discussion-user-info
 			float: left
 			margin-left: 15px
-			width: 302px 
+			width: 302px
 
 			.user-post-info
 				.post-datetime
@@ -2288,7 +2289,7 @@ table.reset-password-table
 
 	&:hover, &:focus
 		border: 1px solid #b2b2b2
-		@include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))	
+		@include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
 
 
 form
@@ -2310,7 +2311,7 @@ ul.tagit
 	.new-discussion-post-prompt, .new-comment-reply-prompt
 		margin-left: 8px
 
-	.new-discussion-post-prompt, .new-comment-reply-prompt, .new-comment-reply-original-prompt	
+	.new-discussion-post-prompt, .new-comment-reply-prompt, .new-comment-reply-original-prompt
 
 		.new-discussion-post-prompt-suggest, .new-comment-reply-prompt-suggest,
 		.new-comment-original-prompt-suggest
@@ -2697,7 +2698,7 @@ ul.collaborators
 	.easy-signup-form
 		margin: auto
 		margin-top: 60px
-		
+
 		.google-signin
 			#signinButton
 				text-align: center
