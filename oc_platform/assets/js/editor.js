@@ -430,6 +430,7 @@ $(function() {
         });
     });
 
+
     $('#article-edit-form #submission-buttons button').click(function (e) {
         var action = $(this).attr('data-action');
 
@@ -662,7 +663,7 @@ $(document).ready(function(){
                 }
             } else if (documentElement.hasClass('document-textblock')){
                 element.type = 'textblock';
-                element.data = documentElement.html();
+                element.data = documentElement.val();
             }
 
             serializedElements.push(element);
