@@ -1017,7 +1017,7 @@ var OC = {
             });
 
             if (profileCollectionBrowser.children().length === 0){
-                $.get('/resources/collection/' + collectionID + '/tree/user/',
+                $.get('/resources/tree/user/',
                     function(response){
                         if (response.status == 'true'){
                             OC.renderBrowser(response.tree, profileCollectionBrowser);
@@ -1085,7 +1085,7 @@ var OC = {
             collectionID = $('form#resource-form input[name=collection_id]').val();
 
         if (projectsCollectionBrowser.children().length === 0){
-            $.get('/resources/collection/' + collectionID + '/tree/projects/',
+            $.get('/resources/tree/projects/',
                 function(response){
                     if (response.status == 'true'){
                         OC.renderBrowser(response.tree, projectsCollectionBrowser);

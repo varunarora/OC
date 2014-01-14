@@ -1531,7 +1531,7 @@ def move_collection_to_collection(request, collection_id, from_collection_id, to
         return APIUtilities._api_failure(context)
 
 
-def collection_tree(request, collection_id, host):
+def collection_tree(request, host):
     import oer.CollectionUtilities as cu
     tree = None
 
@@ -1552,12 +1552,10 @@ def collection_tree(request, collection_id, host):
             browse_trees, request.user)
 
     else:
-        current_collection = Collection.objects.get(pk=collection_id)
+        from user_account.models import UserProfile
+        user_profile = UserProfile.objects.get(user__id=request.user.id)
 
-        (root_host_type, root) = cu.get_collection_root(
-            current_collection)
-
-        (browse_tree, flattened_tree) = cu._get_browse_tree(root.collection)
+        (browse_tree, flattened_tree) = cu._get_browse_tree(user_profile.collection)
 
         # If there are no collections associated with the host, return error.
         if len(browse_tree) == 0:

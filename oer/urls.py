@@ -19,7 +19,7 @@ urlpatterns = patterns(
 
     url(r'^resource-comments/(?P<resource_id>.+)/', views.get_resource_comments, name='get_resource_comments'),
 
-    url(r'^collection/(?P<collection_id>\d+)/tree/(?P<host>[\w\-]+)/$', views.collection_tree, name='collection_tree'),
+    url(r'^tree/(?P<host>[\w\-]+)/$', views.collection_tree, name='collection_tree'),
 
     url(r'^collection/(?P<collection_id>\d+)/add/(?P<user_id>\d+)/$', views.add_user_to_collection, name='add_user_to_collection'),
     url(r'^collection/(?P<collection_id>\d+)/remove/(?P<user_id>\d+)/$', views.remove_user_from_collection, name='remove_user_from_collection'),
