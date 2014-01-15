@@ -120,7 +120,7 @@ class URLEditForm(forms.ModelForm):
 
         # Create and save new Link, if the link URL changed.
         url_submitted = sanitize_url(newRequest.get('url', None))
-        if instance.revision.url == url_submitted:
+        if instance.revision.content.url == url_submitted:
             new_link = Link(url=url_submitted)
             new_link.save()
             content = new_link
@@ -158,7 +158,7 @@ class VideoEditForm(forms.ModelForm):
 
         # Create and save new Link, if the link URL changed.
         url_submitted = sanitize_url(newRequest.get('url', None))
-        if instance.revision.url == url_submitted:
+        if instance.revision.content.url == url_submitted:
             new_video_link = Link(url=url_submitted)
             new_video_link.save()
             content = new_video_link
