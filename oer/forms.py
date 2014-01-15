@@ -125,7 +125,7 @@ class URLEditForm(forms.ModelForm):
             new_link.save()
             content = new_link
         else:
-            content = Link(url=instance.revision.content.url)
+            content = instance.revision.content
 
         new_resource_revision = ResourceRevision()
         new_resource_revision.content = content
@@ -163,7 +163,7 @@ class VideoEditForm(forms.ModelForm):
             new_video_link.save()
             content = new_video_link
         else:
-            content = Link(url=instance.revision.content.url)
+            content = instance.revision.content
 
         new_resource_revision = ResourceRevision()
         new_resource_revision.content = content
