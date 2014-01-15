@@ -281,7 +281,7 @@ class NewDocumentForm(forms.ModelForm):
 
 def sanitize_url(user_submitted_url):
     cleaned_url = user_submitted_url
-    if cleaned_url[:3] != "http":
+    if cleaned_url[:4] != "http":
         cleaned_url = 'http://' + user_submitted_url
 
     return cleaned_url
