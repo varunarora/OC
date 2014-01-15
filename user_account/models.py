@@ -95,8 +95,12 @@ class Notification(models.Model):
             comment_users = map(lambda x: x.comment.user, comment_references)
             users_to_notify = set(resourcerevision.resource.collaborators.all()) | set(comment_users)
 
-            # Remove the creator of the comment from the list of users to notify.
-            users_to_notify.remove(comment.user)
+            try:
+                # Remove the creator of the comment from the list of users to notify if he/she
+                # is a collaborator.
+                users_to_notify.remove(comment.user)
+            except:
+                pass
 
             for user in users_to_notify:
                 notification = Notification()
