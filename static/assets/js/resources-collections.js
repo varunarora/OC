@@ -747,7 +747,7 @@ OC.resourcesCollectionsActions = {
                 },
             'json');
         } else {
-            $.get('/resources/collection/' + collectionID + '/tree/user/',
+            $.get('/resources/tree/user/',
                 function(response){
                     if (response.status == 'true'){
                         OC.renderBrowser(
