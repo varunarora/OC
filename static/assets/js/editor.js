@@ -205,7 +205,7 @@ OC.editor = {
                         var appendedTableWrapper = $('.document-body .document-table:last');
 
                         // Make cells CKEditor-able.
-                        //$('td[contenteditable=true], th[contenteditable=true]', appendedTableWrapper).ckeditor();
+                        $('td[contenteditable=true], th[contenteditable=true]', appendedTableWrapper).ckeditor();
 
                         // Focus on the first cell.
                         $('th:first', appendedTableWrapper).focus();
