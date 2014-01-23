@@ -17,7 +17,9 @@
             {% endif %}
         {% elif host == 'project' %}
             {% if collection_item.visibility == 'project' %}
-                {% if user in project.confirmed_members %}
+                {% if project.visibility == 'public' %}
+                    {% include 'partials/collection-item.html' %}
+                {% elif user in project.confirmed_members %}
                     {% include 'partials/collection-item.html' %}
                 {% endif %}
             {% elif collection_item.visibility == 'private' %}
@@ -37,8 +39,16 @@
                 {% include 'partials/resource-item.html' %}
             {% endif %}
         {% elif host == 'project' %}
-            {% if user in project.confirmed_members %}
-                {% include 'partials/resource-item.html' %}
+            {% if resource.visibility == 'project' %}
+                {% if project.visibility == 'public' %}
+                    {% include 'partials/resource-item.html' %}
+                {% elif user in project.confirmed_members %}
+                    {% include 'partials/resource-item.html' %}
+                {% endif %}
+            {% elif resource.visibility == 'private' %}
+                {% if user == resource.user or user in resource.collaborators.all %}
+                    {% include 'partials/resource-item.html' %}
+                {% endif %}
             {% endif %}
         {% endif %}
         {% endfor %}

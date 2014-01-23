@@ -202,8 +202,9 @@ def build_child_tree(root_node, collection_owner, url_creator, user, host_type):
 
         if host_type == 'project':
             if node_visibility == 'project':
-                if user not in collection_owner.confirmed_members:
-                    continue
+                if collection_owner.visibility != 'public':
+                    if user not in collection_owner.confirmed_members:
+                        continue
 
             if node_visibility == 'private':
                 if user not in current_node.collaborators.all() and user != current_node.creator:
