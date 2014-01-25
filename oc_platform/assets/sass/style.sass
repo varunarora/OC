@@ -1699,7 +1699,9 @@ nav.collections-navigation
 nav.collections-navigation,
 .move-resource-collection-browser,
 .add-resource-profile-browser,
-.add-resource-project-browser
+.add-resource-project-browser,
+.link-resource-profile-browser,
+.link-resource-project-browser
 	ul
 		li
 			ul
@@ -1744,7 +1746,7 @@ nav.collections-navigation,
 .current-navigation-collection
 	@include sans-bold
 
-.toggle-collection
+.toggle-collection, .toggle-resource
 	width: 10px
 	height: 16px
 	background-repeat: no-repeat
@@ -1765,10 +1767,15 @@ nav.collections-navigation,
 	background-image: url('../images/arrow-bottom-small.png')				
 	background-position: 3px 6px
 
+.empty-resource > .toggle-resource
+	background-image: url('../images/all-subjects.png')
+	background-position: 2px 4px
 
 .move-resource-collection-browser,
 .add-resource-profile-browser,
-.add-resource-project-browser
+.add-resource-project-browser,
+.link-resource-profile-browser,
+.link-resource-project-browser
 	margin-top: 10px
 	ul
 		li
@@ -2638,6 +2645,10 @@ ul.collaborators
 	width: 400px
 	height: 360px
 
+.link-resource-dialog
+	width: 600px
+	height: 410px
+
 .oc-popup-dialog-browser
 	height: 230px
 	border: 1px solid #ddd
@@ -2647,9 +2658,12 @@ ul.collaborators
 	&.loading-browser
 		background: url('../images/spinner.gif') no-repeat center center
 
-	.selected-destination-collection
+	.selected-destination-collection, .selected-destination-resource
 		background-color: $link-hover
 		color: #fff
+
+		&:hover
+			color: #fff
 
 .oc-popup-submit-wrapper
 	margin-top: 10px
@@ -2657,6 +2671,9 @@ ul.collaborators
 
 	.oc-popup-submit-button
 		float: right
+
+.oc-popup-dialog-tab-body
+	padding: 10px
 
 .favorite-resource-item
 	overflow: hidden

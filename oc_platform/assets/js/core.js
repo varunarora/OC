@@ -538,7 +538,6 @@ var OC = {
 
     /*jslint nomen: true */
     expediteGLogin: function(profile) {
-        console.log(profile);
         var first_name = profile.name.givenName || "",
             last_name = profile.name.familyName || "";
 
@@ -964,7 +963,7 @@ var OC = {
             // Bind Done button on custom popup.
             $('.add-resource-submit-button').click(function(event){
                 // Capture the actively selected tab.
-                var activeTab = $('.add-resource-tabs li a.selected', addToPopup);
+                var activeTab = $('.add-resource-dialog .add-resource-tabs li a.selected');
 
                 var toCollection;
 
@@ -1017,7 +1016,7 @@ var OC = {
             });
 
             if (profileCollectionBrowser.children().length === 0){
-                $.get('/resources/tree/user/',
+                $.get('/resources/tree/collections/user/',
                     function(response){
                         if (response.status == 'true'){
                             OC.renderBrowser(response.tree, profileCollectionBrowser);
@@ -1052,21 +1051,30 @@ var OC = {
         // When clicking in whitespace in the move browser, unselect current selection.
         parentElement.click(function(event){
             parentElement.find('a.selected-destination-collection').removeClass(
-                    'selected-destination-collection');
+                'selected-destination-collection');
+            parentElement.find('a.selected-destination-resource').removeClass(
+                'selected-destination-resource');
         });
 
         // Bind collection click with selection of collection.
         parentElement.find('a').click(function(event){
             // Remove any other selections previously made.
             var currentlySelectedCollection = parentElement.find(
-                'a.selected-destination-collection');
+                'a.selected-destination-collection, a.selected-destination-resource');
 
             if (!$(event.target).hasClass('current-collection')){
                 currentlySelectedCollection.removeClass(
                     'selected-destination-collection');
+                currentlySelectedCollection.removeClass(
+                    'selected-destination-resource');
 
                 if (currentlySelectedCollection[0] !== event.target){
-                    $(event.target).toggleClass('selected-destination-collection');
+                    var newlySelectedCollection = $(event.target);
+                    if (newlySelectedCollection.attr('id').indexOf('collection') !== -1){
+                        newlySelectedCollection.toggleClass('selected-destination-collection');
+                    } else {
+                        newlySelectedCollection.toggleClass('selected-destination-resource');
+                    }
                 }
             }
 
@@ -1085,7 +1093,7 @@ var OC = {
             collectionID = $('form#resource-form input[name=collection_id]').val();
 
         if (projectsCollectionBrowser.children().length === 0){
-            $.get('/resources/tree/projects/',
+            $.get('/resources/tree/collections/projects/',
                 function(response){
                     if (response.status == 'true'){
                         OC.renderBrowser(response.tree, projectsCollectionBrowser);
@@ -2318,8 +2326,6 @@ var OC = {
         },
 
         commentReplyButtonClickHandler: function(event){
-            console.log('mai idhar aaya');
-
             var originalComment = $(event.target).closest('.post-comment');
             var commentBodyClone = originalComment.find('.post-comment-body:first').clone();
 

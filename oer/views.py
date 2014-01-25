@@ -278,7 +278,7 @@ def _prepare_add_resource_context(request):
         host = 'project'
 
         if collection_slug:
-            (browse_tree, flattened_tree) = cu._get_browse_tree(project.collection)
+            (browse_tree, flattened_tree) = cu._get_collections_browse_tree(project.collection)
             collection = next(
                 tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
 
@@ -295,7 +295,7 @@ def _prepare_add_resource_context(request):
             user = request.user
 
         if collection_slug:
-            (browse_tree, flattened_tree) = cu._get_browse_tree(
+            (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
                 user.get_profile().collection)
             collection = next(
                 tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
@@ -1016,7 +1016,7 @@ def new_project_collection(request, project_slug):
 
     # Find the current collection through the project collection tree.
     import oer.CollectionUtilities as cu
-    (browse_tree, flattened_tree) = cu._get_browse_tree(project.collection)
+    (browse_tree, flattened_tree) = cu._get_collections_browse_tree(project.collection)
     collection = next(
         tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
 
@@ -1057,7 +1057,7 @@ def new_user_collection(request, username):
     try:
         # Find the current collection through the project collection tree.
         import oer.CollectionUtilities as cu
-        (browse_tree, flattened_tree) = cu._get_browse_tree(user.get_profile().collection)
+        (browse_tree, flattened_tree) = cu._get_collections_browse_tree(user.get_profile().collection)
         collection = next(
             tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
 
@@ -1531,7 +1531,7 @@ def move_collection_to_collection(request, collection_id, from_collection_id, to
         return APIUtilities._api_failure(context)
 
 
-def user_tree(request, host):
+def user_tree(request, ask, host):
     import oer.CollectionUtilities as cu
     tree = None
 
@@ -1544,8 +1544,9 @@ def user_tree(request, host):
         browse_trees = []
 
         for membership in memberships:
-            (browse_tree, flattened_tree) = cu._get_browse_tree(
-                membership.project.collection)            
+            (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
+                membership.project.collection) if ask == 'collections' else cu._get_browse_tree(
+                membership.project.collection)
             browse_trees.append(browse_tree)
 
         tree = cu.build_projects_collection_navigation(
@@ -1555,7 +1556,9 @@ def user_tree(request, host):
         from user_account.models import UserProfile
         user_profile = UserProfile.objects.get(user__id=request.user.id)
 
-        (browse_tree, flattened_tree) = cu._get_browse_tree(user_profile.collection)
+        (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
+            user_profile.collection) if ask == 'collections' else cu._get_browse_tree(
+            user_profile.collection)
 
         # If there are no collections associated with the host, return error.
         if len(browse_tree) == 0:
@@ -1573,13 +1576,15 @@ def user_tree(request, host):
     return APIUtilities._api_success(context)
 
 
-def collection_tree(request, collection_id, host):
+def collection_tree(request, collection_id, ask, host):
     import oer.CollectionUtilities as cu
     tree = None
 
     current_collection = Collection.objects.get(pk=collection_id)
     (root_host_type, root) = cu.get_collection_root(current_collection)
-    (browse_tree, flattened_tree) = cu._get_browse_tree(root.collection)
+    (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
+        root.collection) if ask == 'collections' else cu._get_browse_tree(
+        root.collection)
 
     # If there are no collections associated with the host, return error.
     if len(browse_tree) == 0:
@@ -1606,7 +1611,7 @@ def propagate_collection_visibility(request, collection_id):
     try:
         # Get all nested descendant collections and resources.
         import oer.CollectionUtilities as cu
-        (descendantTree, descendantCollections) = cu._get_browse_tree(collection)
+        (descendantTree, descendantCollections) = cu._get_collections_browse_tree(collection)
         descendantCollections.remove(collection)
 
         # Set the visibility of all the descendant collections and resources to

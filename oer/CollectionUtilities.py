@@ -27,6 +27,19 @@ def _get_child_collections(collection):
 
     return child_collections
 
+
+def _get_child_collections_resources(collection):
+    # Executes if the collection is actually a collection object and not a resource.
+    try:
+        child_resources = collection.resources.all()
+        child_collections = _get_child_collections(collection)
+        return list(child_collections) + list(child_resources)
+
+    except:
+        pass
+
+    return []
+
 """
 def list_collection(collection_slug, root_collection):
     collection = Collection.objects.get(slug=collection_slug)
@@ -44,12 +57,15 @@ def list_collection(collection_slug, root_collection):
     return context
 """
 
-
 def _get_browse_tree(collection):
-    return buildChildCollections({'root': [collection]}, [])
+    return buildChildCollections({'root': [collection]}, [], True)
 
 
-def buildChildCollections(collectionModel, flattenedDescendants):
+def _get_collections_browse_tree(collection):
+    return buildChildCollections({'root': [collection]}, [], False)
+
+
+def buildChildCollections(collectionModel, flattenedDescendants, include_resources=False):
     """Adapted from buildChildCategories() in articles.views"""
     # Get the child collections of this collection recursively
     if len(collectionModel) == 0:
@@ -62,7 +78,8 @@ def buildChildCollections(collectionModel, flattenedDescendants):
         childCollections = list(itertools.chain.from_iterable(colValues))
 
         # Create a master list [] of all { parent : [child, child] } mapping
-        children = map(_hasImmediateChildren, childCollections)
+        children = map(_has_immediate_children, childCollections) if include_resources else map(
+            _hasImmediateCollectionChildren, childCollections)
 
         # Flatten the {} objects in the master list into one new dict
         collectionModel = {}
@@ -76,7 +93,7 @@ def buildChildCollections(collectionModel, flattenedDescendants):
         # Call this function recursively to obtain the current models'
         #     descendant child categories
         (descendantsTree, descendantsFlattened) = buildChildCollections(
-            collectionModel, childCollections
+            collectionModel, childCollections, include_resources
         )
 
         # Append "my" descendants to the descendants of "my" children
@@ -95,7 +112,16 @@ def buildChildCollections(collectionModel, flattenedDescendants):
             return (collectionModel, flattenedDescendants)
 
 
-def _hasImmediateChildren(collection):
+def _has_immediate_children(collection):
+    """Adapted from _hasImmediateChildren() in articles.views"""
+    children = list(_get_child_collections_resources(collection))
+    if len(children) > 0:
+        return {collection: children}
+    else:
+        return None
+
+
+def _hasImmediateCollectionChildren(collection):
     """Adapted from _hasImmediateChildren() in articles.views"""
     childCollections = list(_get_child_collections(collection))
     if len(childCollections) > 0:
@@ -125,7 +151,8 @@ def build_project_collection_navigation(browse_tree, user):
         projectRootList = ElementTree.Element('ul')
 
         child_nodes = build_child_tree(
-            browse_tree, project, _get_project_url, user, 'project')
+            browse_tree, project, _get_project_collection_url,
+            _get_project_resource_url, user, 'project')
         for node in child_nodes:
             projectRootList.append(node)
 
@@ -167,7 +194,8 @@ def build_user_collection_navigation(browse_tree, user):
         userRootList = ElementTree.Element('ul')
 
         child_nodes = build_child_tree(
-            browse_tree, user_profile, _get_user_url, user, 'profile')
+            browse_tree, user_profile, _get_user_collection_url,
+            _get_user_resource_url, user, 'profile')
         for node in child_nodes:
             userRootList.append(node)
 
@@ -179,7 +207,7 @@ def build_user_collection_navigation(browse_tree, user):
         return ''
 
 
-def build_child_tree(root_node, collection_owner, url_creator, user, host_type):
+def build_child_tree(root_node, collection_owner, collection_url_creator, resource_url_creator, user, host_type):
     # Get the list of child of this node.
     nodes = list(itertools.chain.from_iterable(root_node.values()))
     node_elements = []
@@ -195,9 +223,17 @@ def build_child_tree(root_node, collection_owner, url_creator, user, host_type):
 
         node_visibility = current_node.visibility
 
+        # Determine whether the node is a resource or collection.
+        try:
+            node_creator = current_node.creator
+            node_type = 'collection'
+        except:
+            node_creator = current_node.user
+            node_type = 'resource'
+
         if host_type == 'profile':
             if node_visibility != 'public':
-                if user not in current_node.collaborators.all() and user != current_node.creator:
+                if user not in current_node.collaborators.all() and user != node_creator:
                     continue
 
         if host_type == 'project':
@@ -207,10 +243,11 @@ def build_child_tree(root_node, collection_owner, url_creator, user, host_type):
                         continue
 
             if node_visibility == 'private':
-                if user not in current_node.collaborators.all() and user != current_node.creator:
+                if user not in current_node.collaborators.all() and user != node_creator:
                     continue
 
         # If this child has other children, build child tree.
+        # Has to be the case of our collection.
         if type(node) is dict:
             # Set a class to indicate that this element has child collections.
             node_element.set('class', 'parent-collection')
@@ -221,29 +258,39 @@ def build_child_tree(root_node, collection_owner, url_creator, user, host_type):
 
             node_href = ElementTree.SubElement(node_element, 'a')
 
-            node_href.set('href', url_creator(collection_owner, current_node.slug))
+            node_href.set('href', collection_url_creator(collection_owner, current_node.slug))
             node_href.set('id', 'collection-' + str(current_node.id))
             node_href.text = current_node.title
 
             nodeList = ElementTree.SubElement(node_element, 'ul')
 
             child_nodes = build_child_tree(
-                node, collection_owner, url_creator, user, 'collection')
+                node, collection_owner, collection_url_creator, resource_url_creator, user, 'collection')
             for child_node in child_nodes:
                 nodeList.append(child_node)
 
         # Otherwise, append a child <a> element as is.
+        # Can be a resource or a collection.
         else:
             # Set a class to indicate that this element does not have child collections.
-            node_element.set('class', 'empty-collection')
+            node_element.set(
+                'class', 'empty-collection' if node_type == 'collection' else 'empty-resource')
 
             node_toggler = ElementTree.SubElement(node_element, 'span')
-            node_toggler.set('class', 'toggle-collection')
+            node_toggler.set(
+                'class', 'toggle-collection' if node_type == 'collection' else 'toggle-resource')
             node_toggler.text = ' '
 
             node_href = ElementTree.SubElement(node_element, 'a')
-            node_href.set('href', url_creator(collection_owner, node.slug))
-            node_href.set('id', 'collection-' + str(node.id))
+            
+            if node_type == 'collection':
+                node_href.set('href', collection_url_creator(collection_owner, node.slug))
+            else:
+                node_href.set('href', resource_url_creator(collection_owner, node))
+
+            node_href.set(
+                'id', ('collection-' if node_type == 'collection' else 'resource-') + str(
+                    node.id))
             node_href.text = node.title
 
         node_elements.append(node_element)
@@ -272,7 +319,7 @@ def _get_browse_url(project):
     )    
 
 
-def _get_project_url(project, collection_slug):
+def _get_project_collection_url(project, collection_slug):
     return reverse(
         'projects:list_collection', kwargs={
             'project_slug': project.slug,
@@ -281,11 +328,30 @@ def _get_project_url(project, collection_slug):
     )
 
 
-def _get_user_url(user_profile, collection_slug): 
+def _get_user_collection_url(user_profile, collection_slug): 
     return reverse(
         'user:list_collection', kwargs={
             'username': user_profile.user.username,
             'collection_slug': collection_slug
+        }
+    )
+
+
+def _get_user_resource_url(user_profile, resource):
+    return reverse(
+        'read', kwargs={
+            'resource_id': resource.id,
+            'resource_slug': resource.slug
+        }
+    )
+
+
+def _get_project_resource_url(project, resource):
+    return reverse(
+        'projects:read_project_resource', kwargs={
+            'project_slug': project.slug,
+            'resource_id': resource.id,
+            'resource_slug': resource.slug
         }
     )
 
@@ -295,4 +361,4 @@ def _get_user_profile(user_profile):
         'user:user_profile', kwargs={
             'username': user_profile.user.username,
         }
-    )    
+    )

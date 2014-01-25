@@ -820,7 +820,7 @@ def list_collection(request, username, collection_slug):
         user_profile = user.get_profile()
 
         import oer.CollectionUtilities as cu
-        (browse_tree, flattened_tree) = cu._get_browse_tree(
+        (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
             user_profile.collection)
 
         # Get user collection.

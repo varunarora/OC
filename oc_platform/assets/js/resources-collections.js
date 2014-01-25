@@ -734,7 +734,7 @@ OC.resourcesCollectionsActions = {
             'project-resources-collections');
 
         if (isProject){
-            $.get('/resources/collection/' + collectionID + '/tree/project/',
+            $.get('/resources/collection/' + collectionID + '/tree/collections/project/',
                 function(response){
                     if (response.status == 'true'){
                         OC.renderBrowser(
@@ -747,7 +747,7 @@ OC.resourcesCollectionsActions = {
                 },
             'json');
         } else {
-            $.get('/resources/tree/user/',
+            $.get('/resources/tree/collections/user/',
                 function(response){
                     if (response.status == 'true'){
                         OC.renderBrowser(

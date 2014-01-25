@@ -393,7 +393,104 @@ OC.editor = {
             }
         });
 
-    }
+    },
+
+    addInlineLinkPopout: function(callback, currentText, currentURL){
+        // Setup the tabs the link-to popup.
+        OC.tabs('.link-resource-browser');
+
+        var linkToPopup = OC.customPopup('.link-resource-dialog'),
+            profileResourceCollectionBrowser = $('.link-resource-profile-browser'),
+            projectsResourceCollectionBrowser = $('.link-resource-project-browser'),
+            collectionID = $('form#resource-form input[name=collection_id]').val(),
+            toURLInput = $('form#link-to-url-form input[name=resource-url]'),
+            toURLTextInput = $('form#link-to-url-form input[name=resource-url-text]');
+
+        profileResourceCollectionBrowser.addClass('loading-browser');
+        projectsResourceCollectionBrowser.addClass('loading-browser');
+
+        // If there was a link selected, fill in inputs with original URL values,
+        //     else clear their browser cached value.
+        if (currentURL && currentText){
+            toURLInput.val(currentURL);
+            toURLTextInput.val(currentText);
+        } else if (currentText) {
+            toURLInput.val('');
+            toURLTextInput.val(currentText);
+        } else {
+            toURLInput.val('');
+            toURLTextInput.val('');
+        }
+
+        // Bind Done button on custom popup.
+        $('.link-resource-submit-button').click(function(event){
+            // Capture the actively selected tab.
+            var activeTab = $('.link-resource-dialog .link-resource-tabs li a.selected');
+
+            var toResourceCollection, toURL;
+
+            // If the active tab is projects.
+            if (activeTab.attr('href') === '.my-projects'){
+                // Capture currently selected collection.
+                toResourceCollection = projectsResourceCollectionBrowser.find(
+                    '.selected-destination-collection, .selected-destination-resource');
+            } else if (activeTab.attr('href') === '.my-profile'){
+                toResourceCollection = profileResourceCollectionBrowser.find(
+                    '.selected-destination-collection, .selected-destination-resource');
+            } else {
+                toURL = $('form#link-to-url-form input[name=resource-url]').val();
+                toURLText = $('form#link-to-url-form input[name=resource-url-text]').val();
+            }
+
+            linkToPopup.close();
+
+            if (toResourceCollection){
+                callback($(toResourceCollection[0]).attr('href'), null);
+            } else if (toURL){
+                callback(toURL, toURLText);
+            }
+        });
+
+        if (profileResourceCollectionBrowser.children().length === 0){
+            $.get('/resources/tree/all/user/',
+                function(response){
+                    if (response.status == 'true'){
+                        OC.renderBrowser(response.tree, profileResourceCollectionBrowser);
+                        profileResourceCollectionBrowser.removeClass('loading-browser');
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        }
+
+        var projectBrowserTab = $('.link-resource-tabs li a[href=".my-projects"]');
+
+        if (!projectBrowserTab.hasClickEventListener()){
+            projectBrowserTab.click(OC.editor.linkToProjectsTabClickHandler);
+        }
+    },
+
+    linkToProjectsTabClickHandler: function(event){
+        var projectsResourceCollectionBrowser = $('.link-resource-project-browser'),
+            collectionID = $('form#resource-form input[name=collection_id]').val();
+
+        if (projectsResourceCollectionBrowser.children().length === 0){
+            $.get('/resources/tree/all/projects/',
+                function(response){
+                    if (response.status == 'true'){
+                        OC.renderBrowser(response.tree, projectsResourceCollectionBrowser);
+                        projectsResourceCollectionBrowser.removeClass('loading-browser');
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        }
+    },
+
 };
 
 (function () {

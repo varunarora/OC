@@ -105,6 +105,47 @@
         </div>
     </div>
 </div>
+<div class="link-resource-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Link to...</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        Select a resource or collection, or write a custom URL:
+        <div class="link-resource-browser">
+            <nav class="link-resource-tabs">
+                <ul>
+                    <li><a href=".my-profile">My profile</a></li>
+                    <li><a href=".my-projects">My projects</a></li>
+                    <li><a href=".other-resources">Other resources / link</a></li>
+                </ul>
+            </nav>
+            <div class="link-resource-content oc-tabs-content">
+                <div class="my-profile">
+                    <div class="link-resource-profile-browser oc-popup-dialog-browser
+ loading-browser"></div>
+                </div>
+                <div class="my-projects">
+                    <div class="link-resource-project-browser oc-popup-dialog-browser
+ loading-browser"></div>
+                </div>
+                <div class="other-resources">
+                    <div class="oc-popup-dialog-tab-body">
+                        <form id="link-to-url-form">
+                            Enter a link URL:<br/>
+                            <input type="text" name="resource-url" /><p/>
+                            Link text:<br/>
+                            <input type="text" name="resource-url-text" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="link-resource-submit-wrapper oc-popup-submit-wrapper">
+            <button class="action-button link-resource-submit-button oc-popup-submit-button">Done</button>
+        </div>
+    </div>
+</div>
 <div class="popup-background"></div>
 
 

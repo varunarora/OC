@@ -7,6 +7,9 @@ CKEDITOR.editorConfig = function( config ) {
 	// Define changes to default configuration here. For example:
 	// config.language = 'fr';
 	// config.uiColor = '#AADC6E';
+    config.extraPlugins = 'internallink';
+    config.baseFloatZIndex = 4;
+    config.removePlugins = 'link';
 };
 
 CKEDITOR.config.contentsCss = '/static/assets/css/ckeditor/contents.css';
@@ -15,7 +18,7 @@ CKEDITOR.config.skin = 'moono,/static/assets/css/ckeditor/skins/moono/';
 CKEDITOR.config.toolbar_Basic = [
     [ '-', 'Bold', 'Italic' ],
     [ 'NumberedList','BulletedList'],
-    [ 'Link', 'Unlink' ],
+    [ 'InternalLink', 'InternalUnlink' ],
     [ 'Source' ]
 ];
 CKEDITOR.config.toolbar_Full = [
