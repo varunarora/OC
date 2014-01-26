@@ -115,6 +115,8 @@ class ResourceRevision(models.Model):
     user = models.ForeignKey(User, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
+    def __unicode__(self):
+        return self.resource.title
 
 class Element(models.Model):
     body = JSONField()
