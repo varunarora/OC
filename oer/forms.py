@@ -263,6 +263,7 @@ class NewDocumentForm(forms.ModelForm):
 
         new_resource_revision = ResourceRevision()
         new_resource_revision.content = new_document
+        new_resource_revision.user = user
         new_resource_revision.save()
 
         newRequest.setdefault('revision', new_resource_revision.id);
