@@ -123,8 +123,59 @@ def view_resource(request, resource_id, resource_slug):
         # Increment page views (always remains -1 based on current view).
         Resource.objects.filter(id=resource_id).update(views=resource.views+1)
 
+        from django.core.exceptions import MultipleObjectsReturned
         # Build breadcrumb for the resource
-        collection = Collection.objects.get(resources__id=resource.id)
+        try:
+            collection = Collection.objects.get(resources__id=resource.id)
+        except MultipleObjectsReturned:
+            # Try getting the meta referrer
+            referrer = request.META.get('HTTP_REFERER');
+
+            if referrer:
+                import urlparse
+                url_data = urlparse.urlparse(referrer)
+                domain = url_data.hostname
+                hostname = domain.split(".")[-1]
+
+                # If the link is being referred from within the site.
+                if request.META.get('SERVER_NAME').split(".")[-1] == hostname:
+                    from django.core.urlresolvers import resolve
+                    match = resolve(urlparse.urlparse(referrer)[2])
+
+                    # If the referrer is a project, find the collection in the
+                    # project collections
+                    import oer.CollectionUtilities as cu
+
+                    if match.namespace == 'projects' and (
+                        match.url_name == 'project_browse' or match.url_name == 'list_collection'):
+                            from projects.models import Project
+                            project = Project.objects.get(slug=match.kwargs['project_slug'])
+
+                            (browse_tree, flattened_tree) = cu._get_collections_browse_tree(project.collection)
+
+                            collection = next(
+                                tree_item for tree_item in flattened_tree if resource in list(tree_item.resources.all()))
+
+                    # If the referrer is a user, find the collection in the
+                    # user collections
+                    elif match.url_name == 'user_profile' or match.url_name == 'list_collection':
+                            from user_account.models import UserProfile
+                            user_profile = UserProfile.objects.get(user__username=match.kwargs['username'])
+                            (browse_tree, flattened_tree) = cu._get_collections_browse_tree(user_profile.collection)
+
+                            collection = next(
+                                tree_item for tree_item in flattened_tree if resource in list(tree_item.resources.all()))
+
+                    else:
+                        # Return the first collection.
+                        collection = Collection.objects.filter(
+                            resources__id=resource.id)[0]
+                else:
+                    # Else, return the first one.
+                    collection = Collection.objects.filter(
+                        resources__id=resource.id)[0]
+
+
         breadcrumb = build_collection_breadcrumb(collection)
 
         context = {
