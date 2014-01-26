@@ -1348,7 +1348,7 @@ var OC = {
     },
 
     initCreateCollection: function(){
-        $('.new-collection').click(function(){
+        $('nav#add-resource-menu .add-collection a').click(function(event){
             $('.new-collection-dialog').dialog({
                 modal: true,
                 open: false,
@@ -1370,6 +1370,10 @@ var OC = {
                     }
                 }
             });
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
         });
     },
 

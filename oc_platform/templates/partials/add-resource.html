@@ -1,7 +1,8 @@
 <nav id="add-resource-menu">
     <div class="floating-menu-spacer"></div>
     <ul>
-        <li class="add-document"><a href="/resources/new-document/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}"><span class="document-icon"></span>Document...{{ user_profile.collection }}</a></li>
+        <li class="add-collection"><a href=""><span class="document-icon"></span>Collection...{{ user_profile.collection }}</a></li>
+        <li class="add-document"><a href="/resources/new-document/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}">Document...{{ user_profile.collection }}</a></li>
         <li class="add-link"><a href="/resources/add-link/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}">Link...</a></li>
         <!--<li id="share-on-plus"><a href="">Image...</a></li>-->
         <li class="add-video"><a href="/resources/add-video/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}">Video...</a></li>
