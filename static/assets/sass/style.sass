@@ -781,7 +781,7 @@ nav#share-menu
 
 nav#add-resource-menu
 	z-index: 5
-	width: 140px
+	width: 135px
 
 	.floating-menu-spacer
 		width: 140px
@@ -1604,7 +1604,7 @@ table
 	color: #B94A48
 
 .add-resource
-	width: 125px
+	width: 115px
 
 .page-action-button, .action-button, .collection-button
 	padding: 10px
@@ -1656,12 +1656,18 @@ table
 	padding-right: 20px
 
 nav#add-resource-menu
-	.add-document, .add-link, .add-video, .add-upload
+	.add-collection, .add-document, .add-link, .add-video, .add-upload
 		a
 			padding-left: 34px
 			background-position: 12px 5px
 			@include sans-bold
 			background-repeat: no-repeat
+
+	.add-collection a
+		background-image: url('../images/folder.png')
+
+		&:hover
+			background-image: url('../images/folder-hover.png')
 
 	.add-document a
 		background-image: url('../images/document.png')

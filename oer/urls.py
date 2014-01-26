@@ -14,8 +14,8 @@ urlpatterns = patterns(
     url(r'^new-collection/user/(?P<username>\w+)/', views.new_user_collection, name='new_user_collection'),
 
     # Resources API
-    url(r'^delete-resource/(?P<resource_id>.+)/', views.delete_resource, name='delete_resource'),
-    url(r'^delete-collection/(?P<collection_id>.+)/', views.delete_collection, name='delete_collection'),
+    url(r'^delete-resource/(?P<resource_id>.+)/from/(?P<collection_id>.+)/$', views.delete_resource, name='delete_resource'),
+    url(r'^delete-collection/(?P<collection_id>.+)/$', views.delete_collection, name='delete_collection'),
 
     url(r'^resource-comments/(?P<resource_id>.+)/', views.get_resource_comments, name='get_resource_comments'),
 

@@ -995,20 +995,40 @@ def edit_attachment(request, resource):
     return render(request, 'edit-attachment.html', context)
 
 
-def delete_resource(request, resource_id):
+def delete_resource(request, resource_id, collection_id):
     try:
         resource = Resource.objects.get(pk=resource_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    if request.user != resource.user:
+        return APIUtilities._api_unauthorized_failure()
+
+    # If there are multiple collections where this resource is linked,
+    # do not delete the resource. Remove the resource only from the current collection.
+    from django.core.exceptions import MultipleObjectsReturned
+    try:
+        collection = Collection.objects.get(resources__id=resource.id)
+
+    except MultipleObjectsReturned:
+        collection = Collection.objects.get(pk=collection_id)
+        collection.resources.remove(resource)
+        return APIUtilities._api_success()
         
-        if request.user != resource.user:
-            return APIUtilities._api_unauthorized_failure()
-        
+    try:
         revisions = ResourceRevision.objects.filter(resource=resource)
 
         from django.contrib.contenttypes.models import ContentType
 
         document_content_type = ContentType.objects.get_for_model(Document)
+        document_element_content_type = ContentType.objects.get_for_model(DocumentElement)
         link_content_type = ContentType.objects.get_for_model(Link)
         attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+        resource_content_type = ContentType.objects.get_for_model(Resource)
+        revision_content_type = ContentType.objects.get_for_model(ResourceRevision)
+
+        from interactions.models import CommentReference, Comment
 
         for revision in revisions:
             if revision.content_type == document_content_type:
@@ -1027,7 +1047,39 @@ def delete_resource(request, resource_id):
 
             revision.delete()
 
+            # Delete the comments & comment references on this revision.
+
+            if revision.content_type == document_content_type:
+                # Get all the document elements associated with this revision's document.
+                document_elements = DocumentElement.objects.filter(
+                    document=revision.content)
+                document_element_ids = map(lambda x: x.id, document_elements)
+
+                comment_references = CommentReference.objects.filter(
+                    owner_type=document_element_content_type,
+                    owner_id__in=document_element_ids
+                )
+
+                for comment_reference in comment_references:
+                    comment_reference.delete()
+                    comment_reference.comment.delete()
+
+            revision_comments = Comment.objects.filter(
+                parent_type=revision_content_type, parent_id=revision.id
+            )
+
+            for revision_comment in revision_comments:
+                revision_comment.delete()
+
         resource.delete()
+
+        # Delete all the comments on this document.
+        resource_comments = Comment.objects.filter(
+            parent_type=resource_content_type, parent_id=resource.id
+        )
+
+        for resource_comment in resource_comments:
+            resource_comment.delete()
 
         return APIUtilities._api_success()
 
@@ -1823,7 +1875,19 @@ def link_resource_to_collection(request, resource_id, from_collection_id, to_col
                     if request.user not in from_collection_root.confirmed_members:
                         return APIUtilities._api_unauthorized_failure()
 
-        to_collection.resources.add(resource)
+        from django.core.exceptions import ObjectDoesNotExist
+        try:
+            to_collection.resources.get(pk=resource.id)
+            context = {
+                'title': 'Could not link the resource.',
+                'message': 'We failed to make a link of the resource. The resource '
+                + 'you are trying to link already exists in the destination collection.'
+            }
+            return APIUtilities._api_failure(context)
+
+
+        except ObjectDoesNotExist:
+            to_collection.resources.add(resource)
 
         import datetime
         context = {
@@ -1833,7 +1897,6 @@ def link_resource_to_collection(request, resource_id, from_collection_id, to_col
                 'created': datetime.datetime.strftime(
                     datetime.datetime.now(), '%b. %d, %Y, %I:%M %P'),
                 'visibility': resource.visibility,
-                'type': resource.type,
                 'is_collaborator': request.user in resource.collaborators.all(),
                 'url': reverse(
                     'read', kwargs={

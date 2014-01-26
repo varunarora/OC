@@ -1382,7 +1382,8 @@ var OC = {
             var deleteElement = $(this);
             // NOTE(Varun): Given the ID of the resource is of the format
             //     'resource-x', where x is the ID as stored by the server
-            var resourceID = deleteElement.attr('id').substring(9);
+            var resourceID = deleteElement.attr('id').substring(9),
+                collectionID = $('.resources-collections-added').attr('id').substring(11);
             $('.delete-resource-dialog').dialog({
                 modal: true,
                 open: false,
@@ -1390,7 +1391,8 @@ var OC = {
                 buttons: {
                     'Yes, delete': function () {
                         $(this).dialog("close");
-                        $.post('/resources/delete-resource/' + resourceID  + '/',
+                        $.post('/resources/delete-resource/' + resourceID  +
+                            '/from/' + collectionID + '/',
                             function(response){
                                 // Hide the resource
                                 if (response.status == 'true'){
@@ -2794,10 +2796,12 @@ var OC = {
 
         successfullyCopied: function(copiedResource, resourceID){
             OC.setMessageBoxMessage('Resource has been copied to your collection successfully.');
+            OC.showMessageBox();
         },
 
         successfullyLinked: function(copiedResource, resourceID){
             OC.setMessageBoxMessage('Resource has been linked in your collection successfully.');
+            OC.showMessageBox();
         }
     }
 };
