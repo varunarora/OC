@@ -751,6 +751,7 @@ def create_resource(uploaded_file, user, collection, new_filename=None):
 
     new_resource_revision = ResourceRevision()
     new_resource_revision.content = new_attachment
+    new_resource_revision.user = user
     new_resource_revision.save()
 
     new_resource.revision = new_resource_revision
@@ -1973,7 +1974,8 @@ def get_resource_copy(resource, user, new_name=False):
     # Create the new revision for the copied resource.
     resource_revision_copy = ResourceRevision(
         content=content,
-        log=resource.revision.log
+        log=resource.revision.log,
+        user=user
     )
     resource_revision_copy.save()
 
