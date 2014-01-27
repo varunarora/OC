@@ -1951,6 +1951,7 @@ def get_resource_copy(resource, user, new_name=False):
         description=resource.description,
         visibility=resource.visibility,
         cost=resource.cost,
+        slug=resource.slug,
         user=user,
         image=resource.image,
         source=resource.source,
