@@ -1017,99 +1017,120 @@ def delete_resource(request, resource_id, collection_id):
         return APIUtilities._api_success()
         
     try:
-        revisions = ResourceRevision.objects.filter(resource=resource)
-
-        from django.contrib.contenttypes.models import ContentType
-
-        document_content_type = ContentType.objects.get_for_model(Document)
-        document_element_content_type = ContentType.objects.get_for_model(DocumentElement)
-        link_content_type = ContentType.objects.get_for_model(Link)
-        attachment_content_type = ContentType.objects.get_for_model(Attachment)
-
-        resource_content_type = ContentType.objects.get_for_model(Resource)
-        revision_content_type = ContentType.objects.get_for_model(ResourceRevision)
-
-        from interactions.models import CommentReference, Comment
-
-        for revision in revisions:
-            if revision.content_type == document_content_type:
-                document_elements = DocumentElement.objects.filter(
-                    document=revision.content
-                )
-                for element in document_elements:
-                    element.element.delete()
-                    element.delete()
-
-                revision.content.delete()
-
-            elif (revision.content_type == link_content_type or 
-                revision.content_type == attachment_content_type):
-                    revision.content.delete()
-
-            revision.delete()
-
-            # Delete the comments & comment references on this revision.
-
-            if revision.content_type == document_content_type:
-                # Get all the document elements associated with this revision's document.
-                document_elements = DocumentElement.objects.filter(
-                    document=revision.content)
-                document_element_ids = map(lambda x: x.id, document_elements)
-
-                comment_references = CommentReference.objects.filter(
-                    owner_type=document_element_content_type,
-                    owner_id__in=document_element_ids
-                )
-
-                for comment_reference in comment_references:
-                    comment_reference.delete()
-                    comment_reference.comment.delete()
-
-            revision_comments = Comment.objects.filter(
-                parent_type=revision_content_type, parent_id=revision.id
-            )
-
-            for revision_comment in revision_comments:
-                revision_comment.delete()
-
-        resource.delete()
-
-        # Delete all the comments on this document.
-        resource_comments = Comment.objects.filter(
-            parent_type=resource_content_type, parent_id=resource.id
-        )
-
-        for resource_comment in resource_comments:
-            resource_comment.delete()
-
+        delete_individual_resource(resource)
         return APIUtilities._api_success()
 
     except:
         return APIUtilities._api_failure()
+
+
+def delete_individual_resource(resource):
+    revisions = ResourceRevision.objects.filter(resource=resource)
+
+    from django.contrib.contenttypes.models import ContentType
+
+    document_content_type = ContentType.objects.get_for_model(Document)
+    document_element_content_type = ContentType.objects.get_for_model(DocumentElement)
+    link_content_type = ContentType.objects.get_for_model(Link)
+    attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+    resource_content_type = ContentType.objects.get_for_model(Resource)
+    revision_content_type = ContentType.objects.get_for_model(ResourceRevision)
+
+    from interactions.models import CommentReference, Comment
+
+    for revision in revisions:
+        if revision.content_type == document_content_type:
+            document_elements = DocumentElement.objects.filter(
+                document=revision.content
+            )
+            for element in document_elements:
+                element.element.delete()
+                element.delete()
+
+            revision.content.delete()
+
+        elif (revision.content_type == link_content_type or 
+            revision.content_type == attachment_content_type):
+                revision.content.delete()
+
+        revision.delete()
+
+        # Delete the comments & comment references on this revision.
+
+        if revision.content_type == document_content_type:
+            # Get all the document elements associated with this revision's document.
+            document_elements = DocumentElement.objects.filter(
+                document=revision.content)
+            document_element_ids = map(lambda x: x.id, document_elements)
+
+            comment_references = CommentReference.objects.filter(
+                owner_type=document_element_content_type,
+                owner_id__in=document_element_ids
+            )
+
+            for comment_reference in comment_references:
+                comment_reference.delete()
+                comment_reference.comment.delete()
+
+        revision_comments = Comment.objects.filter(
+            parent_type=revision_content_type, parent_id=revision.id
+        )
+
+        for revision_comment in revision_comments:
+            revision_comment.delete()
+
+    resource.delete()
+
+    # Delete all the comments on this document.
+    resource_comments = Comment.objects.filter(
+        parent_type=resource_content_type, parent_id=resource.id
+    )
+
+    for resource_comment in resource_comments:
+        resource_comment.delete()
 
 
 def delete_collection(request, collection_id):
     try:
         collection = Collection.objects.get(pk=collection_id)
-        
-        # TODO(Varun): Delete all child collections & resources
 
-        project_permissions = False
         import oer.CollectionUtilities as cu
         (collection_root_type, collection_root) = cu.get_collection_root(collection)
+
         if collection_root_type.name == 'project':
             from projects.models import Project
             project = Project.objects.get(pk=collection_root.id)
-            if request.user in project.admins.all():
-                project_permissions = True
 
-        if request.user != collection.creator and not project_permissions:
-            return APIUtilities._api_unauthorized_failure()
-        
-        collection.delete()
+            if request.user not in project.admins.all() or request.user != collection.creator:
+                return APIUtilities._api_unauthorized_failure()
+
+        delete_individual_collection(collection)
+
         return APIUtilities._api_success()
     except:
         return APIUtilities._api_failure()
+
+
+def delete_individual_collection(collection):
+    # Delete all child collections & resources
+    for resource in collection.resources.all():
+        delete_individual_resource(resource)
+
+    from django.contrib.contenttypes.models import ContentType
+    collection_content_type = ContentType.objects.get_for_model(Collection)   
+ 
+    child_collections = Collection.objects.filter(
+        host_id=collection.id, host_type=collection_content_type)
+
+    # Find all child collections of this collection.
+    child_collections = Collection.objects.filter(
+        host_id=collection.id, host_type=collection_content_type)
+
+    for child in child_collections:
+        delete_individual_collection(child)
+
+    collection.delete()
 
 
 def new_project_collection(request, project_slug):
