@@ -1378,81 +1378,87 @@ var OC = {
     },
 
     bindDeleteResourceHandler: function(){
-        $('.profile-resource-delete, .project-resource-delete').click(function(event){
-            var deleteElement = $(this);
-            // NOTE(Varun): Given the ID of the resource is of the format
-            //     'resource-x', where x is the ID as stored by the server
-            var resourceID = deleteElement.attr('id').substring(9),
-                collectionID = $('.resources-collections-added').attr('id').substring(11);
-            $('.delete-resource-dialog').dialog({
-                modal: true,
-                open: false,
-                width: 500,
-                buttons: {
-                    'Yes, delete': function () {
-                        $(this).dialog("close");
-                        $.post('/resources/delete-resource/' + resourceID  +
-                            '/from/' + collectionID + '/',
-                            function(response){
-                                // Hide the resource
-                                if (response.status == 'true'){
-                                    $(deleteElement).parents('.resource-collection-item').fadeOut();
-                                }
-                                else {
-                                    OC.popup(
-                                        'Sorry, the resource could not be deleted. Please try again later.');
-                                }
-                            },
-                        'json');
-                    },
-                    Cancel: function () {
-                        $(this).dialog("close");
-                    }
-                }
-            });
+        $('.profile-resource-delete, .project-resource-delete').click(
+            OC.deleteResourceHandler);
+    },
 
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
+    deleteResourceHandler: function(event){
+        var deleteElement = $(this);
+        // NOTE(Varun): Given the ID of the resource is of the format
+        //     'resource-x', where x is the ID as stored by the server
+        var resourceID = deleteElement.attr('id').substring(9),
+            collectionID = $('.resources-collections-added').attr('id').substring(11);
+        $('.delete-resource-dialog').dialog({
+            modal: true,
+            open: false,
+            width: 500,
+            buttons: {
+                'Yes, delete': function () {
+                    $(this).dialog("close");
+                    $.post('/resources/delete-resource/' + resourceID  +
+                        '/from/' + collectionID + '/',
+                        function(response){
+                            // Hide the resource
+                            if (response.status == 'true'){
+                                $(deleteElement).parents('.resource-collection-item').fadeOut();
+                            }
+                            else {
+                                OC.popup(
+                                    'Sorry, the resource could not be deleted. Please try again later.');
+                            }
+                        },
+                    'json');
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
         });
+
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
     },
 
     bindDeleteCollectionHandler: function(){
-        $('.profile-collection-delete, .project-collection-delete').click(function(event){
-            var deleteElement = $(this);
-            // NOTE(Varun): Given the ID of the resource is of the format
-            //     'resource-x', where x is the ID as stored by the server
-            var collectionID = deleteElement.attr('id').substring(11);
-            $('.delete-collection-dialog').dialog({
-                modal: true,
-                open: false,
-                width: 500,
-                buttons: {
-                    'Yes, delete': function () {
-                        $(this).dialog("close");
-                        $.post('/resources/delete-collection/' + collectionID  + '/',
-                            function(response){
-                                // Hide the resource
-                                if (response.status == 'true'){
-                                    $(deleteElement).parents('.resource-collection-item').fadeOut();
-                                }
-                                else {
-                                    OC.popup(
-                                        'Sorry, the collection could not be deleted. Please try again later.');
-                                }
-                            },
-                        'json');
-                    },
-                    Cancel: function () {
-                        $(this).dialog("close");
-                    }
-                }
-            });
+        $('.profile-collection-delete, .project-collection-delete').click(
+            OC.deleteCollectionHandler);
+    },
 
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
+    deleteCollectionHandler: function(event){
+        var deleteElement = $(this);
+        // NOTE(Varun): Given the ID of the resource is of the format
+        //     'resource-x', where x is the ID as stored by the server
+        var collectionID = deleteElement.attr('id').substring(11);
+        $('.delete-collection-dialog').dialog({
+            modal: true,
+            open: false,
+            width: 500,
+            buttons: {
+                'Yes, delete': function () {
+                    $(this).dialog("close");
+                    $.post('/resources/delete-collection/' + collectionID  + '/',
+                        function(response){
+                            // Hide the resource
+                            if (response.status == 'true'){
+                                $(deleteElement).parents('.resource-collection-item').fadeOut();
+                            }
+                            else {
+                                OC.popup(
+                                    'Sorry, the collection could not be deleted. Please try again later.');
+                            }
+                        },
+                    'json');
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
         });
+
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
     },
 
     initCollectionsTree: function(){

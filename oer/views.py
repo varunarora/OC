@@ -2037,7 +2037,7 @@ def copy_collection(collection, to_collection, user):
 
     # Make a copy of all the resources in the collection.
     for resource in collection.resources.all():
-        new_resource = get_resource_copy(resource, user)
+        (new_resource, new_resource_type) = get_resource_copy(resource, user)
         collection_copy.resources.add(new_resource)
 
     # Copy all the collections inside this collection.
@@ -2049,6 +2049,8 @@ def copy_collection(collection, to_collection, user):
 
     for child in child_collections:
         copy_collection(child, collection_copy, user)
+
+    return collection_copy
 
 
 def copy_collection_to_collection(request, collection_id, to_collection_id):
@@ -2107,7 +2109,45 @@ def copy_collection_to_collection(request, collection_id, to_collection_id):
                 if request.user not in collection.collaborators.all():
                     return APIUtilities._api_unauthorized_failure()
 
-        copy_collection(collection, to_collection, request.user)
+        new_collection = copy_collection(collection, to_collection, request.user)
+
+        if collection_root_type.name == 'user profile':
+            # If this collection is a descendant of the user
+            user = collection_root.user
+
+            url = reverse(
+                'user:list_collection', kwargs={
+                    'username': user.username,
+                    'collection_slug': new_collection.slug
+                }
+            )
+
+        elif collection_root_type.name == 'project':
+            # If this collection is a descendant of a project
+            project = collection_root
+
+            url = reverse(
+                'projects:list_collection', kwargs={
+                    'project_slug': project.slug,
+                    'collection_slug': new_collection.slug
+                }
+            )
+
+        import datetime
+        context = {
+            'collection': {
+                'id': new_collection.id,
+                'title': new_collection.title,
+                'created': datetime.datetime.strftime(
+                    datetime.datetime.now(), '%b. %d, %Y, %I:%M %P'),
+                'visibility': new_collection.visibility,
+                'is_collaborator': request.user in new_collection.collaborators.all(),
+                'url': url,
+                'host': 'project' if to_collection_root_type.name == 'project' else 'profile',
+            }
+        }
+
+        return APIUtilities._api_success(context)
 
     except:
         context = {

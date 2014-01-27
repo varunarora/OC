@@ -28,134 +28,138 @@ OC.resourcesCollections = {
 
     bindItemVisibilityButton: function(){
         $('.collection-visibility-public .browse-item-visibility, ' +
-            '.collection-visibility-project .browse-item-visibility').click(function(event){
-            // Check to see if the user is allow to change to visibility or members.
-            var actionsWrapper = $(event.target).closest('.resource-collection-actions');
+            '.collection-visibility-project .browse-item-visibility').click(
+            OC.resourcesCollections.itemVisibilityButtonClickHandler);
 
-            if (actionsWrapper.hasClass('is-owner') || actionsWrapper.hasClass(
-                'is-collaborator')){
+    },
 
-                // Is this resource/collection a part of a project or not.
-                var isProject = $(event.target).hasClass('project-browse-item-visibility');
+    itemVisibilityButtonClickHandler: function(event){
+        // Check to see if the user is allow to change to visibility or members.
+        var actionsWrapper = $(event.target).closest('.resource-collection-actions');
 
-                // Get wrapping resource/collection element.
-                var resourceCollectionItem = $(event.target).closest('.resource-collection-item');
+        if (actionsWrapper.hasClass('is-owner') || actionsWrapper.hasClass(
+            'is-collaborator')){
 
-                OC.customPopup('.resource-collection-visibility-dialog', {
-                    closeCallback: OC.resourcesCollections.closeCollaboratorPopupCallback
-                });
+            // Is this resource/collection a part of a project or not.
+            var isProject = $(event.target).hasClass('project-browse-item-visibility');
 
-                var isOwner = actionsWrapper.hasClass('is-owner');
+            // Get wrapping resource/collection element.
+            var resourceCollectionItem = $(event.target).closest('.resource-collection-item');
 
-                var collaboratorForm = $('#add-collection-collaborator-form');
-                var collaboratorInput = $('input[name=add-collaborator]', collaboratorForm);
-                collaboratorInput.focus();
+            OC.customPopup('.resource-collection-visibility-dialog', {
+                closeCallback: OC.resourcesCollections.closeCollaboratorPopupCallback
+            });
 
-                // Nested if/else to figure out the visibility of the resource/collection.
-                OC.resourcesCollections.currentResourceCollectionVisibility = OC.resourcesCollections.getResourceCollectionVisibility(
-                    $(event.target), isProject);
+            var isOwner = actionsWrapper.hasClass('is-owner');
 
-                // Empty contents of collaborator input.
-                collaboratorInput.val('');
+            var collaboratorForm = $('#add-collection-collaborator-form');
+            var collaboratorInput = $('input[name=add-collaborator]', collaboratorForm);
+            collaboratorInput.focus();
 
-                // Get the list of current collaborators and place in popup list.
-                var userList = $('ul.collaborators', collaboratorForm);
+            // Nested if/else to figure out the visibility of the resource/collection.
+            OC.resourcesCollections.currentResourceCollectionVisibility = OC.resourcesCollections.getResourceCollectionVisibility(
+                $(event.target), isProject);
 
-                // Clear current list.
-                userList.children().remove();
+            // Empty contents of collaborator input.
+            collaboratorInput.val('');
 
-                // Unbind all previously registered events from tabs.
-                $('.resource-collection-visibility-form-tabs li a').unbind('click');
+            // Get the list of current collaborators and place in popup list.
+            var userList = $('ul.collaborators', collaboratorForm);
 
-                if (resourceCollectionItem.hasClass('directory')){
-                    // Setup the popup.
-                    var collectionID = resourceCollectionItem.attr('id').substring(11);
-                    $('input[name=collection_id]', collaboratorForm).val(collectionID);
+            // Clear current list.
+            userList.children().remove();
 
-                    // Re-initiate autocomplete add-a-collaborator-to-collection
-                    //     functionality.
-                    OC.resourcesCollections.addCollaborator(true);
+            // Unbind all previously registered events from tabs.
+            $('.resource-collection-visibility-form-tabs li a').unbind('click');
 
-                    userList.addClass('waiting');
-                    $.get('/resources/collection/' + collectionID + '/list-collaborators/',
-                        function (response) {
-                            if (response.status === 'true'){
-                                OC.resourcesCollections.listCollaboratorsHandler(response);
-                            } else {
-                                OC.popup(response.message, response.title);
-                            }
+            if (resourceCollectionItem.hasClass('directory')){
+                // Setup the popup.
+                var collectionID = resourceCollectionItem.attr('id').substring(11);
+                $('input[name=collection_id]', collaboratorForm).val(collectionID);
 
-                            // Clear spinner from the user listing.
-                            userList.removeClass('waiting');
-                        },
-                    'json');
+                // Re-initiate autocomplete add-a-collaborator-to-collection
+                //     functionality.
+                OC.resourcesCollections.addCollaborator(true);
 
-                    // Make requests everytime the user clicks on a visibility button.
-                    OC.resourcesCollections.collectionVisibility.setupToggler(
-                        collectionID, isProject);
-                } else {
-                    // Setup the popup.
-                    var resourceID = resourceCollectionItem.attr('id').substring(9);
-                    $('input[name=resource_id]', collaboratorForm).val(resourceID);
+                userList.addClass('waiting');
+                $.get('/resources/collection/' + collectionID + '/list-collaborators/',
+                    function (response) {
+                        if (response.status === 'true'){
+                            OC.resourcesCollections.listCollaboratorsHandler(response);
+                        } else {
+                            OC.popup(response.message, response.title);
+                        }
 
-                    // Re-initiate autocomplete add-a-collaborator-to-a-resource
-                    //     functionality.
-                    OC.resourcesCollections.addCollaborator(false);
+                        // Clear spinner from the user listing.
+                        userList.removeClass('waiting');
+                    },
+                'json');
 
-                    userList.addClass('waiting');
-                    $.get('/resources/resource/' + resourceID + '/list-collaborators/',
-                        function (response) {
-                            if (response.status === 'true'){
-                                OC.resourcesCollections.listCollaboratorsHandler(response);
-                            } else {
-                                OC.popup(response.message, response.title);
-                            }
+                // Make requests everytime the user clicks on a visibility button.
+                OC.resourcesCollections.collectionVisibility.setupToggler(
+                    collectionID, isProject);
+            } else {
+                // Setup the popup.
+                var resourceID = resourceCollectionItem.attr('id').substring(9);
+                $('input[name=resource_id]', collaboratorForm).val(resourceID);
 
-                            // Clear spinner from the user listing.
-                            userList.removeClass('waiting');
-                        },
-                    'json');
+                // Re-initiate autocomplete add-a-collaborator-to-a-resource
+                //     functionality.
+                OC.resourcesCollections.addCollaborator(false);
 
-                    // Make requests everytime the user clicks on a visibility button.
-                    OC.resourcesCollections.resourceVisibility.setupToggler(
-                        resourceID, isProject);
-                }
+                userList.addClass('waiting');
+                $.get('/resources/resource/' + resourceID + '/list-collaborators/',
+                    function (response) {
+                        if (response.status === 'true'){
+                            OC.resourcesCollections.listCollaboratorsHandler(response);
+                        } else {
+                            OC.popup(response.message, response.title);
+                        }
 
-                if (isProject){
-                    // Get current visibility of the project.
-                    // TODO(Varun): Make projectID retrieval less hackish.
-                    var projectID = $('#add-collection-collaborator-form input[name=project_id]').val();
-                    $.get('/project/' + projectID + '/visibility/',
-                        function (response) {
-                            if (response.status === 'true'){
-                                // Set the body of the project visibility tab accordingly.
-                                var projectAccessWrapper = $(
-                                    '.resource-collection-visibility-form-content .project-access');
-                                if (response.visibility === 'private'){
-                                    projectAccessWrapper.text('This project is private, so only ' +
-                                        'the members of this project can see this.');
-                                } else if (response.visibility === 'public'){
-                                    projectAccessWrapper.text('This project is public, so ' +
-                                        'everyone can see this.');
-                                }
-                            } else {
-                                OC.popup(response.message, response.title);
-                            }
-                        },
-                    'json');
-                }
+                        // Clear spinner from the user listing.
+                        userList.removeClass('waiting');
+                    },
+                'json');
 
-                OC.tabs('.resource-collection-visibility-form', {
-                    // Select the second tab (with index starting at 0)
-                    tab: OC.resourcesCollections.currentResourceCollectionVisibility == 'private' ? 1:0,
-                    showOnly: isOwner ? null : 1,
-                });
+                // Make requests everytime the user clicks on a visibility button.
+                OC.resourcesCollections.resourceVisibility.setupToggler(
+                    resourceID, isProject);
             }
 
-            event.stopPropagation();
-            event.preventDefault();
-            return false;
-        });
+            if (isProject){
+                // Get current visibility of the project.
+                // TODO(Varun): Make projectID retrieval less hackish.
+                var projectID = $('#add-collection-collaborator-form input[name=project_id]').val();
+                $.get('/project/' + projectID + '/visibility/',
+                    function (response) {
+                        if (response.status === 'true'){
+                            // Set the body of the project visibility tab accordingly.
+                            var projectAccessWrapper = $(
+                                '.resource-collection-visibility-form-content .project-access');
+                            if (response.visibility === 'private'){
+                                projectAccessWrapper.text('This project is private, so only ' +
+                                    'the members of this project can see this.');
+                            } else if (response.visibility === 'public'){
+                                projectAccessWrapper.text('This project is public, so ' +
+                                    'everyone can see this.');
+                            }
+                        } else {
+                            OC.popup(response.message, response.title);
+                        }
+                    },
+                'json');
+            }
+
+            OC.tabs('.resource-collection-visibility-form', {
+                // Select the second tab (with index starting at 0)
+                tab: OC.resourcesCollections.currentResourceCollectionVisibility == 'private' ? 1:0,
+                showOnly: isOwner ? null : 1,
+            });
+        }
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
     },
 
     addCollaborator: function(isCollection){
@@ -497,8 +501,18 @@ OC.resourcesCollectionsActions = {
     },
 
     initMoveResourcesCollections: function(){
-        $('.resource-collection-item').draggable({ revert: "invalid" });
-        $('.resource-collection-item.directory').droppable({
+        OC.resourcesCollectionsActions.initResourceCollectionsDraggability(
+            $('.resource-collection-item'));
+        OC.resourcesCollectionsActions.initResourceCollectionsDroppability(
+            $('.resource-collection-item.directory'));
+    },
+
+    initResourceCollectionsDraggability: function(resourceCollectionItems){
+        resourceCollectionItems.draggable({ revert: "invalid" });
+    },
+
+    initResourceCollectionsDroppability: function(resourceCollectionItems){
+        resourceCollectionItems.droppable({
             hoverClass: 'droppable',
             accept: ".directory, .resource",
             drop: function(event, ui){
@@ -604,10 +618,28 @@ OC.resourcesCollectionsActions = {
         copiedResource.resource_type = resourceType;
         copiedResource.access = whoHasAccess;
 
-        var newResourceItem = OC.resourcesCollections.resourceItemTemplate(copiedResource);
+        var newResourceHTML = OC.resourcesCollections.resourceItemTemplate(copiedResource);
 
         // Append the new resource to the resources collections listing
-        $('.' + copiedResource.host + '-resources-added-list').append(newResourceItem);
+        $('.' + copiedResource.host + '-resources-added-list').append(newResourceHTML);
+
+        // Associate resource actions with the new resource element.
+        var newResourceItem = $(
+            '.' + copiedResource.host + '-resources-added-list .resource-collection-item:last'),
+            newResourceItemCheckbox = $('input[type=checkbox]', newResourceItem),
+            newResourceItemDeleteButton = $(
+                '.' + copiedResource.host + '-resource-delete', newResourceItem),
+            newResourceItemVisibilityButton = $('.browse-item-visibility', newResourceItem);
+
+        // Bind the click handler on the checkbox, the delete button and the visibility.
+        newResourceItemCheckbox.click(
+            OC.resourcesCollectionsActions.resourceCollectionCheckboxHandler);
+        newResourceItemDeleteButton.click(OC.deleteResourceHandler);
+        newResourceItemVisibilityButton.click(
+            OC.resourcesCollections.itemVisibilityButtonClickHandler);
+
+        // Now make the collection draggable-droppable (+acceptable of new stuff).
+        OC.resourcesCollectionsActions.initResourceCollectionsDraggability(newResourceItem);
 
         // Drop the action from the pending action list and announce completion.
         OC.resourcesCollectionsActions.pendingActions.copyResources.splice(resourceID);
@@ -617,17 +649,36 @@ OC.resourcesCollectionsActions = {
     },
 
     collectionCopiedSuccessfully: function(copiedCollection, collectionID){
-        var collectionType = collection.host === 'project' ? '' : 'profile-collection';
-        var whoHasAccess = collection.visibility === 'collection' ?
-            'Private (collection)' : collection.visibility.charAt(0).toUpperCase();
+        var collectionType = copiedCollection.host === 'project' ? '' : 'profile-collection';
+        var whoHasAccess = copiedCollection.visibility === 'collection' ?
+            'Private (collection)' : copiedCollection.visibility.charAt(0).toUpperCase();
 
-        collection.collection_type = collectionType;
-        collection.access = whoHasAccess;
+        copiedCollection.collection_type = collectionType;
+        copiedCollection.access = whoHasAccess;
 
-        var newCollectionItem = OC.resourcesCollections.collectionItemTemplate(copiedCollection);
+        var newCollectionHTML = OC.resourcesCollections.collectionItemTemplate(copiedCollection);
 
         // Append the new collection to the resources collections listing
-        $('.' + collection.host + '-collections-added-list').append(newResourceItem);
+        $('.' + copiedCollection.host + '-collections-added-list').append(newCollectionHTML);
+
+        // Associate collection actions with the new collection element.
+        var newCollectionItem = $(
+            '.' + copiedCollection.host + '-collections-added-list .resource-collection-item:last'),
+            newCollectionItemCheckbox = $('input[type=checkbox]', newCollectionItem),
+            newCollectionItemDeleteButton = $(
+                '.' + copiedCollection.host + '-collection-delete', newCollectionItem),
+            newCollectionItemVisibilityButton = $('.browse-item-visibility', newCollectionItem);
+
+        // Bind the click handler on the checkbox, the delete button and the visibility.
+        newCollectionItemCheckbox.click(
+            OC.resourcesCollectionsActions.resourceCollectionCheckboxHandler);
+        newCollectionItemDeleteButton.click(OC.deleteCollectionHandler);
+        newCollectionItemVisibilityButton.click(
+            OC.resourcesCollections.itemVisibilityButtonClickHandler);
+
+        // Now make the collection draggable-droppable (+acceptable of new stuff).
+        OC.resourcesCollectionsActions.initResourceCollectionsDraggability(newCollectionItem);
+        OC.resourcesCollectionsActions.initResourceCollectionsDroppability(newCollectionItem);
 
         // Drop the action from the pending action list and announce completion.
         OC.resourcesCollectionsActions.pendingActions.copyCollections.splice(collectionID);
