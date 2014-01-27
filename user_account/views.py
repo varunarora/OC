@@ -784,12 +784,13 @@ def user_profile(request, username):
         # Get user profile.
         user_profile = user.get_profile()
 
-        # Get all the resources that the user has created.
-        resources = user_profile.collection.resources.all().order_by('-created')
-
         # Get all the collections that have the user's root collection as parent.
         import oer.CollectionUtilities as cu
         child_collections = cu._get_child_collections(user_profile.collection)
+
+        # Get all the resources that the user has created.
+        resources = user_profile.collection.resources.all().order_by('-created')
+        cu.set_resources_type(resources)
 
         from forms import UploadProfilePicture
         form = UploadProfilePicture(request.POST, request.FILES)
@@ -830,13 +831,16 @@ def list_collection(request, username, collection_slug):
         root_assets = collection.resources
         child_collections = cu._get_child_collections(collection)        
 
+        resources = root_assets.all()
+        cu.set_resources_type(resources)
+
         context = {
             'user_profile': user,
             'collection': collection,
             # TODO(Varun): Make this a custom title.
             'title': collection.title + ' &lsaquo; ' + user.get_full_name(),
             'browse_tree': browse_tree,
-            'resources': root_assets.all(),
+            'resources': resources,
             'collections': child_collections,
         }
         return render(request, 'profile.html', context)

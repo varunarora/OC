@@ -362,3 +362,19 @@ def _get_user_profile(user_profile):
             'username': user_profile.user.username,
         }
     )
+
+
+def set_resources_type(resources):
+    from django.contrib.contenttypes.models import ContentType
+    from oer.models import Document, Link, Attachment
+    document_content_type = ContentType.objects.get_for_model(Document)
+    link_content_type = ContentType.objects.get_for_model(Link)
+    attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+    for resource in resources:
+        if resource.revision.content_type == document_content_type:
+            resource.type = "document"
+        elif resource.revision.content_type == link_content_type:
+            resource.type = "url"
+        elif resource.revision.content_type == attachment_content_type:
+            resource.type = "attachment"

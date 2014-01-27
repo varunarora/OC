@@ -258,9 +258,12 @@ def browse(request, project_slug):
 
     (browse_tree, flattened_tree) = _get_browse_tree(root_collection)
 
+    resources = root_assets.all()
+    cu.set_resources_type(resources)
+
     context = {
         'project': project,
-        'resources': root_assets.all, 'collections': child_collections,
+        'resources': resources, 'collections': child_collections,
         'collection': root_collection,
         'browse_tree': browse_tree,
         'title': (_(settings.STRINGS['projects']['BROWSE_TITLE']) +
@@ -450,9 +453,12 @@ def list_collection(request, project_slug, collection_slug):
     import oer.CollectionUtilities as cu
     child_collections = cu._get_child_collections(collection)
 
+    resources = root_assets.all()
+    cu.set_resources_type(resources)
+
     context = {
         'project': project,
-        'resources': root_assets.all(), 'collections': child_collections,
+        'resources': resources, 'collections': child_collections,
         'collection': collection,
         'browse_tree': browse_tree,
         # TODO(Varun): Make this a custom title.
