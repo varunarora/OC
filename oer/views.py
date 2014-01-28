@@ -174,7 +174,10 @@ def view_resource(request, resource_id, resource_slug):
                     # Else, return the first one.
                     collection = Collection.objects.filter(
                         resources__id=resource.id)[0]
-
+            else:
+                # Else, return the first one.
+                collection = Collection.objects.filter(
+                    resources__id=resource.id)[0]
 
         breadcrumb = build_collection_breadcrumb(collection)
 
