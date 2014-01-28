@@ -86,7 +86,7 @@ OC.upload = {
             data['collection'] = $('form input[name=collection]').val();
         }
 
-        $.post('/api/fpUpload/', data, OC.upload.uploadCallback, 'json');
+        $.post('/api/filepicker-upload/', data, OC.upload.uploadCallback, 'json');
     },
 
     /**
