@@ -7,6 +7,7 @@ from projects.models import Project, Membership
 from oer.models import Collection
 from media.models import ImagePosition
 from django.core.urlresolvers import reverse
+import user_account.NotificationUtilities as nu
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -61,6 +62,7 @@ class Notification(models.Model):
     def add_comment_notification(sender, **kwargs):
         comment_id = kwargs.get('comment_id', None)
         parent_type = kwargs.get('parent_type', None)
+        request = kwargs.get('request', None)
 
         # Get the commment.
         from interactions.models import Comment, CommentReference
@@ -118,6 +120,9 @@ class Notification(models.Model):
 
                 notification.save()
 
+                # Send an email about this notification.
+                nu.notify_by_email(notification, request.get_host())
+
         else:
             # Determine whether this is an ArticleRevision, resource, etc. and the
             #     user who created it.
@@ -164,7 +169,35 @@ class Notification(models.Model):
                     notification.description = "%s commented on your post in %s: \"%s\"" % (
                         comment.user.get_full_name(), root_parent.title, comment.body_markdown[:100])
 
+                elif root_parent_type.name == 'resource':
+                    import oer.ResourceUtilities as ru
+                    (resource_root_type, resource_root) = ru.get_resource_root(root_parent)
+
+                    if resource_root_type.name == 'project':
+                        notification.url = reverse(
+                            'projects:read_project_resource', kwargs={
+                                'project_slug': resource_root.slug,
+                                'resource_id': root_parent.id,
+                                'resource_slug': root_parent.slug
+                            }
+                        )
+
+                    elif resource_root_type.name == 'user profile':
+                        notification.url = reverse(
+                            'read', kwargs={
+                                'resource_id': root_parent.id,
+                                'resource_slug': root_parent.slug
+                            }
+                        )                        
+
+                    notification.description = "%s commented on your post in %s: \"%s\"" % (
+                        comment.user.get_full_name(), root_parent.title, comment.body_markdown[:100])
+
+
                 notification.save()
+
+                # Send an email about this notification.
+                nu.notify_by_email(notification, request.get_host())
 
 
     @receiver(Project.discussion_post_created)
@@ -197,6 +230,7 @@ class Notification(models.Model):
     @receiver(Membership.new_invite_request)
     def add_project_invite_notification(sender, **kwargs):
         membership_id = kwargs.get('membership_id', None)
+        request = kwargs.get('request', None)
 
         membership_request = Membership.objects.get(pk=int(membership_id))
         project = membership_request.project
@@ -216,10 +250,14 @@ class Notification(models.Model):
 
             notification.save()
 
+            # Send an email about this notification.
+            nu.notify_by_email(notification, request.get_host())
+
 
     @receiver(Membership.invite_request_accepted)
     def accept_project_invite_notification(sender, **kwargs):
         membership_id = kwargs.get('membership_id', None)
+        request = kwargs.get('request', None)
 
         membership_request = Membership.objects.get(pk=int(membership_id))
         project = membership_request.project
@@ -237,6 +275,9 @@ class Notification(models.Model):
             project.title)
 
         notification.save()
+
+        # Send an email about this notification.
+        nu.notify_by_email(notification, request.get_host())
 
 
     @receiver(Membership.new_member_added)
@@ -265,6 +306,7 @@ class Notification(models.Model):
     def turn_member_into_admin_notification(sender, **kwargs):
         project = kwargs.get('project', None)
         user = kwargs.get('user', None)
+        request = kwargs.get('request', None)
 
         notification = Notification()
         notification.user = user
@@ -279,6 +321,9 @@ class Notification(models.Model):
             project.title)
 
         notification.save()
+
+        # Send an email about this notification.
+        nu.notify_by_email(notification, request.get_host())
 
 
     @receiver(Vote.vote_casted)
@@ -315,6 +360,7 @@ class Notification(models.Model):
     def collaborator_add_notification(sender, **kwargs):
         collection = kwargs.get('collection', None)
         user = kwargs.get('user', None)
+        request = kwargs.get('request', None)
 
         notification = Notification()
         notification.user = user
@@ -336,10 +382,14 @@ class Notification(models.Model):
 
         notification.save()
 
+        # Send an email about this notification.
+        nu.notify_by_email(notification, request.get_host())
+
 
     @receiver(Favorite.resource_favorited)
     def my_resource_favorited_notification(sender, **kwargs):
         favorite = kwargs.get('favorite', None)
+        request = kwargs.get('request', None)
 
         notification = Notification()
         notification.user = favorite.resource.user
@@ -354,6 +404,9 @@ class Notification(models.Model):
             favorite.user.get_full_name(), favorite.resource.title)
 
         notification.save()
+
+        # Send an email about this notification.
+        nu.notify_by_email(notification, request.get_host())
 
 
     @receiver(Vote.resource_vote_casted)
