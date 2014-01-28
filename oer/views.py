@@ -599,26 +599,26 @@ def fp_upload(request):
     failure_list = []
 
     for (key, title) in file_list:
-        #try:
-        # Create Resource objects for each file uploaded.
-        # And generate the list for the response.
-        file_path = settings.FILEPICKER_ROOT + key
+        try:
+            # Create Resource objects for each file uploaded.
+            # And generate the list for the response.
+            file_path = settings.FILEPICKER_ROOT + key
 
-        # Set readable permissions for the file just uploaded through Fp.
-        import os
-        import stat
-        st = os.stat(file_path)
-        os.chmod(file_path, st.st_mode | stat.S_IREAD)
+            # Set readable permissions for the file just uploaded through Fp.
+            import os
+            import stat
+            st = os.stat(file_path)
+            os.chmod(file_path, st.st_mode | stat.S_IREAD)
 
-        static_file = open(file_path)
+            static_file = open(file_path)
 
-        new_resource = create_resource(
-            File(static_file), user, collection, title)
+            new_resource = create_resource(
+                File(static_file), user, collection, title)
 
-        response[new_resource.id] = new_resource.title
-        static_file.close()
+            response[new_resource.id] = new_resource.title
+            static_file.close()
 
-        """except Exception:          
+        except Exception:          
             # Delete this file from S3, and add it to the failure list
             from boto.s3.connection import S3Connection
             from boto.s3.bucket import Bucket
@@ -629,7 +629,11 @@ def fp_upload(request):
             k.key = key
             b.delete_key(k)
 
-            failure_list.append(title)"""
+            from django.core.mail import mail_admins
+            mail_admins('Filepicker S3 mounting failed', (
+                'Apologize to ' + str(user.id) + ": " + user.get_full_name()))
+
+            failure_list.append(title)
 
     if len(failure_list) > 0:
         response['failures'] = failure_list
