@@ -33,7 +33,7 @@ class Comment(models.Model):
     def __unicode__(self):
         return str(self.parent_type) + ": " + str(self.parent_id)
 
-    comment_created = Signal(providing_args=["comment_id", "parent_type"])
+    comment_created = Signal(providing_args=["comment_id", "parent_type", "request"])
 
 
 class CommentReference(models.Model):
@@ -49,7 +49,7 @@ class Favorite(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)    
     resource = models.ForeignKey(Resource)
 
-    resource_favorited = Signal(providing_args=["favorite"])
+    resource_favorited = Signal(providing_args=["favorite", "request"])
 
 
 """

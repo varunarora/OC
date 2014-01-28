@@ -96,7 +96,7 @@ class Collection(models.Model):
     def __unicode__(self):
         return self.title
     
-    collaborator_added = Signal(providing_args=["collection", "user"])
+    collaborator_added = Signal(providing_args=["collection", "user", "request"])
 
 
 class Forks(models.Model):
@@ -116,7 +116,7 @@ class ResourceRevision(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
     def __unicode__(self):
-        return self.resource.title
+        return self.content_type.name
 
 class Element(models.Model):
     body = JSONField()

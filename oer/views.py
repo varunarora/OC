@@ -1327,7 +1327,7 @@ def add_user_to_collection(request, collection_id, user_id):
 
         # Notify user of being added to collection through a notification.
         Collection.collaborator_added.send(
-            sender="Projects", collection=collection, user=user)        
+            sender="Projects", collection=collection, user=user, request=request)        
 
         context = {
             'user': {

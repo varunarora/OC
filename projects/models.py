@@ -36,11 +36,11 @@ class Membership(models.Model):
     confirmed = models.BooleanField()
     joined = models.DateTimeField(auto_now_add=True, editable=False)
 
-    new_invite_request = Signal(providing_args=["membership_id"])
-    invite_request_accepted = Signal(providing_args=["membership_id"])
+    new_invite_request = Signal(providing_args=["membership_id", "request"])
+    invite_request_accepted = Signal(providing_args=["membership_id", "request"])
 
     new_member_added = Signal(providing_args=["membership_id"])
-    member_turned_admin = Signal(providing_args=["project", "user"])
+    member_turned_admin = Signal(providing_args=["project", "user", "request"])
 
     def __unicode__(self):
         return str(self.project.title) + ":" + str(self.user.id)

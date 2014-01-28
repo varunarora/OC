@@ -12,7 +12,7 @@ def post_comment(request):
 
     if request.method == "POST":
         try:
-            comment = create_comment(request.POST)
+            comment = create_comment(request, request.POST)
             if comment:
                 comment_ct = ContentType.objects.get_for_model(Comment)
 
@@ -42,52 +42,52 @@ def post_comment(request):
 
 def post_comment_reference(request):
     if request.method == "POST":
-        #try:
-        from interactions.models import CommentReference
-        from django.contrib.contenttypes.models import ContentType
+        try:
+            from interactions.models import CommentReference
+            from django.contrib.contenttypes.models import ContentType
 
-        # Get comment reference owner.
-        owner_content_type = ContentType.objects.get(pk=request.POST.get('owner_type'))
+            # Get comment reference owner.
+            owner_content_type = ContentType.objects.get(pk=request.POST.get('owner_type'))
 
-        # Create a comment reference to no comment.
-        new_comment_reference = CommentReference(
-            reference=request.POST.get('reference'),
-            owner_id=request.POST.get('owner_id'),
-            owner_type=owner_content_type
-        )
-        new_comment_reference.save()
+            # Create a comment reference to no comment.
+            new_comment_reference = CommentReference(
+                reference=request.POST.get('reference'),
+                owner_id=request.POST.get('owner_id'),
+                owner_type=owner_content_type
+            )
+            new_comment_reference.save()
 
-        # Create a new comment.
-        comment_reference_content_type = ContentType.objects.get_for_model(CommentReference)
+            # Create a new comment.
+            comment_reference_content_type = ContentType.objects.get_for_model(CommentReference)
 
-        modified_request = request.POST.copy()
-        modified_request.setdefault('parent_type', comment_reference_content_type.id)
-        modified_request.setdefault('parent_id', new_comment_reference.id)
+            modified_request = request.POST.copy()
+            modified_request.setdefault('parent_type', comment_reference_content_type.id)
+            modified_request.setdefault('parent_id', new_comment_reference.id)
 
-        new_comment = create_comment(modified_request)
+            new_comment = create_comment(request, modified_request)
 
-        # Map the comment to the reference.
-        new_comment_reference.comment = new_comment
-        new_comment_reference.save()
+            # Map the comment to the reference.
+            new_comment_reference.comment = new_comment
+            new_comment_reference.save()
 
-        import datetime
-        context = {
-            'username': new_comment.user.username,
-            'name': new_comment.user.get_full_name(),
-            'created': datetime.datetime.strftime(new_comment.created, '%b. %d, %Y, %I:%M %P'),
-            'profile_pic': settings.MEDIA_URL + new_comment.user.get_profile().profile_pic.name,
-            'body': new_comment.body_markdown_html,
-            'id': new_comment.id        
-        }
-        return APIUtilities._api_success(context)
+            import datetime
+            context = {
+                'username': new_comment.user.username,
+                'name': new_comment.user.get_full_name(),
+                'created': datetime.datetime.strftime(new_comment.created, '%b. %d, %Y, %I:%M %P'),
+                'profile_pic': settings.MEDIA_URL + new_comment.user.get_profile().profile_pic.name,
+                'body': new_comment.body_markdown_html,
+                'id': new_comment.id        
+            }
+            return APIUtilities._api_success(context)
 
-        #except:
-        #    return APIUtilities._api_failure()
+        except:
+            return APIUtilities._api_failure()
     else:
         return APIUtilities._api_failure()
 
 
-def create_comment(postRequest):
+def create_comment(request, postRequest):
     from forms import NewCommentForm
     comment_form = NewCommentForm(postRequest)
 
@@ -96,11 +96,12 @@ def create_comment(postRequest):
 
         parent_type = postRequest.get('parent_type')
         Comment.comment_created.send(
-            sender="Comments", comment_id=comment.id, parent_type=parent_type)
+            sender="Comments", comment_id=comment.id,
+            parent_type=parent_type, request=request
+        )
         return comment
 
     else:
-        print comment_form.errors
         return None
 
 
@@ -259,7 +260,8 @@ def favorite_resource(request, resource_id, user_id):
             if resource.user != user:
                 # Send out a notification to the person who originally made
                 # the resource.
-                Favorite.resource_favorited.send(sender="Favorite", favorite=new_favorite)
+                Favorite.resource_favorited.send(
+                    sender="Favorite", favorite=new_favorite, request=request)
 
             return APIUtilities._api_success()
         except:

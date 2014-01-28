@@ -2,18 +2,19 @@ DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Varun Arora', 'varun@theopencurriculum.org'),
+    ('Varun Arora', 'varun@opencurriculum.org'),
 )
 
-SIGNUPS_ADMINS = ['hello@theopencurriculum.org']
-CONTRIBUTOR_SIGNUPS_ADMINS = ['hello@theopencurriculum.org', 'zeinab@theopencurriculum.org', 'duncan@theopencurriculum.org']
-HELP_EMAIL = 'hello@theopencurriculum.org'
+SIGNUPS_ADMINS = ['hello@opencurriculum.org']
+CONTRIBUTOR_SIGNUPS_ADMINS = ['hello@opencurriculum.org', 'zeinab@opencurriculum.org', 'duncan@opencurriculum.org']
+HELP_EMAIL = 'hello@opencurriculum.org'
 
 EMAIL_HOST = "smtp.sendgrid.net"
 EMAIL_PORT = "587"
 EMAIL_HOST_USER = ""  # This needs to filled in
 EMAIL_HOST_PASSWORD = ""  # This needs to filled in
-SERVER_EMAIL = "hello@theopencurriculum.org"  # This needs to filled in
+SERVER_EMAIL = "hello@opencurriculum.org"  # This needs to filled in
+NOTIFICATIONS_EMAIL = "notifications@opencurriculum.org"  # This needs to filled in
 EMAIL_USE_TLS = True
 
 MAILCHIMP_API_KEY = 'f8cfcc0cca3214a9894a8c8a58d733f5-us7'

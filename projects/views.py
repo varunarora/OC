@@ -676,7 +676,7 @@ def add_admin(request, project_id, user_id):
 
         # Notify the member about being assigned an admin.
         Membership.member_turned_admin.send(
-            sender="Projects", project=project, user=user)
+            sender="Projects", project=project, user=user, request=request)
 
         # Prepare (serialize) user object be sent through the response.
         context = {
@@ -773,7 +773,7 @@ def request_invite(request, project_id):
 
         # Create a notification for the admins about this request.
         Membership.new_invite_request.send(
-            sender="Projects", membership_id=new_membership.id)
+            sender="Projects", membership_id=new_membership.id, request=request)
 
         return APIUtilities._api_success()
 
@@ -786,7 +786,7 @@ def accept_request(request, request_id):
 
         # Generate notification for user just accepted into the project to notify.
         Membership.invite_request_accepted.send(
-            sender="Projects", membership_id=membership_request.id)
+            sender="Projects", membership_id=membership_request.id, request=request)
 
         return APIUtilities._api_success()
     except:
