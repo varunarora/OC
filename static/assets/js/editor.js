@@ -194,6 +194,8 @@ OC.editor = {
 
             OC.editor.bindWidgetHandlers(widget, widgetElement, true);
         }
+
+        OC.editor.initWidgetSorting(true);
     },
 
     bindWidgetDelete: function(widgetDeleteButton){
@@ -219,9 +221,7 @@ OC.editor = {
         });
     },
 
-    bindWidgetHandlers: function(widget, widgetElement, initialize){
-        var initializeDocument = initialize || false;
-
+    bindWidgetHandlers: function(widget, widgetElement){
         // Add 'move' and 'delete' widget controls on the elements.
         var deleteButton = $('<div/>', {
             'class': 'document-element-delete-button delete-button',
@@ -247,6 +247,10 @@ OC.editor = {
         });
 
         widget.prepend(moveHandle);
+    },
+
+    initWidgetSorting: function(initialize){
+        var initializeDocument = initialize || false;
 
         if (initializeDocument){
             // Make all elements sortable.
@@ -331,6 +335,7 @@ OC.editor = {
 
                             // Add widget handlers.
                             OC.editor.bindWidgetHandlers(widget, widgetElement);
+                            OC.editor.initWidgetSorting();
                         });
                     }
                 }
