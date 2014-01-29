@@ -5,6 +5,6 @@
     {% if document_element.element.body.type == "table" %}
         {% include 'partials/document-table.html' %}
     {% elif document_element.element.body.type == "textblock" %}
-        {{ document_element.element.body.data|safe }}
+        {% include 'partials/document-textblock.html' %}
     {% endif %}
 {% endfor %}

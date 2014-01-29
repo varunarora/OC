@@ -151,34 +151,131 @@ OC.editor = {
     },
 
     initExistingWidgets: function(){
-        var tables =  $('.document-body .document-table');
+        var widgets = $('.document-element'),
+            i, j, k, table, columns, cells, widget,
+            widgetElement, moveHandle, documentElementDelete;
 
-        var i, j, k, table, columns, cells;
-        for (i = 0; i < tables.length; i++){
-            tableWrapper = $(tables[i]);
+        for (i = 0; i < widgets.length; i++){
+            widget = $(widgets[i]);
 
-            // Set table ID.
-            tableWrapper.find('table').attr('id', 'table-' + i);
+            // Initialize custom widgets.
+            // TODO(Varun): This needs to be made "object-oriented".
+            if (widget.hasClass('document-table')){
+                tableWrapper = widget;
+                widgetElement = $('table', tableWrapper);
 
-            // Allow resize of the columns.
-            tableWrapper.prepend('<div class="column-resize"></div>');
-            columns = $('col', tableWrapper);
-            for (j = 0; j < columns.length; j++){
-                $(columns[j]).attr('id', 'column-' + i + '-' + j);
+                // Set table ID.
+                widgetElement.attr('id', 'table-' + i);
+
+                // Allow resize of the columns.
+                tableWrapper.prepend('<div class="column-resize"></div>');
+                columns = $('col', tableWrapper);
+                for (j = 0; j < columns.length; j++){
+                    $(columns[j]).attr('id', 'column-' + i + '-' + j);
+                }
+                OC.editor.initTableResize(tableWrapper);
+
+                // Add action row to the table.
+                $('tr:last', tableWrapper).after(OC.editor.widgets.tableActionsRowHTML);
+
+                // Bind table actions with event handlers.
+                OC.editor.bindTableActionHandlers(tableWrapper);
+
+                // Make all cells editable.
+                cells = $('td, th', tableWrapper).not('td.table-actions-wrapper', tableWrapper);
+                for (k = 0; k < cells.length; k++){
+                    $(cells[k]).attr('contenteditable', 'true');
+                }
+            } else if (widget.hasClass('document-textblock')){
+                $('textarea', widget).ckeditor(function(textarea){
+                    widgetElement = $('.cke', widget);
+                });
             }
-            OC.editor.initTableResize(tableWrapper);
 
-            // Add action row to the table.
-            $('tr:last', tableWrapper).after(OC.editor.widgets.tableActionsRowHTML);
+            OC.editor.bindWidgetHandlers(widget, widgetElement, true);
+        }
+    },
 
-            // Bind table actions with event handlers.
-            OC.editor.bindTableActionHandlers(tableWrapper);
+    bindWidgetDelete: function(widgetDeleteButton){
+        widgetDeleteButton.click(function(event){
+            $('.widget-delete-dialog').dialog({
+                modal: true,
+                open: false,
+                width: 500,
+                buttons: {
+                    Yes: function () {
+                        widgetDeleteButton.parent('.document-element').remove();
+                        $(this).dialog("close");
+                    },
+                    Cancel: function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
 
-            // Make all cells editable.
-            cells = $('td, th', tableWrapper).not('td.table-actions-wrapper', tableWrapper);
-            for (k = 0; k < cells.length; k++){
-                $(cells[k]).attr('contenteditable', 'true');
-            }
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+    },
+
+    bindWidgetHandlers: function(widget, widgetElement, initialize){
+        var initializeDocument = initialize || false;
+
+        // Add 'move' and 'delete' widget controls on the elements.
+        var deleteButton = $('<div/>', {
+            'class': 'document-element-delete-button delete-button',
+            'title': 'Delete block'
+        });
+        deleteButton.css({
+            'left': widgetElement.position().left + widgetElement.width() + 10
+        });
+        widget.prepend(deleteButton);
+        widgetDelete = $('.document-element-delete-button', widget);
+        widgetDelete.tipsy({ gravity: 'n' });
+
+        // Bind delete functionality with delete button.
+        OC.editor.bindWidgetDelete(widgetDelete);
+
+        var moveHandle = $('<div/>', {
+            'class': 'document-element-handle'
+        });
+        moveHandle.css({
+            'height': widget.height(),
+            'margin-bottom': widget.height(),
+            'left': widgetElement.position().left - 35
+        });
+
+        widget.prepend(moveHandle);
+
+        if (initializeDocument){
+            // Make all elements sortable.
+            $('.document-body').sortable({
+                axis: 'y',
+                handle: '.document-element-handle',
+                opacity: 0.5,
+                items: '.document-element',
+
+                start: function(event, ui){
+                    var widgetBeingDragged = $(ui.item);
+                    if (widgetBeingDragged.hasClass('document-textblock')){
+                        // Get the editor instance associated with this object.
+                        var editor = $('textarea', widgetBeingDragged).ckeditorGet();
+                        editor.destroy();
+                    }
+                },
+
+                stop: function(event, ui){
+                    var widgetDragged = $(ui.item);
+                    if (widgetDragged.hasClass('document-textblock')){
+                        // Create an editor instance from this textarea.
+                        var editor = $('textarea', widgetDragged).ckeditor();
+                    }
+                }
+            });
+        } else {
+            // Refresh the sortable list by recognizing the new widget.
+            $('.document-body').sortable('refresh');
         }
     },
 
@@ -190,6 +287,8 @@ OC.editor = {
 
             var widgetSubmit = $('.add-document-widget-submit-button');
             widgetSubmit.unbind('click');
+
+            var widgetElement;
 
             // Bind the 'Done' button on the popup.
             widgetSubmit.click(function(event){
@@ -216,10 +315,23 @@ OC.editor = {
                         // Bind table actions with event handlers.
                         OC.editor.bindTableActionHandlers(appendedTableWrapper);
 
+                        widget = appendedTableWrapper;
+                        widgetElement = $('table', appendedTableWrapper);
+
+                        // Add widget handlers.
+                        OC.editor.bindWidgetHandlers(widget, widgetElement);
                     } else if (selectedOption.hasClass('text-block')){
                         var newTextBlock = OC.editor.widgets.textBlock();
                         $('.document-body').append(newTextBlock);
-                        $('.document-textblock').ckeditor();
+
+                        var appendedTextBlock = $('.document-body .document-textblock:last');
+                        $('textarea', appendedTextBlock).ckeditor(function(textarea){
+                            widgetElement = $('.cke', appendedTextBlock);
+                            widget = appendedTextBlock;
+
+                            // Add widget handlers.
+                            OC.editor.bindWidgetHandlers(widget, widgetElement);
+                        });
                     }
                 }
 
@@ -254,7 +366,7 @@ OC.editor = {
 
         tableRow: _.template('<tr><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>'),
 
-        textBlock: _.template('<textarea class="document-textblock document-element"></textarea>')
+        textBlock: _.template('<div class="document-textblock document-element"><textarea></textarea></div>')
     },
 
     bindTableActionHandlers: function(tableWrapper){
@@ -760,7 +872,7 @@ $(document).ready(function(){
                 }
             } else if (documentElement.hasClass('document-textblock')){
                 element.type = 'textblock';
-                element.data = documentElement.val();
+                element.data = $('textarea', documentElement).val();
             }
 
             serializedElements.push(element);
@@ -782,6 +894,4 @@ $(document).ready(function(){
         event.preventDefault();
         return false;
     });
-
-
 });
