@@ -281,11 +281,11 @@ STRINGS = {
             'ACCOUNT_CREATE_SUCCESS': 'Congratulations! Now confirm your account',
             'EMAIL_CONFIRMATION_MSG': (
                 '%s,\n\nWelcome to OpenCurriculum! Thank you for helping us push '
-                'open education forward.\n\nConfirm your account click on this link '
-                '(or copy-pasting it in a browser): %s\n\n'
+                'open education forward.\n\nConfirm your account by clicking on this link '
+                '(or copy-and-pasting it in the browser): %s\n\n'
                 'If you experience any problems with confirming your account, let us '
                 'know at %s or simply reply to this email.\n\n'
-                'See you on OpenCurriculum,\n\nVarun from OpenCurriculum'
+                'See you on OpenCurriculum,\n\nVarun'
             ),
             'EMAIL_CONFIRMATION_SUBJECT': 'Confirm your new OpenCurriculum account',
             'EMAIL_CONFIRMATION_SUCCESS': 'Congratulations! Your account is now active and ready to go!',
