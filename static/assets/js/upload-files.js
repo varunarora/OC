@@ -152,22 +152,36 @@ OC.upload = {
             formatted_filesize = size + " B";
         }
 
-        var filename = $(this)[0].files[0].name;
-        OC.upload.addToUploadList(
-            filename, filename, formatted_filesize, 'manual-item');
-        OC.upload.manual_to_upload_files.push(filename);
+        // If filesize > 5MB, prompt user to use filepicker for the same.
+        if (size > 5242880){
+            var filepickerPrompt = OC.customPopup('.upload-filepicker-suggest-dialog');
+            $('.filepicker-suggest', filepickerPrompt.dialog).click(
+                function(event){
+                    filepickerPrompt.close();
 
-        OC.upload.newFileUploadListener();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
+                }
+            );
+        } else {
+            var filename = $(this)[0].files[0].name;
+            OC.upload.addToUploadList(
+                filename, filename, formatted_filesize, 'manual-item');
+            OC.upload.manual_to_upload_files.push(filename);
 
-        var numberOfFiles = $('form.files-upload-rename input.manual-upload').length;
-        var newFileInput = $('<input/>', {
-            'class': 'manual-upload',
-            'type': 'file'
-        });
+            OC.upload.newFileUploadListener();
 
-        newFileInput.change(OC.upload.onFileInputChange);
+            var numberOfFiles = $('form.files-upload-rename input.manual-upload').length;
+            var newFileInput = $('<input/>', {
+                'class': 'manual-upload',
+                'type': 'file'
+            });
 
-        $('form.files-upload-rename').append(newFileInput);
+            newFileInput.change(OC.upload.onFileInputChange);
+
+            $('form.files-upload-rename').append(newFileInput);
+        }
     },
 
     preSubmissionHandler: function(event){
