@@ -169,23 +169,26 @@ var OC = {
         });
     },
 
-    customPopup: function(blockToPopup, options){
+    customPopup: function(elementSelector, options){
         var closeCallback = null;
         if (options){
             closeCallback = options.closeCallback || closeCallback;
         }
 
         // Unbind old events from popup escape/background click.
-        $('.oc-popup-exit', blockToPopup).unbind('click');
+        $('.oc-popup-exit', elementSelector).unbind('click');
         $('.popup-background').unbind('click');
 
+        var blockToPopup = $(elementSelector);
+
         // Launch popup on init.
-        launchPopup($(blockToPopup));
+        launchPopup(blockToPopup);
 
         // Attach handler to close popup.
-        attachEscapePopupHandler($(blockToPopup));
+        attachEscapePopupHandler(blockToPopup);
 
         return {
+            dialog: blockToPopup,
             close: closePopup
         };
 
