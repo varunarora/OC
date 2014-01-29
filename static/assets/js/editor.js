@@ -415,20 +415,23 @@ OC.editor = {
                 }
 
                 // Set the colspan of the bottom row to the new column length.
-                $('tr:last td', table).attr('colspan', tableColumns.length + 1);
+                $('table tr:last td', tableWrapper).attr('colspan', tableColumns.length + 1);
             }
 
             // Recalculate and set widths of all columns.
             $('.document-body table col').width((100 / (tableColumns.length + 1)) + '%');
+            
+            // Adjust the position of the handlers.
+            OC.editor.addNewColumnHandle(tableWrapper);
         });
     },
 
     getNewColumnID: function(tableWrapper){
         var tableID = $('table', tableWrapper).attr('id'),
-            tableNumber = tableID.substring(8);
+            tableNumber = tableID.substring(6);
 
         var columns = $('col', tableWrapper);
-        return 'column-' + tableID + '-' + (columns.length + 1);
+        return 'column-' + tableNumber + '-' + (columns.length);
     },
 
     initTableResize: function(tableWrapper){
@@ -472,10 +475,14 @@ OC.editor = {
         columnResizeWrapper.css('margin-bottom', '-' + (
             tableHeader.outerHeight() + parseInt(table.css('margin-top'), 10)) + 'px');
 
+        OC.editor.makeHandlerDraggable($('.column-handle', columnResizeWrapper), tableNumber);
+    },
+
+    makeHandlerDraggable: function(elementSelector, tableNumber){
         // Make the resize handle draggable on the x-axis, with the constraint
         //    being the 'th' row width.
         var handleID, endIndex, columnNumber, column;
-        $('.column-handle', columnResizeWrapper).draggable({
+        elementSelector.draggable({
             axis: 'x',
             containment: '.column-resize',
             start: function(event, ui){
@@ -509,7 +516,54 @@ OC.editor = {
                     ((originalWidth - newWidth) + rightColumn.width()));
             }
         });
+    },
 
+    addNewColumnHandle: function(tableWrapper){
+        var columns = $('tr > th', tableWrapper);
+
+        // Reposition the existing column handles.
+        var columnResizeWrapper = $('.column-resize', tableWrapper),
+            columnHandles = $('.column-resize .column-handle', tableWrapper);
+
+        var table = $('table', tableWrapper),
+            tableHeader = $('tr:first', tableWrapper),
+            tableNumber = table.attr('id').substring(6),
+            tableLeft = tableWrapper.position().left;
+
+        var i;
+        // Don't iterate through the last column.
+        for (i = 0; i < columns.length - 2; i++){
+            var currentColumn = $(columns[i]),
+                currentColumnHandler = $(columnHandles[i]);
+
+            // Calculate the offset of the column from the left edge of the table.
+            var columnLeft = currentColumn.position().left;
+
+            // Set the new left of the handle based on the new column position.
+            var left = (columnLeft - tableLeft) + (
+                currentColumn.outerWidth() - currentColumnHandler.width()/2);
+            currentColumnHandler.css({ 'left': left });
+        }
+
+        var columnHandle = $('<div/>', {
+            'class': 'column-handle', 'id': 'column-' + tableNumber + '-' + i + '-handle'});
+            columnResizeWrapper.append(columnHandle);
+
+        var appendedColumnHandle = $('.column-handle:last', columnResizeWrapper);
+
+        var appendedColumn = $(columns[i]),
+            appendedColumnLeft = appendedColumn.position().left;
+        var appendColumnHandleLeft = (appendedColumnLeft - tableLeft) + (
+            appendedColumn.outerWidth() - appendedColumnHandle.width()/2);
+
+        appendedColumnHandle.css({'left': appendColumnHandleLeft + 'px'});
+
+        // Set the handle height and left position.
+        var currentColumnHeight = tableHeader.outerHeight();
+        appendedColumnHandle.height(currentColumnHeight);
+        appendedColumnHandle.css('margin-bottom', '-' + currentColumnHeight + 'px');
+
+        OC.editor.makeHandlerDraggable(appendedColumnHandle, tableNumber);
     },
 
     addInlineLinkPopout: function(callback, currentText, currentURL){
