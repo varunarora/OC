@@ -1155,13 +1155,10 @@ def new_project_collection(request, project_slug):
     new_collection = Collection()
     new_collection.title = request.POST.get('new_collection_name')
 
-    from django.contrib.contenttypes.models import ContentType
-    collection_content_type = ContentType.objects.get_for_model(Collection)
-
     new_collection.host = collection
     new_collection.visibility = request.POST.get('collection_visibility')
     new_collection.slug = _get_fresh_collection_slug(
-        request.POST.get('new_collection_name'), collection, collection_content_type)
+        request.POST.get('new_collection_name'), collection, flattened_tree)
     new_collection.creator = request.user    
     new_collection.save()
 
@@ -1199,7 +1196,7 @@ def new_user_collection(request, username):
         new_collection.host = collection
         new_collection.visibility = request.POST.get('collection_visibility')
         new_collection.slug = _get_fresh_collection_slug(
-            request.POST.get('new_collection_name'), collection)
+            request.POST.get('new_collection_name'), collection, flattened_tree)
         new_collection.creator = user
         new_collection.save()
 
@@ -1223,39 +1220,31 @@ def new_user_collection(request, username):
         return redirect(
                 'user:user_profile',
                 username=username,
-            ) 
+            )
 
 
-def _get_fresh_collection_slug(title, collection, content_type=None):
+def _get_fresh_collection_slug(title, collection, flattened_tree):
     from django.template.defaultfilters import slugify
     slug = slugify(title)
 
-    if not content_type:
-        from django.contrib.contenttypes.models import ContentType
-        content_type = ContentType.objects.get_for_model(Collection)
+    collection = next(
+        tree_item for tree_item in flattened_tree if tree_item.slug == slug)
 
-    # Check if this slug has already been taken by another project.
-    collections_with_slug = Collection.objects.filter(
-        slug=slug, host_id=collection.id, host_type=content_type
-    )
-    num_projects_with_slug = collections_with_slug.count()
-    if num_projects_with_slug != 0:
-        slug = _apply_additional_collection_slug(slug, 1, collection, content_type)
+    if collection:
+        slug = _apply_additional_collection_slug(
+            slug, 1, collection, flattened_tree)
 
     return slug
 
 
-def _apply_additional_collection_slug(slug, depth, collection, content_type):
+def _apply_additional_collection_slug(slug, depth, collection, flattened_tree):
     attempted_slug = slug + "-" + str(depth)
-    collections = Collection.objects.filter(
-        slug=slug + "-" + str(depth),
-        host_id=collection.id,
-        host_type=content_type
-    )
-    if collections.count() == 0:
+    collections = [col for col in flattened_tree if col.slug == attempted_slug]
+
+    if len(collections) == 0:
         return attempted_slug
     else:
-        return _apply_additional_collection_slug(slug, depth + 1, collection, content_type)
+        return _apply_additional_collection_slug(slug, depth + 1, collection, flattened_tree)
 
 
 def file_upload(request):
