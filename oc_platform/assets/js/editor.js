@@ -276,8 +276,8 @@ OC.editor = {
             var tableRows = $('tr', tableWrapper);
             var tableColumns = $('tr:first th', tableWrapper);
 
-            if (tableColumns.length >= 3){
-                OC.popup('We only permit 3 columns per document at this stage. Sorry ' +
+            if (tableColumns.length >= 4){
+                OC.popup('We only permit 4 columns per document at this stage. Sorry ' +
                     'for the inconvenience.', 'Cannot add new column');
             } else {
                 // Append a 'th' to the header row.
