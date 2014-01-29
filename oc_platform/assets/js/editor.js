@@ -186,13 +186,19 @@ OC.editor = {
                 for (k = 0; k < cells.length; k++){
                     $(cells[k]).attr('contenteditable', 'true');
                 }
+
+                OC.editor.bindWidgetHandlers(widget, widgetElement);
             } else if (widget.hasClass('document-textblock')){
+                var textblockTextarea = $('<textarea/>', {
+                    'html': widget.html()
+                });
+                widget.html(textblockTextarea);
+
                 $('textarea', widget).ckeditor(function(textarea){
                     widgetElement = $('.cke', widget);
+                    OC.editor.bindWidgetHandlers(widget, widgetElement);
                 });
             }
-
-            OC.editor.bindWidgetHandlers(widget, widgetElement, true);
         }
 
         OC.editor.initWidgetSorting(true);
@@ -324,6 +330,7 @@ OC.editor = {
 
                         // Add widget handlers.
                         OC.editor.bindWidgetHandlers(widget, widgetElement);
+                        OC.editor.initWidgetSorting();
                     } else if (selectedOption.hasClass('text-block')){
                         var newTextBlock = OC.editor.widgets.textBlock();
                         $('.document-body').append(newTextBlock);
