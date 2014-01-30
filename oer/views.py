@@ -146,25 +146,40 @@ def view_resource(request, resource_id, resource_slug):
                     # project collections
                     import oer.CollectionUtilities as cu
 
-                    if match.namespace == 'projects' and (
-                        match.url_name == 'project_browse' or match.url_name == 'list_collection'):
-                            from projects.models import Project
-                            project = Project.objects.get(slug=match.kwargs['project_slug'])
+                    if match.namespace == 'projects' and match.url_name == 'project_browse':
+                        from projects.models import Project
+                        project = Project.objects.get(slug=match.kwargs['project_slug'])
 
-                            (browse_tree, flattened_tree) = cu._get_collections_browse_tree(project.collection)
+                        (browse_tree, flattened_tree) = cu._get_collections_browse_tree(project.collection)
 
-                            collection = next(
-                                tree_item for tree_item in flattened_tree if resource in list(tree_item.resources.all()))
+                        collection = project.collection
+
+                    elif match.namespace == 'projects' and match.url_name == 'list_collection':
+                        from projects.models import Project
+                        project = Project.objects.get(slug=match.kwargs['project_slug'])
+
+                        (browse_tree, flattened_tree) = cu._get_collections_browse_tree(project.collection)
+
+                        collection = next(
+                            tree_item for tree_item in flattened_tree if match.kwargs['collection_slug'] == tree_item.slug)
 
                     # If the referrer is a user, find the collection in the
                     # user collections
-                    elif match.url_name == 'user_profile' or match.url_name == 'list_collection':
-                            from user_account.models import UserProfile
-                            user_profile = UserProfile.objects.get(user__username=match.kwargs['username'])
-                            (browse_tree, flattened_tree) = cu._get_collections_browse_tree(user_profile.collection)
+                    elif match.url_name == 'user_profile':
+                        from user_account.models import UserProfile
+                        user_profile = UserProfile.objects.get(user__username=match.kwargs['username'])
+                        (browse_tree, flattened_tree) = cu._get_collections_browse_tree(user_profile.collection)
 
-                            collection = next(
-                                tree_item for tree_item in flattened_tree if resource in list(tree_item.resources.all()))
+                        # Match based on first found resource in all of user profile tree.
+                        collection = user_profile.collection
+
+                    elif match.url_name == 'list_collection':
+                        from user_account.models import UserProfile
+                        user_profile = UserProfile.objects.get(user__username=match.kwargs['username'])
+                        (browse_tree, flattened_tree) = cu._get_collections_browse_tree(user_profile.collection)
+
+                        collection = next(
+                            tree_item for tree_item in flattened_tree if match.kwargs['collection_slug'] == tree_item.slug)
 
                     else:
                         # Return the first collection.
@@ -826,6 +841,10 @@ def edit_resource(request, resource_id):
         # Fetch the resource from its ID using the QuerySet API.
         resource = Resource.objects.get(pk=resource_id)
 
+        # Fetch collection where this resource was.
+        collection_id = request.GET.get('collection', None)
+        collection = Collection.objects.get(pk=int(collection_id))
+
         if request.user == resource.user or request.user in resource.collaborators.all():
 
             from django.contrib.contenttypes.models import ContentType
@@ -834,18 +853,18 @@ def edit_resource(request, resource_id):
             attachment_content_type = ContentType.objects.get_for_model(Attachment)
 
             if resource.revision.content_type == document_content_type:
-                return edit_document(request, resource)
+                return edit_document(request, resource, collection)
 
             elif resource.revision.content_type == link_content_type:
                 (hostname, url_data) = get_url_hostname(resource.revision.content.url)
 
                 if "youtube" in hostname or "vimeo" in hostname:
-                    return edit_video(request, resource)
+                    return edit_video(request, resource, collection)
                 else:
-                    return edit_url(request, resource)
+                    return edit_url(request, resource, collection)
 
             elif resource.revision.content_type == attachment_content_type:
-                return edit_attachment(request, resource)
+                return edit_attachment(request, resource, collection)
 
         else:
             raise PermissionDenied
@@ -854,16 +873,13 @@ def edit_resource(request, resource_id):
         raise Http404
 
 
-def _prepare_edit_resource_context(resource):
+def _prepare_edit_resource_context(resource, collection):
     # Get all licenses
     from license.models import License
     licenses = License.objects.all()
 
-    # Figure out if this resource belongs to a project or user profile
-    resource_collection = Collection.objects.get(resources__id=resource.id)
-
     import oer.CollectionUtilities as cu
-    (host_type, host) = cu.get_collection_root(resource_collection)
+    (host_type, host) = cu.get_collection_root(collection)
 
     return {
         'licenses': licenses,
@@ -872,8 +888,8 @@ def _prepare_edit_resource_context(resource):
     }
 
 
-def edit_url(request, resource):
-    edit_resource_context = _prepare_edit_resource_context(resource)
+def edit_url(request, resource, collection):
+    edit_resource_context = _prepare_edit_resource_context(resource, collection)
 
     form_context = {}
     if request.method == 'POST':
@@ -904,8 +920,8 @@ def edit_url(request, resource):
     return render(request, 'add-url.html', context)
 
 
-def edit_video(request, resource):
-    edit_resource_context = _prepare_edit_resource_context(resource)
+def edit_video(request, resource, collection):
+    edit_resource_context = _prepare_edit_resource_context(resource, collection)
 
     form_context = {}
     if request.method == 'POST':
@@ -936,8 +952,8 @@ def edit_video(request, resource):
     return render(request, 'add-video.html', context)
 
 
-def edit_document(request, resource):
-    edit_resource_context = _prepare_edit_resource_context(resource)
+def edit_document(request, resource, collection):
+    edit_resource_context = _prepare_edit_resource_context(resource, collection)
 
     form_context = {}
     if request.method == 'POST':
@@ -971,8 +987,8 @@ def edit_document(request, resource):
     return render(request, 'document.html', context)
 
 
-def edit_attachment(request, resource):
-    edit_resource_context = _prepare_edit_resource_context(resource)
+def edit_attachment(request, resource, collection):
+    edit_resource_context = _prepare_edit_resource_context(resource, collection)
 
     form_context = {}
     if request.method == 'POST':

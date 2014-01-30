@@ -1,8 +1,8 @@
 <div class="article-actions">
 	<ul>
-		<!--<li class="download-action"><a href=""><span class="icon"></span>Download as... <span class="horizontal-caret-up breadcrumb-caret"></span></li>-->
-		{% if user == resource.user %}
-        <li class="edit-action"><a href="{% url resource:edit_resource resource_id=resource.id %}"><span class="icon"></span>Edit</a></li>
+	<!--<li class="download-action"><a href=""><span class="icon"></span>Download as... <span class="horizontal-caret-up breadcrumb-caret"></span></li>-->
+        {% if user == resource.user %}
+        <li class="edit-action"><a href="{% url resource:edit_resource resource_id=resource.id %}?collection={{ resource_collection.id }}"><span class="icon"></span>Edit</a></li>
         {% endif %}
         {% if user.is_authenticated %}
         <li class="add-action"><a href=""><span class="icon"></span>Add to...</a></li>
