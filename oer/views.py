@@ -1243,12 +1243,15 @@ def _get_fresh_collection_slug(title, collection, flattened_tree):
     from django.template.defaultfilters import slugify
     slug = slugify(title)
 
-    collection = next(
-        tree_item for tree_item in flattened_tree if tree_item.slug == slug)
+    try:
+        collection = next(
+            tree_item for tree_item in flattened_tree if tree_item.slug == slug)
 
-    if collection:
-        slug = _apply_additional_collection_slug(
-            slug, 1, collection, flattened_tree)
+        if collection:
+            slug = _apply_additional_collection_slug(
+                slug, 1, collection, flattened_tree)
+    except:
+        return slug
 
     return slug
 
