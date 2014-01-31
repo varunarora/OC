@@ -186,8 +186,6 @@ def delete_comment_tree(comment):
     (comment.comments, flatted_comment_descendants) = comments_builder.build_tree()
 
     for child_comment in flatted_comment_descendants:
-        child_comment.delete()
-
         # Delete all votes associated with this comment
         votes = Vote.objects.filter(
             parent_type=comment_ct, parent_id=child_comment.id
@@ -195,6 +193,8 @@ def delete_comment_tree(comment):
 
         for vote in votes:
             vote.delete()
+
+        child_comment.delete()
 
 
 def get_favorite_state(request, resource_id, user_id):
