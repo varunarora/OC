@@ -483,7 +483,6 @@ def project_settings(request, project_slug):
                 'success': 'Successfully saved your changes.'
             }            
         else:
-            print settings_form.errors
             submit_context = {
                 'error': 'There were errors with your submission.'
             }
@@ -509,6 +508,27 @@ def requests(request, project_slug):
                   ' &lsaquo; ' + project.title)
     }
     return render(request, 'project/pending-invites.html', context)
+
+
+def administration(request, project_slug):
+    project = Project.objects.get(slug=project_slug)
+
+    if request.method == "POST":
+        from forms import ProjectDelete
+        ProjectDelete(request.POST, project)
+
+        from django.contrib import messages
+        messages.success(request,
+            'Project titled \'%s\' has been deleted successfully.' % project.title)
+
+        return redirect('user:user_profile', username=request.user.username)
+
+    context = {
+        'project': project,
+        'title': (_(settings.STRINGS['projects']['ADMINISTRATION']) +
+                  ' &lsaquo; ' + project.title)
+    }
+    return render(request, 'project/delete.html', context)
 
 
 def view_project_resource_by_id(request, project_slug, resource_id):

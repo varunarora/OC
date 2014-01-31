@@ -33,6 +33,7 @@ urlpatterns = patterns(
     url(r'^(?P<project_id>\d+)/reposition-cover/$', views.reposition_cover_picture, name='reposition_cover_picture'),
     url(r'^(?P<project_id>\d+)/request-invite/$', views.request_invite, name='request_invite'),
 
+    url(r'^(?P<project_slug>[\w\-]+)/settings/administration/', views.administration, name='project_administration'),
     url(r'^(?P<project_slug>[\w\-]+)/settings/requests/', views.requests, name='project_requests'),
     url(r'^(?P<project_slug>[\w\-]+)/settings/', views.project_settings, name='project_settings'),
 

@@ -1,0 +1,38 @@
+{% include 'partials/header.html' %}
+{% include 'project/header.html' with page="settings" %}
+
+<div class="center-stage">
+    <div id="fill-panel" class="panel-left">
+        {% include 'project/partials/settings-submenu.html' with submenu='administration' %}
+    </div>
+    <div id="key-panel" class="panel-right">
+        <h2>Administration</h2>
+        <p><h4>Delete this project</h4></p>
+        <p>Would you like to delete this project, and all its contents (resources, folders, discussions, memberships, etc.)?</p>
+        <p><button class="action-button page-submit-button delete-project-button" />Yes, delete project</button></p>
+        </div>
+    </div>
+</div>
+
+<div class="confirm-project-delete-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Are you sure you want to delete this project?</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        Are you sure you want to delete all resources, folders, discussions and memberships of this project? Please note that this action is irreversible.
+        <div class="confirm-project-delete-submit-wrapper oc-popup-submit-wrapper-set">
+            <form action="/project/{{ project.slug }}/settings/administration/" method="POST" id="project-delete-form">
+                {% csrf_token %}
+                <div class="oc-popup-submit-button-set">
+                    <button class="collection-button confirm-project-delete-submit-button oc-popup-submit-button-set-button">Confirm delete</button>
+                    <button class="action-button cancel-project-delete-submit-button oc-popup-submit-button-set-button oc-popup-exit">Cancel</div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="popup-background"></div>
+
+{% include 'project/footer.html' %}
+{% include 'partials/footer.html' %}

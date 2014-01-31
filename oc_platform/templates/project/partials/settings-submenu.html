@@ -3,6 +3,7 @@
         <ul class="settings-submenu">
             <li{% if submenu == "general" %} class="selected-submenu-item"{% endif %}><a href="/project/{{ project.slug }}/settings/">General settings</a></li>
             <li{% if submenu == "requests" %} class="selected-submenu-item"{% endif %}><a href="/project/{{ project.slug }}/settings/requests/">Pending requests</a></li>
+            <li{% if submenu == "administration" %} class="selected-submenu-item"{% endif %}><a href="/project/{{ project.slug }}/settings/administration/">Administration</a></li>
         </ul>
     </nav>
 </aside>

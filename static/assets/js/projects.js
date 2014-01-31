@@ -360,6 +360,16 @@ OC.projects = {
         requestorItem.addClass('user-failure');
     },
 
+    bindProjectDeleteButton: function(){
+        $('.delete-project-button').click(function(event){
+            projectDeletePopup = OC.customPopup('.confirm-project-delete-dialog');
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+    },
+
     launch: {
         init: function(){
             this.bindClickScrolls();
@@ -486,4 +496,7 @@ jQuery(document).ready(function ($) {
     OC.projects.bindInviteAcceptButton();
 
     OC.projects.bindInviteDeclineButton();
+
+    // Initialize the projects deletion button on settings page.
+    OC.projects.bindProjectDeleteButton();
 });

@@ -90,3 +90,24 @@ class ProjectSettings(forms.ModelForm):
     class Meta:
         exclude = ('members',)
         model = Project
+
+
+class ProjectDelete():
+    def __init__(self, request, instance):
+        # Delete all the project's collection (which deletes all the resources in it).
+        from oer.views import delete_individual_collection
+        delete_individual_collection(instance.collection)
+
+        # Delete all the discussion comments (including posts) & votes.
+        from interactions.views import delete_comment_tree
+
+        from django.contrib.contenttypes.models import ContentType
+        project_ct = ContentType.objects.get_for_model(Project)
+
+        root_comments = Comment.objects.filter(
+            parent_id=instance.id, parent_type=project_ct)
+        for comment in root_comments:
+            delete_comment_tree(comment)
+
+        # Delete the project (deletes memberships and administration).
+        instance.delete()

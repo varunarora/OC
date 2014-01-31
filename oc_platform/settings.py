@@ -325,6 +325,7 @@ STRINGS = {
         'DISCUSSION_BOARD_TITLE': 'Discussion Board',
         'SETTINGS_TITLE': 'Settings',
         'REQUESTS_TITLE': 'Pending requests',
+        'ADMINISTRATION': 'Administration',
         'invite': {
             'SUCCESS_TITLE': 'Successfully received your projects invite',
             'FAILURE': 'Failed to submit form'
