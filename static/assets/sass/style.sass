@@ -757,6 +757,45 @@ nav#user-menu
 	z-index: 5
 	width: 210px
 
+	ul
+		padding: 10px 0px
+
+		li
+			height: 24px
+			padding: 0px
+
+			a
+				.profile-icon, .dashboard-icon, .logout-icon
+					width: 13px
+					height: 15px
+					margin-right: 10px
+					margin-left: 6px
+					display: inline-block
+					background-position: 0px 2px
+					background-repeat: no-repeat
+
+				span.profile-icon
+					background-image: url('../images/user-icon.png')
+
+				&:hover
+					span.profile-icon
+						background-image: url('../images/user-icon-hover.png')
+
+				span.dashboard-icon
+					background-image: url('../images/dashboard-icon.png')
+
+				&:hover
+					span.dashboard-icon
+						background-image: url('../images/dashboard-icon-hover.png')
+
+				span.logout-icon
+					background-position: 0px 4px
+					background-image: url('../images/logout-icon.png')
+
+				&:hover
+					span.logout-icon
+						background-image: url('../images/logout-icon-hover.png')
+
 	.floating-menu-spacer
 		width: 210px
 		background: url('../images/user-nav-pointer.png') no-repeat
