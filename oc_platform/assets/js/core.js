@@ -1768,6 +1768,16 @@ var OC = {
         }
     },
 
+    initPrintResource: function(){
+        $('.print-action a').click(function(event){
+            window.print();
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+    },
+
     initEditResource: function(){
         $('form.resource-create-edit-form #submission-buttons button[type=submit]').click(
             function(event){
@@ -2912,6 +2922,8 @@ jQuery(document).ready(function ($) {
     OC.comments.initRenderComments();
 
     OC.initUpvoteDownvoteResource();
+
+    OC.initPrintResource();
 
     //OC.initEditResource();
 

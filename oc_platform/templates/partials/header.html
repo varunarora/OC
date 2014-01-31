@@ -32,6 +32,7 @@
 			<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ie.css" />
 		<![endif]-->
 		<link type="text/css" href="{{ STATIC_URL }}css/style.css" rel="stylesheet" />
+		<link type="text/css" href="{{ STATIC_URL }}css/print.css" rel="stylesheet" media="print" />
 		<!--[if lt IE 9]>
 			<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ie-override.css" />
 		<![endif]-->
@@ -76,7 +77,9 @@
 								<nav id="user-menu">
 									<div class="floating-menu-spacer"></div>
 									<ul>
-										<li><a href="/logout/">Logout</a></li>
+										<li><a href="{% url user:user_profile username=user.username %}"><span class="profile-icon"></span>My profile</a></li>
+										<li><a href="{% url dashboard %}"><span class="dashboard-icon"></span>My dashboard</a></li>
+										<li><a href="/logout/"><span class="logout-icon"></span>Logout</a></li>
 									</ul>
 								</nav>
 								<nav id="notifications-menu">

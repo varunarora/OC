@@ -8,6 +8,9 @@
         <li class="add-action"><a href=""><span class="icon"></span>Add to...</a></li>
         {% endif %}
         <li class="history-action"><a href="{% url resource:view_history resource_id=resource.id %}"><span class="icon"></span>View history</a></li>
+        {% if resource_type == 'document' %}
+        <li class="print-action"><a href=""><span class="icon"></span>Print</a></li>
+        {% endif %}
         <li class="share-action"><a href=""><span class="icon"></span>Share <span class="horizontal-caret-up breadcrumb-caret"></span></a></li>
         {% include 'partials/share.html' %}
 	</ul>

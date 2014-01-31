@@ -75,6 +75,7 @@ def view_resource(request, resource_id, resource_slug):
 
         if resource.revision.content_type == document_content_type:
             resource.data = build_document_view(resource.revision.content_id)
+            resource_type = "document"
 
         elif resource.revision.content_type == link_content_type:
             import urlparse
@@ -86,6 +87,7 @@ def view_resource(request, resource_id, resource_slug):
 
             # In either case, use an appropriate pattern matching to obtain the
             #     video #.
+            resource_type = "video"
             if "youtube" in hostname:
                 query = urlparse.parse_qs(url_data.query)
                 video = query["v"][0]
@@ -95,6 +97,9 @@ def view_resource(request, resource_id, resource_slug):
             elif "vimeo" in hostname:
                 resource.video_tag = url_data.path.split('/')[1]
                 resource.provider = "vimeo"
+
+            else:
+                resource_type = "url"
 
         # If the resource is a kind of attachment, format its metadata.
         elif resource.revision.content_type == attachment_content_type:
@@ -113,6 +118,8 @@ def view_resource(request, resource_id, resource_slug):
             # Determine the extension of the attachment.
             from os.path import splitext
             name, resource.extension = splitext(resource.revision.content.file.name)
+
+            resource_type = "attachment"
 
         # Fetch the number of resources that have been uploaded by the user who
         #     has created this resource.
@@ -198,6 +205,7 @@ def view_resource(request, resource_id, resource_slug):
 
         context = {
             'resource': resource,
+            'resource_type': resource_type,
             'host_content_type': resource_ct,
             'comments_content_type': comments_ct,
             'document_element_content_type': document_element_content_type,
