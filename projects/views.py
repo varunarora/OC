@@ -354,6 +354,7 @@ def discussions(request, project_slug):
 
     context = {
         'posts': posts,
+        'host_content_type': comments_ct,
         'comments_content_type': comments_ct,
         'project': project,
         'title': (_(settings.STRINGS['projects']['DISCUSSION_BOARD_TITLE']) +
