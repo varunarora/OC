@@ -234,7 +234,7 @@ OC.editor = {
             'title': 'Delete block'
         });
         deleteButton.css({
-            'left': widgetElement.position().left + widgetElement.width() + 10
+            'left': widgetElement.offset().left + widgetElement.width() + 10
         });
         widget.prepend(deleteButton);
         widgetDelete = $('.document-element-delete-button', widget);
@@ -249,7 +249,7 @@ OC.editor = {
         moveHandle.css({
             'height': widget.height(),
             'margin-bottom': widget.height(),
-            'left': widgetElement.position().left - 35
+            'left': widgetElement.offset().left - 35
         });
 
         widget.prepend(moveHandle);
