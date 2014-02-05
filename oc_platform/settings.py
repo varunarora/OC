@@ -147,6 +147,7 @@ MIDDLEWARE_CLASSES = (
 
 AUTHENTICATION_BACKENDS = (
     'user_account.backends.SocialModelBackend',
+    'user_account.backends.ConfirmAccountBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -218,6 +219,7 @@ LOGGING = {
 AUTH_PROFILE_MODULE = 'user_account.UserProfile'
 
 RECAPTCHA_PRIVATE_KEY = '6LdyZOsSAAAAAI5o9s7tozx0lAab6mnkfcfLyoav'
+DEFAULT_PROJECT_KEY = 1
 
 STRINGS = {
     'global': {
@@ -278,11 +280,12 @@ STRINGS = {
                 'PUBLISHER': 'Publisher',
                 'OTHER': 'Other'
             },
-            'ACCOUNT_CREATE_SUCCESS': 'Congratulations! Now confirm your account',
+            'ACCOUNT_CREATE_SUCCESS': 'Congratulations! Now check your email to confirm your account',
+            'ACCOUNT_CONFIRMATION_EMAIL_SUBJECT': 'Confirm your OpenCurriculum account',
             'EMAIL_CONFIRMATION_MSG': (
                 '%s,\n\nWelcome to OpenCurriculum! Thank you for helping us push '
                 'open education forward.\n\nConfirm your account by clicking on this link '
-                '(or copy-and-pasting it in the browser): %s\n\n'
+                '(or copy-and-pasting it in the browser):\n%s\n\n'
                 'If you experience any problems with confirming your account, let us '
                 'know at %s or simply reply to this email.\n\n'
                 'See you on OpenCurriculum,\n\nVarun'

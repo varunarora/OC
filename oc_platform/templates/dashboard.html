@@ -1,0 +1,28 @@
+{% include 'partials/header.html' %}
+
+<div class="center-stage">
+    <h2>My Curriculum dashboard</h2>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Stage</th>
+            <th>Last changed at</th>
+            <th>Last change note</th>
+        </tr>
+        {% for item in dashboard_items %}
+        <tr>
+            <td><a href="{% url item.url %}">{{ item.title }}</a></td>
+            <td>{{ item.breadcrumb }}</td>
+            <td>{{ item.stage }}</td>
+            <td>{{ item.revision.created }}</td>
+            <td>{{ item.revision.log }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="5"><a class="table-action table-action-new new-row-action"> Add resource or folder</a></td>
+        </tr>
+    </table>
+</div>
+
+{% include 'partials/footer.html' %}

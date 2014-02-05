@@ -14,7 +14,7 @@ class UserProfile(models.Model):
     headline = models.CharField(max_length=256, null=True, blank=True)
     dob = models.DateTimeField()
     gender = models.NullBooleanField()
-    location = models.CharField(max_length=256)
+    location = models.CharField(max_length=256, null=True, blank=True)
     profession = models.CharField(max_length=256)
     profile_pic = models.ImageField(upload_to='images/users', blank=True)
     profile_pic_position = models.ForeignKey(ImagePosition)

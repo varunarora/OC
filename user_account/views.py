@@ -7,7 +7,7 @@ from oc_platform import APIUtilities
 import json
 
 
-def register(request):
+def old_register(request):
     """Renders the register page for a new user, and performs validation upon
     submissions.
 
@@ -62,6 +62,67 @@ def register(request):
     # Build the form from previous inputs and Google+ login data to
     #     pre-populate form.
     #registration_template += "?"
+    from AuthHelper import AuthHelper
+    context = dict(
+        AuthHelper.generateGPlusContext(request).items() + page_context.items()
+        + fields_context.items() + form_context.items())
+    return render(request, registration_template, context)
+
+
+def register(request):
+    """if request.user.is_authenticated():
+        return redirect('home')"""
+    # TODO(Varun): Make this more "function"al.
+    registration_template = 'register.html'
+    page_context = {
+        'title': _(settings.STRINGS['user']['REGISTER_TITLE'])
+    }
+
+    form_context = _prepare_registration_form_context()
+
+    # Context objects which render the form.
+    fields_context = {}
+
+    if request.method == "POST":
+        # Capture only thse inputs from the original form that need to be
+        #     returned in the case of an error with form validation.
+        form_fields_to_return = [
+            'first_name', 'last_name', 'email', 'dob_month', 'dob_date',
+            'dob_year', 'profile_pic', 'social_login', 'location',
+            'profession', 'username', 'gender', 'social_id'
+        ]
+        # TODO(Varun): Turn this into a non-short statement.
+        original_form_inputs = _get_original_form_values(
+            request, form_fields_to_return)
+
+        # Returns context if form registration fails, else redirects response.
+        (fields_context, user_creation_success) = _create_user(request)
+
+        if user_creation_success:
+            # Add message to confirm account.
+            from django.contrib import messages
+            messages.success(request, _(
+                settings.STRINGS['user']['register']['ACCOUNT_CREATE_SUCCESS']))
+        
+            from django.contrib.auth import authenticate, login
+            new_user = fields_context['new_user']
+
+            social_login = request.POST.get('social_login').lower() == "true"
+            if social_login:
+                authenticated_user = authenticate(social_id=int(request.POST.get('social_id')))
+                login(request, authenticated_user)
+            else:
+                authenticated_user = authenticate(
+                    username=new_user.username, password=request.POST.get('password'))
+                login(request, authenticated_user)
+
+            return redirect(
+                'user:user_profile', username=fields_context['new_user'].username)
+
+        fields_context['form'] = original_form_inputs
+
+    # Build the form from previous inputs and Google+ login data to
+    #     pre-populate form.
     from AuthHelper import AuthHelper
     context = dict(
         AuthHelper.generateGPlusContext(request).items() + page_context.items()
@@ -124,7 +185,6 @@ def _create_user(request):
 
     # Set recaptcha success defaults.
     recaptcha_success = False
-    password_success = False
 
     # Determine if social login was used or organic signup.
     social_login = request.POST.get('social_login').lower() == "true"
@@ -140,21 +200,18 @@ def _create_user(request):
     if social_login:
         # Ignore reCaptcha validation entirely.
         recaptcha_success = True
-        password_success = True
 
     else:
         if not recaptcha_success:
             # Check if the captcha entries were valid.
             recaptcha_success = _check_recaptcha(request, profile_form)
 
-        password_success = _check_password(request, user_form)
-
     # If social login, get social ID
     social_id = request.POST.get('social_id') if social_login else None
 
     # Only if passwords match, reCaptcha is successful and DoB is created,
     #     move forward with creating a user and connected Profile model.
-    if password_success and recaptcha_success and dob_success:
+    if recaptcha_success and dob_success:
         user_form = NewUserForm.NewUserForm(request.POST, social_login)
 
         if user_form.is_valid():
@@ -198,6 +255,9 @@ def _create_user(request):
                                 new_user, confirmation_code, request
                             )
 
+                            # Setup user social interactoin.
+                            _setup_user_social(new_user)
+
                             return ({
                                 'title': _(
                                     settings.STRINGS['user']['register']['ACCOUNT_CREATE_SUCCESS']),
@@ -208,12 +268,14 @@ def _create_user(request):
                             # TODO(Varun): Delete user and announce failure.
                             new_user.delete()
 
+                            print profile_form.errors
+
                             # TODO(Varun): Create a django error notication.
                             print "Profile object failed to be created"
                     else:
                         print profile_form.errors
                         new_user.delete()
-            except:
+            except Exception, e:
                 new_user.delete()
 
                 print user_form.errors
@@ -300,7 +362,7 @@ def _send_email_confirmation(user, confirmation_code, request):
     # Send the email with the fields prepared above.
     from django.core.mail import send_mail
     send_mail(
-        _(settings.STRINGS['user']['register']['ACCOUNT_CREATE_SUCCESS']),
+        _(settings.STRINGS['user']['register']['ACCOUNT_CONFIRMATION_EMAIL_SUBJECT']),
         confirmation_message, 'OpenCurriculum <%s>' % settings.SERVER_EMAIL,
         [user.email], fail_silently=False
     )
@@ -345,15 +407,19 @@ def confirm_account(request):
 
         # Return the user to their profile with the pop-up message that their
         #     account has been confirmed.
-        popup_message = _(
+        confirmation_message = _(
             settings.STRINGS['user']['register']['EMAIL_CONFIRMATION_SUCCESS'])
-        context = {
-            'popup_message': popup_message,
-            'title': popup_message
-        }
-        # TODO(Varun): Change redirection back to profile.html when
-        #     profile/auth ready.
-        return render(request, 'confirmation.html', context)
+
+        from django.contrib import messages
+        messages.success(request, confirmation_message)
+
+        from django.contrib.auth import authenticate, login
+        authenticated_user = authenticate(
+            username=user.username, confirm_account=True)
+        login(request, authenticated_user)
+
+        return redirect('user:user_profile', username=user.username)
+
     else:
         # Set the appropriate failure message and return failed page to user.
         failure_message = _(
@@ -451,15 +517,13 @@ def _prepare_user_from_form(user_form):
     first_name = user_form.cleaned_data['first_name']
     last_name = user_form.cleaned_data['last_name']
     username = user_form.cleaned_data['username']
-    password1 = user_form.cleaned_data['password']
-    password2 = user_form.cleaned_data['password2']
+    password = user_form.cleaned_data['password']
     email = user_form.cleaned_data['email']
 
     user_form.first_name = first_name
     user_form.last_name = last_name
     user_form.username = username
-    user_form.password1 = password1
-    user_form.password2 = password2
+    user_form.password = password
     user_form.email = email
 
 
@@ -601,7 +665,7 @@ def authenticate(request):
             if redirect_to:
                 return redirect(redirect_to)
             else:
-                return redirect('home')
+                return redirect('user:user_profile', username=user.username)
         else:
             # HACK(Varun): These GET parameters need to be moved to settings
             redirect_url = '/?login=true&error=inactive'
@@ -624,6 +688,21 @@ def logout_view(request):
         return redirect(request.META.get('HTTP_REFERER'))
     except:
         return redirect('home')
+
+def _setup_user_social(user):
+    # Add user to the default website project, generating a notification.
+    from projects.models import Project
+    handbook_project = Project.objects.get(pk=settings.DEFAULT_PROJECT_KEY)
+
+    from projects.views import add_user_to_project
+    add_user_to_project(user, handbook_project)
+
+
+def dashboard_view(request):
+    context = {
+        'title': 'My curriculum dashboard'
+    }
+    return render(request, 'dashboard.html', context)
 
 
 def googleplus_login(request):
@@ -1104,12 +1183,6 @@ def reset_password_set(request, username):
         'errors': errors
     }
     return render(request, 'reset-password.html', context)
-
-
-def easy_register(request):
-    context = {}
-    return render(request, 'event-register.html', context)
-
 
 
 # API Stuff below #/

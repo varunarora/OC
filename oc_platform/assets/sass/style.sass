@@ -2779,8 +2779,22 @@ ul.collaborators
 		margin-top: 60px
 		
 		.google-signin
+			width: 80%
+			margin: auto
+			margin-bottom: 10px
+			height: 40px
+
 			#signinButton
 				text-align: center
+
+		> .form-error
+			width: 80%
+			margin: auto
+
+		.form-error
+			text-align: left
+			display: block
+			background-color: transparent
 
 		table#signup-form-table
 			width: 80%
@@ -2798,6 +2812,11 @@ ul.collaborators
 			td.email-address-input-wrapper
 				input
 					width: 95%
+
+			tr.registration-username-password
+				td[colspan="2"]
+					input[type="text"]
+						width: 95%
 
 			.action-button
 				float: right
@@ -2834,6 +2853,10 @@ ul.collaborators
 
 				input[name=dob_year]
 					width: 80px
+
+			.terms-privacy-message
+				color: $light-font
+				font-size: 0.9em
 
 .or-wrapper
 	background-image: url("../images/signup-flank.png")

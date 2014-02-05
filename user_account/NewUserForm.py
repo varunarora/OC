@@ -23,6 +23,7 @@ class NewUserForm(UserCreationForm):
     first_name = forms.CharField(required=True)
     last_name = forms.CharField()
     username = forms.CharField(max_length=30, min_length=4, required=True)
+    password = forms.CharField(required=True)
 
     def __init__(self, request, social_login):
         """Initialize the user form object by modifying the Django request
@@ -47,6 +48,7 @@ class NewUserForm(UserCreationForm):
         else:
             # Copy the password field into password1 for validation
             newRequest.__setitem__('password1', request.get('password'))
+            newRequest.__setitem__('password2', request.get('password'))
 
         # Put timestamps of last login and date of joining of user.
         from datetime import datetime
@@ -164,6 +166,7 @@ class NewUserProfileForm(ModelForm):
         gender: '1' for Male or '0' for Female.
     """
     profile_pic_tmp = open(settings.MEDIA_ROOT + 'profile/' + 'default.jpg')
+    social_id = forms.IntegerField()
     # gender = forms.BooleanField(required=True)
 
     def __init__(self, request, social_login, new_user, dob, social_id):
@@ -248,6 +251,27 @@ class NewUserProfileForm(ModelForm):
         from django.core.files import File
         return File(default_image)
 
+    def clean_social_id(self):
+        """Test the validity of the social ID or raise a validation error.
+
+        Returns:
+            The social_id attribute of the class.
+
+        Raises:
+            ValidationError: In the case that the username has undesired
+                characters or if it already exists.
+        """
+        social_id = self.cleaned_data['social_id']
+
+        # Try locating the username, and if found, raise error.
+        try:
+            UserProfile.objects.get(social_id=social_id)
+        except UserProfile.DoesNotExist:
+            return social_id
+        raise forms.ValidationError(
+            u'You Google+ account is already linked to a user account. Please refresh and retry.')
+
+
     class Meta:
         model = UserProfile
 
@@ -285,10 +309,7 @@ class UserExtended():
     Attributes:
         password: Empty Field object that can hold errors.
     """
-    password = Field()
-
-    def __init__(self):
-        self.password = Field()
+    pass
 
 
 class UserProfileExtended():

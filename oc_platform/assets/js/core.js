@@ -47,7 +47,8 @@ var OC = {
                 socialID: 'form#signup-form input[name=social_id]'
             },
             googleAuthURL: '/gauth/',
-            googleAuthResult: '#results',
+            googleAuthResult: '.google-signin',
+            orWrapper: '.or-wrapper',
             ToS: '#agree-terms-conditions',
             signUpButtonID: 'signup-button'
         },
@@ -561,11 +562,16 @@ var OC = {
         $(OC.config.registration.fields.location).attr('value', location);
 
         // Hide fields that do not need to be filled
-        $(OC.config.registration.fields.socialLogin).slideUp('slow');
+        // $(OC.config.registration.fields.socialLogin).slideUp('slow');
+        $('tr.registration-username-password td:first').attr('colspan', '2');
+        $('tr.registration-username-password td:last').remove();
 
         // Set the hidden field value for profile picture with the URL from gapi
+        var smallPicture = profile.image.url,
+            mediumPicture = smallPicture.substring(0, smallPicture.indexOf('?sz=') + 4) + '150';
         $(OC.config.registration.fields.profilePicture).attr(
-            'value', profile.image.url);
+            'value', mediumPicture);
+
 
         // Set the user email address & username
         $(OC.config.registration.fields.email).attr('value', profile.email);
@@ -592,9 +598,10 @@ var OC = {
             // Set user message conveyed success with Google+
             //     login
             $(OC.config.registration.googleAuthResult).html(
-                'You have successfully connected to Google. Kindly complete the ' +
-                    'the form below to complete your sign up.'
+                '<p>You have successfully connected to Google. Kindly complete the ' +
+                    'the form below to complete your sign up.</p>'
             );
+            $(OC.config.registration.orWrapper).hide();
         }
         OC.googleAuthenticationCallback(authResult, success);
     },
@@ -741,7 +748,22 @@ var OC = {
 
     initRegistrationForm: function() {
         // Setup tipsy info on username and password
-        $('#signup-form input[title]').tipsy({trigger: 'focus', gravity: 'w'});
+        $('#signup-form input[title]:not(.form-input-error)').tipsy(
+            {trigger: 'focus', gravity: 'n'});
+
+        // Setup tipsy for errors.
+        $('#signup-form input[title].form-input-error').tipsy(
+            {trigger: 'manual', gravity: 'n', fade: true });
+
+        // Show errors on the page once the G+ button loads.
+        $('#signup-form input.form-input-error').each(function(){
+            error_input = $(this);
+            error_input.change(function(){
+                error_input.removeClass('form-input-error');
+                error_input.tipsy('hide');
+            });
+            error_input.tipsy('show');
+        });
 
         $(OC.config.registration.ToS).change(function () {
             $('#' + OC.config.registration.signUpButtonID).toggleClass(

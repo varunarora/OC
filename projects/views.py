@@ -553,6 +553,15 @@ def view_project_resource(request, project_slug, resource_id, resource_slug):
     return view_resource(request, resource_id, resource_slug)
 
 
+def add_user_to_project(user, project):
+    # Add the user to the project members.
+    new_member = Membership(user=user, project=project, confirmed=True)
+    new_member.save()
+
+    # Notify the member about being added.
+    Membership.new_member_added.send(
+        sender="Projects", membership_id=new_member.id)
+
 # Projects-specific API below
 
 def add_member(request, project_id, user_id):
@@ -585,13 +594,7 @@ def add_member(request, project_id, user_id):
         return APIUtilities._api_failure(context)        
 
     try:
-        # Add the user to the project members.
-        new_member = Membership(user=user, project=project, confirmed=True)
-        new_member.save()
-
-        # Notify the member about being added.
-        Membership.new_member_added.send(
-            sender="Projects", membership_id=new_member.id)
+        add_user_to_project(user, project)
 
         # Prepare (serialize) user object be sent through the response.
         context = {
