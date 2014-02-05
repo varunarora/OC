@@ -166,7 +166,7 @@ class NewUserProfileForm(ModelForm):
         gender: '1' for Male or '0' for Female.
     """
     profile_pic_tmp = open(settings.MEDIA_ROOT + 'profile/' + 'default.jpg')
-    social_id = forms.IntegerField()
+    social_id = forms.IntegerField(required=False)
     # gender = forms.BooleanField(required=True)
 
     def __init__(self, request, social_login, new_user, dob, social_id):
