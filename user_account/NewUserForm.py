@@ -263,17 +263,22 @@ class NewUserProfileForm(ModelForm):
         """
         social_id = self.cleaned_data['social_id']
 
-        # Try locating the username, and if found, raise error.
-        try:
-            UserProfile.objects.get(social_id=social_id)
-        except UserProfile.DoesNotExist:
+        if social_id:
+            # Try locating the username, and if found, raise error.
+            try:
+                UserProfile.objects.get(social_id=social_id)
+            except UserProfile.DoesNotExist:
+                return social_id
+            raise forms.ValidationError(
+                u'You Google+ account is already linked to a user account. Please refresh and retry.')
+
+        else:
             return social_id
-        raise forms.ValidationError(
-            u'You Google+ account is already linked to a user account. Please refresh and retry.')
 
 
     class Meta:
         model = UserProfile
+        exclude = ('subscriptions',)
 
 
 class Error():
