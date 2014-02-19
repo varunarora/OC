@@ -4,7 +4,7 @@ from oer import views
 
 urlpatterns = patterns(
     '',
-    url(r'^download/(?P<resource_id>.+)/$', views.download, name='download'),
+    url(r'^download/(?P<resource_id>\d+)/$', views.download, name='download'),
     url(r'^add-video/$', views.add_video, name='add_video'),
     url(r'^add-link/$', views.add_url, name='add_url'),
     url(r'^new-document/$', views.new_document, name='new_document'),
