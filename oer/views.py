@@ -325,7 +325,10 @@ def download(request, resource_id):
             setting.
     """
     # TODO(Varun): Need to check whether the resource is of type "attachment"
-    resource = Resource.objects.get(pk=resource_id)
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+    except:
+        raise Http404
 
     import magic
     mime = magic.Magic(mime=True)
@@ -1790,6 +1793,35 @@ def user_tree(request, ask, host):
     return APIUtilities._api_success(context)
 
 
+def raw_user_collection_tree(request, ask, host):
+    import oer.CollectionUtilities as cu
+    tree = None
+
+    if host == 'projects':
+        from projects.models import Membership
+        memberships = Membership.objects.filter(user=request.user, confirmed=True)
+
+        browse_trees = []
+        for membership in memberships:
+            (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
+                membership.project.collection) if ask == 'collections' else cu._get_browse_tree(
+                membership.project.collection)
+            browse_trees.append(browse_tree)
+
+        tree = cu.build_projects_raw_tree(request, browse_trees)
+    else:
+        from user_account.models import UserProfile
+        user_profile = UserProfile.objects.get(user__id=request.user.id)
+
+        (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
+            user_profile.collection) if ask == 'collections' else cu._get_browse_tree(
+            user_profile.collection)
+        tree = cu.build_user_raw_tree(request, browse_tree)        
+
+    context = { 'tree': tree }
+    return APIUtilities._api_success(context)
+
+
 def collection_tree(request, collection_id, ask, host):
     import oer.CollectionUtilities as cu
     tree = None
@@ -2185,7 +2217,7 @@ def copy_collection_to_collection(request, collection_id, to_collection_id):
         # If the collection to be copied belongs to a project.
         if collection_root_type.name == 'project':
             # Break if the requestor is the administrator of the project.
-            if request.user in to_collection_root.admins.all():
+            if request.user in collection_root.admins.all():
                 pass
 
             elif collection.visibility == 'project':
@@ -2336,7 +2368,7 @@ def get_resource_comments(request, resource_id):
             'message': 'We failed to fetch some of the comments of this resources. '
             + 'Please contact us if the problem persists.'
         }
-        return APIUtilities._api_failure(context)        
+        return APIUtilities._api_failure(context)
 
 
 def build_export_document(request, resource_id):
