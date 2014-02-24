@@ -276,6 +276,8 @@ def browse(request, project_slug):
     resources = root_assets.all()
     cu.set_resources_type(resources)
 
+    cu.preprocess_collection_listings(resources, child_collections)
+
     context = {
         'project': project,
         'resources': resources, 'collections': child_collections,
@@ -478,6 +480,8 @@ def list_collection(request, project_slug, collection_slug):
 
     resources = root_assets.all()
     cu.set_resources_type(resources)
+
+    cu.preprocess_collection_listings(resources, child_collections)
 
     context = {
         'project': project,
