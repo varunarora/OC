@@ -45,21 +45,7 @@ def view_resource(request, resource_id, resource_slug):
     from django.core.exceptions import ObjectDoesNotExist
 
     try:
-        # Fetch the resource from its ID using the QuerySet API.
-        resource = Resource.objects.get(pk=resource_id)
-
-        revision = None
-        revision_id = request.GET.get('revision', None)
-
-        if revision_id:
-            try:
-                revision = ResourceRevision.objects.get(pk=revision_id)
-                resource.revision = revision
-            except ObjectDoesNotExist:
-                pass
-
-        # TODO(Varun): Change this to actually get the top 5 best resources.
-        related = Resource.objects.all()[:5]
+        (resource, resource_type, revision) = render_resource(resource_id, request)
 
         from django.contrib.contenttypes.models import ContentType
         resource_ct = ContentType.objects.get_for_model(Resource)
@@ -67,59 +53,7 @@ def view_resource(request, resource_id, resource_slug):
         from interactions.models import Comment
         comments_ct = ContentType.objects.get_for_model(Comment)
 
-        document_content_type = ContentType.objects.get_for_model(Document)
         document_element_content_type = ContentType.objects.get_for_model(DocumentElement)
-
-        link_content_type = ContentType.objects.get_for_model(Link)
-        attachment_content_type = ContentType.objects.get_for_model(Attachment)
-
-        if resource.revision.content_type == document_content_type:
-            resource.data = build_document_view(resource.revision.content_id)
-            resource_type = "document"
-
-        elif resource.revision.content_type == link_content_type:
-            import urlparse
-            (hostname, url_data) = get_url_hostname(resource.revision.content.url)
-
-            # If the resource is a video, determine whether or not it is a YouTube
-            #     Vimeo video, and obtain the video ID (as determined by the
-            #     service provider), so that it can be plugged into its player.
-
-            # In either case, use an appropriate pattern matching to obtain the
-            #     video #.
-            resource_type = "video"
-            if "youtube" in hostname:
-                query = urlparse.parse_qs(url_data.query)
-                video = query["v"][0]
-                resource.video_tag = video
-                resource.provider = "youtube"
-
-            elif "vimeo" in hostname:
-                resource.video_tag = url_data.path.split('/')[1]
-                resource.provider = "vimeo"
-
-            else:
-                resource_type = "url"
-
-        # If the resource is a kind of attachment, format its metadata.
-        elif resource.revision.content_type == attachment_content_type:
-            #TODO: Replace with |filesizeformat template tag
-            filesize = resource.revision.content.file.size
-            if filesize >= 1048576:
-                resource.filesize = str(
-                    _filesizeFormat(float(filesize) / 1048576)) + " MB"
-            elif filesize >= 1024:
-                resource.filesize = str(
-                    _filesizeFormat(float(filesize) / 1024)) + " KB"
-            else:
-                resource.filesize = str(
-                    _filesizeFormat(float(filesize))) + " B"
-
-            # Determine the extension of the attachment.
-            from os.path import splitext
-            name, resource.extension = splitext(resource.revision.content.file.name)
-
-            resource_type = "attachment"
 
         # Fetch the number of resources that have been uploaded by the user who
         #     has created this resource.
@@ -213,7 +147,7 @@ def view_resource(request, resource_id, resource_slug):
             'revision_view': resource.revision == revision,
             'breadcrumb': breadcrumb,
             'resource_collection': collection,
-            'related': related, "user_resource_count": user_resource_count,
+            "user_resource_count": user_resource_count,
             'current_path': 'http://' + request.get_host() + request.get_full_path(),  # request.get_host()
             'thumbnail': 'http://' + request.get_host() + settings.MEDIA_URL + resource.image.name
         }
@@ -223,20 +157,88 @@ def view_resource(request, resource_id, resource_slug):
         raise Http404
 
 
-def get_url_hostname(url):
-    import urlparse
-    url_data = urlparse.urlparse(url)
+def render_resource(resource_id, request=None):
+    from django.core.exceptions import ObjectDoesNotExist
+    from django.contrib.contenttypes.models import ContentType
+    document_content_type = ContentType.objects.get_for_model(Document)
 
-    # Figure out the entire domain the specific hostname (eg. "vimeo")
-    domain = url_data.hostname
+    # Fetch the resource from its ID using the QuerySet API.
+    resource = Resource.objects.get(pk=resource_id)
 
-    return (domain.split(".")[:-1], url_data)
+    revision = None
+    if request:
+        revision_id = request.GET.get('revision', None)
+
+        if revision_id:
+            try:
+                revision = ResourceRevision.objects.get(pk=revision_id)
+                resource.revision = revision
+            except ObjectDoesNotExist:
+                pass
+
+    link_content_type = ContentType.objects.get_for_model(Link)
+    attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+    if resource.revision.content_type == document_content_type:
+        resource.data = build_document_view(resource.revision.content_id)
+        resource_type = "document"
+
+    elif resource.revision.content_type == link_content_type:
+        import ResourceUtilities as ru
+        resource_type = ru.get_resource_type_from_url(resource)
+
+    # If the resource is a kind of attachment, format its metadata.
+    elif resource.revision.content_type == attachment_content_type:
+        #TODO: Replace with |filesizeformat template tag
+        filesize = resource.revision.content.file.size
+        if filesize >= 1048576:
+            resource.filesize = str(
+                _filesizeFormat(float(filesize) / 1048576)) + " MB"
+        elif filesize >= 1024:
+            resource.filesize = str(
+                _filesizeFormat(float(filesize) / 1024)) + " KB"
+        else:
+            resource.filesize = str(
+                _filesizeFormat(float(filesize))) + " B"
+
+        # Determine the extension of the attachment.
+        from os.path import splitext
+        name, resource.extension = splitext(resource.revision.content.file.name)
+
+        resource_type = "attachment"
+
+    return (resource, resource_type, revision)
 
 
 def build_document_view(document_id):
     document = Document.objects.get(pk=document_id)
-    return DocumentElement.objects.filter(
+    document_elements = DocumentElement.objects.filter(
         document=document).order_by('position')
+
+    from django.template import Template, Context
+    template = Template(open(
+        settings.TEMPLATE_DIR + '/templates/partials/foreign-document-element.html', 'r').read())
+    
+    from oer.BeautifulSoup import BeautifulSoup
+
+    # Replace embedded resource references with resource contents.
+    for document_element in document_elements:
+        soup = BeautifulSoup(document_element.element.body['data'])
+
+        document_resources = soup.findAll('div', 'foreign-document-element')
+        for document_resource in document_resources:
+            resource_id = document_resource['id']
+            
+            (rendered_resource, resource_type, revision) = render_resource(resource_id)
+            context = Context({
+                'resource': rendered_resource,
+                'MEDIA_URL': settings.MEDIA_URL
+            })
+            document_resource.replaceWith(BeautifulSoup(template.render(context)))
+
+        document_element.element.body['data'] = str(soup)
+
+    return document_elements
 
 
 def build_collection_breadcrumb(collection):
