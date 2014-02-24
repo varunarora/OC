@@ -20,7 +20,7 @@
                         {% if revision.flag == "fork" %}
                         <div class="edit-title">
                             <a href="{% url user:user_profile username=revision.user.username %}">{{ revision.user.username }}</a> started editing <a href="{% url articles:reader category_slug=revision.article.category.slug %}?q={{ article.slug }}&revision={{ revision.id }}">a copy</a> in 
-                            {% ifequal request.get_profile.gender 1 %}his{% else %}her{% endifequal %} collection
+                            {% ifequal request.get_profile.gender 1 %}his{% else %}her{% endifequal %} folder
                         </div>
                         <div class="edit-description">
                             On {{ revision.created }}

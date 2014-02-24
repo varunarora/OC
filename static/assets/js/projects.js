@@ -94,14 +94,14 @@ OC.projects = {
 
         if (target.hasClass('make-admin')) {
             // Submit the add request through the project API.
-            $.get('/project/' + projectID + '/add-admin/' + userID + '/',
+            $.get('/group/' + projectID + '/add-admin/' + userID + '/',
                 function (response) {
                     OC.projects.addAdminHandler(response, target);
                     spinner.hide();
                 }, 'json');
         } else {
             // Submit the add request through the project API.
-            $.get('/project/' + projectID + '/remove-admin/' + userID + '/',
+            $.get('/group/' + projectID + '/remove-admin/' + userID + '/',
                 function (response) {
                     OC.projects.removeAdminHandler(response, target);
                     spinner.hide();
@@ -130,7 +130,7 @@ OC.projects = {
         var userID = targetID.substring(lastHyphenPosition + 1);
 
         // Submit the remove member request through the project API.
-        $.get('/project/' + projectID + '/remove/' + userID + '/',
+        $.get('/group/' + projectID + '/remove/' + userID + '/',
             function (response) {
                 OC.projects.removeMemberHandler(response, target);
             }, 'json');
@@ -173,7 +173,7 @@ OC.projects = {
                 var projectID = OC.projects.getProjectID();
 
                 // Submit the add request through the project API        
-                $.get('/project/' + projectID + '/add/' + ui.item.id + '/',
+                $.get('/group/' + projectID + '/add/' + ui.item.id + '/',
                     function (response) {
                     OC.projects.addMemberHandler(response);
                     
@@ -248,7 +248,7 @@ OC.projects = {
             project_id = $(event.target).parents('form').find(
                 'input[name=project_id]').val();
 
-            $.get('/project/' + project_id + '/request-invite/',
+            $.get('/group/' + project_id + '/request-invite/',
                 function(response){
                     if (response.status == 'true'){
                         OC.projects.inviteRequestSuccessHandler(event.target);
@@ -291,7 +291,7 @@ OC.projects = {
             request_id = $(event.target).parents('form').find(
                 'input[name=request_id]').val();
 
-            $.get('/project/request/' + request_id + '/accept/',
+            $.get('/group/request/' + request_id + '/accept/',
                 function(response){
                     if (response.status == 'true'){
                         OC.projects.inviteAcceptSuccessHandler(event.target);
@@ -328,7 +328,7 @@ OC.projects = {
             request_id = $(event.target).parents('form').find(
                 'input[name=request_id]').val();
 
-            $.get('/project/request/' + request_id + '/decline/',
+            $.get('/group/request/' + request_id + '/decline/',
                 function(response){
                     if (response.status == 'true'){
                         OC.projects.inviteDeclineSuccessHandler(event.target);

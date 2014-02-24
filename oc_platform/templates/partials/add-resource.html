@@ -1,7 +1,7 @@
 <nav id="add-resource-menu">
     <div class="floating-menu-spacer"></div>
     <ul>
-        <li class="add-collection"><a href=""><span class="document-icon"></span>Collection...{{ user_profile.collection }}</a></li>
+        <li class="add-collection"><a href=""><span class="document-icon"></span>Folder...{{ user_profile.collection }}</a></li>
         <li class="add-document"><a href="/resources/new-document/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}">Document...{{ user_profile.collection }}</a></li>
         <li class="add-link"><a href="/resources/add-link/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}">Link...</a></li>
         <!--<li id="share-on-plus"><a href="">Image...</a></li>-->
@@ -9,12 +9,12 @@
         <li class="add-upload"><a href="/upload/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}">Upload...</a></li>
     </ul>
 </nav>
-<div class="dialog new-collection-dialog" title="Create a new collection">
+<div class="dialog new-collection-dialog" title="Create a new folder">
     <form action={% if host == 'project' %}"/resources/new-collection/project/{{ project.slug }}/"{% else %}"/resources/new-collection/user/{{ user.username }}/"{% endif %} method="POST" id="new-collection-form">
         {% csrf_token %}
         <input type="hidden" name="parent_collection" value="{{ collection.slug }}" />
         <table>
-            <tr><td>New collection name:</td><td><input type="text" name="new_collection_name"/></td></tr>
+            <tr><td>New folder name:</td><td><input type="text" name="new_collection_name"/></td></tr>
             <tr><td>Who can see its contents?</td><td>
                 {% if host == 'project' %}
                 <label>

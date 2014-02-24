@@ -7,7 +7,7 @@
     </div>
     <div id="key-panel" class="panel-right">
         <h2>General settings</h2>
-        <form action="/project/{{ project.slug }}/settings/" method="POST" id="project-settings-form">
+        <form action="/group/{{ project.slug }}/settings/" method="POST" id="project-settings-form">
             {% if success %}
                 <div class="success-message">{{ success }}</div>
             {% elif error %}

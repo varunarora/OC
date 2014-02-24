@@ -1,9 +1,9 @@
 {% include 'partials/header.html' %}
 <div class="center-stage">
     <div id="key-panel" class="panel-left">
-        <h2>Create a new project</h2>
-        <div id="new-project-info" class="form-info-box"><p>Creating a new project is easy. Simply fill out the form below and you are all set.</p></div>
-        <form method="POST" action="/project/new/" id="new-project-form" enctype="multipart/form-data">
+        <h2>Create a new group</h2>
+        <div id="new-project-info" class="form-info-box"><p>Creating a new group is easy. Simply fill out the form below and you are all set.</p></div>
+        <form method="POST" action="/group/new/" id="new-project-form" enctype="multipart/form-data">
             {% csrf_token %}
             <table id="project-form-table">
                 <tr><td>Title*</td><td class="inputs"><input type="text" name="title" /></td></tr>
@@ -12,14 +12,14 @@
                     {% include 'project/partials/project-form-visibility.html' %}
                 </td></tr>
                 <tr><td>Cover picture</td><td class="inputs"><input type="file" name="cover_pic"></td></tr>
-                <tr><td colspan="2" class="right"><p><button class="btn success-button" id="new-project-button">Create project <span class="vertical-caret"></span></button></p></td></tr>
+                <tr><td colspan="2" class="right"><p><button class="btn success-button" id="new-project-button">Create group <span class="vertical-caret"></span></button></p></td></tr>
             </table>
         </form>
     </div>
     <div id="fill-panel" class="panel-right">
         <aside id="support">
-            <h3>What is a project?</h3>
-            <p>Projects are online workspaces for teachers, schools and other content creators to create, manage and share their lesson plans, worksheets, syllabi, tests etc. </p>
+            <h3>What is a group?</h3>
+            <p>Groups are online workspaces for teachers, schools and other content creators to create, manage and share their lesson plans, worksheets, syllabi, tests etc. </p>
         </aside>
     </div>
 </div>

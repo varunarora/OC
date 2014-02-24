@@ -14,7 +14,7 @@ urlpatterns = patterns(
 
     url(r'^articles/', include('articles.urls', namespace='articles')),
 
-    url(r'^project/', include('projects.urls', namespace='projects')),
+    url(r'^group/', include('projects.urls', namespace='projects')),
 
     url(r'^user/', include('user_account.urls', namespace='user')),
 

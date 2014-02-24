@@ -22,7 +22,7 @@
     <div class="oc-popup-body">
         Are you sure you want to delete all resources, folders, discussions and memberships of this project? Please note that this action is irreversible.
         <div class="confirm-project-delete-submit-wrapper oc-popup-submit-wrapper-set">
-            <form action="/project/{{ project.slug }}/settings/administration/" method="POST" id="project-delete-form">
+            <form action="/group/{{ project.slug }}/settings/administration/" method="POST" id="project-delete-form">
                 {% csrf_token %}
                 <div class="oc-popup-submit-button-set">
                     <button class="collection-button confirm-project-delete-submit-button oc-popup-submit-button-set-button">Confirm delete</button>
