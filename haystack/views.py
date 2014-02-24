@@ -238,6 +238,23 @@ def basic_search(request, template='search/search.html', load_all=True, form_cla
 class SanitizedSearchView(SearchView):
     __name__ = 'SanitizedSearchView'
 
+
+    def __init__(self, template=None, load_all=True, form_class=None, searchqueryset=None, context_class=RequestContext, results_per_page=None):
+        return super(SanitizedSearchView, self).__init__(
+            template, load_all, form_class, searchqueryset, context_class, results_per_page)
+
+
+    def __call__(self, request):
+        tags = request.GET.get('tags', None)
+        if tags:
+            tag_set = tags.split(',')
+            from haystack.query import SearchQuerySet
+            tagged_searchqueryset = SearchQuerySet().filter(tags__in=tag_set)
+            self.searchqueryset = tagged_searchqueryset
+
+        return super(SanitizedSearchView, self).__call__(request)
+
+
     def extra_context(self):
         extra = super(SanitizedSearchView, self).extra_context()
 
@@ -250,6 +267,12 @@ class SanitizedSearchView(SearchView):
                 result.object.revision.body_markdown_html = re.sub("\s+", ' ', result.object.revision.body_markdown_html.strip())
             except:
                 pass
+
+        # For all resource outputs, assign the type.
+        import oer.CollectionUtilities as cu
+        filtered_resource_list = [item for item in page.object_list if item.content_type() == 'oer.resource']
+        cu.set_resources_type([item.object for item in filtered_resource_list])
+
         extra['page'] = page
         extra['paginator'] = paginator
         extra['title'] = self.query + " &lsaquo; OpenCurriculum"
