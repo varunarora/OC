@@ -10,6 +10,8 @@
         <li class="history-action"><a href="{% url resource:view_history resource_id=resource.id %}"><span class="icon"></span>View history</a></li>
         {% if resource_type == 'document' %}
         <li class="print-action"><a href=""><span class="icon"></span>Print</a></li>
+        <li class="export-action"><a href=""><span class="icon"></span>Export as PDF</a></li>
+        <li class="word-action"><a href=""><span class="icon"></span>Word</a></li>
         {% endif %}
         <li class="share-action"><a href=""><span class="icon"></span>Share <span class="horizontal-caret-up breadcrumb-caret"></span></a></li>
         {% include 'partials/share.html' %}
@@ -26,4 +28,32 @@
 	</ul>
 </div>
 
+{% if resource_type == 'document' %}
+<div class="export-document-pdf-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Export to PDF</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <div class="export-document-pdf-status">Exporting to PDF...</div>
+        <div class="export-document-pdf-progress oc-progressbar">
+            <div class="export-document-pdf-progress-indicator oc-progressbar-indicator"></div>
+        </div>
+    </div>
+</div>
+
+<div class="export-document-word-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Export to Word</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <div class="export-document-word-status">Exporting to Word...</div>
+        <div class="export-document-word-progress oc-progressbar">
+            <div class="export-document-word-progress-indicator oc-progressbar-indicator"></div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
 {% include 'partials/add.html' %}

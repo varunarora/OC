@@ -2335,3 +2335,129 @@ def get_resource_comments(request, resource_id):
             + 'Please contact us if the problem persists.'
         }
         return APIUtilities._api_failure(context)        
+
+
+def build_export_document(request, resource_id):
+    # Fetch the resource.
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    # Return failure message if the resource is not a document.
+    from django.contrib.contenttypes.models import ContentType
+    document_content_type = ContentType.objects.get_for_model(Document)
+    
+    if resource.revision.content_type != document_content_type:
+        return APIUtilities._api_failure()
+
+    # Fetch all elements of the resource in order.
+    document = build_document_view(resource.revision.content.id)
+
+    # Build a {} of HTML'ized document elements.
+    serialized_document_elements = {}
+
+    for element in document:
+        element_type = element.element.body['type']
+
+        if element_type == 'table':
+            from django.template import Template, Context
+            from django.conf import settings
+            table_template = Template(open(
+                settings.TEMPLATE_DIR + '/templates/partials/table.html', 'r').read())
+            table_context = Context({
+                'table': element.element.body['data']
+            })
+            table_template_html = table_template.render(table_context)
+
+            # Clean the raw template HTML produced and save.
+            serialized_document_elements[element_type] = table_template_html.replace(
+                '\n', '').replace('  ', '')
+        elif element_type == 'textblock':
+            serialized_document_elements[element_type] = element.element.body['data']
+
+    response = {
+        'title': resource.title,
+        'elements': serialized_document_elements
+    }
+
+    context = {
+        'document': response
+    }
+    return APIUtilities._api_success(context)
+
+
+def autocomplete_search(request, query):
+    from haystack.query import SearchQuerySet
+
+    sqs = SearchQuerySet().autocomplete(
+        content_auto=query).filter(visibility='public')[:10]
+
+    result_set = set()
+    for resource in sqs:
+        result_set.add(resource.object.title)
+
+    serialized_resources = list(result_set)
+
+    return HttpResponse(
+        json.dumps(serialized_resources), 200, content_type="application/json")
+
+
+def editor_autocomplete_search(request, query):
+    from haystack.query import SearchQuerySet
+
+    sqs = SearchQuerySet().autocomplete(
+        content_auto=query).filter(visibility='public')[:10]
+
+    serialized_resources = list()
+    for resource in sqs:
+        serialized_resources.append({
+            'id': resource.object.id,
+            'user_url': reverse('user:user_profile', kwargs={
+                'username': resource.object.user.username }),
+            'url': reverse(
+                'read', kwargs={
+                    'resource_id': resource.object.id,
+                    'resource_slug': resource.object.slug
+                }),
+            'title': resource.object.title,
+            'user': resource.object.user.get_full_name(),
+            'username': resource.object.user.username,
+            'views': resource.object.views,
+            'thumbnail': 'http://' + request.get_host(
+                ) + settings.MEDIA_URL + resource.object.image.name
+        })
+
+    return HttpResponse(
+        json.dumps(serialized_resources), 200, content_type="application/json")
+
+
+def get_collection_from_resource(request, resource_id):
+    from django.core.exceptions import MultipleObjectsReturned
+    try:
+        collection = Collection.objects.get(resources__id=resource_id)
+    except MultipleObjectsReturned:
+        collection = Collection.objects.filter(resources__id=resource_id)[0]
+
+    context = {
+        'collectionID': collection.id
+    }
+    return APIUtilities._api_success(context)
+
+
+def get_parent_collection_from_collection(request, collection_id):
+    try:
+        collection = Collection.objects.get(pk=collection_id)
+    except Collection.ObjectDoesNotExist:
+        return APIUtilities._api_not_found()
+
+    if collection.host_type.name == 'collection':
+        context = {
+            'collectionID': collection.host_id
+        }
+    else:
+        context = {
+            'collectionID': None
+        }
+
+    return APIUtilities._api_success(context)
