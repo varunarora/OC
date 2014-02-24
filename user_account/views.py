@@ -7,7 +7,7 @@ from oc_platform import APIUtilities
 import json
 
 
-def old_register(request):
+def register(request):
     """Renders the register page for a new user, and performs validation upon
     submissions.
 
@@ -27,51 +27,6 @@ def old_register(request):
     if request.user.is_authenticated():
         return redirect('home')
 
-    # TODO(Varun): Make this more "function"al.
-    registration_template = 'register.html'
-    success_template = 'registration-success.html'
-    page_context = {
-        'title': _(settings.STRINGS['user']['REGISTER_TITLE'])
-    }
-
-    form_context = _prepare_registration_form_context()
-
-    # Context objects which render the form.
-    fields_context = {}
-
-    if request.method == "POST":
-        # Capture only thse inputs from the original form that need to be
-        #     returned in the case of an error with form validation.
-        form_fields_to_return = [
-            'first_name', 'last_name', 'email', 'dob_month', 'dob_date',
-            'dob_year', 'profile_pic', 'social_login', 'location',
-            'profession', 'username', 'gender', 'social_id'
-        ]
-        # TODO(Varun): Turn this into a non-short statement.
-        original_form_inputs = _get_original_form_values(
-            request, form_fields_to_return)
-
-        # Returns context if form registration fails, else redirects response.
-        (fields_context, user_creation_success) = _create_user(request)
-
-        if user_creation_success:
-            return render(request, success_template, fields_context)
-
-        fields_context['form'] = original_form_inputs
-
-    # Build the form from previous inputs and Google+ login data to
-    #     pre-populate form.
-    #registration_template += "?"
-    from AuthHelper import AuthHelper
-    context = dict(
-        AuthHelper.generateGPlusContext(request).items() + page_context.items()
-        + fields_context.items() + form_context.items())
-    return render(request, registration_template, context)
-
-
-def register(request):
-    """if request.user.is_authenticated():
-        return redirect('home')"""
     # TODO(Varun): Make this more "function"al.
     registration_template = 'register.html'
     page_context = {
@@ -117,7 +72,7 @@ def register(request):
                 login(request, authenticated_user)
 
             return redirect(
-                'user:user_profile', username=fields_context['new_user'].username)
+                'user:user_files', username=fields_context['new_user'].username)
 
         fields_context['form'] = original_form_inputs
 
@@ -264,12 +219,11 @@ def _create_user(request):
                                 'new_user': new_user
                             }, True)
 
-                        except:
+                        except Exception, f:
                             # TODO(Varun): Delete user and announce failure.
                             new_user.delete()
 
                             print profile_form.errors
-
                             # TODO(Varun): Create a django error notication.
                             print "Profile object failed to be created"
                     else:
