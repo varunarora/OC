@@ -355,6 +355,9 @@ STRINGS = {
     }
 }
 
+
+STAR_USERS = ['khanacademy']
+
 try:
     from settings_dev import *
 except ImportError:
