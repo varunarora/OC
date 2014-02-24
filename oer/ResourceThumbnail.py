@@ -1,7 +1,7 @@
 from VideoHelper import VideoHelper
 #from webkit2pngInit import WebKit2PNG, WebKit2PNGOptions
 import json
-from subprocess import call
+from subprocess import call, check_output
 from django.conf import settings
 
 
@@ -120,14 +120,21 @@ class ResourceThumbnail:
         call(
             ["phantomjs", settings.PROJECT_PATH + "oer/takeScreenshot.js", resource.url, thumbnail + "-tmp"
                 + ResourceThumbnail.THUMBNAIL_EXT])
+        try:
+            check_output(
+                ["convert", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT, "-resize",
+                    "600x300", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
+            """call(
+                ["convert", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT, "-resize",
+                    "600x300", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])"""
 
-        call(
-            ["convert", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT, "-resize",
-                "600x300", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
+            # Now delete the temporary retrived image thumbnail
+            call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
 
-        # Now delete the temporary retrived image thumbnail
-        call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
-
+        except:
+            call(
+                ["cp", settings.MEDIA_ROOT + 'resource_thumbnail/defaults/' + "blank.jpg",
+                    thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
     @staticmethod
     def get_resource_type(resource):
