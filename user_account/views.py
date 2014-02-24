@@ -968,8 +968,8 @@ def _get_user_subscribed(user_profile, visitor):
     user_subscribed = False
     if visitor != user_profile.user:
         from user_account.models import UserProfile, Subscription
-        requester_profile = UserProfile.objects.get(user=visitor.id)
         try:
+            requester_profile = UserProfile.objects.get(user=visitor.id)
             Subscription.objects.get(
                 subscriber=requester_profile, subscribee=user_profile)
             user_subscribed = True
