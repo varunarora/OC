@@ -1,6 +1,7 @@
 from oer.models import Collection
 from xml.etree import ElementTree
 from django.core.urlresolvers import reverse
+from django.conf import settings
 import itertools
 
 
@@ -375,6 +376,218 @@ def set_resources_type(resources):
         if resource.revision.content_type == document_content_type:
             resource.type = "document"
         elif resource.revision.content_type == link_content_type:
-            resource.type = "url"
+            import ResourceUtilities as ru
+            resource.type = ru.get_resource_type_from_url(resource)
+
         elif resource.revision.content_type == attachment_content_type:
             resource.type = "attachment"
+
+
+def preprocess_collection_listings(resources, collections):
+    from oer.models import Link, Attachment
+    from django.contrib.contenttypes.models import ContentType
+    link_content_type = ContentType.objects.get_for_model(Link)
+    attachment_content_type = ContentType.objects.get_for_model(Attachment)
+    import oer.ResourceUtilities as ru
+    from os.path import splitext
+
+    for resource in resources:
+        if resource.revision.content_type == link_content_type:
+            (hostname, url_data) = ru.get_url_hostname(resource.revision.content.url)
+
+            if ('docs' in hostname and 'google' in hostname) and (
+                'document' in url_data.path):
+                resource.open_url = resource.revision.content.url
+                resource.type = 'gdoc'
+
+            elif 'dropbox' in hostname and 'sh' in url_data.path:
+                resource.open_url = resource.revision.content.url
+                resource.type = 'dropbox'
+
+            elif ('drive' in hostname and 'google' in hostname) and (
+                'folders' in url_data.fragment):
+                resource.open_url = resource.revision.content.url
+                resource.type = 'gfolder'
+        
+        elif resource.revision.content_type == attachment_content_type:
+            name, resource.extension = splitext(resource.revision.content.file.name)
+
+            document = [".doc", ".docx", ".rtf", "odt"]
+            presentation = [".key", ".keynote", ".ppt", ".pptx", ".odp"]
+            spreadsheet = [".xls", ".xlsx", ".ods", ".csv"]
+            pdf = [".pdf"]
+            image = [".jpg", ".jpeg", ".png", ".bmp", ".eps", ".ps", ".gif", ".tiff"]
+
+            ext = str.lower(str(resource.extension))
+            if ext in document:
+                resource.type = 'document'
+            elif ext in pdf:
+                resource.type = 'pdf'
+            elif ext in presentation:
+                resource.type = 'presentation'
+            elif ext in spreadsheet:
+                resource.type = 'spreadsheet'
+            elif ext in image:
+                resource.type = 'image'
+            else:
+                resource.type = 'upload'
+
+
+def build_projects_raw_tree(request, browse_trees):
+    raw_tree = []
+    for browse_tree in browse_trees:
+        raw_tree.append(build_project_raw_tree(request, browse_tree))
+    return raw_tree
+
+
+def build_user_raw_tree(request, browse_tree):
+    root = {}
+    root_collection = get_root_key(browse_tree)
+
+    if root_collection:
+        root[root_collection.host.user.get_full_name()] = {
+            'id': root_collection.id,
+            'title': root_collection.title,
+            'visibility': root_collection.visibility,
+            'url': _get_user_collection_url(root_collection.host, root_collection),
+            'user_url': reverse('user:user_profile', kwargs={
+                'username': root_collection.creator.username }),
+            'user': root_collection.creator.get_full_name(),
+            'username': root_collection.creator.username,
+            'thumbnail': 'http://' + request.get_host(
+                ) + settings.STATIC_URL + 'images/folder-icon.png',
+            'items': build_child_raw_tree(
+                browse_tree, root_collection.host,
+                _get_user_collection_url, _get_user_resource_url,
+                request.user, 'profile', request.get_host()
+            )
+        }
+
+        return root
+    else:
+        return {}
+
+
+def build_child_raw_tree(root_node, collection_owner, collection_url_creator, resource_url_creator, user, host_type, host):
+    # Get the list of child of this node.
+    nodes = list(itertools.chain.from_iterable(root_node.values()))
+    node_elements = []
+
+    # Create <li> nodes for each.
+    for node in nodes:
+        node_element = {}
+
+        if type(node) is dict:
+            current_node = get_root_key(node)
+        else:
+            current_node = node
+
+        node_visibility = current_node.visibility
+
+        # Determine whether the node is a resource or collection.
+        try:
+            node_creator = current_node.creator
+            node_type = 'collection'
+        except:
+            node_creator = current_node.user
+            node_type = 'resource'
+
+        if host_type == 'profile':
+            if node_visibility != 'public':
+                if user not in current_node.collaborators.all() and user != node_creator:
+                    continue
+
+        if host_type == 'project':
+            if node_visibility == 'project':
+                if collection_owner.visibility != 'public':
+                    if user not in collection_owner.confirmed_members:
+                        continue
+
+            if node_visibility == 'private':
+                if user not in current_node.collaborators.all() and user != node_creator:
+                    continue
+
+        # If this child has other children, build child tree.
+        # Has to be the case of our collection.
+        if type(node) is dict:
+            node_element['type'] = 'collection'
+            node_element['collection'] = {
+                'id': current_node.id,
+                'title': current_node.title,
+                'visibility': current_node.visibility,
+                'url': collection_url_creator(collection_owner, current_node),
+                'user_url': reverse('user:user_profile', kwargs={
+                    'username': current_node.creator.username }),
+                'user': current_node.creator.get_full_name(),
+                'username': current_node.creator.username,
+                'thumbnail': 'http://' + host + settings.STATIC_URL + 'images/folder-icon.png',
+                'items': build_child_raw_tree(
+                    node, collection_owner, collection_url_creator, 
+                    resource_url_creator, user, 'collection', host
+                )
+            }
+
+        # Otherwise, append a child <a> element as is.
+        # Can be a resource or a collection.
+        else:
+            node_element['type'] = 'collection' if node_type == 'collection' else 'resource'
+            
+            if node_type == 'collection':
+                node_element['collection'] = {
+                    'id': node.id,
+                    'title': node.title,
+                    'visibility': node.visibility,
+                    'url': collection_url_creator(collection_owner, node),
+                    'user_url': reverse('user:user_profile', kwargs={
+                        'username': node.creator.username }),
+                    'user': node.creator.get_full_name(),
+                    'username': node.creator.username,
+                    'thumbnail': 'http://' + host + settings.STATIC_URL + 'images/folder-icon.png',
+                    'items': []
+                }
+            else:
+                node_element['resource'] = {
+                    'id': node.id,
+                    'title': node.title,
+                    'visibility': node.visibility,
+                    'url': resource_url_creator(collection_owner, node),
+                    'user_url': reverse('user:user_profile', kwargs={
+                        'username': node.user.username }),
+                    'user': node.user.get_full_name(),
+                    'username': node.user.username,
+                    'views': node.views,
+                    'thumbnail': 'http://' + host + settings.MEDIA_URL + node.image.file.name,
+                    'items': []
+                }
+
+        node_elements.append(node_element)
+
+    return node_elements
+
+
+def build_project_raw_tree(request, browse_tree):
+    root = {}
+    root_collection = get_root_key(browse_tree)
+
+    if root_collection:
+        root[root_collection.host.title] = {
+            'id': root_collection.id,
+            'title': root_collection.title,
+            'visibility': root_collection.visibility,
+            'url': _get_project_collection_url(root_collection.host, root_collection),
+            'user_url': reverse('user:user_profile', kwargs={
+                'username': root_collection.creator.username }),
+            'user': root_collection.creator.get_full_name(),
+            'username': root_collection.creator.username,
+            'thumbnail': 'http://' + request.get_host(
+                ) + settings.STATIC_URL + 'images/folder-icon.png',
+            'items': build_child_raw_tree(
+                browse_tree, root_collection.host,
+                _get_project_collection_url, _get_project_resource_url,
+                request.user, 'project', request.get_host()
+            )
+        }        
+
+        return root
+    else:
+        return {}

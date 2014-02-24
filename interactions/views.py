@@ -164,6 +164,9 @@ def delete_comment(request, comment_id):
                 delete_comment_tree(comment)
                 return APIUtilities._api_success()
 
+            else:
+                return APIUtilities._api_unauthorized_failure()
+
         elif host_type.name == 'resource':
             if request.user == comment.user or (
                 request.user in host.collaborators.all() or
@@ -444,3 +447,40 @@ def cast_resource_revision_vote(request, resource_id, revision_id, positive):
                 + 'Please contact us if the problem persists.'
             }
             return APIUtilities._api_failure(context)
+
+
+def list_user_favorites(request):
+    try:
+        from django.contrib.auth.models import User
+        user = User.objects.get(username=request.user.username)
+    except:
+        return APIUtilities._api_not_found()
+
+    # Get user favorites.
+    user_favorites = Favorite.objects.filter(user=user)
+
+    from django.core.urlresolvers import reverse
+
+    serialized_favorites = list()
+    for favorite in user_favorites:
+        serialized_favorites.append({
+            'id': favorite.resource.id,
+            'user_url': reverse('user:user_profile', kwargs={
+                'username': favorite.user.username }),
+            'url': reverse(
+                'read', kwargs={
+                    'resource_id': favorite.resource.id,
+                    'resource_slug': favorite.resource.slug
+                }),
+            'title': favorite.resource.title,
+            'user': favorite.user.get_full_name(),
+            'username': favorite.user.username,
+            'views': favorite.resource.views,
+            'thumbnail': 'http://' + request.get_host(
+                ) + settings.MEDIA_URL + favorite.resource.image.name
+        })
+
+    context = {
+        'favorites': serialized_favorites
+    }
+    return APIUtilities._api_success(context)

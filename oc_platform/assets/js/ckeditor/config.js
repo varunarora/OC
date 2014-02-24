@@ -13,7 +13,7 @@ CKEDITOR.editorConfig = function( config ) {
 };
 
 CKEDITOR.config.contentsCss = '/static/assets/css/ckeditor/contents.css';
-CKEDITOR.config.skin = 'moono,/static/assets/css/ckeditor/skins/moono/';
+CKEDITOR.config.skin = 'moono,/static/assets/css/ckeditor/skins/moono_docs/';
 
 CKEDITOR.config.toolbar_Basic = [
     [ '-', 'Bold', 'Italic' ],
@@ -22,16 +22,16 @@ CKEDITOR.config.toolbar_Basic = [
     [ 'Source' ]
 ];
 CKEDITOR.config.toolbar_Full = [
-['Source','-','Save','NewPage','Preview','-','Templates'],
-['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
-'/',
+['Undo','Redo','Styles','Format','FontSize'],
 ['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],
-['Link','Unlink','Anchor'],
-'/',
-['Styles','Format','Font','FontSize'],
+[ 'NumberedList','BulletedList'],
+['InternalLink', 'InternalUnlink'],
 ];
 
-CKEDITOR.config.toolbar = 'Basic';
+CKEDITOR.config.toolbar = 'Full';
 
 CKEDITOR.dtd.$editable.td = 1;
 CKEDITOR.dtd.$editable.th = 1;
+
+// Turn off automatic editor creation first.
+CKEDITOR.disableAutoInline = true;

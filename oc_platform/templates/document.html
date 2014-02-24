@@ -1,7 +1,94 @@
-{% include 'partials/header.html' %}
+{% include 'partials/header.html' with body_class='editor' %}
 
 <form id="new-resource-document-form" class="document-edit-form resource-create-edit-form" method="POST">
     {% csrf_token %}
+    <div class="center-stage editor-header">
+        {% include 'partials/resource-meta.html' %}
+        <div id="key-panel" class="panel-left">
+             <input type="hidden" name="user" value="{{ user.id }}" />
+             <input type="hidden" name="description" class="document-description" />
+             <h2 id="article-title" class="browser-edit"><input type="text" value="{{ resource.title }}" name="title" class="browser-edit" placeholder="(Document title)" /></h2>
+        </div>
+        <div id="fill-panel" class="panel-right">
+            <div class="editor-button-wrapper">
+                <button class="action-button secondary-button license-button">License <span class="horizontal-caret-up breadcrumb-caret"></span></button>
+                <button class="action-button secondary-button tags-button">Tags <span class="horizontal-caret-up breadcrumb-caret"></span></button>
+                <button class="action-button secondary-button share-button">Share <span class="horizontal-caret-up breadcrumb-caret"></span></button>
+                <button class="action-button save-button">Save</button>
+
+                <nav id="license-menu">
+                    <div class="floating-menu-spacer"></div>
+                    <select name="license">
+                        {% for license in licenses.all %}
+                        <option value="{{ license.id }}">{{ license.title }}</option>
+                        {% endfor %}
+                    </select>
+                </nav>
+                <nav id="tags-menu">
+                    <div class="floating-menu-spacer"></div>
+                    <ul class="tagit document-tags">
+                        {% if resource.tags %}
+                        {% for tag in resource.tags.all %}
+                        <li>{{ tag }}</li>
+                        {% endfor %}
+                        {% endif %}
+                    </ul>
+                </nav>
+                <nav id="share-menu">
+                    <div class="floating-menu-spacer"></div>
+                    {% include 'partials/resource-form-visibility.html' %}
+                </nav>
+            </div>
+        </div>
+    </div>
+    <div class="center-spread editor-toolbar-wrapper">
+        <div id="editor-toolbar">
+        </div>
+    </div>
+    <div class="center-spread editor-frame">
+        <div class="editor-search">
+            <div class="editor-search-pullout">
+            </div>
+            <div class="editor-search-main-panel">
+                <div class="editor-search-bar">
+                    <input type="search" placeholder="Search">
+                </div>
+                <div class="editor-search-body">
+                    <nav class="editor-search-tabs">
+                        <ul>
+                            <li><a href=".my-search-results" class="editor-search-tab">"<span class="search-query"></span>"</a></li>
+                            <li><a href=".my-favorites" class="editor-favorites-tab">Favorites</a></li>
+                            <li><a href=".my-profile" class="editor-files-tab">Files</a></li>
+                            <li><a href=".my-projects" class="editor-projects-tab">Groups</a></li>
+                        </ul>
+                    </nav>
+
+                    <div class="editor-search-body-content">
+                        <div class="my-search-results">
+                            <div class="editor-search-result"><div class="editor-search-result-handle"></div><div style="background-image: url('http://localhost:8000/media/resource_thumbnail/114_1.jpg');" class="editor-search-result-thumbnail"></div><div class="editor-search-result-description"><div class="editor-search-result-description-title">Inverse Variation</div><div class="editor-search-result-description-meta">21 views ·By <a href="/user/ocrootu/">Administrator Arora</a></div></div><div class="editor-search-result-preview"></div></div>
+                        </div>
+                        <div class="my-favorites">
+                            <div class="editor-favorites-browser oc-popup-dialog-browser
+         loading-browser"></div>
+                        </div>
+                        <div class="my-profile">
+                            <div class="editor-profile-browser oc-popup-dialog-browser
+         loading-browser"></div>
+                        </div>
+                        <div class="my-projects">
+                            <div class="editor-project-browser oc-popup-dialog-browser
+         loading-browser"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="center-stage editor-body" contentEditable="true">
+        </div>
+        <div class="editor-frame-result-clones">
+        </div>
+    </div>
+    <!--
     <div id="submission-info-wrapper">
         <div id="submission-info">
             <div>
@@ -12,6 +99,7 @@
             </div>
         </div>
     </div>
+    
 
     <article id="article-edit" class="resource-article-edit">
         <span class="document-meta-collapser"></span>
@@ -59,13 +147,10 @@
             {% include 'partials/oer-document.html' %}
         </div>
         <div class="center-stage document-actions">
-            <!--
-            <div id="wmd-button-bar"></div>
-            <textarea class="wmd-input large-textarea" id="wmd-input" name="body_markdown">{{ original.body_markdown }}</textarea>       
-            <tr><td></td><td><span class="resource-form-error">{{ form.errors.body_markdown }}</span></td></tr>-->
             <button class="page-action-button add-widget">Add...</button>
         </div>
     </article>
+    -->
 </form>
 
 <div id="log-message" title="Log message" class="dialog">
@@ -116,12 +201,13 @@
         <div class="delete-button oc-popup-exit"></div>
     </div>
     <div class="oc-popup-body">
-        Select a resource or collection, or write a custom URL:
+        Select a resource or folder, or write a custom URL:
         <div class="link-resource-browser">
             <nav class="link-resource-tabs">
                 <ul>
                     <li><a href=".my-profile">My profile</a></li>
-                    <li><a href=".my-projects">My projects</a></li>
+                    <li><a href=".my-projects">My groups</a></li>
+                    <li><a href=".standards">Standards</a></li>
                     <li><a href=".other-resources">Other resources / link</a></li>
                 </ul>
             </nav>
@@ -132,6 +218,10 @@
                 </div>
                 <div class="my-projects">
                     <div class="link-resource-project-browser oc-popup-dialog-browser
+ loading-browser"></div>
+                </div>
+                <div class="standards">
+                    <div class="link-resource-standards-browser oc-popup-dialog-browser
  loading-browser"></div>
                 </div>
                 <div class="other-resources">
@@ -157,5 +247,3 @@
 {% include 'partials/image-upload.html' %}
 
 {% include 'partials/editor-imports.html' %}
-
-{% include 'partials/footer.html' %}

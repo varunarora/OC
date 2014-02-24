@@ -21,4 +21,6 @@ urlpatterns = patterns(
 
     url(r'^favorite/state/resource/(?P<resource_id>.+)/user/(?P<user_id>.+)/$', views.get_favorite_state, name='get_favorite_state'),
     url(r'^favorite/resource/(?P<resource_id>.+)/user/(?P<user_id>.+)/$', views.favorite_resource, name='favorite_resource'),
+    
+    url(r'^favorites/list/$', views.list_user_favorites, name='list_user_favorites'),
 )

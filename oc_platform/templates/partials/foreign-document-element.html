@@ -1,0 +1,9 @@
+{% if resource.revision.content_type.name == "document" %}
+    <div class="foreign-document-body">
+        {% include 'partials/oer-document.html' %}
+    </div>
+{% elif resource.revision.content_type.name == "link" %}
+    {% include 'partials/oer-url.html' %}
+{% elif resource.revision.content_type.name == "attachment" %}
+    {% include 'partials/oer-attachment.html' %}
+{% endif %}

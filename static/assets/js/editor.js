@@ -2,6 +2,8 @@ OC.editor = {
     myImages: [],
     imageUploadCallback: undefined,
 
+    searchCache: {},
+
     imageHistoryTemplate: _.template('<div class="image">' +
         '<div class="image-info">' +
         '<div class="image-title"><%= title %></div>' +
@@ -10,6 +12,347 @@ OC.editor = {
         '<div class="image-insert-button">' +
         '<button class="btn dull-button" value="<%= path %>">Insert image</button>' +
         '</div></div>'),
+
+    editorSearchItemTemplate: _.template('<div class="editor-search-result" id="<%= id %>">' +
+        '<div class="editor-search-result-handle"></div>' +
+        '<div class="editor-search-result-thumbnail" style="background-image: ' +
+        'url(\'<%= thumbnail %>\');"></div><div class="editor-search-result-description">' +
+        '<div class="editor-search-result-description-title"><%= title %></div>'+
+        '<div class="editor-search-result-description-meta"><%= views %> views &#183;' +
+        'By <a href="<%= user_url %>"><%= user %></a></div></div>' +
+        '<div class="editor-search-result-preview"></div>' +
+        '</div>'),
+
+    init: function(){
+        var editorFrame = $('.editor-frame'),
+            editorBody = $('.editor-body');
+        editorFrame.height(
+            $(window).height() - ($('body > header').height() + $(
+                '.editor-header').outerHeight(true) + $(
+                '.editor-toolbar-wrapper').height() + parseInt($('.editor-toolbar-wrapper').css(
+                'padding-top'), 10) + parseInt(editorFrame.css(
+                'padding-top'), 10)) + 'px');
+
+        editorBody.ckeditor({
+            extraPlugins: 'internallink,sharedspace,resources',
+            startupFocus: true,
+            sharedSpaces: {
+                top: 'editor-toolbar'
+            }
+        });
+
+        var scrollbarWidth = getScrollbarWidth();
+
+        // Prepare the internal search visuals.
+        var editorSearch = $('.editor-search'),
+            editorSearchPullout = $('.editor-search-pullout');
+
+        editorSearchPullout.css({
+            'margin-right': scrollbarWidth
+        });
+
+        editorSearch.css({
+            'top': $('.editor-toolbar-wrapper').outerHeight(true) + $(
+                '.editor-toolbar-wrapper').offset().top + 5
+        });
+
+        editorSearchPullout.click(function(event){
+            if (!$(this).hasClass('pulled-out')){
+                editorSearch.animate({
+                    right: scrollbarWidth,
+                }, {
+                    duration: 'slow'
+                });
+                editorSearchPullout.css({
+                    'margin-right': 0
+                });
+                $(this).addClass('pulled-out');
+            } else {
+                editorSearch.animate({
+                    right: '-' + $('.editor-search-main-panel').width(),
+                }, {
+                    duration: 'slow',
+                    complete: function(){
+                        editorSearchPullout.css({
+                            'margin-right': scrollbarWidth
+                        });
+                    }
+                });
+                $(this).removeClass('pulled-out');
+            }
+        });
+
+        $('.editor-search-body').css({
+            'height': editorFrame.outerHeight(true) - $(
+                '.editor-search-bar').height() - 5
+        });
+
+        // Initialize side search experience.
+        OC.tabs('.editor-search-body', { tab: 1 });
+        OC.editor.initEditorSearchAutocomplete();
+
+        $('.editor-search-tabs .editor-search-tab').parent('li').addClass('hide-tab');
+
+        var editorFavoritesBrowser = $('.editor-favorites-browser');
+        if (editorFavoritesBrowser.children().length === 0){
+            $.get('/interactions/favorites/list/',
+                function(response){
+                    if (response.status == 'true'){
+                        OC.editor.renderListings(response.favorites, editorFavoritesBrowser);
+                        editorFavoritesBrowser.removeClass('loading-browser');
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        }
+
+
+        var projectBrowserTab = $('.editor-search-tabs li a[href=".my-projects"]'),
+            profileBrowserTab = $('.editor-search-tabs li a[href=".my-profile"]');
+
+        if (!projectBrowserTab.hasClickEventListener()){
+            projectBrowserTab.click(OC.editor.searchProjectsTabClickHandler);
+        }
+
+        if (!profileBrowserTab.hasClickEventListener()){
+            profileBrowserTab.click(OC.editor.searchProfileTabClickHandler);
+        }
+    },
+
+    searchProjectsTabClickHandler: function(event){
+        var projectsEditorBrowser = $('.editor-project-browser');
+
+        if (projectsEditorBrowser.children().length === 0){
+            $.get('/resources/raw-tree/all/projects/',
+                function(response){
+                    if (response.status == 'true'){
+                        OC.editor.renderTree('projects', response.tree, projectsEditorBrowser);
+                        projectsEditorBrowser.removeClass('loading-browser');
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        }
+    },
+
+    searchProfileTabClickHandler: function(event){
+        var projectsEditorBrowser = $('.editor-profile-browser');
+
+        if (projectsEditorBrowser.children().length === 0){
+            $.get('/resources/raw-tree/all/user/',
+                function(response){
+                    if (response.status == 'true'){
+                        OC.editor.renderTree('user', response.tree, projectsEditorBrowser);
+                        projectsEditorBrowser.removeClass('loading-browser');
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        }
+    },
+
+    renderListings: function(response, listingBrowser){
+        var i;
+        for (i = 0; i < response.length; i++){
+            result = OC.editor.editorSearchItemTemplate(response[i]);
+            listingBrowser.append(result);
+        }
+    },
+
+    renderTree: function(host, tree, listingBrowser){
+        var key;
+        if (host == 'projects'){
+            console.log(tree[0]);
+        } else {
+            for (key in tree){
+                if (tree.hasOwnProperty(key)){
+                    resources = _.pluck(_.where(tree[key].items, {type:'resource'}), 'resource');
+                    OC.editor.renderListings(resources, listingBrowser);
+                }
+            }
+        }
+    },
+
+    searchDraggable: function($el){
+        $el.on('mousedown', function(event){
+            var originalEl = $(this);
+            var $elShadow = originalEl.clone();
+
+            //$elShadow.addClass('draggable-shadow');
+            $elShadow.css({
+                top: originalEl.offset().top - 10,
+                left: originalEl.offset().left
+            });
+            $('.editor-frame-result-clones').append($elShadow);
+
+            var $newEl = $('.editor-frame-result-clones .editor-search-result:last');
+
+            var newElHeight = $(this).outerHeight(),
+                newElWidth = $(this).outerWidth(),
+                newElY = $(this).offset().top + newElHeight - event.pageY,
+                newElX = $(this).offset().left + newElWidth - event.pageX;
+
+
+            // Establish the editor frame.
+            var droppableFrame = {
+                top: $('.editor-frame').offset().top,
+                bottom: $('.editor-frame').offset().top + $('.editor-frame').outerHeight(true),
+                left: $('.editor-body').offset().left,
+                right: $('.editor-frame').width() - $('.editor-search').offset().left
+            };
+
+            $(this).parents('.editor-frame').on('mousemove', function(event){
+                $newEl.addClass('draggable-shadow');
+                $('.draggable-shadow').offset({
+                    top: event.pageY + newElY - newElHeight,
+                    left: event.pageX + newElX - newElWidth
+                });
+
+                $newEl.offset().right = $newEl.offset().left + $newEl.width();
+
+                // TODO(Varun): Needs to account for the case dual case of newEl larger than frame on y-axis.
+                if (($newEl.offset().top > droppableFrame.top && $newEl.offset().top < droppableFrame.bottom) && ((
+                        $newEl.offset().left < droppableFrame.right && $newEl.offset().left > droppableFrame.left) || (
+                        $newEl.offset().right < droppableFrame.right && $newEl.offset().right > droppableFrame.left) || (
+                        droppableFrame.left > $newEl.offset().left && droppableFrame.right < $newEl.offset().right)
+                    )){
+                    $('.editor-body').addClass('accepting');
+                }
+                else {
+                    $('.editor-body').removeClass('accepting');
+                }
+
+            }).on('mouseup', function(){
+                $newEl.removeClass('draggable-shadow');
+
+                if ($('.editor-body').hasClass('accepting')){
+                    var editor = $('.editor-body').ckeditorGet();
+                    var resultData = {
+                        id: $newEl.attr('id'),
+                        title: $('.editor-search-result-description-title', $newEl).text(),
+                        thumbnail: $('.editor-search-result-thumbnail', $newEl).css('background-image').replace(/"/g, '\'')
+                    };
+
+                    editor.insertHtml(
+                        _.template(OC.editor.insertedSearchResultTemplate)(resultData)
+                    );
+                    $newEl.remove();
+                }
+
+                $(this).unbind('mousemove');
+                $(this).unbind('mouseup');
+            });
+
+            event.preventDefault();
+        });
+    },
+
+    insertedSearchResultTemplate: '<div class="foreign-document-element" id="<%= id %>">' +
+        '<div class="foreign-document-element-thumbnail" style="background-image: <%= thumbnail %>"></div>' +
+        '<div class="foreign-document-element-description">' +
+            '<div class="foreign-document-element-description-title"><%= title %></div>' +
+            '<div class="foreign-document-element-description-preview"><a href="">Preview</a></div>' +
+        '</div>' +
+        '</div>',
+
+    initEditorSearchAutocomplete: function(){
+        var searchInput = $('.editor-search-bar input[type="search"]'),
+            searchResults = $('.my-search-results'),
+            i, resultsHTML;
+
+        var editorSearchTab = $('nav.editor-search-tabs .editor-search-tab').parent(
+            'li');
+
+        searchInput.bind('paste keyup', function(){
+            var currentValue = $(this).val();
+            if (currentValue.length > 2){
+                $('.search-query', editorSearchTab).text(currentValue);
+
+                // Check if the search tab has been opened.
+                if (editorSearchTab.hasClass('hide-tab')){
+                    editorSearchTab.removeClass('hide-tab');
+                    $('a', editorSearchTab).click();
+                }
+
+                if (OC.editor.searchCache.hasOwnProperty(currentValue)){
+                    searchResults.html(OC.editor.searchCache[currentValue]);
+                } else {
+                    $.get('/resources/api/editor-search/' + currentValue.trim() + '/',
+                        function(response){
+                            searchResults.html('');
+                            resultsHTML = '';
+                            for (i = 0; i < response.length; i++){
+                                result = OC.editor.editorSearchItemTemplate(response[i]);
+                                
+                                resultsHTML += result;
+                                searchResults.append(result);
+
+                                OC.editor.searchDraggable(
+                                    $('.editor-search-result:last', searchResults));
+                            }
+                            
+                            OC.editor.searchCache[currentValue] = resultsHTML;
+                        },
+                    'json');
+                }
+
+            } else {
+                searchResults.html('');
+            }
+        });
+    },
+
+    initDropMenus: function(){
+        OC.setUpMenuPositioning('nav#license-menu', '.editor-button-wrapper .license-button');
+        OC.setUpMenuPositioning('nav#tags-menu', '.editor-button-wrapper .tags-button');
+        OC.setUpMenuPositioning('nav#share-menu', '.editor-button-wrapper .share-button');
+
+        $(window).resize(function () {
+            OC.setUpMenuPositioning('nav#license-menu', '.editor-button-wrapper .license-menu');
+            OC.setUpMenuPositioning('nav#tags-menu', '.editor-button-wrapper .tags-menu');
+            OC.setUpMenuPositioning('nav#share-menu', '.editor-button-wrapper .share-button');
+        });
+
+        // Now bind the click actions with the menus.
+        $('.editor-button-wrapper button.license-button').click(
+            function(e){
+                $('#license-menu').toggleClass('showMenu');
+                $('button.license-button').toggleClass('menu-open');
+
+                e.stopPropagation();
+                e.preventDefault();
+                return false;
+            }
+        );
+
+        $('.editor-button-wrapper button.tags-button').click(
+            function(e){
+                $('#tags-menu').toggleClass('showMenu');
+                $('button.tags-button').toggleClass('menu-open');
+
+                e.stopPropagation();
+                e.preventDefault();
+                return false;
+            }
+        );
+
+        $('.editor-button-wrapper button.share-button').click(
+            function(e){
+                $('#share-menu').toggleClass('showMenu');
+                $('button.share-button').toggleClass('menu-open');
+
+                e.stopPropagation();
+                e.preventDefault();
+                return false;
+            }
+        );
+    },
 
     createImageUploadDialog: function(callback) {
         OC.editor.setImageUploadCallback(callback);
@@ -648,6 +991,12 @@ OC.editor = {
         if (!projectBrowserTab.hasClickEventListener()){
             projectBrowserTab.click(OC.editor.linkToProjectsTabClickHandler);
         }
+
+        var standardsBrowserTab = $('.link-resource-tabs li a[href=".standards"]');
+
+        if (!standardsBrowserTab.hasClickEventListener()){
+            standardsBrowserTab.click(OC.editor.linkToStandardsTabClickHandler);
+        }
     },
 
     linkToProjectsTabClickHandler: function(event){
@@ -669,6 +1018,23 @@ OC.editor = {
         }
     },
 
+    linkToStandardsTabClickHandler: function(event){
+        var standardsResourceCollectionBrowser = $('.link-resource-standards-browser');
+
+        if (standardsResourceCollectionBrowser.children().length === 0){
+            $.get('/meta/standards/tree/',
+                function(response){
+                    if (response.status == 'true'){
+                        OC.renderBrowser(response.tree, standardsResourceCollectionBrowser);
+                        standardsResourceCollectionBrowser.removeClass('loading-browser');
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        }
+    },
 };
 
 (function () {
@@ -795,6 +1161,8 @@ $(document).ready(function(){
             '<div data-dz-errormessage></div>',*/
     });
 
+    OC.editor.init();
+
     OC.editor.initImageUploaderTabs();
 
     Dropzone.forElement('.upload-drag-drop').on('sending', function(file, xhr, formData){
@@ -888,15 +1256,18 @@ $(document).ready(function(){
 
     $('span.delete-objective').click(OC.editor.objectiveDeleteHandler);
 
+    OC.editor.initDropMenus();
+
     // Initialize document meta collapser.
-    OC.editor.initDocumentMetaCollapser();
+    //OC.editor.initDocumentMetaCollapser();
 
     // Initialize the JS on widgets on page from load, such as in the case of edit.
-    OC.editor.initExistingWidgets();
+    //OC.editor.initExistingWidgets();
 
     // Initialize the add widget functionality.
-    OC.editor.initAddWidget();
+    //OC.editor.initAddWidget();
 
+    /*
     $('#new-resource-document-form #submission-buttons button').click(function(event){
         // Serialize the widgets on the page.
         var documentElements = $('.document-body .document-element');
@@ -960,4 +1331,28 @@ $(document).ready(function(){
         event.preventDefault();
         return false;
     });
+    */
+
+    $('#new-resource-document-form .editor-button-wrapper .save-button').click(function(event){
+        // Add all element JSONs into strings.
+        var newDocumentForm = $('#new-resource-document-form');
+
+        var serializedDocumentBody = $('<textarea/>', {
+            'text': JSON.stringify([
+                {
+                    type: 'textblock',
+                    data: $('.editor-body').ckeditorGet().getData()
+                }
+            ]),
+            'name': 'serialized-document-body'
+        });
+        
+        newDocumentForm.append(serializedDocumentBody);
+        newDocumentForm.submit();
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+    });
+
 });

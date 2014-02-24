@@ -21,6 +21,10 @@ urlpatterns = patterns(
 
     url(r'^collection/(?P<collection_id>\d+)/tree/(?P<ask>[\w\-]+)/(?P<host>[\w\-]+)/$', views.collection_tree, name='collection_tree'),
     url(r'^tree/(?P<ask>[\w\-]+)/(?P<host>[\w\-]+)/$', views.user_tree, name='user_tree'),
+    url(r'^raw-tree/(?P<ask>[\w\-]+)/(?P<host>[\w\-]+)/$', views.raw_user_collection_tree, name='raw_user_collection_tree'),
+
+    url(r'^parent-collection-from-collection/(?P<collection_id>\d+)/$', views.get_parent_collection_from_collection, name='get_parent_collection_from_collection'),
+    url(r'^collection-from-resource/(?P<resource_id>\d+)/$', views.get_collection_from_resource, name='get_collection_from_resource'),
 
     url(r'^collection/(?P<collection_id>\d+)/add/(?P<user_id>\d+)/$', views.add_user_to_collection, name='add_user_to_collection'),
     url(r'^collection/(?P<collection_id>\d+)/remove/(?P<user_id>\d+)/$', views.remove_user_from_collection, name='remove_user_from_collection'),
