@@ -6,25 +6,37 @@ from projects.models import Project, Membership
 from interactions.models import Comment
 from django.core.exceptions import PermissionDenied
 from oc_platform import APIUtilities
+from oer.models import Resource
+from user_account.models import Activity
 
 import itertools
 
 
 def project_home(request, project_slug):
-    try:
-        project = Project.objects.get(slug=project_slug)
-        # TODO(Varun): Check if this is a private project, and if it is, check
-        #     if the requestee of the page is a member of the project. If not,
-        #     have a flag that blocks the page contents from being listed, or has
-        #     an alternative view.
-        context = {
-            'title': project.title + ' &lsaquo; OpenCurriculum',
-            'project': project
-        }
-        #return render(request, 'project/project.html', context)
-        return redirect('projects:project_about', project_slug=project_slug)
-    except:
-        raise Http404
+    #try:
+    project = Project.objects.get(slug=project_slug)
+
+    # TODO(Varun): Check if this is a private project, and if it is, check
+    #     if the requestee of the page is a member of the project. If not,
+    #     have a flag that blocks the page contents from being listed, or has
+    #     an alternative view.
+
+    if request.user not in project.confirmed_members:
+        return redirect('projects:project_about', project_slug=project.slug)
+
+    # Get activity feed related to this project.
+    from django.contrib.contenttypes.models import ContentType
+    project_ct = ContentType.objects.get_for_model(Project)
+
+    feed = Activity.objects.filter(
+        context_type=project_ct, context_id=project.id).order_by('-pk')[:10]
+    context = {
+        'title': project.title + ' &lsaquo; OpenCurriculum',
+        'project': project, 'feed': feed
+    }
+    return render(request, 'project/project.html', context)
+    """except:
+        raise Http404"""
 
 
 def launch(request):
@@ -546,7 +558,6 @@ def view_project_resource_by_id(request, project_slug, resource_id):
     from django.core.exceptions import ObjectDoesNotExist
 
     try:
-        from oer.models import Resource
         resource = Resource.objects.get(pk=resource_id)
         return redirect('projects:read_project_resource',
             project_slug=project_slug,
