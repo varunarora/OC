@@ -784,102 +784,199 @@ def user_profile(request, username):
     """
     try:
         user = User.objects.get(username=username)
-
-        # Get all the articles the user has forked.
-        from articles.models import ArticleRevision
-        forks = ArticleRevision.objects.filter(
-            user=user.id, flag="fork").order_by("-created")
-
-        from articles.ArticleUtilities import ArticleUtilities
-        # Set URLs of the forks using its breadcrumb
-        for fork in forks:
-            fork.article.category.url = ArticleUtilities.buildBreadcrumb(
-                fork.article.category)[0].url
-
-        # Get all the articles the user has submitted.
-        from articles.models import ArticleRevision
-        contributions = ArticleRevision.objects.filter(
-            user=user.id, flag="submit").order_by("-created")
-
-        # Set URLs of the category pages using its breadcrumb
-        for contribution in contributions:
-            contribution.category.url = ArticleUtilities.buildBreadcrumb(
-                contribution.category)[0].url
-
-        # Get all the projects that the user is a part of.
-        from projects.models import Project
-        projects = Project.objects.filter(membership__user__id=user.id)
-
-        # Get all the resources the user has favorited.
-        from interactions.models import Favorite
-        favorites = Favorite.objects.filter(user=user)
-
-        # Get user profile.
-        user_profile = user.get_profile()
-
-        # Get all the collections that have the user's root collection as parent.
-        import oer.CollectionUtilities as cu
-        child_collections = cu._get_child_collections(user_profile.collection)
-
-        # Get all the resources that the user has created.
-        resources = user_profile.collection.resources.all().order_by('-created')
-        cu.set_resources_type(resources)
-
-        from forms import UploadProfilePicture
-        form = UploadProfilePicture(request.POST, request.FILES)
-
-        context = {
-            'user_profile': user, 'edits': forks, 'projects': projects,
-            'resources': resources, 'contributions': contributions, 'favorites': favorites,
-            'form': form,
-            'collection': user_profile.collection,
-            'collections': child_collections,
-            'title': user.first_name + ' ' + user.last_name + " &lsaquo; OpenCurriculum"
-        }
-        return render(request, 'profile.html', context)
-
     except User.DoesNotExist:
         raise Http404
 
+    if request.user != user:
+        return redirect('user:user_favorites', username=username)
 
-def list_collection(request, username, collection_slug):
-    from oer.models import Collection
-    match_collections = Collection.objects.filter(slug=collection_slug)
+    # Get user profile.
+    user_profile = user.get_profile()
 
-    if match_collections.count() == 0:
-        raise Http404
+    user_context = _prepare_user_context(request, user, user_profile)
 
+    # Get users who have the most have the most subscribers.
+    # Subscription.objects.all().order_by('')[:10]
+    import copy
+    stars_raw = copy.deepcopy(settings.STAR_USERS)
+    try:
+        stars_raw.remove(user.username)
+    except:
+        pass
+
+    # Remove the suggested person name if the user has already subscribed to the star.
+    from user_account.models import Subscription
+    for star in stars_raw:
+        try:
+            Subscription.objects.get(
+                subscriber=user_profile, subscribee__user__username=star)
+            stars_raw.remove(star)
+        except:
+            pass
+
+    stars = User.objects.filter(username__in=stars_raw)
+
+    from user_account.models import Activity
+    feed = Activity.objects.filter(recipients=user).order_by('-pk')[:10]
+
+    # Do all kinds of feed preprocessing.
+    _preprocess_feed(feed)
+
+    context = dict({
+        'user_profile': user,
+        'feed': feed,
+        'collection': user_profile.collection,
+        'stars': stars,
+        'title': user.first_name + ' ' + user.last_name + " &lsaquo; OpenCurriculum"
+    }.items() + user_context.items())
+    return render(request, 'profile.html', context)
+
+
+def _preprocess_feed(feed):
+    import oer.CollectionUtilities as cu
+    
+    resources = []
+    for item in feed:
+        if item.target_type.name == 'resource':
+            resources.append(item.target)
+
+    cu.set_resources_type(resources)
+
+
+def _prepare_user_context(request, user, user_profile):
+    user_subscribed = _get_user_subscribed(user_profile, request.user)
+    
+    from user_account.models import Subscription
+    subscriber_count = Subscription.objects.filter(subscribee=user_profile).count()
+
+    from forms import UploadProfilePicture
+    form = UploadProfilePicture(request.POST, request.FILES)
+    
+    context = {
+        'form': form,
+        'user_subscribed': user_subscribed,
+        'subscriber_count': subscriber_count
+    }
+
+    return context
+
+
+
+def user_favorites(request, username):
     try:
         user = User.objects.get(username=username)
-        user_profile = user.get_profile()
+    except User.DoesNotExist:
+        raise Http404
 
-        import oer.CollectionUtilities as cu
-        (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
-            user_profile.collection)
+    # Get all the resources the user has favorited.
+    from interactions.models import Favorite
+    favorites = Favorite.objects.filter(user=user)
+
+    # Get user profile.
+    user_profile = user.get_profile()
+    user_subscribed = _get_user_subscribed(user_profile, request.user)
+
+    user_context = _prepare_user_context(request, user, user_profile)
+
+    context = dict({
+        'user_profile': user,
+        'favorites': favorites,
+        'collection': user_profile.collection,
+        'user_subscribed': user_subscribed,
+        'title': user.get_full_name() + " &lsaquo; OpenCurriculum"
+    }.items() + user_context.items())
+    return render(request, 'partials/profile-favorites.html', context)
+
+
+def user_files(request, username):
+    return list_collection(request, username, None)
+
+
+def list_collection(request, username, collection_slug):
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        raise Http404
+
+    user_profile = user.get_profile()
+
+    user_context = _prepare_user_context(request, user, user_profile)
+
+    import oer.CollectionUtilities as cu
+    (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
+        user_profile.collection)
+
+    if not collection_slug:
+        collection = user_profile.collection
+        title = 'Files' + ' &lsaquo; ' + user.get_full_name()
+    else:
+        from oer.models import Collection
+        match_collections = Collection.objects.filter(slug=collection_slug)
+
+        if match_collections.count() == 0:
+            raise Http404
 
         # Get user collection.
         collection = next(
             tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
 
-        root_assets = collection.resources
-        child_collections = cu._get_child_collections(collection)        
+        title = collection.title + ' &lsaquo; ' + user.get_full_name()
 
-        resources = root_assets.all()
-        cu.set_resources_type(resources)
+    root_assets = collection.resources
+    child_collections = cu._get_child_collections(collection)        
 
-        context = {
-            'user_profile': user,
-            'collection': collection,
-            # TODO(Varun): Make this a custom title.
-            'title': collection.title + ' &lsaquo; ' + user.get_full_name(),
-            'browse_tree': browse_tree,
-            'resources': resources,
-            'collections': child_collections,
-        }
-        return render(request, 'profile.html', context)
+    resources = root_assets.all()
+    cu.set_resources_type(resources)
 
+    cu.preprocess_collection_listings(resources, child_collections)
+
+    context = dict({
+        'user_profile': user,
+        'collection': collection,
+        'title': title,
+        'browse_tree': browse_tree,
+        'resources': resources,
+        'collections': child_collections,
+    }.items() + user_context.items())
+    return render(request, 'partials/profile-files.html', context)
+
+
+def user_groups(request, username):
+    try:
+        user = User.objects.get(username=username)
     except User.DoesNotExist:
         raise Http404
+
+    user_profile = user.get_profile()
+
+    user_context = _prepare_user_context(request, user, user_profile)
+
+    # Get all the projects that the user is a part of.
+    from projects.models import Project
+    projects = Project.objects.filter(membership__user__id=user.id)
+
+    context = dict({
+        'user_profile': user,
+        'collection': user_profile.collection,
+        'title': user.get_full_name() + " &lsaquo; OpenCurriculum",
+        'projects': projects,
+    }.items() + user_context.items())
+    return render(request, 'partials/profile-groups.html', context)
+
+
+def _get_user_subscribed(user_profile, visitor):
+    user_subscribed = False
+    if visitor != user_profile.user:
+        from user_account.models import UserProfile, Subscription
+        requester_profile = UserProfile.objects.get(user=visitor)
+        try:
+            Subscription.objects.get(
+                subscriber=requester_profile, subscribee=user_profile)
+            user_subscribed = True
+        except:
+            pass
+
+    return user_subscribed
 
 
 def contributor_registration(request):
