@@ -20,6 +20,9 @@ urlpatterns = patterns(
 
     url(r'^resources/', include('oer.urls', namespace='resource')),
 
+    url(r'^meta/', include('meta.urls', namespace='meta')),
+
+
     # Interactions
     url(r'^interactions/', include('interactions.urls', namespace='interactions')),
 
