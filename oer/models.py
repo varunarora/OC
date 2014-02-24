@@ -63,6 +63,7 @@ class Resource(models.Model):
         return self.title
 
     collaborator_added = Signal(providing_args=["resource", "user"])
+    resource_created = Signal(providing_args=["resource"])
 
 
 def generate_thumnbnail(sender, instance, created, raw, **kwargs):
@@ -97,6 +98,7 @@ class Collection(models.Model):
         return self.title
     
     collaborator_added = Signal(providing_args=["collection", "user", "request"])
+    new_collection_created = Signal(providing_args=["collection", "collection_host"])
 
 
 class Forks(models.Model):

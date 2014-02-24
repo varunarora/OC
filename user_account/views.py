@@ -1328,3 +1328,55 @@ def dismiss_notifications(request, user_id):
         return APIUtilities._api_success()
     except:
         return APIUtilities._api_failure()
+
+
+def subscribe(request, username):
+    from user_account.models import Subscription, UserProfile
+    try:
+        subscribee = UserProfile.objects.get(user__username=username)
+        subscriber = UserProfile.objects.get(user=request.user)
+    except:
+        return APIUtilities._api_not_found()
+
+    # Check if a previous subscription exists, and if it does, unsubscribe,
+    #     if not, subscribe.
+    try:
+        previous_subscription = Subscription.objects.get(
+            subscriber=subscriber, subscribee=subscribee)
+        previous_subscription.delete()
+
+        return APIUtilities._api_success()
+    except Subscription.DoesNotExist:
+        new_subscription = Subscription(
+            subscriber = subscriber,
+            subscribee = subscribee
+        )
+        new_subscription.save()
+
+        # Notify the user who has been subscribed to.
+        Subscription.new_subscription.send(
+            sender="UserProfile", subscription=new_subscription
+        )
+
+        prepopulate_feed(new_subscription)
+
+        return APIUtilities._api_success()
+    except:
+        return APIUtilities._api_failure()
+
+
+def prepopulate_feed(subscription):
+    # Fetch the past few activities of the subscribee where they created a resource.
+    from django.contrib.contenttypes.models import ContentType
+    from oer.models import Resource
+    from user_account.models import Activity
+
+    resource_type = ContentType.objects.get_for_model(Resource)
+
+    activities = Activity.objects.filter(
+        actor=subscription.subscribee.user, action_type=resource_type)[:10]
+
+    for activity in activities:
+        if activity.context_type.name == 'user profile' and activity.action.visibility == 'public':
+            # Push into the feed of the subscriber.
+            activity.recipients.add(subscription.subscriber.user)

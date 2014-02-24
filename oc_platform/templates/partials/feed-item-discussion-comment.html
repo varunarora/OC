@@ -1,0 +1,6 @@
+<div class="activity-object-wrapper" />
+    <div class="user-photo" style="background-image: url('{{ MEDIA_URL }}{{ item.target.user.get_profile.profile_pic.name }}');"></div>
+    <div class="user-description"><a href="{% url user:user_profile username=item.target.user.username %}">{{ item.target.user.get_full_name }}</a>{{ item.target.body_markdown_html|safe }}
+        <blockquote>"{{ item.action.body_markdown_html|safe }}"</blockquote>
+    </div>
+</div>

@@ -24,6 +24,7 @@ class Project(models.Model):
         return self.title
 
     discussion_post_created = Signal(providing_args=["comment_id"])
+    project_created = Signal(providing_args=["project", "creator"])
 
     @property
     def confirmed_members(self):

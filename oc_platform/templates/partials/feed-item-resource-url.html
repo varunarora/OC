@@ -1,0 +1,1 @@
+<a href="{% if host == 'profile' %}{% url read resource_id=item.target.id resource_slug=item.target.slug %}{% else %}{% url projects:read_project_resource project_slug=project.slug resource_id=item.target.id resource_slug=item.target.slug %}{% endif %}">{{ item.target.title }}</a>

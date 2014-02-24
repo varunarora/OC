@@ -1,14 +1,11 @@
-{% for project in projects %}
 <div class="projects-item">
-    <a href="{% url projects:project_home project_slug=project.slug %}">
+    <a href="{% url projects:project_home project_slug=project.slug %}" title="{{ project.short_description }}">
         <div style="background-image: url('{{ MEDIA_URL }}{{ project.cover_pic }}'); background-position: {{ project.cover_pic_position.left }}% {{ project.cover_pic_position.top }}%;" class="profile-projects-item-description-wrapper">
             <div class="profile-projects-item-description">
                 <div class="profile-projects-item-title bold">
-                        {{ project.title }}
+                    {{ project.title }}
                 </div>
-                {{ project.short_description }}
             </div>
         </div>
     </a>
 </div>
-{% endfor %}

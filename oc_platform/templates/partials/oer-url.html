@@ -1,29 +1,10 @@
 {% if resource.provider %}
-<div class="oer-video">
-	{% if resource.provider == "youtube" %} 
-	<iframe width="573" height="322" src="http://www.youtube.com/embed/{{ resource.video_tag }}?wmode=opaque" frameborder="0" allowfullscreen></iframe>
-	{% elif resource.provider == "vimeo" %}
-	<iframe src="http://player.vimeo.com/video/{{ resource.video_tag }}?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;color=ffffff" width="573" height="322" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
-	{% endif %}
-</div>
+{% include 'partials/oer-video-snippet.html' %}
 {% else %}
 
 <div class="center-stage">
 	<div id="key-panel" class="panel-left">
-		<div class="oer-external" style="background-image: url('{{ MEDIA_URL }}{{ resource.image.name }}');">
-			<div id="oer-info">
-				<div id="oer-details">
-					<ul>
-						<li><span class="oer-info-caption">URL:</span> <span class="oer-info-detail"><a href="{{ resource.revision.content.url }}">{{ resource.revision.content.url|slice:":30" }}...</a></span></li>
-						<li><span class="oer-info-caption">License:</span> <span class="oer-info-detail"> {{ resource.license.title }}</span></li>
-						<li><span class="oer-info-caption">Posted on:</span> <span class="oer-info-detail"> {{ resource.created }}</span></li>
-					</ul>
-				</div>
-				<div id="oer-get">
-					<a href="{{ resource.revision.content.url }}" target="_blank"><button class="action-button">Open website</button></a>
-				</div>
-			</div>
-		</div>
+		{% include 'partials/oer-url-snippet.html' %}
 	</div>
 	<div id="fill-panel" class="panel-right">
 	</div>

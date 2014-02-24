@@ -2806,6 +2806,48 @@ var OC = {
         }
     },
 
+    initSubscribe: function(){
+        var username = $('form.profile-subscribe-form input[name=username]').val(),
+            button;
+        
+        function subscribe_to(username, button){
+            $.get('/user/api/subscribe/' + username + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        if (button.hasClass('subscribed')){
+                            button.removeClass('subscribed');
+                            button.text('Subscribe');
+                        } else {
+                            button.addClass('subscribed');
+                            button.text('✔ Subscribed');
+                        }
+                    } else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        }
+
+        $('.profile-subscribe .subscribe-button').click(function(event){
+            button = $(this);
+            subscribe_to(username, button);
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+
+        $('.subscribe-suggestions .subscribe-button').click(function(event){
+            username = $(this).parents('.subscribe-suggestion-form').find(
+                'input[name=username]').val();
+            subscribe_to(username, $(this));
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+    },
+
     resource: {
         copy: function(fromCollectionID, resourceID, toCollectionID, callback){
             $.get('/resources/resource/' + resourceID + '/copy/from/' +

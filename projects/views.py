@@ -131,6 +131,9 @@ def new_project(request):
                 if not new_project.cover_pic:
                     _set_cover_picture(new_project, new_project_form)
 
+                Project.project_created.send(
+                    sender="Project", project=new_project, creator=request.user)
+
                 return redirect(
                     'projects:project_home', project_slug=new_project.slug)
 
@@ -437,6 +440,13 @@ def post_discussion(request, project_slug):
         Project.discussion_post_created.send(
             sender="Projects", comment_id=comment_created.id)
 
+        from django.contrib.contenttypes.models import ContentType
+        project_ct = ContentType.objects.get_for_model(Project)
+        Comment.comment_created.send(
+            sender="Projects", comment_id=comment_created.id,
+            parent_type=project_ct.id, request=request
+        )
+
     # Redirect to discussions page
     return redirect('projects:project_discussions', project_slug=project_slug)
 
@@ -561,6 +571,7 @@ def add_user_to_project(user, project):
     # Notify the member about being added.
     Membership.new_member_added.send(
         sender="Projects", membership_id=new_member.id)
+
 
 # Projects-specific API below
 

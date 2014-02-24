@@ -449,6 +449,15 @@ def add_video(request, submission_context=None):
             # Add to the necessary collection.
             add_resource_to_collection(url, collection)
 
+            # Push a signal for new resource created.
+            import oer.CollectionUtilities as cu
+            from oer.models import Resource
+            (collection_host_type, collection_host) = cu.get_collection_root(collection)
+            Resource.resource_created.send(
+                sender="Resources", resource=url,
+                context_type=collection_host_type.name, context=collection_host
+            )
+
             return redirect_to_collection(user_id, project_id, collection_id)
         else:
             build_return_resource_form_context(request, new_video, form_context)
@@ -487,6 +496,16 @@ def add_url(request):
 
             # Add to the necessary collection.
             add_resource_to_collection(url, collection)
+
+            # Push a signal for new resource created.
+            import oer.CollectionUtilities as cu
+            from oer.models import Resource
+            (collection_host_type, collection_host) = cu.get_collection_root(collection)
+            
+            Resource.resource_created.send(
+                sender="Resources", resource=url,
+                context_type=collection_host_type.name, context=collection_host
+            )
 
             return redirect_to_collection(user_id, project_id, collection_id)
         else:
@@ -528,6 +547,15 @@ def new_document(request):
 
             # Add to the necessary collection.
             add_resource_to_collection(document_resource, collection)
+
+            # Push a signal for new resource created.
+            import oer.CollectionUtilities as cu
+            from oer.models import Resource
+            (collection_host_type, collection_host) = cu.get_collection_root(collection)
+            Resource.resource_created.send(
+                sender="Resources", resource=document_resource,
+                context_type=collection_host_type.name, context=collection_host
+            )
 
             return redirect_to_collection(user_id, project_id, collection_id)
         else:
@@ -786,6 +814,14 @@ def create_resource(uploaded_file, user, collection, new_filename=None):
 
     new_resource.revision = new_resource_revision
     new_resource.save()
+
+    # Push a signal for new resource created.     
+    import oer.CollectionUtilities as cu
+    (collection_host_type, collection_host) = cu.get_collection_root(collection)
+    Resource.resource_created.send(
+        sender="Resources", resource=new_resource,
+        context_type=collection_host_type.name, context=collection_host
+    )
 
     # Assign this resource to the revision created.
     new_resource.revision.resource = new_resource
@@ -1188,6 +1224,10 @@ def new_project_collection(request, project_slug):
 
     # TODO(Varun):Set Django message on creation of collection
 
+    Collection.new_collection_created.send(
+        sender='Resources', collection=new_collection,
+        collection_host=project, collection_host_type='project')
+
     if project.collection == collection:
         return redirect(
             'projects:project_browse',
@@ -1225,6 +1265,10 @@ def new_user_collection(request, username):
         new_collection.save()
 
         # TODO(Varun):Set Django message on creation of collection
+
+        Collection.new_collection_created.send(
+            sender='Resources', collection=new_collection,
+            collection_host=user.get_profile(), collection_host_type='user profile')
 
         if user.get_profile().collection == collection:
             return redirect(

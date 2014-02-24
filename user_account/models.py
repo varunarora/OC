@@ -4,9 +4,12 @@ from django.db import models
 from django.dispatch import receiver
 from interactions.models import Comment, Vote, Favorite
 from projects.models import Project, Membership
-from oer.models import Collection
+from oer.models import Resource, Collection
 from media.models import ImagePosition
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 from django.core.urlresolvers import reverse
+from django.dispatch import Signal
 import user_account.NotificationUtilities as nu
 
 class UserProfile(models.Model):
@@ -21,9 +24,21 @@ class UserProfile(models.Model):
     interests = models.ManyToManyField(Tag, null=True, blank=True)
     social_id = models.CharField(max_length=32, null=True, blank=True)
     collection = models.ForeignKey('oer.Collection', null=True, blank=True)
+    subscriptions = models.ManyToManyField('self', symmetrical=False,
+        related_name="user_subscriptions", blank=True, null=True, through='Subscription')
 
     def __unicode__(self):
         return self.user.username
+
+
+class Subscription(models.Model):
+    subscriber = models.ForeignKey(UserProfile, related_name="user_subscriber")
+    subscribee = models.ForeignKey(UserProfile, related_name="user_subscribee")
+
+    def __unicode__(self):
+        return self.subscriber.user.username + ":" +  self.subscribee.user.username  
+
+    new_subscription = Signal(providing_args=["subscription"])
 
 
 def add_to_mailing_list(sender, instance, created, raw, **kwargs):
@@ -47,6 +62,27 @@ post_save.connect(add_to_mailing_list, sender=UserProfile)
 
 class Cohort(models.Model):
     members = models.ManyToManyField(User)
+
+
+class Activity(models.Model):
+    actor = models.ForeignKey(User, related_name='actor')
+
+    action_type = models.ForeignKey(ContentType, related_name='activity_action_host')
+    action_id = models.PositiveIntegerField()
+    action = generic.GenericForeignKey('action_type', 'action_id')
+
+    target_type = models.ForeignKey(ContentType, related_name='activity_target_host')
+    target_id = models.PositiveIntegerField()
+    target = generic.GenericForeignKey('target_type', 'target_id')
+
+    context_type = models.ForeignKey(ContentType, related_name='activity_context_host')
+    context_id = models.PositiveIntegerField()
+    context = generic.GenericForeignKey('context_type', 'context_id')
+
+    recipients = models.ManyToManyField(User, blank=True, null=True, related_name="feed")
+
+    def __unicode__(self):
+        return unicode(self.actor)
 
 
 class Notification(models.Model):
@@ -123,7 +159,7 @@ class Notification(models.Model):
                 # Send an email about this notification.
                 nu.notify_by_email(notification, request.get_host())
 
-        else:
+        elif parent_ct.name == 'comment' or parent_ct.name == 'resource' or parent_ct.name == 'article revision':
             # Determine whether this is an ArticleRevision, resource, etc. and the
             #     user who created it.
             asset = comment.parent
@@ -199,32 +235,122 @@ class Notification(models.Model):
                 # Send an email about this notification.
                 nu.notify_by_email(notification, request.get_host())
 
+        elif parent_ct.name == 'project':
+            project_members = comment.parent.members.all().exclude(pk=comment.user.id)
 
-    @receiver(Project.discussion_post_created)
-    def add_discussion_post_notification(sender, **kwargs):
+            for member in project_members:
+                notification = Notification()
+                notification.user = member
+
+                notification.url = reverse(
+                    'projects:project_discussion', kwargs={
+                        'project_slug': comment.parent.slug,
+                        'discussion_id': comment.id
+                    }
+                )
+
+                notification.description = "%s wrote a new post in %s: \"%s\"" % (
+                    comment.user.get_full_name(), comment.parent.title, comment.body_markdown[:100])
+
+                notification.save()
+
+
+    @receiver(Resource.resource_created)
+    def new_resource_activity(sender, **kwargs):
+        resource = kwargs.get('resource', None)
+        context = kwargs.get('context', None)
+        context_type = kwargs.get('context_type', None)
+
+        new_activity = Activity(
+            actor=resource.user,
+            action=resource,
+            target=resource,
+            context=context
+        )        
+        new_activity.save()
+
+        recipients = None
+        if context_type == 'user profile' and resource.visibility == 'public':
+            # Get all people subscribed to resource creator.
+            subscriptions = Subscription.objects.filter(subscribee=context)
+            if subscriptions.count() >= 1:
+                recipients = [x.subscriber.user for x in subscriptions]
+
+        if recipients:
+            for recipient in recipients:
+                new_activity.recipients.add(recipient)
+
+
+    @receiver(Comment.comment_created)
+    def new_comment_activity(sender, **kwargs):
         comment_id = kwargs.get('comment_id', None)
+        parent_type = kwargs.get('parent_type', None)
 
-        # Get the discussion post.
+        # Get the commment.
         from interactions.models import Comment
-        comment = Comment.objects.get(pk=comment_id)        
+        comment = Comment.objects.get(pk=comment_id)
 
-        project_members = comment.parent.members.all().exclude(pk=comment.user.id)
+        # Get the type of the parent of the comment
+        from django.contrib.contenttypes.models import ContentType
+        parent_ct = ContentType.objects.get(pk=parent_type)
 
-        for member in project_members:
-            notification = Notification()
-            notification.user = member
+        if parent_ct.name == 'resource':
+            import oer.ResourceUtilities as ru
+            (resource_root_type, resource_root) = ru.get_resource_root(comment.parent)
 
-            notification.url = reverse(
-                'projects:project_discussion', kwargs={
-                    'project_slug': comment.parent.slug,
-                    'discussion_id': comment.id
-                }
-            )
+            if resource_root_type.name == 'project':
+                new_activity = Activity(
+                    actor=comment.user,
+                    action=comment,
+                    target=comment.parent,
+                    context=resource_root
+                )
+                new_activity.save()
 
-            notification.description = "%s wrote a new post in %s: \"%s\"" % (
-                comment.user.get_full_name(), comment.parent.title, comment.body_markdown[:100])
+        if parent_ct.name == 'comment' or parent_ct.name == 'project':
+            # Get root parent of the comment
+            from interactions.CommentUtilities import CommentUtilities
+            (root_parent_type, root_parent, root_comment) = CommentUtilities.get_comment_root(comment)
 
-            notification.save()
+            # If this is the child of a comment 
+            if parent_ct.name == 'project':
+                new_activity = Activity(
+                    actor=comment.user,
+                    action=comment,
+                    target=comment,
+                    context=root_parent
+                )
+                new_activity.save()
+
+            # If this is the child of a comment 
+            elif parent_ct.name == 'comment':
+                if root_parent_type.name == 'project':
+                    new_activity = Activity(
+                        actor=comment.user,
+                        action=comment,
+                        target=root_comment,
+                        context=root_parent
+                    )
+                    new_activity.save()
+
+        if parent_ct.name == 'project' or (
+            parent_ct.name == 'comment' and root_parent_type.name == 'project'):
+            recipients = None
+            if root_parent.visibility == 'public':
+                # Get all people subscribed to comment creator.
+                subscriptions = Subscription.objects.filter(
+                    subscribee=comment.user.get_profile())
+                if subscriptions.count() >= 1:
+                    recipients = [x.subscriber.user for x in subscriptions]
+
+            elif root_parent.visibility == 'private':
+                project_members = root_parent.confirmed_members
+                if len(project_members) >= 1:
+                    recipients = project_members
+
+            if recipients:
+                for recipient in recipients:
+                    new_activity.recipients.add(recipient)
 
 
     @receiver(Membership.new_invite_request)
@@ -278,6 +404,35 @@ class Notification(models.Model):
 
         # Send an email about this notification.
         nu.notify_by_email(notification, request.get_host())
+
+
+    @receiver(Membership.invite_request_accepted)
+    def new_membership_acceptance_activity(sender, **kwargs):
+        membership_id = kwargs.get('membership_id', None)
+
+        membership = Membership.objects.get(pk=int(membership_id))
+
+        new_activity = Activity(
+            actor=membership.user,
+            action=membership,
+            target=membership.project,
+            context=membership.project
+        )
+        new_activity.save()
+
+        # Get all people subscribed to member.
+        recipients = None
+        subscriptions = Subscription.objects.filter(
+            subscribee=membership.user.get_profile())
+        if subscriptions.count() >= 1:
+            recipients = [x.subscriber.user for x in subscriptions]
+
+        if membership.project.visibility == 'private':
+           recipients = [user for user in recipients if user in membership.project.confirmed_members]
+
+        if recipients:
+            for recipient in recipients:
+                new_activity.recipients.add(recipient)
 
 
     @receiver(Membership.new_member_added)
@@ -445,5 +600,151 @@ class Notification(models.Model):
 
         notification.description = '%s upvoted your resource "%s"' % (
             vote.user.get_full_name(), vote.parent.title)
+
+        notification.save()
+
+
+    @receiver(Project.project_created)
+    def new_project_activity(sender, **kwargs):
+        project = kwargs.get('project', None)
+        creator = kwargs.get('creator', None)
+
+        new_activity = Activity(
+            actor=creator,
+            action=project,
+            target=project,
+            context=project
+        )        
+        new_activity.save()
+
+        recipients = None
+        if project.visibility == 'public':
+            # Get all people subscribed to resource creator.
+            subscriptions = Subscription.objects.filter(
+                subscribee=creator.get_profile())
+            if subscriptions.count() >= 1:
+                recipients = [x.subscriber.user for x in subscriptions]
+
+        if recipients:
+            for recipient in recipients:
+                new_activity.recipients.add(recipient)
+
+
+    @receiver(Favorite.resource_favorited)
+    def new_resource_favorite_activity(sender, **kwargs):
+        favorite = kwargs.get('favorite', None)
+
+        import oer.CollectionUtilities as cu
+        import oer.ResourceUtilities as ru
+
+        from django.core.exceptions import MultipleObjectsReturned
+        try:
+            collection = Collection.objects.get(resources__id=favorite.resource.id)
+        except MultipleObjectsReturned:
+            collection = Collection.objects.filter(
+                resources__id=favorite.resource.id)[0]
+
+        (collection_host_type, collection_host) = ru.get_resource_root(
+            favorite.resource)
+
+        new_activity = Activity(
+            actor=favorite.user,
+            action=favorite,
+            target=favorite.resource,
+            context=collection_host
+        )
+        new_activity.save()
+
+        recipients = None
+
+        # Get all people subscribed to resource creator.
+        subscriptions = Subscription.objects.filter(
+            subscribee=favorite.user.get_profile())
+
+
+        if subscriptions.count() >= 1:
+            if (collection_host_type.name == 'project' and (
+                collection_host.visibility == 'public') and (
+                favorite.resource.visibility != 'private')):
+                    recipients = [x.subscriber.user for x in subscriptions]
+
+            elif (collection_host_type.name == 'project' and (
+                collection_host.visibility == 'private')):
+                    if favorite.resource.visibility == 'project':
+                        recipients = [x.subscriber.user for x in subscriptions
+                            if x in collection_host.confirmed_members]
+
+                    elif favorite.resource.visibility == 'private':
+                        recipients = [x.subscriber.user for x in subscriptions
+                            if x in favorite.resource.collaborators.all()]
+
+                    elif favorite.resource.visibility == 'collection':
+                        root_private_collection = cu.get_root_private_collection(collection)
+                        recipients = [x.subscriber.user for x in subscriptions
+                            if x in root_private_collection.collaborators.all()]
+
+            elif favorite.resource.visibility == 'public':
+                recipients = [x.subscriber.user for x in subscriptions]
+
+            elif favorite.resource.visibility == 'private':
+                recipients = [x.subscriber.user for x in subscriptions
+                    if x in favorite.resource.collaborators.all()]
+
+            elif favorite.resource.visibility == 'collection':
+                root_private_collection = cu.get_root_private_collection(collection)
+                recipients = [x.subscriber.user for x in subscriptions
+                    if x in root_private_collection.collaborators.all()]
+
+        if recipients:
+            for recipient in recipients:
+                new_activity.recipients.add(recipient)
+
+
+    @receiver(Collection.new_collection_created)
+    def new_collection_activity(sender, **kwargs):
+        collection = kwargs.get('collection', None)
+        collection_host = kwargs.get('collection_host', None)
+        collection_host_type = kwargs.get('collection_host_type', None)
+
+        new_activity = Activity(
+            actor=collection.creator,
+            action=collection,
+            target=collection,
+            context=collection_host
+        )        
+        new_activity.save()
+
+        recipients = None
+        # Get all people subscribed to resource creator.
+        subscriptions = Subscription.objects.filter(
+            subscribee=collection.creator.get_profile())
+        if subscriptions.count() >= 1:
+            if collection_host_type == 'project' and collection.visibility == 'public':
+                recipients = [x.subscriber.user for x in subscriptions
+                    if x in collection_host_type.confirmed_members]
+
+            elif collection_host_type == 'user profile' and collection.visibility == 'public':
+                recipients = [x.subscriber.user for x in subscriptions]
+
+        if recipients:
+            for recipient in recipients:
+                new_activity.recipients.add(recipient)
+
+
+    @receiver(Subscription.new_subscription)
+    def new_subscription_notification(sender, **kwargs):
+        subscription = kwargs.get('subscription', None)
+
+        notification = Notification()
+        notification.user = subscription.subscribee.user
+
+        notification.url = reverse(
+            'user:user_profile', kwargs={
+                'username': subscription.subscriber.user,
+            }
+        )
+
+        notification.description = '%s subscribed to you' % (
+            subscription.subscriber.user.get_full_name())
 
         notification.save()
