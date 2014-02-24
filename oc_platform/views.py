@@ -11,6 +11,8 @@ def home(request):
 
     if request.user.is_authenticated():
         login = False
+        return redirect('user:user_profile', username=request.user.username)
+
 
     login_error_message = None
     source = None
@@ -34,7 +36,7 @@ def home(request):
 
     # Get the top 10 projects ordered in descending order of views.
     from projects.models import Project
-    top_projects = Project.objects.filter(visibility='public').order_by('title').order_by('-created')[:10]
+    #top_projects = Project.objects.filter(visibility='public').order_by('title').order_by('-created')[:10]
 
     # Get the sign-in form.
     import SignupForm
@@ -48,7 +50,7 @@ def home(request):
         AuthHelper.generateGPlusContext(request).items() + {
             'top_articles': top_articles,
             'top_resources': top_resources,
-            'top_projects': top_projects,
+            #'top_projects': top_projects,
             'title': _(settings.STRINGS['global']['TITLE']),
             'count': article_count,
             'form': form,

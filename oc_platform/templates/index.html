@@ -96,6 +96,89 @@
 
 {% else %}
 <div id="chief-panel-container" class="home">
+	<div id="chief-panel">
+		<h1>Create better <span class="animated-learning-item">curriculum</span></h1>
+		<p>The easiest way to create &amp; share K-12 teaching materials.</p>
+		<a href="{% url register %}" class="action-button site-action-button">Sign up for free</a>
+	</div>
+</div>
+<div class="center-stage home-teaser">
+	<div id="key-panel" class="panel-left">
+		<h2>One easy-to-use editor for all your needs</h2>
+		<p>Whether you are creating your next worksheet or a homework assignment, a curriculum map or a reading, the OpenCurriculum editor gives you the ease and power to create all kinds of content fluidly. Use widgets to insert examples, questions, standards, and other media into your next amazing resource. Word will feel like such a waste of time.</p>
+		<p><a href="{% url register %}">Try the magic for yourself &#187;</a></p>
+	</div>
+	<div id="fill-panel" class="panel-right">
+		<img src="{{ STATIC_URL }}images/home/editor.png" class="home-teaser-image" />
+	</div>
+</div>
+
+<div class="center-stage home-teaser">
+	<div id="fill-panel" class="panel-left">
+		<img src="{{ STATIC_URL }}images/home/discover.png" class="home-teaser-image" />
+	</div>
+	<div id="key-panel" class="panel-right">
+		<h2>Discover &amp; remix what other teachers are creating</h2>
+		<p>Don't feel like starting from scratch? Don't worry! Discover thousands of resources being produced by other teachers around you, get inspired and even remix other resources. Start from a document, video or PDF. Because reinventing the wheel just isn't worth your valuable time.</p>
+		<p><a href="{% url register %}">Explore the stream of activity around you &#187;</a></p>
+
+	</div>
+</div>
+
+<div class="center-stage home-teaser">
+	<div id="key-panel" class="panel-left">
+		<h2>Throw away those USB sticks</h2>
+		<p>Get rid of the hassle of emailing and passing around content in USB sticks. Let us take you into 2014 with seamless track changes and version history on all your content, along with instant resource previews, commenting and moderation. Don't worry about space limits - you get unlimited space for anything you want. It just works.</p>
+		<p><a href="{% url register %}">Get started on your life's best decision &#187;</a></p>
+	</div>
+	<div id="fill-panel" class="panel-right">
+		<img src="{{ STATIC_URL }}images/home/filesystem.png" class="home-teaser-image" />
+	</div>
+</div>
+
+<div class="center-stage home-teaser">
+	<div id="fill-panel" class="panel-left">
+		<img src="{{ STATIC_URL }}images/home/content.png" class="home-teaser-image no-border" />
+	</div>
+	<div id="key-panel" class="panel-right">
+		<h2>Come for the tools, stay for the content</h2>
+		<p>With more than millions of resource catalogued and tagged, tap into some of the largest repositories of high-quality videos, exams, worksheets, notes and other media while preparing for your needs. It's a one-stop shop for all your favorite free content including Khan Academy, CK-12, and other great Creative Commons content.</p>
+		<p><a href="{% url register %}">Try now to make more time for your loved ones &#187;</a></p>
+	</div>
+</div>
+
+<!--
+<div class="center-stage">
+    <div class="home-tripanel">
+        <div id="locally-relevant">
+        	<div class="tripanel-image"></div>
+            <span class="bold">Instant Feedback</span>
+            <p>Resources aligned by community to local education standards around the world.
+            </p>
+        </div>
+        <div id="high-quality-content">
+            <div class="tripanel-image"></div>
+            <span class="bold">Take it away</span>
+            <p>Peer reviewed and moderated content to ensure that you get only the best.</p>
+        </div>
+        <div id="social">
+            <div class="tripanel-image"></div>
+            <span class="bold">Collaborate as groups</span>
+            <p>Create and share with friends and education communities, easier than ever before.
+            </p>
+        </div>
+    </div>
+</div>
+-->
+
+<div class="center-stage testimonial-wrapper">
+	<div class="testimonial">"A tool like this is a godsend for teachers who might be hard-pressed to come up with lesson plans from scratch" - Tyson S., Rukmini Foundation</div>
+	<a href="{% url register %}" class="action-button site-action-button">Sign up for free</a>
+	<p>Have a question or suggestion? Contact us at hello@opencurriculum.org</p>
+</div>
+
+<!--
+<div id="chief-panel-container" class="home">
 	<div id="chief-panel-wrapper"></div>
 	<div id="chief-panel">
 		<div id="key-panel" class="panel-left">
@@ -129,10 +212,10 @@
 	</div>
 	<div class="chief-panel-container-cover"></div>
 </div>
-
+-->
 {% endif %}
 
-
+<!--
 <div class="center-stage">
     <div class="home-tripanel">
         <div id="locally-relevant">
@@ -157,12 +240,6 @@
 
 <div class="center-stage">
 	<div id="key-panel" class="panel-left">
-		<div class="content-gallery">
-			<h3>Featured <a href="{% url projects:invite %}">Projects</a></h3>
-			<div class="home-projects-listing">
-				{% include 'partials/project-item.html' with projects=top_projects %}
-			</div>
-		</div>
 
 		<div class="content-gallery">
 			<h3>Featured Resources</h3>
@@ -208,4 +285,5 @@
 		</aside>
 	</div>
 </div>
+-->
 {% include 'partials/footer.html' %}

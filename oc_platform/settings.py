@@ -223,7 +223,7 @@ DEFAULT_PROJECT_KEY = 1
 
 STRINGS = {
     'global': {
-        'TITLE': 'OpenCurriculum: A K-12 Learning Content Hub',
+        'TITLE': 'OpenCurriculum: Create and discover better K-12 curriculum together',
         'invite': {
             'SUCCESS': 'Congratulations! We have successfully received your request submission.',
             'FAILURE': 'Unknown error occured. Try again or contact us at hello@ for a resolution.'
