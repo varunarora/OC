@@ -14,10 +14,10 @@ urlpatterns = patterns(
     url(r'^new-collection/user/(?P<username>\w+)/', views.new_user_collection, name='new_user_collection'),
 
     # Resources API
-    url(r'^delete-resource/(?P<resource_id>.+)/from/(?P<collection_id>.+)/$', views.delete_resource, name='delete_resource'),
-    url(r'^delete-collection/(?P<collection_id>.+)/$', views.delete_collection, name='delete_collection'),
+    url(r'^delete-resource/(?P<resource_id>\d+)/from/(?P<collection_id>.+)/$', views.delete_resource, name='delete_resource'),
+    url(r'^delete-collection/(?P<collection_id>\d+)/$', views.delete_collection, name='delete_collection'),
 
-    url(r'^resource-comments/(?P<resource_id>.+)/', views.get_resource_comments, name='get_resource_comments'),
+    url(r'^resource-comments/(?P<resource_id>\d+)/', views.get_resource_comments, name='get_resource_comments'),
 
     url(r'^collection/(?P<collection_id>\d+)/tree/(?P<ask>[\w\-]+)/(?P<host>[\w\-]+)/$', views.collection_tree, name='collection_tree'),
     url(r'^tree/(?P<ask>[\w\-]+)/(?P<host>[\w\-]+)/$', views.user_tree, name='user_tree'),
@@ -44,6 +44,8 @@ urlpatterns = patterns(
 
     url(r'^move/resource/(?P<resource_id>\d+)/from/(?P<from_collection_id>\d+)/to/(?P<to_collection_id>\d+)/$', views.move_resource_to_collection, name='move_resource_to_collection'),    
     url(r'^move/collection/(?P<collection_id>\d+)/from/(?P<from_collection_id>\d+)/to/(?P<to_collection_id>\d+)/$', views.move_collection_to_collection, name='move_collection_to_collection'),
+
+    url(r'^(?P<resource_id>\d+)/build-export-document/$', views.build_export_document, name='build_export_document'),
 
     url(r'^(?P<resource_id>\d+)/$', views.view_resource_by_id, name='read_by_id_old'),
     url(r'^(?P<resource_id>\d+)/edit/$', views.edit_resource, name='edit_resource'),
