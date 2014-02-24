@@ -50,11 +50,3 @@ class Favorite(models.Model):
     resource = models.ForeignKey(Resource)
 
     resource_favorited = Signal(providing_args=["favorite", "request"])
-
-
-"""
-
-class Rating(models.Model):
-
-
-"""
