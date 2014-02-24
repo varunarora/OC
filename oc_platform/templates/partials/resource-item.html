@@ -1,8 +1,100 @@
-<div class="{{ host }}-browse-item resource-collection-item resource {{ resource.type }}-resource" id="resource-{{ resource.id }}">
-    <input type="checkbox" name="resource_id" value="{{ resource.id }}"/>
-    <a href="{% if host == 'profile' %}{% url read resource_id=resource.id  resource_slug=resource.slug %}{% else %}{% url projects:read_project_resource project_slug=project.slug resource_id=resource.id  resource_slug=resource.slug %}{% endif %}">{{ resource }} <span class="{{ host }}-browse-item-date">{{ resource.created|date:"M nS, 'y P"}}</span>
-    
-    <div class="resource-collection-actions{% if host == 'profile' %}{% if user == user_profile %} profile-resource is-owner{% endif %}{% elif user in project.admins.all or user == resource.user %} is-owner{% elif resource.visibility == 'private' and user in resource.collaborators.all %} is-collaborator{% endif %}">
-        <span class="{{ host }}-browse-item-visibility browse-item-visibility visibility-{{ resource.visibility }}" title="Who has access: {% if collection.visibility == 'collection' %}Private (collection){% else %}{{ resource.visibility|title }}{% endif %}"></span><div class="{{ host }}-resource-delete resource-collection-delete" id="resource-{{ resource.id }}" title="Delete"></div>
-    </div></a>
+<div class="resource-collection-item {{ item_type }}" id="{{ item_type }}-{{ item.id }}">
+    <input type="checkbox" name="resource_collection_id" value="{{ item.id }}"/>
+    {% if item_type == 'resource' and item.type != 'gfolder' and item.type != 'dropbox' %}
+    <div class="resource-item-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ item.image.name }}');">
+        <div class="resource-item-thumbnail-selector"></div>
+        {% if item.type == 'image' %}
+        <div class="resource-item-thumbnail-image"></div>
+        {% elif item.type == 'pdf' %}
+        <div class="resource-item-thumbnail-pdf"></div>
+        {% elif item.type == 'document' %}
+        <div class="resource-item-thumbnail-document"></div>
+        {% elif item.type == 'presentation' %}
+        <div class="resource-item-thumbnail-presentation"></div>
+        {% elif item.type == 'spreadsheet' %}
+        <div class="resource-item-thumbnail-spreadsheet"></div>
+        {% elif item.type == 'upload' %}
+        <div class="resource-item-thumbnail-upload"></div>
+        {% elif item.type == 'url' %}
+        <div class="resource-item-thumbnail-url"></div>
+        {% elif item.type == 'video' %}
+        <div class="resource-item-thumbnail-video"></div>        
+        {% elif item.type == 'gdoc' %}
+        <div class="resource-item-thumbnail-drive"></div>  
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="resource-item-thumbnail" style="background-image: url('{{ STATIC_URL }}images/folder-icon.png');">
+        <div class="resource-item-thumbnail-selector"></div>
+        {% if item.type == 'gfolder' or item.type == 'gdoc' %}
+        <div class="resource-item-thumbnail-drive"></div>
+        {% elif item.type == 'dropbox' %}
+        <div class="resource-item-thumbnail-dropbox"></div>
+        {% endif %}
+    </div>
+    {% endif %}
+    <div class="resource-item-description">
+        <div class="resource-item-description-title"><a href="{% if item.open_url %}{{ item.open_url }}{% elif item_type == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id  resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %}>{{ item.title }}</a>
+        <div class="resource-item-description-meta">Last modified at: {% if item_type == 'resource' %}{{ item.revision.created }}{% else %}{{ item.changed|date:"M nS, 'y P"}}{% endif %}</div>
+        </div>
+        <div class="resource-item-description-actions">
+            <div class="resource-item-description-actions-visibility">
+                <button class="action-button secondary-button mini-action-button {{ host }}-browse-item-visibility browse-item-visibility visibility-{{ item.visibility }}{% if host == 'profile' %}{% if user == user_profile %} profile-collection is-owner{% endif %}{% elif user in project.admins.all or user == item.creator or user == item.user %} is-owner{% elif item.visibility == 'private' and user in item.collaborators.all %} is-collaborator{% endif %}{% if host == 'profile' %}{% if user != item.creator and user != item.user %} unclickable{% endif %}{% elif host == 'project' and user != item.creator and user != item.user and user not in project.admins.all %} unclickable{% endif %}{% if item.visibility == 'private' and user not in item.collaborators.all and user != item.creator and user != item.user %} unclickable{% endif %}">
+                {% if host == 'project' %}
+                    {% if item.user != user and item.creator != user %}
+                        {% if project.visibility == 'public' %}
+                            {% if item.visibility == 'project' or item.visibility == 'public' %}
+                                <span class="publicly-shared-icon"></span>Public
+                            {% endif %}
+                        {% else %}
+                            {% if item.visibility == 'project' %}
+                                <span class="group-shared-icon"></span>Shared with group
+                            {% elif item.visibility == 'private' %}
+                                <span class="private-shared-icon"></span>Shared
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        {% if item.visibility == 'private' %}
+                            {% if item.collaborators.all|length == 0 %}
+                                <span class="personal-shared-icon"></span>Only me
+                            {% else %}
+                                <span class="private-shared-icon"></span>Shared
+                            {% endif %}
+                        {% elif item.visibility == 'project' %}
+                            {% if project.visibility == 'public' %}
+                                <span class="publicly-shared-icon"></span>Public
+                            {% elif project.visibility == 'private' %}
+                                <span class="group-shared-icon"></span>Shared with group
+                            {% endif %}
+                        {% elif item.visibility == 'public' %}
+                            <span class="publicly-shared-icon"></span>Public
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                {% if item.user != user and item.creator != user %}
+                    {% if item.visibility == 'public' %}
+                        <span class="publicly-shared-icon"></span>Public
+                    {% elif item.visibility == 'private' %}
+                        <span class="shared-with-me-icon"></span>Shared with me
+                    {% endif %}
+                {% else %}
+                    {% if item.visibility == 'private' %}
+                        {% if item.collaborators.all|length == 0 %}
+                            <span class="personal-shared-icon"></span>Only me
+                        {% else %}
+                            <span class="private-shared-icon"></span>Shared
+                        {% endif %}
+                    {% elif item.visibility == 'public' %}
+                        <span class="publicly-shared-icon"></span>Public
+                    {% endif %}
+                {% endif %}
+                {% endif %}
+                </button>
+            </div>
+            <div class="resource-item-description-actions-common">
+                <span class="resource-favorite-wrapper"><a class="resource-favorite">Favorite</a></span>
+                <a class="resource-copy">Copy</a><a class="resource-remix">Remix</a>
+            </div>
+        </div>
+    </div>
 </div>

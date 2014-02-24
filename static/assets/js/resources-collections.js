@@ -26,22 +26,162 @@ OC.resourcesCollections = {
 
     currentResourceCollectionVisibility: '',
 
-    bindItemVisibilityButton: function(){
-        $('.collection-visibility-public .browse-item-visibility, ' +
-            '.collection-visibility-project .browse-item-visibility').click(
-            OC.resourcesCollections.itemVisibilityButtonClickHandler);
+    initFavoriteStates: function(){
+        var resourceCollectionItem, resourceFavoriteWrapper, resourceFavoriteButton;
 
+        function setFavoriteState(resourceID, state){
+            resourceCollectionItem = $(
+                '.resource-collection-item#resource-' + resourceID);
+            var resourceFavoriteButton = $(
+                '.resource-favorite', resourceCollectionItem),
+                resourceFavoriteWrapper = $(
+                    '.resource-favorite-wrapper', resourceCollectionItem);
+            if (state){
+                resourceFavoriteWrapper.addClass(
+                    'favorited');
+                resourceFavoriteButton.text('Favorited');
+            }
+
+            resourceFavoriteButton.click(function(event){
+                OC.favoriteClickHandler(
+                    resourceID, OC.config.user.id, resourceFavoriteWrapper, event);
+            });
+
+        }
+
+        var resourcesCollections = $('.resource-collection-item');
+
+        var i, resourceID;
+        for (i = 0; i < resourcesCollections.length; i++){
+            resourceID = $(resourcesCollections[i]).attr('id').substring(9);
+            OC.getFavoriteState(resourceID, setFavoriteState);
+        }
+    },
+
+    initCopyAction: function(){
+        var resourcesCollections = $('.resource-collection-item'),
+            resourceCollectionSet = $('.resources-collections-added');
+        
+        var currentCollectionID;
+        if (resourceCollectionSet.length >= 1){
+            currentCollectionID =  resourceCollectionSet.attr('id').substring(11);
+        }
+
+        var i, loadingPopup;
+        for (i = 0; i < resourcesCollections.length; i++){
+            var resourceID, collectionID, resourceCopyButton;
+            resourceCollectionItem = $(resourcesCollections[i]);
+            resourceCollectionCopyButton = $(
+                '.resource-copy', resourceCollectionItem);
+
+            if (resourceCollectionItem.hasClass('collection')){
+                collectionID = resourceCollectionItem.attr('id').substring(11);
+            } else {
+                resourceID = resourceCollectionItem.attr('id').substring(9);
+                collectionID = undefined;
+            }
+
+            if (currentCollectionID){
+                if (collectionID){
+                    OC.resourcesCollections.bindResourceCollectionCopyButton(
+                        'collection', collectionID, currentCollectionID);
+                } else {
+                    OC.resourcesCollections.bindResourceCollectionCopyButton(
+                        'resource', resourceID, currentCollectionID);
+                }
+            } else {
+                if (collectionID){
+                    OC.resourcesCollections.fetchParentCollectionAndBindCopyButton(
+                        'collection', collectionID, OC.resourcesCollections.bindResourceCollectionCopyButton);
+                } else {
+                    OC.resourcesCollections.fetchParentCollectionAndBindCopyButton(
+                        'resource', resourceID, OC.resourcesCollections.bindResourceCollectionCopyButton);
+                }
+            }
+        }
+    },
+
+    synchronizeSelectors: function(){
+        var thumbnail, resourceCollectionCheckbox,
+            thumbnails = $('.resource-item-thumbnail-selector');
+
+        // Synchonize the checkbox value with the thumbnail.
+        var i = 0;
+        for (i = 0; i < thumbnails.length; i++){
+            thumbnail = $(thumbnails[i]);
+            resourceCollectionCheckbox = thumbnail.parents(
+                '.resource-collection-item').find('input[name=resource_collection_id]')[0];
+
+            if (resourceCollectionCheckbox.checked){
+                console.log(thumbnail);
+                thumbnail.addClass('selected');
+            } else {
+                thumbnail.removeClass('selected');
+            }
+        }
+
+    },
+
+    bindThumbnailSelect: function(){
+        var thumbnail, resourceCollectionCheckbox,
+            thumbnails = $('.resource-item-thumbnail');
+
+        $('.resource-item-thumbnail').click(function(event){
+            thumbnail = $(event.target);
+            resourceCollectionCheckbox = $(event.target).parents(
+                '.resource-collection-item').find('input[name=resource_collection_id]');
+
+            resourceCollectionCheckbox.trigger('click');
+            thumbnail.toggleClass('selected');
+        });
+    },
+
+    bindResourceCollectionCopyButton: function(itemType, resourceCollectionID, currentCollectionID){
+        resourceCollectionCopyButton.click(function(event){
+            OC.addCopyClickHandler(itemType, resourceCollectionID, currentCollectionID, event);
+        });
+    },
+
+    fetchParentCollectionAndBindCopyButton: function(itemType, resourceCollectionID, callback){
+        if (itemType === 'collection'){
+            $.get('/resources/parent-collection-from-collection/' + resourceCollectionID + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        callback('collection', collectionID, response.collectionID);
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        } else {
+            $.get('/resources/collection-from-resource/' + resourceCollectionID + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        callback('resource', resourceID, response.collectionID);
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        }
+    },
+
+    bindItemVisibilityButton: function(){
+        $('.browse-item-visibility').click(
+            OC.resourcesCollections.itemVisibilityButtonClickHandler);
     },
 
     itemVisibilityButtonClickHandler: function(event){
         // Check to see if the user is allow to change to visibility or members.
-        var actionsWrapper = $(event.target).closest('.resource-collection-actions');
+        var actionsWrapper = $(event.target);
 
         if (actionsWrapper.hasClass('is-owner') || actionsWrapper.hasClass(
             'is-collaborator')){
 
             // Is this resource/collection a part of a project or not.
-            var isProject = $(event.target).hasClass('project-browse-item-visibility');
+            var isProject = actionsWrapper.hasClass('project-browse-item-visibility');
 
             // Get wrapping resource/collection element.
             var resourceCollectionItem = $(event.target).closest('.resource-collection-item');
@@ -58,7 +198,7 @@ OC.resourcesCollections = {
 
             // Nested if/else to figure out the visibility of the resource/collection.
             OC.resourcesCollections.currentResourceCollectionVisibility = OC.resourcesCollections.getResourceCollectionVisibility(
-                $(event.target), isProject);
+                actionsWrapper, isProject);
 
             // Empty contents of collaborator input.
             collaboratorInput.val('');
@@ -72,7 +212,7 @@ OC.resourcesCollections = {
             // Unbind all previously registered events from tabs.
             $('.resource-collection-visibility-form-tabs li a').unbind('click');
 
-            if (resourceCollectionItem.hasClass('directory')){
+            if (resourceCollectionItem.hasClass('collection')){
                 // Setup the popup.
                 var collectionID = resourceCollectionItem.attr('id').substring(11);
                 $('input[name=collection_id]', collaboratorForm).val(collectionID);
@@ -130,17 +270,17 @@ OC.resourcesCollections = {
                 // Get current visibility of the project.
                 // TODO(Varun): Make projectID retrieval less hackish.
                 var projectID = $('#add-collection-collaborator-form input[name=project_id]').val();
-                $.get('/project/' + projectID + '/visibility/',
+                $.get('/group/' + projectID + '/visibility/',
                     function (response) {
                         if (response.status === 'true'){
                             // Set the body of the project visibility tab accordingly.
                             var projectAccessWrapper = $(
                                 '.resource-collection-visibility-form-content .project-access');
                             if (response.visibility === 'private'){
-                                projectAccessWrapper.text('This project is private, so only ' +
+                                projectAccessWrapper.text('This group is private, so only ' +
                                     'the members of this project can see this.');
                             } else if (response.visibility === 'public'){
-                                projectAccessWrapper.text('This project is public, so ' +
+                                projectAccessWrapper.text('This group is public, so ' +
                                     'everyone can see this.');
                             }
                         } else {
@@ -283,6 +423,8 @@ OC.resourcesCollections = {
 
             // Add the project visibility class on the collection.
             collectionVisibility.addClass('visibility-project');
+            collectionVisibility.html(
+                '<span class="group-shared-icon"></span>Shared with group');
         },
 
         setPrivateVisibility: function(collectionVisibility, collectionID){
@@ -294,6 +436,8 @@ OC.resourcesCollections = {
 
             // Add the project visibility class on the collection.
             collectionVisibility.addClass('visibility-private');
+            collectionVisibility.html(
+                '<span class="private-shared-icon"></span>Shared');
         },
 
         setPublicVisibility: function(collectionVisibility, collectionID){
@@ -304,13 +448,15 @@ OC.resourcesCollections = {
 
             // Add the public visibility class on the collection.
             collectionVisibility.addClass('visibility-public');
+            collectionVisibility.html(
+                '<span class="publicly-shared-icon"></span>Public');
         }
     },
 
     resourceVisibility: {
         setupToggler: function(resourceID, isProject){
             var resourceVisibility = $('.resources-collections-added #resource-' +
-                    resourceID + ' .project-browse-item-visibility');
+                    resourceID + ' .browse-item-visibility');
 
             if (isProject){
                 var projectVisibilityTab = $(
@@ -344,6 +490,8 @@ OC.resourcesCollections = {
 
             // Add the project & public visibility class on the collection.
             resourceVisibility.addClass('visibility-project');
+            resourceVisibility.html(
+                '<span class="group-shared-icon"></span>Shared with group');
         },
 
         setPrivateVisibility: function(resourceVisibility, resourceID){
@@ -355,6 +503,8 @@ OC.resourcesCollections = {
 
             // Add the project visibility class on the collection.
             resourceVisibility.addClass('visibility-private');
+            resourceVisibility.html(
+                '<span class="private-shared-icon"></span>Shared');
         },
 
         setPublicVisibility: function(resourceVisibility, resourceID){
@@ -363,8 +513,11 @@ OC.resourcesCollections = {
             // Remove the private visibility class on the collection.
             resourceVisibility.removeClass('visibility-private');
 
+
             // Add the public visibility class on the collection.
             resourceVisibility.addClass('visibility-public');
+            resourceVisibility.html(
+                '<span class="publicly-shared-icon"></span>Public');
         }
     },
 
@@ -429,10 +582,10 @@ OC.resourcesCollections = {
             resourceCollectionElement, isProject);
 
         if (resourceCollectionNewVisibility !== OC.resourcesCollections.currentResourceCollectionVisibility){
-            OC.setMessageBoxMessage(
-                'Changing access control of resources and collections inside...');
-            OC.showMessageBox();
             if (collectionID !== ''){
+                OC.setMessageBoxMessage(
+                'Changing access control of resources and folders inside...');
+                OC.showMessageBox();
                 OC.resourcesCollections.collectionVisibilityChangePropagation(collectionID);
             }
         }
@@ -458,12 +611,16 @@ OC.resourcesCollections = {
 OC.resourcesCollectionsActions = {
     pendingActions: {
         copyResources: [],
-        copyCollections: []
+        copyCollections: [],
+        deleteResources: [],
+        deleteCollections: []
     },
 
     actionsCompleted: {
         copyResources: [],
-        copyCollections: []
+        copyCollections: [],
+        deleteResources: [],
+        deleteCollections: []
     },
     actionCompletionCallback: '',
 
@@ -582,32 +739,16 @@ OC.resourcesCollectionsActions = {
         // Generate message over project header.
         if (movedResources.length >= 1 && movedCollections.length >= 1) {
             OC.setMessageBoxMessage(
-                'Moved resources and collections successfully');
+                'Moved resources and folders successfully');
         } else if (movedResources.length >= 1) {
             OC.setMessageBoxMessage(
-                'Moved resource(s) into the collection successfully');
+                'Moved resource(s) into the folder successfully');
         } else if (movedCollections.length >= 1) {
             OC.setMessageBoxMessage(
-                'Moved collection(s) successfully');
+                'Moved folder(s) successfully');
         }
 
         OC.showMessageBox();
-    },
-
-    copyCollection: function(collectionID, toCollectionID){
-
-        $.get('/resources/collection/' + collectionID + '/copy/to/' +
-            toCollectionID + '/',
-            function(response){
-                if (response.status == 'true'){
-                    OC.resourcesCollectionsActions.collectionCopiedSuccessfully(
-                        response.collection, collectionID);
-                } else {
-                    OC.popup(response.message, response.title);
-                    OC.dismissMessageBox();
-                }
-            },
-        'json');
     },
 
     resourceCopiedSuccessfully: function(copiedResource, resourceID){
@@ -699,17 +840,63 @@ OC.resourcesCollectionsActions = {
         // Generate message over project header.
         if (copiedResources.length >= 1 && copiedCollections.length >= 1) {
             OC.setMessageBoxMessage(
-                'Copied resources and collections successfully');
+                'Copied resources and folders successfully');
         } else if (copiedResources.length >= 1) {
             OC.setMessageBoxMessage(
                 'Copied resource(s) successfully');
         } else if (copiedCollections.length >= 1) {
             OC.setMessageBoxMessage(
-                'Copied collection(s) successfully');
+                'Copied folder(s) successfully');
         }
 
         OC.showMessageBox();
     },
+
+    collectionDeletedSuccessfully: function(deletedCollectionID){
+        $('.resource-collection-item#collection-' + deletedCollectionID).fadeOut();
+
+        // Drop the action from the pending action list and announce completion.
+        OC.resourcesCollectionsActions.pendingActions.deleteCollections.splice(deletedCollectionID);
+        OC.resourcesCollectionsActions.actionsCompleted.deleteCollections.push(deletedCollectionID);
+
+        OC.resourcesCollectionsActions.actionCompleted();
+    },
+
+    resourceDeletedSuccessfully: function(deletedResourceID){
+        console.log($('.resource-collection-item#resource-' + deletedResourceID));
+        $('.resource-collection-item#resource-' + deletedResourceID).fadeOut();
+
+        // Drop the action from the pending action list and announce completion.
+        OC.resourcesCollectionsActions.pendingActions.deleteResources.splice(deletedResourceID);
+        OC.resourcesCollectionsActions.actionsCompleted.deleteResources.push(deletedResourceID);
+
+        OC.resourcesCollectionsActions.actionCompleted();
+    },
+
+    deleting: function(){
+        OC.setMessageBoxMessage('Deleting...');
+        OC.showMessageBox();
+    },
+
+    deleted: function(){
+        var deletedResources = OC.resourcesCollectionsActions.actionsCompleted.deleteResources;
+        var deletedCollections = OC.resourcesCollectionsActions.actionsCompleted.deleteCollections;
+
+        // Generate message over project header.
+        if (deletedResources.length >= 1 && deletedCollections.length >= 1) {
+            OC.setMessageBoxMessage(
+                'Deleted resources and folders successfully');
+        } else if (deletedResources.length >= 1) {
+            OC.setMessageBoxMessage(
+                'Deleted resource(s) successfully');
+        } else if (deletedCollections.length >= 1) {
+            OC.setMessageBoxMessage(
+                'Deleted folder(s) successfully');
+        }
+
+        OC.showMessageBox();
+    },
+
 
     initResourceCollectionActions: function(){
         OC.resourcesCollectionsActions.bindResourceCollectionSelectors();
@@ -739,6 +926,12 @@ OC.resourcesCollectionsActions = {
 
         var copyButton = $('.collection-actions .copy-button');
         copyButton.click(OC.resourcesCollectionsActions.copyButtonClickHandler);
+
+        //var renameButton = $('.collection-actions .rename-button');
+        //renameButton.click(OC.resourcesCollectionsActions.renameButtonClickHandler);
+
+        var deleteButton = $('.collection-actions .del-button');
+        deleteButton.click(OC.resourcesCollectionsActions.deleteButtonClickHandler);
     },
 
     moveButtonClickHandler: function(event){
@@ -766,7 +959,7 @@ OC.resourcesCollectionsActions = {
                 for (i = 0; i < OC.resourcesCollectionsActions.selectedResourcesCollections.length; i++){
                     var resourceCollectionItem = $(OC.resourcesCollectionsActions.selectedResourcesCollections[i]).closest(
                         '.resource-collection-item');
-                    if (resourceCollectionItem.hasClass('directory')){
+                    if (resourceCollectionItem.hasClass('collection')){
                         OC.resourcesCollectionsActions.moveCollectionIntoCollection(
                             resourceCollectionItem.attr('id').substring(11), toCollectionID);
                         collectionsMoved.push(OC.resourcesCollectionsActions.selectedResourcesCollections[i]);
@@ -825,10 +1018,10 @@ OC.resourcesCollectionsActions = {
         for (i = 0; i < OC.resourcesCollectionsActions.selectedResourcesCollections.length; i++){
             var resourceCollectionItem = $(OC.resourcesCollectionsActions.selectedResourcesCollections[i]).closest(
                 '.resource-collection-item');
-            if (resourceCollectionItem.hasClass('directory')){
+            if (resourceCollectionItem.hasClass('collection')){
                 var collectionID = resourceCollectionItem.attr('id').substring(11);
-                OC.resourcesCollectionsActions.copyCollection(
-                    collectionID, currentCollectionID);
+                OC.collection.copy(
+                    collectionID, currentCollectionID, OC.resourcesCollectionsActions.collectionCopiedSuccessfully);
                 collectionsCopied.push(collectionID);
             } else {
                 var resourceID = resourceCollectionItem.attr('id').substring(9);
@@ -845,8 +1038,41 @@ OC.resourcesCollectionsActions = {
         OC.resourcesCollectionsActions.actionCompletionCallback = OC.resourcesCollectionsActions.copied;
     },
 
+    deleteButtonClickHandler: function(event){
+        var currentCollectionID = $('.resources-collections-added').attr('id').substring(11);
+
+        // Set status to deleting.
+        OC.resourcesCollectionsActions.deleting();
+
+        // Loop through all selected resources.
+        var i, resourcesDeleted = [], collectionsDeleted = [];
+        for (i = 0; i < OC.resourcesCollectionsActions.selectedResourcesCollections.length; i++){
+            var resourceCollectionItem = $(OC.resourcesCollectionsActions.selectedResourcesCollections[i]).closest(
+                '.resource-collection-item');
+            if (resourceCollectionItem.hasClass('collection')){
+                OC.collection.delete(
+                    resourceCollectionItem.attr('id').substring(11),
+                    OC.resourcesCollectionsActions.collectionDeletedSuccessfully
+                );
+                collectionsDeleted.push(OC.resourcesCollectionsActions.selectedResourcesCollections[i]);
+            } else {
+                OC.resource.delete(
+                    resourceCollectionItem.attr('id').substring(9), currentCollectionID,
+                    OC.resourcesCollectionsActions.resourceDeletedSuccessfully
+                );
+                resourcesDeleted.push(OC.resourcesCollectionsActions.selectedResourcesCollections[i]);
+            }
+        }
+
+        OC.resourcesCollectionsActions.pendingActions.deleteResources.concat(resourcesDeleted);
+        OC.resourcesCollectionsActions.pendingActions.deleteCollections.concat(collectionsDeleted);
+
+        OC.resourcesCollectionsActions.actionCompletionCallback = OC.resourcesCollectionsActions.deleted;
+    },
+
+
     bindResourceCollectionSelectors: function(){
-        $('.resource-collection-item input[type=checkbox]').click(
+        $('.resource-collection-item input[type=checkbox]').change(
             OC.resourcesCollectionsActions.resourceCollectionCheckboxHandler);
     },
 
@@ -867,16 +1093,19 @@ OC.resourcesCollectionsActions = {
 
     selectedResourcesCollectionsChangeListener: function(){
         var moveButton = $('.collection-actions .move-button'),
-            copyButton = $('.collection-actions .copy-button');
+            copyButton = $('.collection-actions .copy-button'),
+            deleteButton = $('.collection-actions .del-button');
         if (OC.resourcesCollectionsActions.selectedResourcesCollections.length >= 1){
             // Enable the action buttons that depend on checked resources/collections.
             OC.resourcesCollectionsActions.enableActionButton(moveButton);
             OC.resourcesCollectionsActions.enableActionButton(copyButton);
+            OC.resourcesCollectionsActions.enableActionButton(deleteButton);
 
             OC.resourcesCollectionsActions.actionButtonsClickHandler();
         } else {
             OC.resourcesCollectionsActions.disableActionButton(moveButton);
             OC.resourcesCollectionsActions.disableActionButton(copyButton);
+            OC.resourcesCollectionsActions.disableActionButton(deleteButton);
         }
     },
 
@@ -904,3 +1133,7 @@ OC.resourcesCollectionsActions = {
         });
     },
 };
+
+jQuery(document).ready(function ($) {
+    OC.resourcesCollections.synchronizeSelectors();
+});

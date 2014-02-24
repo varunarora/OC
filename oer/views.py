@@ -872,7 +872,7 @@ def redirect_to_collection(user_id, project_id=None, collection_id=None):
         if collection_id:
             return redirect('user:list_collection', username=username, collection_slug=collection.slug)
         else:            
-            return redirect('user:user_profile', username=username)
+            return redirect('user:user_files', username=username)
 
 
 def edit_resource(request, resource_id):
@@ -900,7 +900,9 @@ def edit_resource(request, resource_id):
                 return edit_document(request, resource, collection)
 
             elif resource.revision.content_type == link_content_type:
-                (hostname, url_data) = get_url_hostname(resource.revision.content.url)
+                import oer.ResourceUtilities as ru
+                (hostname, url_data) = ru.get_url_hostname(
+                    resource.revision.content.url)
 
                 if "youtube" in hostname or "vimeo" in hostname:
                     return edit_video(request, resource, collection)
@@ -1085,9 +1087,18 @@ def delete_resource(request, resource_id, collection_id):
         
     try:
         delete_individual_resource(resource)
-        return APIUtilities._api_success()
+
+        context = {
+            'resourceID': resource_id
+        }
+        return APIUtilities._api_success(context)
 
     except:
+        context = {
+            'title': 'Could not delete the resource.',
+            'message': 'The resource could not be deleted. Sorry! '
+            + 'Please contact us if the problem persists.'
+        }
         return APIUtilities._api_failure()
 
 
@@ -1174,8 +1185,17 @@ def delete_collection(request, collection_id):
 
         delete_individual_collection(collection)
 
-        return APIUtilities._api_success()
+        context = {
+            'collectionID': collection_id
+        }
+
+        return APIUtilities._api_success(context)
     except:
+        context = {
+            'title': 'Could not delete the folder.',
+            'message': 'The folder could not be deleted. Sorry! '
+            + 'Please contact us if the problem persists.'
+        }
         return APIUtilities._api_failure()
 
 
@@ -2086,13 +2106,13 @@ def get_resource_copy(resource, user, new_name=False):
     return (resource_copy, resource_type)
 
 
-def copy_collection(collection, to_collection, user):
+def copy_collection(collection, to_collection, user, flattened_tree, visibility_transform):
     # Make a copy of the collection.
     collection_copy = Collection(
         title='Copy of ' + collection.title,
         host=to_collection,
-        visibility=collection.visibility,
-        slug=_get_fresh_collection_slug(collection.title, to_collection),
+        visibility=visibility_transform if visibility_transform else collection.visibility,
+        slug=_get_fresh_collection_slug(collection.title, to_collection, flattened_tree),
         creator=user
     )
     collection_copy.save()
@@ -2176,7 +2196,18 @@ def copy_collection_to_collection(request, collection_id, to_collection_id):
                 if request.user not in collection.collaborators.all():
                     return APIUtilities._api_unauthorized_failure()
 
-        new_collection = copy_collection(collection, to_collection, request.user)
+        visibility_transform = False
+        if collection_root_type.name == 'project' and to_collection_root_type.name == 'user profile':
+            if collection.visibility == 'project':
+                if collection_root.visibility == 'public':
+                    visibility_transform = 'public'
+                elif collection_root.visibility == 'private' or collection_root.visibility == 'collection':
+                    visibility_transform = 'public'
+
+        (browse_tree, flattened_tree) = cu._get_collections_browse_tree(to_collection)
+        
+        new_collection = copy_collection(
+            collection, to_collection, request.user, flattened_tree, visibility_transform)
 
         if collection_root_type.name == 'user profile':
             # If this collection is a descendant of the user
