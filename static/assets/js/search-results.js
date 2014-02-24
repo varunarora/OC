@@ -1,5 +1,8 @@
 // Initialize Search results Model
 var Result = Backbone.Model.extend({
+    // ID of the search result
+    id: "",
+
     // URL of the search result
     url: "",
 
@@ -18,6 +21,9 @@ var Result = Backbone.Model.extend({
     // Difficulty level of result
     difficulty: "",
 
+    // Visibility of result
+    Visibility: "",
+
     // Cost of the search result
     cost: "",
 
@@ -25,7 +31,13 @@ var Result = Backbone.Model.extend({
     license: "",
 
     // Type of content
-    type: ""
+    type: "",
+
+    // Thumbnail of content
+    thumbnail: "",
+
+    // Whether or not the resource has been favorited by the logged in user.
+    favorited: "",
 });
 
 // Initialize Search results set Collection
@@ -37,18 +49,66 @@ var ResultsSet = Backbone.Collection.extend({
 var ResultsView = Backbone.View.extend({
     tagName: "div",
     className: "search-result",
-    template: _.template("<div class=\"description\">" +
-        "<div class=\"search-result-title\">" +
+    template: _.template("<div class=\"search-result-thumbnail\"" +
+        "style=\"background-image: url('<%= thumbnail %>');\"></div>" +
+        "<div class=\"description\"><div class=\"search-result-title\">" +
         "<a href=\"<%= url %>\"><%= title %></a></div>" +
         "<div class=\"search-result-description\"><%= summary %></a></div>" +
-        "<div class=\"search-result-meta\">Created on <%= created %></div>" +
-        "</div><div class=\"search-result-thumbnail\" style=\"background-image: " +
-        "url('<%= thumbnail %>');\"></div>"),
+        "<div class=\"search-result-meta\"><div class=\"search-result-meta-views\">" +
+        "<%= views %> views</div><div class=\"search-result-meta-actions\">" +
+        "<span class=\"resource-favorite-wrapper<% if (favorited) { %> " +
+        "favorited<% } %>\"><a class=\"resource-favorite\">" +
+        "<% if (favorited) {%>Favorited<% } else {%>Favorite<% }%></a></span>" +
+        "<a class=\"resource-copy\">Copy</a>" +
+        "<a class=\"resource-remix\">Remix</a></div></div></div>"),
+
+    events: {
+        // Bind the favorite button.
+        'click .resource-favorite': 'favorite',
+        'click .resource-copy': 'copy'
+    },
+
+    initialize: function() {
+        this.listenTo(this.model, "change", this.render);
+    },
 
     render: function () {
         this.$el.html(this.template(this.model.toJSON()));
         $('#search-result-set').append(this.$el);
+
         return this;
+    },
+
+    favorite: function(event){
+        OC.favoriteClickHandler(
+            this.model.get('id'), OC.config.user.id, this.$(
+                '.resource-favorite-wrapper'), event, this.favoriteCallback, this.unfavoriteCallback);
+    },
+
+    copy: function(event){
+        var loadingPopup = OC.customPopup('.loading-dialog'),
+            resourceView = this;
+
+        $.get('/resources/collection-from-resource/' + resourceView.model.get('id') + '/',
+            function(response){
+                if (response.status == 'true'){
+                    loadingPopup.close();
+                    OC.addCopyClickHandler(
+                        'resource', resourceView.model.get('id'), response.collectionID, event);
+                }
+                else {
+                    OC.popup(response.message, response.title);
+                }
+            },
+        'json');
+    },
+
+    favoriteCallback: function(resourceFavoriteWrapper){
+        $('.resource-favorite', resourceFavoriteWrapper).text('Favorited');
+    },
+
+    unfavoriteCallback: function(resourceFavoriteWrapper){
+        $('.resource-favorite', resourceFavoriteWrapper).text('Favorite');
     }
 });
 
@@ -136,6 +196,8 @@ var ResultsCollectionView = Backbone.View.extend({
         this.clearView();
         this.prepareView();
         var collectionToRender = newCollection || this.collection;
+        this.collection = collectionToRender;
+
         // If no search results found
         if (collectionToRender.length === 0) {
             this.showNullView();
@@ -164,15 +226,27 @@ var ResultsCollectionView = Backbone.View.extend({
 
     showNullView: function () {
         $('#search-result-set').html('<p>No results matching your criteria found.</p>');
+    },
+
+    setFavoriteStates: function () {
+
     }
 });
 
 jQuery(document).ready(function ($) {
+    if (OC.config.user.id){
+        // Initialize the favorite state of the search results.
+        initFavoriteState(resultSet);
+    }
+
     // Construct a collection view using the search result objects built in
     resultCollectionView = new ResultsCollectionView({collection: resultSet});
 
     // Render the collection view
     resultCollectionView.render();
+
+    // Initialize the search filter menus.
+    initSearchFilterMenus();
 
     // Initiatilize the search filter slider
     init_slider();
@@ -213,6 +287,49 @@ function init_slider(){
 	$("<div/>", {
 			id: "slider-postfade"
 		}).insertAfter(".ui-slider-range");
+}
+
+function initSearchFilterMenus(){
+    // Find all menus and assign their 'top' and 'left' properties based on their buttons.
+    var filterMenus = $('.search-filter-menu');
+
+    var i, filterMenu, parentFilter, filterTitle;
+    for (i = 0; i < filterMenus.length; i++){
+        filterMenu = $(filterMenus[i]);
+        parentFilter = filterMenu.parent('.search-filter');
+        filterTitle = $('.search-filter-title', parentFilter);
+
+        filterMenu.css({
+            top: filterTitle.position().top + filterTitle.outerHeight(true) + 8,
+            left: filterTitle.position().left
+        });
+    }
+
+    $('.search-filter-title').click(function(event){
+        var filterButton = $(this),
+            filter = filterButton.parent(
+                '.search-filter');
+
+        // Close all other menus.
+        $('.search-filter').not(filter).removeClass('menu-open');
+
+        filter.toggleClass('menu-open');
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+    });
+}
+
+function initFavoriteState(resultSet){
+    var i, state;
+    for (i = 0; i < resultSet.length; i++){
+        OC.getFavoriteState(resultSet.models[i].get('id'), setFavoriteState);
+    }
+}
+
+function setFavoriteState(id, state){
+    resultSet.get(id).set('favorited', state);
 }
 
 /**

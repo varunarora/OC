@@ -4,22 +4,21 @@
 	
 	/* Custom IE styling in ie.sass */	
 	input[type=search]
-		background-color: #f2f2f2
-		border: 1px solid #b2b2b2
-		@include border-radius(5px)
-		height: 16px
-		width: 260px
-		padding: 4px
+		background-color: #f9f9f9
+		border: 1px solid #ddd
+		height: 24px
+		width: 275px
+		padding: 2px
 		padding-left: 6px
-		font-size: 0.75em
+		font-size: 1em
 		padding-right: 20px
 		float: left
 
 		&:focus
-			background-color: #f6f6f6
+			border-color: #5abd02
 			font-style: normal
 			font-weight: normal
-			@include box-shadow(0 0 5px rgba(90, 189, 2, 0.6))
+			@include box-shadow(0 0 4px rgba(90, 189, 2, 0.6))
 			outline: 0 none
 
 		&.typing
@@ -36,18 +35,42 @@
 
 	input[type=submit]
 		border-width: 0px
-		background-color: #f2f2f2
+		background-color: #5abd02
 		background-image: url('../images/search-icon.png')
 		background-repeat: no-repeat
 		background-position: center
-		@include border-radius(0px 5px 5px 0px)
-		height: 24px
-		left: -26px
+		height: 28px
+		left: -57px
 		top: 1px
-		width: 25px
+		width: 40px
 		position: relative
 		float: right
 
 		&:hover
-			background-color: #e2e2e2
+			@include box-shadow(0 0 1px rgba(0, 0, 0, 0.6))
 
+	.search-options-button
+		display: inline-block
+		width: 16px
+		height: 28px
+		background: url('../images/downvote.png') no-repeat
+		background-position: center
+		background-size: 10px 10px
+		position: relative
+		float: right
+		left: -64px
+		cursor: pointer
+
+	.search-options
+		width: 300px
+		height: 100px
+		background-color: #fff
+		position: absolute
+		top: 44px
+		left: 377px
+		display: none
+		@include box-shadow(0 2px 2px rgba(0, 0, 0, 0.4))
+		z-index: 6
+
+		&.show
+			display: block

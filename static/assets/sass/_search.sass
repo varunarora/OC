@@ -6,28 +6,112 @@
 	> .description
 		float: left
 		width: 475px
+		margin-left: 15px
+
+		.search-result-description
+			height: 45px
+
+		.search-result-title
+			a
+				font-size: 1.4em
+				@include sans-font-family
 
 .search-result-thumbnail
 	background-color: #b2b2b2
 	width: 80px
 	height: 80px
-	margin-left: 15px
 	float: left
 	background-position: center
 	background-size: 100%
 
 .search-result-meta
-	font-style: italic
 	color: #666
+	overflow: hidden
+	height: 18px
 
-.search-filter
-	margin-bottom: 20px
+	.search-result-meta-views
+		float: left
+
+	.search-result-meta-actions
+		float: right
+
+.search-filters
+	margin-bottom: 15px
+	height: 30px
+
+	.search-filter
+		.search-filter-title
+			float: left
+			color: $light-font
+			margin-right: 40px
+			-webkit-user-select: none /* Chrome/Safari */        
+			-moz-user-select: none /* Firefox */
+			-ms-user-select: none /* IE10+ */
+			-o-user-select: none
+			user-select: none
+
+			&:hover
+				color: $body-color
+				cursor: pointer
+
+		.search-filter-menu
+			display: none
+			position: absolute
+			background-color: #fff
+			width: 200px
+			padding: 10px
+			@include box-shadow(0 1px 2px rgba(0, 0, 0, 0.4))
+			z-index: 10
+
+		&.menu-open
+			.search-filter-title
+				color: $body-color
+
+			.search-filter-menu
+				display: block
 
 .search-filter-header
 	margin: 5px 0px
 
 .search-term
 	color: #000
+
+#search-result-set
+	min-height: 300px
+
+.resource-remix, .resource-copy, .resource-favorite
+	color: $light-font
+	background-repeat: no-repeat
+	cursor: pointer
+	padding-left: 16px
+	margin-right: 10px
+
+	&:hover
+		text-decoration: none
+		color: $body-color
+
+.resource-favorite-wrapper
+	.resource-favorite
+		background-image: url('../images/favorite.png')
+		background-size: 12px 12px
+		background-position: 0px 2px
+
+	&.favorited
+		.resource-favorite
+			background-image: url('../images/favorited.png')
+			background-position: 0px 3px
+			color: #f1c40f
+			@include sans-bold
+
+
+.resource-copy
+	background-image: url('../images/copy.png')
+	background-position: 0px 2px
+
+.resource-remix
+	background-image: url('../images/remix.png')
+	background-position: 0px 2px
+	padding-left: 16px
 
 #difficulty-slider-range
 	margin-left: 8px

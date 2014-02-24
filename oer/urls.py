@@ -45,5 +45,8 @@ urlpatterns = patterns(
     url(r'^(?P<resource_id>\d+)/edit/$', views.edit_resource, name='edit_resource'),
     url(r'^(?P<resource_id>\d+)/history/$', views.view_history, name='view_history'),
 
+    url(r'^api/search/(?P<query>[\w\ ]+)/$', views.autocomplete_search, name='autocomplete'),
+    url(r'^api/editor-search/(?P<query>[\w\ ]+)/$', views.editor_autocomplete_search, name='editor-autocomplete'),
+
     url(r'^$', views.resource_center, name='resource_center'),
 )

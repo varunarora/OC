@@ -5,39 +5,30 @@
 {% load highlight %}
 {% load stripper %}
 
-<div class="center-stage">
-	<div id="fill-panel" class="panel-left">
-		<aside id="support">
-			<h3>Search filters</h3>
+<div class="center-stage search-center-stage">
+	<div id="key-panel" class="panel-left">
+		<div class="search-filters">
 			<div class="search-filter">
-				<div class="search-filter-header">Content type</div>
-				<label><input type="checkbox" name="type" value="article" checked />OpenCurriculum article</label>
-				<label><input type="checkbox" name="type" value="project" checked />OpenCurriculum project</label>
-				<label><input type="checkbox" name="type" value="audio-clip" checked />Audio clip</label>
-				<label><input type="checkbox" name="type" value="video" checked />Video clip</label>
-				<label><input type="checkbox" name="type" value="app-game" checked />App / game</label>
-				<label><input type="checkbox" name="type" value="image" checked />Image(s) / Graphic(s)</label>
-				<label><input type="checkbox" name="type" value="attachment" checked />PDF / PPT / Document</label>
-				<label><input type="checkbox" name="type" value="url" checked />External Webpage</label>
+				<div class="search-filter-title">Type of content <span class="horizontal-caret-up breadcrumb-caret"></span></div>
+				<div class="search-filter-menu">
+					<label><input type="checkbox" name="type" value="article" checked />OpenCurriculum article</label>
+					<label><input type="checkbox" name="type" value="project" checked />OpenCurriculum project</label>
+					<label><input type="checkbox" name="type" value="audio-clip" checked />Audio clip</label>
+					<label><input type="checkbox" name="type" value="video" checked />Video clip</label>
+					<label><input type="checkbox" name="type" value="app-game" checked />App / game</label>
+					<label><input type="checkbox" name="type" value="image" checked />Image(s) / Graphic(s)</label>
+					<label><input type="checkbox" name="type" value="attachment" checked />PDF / PPT / Document</label>
+					<label><input type="checkbox" name="type" value="url" checked />External Webpage</label>
+				</div>
 			</div>
 			<div class="search-filter">
-				<div class="search-filter-header">Difficulty level</div>
-				<div id="difficulty-slider-range" class="thermometer"></div>
-			</div>
-			<div class="search-filter">
-				<div class="search-filter-header">Cost</div>
-				<label><input type="checkbox" name="cost" value="free" checked />Free</label>
-				<label><input type="checkbox" name="cost" value="paid" checked />Paid (Premium)</label>
-			</div>
-			<div class="search-filter">
-				<div class="search-filter-header">License category</div>
-				<!-- TODO: Change value of license to "creative commons" and support other licenses -->
-				<label><input type="checkbox" name="license" value="CC-BY-SA" checked />Creative Commons</label>
-				<label><input type="checkbox"  name="license" value="gnu-fdl" checked />GNU / FDL</label>
-			</div>
-		</aside>
-	</div>
-	<div id="key-panel" class="panel-right">
+				<div class="search-filter-title">License <span class="horizontal-caret-up breadcrumb-caret"></span></div>
+				<div class="search-filter-menu">
+					<label><input type="checkbox" name="license" value="CC-BY-SA" checked />Creative Commons</label>
+					<label><input type="checkbox"  name="license" value="gnu-fdl" checked />GNU / FDL</label>
+				</div>
+			</div>	
+		</div>
 		<h3>Search results for <span class="search-term">{{ query }}</span></h3>
 		{% if query %}
 			<div id="search-result-set">
@@ -45,34 +36,42 @@
 				{% for result in page.object_list %}
 					{% if result.content_type == "articles.article" %}				
 					var result = new Result({
+						id: '{{ result.object.id }}',
 						url: '{% url articles:reader category_slug=result.object.category.slug %}?q={{ result.object.slug }}',
 		    			title: '{{ result.object.title }}',
-		    			{% with result.object.description|striptags|escapejs as stripped_result %}
+		    			{% with result.object.revision.body_markdown_html|striptags|escapejs as stripped_result %}
 		    			summary: '{% highlight stripped_result with query %}',
 		    			{% endwith %}
 		    			created: '{{ result.object.created }}',
 		    			user: '{{ result.object.revision.user }}',
 		    			difficulty: '{{ result.object.difficulty }}',
+		    			visibility: '{{ result.object.visibility }}',
 		    			cost: 'free',
 		    			license: '{{ result.object.license }}',
+		    			views: '{{ result.object.views }}',
 		    			type: 'article',
-		    			thumbnail: '{{ MEDIA_URL }}{{ result.object.image.name }}'
+		    			thumbnail: '{{ MEDIA_URL }}{{ result.object.image.name }}',
+		    			favorited: false
 		    		});
 		    		{% endif %}
-					{% if result.content_type == "oer.resource" %}
+					{% if result.content_type == "oer.resource" and result.object.visibility == 'public' %}
 					var result = new Result({
+						id: '{{ result.object.id }}',
 						url: '{% url read resource_id=result.object.id resource_slug=result.object.slug %}',
 		    			title: '{{ result.object.title }}',
-		    			{% with result.object.body|striptags as stripped_result %}
+		    			{% with result.object.description|striptags as stripped_result %}
 		    			summary: '{% highlight stripped_result with query %}',
 		    			{% endwith %}
 		    			created: '{{ result.object.created }}',
 		    			user: '{{ result.object.user }}',
 		    			difficulty: '{{ result.object.difficulty }}',
+		    			visibility: '{{ result.object.visibility }}',
 		    			cost: 'free',
 		    			license: '{{ result.object.license }}',
 		    			type: '{{ result.object.type }}',
-		    			thumbnail: '{{ MEDIA_URL }}{{ result.object.image.name }}'
+		    			views: '{{ result.object.views }}',
+		    			thumbnail: '{{ MEDIA_URL }}{{ result.object.image.name }}',
+		    			favorited: false
 		    		});
 					{% endif %}
 					resultSet.add(result);
@@ -92,8 +91,36 @@
 			    {% endif %}-->
 		{% endif %}
 	</div>
+	<div id="fill-panel" class="panel-right">
+		<!--
+		<aside id="support">
+			<h3>Search filters</h3>
+			<div class="search-filter">
+				<div class="search-filter-header">Content type</div>
+
+			</div>
+			<div class="search-filter">
+				<div class="search-filter-header">Difficulty level</div>
+				<div id="difficulty-slider-range" class="thermometer"></div>
+			</div>
+			<div class="search-filter">
+				<div class="search-filter-header">Cost</div>
+				<label><input type="checkbox" name="cost" value="free" checked />Free</label>
+				<label><input type="checkbox" name="cost" value="paid" checked />Paid (Premium)</label>
+			</div>
+			<div class="search-filter">
+				<div class="search-filter-header">License category</div>
+				<label><input type="checkbox" name="license" value="CC-BY-SA" checked />Creative Commons</label>
+				<label><input type="checkbox"  name="license" value="gnu-fdl" checked />GNU / FDL</label>
+			</div>
+		</aside>
+		-->
+	</div>
 </div>
 
-<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>	
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<div class="loading-dialog oc-popup"></div>
+{% include 'partials/add.html' %}
 
 {% include 'partials/footer.html' %}

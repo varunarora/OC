@@ -56,65 +56,36 @@ var OC = {
             formSelector: 'form.signup',
             formSpinner: '.form-spinner',
             formError: '.form-error'
-        }
+        },
     },
 
-    /**
-     * Initializes the click and styling interaction with the search box in the
-     *     page header
-     * @param none
-     * @return none
-     */
-    renderSearch: function (){
-        var searchBox = $(OC.config.search.input),
-            searchBoxDefault = searchBox.attr('data-default'),
-            searchButton = $(OC.config.search.submit);
-
-        // Disable the search button by default
-        searchButton.attr('disabled', 'disabled');
-
-        // Initialize with default value and styling
-        searchBox.val(searchBoxDefault);
-        searchBox.addClass('default');
-
-        // When there is focus on the input box, add CSS class. Remove when out
-        //      of focus
-        searchBox.focus(function () {
-            if (searchBox.val() !== searchBoxDefault) {
-                searchBox.removeClass('default');
-                searchBox.addClass('typing');
-            } else {
-                searchBox.removeClass('typing');
-                searchBox.addClass('empty');
-                // Move cursor to initial position
-                setTimeout(function () {
-                    searchBox.selectRange(0, 0);
-                }, 200);
-            }
+    initSearchOptions: function(){
+        $('.search-options-button').click(function(event){
+            $('.search-options').toggleClass('show');
         });
+    },
 
-        // When user begins typing, clear the default value and add CSS class
-        searchBox.keydown(function () {
-            if (searchBox.val() === searchBoxDefault) {
-                searchBox.val('');
-                searchButton.attr('disabled', 'disabled');
-            } else { searchButton.removeAttr('disabled'); }
-            searchBox.removeClass('default');
-            searchBox.removeClass('empty');
-            searchBox.addClass('typing');
-        });
+    initSearchAutocomplete: function(){
+        $(OC.config.search.input).autocomplete({
+            source: function(request, response){
+                $.get('/resources/api/search/' + request.term  + '/',
+                    function (data){
+                        response($.map(data, function(item){
+                            return { label: item, value: item };
+                        }));
+                    }, 'json');
+            },
+            minLength: 2,
+            select: function(event, ui){
+                var searchForm = $('form#search-form'),
+                    searchInput = $('input[name=q]', searchForm);
 
         // When user takes away focus, and leaves input empty, replace with
         //     original default text and remove CSS class
         searchBox.blur(function () {
             if (searchBox.val() === '') {
-                searchBox.val(searchBoxDefault);
-                searchButton.attr('disabled', 'disabled');
-            }
-            searchBox.removeClass('typing');
-            searchBox.removeClass('empty');
-            if (searchBox.val() === searchBoxDefault) {
-                searchBox.addClass('default');
+                searchInput.val(ui.item.label);
+                $('form#search-form').submit();
             }
         });
     },

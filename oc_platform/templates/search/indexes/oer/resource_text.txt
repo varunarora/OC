@@ -1,0 +1,7 @@
+{{ object.title }}
+{{ object.description }}
+{{ object.revision.content.body }}
+{{ object.visibility }}
+{% for tag in object.tags.all %}
+    {{ tag }}
+{% endfor %}
