@@ -1,82 +1,40 @@
 {% include 'partials/header.html' %}
-<div class="center-stage">
-    <div id="key-panel" class="panel-left">
-    {{ popup_message }}
-        <div class="user-info{% if user == user_profile %} my-profile{% endif %}">
-            <div class="user-profile-picture">
-                <form id="profile-picture-reposition-form">
-                    <input type="hidden" name="username" value="{{ user_profile.username }}"/>
-                </form>
-                <div style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}'); background-position: {{ user_profile.get_profile.profile_pic_position.left }}% {{ user_profile.get_profile.profile_pic_position.top }}%;" class="user-picture-cover" title="Hold and drag to reposition image">
-                {% if user == user_profile %}
-                <div class="edit-picture edit-profile-picture">
-                    <div class="change-picture" title="Change picture"></div>
-                    <div class="reposition-picture" title="Reposition picture"></div>
-                </div>
-                {% endif %}
-                </div>
-                <div class="user-picture-repositioner"></div>
-            </div>
-            <div class="user-profile-info">
-                <div class="profile-name">
-                    <h2>{{ user_profile.get_full_name }}</h2>
-                </div>
-                <div class="profile-headline-wrapper">
-                    <form>
-                        <input type="hidden" name="user_id" value="{{ user_profile.id }}"/>
-                        <input type="text" title='{{ user_profile.get_profile.headline }}' class="profile-headline" value="{% if user == user_profile %}{% if user_profile.get_profile.headline %}{{ user_profile.get_profile.headline }}{% else %}(edit headline){% endif %}{% else %}{{ user_profile.get_profile.headline }}{% endif %}" autocomplete="off"  {% if user != user_profile %} readonly{% endif %}/>
+{% include 'partials/profile-header.html' with page="home" %}
+
+        <div id="fill-panel" class="panel-left">
+            {% if user == user_profile %}
+            <h3>Who to subscribe to</h3>
+            <div class="subscribe-suggestions user-list">
+            {% for star in stars %}
+                <div class="user">
+                    <form class="subscribe-suggestion-form">
+                        <input type="hidden" name="username" value="{{ star.username }}" />
+                        <div class="user-photo" style="background-image: url('{{ MEDIA_URL }}{{ star.get_profile.profile_pic.name }}');"></div>
+                        <div class="user-description"><a href="{% url user:user_profile username=star.username %}">{{ star.get_full_name }}</a>
+                        <p><button class="btn dull-button subscribe-button">Subscribe</button></p>
+                        </div>
                     </form>
-                    <span class="headline-edit"></span>
                 </div>
-                {% if user == user_profile %}
-                    {% include 'partials/create-resource-collection.html' with host='profile' %}
-                {% endif %}
-                <!--
-                <div class="profile-subscribe">
-                    <button class="btn dull-button">SUBSCRIBE</button><span class="profile-subscriber-count">23 subscribers (3 mutual)</span>
-                </div>
-                -->
+            {% endfor %}
+            </div>
+            {# include 'partials/profile-updates.html' #}
+            {% endif %}            
+        </div>
+        <div id="key-panel" class="panel-right">
+            {# include 'partials/profile-content.html' #}
+            {% if user == user_profile %}
+            <h3>My feed</h3>
+            {% else %}
+            <h3>Recent activity</h3>
+            {% endif %}
+            <div class="user-list">
+            {% for item in feed %}
+            {% include 'partials/feed-item.html' with host='profile' %}
+            {% endfor %}
             </div>
         </div>
-    </div>
-    <div id="fill-panel" class="panel-right">
-    </div>
-</div>
-<div class="profile-background-wrapper"></div>
-<div class="center-stage profile-details">
-    {% if collection != user_profile.get_profile.collection %}
-    <div id="fill-panel" class="panel-left">
-        <h3>{{ collection.title }}</h3>
-        <nav class="collections-navigation">
-            {% load project_tags %}
-            {{ browse_tree|user_navigation_tree:user|safe }}
-        </nav>
-    </div>
-    <div id="key-panel" class="panel-right">
-        {% if resources or collections %}
-        {% include 'partials/resources-collections-listing.html' with host='profile' %}
-        {% else %}
-        Sorry, there is nothing in this collection.
-        {% endif %}
-    </div>
-    {% else %}
+        </div>
 
-    <div id="key-panel" class="panel-left">
-        {% include 'partials/profile-content.html' %}
-    </div>
-    <div id="fill-panel" class="panel-right">
-        {% include 'partials/profile-updates.html' %}
-    </div>
-    {% endif %}
-</div>
-<div class="picture-upload-dialog dialog">
-    <form method="POST" action="/user/{{ user_profile.username }}/change-picture/" enctype="multipart/form-data">
-        {% csrf_token %}
-        Choose a new profile picture from your computer (&lt;2 MB in size &amp; suggested &gt; 200x200px in dimensions):<p/>
-        <input type="file" name="new_profile_picture" id="id_new_profile_picture"/>
-    </form>
-</div>
 
-<script type="text/javascript" src="{{ STATIC_URL }}js/resources-collections.js"></script>
-
+{% include 'partials/profile-footer.html' %}
 {% include 'partials/footer.html' %}

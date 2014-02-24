@@ -111,40 +111,7 @@
                     visibility: visible
 
 
-.profile-background-wrapper
-    background-image: url('../images/profile-header-bg.png')
-    background-repeat: no-repeat
-    height: 35px
-    width: 1030px
-    margin: auto
-    margin-top: 20px
-
-.profile-details
-    width: 1030px
-    margin-top: 0px
-
-    .panel-left
-        background-image: url('../images/profile-header-left.png')
-        background-repeat: no-repeat
-        padding-left: 45px
-        padding-top: 10px
-        min-height: 300px
-
-    .panel-right
-        background-image: url('../images/profile-header-right.png')
-        background-repeat: no-repeat
-        background-position: right
-        padding-right: 45px
-        padding-top: 10px
-        min-height: 300px
-
-    #key-panel
-        width: $key-panel-width - 45px
-
-    #fill-panel
-        width: $fill-panel-width - 45px    
-
-.profile-contributions, .profile-edits, .profile-projects, .profile-resources, .profile-favorites
+.profile-contributions, .profile-edits, .profile-projects, .profile-resources
     margin-bottom: 20px
     padding-bottom: 20px
     border-bottom: 1px solid #efefef
@@ -185,3 +152,20 @@
         margin: 6px 0px
         font-size: 1.15em
         @include sans-bold
+
+.oc-tabs
+    > nav.profile-tabs
+        .profile-favorites-tab, .profile-groups-tab, .profile-files-tab
+            background-size: 14px 14px
+            background-position: 10px 10px
+            background-repeat: no-repeat
+            padding-left: 30px
+
+        .profile-favorites-tab
+            background-image: url('../images/favorite.png')
+
+        .profile-groups-tab
+            background-image: url('../images/groups.png')
+
+        .profile-files-tab
+            background-image: url('../images/files.png')

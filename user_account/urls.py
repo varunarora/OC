@@ -15,6 +15,10 @@ urlpatterns = patterns(
 
     url(r'^(?P<username>\w+)/change-picture/$', views.change_profile_picture, name='change_profile_picture'),
     url(r'^(?P<username>\w+)/reposition-picture/$', views.reposition_profile_picture, name='reposition_profile_picture'),
-    url(r'^(?P<username>\w+)/browse/(?P<collection_slug>.+)/$', views.list_collection, name='list_collection'),
+
+    url(r'^(?P<username>\w+)/groups/$', views.user_groups, name='user_groups'),
+    url(r'^(?P<username>\w+)/files/(?P<collection_slug>.+)/$', views.list_collection, name='list_collection'),
+    url(r'^(?P<username>\w+)/files/$', views.user_files, name='user_files'),
+    url(r'^(?P<username>\w+)/favorites/$', views.user_favorites, name='user_favorites'),
     url(r'^(?P<username>\w+)/$', views.user_profile, name='user_profile'),
 )

@@ -1,0 +1,61 @@
+<div class="center-stage">
+    <div id="key-panel" class="panel-left">
+    {{ popup_message }}
+        <div class="user-info{% if user == user_profile %} my-profile{% endif %}">
+            <div class="user-profile-picture">
+                <form id="profile-picture-reposition-form">
+                    <input type="hidden" name="username" value="{{ user_profile.username }}"/>
+                </form>
+                <div style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}'); background-position: {{ user_profile.get_profile.profile_pic_position.left }}% {{ user_profile.get_profile.profile_pic_position.top }}%;" class="user-picture-cover" title="Hold and drag to reposition image">
+                {% if user == user_profile %}
+                <div class="edit-picture edit-profile-picture">
+                    <div class="change-picture" title="Change picture"></div>
+                    <div class="reposition-picture" title="Reposition picture"></div>
+                </div>
+                {% endif %}
+                </div>
+                <div class="user-picture-repositioner"></div>
+            </div>
+            <div class="user-profile-info">
+                <div class="profile-name">
+                    <h2>{{ user_profile.get_full_name }}</h2>
+                </div>
+                <div class="profile-headline-wrapper">
+                    <form>
+                        <input type="hidden" name="user_id" value="{{ user_profile.id }}"/>
+                        <input type="text" title='{{ user_profile.get_profile.headline }}' class="profile-headline" value="{% if user == user_profile %}{% if user_profile.get_profile.headline %}{{ user_profile.get_profile.headline }}{% else %}(edit headline){% endif %}{% else %}{{ user_profile.get_profile.headline }}{% endif %}" autocomplete="off"  {% if user != user_profile %} readonly{% endif %}/>
+                    </form>
+                    <span class="headline-edit"></span>
+                </div>
+                {% if user != user_profile %}
+                <div class="profile-subscribe">
+                    <form class="profile-subscribe-form">
+                        <input type="hidden" name="username" value="{{ user_profile.username }}"/>
+                    </form>
+                    {% if user_subscribed %}
+                    <button class="btn dull-button subscribe-button subscribed">✔ Subscribed</button>
+                    {% else %}
+                    <button class="btn dull-button subscribe-button">Subscribe</button>
+                    {% endif %}
+                    <span class="profile-subscriber-count">{{ subscriber_count }} subscriber(s)</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div id="fill-panel" class="panel-right">
+    </div>
+</div>
+
+<div class="center-stage profile-center-stage">
+    <nav class="profile-tabs">
+        <ul>
+            {% if user == user_profile %}
+            <li><a href="{% url user:user_profile username=user_profile.username %}" {% if page == "home" %} class="selected"{% endif %}>Home</a></li>
+            {% endif %}
+            <li><a href="{% url user:user_favorites username=user_profile.username %}" class="profile-favorites-tab{% if page == 'favorites' %} selected{% endif %}">Favorites</a></li>
+            <li><a href="{% url user:user_files username=user_profile.username %}"  class="profile-files-tab{% if page == 'files' %} selected{% endif %}">Files</a></li>
+            <li><a href="{% url user:user_groups username=user_profile.username %}"class="profile-groups-tab {% if page == 'groups' %} selected{% endif %}">Groups</a></li>
+        </ul>
+    </nav>
+    <div class="profile-content oc-tabs-content">
