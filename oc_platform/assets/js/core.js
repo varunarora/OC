@@ -80,10 +80,6 @@ var OC = {
                 var searchForm = $('form#search-form'),
                     searchInput = $('input[name=q]', searchForm);
 
-        // When user takes away focus, and leaves input empty, replace with
-        //     original default text and remove CSS class
-        searchBox.blur(function () {
-            if (searchBox.val() === '') {
                 searchInput.val(ui.item.label);
                 $('form#search-form').submit();
             }
@@ -147,11 +143,11 @@ var OC = {
             closeCallback = options.closeCallback || closeCallback;
         }
 
-        // Unbind old events from popup escape/background click.
-        $('.oc-popup-exit', elementSelector).unbind('click');
-        $('.popup-background').unbind('click');
-
         var blockToPopup = $(elementSelector);
+
+        // Unbind old events from popup escape/background click.
+        $('.oc-popup-exit', blockToPopup).unbind('click');
+        $('.popup-background').unbind('click');
 
         // Launch popup on init.
         launchPopup(blockToPopup);
@@ -218,51 +214,81 @@ var OC = {
         /**
          *  Tab and click handler for everything tabs
          */
-        var tabNumber = 0, showOnly = null;
+        var tabNumber = 0, showOnly = null, viewOnly = false;
         if (options){
             tabNumber = options.tab || tabNumber;
             showOnly = options.showOnly || showOnly;
+            viewOnly = options.viewOnly || viewOnly;
         }
 
         var tabbedUploader = $(tabsWrapperClass);
         tabbedUploader.addClass('oc-tabs');
 
-        var tabs = $('nav > ul > li > a', tabbedUploader);
 
-        var i;
-        for (i = 0; i < tabs.length; i++){
-            // Add a unique class to all blocks represented by the navigation
-            var contentBlock = $(tabs[i]).attr('href');
-            $(contentBlock).addClass('tab-content');
-        }
+        if (!viewOnly){
+            var tabs = $('nav > ul > li > a', tabbedUploader);
 
-        var contentBlocks = $('.tab-content', tabbedUploader);
-
-        tabs.click(function(event){
-            if (! $(this).hasClass('selected')){
-                // Unselect all the other navigation items
-                tabs.removeClass('selected');
-                $(this).addClass('selected');
-
-                var blockToDisplay = $(this).attr('href');
-
-                // Hide all the other open blocks
-                $(contentBlocks).hide();
-                $(blockToDisplay).show();
+            var i;
+            for (i = 0; i < tabs.length; i++){
+                // Add a unique class to all blocks represented by the navigation
+                var contentBlock = $(tabs[i]).attr('href');
+                $(contentBlock).addClass('tab-content');
             }
 
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
+            var contentBlocks = $('.tab-content', tabbedUploader);
 
-        });
+            tabs.click(function(event){
+                if (! $(this).hasClass('selected')){
+                    // Unselect all the other navigation items
+                    tabs.removeClass('selected');
+                    $(this).addClass('selected');
+
+                    var blockToDisplay = $(this).attr('href');
+
+                    // Hide all the other open blocks
+                    $(contentBlocks).hide();
+                    $(blockToDisplay).show();
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+
+            });
+
+            // Set the selected tab as the first one
+            $(tabs[tabNumber]).click();
+        }
 
         if (showOnly){
             $('> nav', tabbedUploader).addClass('hide-tabs');
         }
+    },
 
-        // Set the selected tab as the first one
-        $(tabs[tabNumber]).click();
+    progressBar: function(elementSelector, options){
+        var startAt = 0;
+        if (options){
+            startAt = options.startAt || startAt;
+        }
+
+        var progressBarWrapper = $(elementSelector);
+
+        // Move the indicator to the starting position.
+        advanceProgressIndicator(progressBarWrapper, startAt);
+
+        return {
+            element: progressBarWrapper,
+            advanceTo: advanceTo
+        };
+        
+        function advanceTo(value){
+            advanceProgressIndicator(this.element, value);
+        }
+
+        function advanceProgressIndicator(progressBar, value){
+            $('.oc-progressbar-indicator', progressBar).css(
+                {'width': value + '%'});
+        }
     },
 
     /* Beginning of functionality that may be moved into modules */
@@ -275,6 +301,62 @@ var OC = {
      * @param none
      * @return none
      */
+
+    renderIndexAnimation: function(){
+        var words = ['curriculum', 'lesson plans', 'activities', 'worksheets', 'handouts'],
+            counter = 0;
+
+        var animationID;
+
+        function stop(){
+            clearInterval(animationID);
+            
+            setTimeout(function(){
+                animationID = animate();
+            }, 5000);
+            console.log(animationID);
+        }
+
+        function animate(){
+            forward_motion = false;
+
+            return setInterval(function(){
+                var animatedText = $('.animated-learning-item');
+
+                if (animatedText.text().length > 0 && !forward_motion){
+                    // Remove the current word.
+                    animatedText.text(
+                        animatedText.text().substring(0, animatedText.text().length - 1));
+                } else {
+                    if (animatedText.text().length === words[counter].length){
+                        forward_motion = false;
+                        stop();
+                    } else {
+                        if (animatedText.text().length === 0){
+                            if (counter === (words.length - 1)){
+                                counter = 0;
+                            } else {
+                                counter++;
+                            }
+                            forward_motion = true;
+                        }
+                        // Add a letter to the tex.
+                        animatedText.text(
+                            words[counter].substring(0, animatedText.text().length + 1));
+                    }
+                }
+
+            }, 200);
+        }
+
+        // Start the animation.
+        setTimeout(
+            function(){
+                animationID = animate();
+            },
+        3000);
+    },
+
     renderArticlePanel: function() {
         if (!Modernizr.cssanimations) {
             $(OC.config.articlePanel.item).show();
@@ -943,98 +1025,114 @@ var OC = {
     },
 
     setupAddTo: function(){
+        var resourceID = $('form#resource-form input[name="resource_id"]').val(),
+            collectionID = $('form#resource-form input[name=collection_id]').val();
+
         // Bind add action click to popup.
         $('li.add-action a').click(function(event){
-            // Setup the tabs the add-to popup.
-            OC.tabs('.add-resource-browser');
+            OC.addCopyClickHandler('resource', resourceID, collectionID, event);
+        });
+    },
 
-            var addToPopup = OC.customPopup('.add-resource-dialog'),
-                profileCollectionBrowser = $('.add-resource-profile-browser'),
-                projectsCollectionBrowser = $('.add-resource-project-browser'),
-                collectionID = $('form#resource-form input[name=collection_id]').val();
+    addCopyClickHandler: function(itemType, resourceID, collectionID, event){
+        // Setup the tabs the add-to popup.
+        OC.tabs('.add-resource-browser');
 
-            profileCollectionBrowser.addClass('loading-browser');
-            projectsCollectionBrowser.addClass('loading-browser');
+        var addToPopup = OC.customPopup('.add-resource-dialog'),
+            profileCollectionBrowser = $('.add-resource-profile-browser'),
+            projectsCollectionBrowser = $('.add-resource-project-browser');
 
-            // Bind Done button on custom popup.
-            $('.add-resource-submit-button').click(function(event){
-                // Capture the actively selected tab.
-                var activeTab = $('.add-resource-dialog .add-resource-tabs li a.selected');
+        profileCollectionBrowser.addClass('loading-browser');
+        projectsCollectionBrowser.addClass('loading-browser');
 
-                var toCollection;
+        // Bind Done button on custom popup.
+        $('.add-resource-submit-button').click(function(event){
+            // Capture the actively selected tab.
+            var activeTab = $('.add-resource-dialog .add-resource-tabs li a.selected');
 
-                // If the active tab is projects.
-                if (activeTab.attr('href') === '.my-projects'){
-                    // Capture currently selected collection.
-                    toCollection = projectsCollectionBrowser.find(
-                        '.selected-destination-collection');
-                } else {
-                    toCollection = profileCollectionBrowser.find(
-                        '.selected-destination-collection');
-                }
+            var toCollection;
 
-                addToPopup.close();
+            // If the active tab is projects.
+            if (activeTab.attr('href') === '.my-projects'){
+                // Capture currently selected collection.
+                toCollection = projectsCollectionBrowser.find(
+                    '.selected-destination-collection');
+            } else {
+                toCollection = profileCollectionBrowser.find(
+                    '.selected-destination-collection');
+            }
 
-                if (toCollection){
-                    // Launch popup asking the user to choose between copying the
-                    //    resource or linking to it.
-                    var addActionPopup = OC.customPopup('.add-resource-action-dialog');
+            addToPopup.close();
 
-                    // Bind Done button on custom popup.
-                    $('.add-resource-action-submit-button').click(function(event){
-                        addActionPopup.close();
+            if (toCollection){
+                // Launch popup asking the user to choose between copying the
+                //    resource or linking to it.
+                var addActionPopup = OC.customPopup('.add-resource-action-dialog');
 
-                        // Get the current selected option.
-                        var selectedOption = $(
-                            '.add-resource-action-form input[name=add-action]:checked');
+                // Bind Done button on custom popup.
+                $('.add-resource-action-submit-button').click(function(event){
+                    addActionPopup.close();
 
-                        var toCollectionID = toCollection.attr('id').substring(11),
-                            currentCollectionID = $('form#resource-form input[name="collection_id"]').val(),
-                            resourceID = $('form#resource-form input[name="resource_id"]').val();
+                    // Get the current selected option.
+                    var selectedOption = $(
+                        '#add-resource-action-form input[name=add-action]:checked');
+                    var toCollectionID = toCollection.attr('id').substring(11);
 
-                        if (selectedOption.val() === "copy"){
-                            OC.resource.copy(
-                                currentCollectionID, resourceID,
-                                toCollectionID, OC.resource.successfullyCopied
+                    if (selectedOption.val() === "copy"){
+                        if (itemType == 'collection'){
+                            OC.collection.copy(
+                                collectionID, resourceID,
+                                toCollectionID, OC.collection.successfullyCopied
                             );
                         } else {
-                            OC.resource.link(
-                                currentCollectionID, resourceID,
-                                toCollectionID, OC.resource.successfullyLinked
+                            OC.resource.copy(
+                                collectionID, resourceID,
+                                toCollectionID, OC.resource.successfullyCopied
                             );
                         }
-
-                        event.preventDefault();
-                        event.stopPropagation();
-                        return false;
-                    });
-                }
-            });
-
-            if (profileCollectionBrowser.children().length === 0){
-                $.get('/resources/tree/collections/user/',
-                    function(response){
-                        if (response.status == 'true'){
-                            OC.renderBrowser(response.tree, profileCollectionBrowser);
-                            profileCollectionBrowser.removeClass('loading-browser');
+                    } else {
+                        if (itemType == 'collection'){
+                            OC.popup('The feature to link folders does not exist ' +
+                                'at this point. Sorry for the inconvenience',
+                                'Cannot link folders'
+                            );
                         }
-                        else {
-                            OC.popup(response.message, response.title);
-                        }
-                    },
-                'json');
+                        OC.resource.link(
+                            collectionID, resourceID,
+                            toCollectionID, OC.resource.successfullyLinked
+                        );
+                    }
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
+                });
             }
-
-            var projectBrowserTab = $('.add-resource-tabs li a[href=".my-projects"]');
-
-            if (!projectBrowserTab.hasClickEventListener()){
-                projectBrowserTab.click(OC.addToProjectsTabClickHandler);
-            }
-
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
         });
+
+        if (profileCollectionBrowser.children().length === 0){
+            $.get('/resources/tree/collections/user/',
+                function(response){
+                    if (response.status == 'true'){
+                        OC.renderBrowser(response.tree, profileCollectionBrowser);
+                        profileCollectionBrowser.removeClass('loading-browser');
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        }
+
+        var projectBrowserTab = $('.add-resource-tabs li a[href=".my-projects"]');
+
+        if (!projectBrowserTab.hasClickEventListener()){
+            projectBrowserTab.click(OC.addToProjectsTabClickHandler);
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
     },
 
     renderBrowser: function(tree, parentElement, collectionID){
@@ -1082,6 +1180,10 @@ var OC = {
         // Toggle collections if it has child collections.
         $('ul li.parent-collection > .toggle-collection', parentElement).click(
             OC.parentCollectionClickHandler);
+
+        // Toggle tag categories if it has child tag categories.
+        $('ul li.parent-tag-category > .toggle-tag-category', parentElement).click(
+            OC.parentCollectionClickHandler);
     },
 
     addToProjectsTabClickHandler: function(event){
@@ -1105,9 +1207,7 @@ var OC = {
 
     initShowMoreBlock: function(){
         var blocksToCompress = [
-            '.profile-resources-added-list',
             '.profile-contributions-list',
-            '.profile-projects-listing',
             '.home-projects-listing'
         ];
 
@@ -1309,7 +1409,7 @@ var OC = {
             // Get all target elements with the class 'menu-open'.
             var highlightedMenuTargets = $('.menu-open');
             var j;
-            for (j = 0; j < openMenus.length; j++){
+            for (j = 0; j < highlightedMenuTargets.length; j++){
                 $(highlightedMenuTargets[j]).removeClass('menu-open');
             }
 
@@ -1375,86 +1475,44 @@ var OC = {
 
     bindDeleteResourceHandler: function(){
         $('.profile-resource-delete, .project-resource-delete').click(
-            OC.deleteResourceHandler);
-    },
-
-    deleteResourceHandler: function(event){
-        var deleteElement = $(this);
-        // NOTE(Varun): Given the ID of the resource is of the format
-        //     'resource-x', where x is the ID as stored by the server
-        var resourceID = deleteElement.attr('id').substring(9),
-            collectionID = $('.resources-collections-added').attr('id').substring(11);
-        $('.delete-resource-dialog').dialog({
-            modal: true,
-            open: false,
-            width: 500,
-            buttons: {
-                'Yes, delete': function () {
-                    $(this).dialog("close");
-                    $.post('/resources/delete-resource/' + resourceID  +
-                        '/from/' + collectionID + '/',
-                        function(response){
-                            // Hide the resource
-                            if (response.status == 'true'){
-                                $(deleteElement).parents('.resource-collection-item').fadeOut();
-                            }
-                            else {
-                                OC.popup(
-                                    'Sorry, the resource could not be deleted. Please try again later.');
-                            }
-                        },
-                    'json');
-                },
-                Cancel: function () {
-                    $(this).dialog("close");
+            function(event){
+                function successCallback(resourceID){
+                    $('.resource-collection-item#resource-' + resourceID).fadeOut();
                 }
+                var deleteElement = $(this);
+                // NOTE(Varun): Given the ID of the resource is of the format
+                //     'resource-x', where x is the ID as stored by the server
+                
+                var resourceID = deleteElement.attr('id').substring(9),
+                    fromCollectionID = $('.resources-collections-added').attr('id').substring(11);
+                OC.resource.delete(resourceID, fromCollectionID, callback);
+            
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
             }
-        });
-
-        event.preventDefault();
-        event.stopPropagation();
-        return false;
+        );
     },
 
     bindDeleteCollectionHandler: function(){
         $('.profile-collection-delete, .project-collection-delete').click(
-            OC.deleteCollectionHandler);
-    },
-
-    deleteCollectionHandler: function(event){
-        var deleteElement = $(this);
-        // NOTE(Varun): Given the ID of the resource is of the format
-        //     'resource-x', where x is the ID as stored by the server
-        var collectionID = deleteElement.attr('id').substring(11);
-        $('.delete-collection-dialog').dialog({
-            modal: true,
-            open: false,
-            width: 500,
-            buttons: {
-                'Yes, delete': function () {
-                    $(this).dialog("close");
-                    $.post('/resources/delete-collection/' + collectionID  + '/',
-                        function(response){
-                            // Hide the resource
-                            if (response.status == 'true'){
-                                $(deleteElement).parents('.resource-collection-item').fadeOut();
-                            }
-                            else {
-                                OC.popup(
-                                    'Sorry, the collection could not be deleted. Please try again later.');
-                            }
-                        },
-                    'json');
-                },
-                Cancel: function () {
-                    $(this).dialog("close");
+            function(event){
+                function successCallback(collectionID){
+                    $('.resource-collection-item#collection-' + collectionID).fadeOut();
                 }
-            }
-        });
 
-        event.preventDefault();
-        event.stopPropagation();
-        return false;
+                var deleteElement = $(this);
+
+                // NOTE(Varun): Given the ID of the resource is of the format
+                //     'resource-x', where x is the ID as stored by the server
+                var collectionID = deleteElement.attr('id').substring(11);
+                OC.collection.delete(collectionID, successCallback);
+            
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+            }
+        );
     },
 
     initCollectionsTree: function(){
@@ -1463,6 +1521,14 @@ var OC = {
     },
 
     initResourcesCollections: function(){
+        if ($('.resource-collection-item').length >= 1){
+            OC.resourcesCollections.initFavoriteStates();
+        
+            OC.resourcesCollections.initCopyAction();
+
+            OC.resourcesCollections.bindThumbnailSelect();
+        }
+
         if ($('.resources-collections-added').length >= 1){
             // Tipsy the collections/resources visibility.
             $('.project-browse-item-visibility, .profile-browse-item-visibility').tipsy(
@@ -1565,61 +1631,23 @@ var OC = {
         var resourceFavoriteWrapper = $('li.favorite-action'),
             resourceFavoriteButton = $('a', resourceFavoriteWrapper);
 
+        function setFavoriteState(resourceID, state){
+            if (state){
+                resourceFavoriteWrapper.addClass('favorited');
+                resourceFavoriteButton.attr('title', 'Unfavorite');
+            }
+        }
+
         if (userID){
-                $.get('/interactions/favorite/state/resource/' + resourceID + '/user/' + userID + '/',
-                    function(response){
-                        if (response.status == 'true')
-                            if (response.favorite.state == 'true'){
-                                resourceFavoriteWrapper.addClass('favorited');
-                                resourceFavoriteButton.attr('title', 'Unfavorite');
-                            }
-                    },
-                'json');
+            OC.getFavoriteState(resourceID, setFavoriteState);
 
-                resourceFavoriteButton.click(function(event){
-                    $.get('/interactions/favorite/resource/' + resourceID + '/user/' + userID + '/',
-                        function(response){
-                            if (response.status == 'true'){
-                                resourceFavoriteWrapper.addClass('favorited');
-                                resourceFavoriteButton.attr('title', 'Unfavorite');
-                            }
-                            else if (response.status == 'unfavorite success'){
-                                resourceFavoriteWrapper.removeClass('favorited');
-                                resourceFavoriteButton.attr('title', 'Favorite');
-                            }
-                        },
-                    'json');
-
-                    event.preventDefault();
-                    event.stopPropagation();
-                    return false;
-                });
-
-            // Tipsy the favorite button.
-            resourceFavoriteButton.tipsy({ gravity: 's'});
-        } else if (profileUserID){
-            var profileFavoriteButton = $('.profile-favorite-action');
-            profileFavoriteButton.click(function(event){
-                var resourceID = $(event.target).closest(
-                    '.favorite-resource-item').find(
-                    'form.profile-favorite-form input[name=resource_id]').val();
-
-                $.get('/interactions/favorite/resource/' + resourceID + '/user/' + profileUserID + '/',
-                    function(response){
-                        if (response.status == 'true'){
-                            $(event.target).addClass('favorited');
-                            $(event.target).attr('title', 'Unfavorite');
-                        }
-                        else if (response.status == 'unfavorite success'){
-                            $(event.target).removeClass('favorited');
-                            $(event.target).attr('title', 'Favorite');
-                        }
-                    },
-                'json');
+            resourceFavoriteButton.click(function(event){
+                OC.favoriteClickHandler(
+                    resourceID, userID, resourceFavoriteWrapper, event);
             });
 
             // Tipsy the favorite button.
-            profileFavoriteButton.tipsy({ gravity: 's'});
+            resourceFavoriteButton.tipsy({ gravity: 's'});
         } else {
             resourceFavoriteButton.click(function(event){
                 OC.popup('You must be logged in to favorite a resource',
@@ -1630,6 +1658,42 @@ var OC = {
                 return false;
             });
         }
+    },
+
+    favoriteClickHandler: function(resourceID, userID, resourceFavoriteWrapper, event, favoriteCallback, unfavoriteCallback){
+        var resourceFavoriteButton = $('a', resourceFavoriteWrapper);
+        $.get('/interactions/favorite/resource/' + resourceID + '/user/' + userID + '/',
+            function(response){
+                if (response.status == 'true'){
+                    resourceFavoriteWrapper.addClass('favorited');
+                    resourceFavoriteButton.text('Favorited');
+                    favoriteCallback(resourceFavoriteWrapper);
+                }
+                else if (response.status == 'unfavorite success'){
+                    resourceFavoriteWrapper.removeClass('favorited');
+                    resourceFavoriteButton.text('Favorite');
+                    unfavoriteCallback(resourceFavoriteWrapper);
+                }
+            },
+        'json');
+
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    },
+
+    getFavoriteState: function(resourceID, callback){
+        $.get('/interactions/favorite/state/resource/' + resourceID + '/user/' +
+            OC.config.user.id + '/',
+            function(response){
+                if (response.status == 'true'){
+                    var state;
+                    if (response.favorite.state == 'true') state = true;
+                    else state = false;
+                    callback(resourceID, state);
+                }
+            },
+        'json');
     },
 
     initUpvoteDownvoteResource: function(){
@@ -1771,6 +1835,164 @@ var OC = {
         });
     },
 
+    initExportResource: function(){
+        $('.export-action a').click(function(event){
+            // Pull up a popup showing progress.
+            var exportDialog = OC.customPopup('.export-document-pdf-dialog'),
+                exportProgress = OC.progressBar('.export-document-pdf-progress', {
+                    startAt: 30
+                }),
+                exportStatus = $('.export-document-pdf-status'),
+                resourceID = $('form#resource-form input[name=resource_id]').val();
+
+            // Make a GET request for the serialized document.
+            $.get('/resources/' + resourceID + '/build-export-document/',
+                function(response){
+                    if (response.status == 'true'){
+                        // POST the response to the export server for generating a PDF
+                        //     if no WebSockets in browser. But if WS support, use WS.
+                        if ("WebSocket" in window){
+                            // Update the status and the % progress shown to the user.
+                            exportStatus.text('Building document...');
+                            exportProgress.advanceTo(50);
+
+                            var exportSocket = new WebSocket("ws://127.0.0.1:1337/");
+
+                            exportSocket.onopen =  function(event){
+                                response.type = 'pdf';
+                                exportSocket.send(JSON.stringify(response));
+                            };
+
+                            exportSocket.onmessage = function(event){
+                                data = JSON.parse(event.data);
+                                if (data.documentReceived){
+                                    exportStatus.text('Generating PDF...');
+                                    exportProgress.advanceTo(60);
+
+                                    // Increment the counter fictitiously.
+                                    var currentProgress = 60;
+                                    setInterval(function(){
+                                        if (currentProgress <= 80)
+                                            exportProgress.advanceTo(++currentProgress);
+                                    }, 100);
+                                } else if (data.documentProcessed){
+                                    exportStatus.text('Finished! Opening PDF...');
+                                    exportProgress.advanceTo(100);
+
+                                    setTimeout(function(){
+                                        // Open the retrieved PDF URL in a new tab / window.
+                                        window.open(data.url,'_blank');
+
+                                        // Close the dialog.
+                                        exportDialog.close();
+                                    }, 500);
+                                }
+                            };
+                        } else {
+                            // Update the status and the % progress shown to the user.
+                            exportStatus.text('Generating PDF...');
+                            exportProgress.advanceTo(50);
+
+                            /*
+                            $.post('/interactions/comment-reference/', response.document,
+                                function (response) {
+                                    if (response.status == 'true'){
+                                        OC.documentElementCommentSubmissionHandler(
+                                            response, cellCommentsForm);
+                                    }
+                                },
+                            'json');*/
+                        }
+                    } else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+
+        $('.word-action a').click(function(event){
+            // Pull up a popup showing progress.
+            var exportDialog = OC.customPopup('.export-document-word-dialog'),
+                exportProgress = OC.progressBar('.export-document-word-progress', {
+                    startAt: 30
+                }),
+                exportStatus = $('.export-document-word-status'),
+                resourceID = $('form#resource-form input[name=resource_id]').val();
+
+            // Make a GET request for the serialized document.
+            $.get('/resources/' + resourceID + '/build-export-document/',
+                function(response){
+                    if (response.status == 'true'){
+                        // POST the response to the export server for generating a PDF
+                        //     if no WebSockets in browser. But if WS support, use WS.
+                        if ("WebSocket" in window){
+                            // Update the status and the % progress shown to the user.
+                            exportStatus.text('Building document...');
+                            exportProgress.advanceTo(50);
+
+                            var exportSocket = new WebSocket("ws://127.0.0.1:1337/");
+
+                            exportSocket.onopen =  function(event){
+                                response.type = 'word';
+                                exportSocket.send(JSON.stringify(response));
+                            };
+
+                            exportSocket.onmessage = function(event){
+                                data = JSON.parse(event.data);
+                                if (data.documentReceived){
+                                    exportStatus.text('Generating Word file...');
+                                    exportProgress.advanceTo(60);
+
+                                    // Increment the counter fictitiously.
+                                    var currentProgress = 60;
+                                    setInterval(function(){
+                                        if (currentProgress <= 80)
+                                            exportProgress.advanceTo(++currentProgress);
+                                    }, 100);
+                                } else if (data.documentProcessed){
+                                    exportStatus.text('Finished! Opening Word file...');
+                                    exportProgress.advanceTo(100);
+
+                                    setTimeout(function(){
+                                        // Open the retrieved PDF URL in a new tab / window.
+                                        window.open(data.url,'_blank');
+
+                                        // Close the dialog.
+                                        exportDialog.close();
+                                    }, 500);
+                                }
+                            };
+                        } else {
+                            // Update the status and the % progress shown to the user.
+                            exportStatus.text('Generating PDF...');
+                            exportProgress.advanceTo(50);
+
+                            /*
+                            $.post('/interactions/comment-reference/', response.document,
+                                function (response) {
+                                    if (response.status == 'true'){
+                                        OC.documentElementCommentSubmissionHandler(
+                                            response, cellCommentsForm);
+                                    }
+                                },
+                            'json');*/
+                        }
+                    } else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+    },
+
     initEditResource: function(){
         $('form.resource-create-edit-form #submission-buttons button[type=submit]').click(
             function(event){
@@ -1812,6 +2034,10 @@ var OC = {
         OC.initEditHandlers();
 
         OC.repositionPictures.initRepositionPictures();
+    },
+
+    initProfileTabs: function(){
+        OC.tabs('.profile-center-stage', {viewOnly: true});
     },
 
     initEditHandlers: function(){
@@ -2115,7 +2341,7 @@ var OC = {
                 } else if (OC.repositionPictures.image === OC.repositionPictures.projectCover){
                     var project_id = $(
                         '#project-cover-reposition-form input[name=project_id]').val();
-                    $.get('/project/' + project_id + '/reposition-cover/?left=' +
+                    $.get('/group/' + project_id + '/reposition-cover/?left=' +
                         newBackgroundPosition.left + '&top=' + newBackgroundPosition.top,
                         function(response){
                             if (response.status == 'true'){
@@ -2849,20 +3075,99 @@ var OC = {
         },
 
         successfullyCopied: function(copiedResource, resourceID){
-            OC.setMessageBoxMessage('Resource has been copied to your collection successfully.');
+            OC.setMessageBoxMessage('Resource has been copied to your folder successfully.');
             OC.showMessageBox();
         },
 
         successfullyLinked: function(copiedResource, resourceID){
-            OC.setMessageBoxMessage('Resource has been linked in your collection successfully.');
+            OC.setMessageBoxMessage('Resource has been linked in your folder successfully.');
             OC.showMessageBox();
-        }
+        },
+
+        delete: function(resourceID, fromCollectionID, callback){
+            $('.delete-resource-dialog').dialog({
+                modal: true,
+                open: false,
+                width: 500,
+                buttons: {
+                    'Yes, delete': function () {
+                        $(this).dialog("close");
+                        $.post('/resources/delete-resource/' + resourceID  +
+                            '/from/' + fromCollectionID + '/',
+                            function(response){
+                                // Hide the resource
+                                if (response.status == 'true'){
+                                    callback(response.resourceID);
+                                }
+                                else {
+                                    OC.popup(response.message, response.title);
+                                    OC.dismissMessageBox();
+                                }
+                            },
+                        'json');
+                    },
+                    Cancel: function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        },
+    },
+
+    collection: {
+        copy: function(fromCollectionID, collectionID, toCollectionID, callback){
+            $.get('/resources/collection/' + collectionID + '/copy/to/' +
+                toCollectionID + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        callback(response.collection, collectionID);
+                    } else {
+                        OC.popup(response.message, response.title);
+                        OC.dismissMessageBox();
+                    }
+                },
+            'json');
+        },
+
+        successfullyCopied: function(copiedCollection, collectionID){
+            OC.setMessageBoxMessage('Folder has been copied into your folder successfully.');
+            OC.showMessageBox();
+        },
+
+        delete: function(collectionID, callback){
+            $('.delete-collection-dialog').dialog({
+                modal: true,
+                open: false,
+                width: 500,
+                buttons: {
+                    'Yes, delete': function () {
+                        $(this).dialog("close");
+                        $.post('/resources/delete-collection/' + collectionID  + '/',
+                            function(response){
+                                // Hide the resource
+                                if (response.status == 'true'){
+                                    callback(response.collectionID);
+                                }
+                                else {
+                                    OC.popup(response.message, response.title);
+                                    OC.dismissMessageBox();
+                                }
+                            },
+                        'json');
+                    },
+                    Cancel: function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        },
     }
 };
 
 jQuery(document).ready(function ($) {
-    // Set up search box effect.
-    OC.renderSearch();
+    OC.initSearchOptions();
+
+    OC.initSearchAutocomplete();
 
     // NOTE: This call has been temporarily moved to the callback from the
     //     WebFont loaded callback.
@@ -2876,10 +3181,16 @@ jQuery(document).ready(function ($) {
 
     OC.initMessageBox();
 
+    OC.renderIndexAnimation();
+
 
     /* Profile specific initializers and other functions */
 
+    OC.initProfileTabs();
+
     OC.initPictureManipulation();
+
+    OC.initSubscribe();
 
     // Set up flashing (liffect) article panel.
     OC.renderArticlePanel();
@@ -2959,6 +3270,8 @@ jQuery(document).ready(function ($) {
     OC.initUpvoteDownvoteResource();
 
     OC.initPrintResource();
+
+    OC.initExportResource();
 
     //OC.initEditResource();
 
@@ -3078,6 +3391,24 @@ jQuery.fn.hasClickEventListener = function(eventListener) {
     return false;
 };
 /*jslint nomen: false */
+
+// Adapted from http://chris-spittles.co.uk/jquery-calculate-scrollbar-width/#sthash.pzDdzxwT.dpuf
+getScrollbarWidth = function() {
+    var $inner = $('<div style="width: 100%; height:200px;"></div>'),
+        $outer = $('<div style="width:200px;height:150px; position: absolute;' +
+            'top: 0; left: 0; visibility: hidden; overflow:hidden;"></div>').append($inner),
+        inner = $inner[0],
+        outer = $outer[0];
+     
+    $('body').append(outer);
+    var width1 = inner.offsetWidth;
+    $outer.css('overflow', 'scroll');
+
+    var width2 = outer.clientWidth;
+    $outer.remove();
+ 
+    return (width1 - width2);
+};
 
 /**
  * fastLiveFilter jQuery plugin 1.0.3

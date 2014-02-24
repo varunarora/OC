@@ -22,7 +22,14 @@ $content-width: 960px
 
 @mixin sans-font-family
 	font-family: "Proxima Nova Regular", 'Helvetica Neue', Arial, Helvetica, sans-serif
-	
+	font-weight: normal
+
+@mixin sans-bold
+	font-family: "Proxima Nova Bold", 'Helvetica Neue', Arial, Helvetica, sans-serif
+	font-size-adjust: 0.488
+	font-weight: bold
+	font-style: normal
+
 $header-height: 55px
 $header-prebanner-height: 4px
 
@@ -93,12 +100,12 @@ body
 footer
 	font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif
 	margin: auto
-	width: $content-width
-	text-align: right
+	text-align: center
 	margin-top: 40px
+	padding: 40px
 	font-size: 0.95em
 	color: #666666
-	margin-bottom: 20px
+	background-color: #efefef
 
 	a
 		color: #557799
@@ -231,6 +238,7 @@ h1
 	font-family: 'PT Sans', sans-serif
 	font-size: 2.5em
 	font-size-adjust: none
+	@include sans-bold
 
 h2
 	font-family: 'PT Sans', sans-serif
@@ -427,12 +435,6 @@ li, p
 
 .true-color
 	color: #1a1a1a
-
-@mixin sans-bold
-	font-family: "Proxima Nova Bold", 'Helvetica Neue', Arial, Helvetica, sans-serif
-	font-size-adjust: 0.488
-	font-weight: bold
-	font-style: normal
 
 /* NEEDS ATTENTION */
 span.highlighted,
@@ -719,13 +721,17 @@ nav#authenticate-buttons, nav#user-buttons
 nav#user-menu.showMenu,
 nav#share-menu.showMenu,
 nav#notifications-menu.showMenu,
-nav#add-resource-menu.showMenu
+nav#add-resource-menu.showMenu,
+nav#license-menu.showMenu,
+nav#tags-menu.showMenu
 	display: block
 
 nav#user-menu,
 nav#share-menu,
 nav#notifications-menu,
-nav#add-resource-menu
+nav#add-resource-menu,
+nav#license-menu,
+nav#tags-menu
 	display: none
 	position: absolute
 
@@ -1163,16 +1169,17 @@ textarea[name=objectives]
 		.user-info
 			float: left
 
-			.user-photo
-				float: left
-				margin-right: 16px
-				width: 60px
-				height: 60px
-				background-position: center center
-				background-size: cover
+		.user-photo
+			float: left
+			margin-right: 16px
+			width: 60px
+			height: 60px
+			background-position: center center
+			background-size: cover
 
-			.user-description
-				float: left
+		.user-description
+			float: left	
+			overflow: hidden
 
 		.user-actions
 			float: right
@@ -1186,6 +1193,10 @@ textarea[name=objectives]
 		&.user-failure
 			background-color: #FFDEB5
 
+#key-panel .user-list
+	.user-description
+		width: 83%
+
 /* jQuery UI stuff */
 
 .ui-autocomplete
@@ -1194,12 +1205,15 @@ textarea[name=objectives]
 	border-top-width: 0px
 
 	a
-		font-weight: bold
+		color: $body-color
 
 	a:hover
-		color: #fff
 		cursor: pointer
-		background-color: #1155cc
+		background-color: #efefef
+
+		&.ui-state-focus
+			margin: 0px
+
 
 .ui-dialog-titlebar-close
 	background-repeat: no-repeat
@@ -1596,7 +1610,7 @@ table
 	height: 400px
 
 .oc-tabs
-	nav
+	> nav
 		margin-top: 10px
 		height: 36px
 
@@ -1616,7 +1630,6 @@ table
 					border-color: #bcbcbc
 					border-style: solid
 					background-color: #fff
-					border-radius: 4px 4px 0px 0px
 					display: inline-block
 					background-color: #efefef
 					color: $light-font
@@ -1654,7 +1667,7 @@ table
 	border-width: 0px
 
 .page-action-button
-	background-color: #D14836
+	background-color: #5ABD02
 
 .action-button
 	background-color: #557799
@@ -1670,6 +1683,26 @@ table
 	&.large-action-button
 		font-size: 1.6em
 
+.secondary-button
+	&.unclickable
+		&:hover
+			text-decoration: none
+			background-color: #efefef
+			cursor: auto
+
+.site-action-button
+	background-color: #5abd02
+	float: none
+	margin: 30px 0px
+	display: inline-block
+	font-size: 1.4em
+	padding: 15px 30px
+	border-bottom: 2px solid #3D7F01
+
+	&:hover
+		text-decoration: none
+		background-color: #3D7F01
+
 .disabled-action-button
 	background-color: #A5BACF
 	cursor: default
@@ -1677,7 +1710,7 @@ table
 	&:hover
 		background-color: #A5BACF
 
-.collection-button
+.collection-button, .secondary-button
 	background-color: #efefef
 	color: $light-font
 
@@ -1746,7 +1779,9 @@ nav.collections-navigation,
 .add-resource-profile-browser,
 .add-resource-project-browser,
 .link-resource-profile-browser,
+.link-resource-project-browser,
 .link-resource-project-browser
+.link-resource-standards-browser
 	ul
 		li
 			ul
@@ -1791,7 +1826,7 @@ nav.collections-navigation,
 .current-navigation-collection
 	@include sans-bold
 
-.toggle-collection, .toggle-resource
+.toggle-collection, .toggle-resource, .toggle-tag-category
 	width: 10px
 	height: 16px
 	background-repeat: no-repeat
@@ -1800,15 +1835,15 @@ nav.collections-navigation,
 	float: left
 	padding-right: 10px
 
-.empty-collection .toggle-collection
+.empty-collection .toggle-collection, .empty-tag-category .toggle-tag-category
 	background-image: url('../images/empty-collection.png')
 	background-position: 2px 5px
 
-.parent-collection > .toggle-collection
+.parent-collection > .toggle-collection, .parent-tag-category .toggle-tag-category
 	background-image: url('../images/arrow-right-small.png')
 	background-position: 5px 4px
 
-.opened-collection > .toggle-collection
+.opened-collection > .toggle-collection, , .opened-tag-category .toggle-tag-category
 	background-image: url('../images/arrow-bottom-small.png')				
 	background-position: 3px 6px
 
@@ -1935,33 +1970,6 @@ aside#support.teacher-contributor-invite
 		.project-browse-item-date, .profile-browse-item-date
 			color: #bababa
 
-		.project-browse-item-visibility, .profile-browse-item-visibility
-			display: inline-block
-			float: left
-			height: 16px
-			width: 16px
-			background-repeat: no-repeat
-			background-position: center center
-
-			&.visibility-public
-				background-image: url('../images/public-visibility.png')
-
-				&:hover
-					background-image: url('../images/public-visibility-hover.png')
-
-			&.visibility-project
-				background-image: url('../images/project-visibility.png')
-
-				&:hover
-					background-image: url('../images/project-visibility-hover.png')
-
-
-			&.visibility-private
-				background-image: url('../images/private-visibility.png')
-
-				&:hover
-					background-image: url('../images/private-visibility-hover.png')
-
 		&:hover
 			text-decoration: none
 
@@ -2022,61 +2030,43 @@ aside#support.teacher-contributor-invite
 		.profile-collection-delete, .project-collection-delete
 			background-image: url('../images/delete-resource-hover.png')
 
-.project-listing
-	&.project-visibility-public
-		.project-browse-item-visibility
-			&.visibility-project
-				background-image: url('../images/public-visibility.png')
-
-				&:hover
-					background-image: url('../images/public-visibility-hover.png')
-
-	&.collection-visibility-private
-		.project-browse-item-visibility
-			&.visibility-project, &.visibility-public
-				background-image: url('../images/private-visibility.png')
-
-				&:hover
-					background-image: url('../images/private-visibility-hover.png')
 
 .profile-projects-listing, .home-projects-listing
 	color: #fff
 	padding-top: 10px
-
-	.projects-item
-		margin-bottom: 10px
-
-		.profile-projects-item-description-wrapper
-			background-size: cover
-
-		.profile-projects-item-title
-			font-size: 1.4em
-
-		a
-			color: #fff
-
-		a:hover
-			text-decoration: none
-
-			.profile-projects-item-title
-				text-decoration: underline
-
-	.profile-projects-item-description
-		position: relative
-		padding-left: 20px
-		height: 88px
-		padding-top: 12px
-		/* Custom IE styling in ie.sass */
-		@include background-image(linear-gradient(top, rgba(0,0,0,0.65) 0%, rgba(150,150,150,0.25) 100%))
-
-	.profile-projects-item-description:hover
-		background-image: none
 
 	&.compressed
 		height: 200px
 		overflow: hidden
 
 
+.projects-item
+	margin-bottom: 10px
+
+	.profile-projects-item-description-wrapper
+		background-size: cover
+		height: 100px
+
+	.profile-projects-item-title
+		font-size: 1.4em
+
+	a
+		color: #fff
+
+	a:hover
+		text-decoration: none
+
+		.profile-projects-item-title
+			text-decoration: underline
+
+.profile-projects-item-description
+	position: relative
+	padding-left: 20px
+	height: 28px
+	padding-top: 12px
+	background: url('../images/editor-search-background.png')
+	/* Custom IE styling in ie.sass */
+	//@include background-image(linear-gradient(top, rgba(0,0,0,0.65) 0%, rgba(150,150,150,0.25) 100%))
 
 table.reset-password-table
 	margin-top: 20px
@@ -2346,6 +2336,9 @@ table.reset-password-table
 form
 	input[type=text], input[type=password], textarea
 		@include form-inputs
+
+	input[type=search]
+		@include sans-font-family
 
 ul.tagit
 	@include form-inputs
@@ -2623,6 +2616,12 @@ aside.page-menu-wrapper
 	width: 600px
 	min-height: 125px
 
+.loading-dialog
+	width: 100px
+	height: 100px
+	background: url('../images/spinner.gif') no-repeat center center
+	background-color: #fff
+
 .add-collaborator-wrapper
 	overflow: hidden
 	margin-top: 6px
@@ -2705,6 +2704,10 @@ ul.collaborators
 	width: 400px
 	height: 145px
 
+.export-document-pdf-dialog, .export-document-word-dialog
+	width: 400px
+	height: 125px
+
 .oc-popup-dialog-browser
 	height: 230px
 	border: 1px solid #ddd
@@ -2737,6 +2740,17 @@ ul.collaborators
 
 .oc-popup-dialog-tab-body
 	padding: 10px
+
+.oc-progressbar
+	width: 100%
+	margin-top: 10px
+	border: 1px solid #ddd
+	height: 30px
+
+	.oc-progressbar-indicator
+		width: 0%
+		height: 100%
+		background-color: $link-hover
 
 .favorite-resource-item
 	overflow: hidden
@@ -2941,3 +2955,349 @@ ul.collaborators
 
 		button.document-element-comment-post
 			float: right
+
+.editor-header
+	margin: 20px auto
+
+	#article-title input[type=text].browser-edit
+		width: 550px
+
+	.panel-right
+
+		.editor-button-wrapper
+			float: right
+
+.editor-toolbar-wrapper
+	background-color: #ddd
+	height: 40px
+	padding-top: 8px
+
+	#editor-toolbar
+		width: $content-width
+		margin: auto
+
+body.editor
+	overflow-x: hidden
+
+.editor-frame
+	background-color: #efefef
+	padding-top: 40px
+	overflow-y: scroll
+	overflow-x: initial
+
+	.editor-search
+		right: -600px
+		position: absolute
+		z-index: 2
+
+		.editor-search-pullout
+			float: left
+			background: url('../images/editor-search-background.png') center center
+			width: 50px
+			height: 50px
+			cursor: pointer
+
+		.editor-search-main-panel
+			background: url('../images/editor-search-background.png') center center
+			width: 600px
+			float: right
+
+		.editor-search-bar
+			height: 30px
+			width: 95%
+			margin: 10px auto
+
+			input
+				background: none
+				@include border-radius(2px)
+				border: 2px solid #666
+				width: 98%
+				font-size: 1.4em
+				color: #bababa
+				padding-left: 6px
+
+				&:focus
+					border-color: #bababa
+
+		.editor-search-body-content
+			overflow-y: auto
+			background-color: #fff
+			height: 600px
+
+			.editor-favorites-browser, .editor-profile-browser, .editor-projects-browser
+				border-width: 0px
+
+		.editor-search-body
+			width: 95%
+			margin: auto
+
+			> nav
+				height: 28px
+
+				ul
+					li
+						margin-left: 0px
+						margin-right: 3px
+						height: 28px
+
+						&.hide-tab
+							display: none
+						
+						a
+							padding-top: 4px
+							padding-bottom: 4px
+							border-top-width: 0px
+							border-left-width: 0px
+							border-right-width: 0px
+
+						.editor-favorites-tab, .editor-files-tab, .editor-projects-tab
+							background-size: 14px 14px
+							background-position: 10px 6px
+							background-repeat: no-repeat
+							padding-left: 30px
+
+						.editor-favorites-tab
+							background-image: url('../images/favorite.png')
+
+						.editor-projects-tab
+							background-image: url('../images/groups.png')
+
+						.editor-files-tab
+							background-image: url('../images/files.png')
+
+
+
+	.editor-body
+		background-color: #fff
+		min-height: 600px
+		margin-top: 0px
+		@include box-shadow(0 0px 16px rgba(0, 0, 0, 0.1))
+		outline: 0 none
+		padding: 60px 65px
+		width: 830px
+
+		.foreign-document-element
+			background-color: #efefef
+			padding: 10px
+			overflow: hidden
+
+			.foreign-document-element-thumbnail
+				background-position: center center
+				background-size: cover
+				float: left
+				height: 60px
+				margin-right: 16px
+				width: 60px
+
+			.foreign-document-element-description
+				float: left
+
+				.foreign-document-element-description-title
+					font-size: 1.4em
+					margin-bottom: 5px
+	
+
+.editor-search-result
+	overflow: hidden
+	padding: 15px 10px
+	//position: absolute
+	background-color: #fff
+	//width: 550px
+
+	.editor-search-result-handle
+		float: left
+		width: 30px
+		height: 60px
+
+	.editor-search-result-thumbnail
+		float: left
+		margin-right: 16px
+		width: 60px
+		height: 60px
+		background-position: center center
+		background-size: cover
+
+	.editor-search-result-description
+		float: left
+		width: 70%
+
+		.editor-search-result-description-title
+			font-size: 1.4em
+			margin-bottom: 5px
+
+		.editor-search-result-description-meta
+			color: $light-font
+
+			a
+				color: $light-font
+
+	&:hover
+		background-color: #efefef
+		
+		.editor-search-result-handle
+			background-image: url('../images/move-handle.png')
+			cursor: move
+			background-repeat: repeat-y
+
+
+.editor-frame-result-clones
+	.editor-search-result
+		z-index: 5
+		width: 0.90 * 600px
+		position: absolute
+		opacity: 0.7
+
+.activity-object-wrapper
+	overflow: hidden
+	padding: 8px
+
+.activity-project-wrapper
+	padding-top: 8px
+
+.feed-item-date
+	color: #bababa
+
+blockquote
+	padding-left: 20px
+	padding-top: 10px
+	color: $light-font
+
+	> p
+		margin-top: 0px
+		display: inline
+
+.profile-content
+	padding-top: 20px
+
+.resource-collection-item
+	height: 100px
+
+	input[name=resource_collection_id]
+		display: none
+
+	.resource-item-thumbnail
+		width: 80px
+		height: 80px
+		float: left
+
+		.resource-item-thumbnail-selector
+			background: url('../images/select.png') no-repeat center center
+			width: 80px
+			height: 80px
+			visibility: hidden
+			opacity: 0
+			float: left
+
+			&.selected
+				visibility: visible
+				opacity: 1
+
+		&:hover
+			.resource-item-thumbnail-selector
+				visibility: visible
+				opacity: 0.4
+				cursor: pointer
+
+				&.selected
+					visibility: visible
+					opacity: 1
+
+		.resource-item-thumbnail-drive, .resource-item-thumbnail-dropbox,
+		.resource-item-thumbnail-image, .resource-item-thumbnail-pdf,
+		.resource-item-thumbnail-document, .resource-item-thumbnail-spreadsheet,
+		.resource-item-thumbnail-upload, .resource-item-thumbnail-url,
+		.resource-item-thumbnail-video
+			background-repeat: no-repeat
+			background-position: center center
+			width: 80px
+			height: 80px
+
+		.resource-item-thumbnail-drive
+			background: url('../images/drive-folder.png')
+
+		.resource-item-thumbnail-dropbox
+			background: url('../images/dropbox-folder.png')
+
+		.resource-item-thumbnail-image
+			background: url('../images/image-icon.png')
+
+		.resource-item-thumbnail-pdf
+			background: url('../images/pdf-icon.png')
+
+		.resource-item-thumbnail-document
+			background: url('../images/document-icon.png')
+
+		.resource-item-thumbnail-spreadsheet
+			background: url('../images/spreadsheet-icon.png')
+
+		.resource-item-thumbnail-presentation
+			background: url('../images/powerpoint-icon.png')
+
+		.resource-item-thumbnail-upload
+			background: url('../images/upload-icon.png')
+
+		.resource-item-thumbnail-url
+			background: url('../images/link-icon.png')
+
+		.resource-item-thumbnail-video
+			background: url('../images/video-icon.png')
+
+	.resource-item-description
+		float: left
+		margin-left: 15px
+		width: 80%
+
+		.resource-item-description-title
+			a
+				font-size: 1.2em
+
+		.resource-item-description-meta
+			color: #bababa
+
+		.resource-item-description-actions
+			padding-top: 12px
+
+			.resource-item-description-actions-visibility
+				float: left
+
+				button
+					margin-left: 0px
+
+					&.is-owner, &.is-collaborator
+						cursor:pointer
+
+			.resource-item-description-actions-common
+				padding-top: 5px
+				float: right
+
+
+.publicly-shared-icon, .private-shared-icon, .group-shared-icon,
+.personal-shared-icon, .shared-with-me-icon
+	background-repeat: no-repeat
+	background-position: center center
+	width: 16px
+	height: 16px
+	margin-right: 6px
+	display: inline-block
+	float: left
+
+.publicly-shared-icon
+	background-image: url('../images/public-visibility-hover.png')
+
+.private-shared-icon, .personal-shared-icon
+	background-image: url('../images/private-visibility-hover.png')
+
+.group-shared-icon, .shared-with-me-icon
+	background-image: url('../images/project-visibility-hover.png')
+
+
+.resources-collections-added
+	.resource-copy, .resource-remix, .resource-favorite
+		opacity: 0.4
+
+		&:hover
+			opacity: 1
+
+	.favorited
+		.resource-favorite
+			opacity: 1
