@@ -223,20 +223,23 @@ def build_document_view(document_id):
 
     # Replace embedded resource references with resource contents.
     for document_element in document_elements:
-        soup = BeautifulSoup(document_element.element.body['data'])
+        try:
+            soup = BeautifulSoup(document_element.element.body['data'])
 
-        document_resources = soup.findAll('div', 'foreign-document-element')
-        for document_resource in document_resources:
-            resource_id = document_resource['id']
-            
-            (rendered_resource, resource_type, revision) = render_resource(resource_id)
-            context = Context({
-                'resource': rendered_resource,
-                'MEDIA_URL': settings.MEDIA_URL
-            })
-            document_resource.replaceWith(BeautifulSoup(template.render(context)))
+            document_resources = soup.findAll('div', 'foreign-document-element')
+            for document_resource in document_resources:
+                resource_id = document_resource['id']
+                
+                (rendered_resource, resource_type, revision) = render_resource(resource_id)
+                context = Context({
+                    'resource': rendered_resource,
+                    'MEDIA_URL': settings.MEDIA_URL
+                })
+                document_resource.replaceWith(BeautifulSoup(template.render(context)))
 
-        document_element.element.body['data'] = str(soup)
+            document_element.element.body['data'] = str(soup)
+        except:
+            pass
 
     return document_elements
 
