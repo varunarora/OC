@@ -49,7 +49,7 @@
                     {% include 'partials/resource-item.html' %}
                 {% endif %}
             {% elif item.visibility == 'private' %}
-                {% if user == resource.user or user in resource.collaborators.all %}
+                {% if user == item.user or user in item.collaborators.all %}
                     {% include 'partials/resource-item.html' %}
                 {% endif %}
             {% endif %}
