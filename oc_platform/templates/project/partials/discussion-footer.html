@@ -6,7 +6,7 @@
     <div class="oc-popup-body">
         <div style="background-image: url('{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}')" class="user-thumbnail-xsmall"></div>
         <div class="new-discussion-post-prompt">{{ user.get_full_name }}<span class="new-discussion-post-prompt-suggest"> says:</span></div>
-        <form id="new-discussion-post-form" action="/project/{{ project.slug }}/discussions/post/" method="POST">
+        <form id="new-discussion-post-form" action="/group/{{ project.slug }}/discussions/post/" method="POST">
             {% csrf_token %}
             <input type="hidden" name="parent_id" value="{{ project.id }}" />
             <textarea name="body_markdown" class="new-discussion-post-body" placeholder="Say something..."></textarea>
