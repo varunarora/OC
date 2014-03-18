@@ -87,7 +87,7 @@ urlpatterns = patterns(
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 
-
+    url(r'^cbse-sample-paper-maker/', 'oc_platform.views.worksheet'),
 )
 
 if settings.DEBUG:

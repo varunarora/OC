@@ -1,0 +1,125 @@
+{% include 'partials/header.html' %}
+
+<div class="center-spread worksheet-creator-frame">
+    <div class="worksheet-panel-left">
+        <h2><input type="text" value="My sample exam paper" /></h2>
+        <button class="download-button">Download</button>
+        <div class="marks-tally"></div>
+        <h4>Section A</h4>
+        <ol class="question-list-a"></ol>
+
+        <h4>Section B</h4>
+        <ol class="question-list-b"></ol>
+        
+        <h4>Section C</h4>
+        <ol class="question-list-c"></ol>
+    </div>
+    <div class="worksheet-panel-right">
+        <div class="bold">(drag-and-drop from here into the left handside)</div>
+        <p></p>
+        <h3>Section A</h3>
+        <ol markdown="1" class="sample-question-list">
+            <li class="section-a">If A is a square matrix of order 3 such that \(|adj A| = 64\), find \(|A|\)</li>
+            <li class="section-a">If A = \(\begin{bmatrix}cos\theta&-sin\theta\\sin\theta&\cos\theta\end{bmatrix}\), find ; \(0 < \theta < \frac{\pi}{2}\). when A + A<sup>2</sup> = I</li>
+            <li class="section-a">If \(\begin{vmatrix} x & 2 \\ 18 & x \end{vmatrix} = \begin{vmatrix} 6 & 2 \\ 18 & 6 \end{vmatrix}\), find x.</li>
+            <li class="section-a">Let * be a binary operation on R given by a * b = \(\frac{a^2 - b}{3}\). Write the value of 3 * 4</li>
+            <li class="section-a">Evaluate: \(sin \{ \frac{\pi}{3} - sin^{-1} (\frac{-1}{2})  \}\)</li>
+            <li class="section-a">Evaluate: \(\int\frac{dx}{\sqrt{x} + x} \)</li>
+            <li class="section-a">If \(\int (e^{ax} + bx) dx = \frac{e^{4x}}{4} + \frac{3x^2}{2} \), find the values of a and b.</li>
+            <li class="section-a">If \(\overrightarrow{a} = i + j\), \(\overrightarrow{b} = j + k\), find the unit vector in the direction of \(\overrightarrow{a} + \overrightarrow{b} \)</li>
+            <li class="section-a">If \(|\overrightarrow{a}| = \sqrt{3} \), \(|\overrightarrow{b}| = 2 \) and angle between \(\overrightarrow{a} \) and \(\overrightarrow{b} \) is 60. Find \((\overrightarrow{a}.\overrightarrow{b}) \)</li>
+            <li class="section-a">What is the consine of the angle which the vector \(\sqrt{2}i + j + k\)</li>
+            <li class="section-a">What is the smallest equivalence relation R on Set A = {1, 2, 3}</li>
+            <li class="section-a">If \(|\overrightarrow{a}| = a \), then find the value of \(|\overrightarrow{a} \times \hat{i}|^2 + |\overrightarrow{a} \times \hat{j}|^2 + |\overrightarrow{a} \times \hat{k}|^2 \)</li>
+            <li class="section-a">If \(\overrightarrow{a}\) and \(\overrightarrow{b}\) are two unit vectors inclined to x-axis at angles 30<sup>o</sup> and 120<sup>o</sup> respectively, then write the value of \(|\overrightarrow{a} + \overrightarrow{b}|\)</li>
+            <li class="section-a">Find the sine of the angle between the line \(\frac{x-2}{3} = \frac{y-3}{4} = \frac{z-4}{5}\) and the plane 2x - 2y + x - 5 = 0</li>
+            <li class="section-a">Find \(tan^{-1}\sqrt{3} - sec^{-1}(-2) \)</li>
+            <li class="section-a">If A = \( \begin{pmatrix}4 & 5 \\ 7 & 5\end{pmatrix} \), then what is A. (adj. A)?</li>
+            <li class="section-a">For what value of k, the matrix \( \begin{pmatrix}2k+3 & 4 & 5 \\ -4 & 0 & -6 \\ -5 & 6 & -2k-3\end{pmatrix} \) is skew symmetric?</li>
+            <li class="section-a">If \( \begin{vmatrix} sin\alpha  & cos\beta \\ cos\alpha & sin\beta \end{vmatrix} = \frac{1}{2}\), where \(\alpha\), \(\beta\) are acute angles, then write the values of \(\alpha + \beta\)</li>
+            <li class="section-a">If \(\int_0 ^1 (3x^2 + 2x + k)dx = 0 \), write the value of k.</li>
+            <li class="section-a">Evaluate \(\int cot x(cosec x -1)e^x dx\).</li>
+            <li class="section-a">If A = \(\begin{bmatrix}1 & 3\\2 &1\end{bmatrix}\), find the determinant of A<sup>2</sup>-2A</li>
+            <li class="section-a">If A = \(\begin{bmatrix}3 & -4\\1 & -1\end{bmatrix}]\), B = \(\begin{bmatrix}1 & 3\\-2 & 5\end{bmatrix}\), find (BA)<sup>T</sup></li>
+            <li class="section-a">If \(R \rightarrow R\) is a bijection given by \(f(x) = x^3 + 3\), find \(f^{-1}(x)\).</li>
+            <li class="section-a">Using principal value, evaluate: \(sin^{-1}(sin\frac{3\pi}{5})\)</li>
+            <li class="section-a">Find the equation of the tangent to the curve y = -5x<sup>2</sup> + 6x + 7 at the point \(\left(\frac{1}{2}, \frac{35}{4}\right)\)</li>
+            <li class="section-a">Find \(|\overrightarrow{a} - \overrightarrow{b}|\), if two vectors \(\overrightarrow{a}\) and \(\overrightarrow{b}\) are such that \(|\overrightarrow{a}| = 2\) and \(|\overrightarrow{b}| = 3\) and \(\overrightarrow{a}.\overrightarrow{b} = 4\).</li>
+            <li class="section-a">Evaluate \(\int_0 ^\pi \frac{dx}{1 + sinx} \).</li>
+            <li class="section-a">Evaluate \(\int \frac{3x}{1 + 2x^4}dx \).</li>
+            <li class="section-a">Let \(\begin{bmatrix}x+3 & 2x\\6 & y\end{bmatrix}] = \begin{bmatrix}7 & 8\\6 & 3\end{bmatrix}\), then find the value of x and y.</li>
+            <li class="section-a">Find project of \(\overrightarrow{a} = 2\hat{i} + 3\hat{j} - \hat{k}\) on \(\overrightarrow{b} = \hat{i} - 3\hat{j} + 2\hat{k}\)</li>
+        </ol>
+
+        <h3>Section B</h3>
+        <ol markdown="1" class="sample-question-list">
+            <li class="section-b">Prove that \(sin^{-1} \frac{5}{13} + sin^{-1} \frac{7}{25} = cos^{-1} \frac{253}{325}\)</li>
+            <li class="section-b">Solve for x: \(sin^{-1}(1-x) - 2sin^{-1}x = \frac{\pi}{2} \)</li>
+            <li class="section-b">Consider \(f: R_+ \rightarrow [-5, \infty)\) given by \(f(x) = 9x^2 + 6x - 5\). Show that f is invertible. Find the inverse of f.</li>
+            <li class="section-b">Show that $$\begin{vmatrix}1+a & 1 & 1 \\ 1 & 1+b & 1 \\ 1 & 1 & 1+c\end{vmatrix} = abc\left(1 + \frac{1}{a} + \frac{1}{b} + \frac{1}{c}\right)$$</li>
+            <li class="section-b">If x = a sin pt and y = b cos pt, find the value of \(\frac{d^2y}{dx^2}\) at t = 0.</li>
+            <li class="section-b">If \(y = sin\left(2tan^{-1}\sqrt{\frac{1-x}{1+x}}\right)\). Prove that \(\frac{dy}{dx} = -\frac{x}{\sqrt{1-x^2}}\)</li>
+            <li class="section-b">Find the intervals in which the function f(x) = sinx - cosx; 0  &#8804; x  &#8804; 2&#928; is (i) increasing, (ii) decreasing</li>
+            <li class="section-b">Evaluate \(\int \frac{x^2 + 4}{x^4 + x^2 + 16} dx \).</li>
+            <li class="section-b">Evaluate \(\int_0 ^{\frac{\pi}{2}} \frac{x + sinx}{1 + cosx} dx \).</li>
+            <li class="section-b">Form the differential equation representing the family of ellipse having foci on x-axis and centre at the origin.</li>
+            <li class="section-b">Form the differential equation of the family of circles having radii 3.</li>
+            <li class="section-b">Find the equation of the plane determined by the points A(3,-1,2), B(5,2,4) and C(-1,-1,6). Also find the distance of the point P( 6,5,9) from the plane</li>
+            <li class="section-b">Solve the differential equation \(\frac{dy}{dx} + y sec^2x = tan x.sec^2 x\); y(0) = 1.</li>
+            <li class="section-b">If a and b are unit vectors and &#952; is the angle between them, then prove that \(cos \frac{\theta}{2} = \frac{1}{2} |a + b|\)</li>
+            <li class="section-b">Find the probability distribution of the number of heads in a single row of three coins.</li>
+            <li class="section-b">Three balls are drawn one by one without replacement from a bag containing 5 white and 4 green balls. Find the probability distribution of number of green balls drawn.</li>
+            <li class="section-b">Let S be the set of all rational numbers except 1 and * be defined on S by a * b = a + b - ab, &#8704; a, b &#949;S. Prove that (i) * is binary on S., (ii) * is commutative as well as associative. Also find the identity element of *</li>
+            <li class="section-b">If a + b + c &#8800; 0 and \(\begin{vmatrix}a & b & c \\ b & c & a \\ c & a & b \end{vmatrix} = 0\), then using properties of determinants, prove that a = b = c.</li>
+            <li class="section-b">Evaluate \((2 sin2x - cosx)\sqrt{6-cos^2x-4sinx}dx\)</li>
+            <li class="section-b">Find a unit vector perpendicular to the plane of triangle ABC where the vertices are A (3, –1, 2) B (1,–1, –3) and C (4, –3, 1)</li>
+            <li class="section-b">Find the value of &#955;, if the points with position vectors \(3\hat{i} - 2\hat{j} - \hat{k}\), \(2\hat{i} + 3\hat{j} - 4\hat{k}\), \(-\hat{i} + \hat{j} + 2\hat{k}\) and \(4\hat{i} + 5\hat{j} + \lambda\hat{k}\) are coplanar.</li>
+            <li class="section-b">Show that the lines \(\overrightarrow{r} = (\hat{i} + \hat{j} - \hat{k}) + \lambda(3\hat{i} - \hat{j})\) and \(\overrightarrow{r} = (4\hat{i} - \hat{k}) + \mu(2\hat{i} + 3\hat{k})\) intersect. Also find their point of intersection.</li>
+            <li class="section-b">Prove that \(cot^{-1} + cot^{-1} + cot^{-1}18 = cot^{-1}3\)</li>
+            <li class="section-b">Find the greatest and least values of \(\left(sin^{-1}x\right)^2 + \left(cos^{-1}x\right)^2\).</li>
+            <li class="section-b">Show that the differential equation xdy - ydx = \(\sqrt{x^2 + y^2}dx\) is homogenous, and solve it.</li>
+            <li class="section-b">Find the particular solution of the differential equation cos x dy = sin x (cos x - 2y) dx, given that y = 0 when x = \(\frac{\pi}{3}\)</li>
+            <li class="section-b">Out of a group of 8 highly qualified doctors in a hospital, 6 are very kind and cooperative with their patients and so are very popular, while the other two remain reserved. For a health camp, three doctors are selected at random. Find the probability distribution of the number of very popular doctors. What values are expected from the doctors?</li>
+            <li class="section-b">Show that the function g(x) = |x-2|, x &#8712;R, is continuous but not differentiable at x = 2.</li>
+            <li class="section-b">Differentiate \(log(x^{sin x} + cot^2 x)\) with respect to x.</li>
+            <li class="section-b">Show that the curves xy = a<sup>2</sup> and x<sup>2</sup> + y<sup>2</sup> = 2a<sup>2</sup></li>
+            <li class="section-b">Separate the interval \(\left[0, \frac{\pi}{2}\right]\) into sub-intervals in which f(x) = sin<sup>4></sup>x + cos<sup>4></sup>x is increasing or decreasing.</li>
+            <li class="section-b">Let A=QxQ.Let ‘*’ be a binary operation on A defined by : (a,b)*(c,d) = (ac,ad+b).Find i) Identity element of (A,*) &amp; ii) the invertible element of (A,*).</li>
+            <li class="section-b">Solve: \(tan^{-1}(x + 1) + tan^{-1}(x - 1) = tan^{-1} \frac{8}{31}\), x > 0</li>
+            <li class="section-b">Find the value of \(2tan^{-1}(\frac{1}{5}) + sec^{-1}(\frac{5\sqrt{2}}{7}) + 2tan^{-1}(\frac{1}{8})\)</li>
+            <li class="section-b">Using properties, show that \(\begin{vmatrix}1 & a & a^2 -bc \\ 1 & b & b^2 - ca \\ 1 & c & c^2- ab \end{vmatrix} = 0\)</li>
+            <li class="section-b">Show that f(x) = \begin{cases}\frac{sin3x}{tan2x}, if x > 0 \\ \frac{3}{2}, if x = 0 \\ 3\frac{e^x - 1}{e^{2x} - 1}, if x < 0\end{cases} is continuous at x = 0</li>
+            <li class="section-b">If y = \(y = [x + \sqrt{x^2 + a^2}]^n\), then prove that \frac{dy}{dx} = \frac{ny}{\sqrt{x^2 + a^2}}</li>
+            <li class="section-b">If y = a cos mx + b sin mx, show that \(\frac{d^2y}{dx^2} + m^2y = 0\)</li>
+            <li class="section-b">Show that \(y = log (1 + x) - \frac{2x}{2 + x}\) is an increasing function of x for all values of x > -1.</li>
+            <li class="section-b">Evaluate \(\int_0 ^{\frac{\pi}{2}} \frac{dx}{2 cosx + 4 sinx} \)</li>
+            <li class="section-b">Evaluate \(\int\frac{3x -2}{(x+3)(x^2 + 1)}dx \)</li>
+            <li class="section-b">Solve the differential equation: \(\frac{dy}{dx} = 3ycot x + sin2x\), given that y = 2, when x = \(\frac{\pi}{2}\)</li>
+            <li class="section-b">Solve the differential equation: (1 + y<sup>2</sup>)(1 + logx)dx + xdy = 0, given that y = 1, when x = 1</li>
+            <li class="section-b">Solve the differential equation: \(\left(1 + e^{\frac{x}{y}}\right)dx + e^{\frac{x}{y}}\left(1 - \frac{x}{y}\right)dy = 0\)</li>
+            <li class="section-b">The scalar product of the vector \(\hat{i} + \hat{j} + \hat{k}\) with the unit vector along the sum of vectors \(2\hat{i} + 4\hat{j} - 5\hat{k}\) and \(\lambda\hat{i} + 2\hat{j} + 3\hat{k}\) is equal to one. Find the value of &#955;</li>
+            <li class="section-b">Find the vector equation of the line passing through (1,2,3) and parallel to the planes \(\overrightarrow{r}.(\hat{i} - \hat{j} + 2\hat{k}) = 5\) and \(\overrightarrow{r}.(3\hat{i} + \hat{j} + \hat{k}) = 6\)</li>
+            <li class="section-b">Three students A, B and C are given a question to solve.Their respective probability to solve the question are \(\frac{1}{2}, \frac{1}{3}\) &amp; \(\frac{1}{4}\). What is the probability that only one of them solves it correctly?</li>
+        </ol>
+    </div>
+</div>
+
+<div class="question-clones"></div>
+<div class="export-worksheet-word-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Export Sample Paper</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <div class="export-worksheet-word-status">Exporting to word...</div>
+        <div class="export-worksheet-word-progress oc-progressbar">
+            <div class="export-worksheet-word-progress-indicator oc-progressbar-indicator"></div>
+        </div>
+    </div>
+</div>
+<div class="popup-background"></div>
+
+
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/react.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/worksheet.js"></script>

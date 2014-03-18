@@ -296,3 +296,10 @@ def list_articles(request):
 
 def jstests(request):
     return render(request, 'testjs.html', {})
+
+
+def worksheet(request):
+    context = {
+        'title': 'CBSE Math Clas 12 Sample paper maker'
+    }
+    return render(request, 'questions.html', context)    
