@@ -1,56 +1,58 @@
 {% include 'partials/header.html' %}
-{% include 'partials/profile-header.html' with page="home" %}
-        <div class="profile-new-resource-panel">
-            <div class="profile-browse-lessons">
-                <h3><a href="">Browse Lesson library</a></h3><span class="label coming-soon-label">COMING SOON</span>
-                <!--<div class="profile-new-resource-caption">Categorized and aligned lessons and projects</div>-->
-            </div>
-            <div class="profile-add-unit">
-                <h3><a class="add-unit">New Unit</a></h3>
-                <div class="profile-new-resource-caption">Based off existing organization syllabus / curriculum</div>
-            </div>
-            <div class="profile-add-lesson">            
-                <h3><a href="{% url resource:new_lesson %}" class="add-lesson">New Lesson</a></h3>
-                <div class="profile-new-resource-caption">Create a standards aligned lesson or project</div>
-            </div>
-        </div>
-
-        <div id="fill-panel" class="panel-left">
-            {% if user == user_profile %}
-            <h3>Who to subscribe to</h3>
-            <div class="subscribe-suggestions user-list">
-            {% for star in stars %}
-                <div class="user">
-                    <form class="subscribe-suggestion-form">
-                        <input type="hidden" name="username" value="{{ star.username }}" />
-                        <div class="user-photo" style="background-image: url('{{ MEDIA_URL }}{{ star.get_profile.profile_pic.name }}');"></div>
-                        <div class="user-description"><a href="{% url user:user_profile username=star.username %}">{{ star.get_full_name }}</a>
-                        <p><button class="btn dull-button subscribe-button">Subscribe</button></p>
-                        </div>
-                    </form>
+<div class="body-content">
+    {% include 'partials/profile-header.html' with page="home" %}
+            <div class="profile-new-resource-panel">
+                <div class="profile-browse-lessons">
+                    <h3><a href="">Browse Lesson library</a></h3><span class="label coming-soon-label">COMING SOON</span>
+                    <!--<div class="profile-new-resource-caption">Categorized and aligned lessons and projects</div>-->
                 </div>
-            {% endfor %}
+                <div class="profile-add-unit">
+                    <h3><a class="add-unit">New Unit</a></h3>
+                    <div class="profile-new-resource-caption">Based off existing organization syllabus / curriculum</div>
+                </div>
+                <div class="profile-add-lesson">            
+                    <h3><a href="{% url resource:new_lesson %}" class="add-lesson">New Lesson</a></h3>
+                    <div class="profile-new-resource-caption">Create a standards aligned lesson or project</div>
+                </div>
             </div>
-            {# include 'partials/profile-updates.html' #}
-            {% endif %}            
-        </div>
-        <div id="key-panel" class="panel-right">
-            {# include 'partials/profile-content.html' #}
-            {% if user == user_profile %}
-            <h3>My feed</h3>
-            {% else %}
-            <h3>Recent activity</h3>
-            {% endif %}
-            <div class="user-list">
-            {% for item in feed %}
-            {% include 'partials/feed-item.html' with host='profile' %}
-            {% endfor %}
+
+            <div id="fill-panel" class="panel-left">
+                {% if user == user_profile %}
+                <h3>Who to subscribe to</h3>
+                <div class="subscribe-suggestions user-list">
+                {% for star in stars %}
+                    <div class="user">
+                        <form class="subscribe-suggestion-form">
+                            <input type="hidden" name="username" value="{{ star.username }}" />
+                            <div class="user-photo" style="background-image: url('{{ MEDIA_URL }}{{ star.get_profile.profile_pic.name }}');"></div>
+                            <div class="user-description"><a href="{% url user:user_profile username=star.username %}">{{ star.get_full_name }}</a>
+                            <p><button class="btn dull-button subscribe-button">Subscribe</button></p>
+                            </div>
+                        </form>
+                    </div>
+                {% endfor %}
+                </div>
+                {# include 'partials/profile-updates.html' #}
+                {% endif %}            
             </div>
-        </div>
-        </div>
+            <div id="key-panel" class="panel-right">
+                {# include 'partials/profile-content.html' #}
+                {% if user == user_profile %}
+                <h3>My feed</h3>
+                {% else %}
+                <h3>Recent activity</h3>
+                {% endif %}
+                <div class="user-list">
+                {% for item in feed %}
+                {% include 'partials/feed-item.html' with host='profile' %}
+                {% endfor %}
+                </div>
+            </div>
+            </div>
 
-{% include 'partials/add-unit.html' %}
-<div class="popup-background"></div>
+    {% include 'partials/add-unit.html' %}
+    <div class="popup-background"></div>
 
-{% include 'partials/profile-footer.html' %}
+    {% include 'partials/profile-footer.html' %}
+</div>
 {% include 'partials/footer.html' %}
