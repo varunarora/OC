@@ -175,6 +175,8 @@ def render_resource(resource_id, request=None):
                 resource.revision = revision
             except ObjectDoesNotExist:
                 pass
+            except ValueError:
+                raise Http404
 
     link_content_type = ContentType.objects.get_for_model(Link)
     attachment_content_type = ContentType.objects.get_for_model(Attachment)
