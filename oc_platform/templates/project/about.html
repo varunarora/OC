@@ -8,7 +8,7 @@
         {% if user not in project.confirmed_members %}
             {% if user not in project.members.all %}
             <div class="request-to-join">
-                Want to become a member of this project?
+                Want to become a member of this group?
                 <div class="request-button-wrapper">
                     <form>
                         <input type="hidden" name="project_id" value="{{ project.id }}">
@@ -18,14 +18,14 @@
             </div>
             {% else %}
             <div class="request-to-join">
-                Your request to join this project has been sent.
+                Your request to join this group has been sent.
             </div>
             {% endif %}     
         {% endif %}
 
     {% else %}
         <div class="request-to-join">
-            You must be logged in to request an invite to this project.
+            You must be logged in to request an invite to this group.
         </div>
     {% endif %}
 
