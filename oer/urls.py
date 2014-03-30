@@ -8,6 +8,8 @@ urlpatterns = patterns(
     url(r'^add-video/$', views.add_video, name='add_video'),
     url(r'^add-link/$', views.add_url, name='add_url'),
     url(r'^new-document/$', views.new_document, name='new_document'),
+    url(r'^new-lesson/$', views.new_lesson, name='new_lesson'),
+    url(r'^new-unit/$', views.new_unit, name='new_unit'),
 
     # Collections
     url(r'^new-collection/project/(?P<project_slug>[\w\-]+)/', views.new_project_collection, name='new_project_collection'),
@@ -53,6 +55,10 @@ urlpatterns = patterns(
 
     url(r'^api/search/(?P<query>[\w\ ]+)/$', views.autocomplete_search, name='autocomplete'),
     url(r'^api/editor-search/(?P<query>[\w\ ]+)/$', views.editor_autocomplete_search, name='editor-autocomplete'),
+
+    url(r'^template/five-step-lesson-plan/$', views.template_five_step_lesson_plan, name='template_five_step_lesson_plan'),
+
+    url(r'^unit/(?P<unit_id>\d+)/(?P<unit_slug>[\w\-]+)/edit/$', views.edit_unit, name='edit_unit'),
 
     url(r'^$', views.resource_center, name='resource_center'),
 )

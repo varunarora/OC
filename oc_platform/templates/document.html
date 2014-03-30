@@ -1,5 +1,9 @@
 {% include 'partials/header.html' with body_class='editor' %}
 
+<script type="text/javascript">
+    OC.document_type = '{{ document_type }}';
+</script>
+
 <form id="new-resource-document-form" class="document-edit-form resource-create-edit-form" method="POST">
     {% csrf_token %}
     <div class="center-stage editor-header">
@@ -46,6 +50,12 @@
         </div>
     </div>
     <div class="center-spread editor-frame">
+        {% if document_type == 'lesson' %}
+        <div class="lesson-assist">
+            <div class="lesson-assist-pullout">Tips and tricks</div>
+            <div class="lesson-assist-body">Yeh duniya, yeh duniya pittal di</div>
+        </div>
+        {% else %}
         <div class="editor-search">
             <div class="editor-search-pullout">
             </div>
@@ -83,75 +93,15 @@
                 </div>
             </div>
         </div>
+        {% endif %}
         <div class="center-stage editor-body" contentEditable="true">
         </div>
         <div class="editor-frame-result-clones">
         </div>
     </div>
-    <!--
-    <div id="submission-info-wrapper">
-        <div id="submission-info">
-            <div>
-                <div id="submission-status">{{ message }}</div>
-                <div id="submission-buttons">
-                    <button class="btn success-button" type="submit">Save</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-
-    <article id="article-edit" class="resource-article-edit">
-        <span class="document-meta-collapser"></span>
-        <div class="center-stage">
-            {% include 'partials/resource-meta.html' %}
-            <div id="key-panel" class="panel-left">
-                <input type="hidden" name="user" value="{{ user.id }}" />
-                <h2 id="article-title"><input type="text" value="{{ resource.title }}" name="title" class="browser-edit" placeholder="(Document title)" /></h2>
-                <section class="drop-edit document-description-drop-edit">
-                    <div class="edit-dropdown edit-dropdown-opened">Description</div>
-                    <div class="edit-dropped show-dropped">
-                        <textarea name="description" class="document-description"></textarea>
-                    </div>
-                </section>
-            </div>
-            <div id="fill-panel" class="panel-right">
-                <table class="document-visibility-license">
-                    <tr><td><span class="bold">Who can see this?</span></td><td>
-                        {% include 'partials/resource-form-visibility.html' %}
-                    </td></tr>
-                    <tr><td><span class="bold">License</span></td><td>
-                        <select name="license">
-                            {% for license in licenses.all %}
-                            <option value="{{ license.id }}">{{ license.title }}</option>
-                            {% endfor %}
-                        </select>
-                    </td></tr>
-                    <tr><td></td><td><span class="resource-form-error">{{ form.errors.license }}</span></td></tr>
-                </table>
-                <section class="drop-edit tags-drop-edit">
-                    <div class="edit-dropdown edit-dropdown-opened">Tags</div>
-                    <div class="edit-dropped show-dropped">
-                        <ul class="tagit document-tags">
-                            {% if resource.tags %}
-                            {% for tag in resource.tags.all %}
-                            <li>{{ tag }}</li>
-                            {% endfor %}
-                            {% endif %}
-                        </ul>
-                    </div>
-                </section>
-            </div>
-        </div>
-        <div class="center-spread document-body">
-            {% include 'partials/oer-document.html' %}
-        </div>
-        <div class="center-stage document-actions">
-            <button class="page-action-button add-widget">Add...</button>
-        </div>
-    </article>
-    -->
 </form>
+
+<div class="hidden-templates"></div>
 
 <div id="log-message" title="Log message" class="dialog">
     <p>Briefly describe your edits:</p>
@@ -241,6 +191,35 @@
         </div>
     </div>
 </div>
+{% if document_type == 'lesson' %}
+<div class="lesson-path-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Create a new lesson...</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <div class="lesson-path-options">
+            <div class="lesson-path-blank"><h3>Start off with a blank template</h3></div>
+            <div class="lesson-path-wizard"><h3>Use the lesson wizard for a quick plan</h3><span class="label coming-soon-label">COMING SOON</div>
+        </div>
+    </div>
+</div>
+<div class="lesson-template-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Choose a lesson plan template...</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <div class="lesson-template-browser">
+            <div class="lesson-template-option lesson-template-option-five-step selected">5 step Lesson Plan</div>
+            <div class="lesson-template-option lesson-template-option-three-acts">Three Acts Lesson Plan</div>
+        </div>
+        <div class="lesson-template-submit-wrapper oc-popup-submit-wrapper">
+            <button class="action-button lesson-template-submit-button oc-popup-submit-button">Done</button>
+        </div>
+    </div>
+</div>
+{% endif %}
 <div class="popup-background"></div>
 
 

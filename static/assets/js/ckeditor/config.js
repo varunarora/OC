@@ -16,10 +16,9 @@ CKEDITOR.config.contentsCss = '/static/assets/css/ckeditor/contents.css';
 CKEDITOR.config.skin = 'moono,/static/assets/css/ckeditor/skins/moono_docs/';
 
 CKEDITOR.config.toolbar_Basic = [
-    [ '-', 'Bold', 'Italic' ],
+    [ 'Format','FontSize', '-', 'Bold', 'Italic' ],
     [ 'NumberedList','BulletedList'],
-    [ 'InternalLink', 'InternalUnlink' ],
-    [ 'Source' ]
+    [ 'InternalLink', 'InternalUnlink' ]
 ];
 CKEDITOR.config.toolbar_Full = [
 ['Undo','Redo','Styles','Format','FontSize'],
@@ -28,7 +27,9 @@ CKEDITOR.config.toolbar_Full = [
 ['InternalLink', 'InternalUnlink'],
 ];
 
-CKEDITOR.config.toolbar = 'Full';
+CKEDITOR.config.toolbar = 'Basic';
+
+CKEDITOR.config.allowedContent = true;
 
 CKEDITOR.dtd.$editable.td = 1;
 CKEDITOR.dtd.$editable.th = 1;
