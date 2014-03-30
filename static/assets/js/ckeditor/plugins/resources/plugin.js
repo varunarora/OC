@@ -7,7 +7,6 @@ CKEDITOR.plugins.add('resources', {
                 'div(!foreign-document-element-description); ' +
                 'div(!foreign-document-element-description-title); ' +
                 'div(!foreign-document-element-description-preview); ',
-            //template: OC.editor.insertedSearchResultTemplate,
             upcast: function(element) {
                 return element.name == 'div' && element.hasClass('foreign-document-element');
             }
