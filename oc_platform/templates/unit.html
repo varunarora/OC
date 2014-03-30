@@ -1,0 +1,48 @@
+{% include 'partials/header.html' %}
+<div class="body-content">
+    <div class="center-stage">
+        <header>
+            <section class="unit-title-wrapper">
+                <div class="unit-title"><h2>{{ collection.title }}</h2>{% if user == user_profile %}<a href="{% url resource:edit_unit unit_id=unit.id unit_slug=collection.slug %}" class="secondary-button action-button supporting-action-button"><span class="edit-icon"></span>Edit</a>{% endif %}</span></div>
+            <section class="breadcrumb">
+            {% for collection in breadcrumb %}
+                <a href="{{ collection.url }}">{{ collection.title }}</a> 
+                {% if not forloop.last %}
+                <span class="vertical-caret breadcrumbs-caret"></span> 
+                {% endif %}
+            {% endfor %}
+            </section>
+        </header>
+    </div>
+
+    <div class="center-stage">
+        <div id="key-panel" class="panel-left">
+            <div class="unit-big-question">
+                <h3>Big question</h3>
+                <h4>{{ unit.question }}</h4>
+            </div>
+            
+            <h3>Description</h3>
+            <p>{% if unit.description %}{{ unit.description|safe }}{% else %}No description.{% endif%}</p>
+
+        </div>
+        <div id="fill-panel" class="panel-right">
+            <div class="unit-create-resource-collection">
+            {% if user == user_profile %}
+                {% include 'partials/create-resource-collection.html' with host='profile' %}
+            {% endif %}
+            </div>
+
+            {% include 'partials/resources-collections-listing.html' with container='unit' host='profile' %}
+        </div>
+    </div>
+</div>
+
+{% include 'partials/add-unit.html' %}
+{% include 'partials/post-new-comment-reply.html' %}
+
+<div class="popup-background"></div>
+
+{% include 'partials/footer.html' %}
+
+<script type="text/javascript" src="{{ STATIC_URL }}js/resources-collections.js"></script>

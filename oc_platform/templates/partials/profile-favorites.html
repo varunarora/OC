@@ -13,7 +13,7 @@
         <h3>My favorites</h3>
         {% endif %}
         {% for favorite in favorites %}
-            {% include 'partials/resource-item.html' with item=favorite.resource item_type='resource' %}
+            {% include 'partials/resource-item.html' with item=favorite.resource item_category='resource' %}
         {% endfor %}
     </div>
     {% endif %}

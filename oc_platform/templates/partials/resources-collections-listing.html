@@ -1,4 +1,3 @@
-{% if resources or collections %}
 {% if host == 'project' %}
 {% if user in project.confirmed_members %}
 {% include 'partials/collection-actions.html' %}
@@ -8,52 +7,22 @@
 {% endif %}
 <div class="{{ host }}-resources-collections resources-collections-added collection-visibility-{{ collection.visibility }}{% if host == 'project' %} project-listing project-visibility-{{ project.visibility }}{% endif %}" id="collection-{{ collection.id }}">
     <div class="{{ host }}-collections-added-list">
-        {% with item_type='collection' %}
+        {% with item_category='collection' %}
         {% for item in collections %}
-        {% if item.visibility == 'public' %}
-            {% include 'partials/resource-item.html' with item_type='collection' %}
-        {% elif host == 'profile' %}
-            {% if user == user_profile %}
-                {% include 'partials/resource-item.html' with item_type='collection' %}
-            {% endif %}
-        {% elif host == 'project' %}
-            {% if item.visibility == 'project' %}
-                {% if project.visibility == 'public' %}
-                    {% include 'partials/resource-item.html' %}
-                {% elif user in project.confirmed_members %}
-                    {% include 'partials/resource-item.html' with item_type='collection' %}
-                {% endif %}
-            {% elif item.visibility == 'private' %}
-                {% if user == item.creator or user in item.collaborators.all %}
-                    {% include 'partials/resource-item.html' with item_type='collection' %}
-                {% endif %}
-            {% endif %}
-        {% endif %}
+        {% include 'partials/resource-collection-item-filter.html' %}
+        {% endfor %}
+        {% endwith %}
+
+        {% with item_category='collection' item_type='unit' %}
+        {% for item in units %}
+        {% include 'partials/resource-collection-item-filter.html' %}
         {% endfor %}
         {% endwith %}
     </div>
     <div class="{{ host }}-resources-added-list">
-        {% with item_type='resource' %}
+        {% with item_category='resource' %}
         {% for item in resources %}
-        {% if item.visibility == 'public' %}
-            {% include 'partials/resource-item.html' %}
-        {% elif host == 'profile' %}
-            {% if user == user_profile %}
-                {% include 'partials/resource-item.html' %}
-            {% endif %}
-        {% elif host == 'project' %}
-            {% if item.visibility == 'project' %}
-                {% if project.visibility == 'public' %}
-                    {% include 'partials/resource-item.html' %}
-                {% elif user in project.confirmed_members %}
-                    {% include 'partials/resource-item.html' %}
-                {% endif %}
-            {% elif item.visibility == 'private' %}
-                {% if user == item.user or user in item.collaborators.all %}
-                    {% include 'partials/resource-item.html' %}
-                {% endif %}
-            {% endif %}
-        {% endif %}
+        {% include 'partials/resource-collection-item-filter.html' %}
         {% endfor %}
         {% endwith %}
     </div>
@@ -131,8 +100,3 @@
     </div>
 </div>
 <div class="popup-background"></div>
-{% else %}
-<div class="{{ host }}-resources-added" id="collection-{{ collection.id }}">
-    Sorry, there is nothing in this folder.
-</div>
-{% endif %}

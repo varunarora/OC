@@ -87,6 +87,7 @@ class Collection(models.Model):
     host_id = models.PositiveIntegerField()
     host = generic.GenericForeignKey('host_type', 'host_id')
     resources = models.ManyToManyField(Resource, blank=True, null=True)
+    units = models.ManyToManyField('oer.Unit', blank=True, null=True, related_name='unit_set')
     collaborators = models.ManyToManyField(User, blank=True, null=True,
         related_name='collaborators')
     visibility = models.CharField(max_length=256)
@@ -141,3 +142,9 @@ class Link(models.Model):
 
 class Attachment(models.Model):
     file = models.FileField(upload_to='resources', null=True, blank=True)
+
+
+class Unit(models.Model):
+    tags = models.ManyToManyField('meta.Tag', null=True, blank=True)
+    question = models.CharField(max_length=256, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)

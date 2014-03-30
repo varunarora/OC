@@ -1,5 +1,5 @@
 from django import forms
-from oer.models import Resource, Document, ResourceRevision, Link
+from oer.models import Resource, Document, ResourceRevision, Link, Unit, Collection
 from oc_platform import FormUtilities
 
 class UploadResource(forms.Form):
@@ -278,6 +278,27 @@ class NewDocumentForm(forms.ModelForm):
     class Meta:
         model = Resource
         exclude = ('language',)
+
+
+class UnitForm(forms.ModelForm):
+    def __init__(self, request, user):
+        super(UnitForm, self).__init__(request)
+
+    class Meta:
+        model = Unit
+
+
+class EditUnitForm(forms.ModelForm):
+    def __init__(self, request, user, collection, instance):
+        if request.get('title') != collection.title:
+            collection.title = request.get('title')
+            collection.save()
+
+        super(EditUnitForm, self).__init__(request, instance=instance)
+
+    class Meta:
+        model = Unit
+
 
 
 def sanitize_url(user_submitted_url):

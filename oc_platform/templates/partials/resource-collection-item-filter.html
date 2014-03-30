@@ -1,0 +1,19 @@
+{% if item.visibility == 'public' %}
+    {% include 'partials/resource-item.html' %}
+{% elif host == 'profile' %}
+    {% if user == user_profile %}
+        {% include 'partials/resource-item.html' %}
+    {% endif %}
+{% elif host == 'project' %}
+    {% if item.visibility == 'project' %}
+        {% if project.visibility == 'public' %}
+            {% include 'partials/resource-item.html' %}
+        {% elif user in project.confirmed_members %}
+            {% include 'partials/resource-item.html' %}
+        {% endif %}
+    {% elif item.visibility == 'private' %}
+        {% if user == item.creator or user in item.collaborators.all %}
+            {% include 'partials/resource-item.html' %}
+        {% endif %}
+    {% endif %}
+{% endif %}

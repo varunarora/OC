@@ -1,0 +1,22 @@
+<div class="new-unit-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>New Unit</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <form action="/resources/new-unit/" method="POST" id="new-unit-form">
+            {% csrf_token %}
+            <input type="hidden" name="collection" value="{{ collection.id }}" />
+            <label>Name of unit</label>
+            <input type="text" name="title"/>
+            <p></p>
+
+            <label>Big question</label>
+            <input type="text" name="question" />
+            <p></p>
+
+            <div class="lesson-template-submit-wrapper oc-popup-submit-wrapper">
+                <button class="action-button lesson-template-submit-button oc-popup-submit-button">Done</button>
+            </div>
+    </div>
+</div>

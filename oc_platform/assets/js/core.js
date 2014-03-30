@@ -1993,6 +1993,16 @@ var OC = {
         });
     },
 
+    initProfileCreateResource: function(){
+        $('.add-unit').click(function(event){
+            OC.customPopup('.new-unit-dialog');
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+    },
+
     initEditResource: function(){
         $('form.resource-create-edit-form #submission-buttons button[type=submit]').click(
             function(event){
@@ -3272,6 +3282,8 @@ jQuery(document).ready(function ($) {
     OC.initPrintResource();
 
     OC.initExportResource();
+
+    OC.initProfileCreateResource();
 
     //OC.initEditResource();
 

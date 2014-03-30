@@ -1,0 +1,26 @@
+{% include 'partials/header.html' %}
+<div class="body-content">
+    <div class="center-stage">
+        <div id="key-panel" class="panel-left">
+            <h2>Edit '{{ collection.title }}'</h2>
+            <p></p>
+            <form method="POST" action="/resources/unit/{{ unit.id }}/{{ collection.slug }}/edit/" id="edit-unit-form">
+                {% csrf_token %}
+                <table id="edit-unit-form-table">
+                    <tr><td><h4>Title</h4></td><td class="inputs"><input type="text" name="title" value="{{ collection.title }}"/></td></tr>
+                    <tr><td><h4>Big question</h4></td><td class="inputs"><input type="text" name="question" value="{{ unit.question }}" /></td></tr>
+                    <tr class="spaced-row"><td colspan="2"><h4>Description</h4></td></tr>
+                    <tr><td colspan="2"><textarea name="description" maxlength="200">{{ unit.description }}</textarea></td></tr>
+                    <tr><td colspan="2" class="right"><button class="action-button">Save</td></tr>
+                </table>
+            </form>
+        </div>
+        <div id="fill-panel" class="panel-right">
+        </div>
+    </div>
+</div>
+
+{% include 'partials/image-upload.html' %}
+{% include 'partials/editor-imports.html' %}
+
+{% include 'partials/footer.html' %}

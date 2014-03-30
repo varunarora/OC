@@ -64,6 +64,8 @@ def view_resource(request, resource_id, resource_slug):
         # Increment page views (always remains -1 based on current view).
         Resource.objects.filter(id=resource_id).update(views=resource.views+1)
 
+        import oer.CollectionUtilities as cu
+
         from django.core.exceptions import MultipleObjectsReturned
         # Build breadcrumb for the resource
         try:
@@ -85,8 +87,6 @@ def view_resource(request, resource_id, resource_slug):
 
                     # If the referrer is a project, find the collection in the
                     # project collections
-                    import oer.CollectionUtilities as cu
-
                     if match.namespace == 'projects' and match.url_name == 'project_browse':
                         from projects.models import Project
                         project = Project.objects.get(slug=match.kwargs['project_slug'])
@@ -135,7 +135,7 @@ def view_resource(request, resource_id, resource_slug):
                 collection = Collection.objects.filter(
                     resources__id=resource.id)[0]
 
-        breadcrumb = build_collection_breadcrumb(collection)
+        breadcrumb = cu.build_collection_breadcrumb(collection)
 
         context = {
             'resource': resource,
@@ -242,73 +242,6 @@ def build_document_view(document_id):
             pass
 
     return document_elements
-
-
-def build_collection_breadcrumb(collection):
-    # Get the root of this collection ('project' or 'user profile')
-    import oer.CollectionUtilities as cu 
-    (collection_root_type, collection_root) = cu.get_collection_root(collection)
-
-    # Create breadcrumb list
-    breadcrumb = []
-
-    while True:
-        if collection.host_type.name == 'collection':
-            breadcrumb.append(host_urlize(
-                collection, collection_root, collection_root_type))
-            collection = collection.host
-        else:
-            breadcrumb.append(host_urlize(
-                collection.host, collection_root, collection_root_type))
-            break
-
-    if collection_root_type.name == 'user profile':
-        breadcrumb[-1].title = breadcrumb[-1].user.get_full_name() + '\'s profile'
-
-    # Reverse breadcrumb and return
-    breadcrumb.reverse()
-
-    return breadcrumb
-
-
-def host_urlize(host, collection_root, collection_root_type):
-    if collection_root_type.name == 'user profile':
-        # If this collection is a descendant of the user
-        user = collection_root.user
-
-        if host == collection_root:
-            host.url = reverse(
-                'user:user_profile', kwargs={
-                    'username': user.username
-                }
-            )
-        else:
-            host.url = reverse(
-                'user:list_collection', kwargs={
-                    'username': user.username,
-                    'collection_slug': host.slug
-                }
-            )
-
-    elif collection_root_type.name == 'project':
-        # If this collection is a descendant of a project
-        project = collection_root
-
-        if host == collection_root:
-            host.url = reverse(
-                'projects:project_home', kwargs={
-                    'project_slug': project.slug
-                }
-            )
-        else:
-            host.url = reverse(
-                'projects:list_collection', kwargs={
-                    'project_slug': project.slug,
-                    'collection_slug': host.slug
-                }
-            )            
-
-    return host
 
 
 def _filesizeFormat(size):
@@ -527,6 +460,92 @@ def add_url(request):
 
 
 def new_document(request):
+    return render_editor(request, 'document.html')
+
+
+def new_lesson(request):
+    return render_editor(request, 'lesson.html')
+
+
+def new_unit(request):
+    if request.method == 'POST':
+        project_id = request.POST.get('project', None)
+        collection_id = request.POST.get('collection', None)
+
+        from oer import forms
+        new_unit = forms.UnitForm(request.POST, request.user)
+
+        if new_unit.is_valid():
+            unit = new_unit.save()
+
+            parent_collection = Collection.objects.get(
+                pk=int(request.POST.get('collection')))
+
+            import oer.CollectionUtilities as cu
+            (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
+                parent_collection)
+            slug = cu._get_fresh_collection_slug(
+                request.POST.get('title'), flattened_tree)
+
+            # Create and save the unit colleciton.
+            new_collection = Collection(
+                title=request.POST.get('title') if request.POST.get(
+                    'title') else 'Untitled Unit',
+                host=unit,
+                visibility='private',
+                slug=slug,
+                creator=request.user
+            )
+            new_collection.save()
+
+            # Add unit to the necessary collection.
+            collection = get_collection(request.user.id, project_id, collection_id)
+            add_unit_to_collection(unit, collection)
+
+            return redirect(
+                'user:list_collection', username=new_collection.creator.username, collection_slug=new_collection.slug
+            )
+
+    else:
+        raise Http404
+
+
+def edit_unit(request, unit_id, unit_slug):
+    from oer.models import Unit
+    from django.contrib.contenttypes.models import ContentType
+    unit_type = ContentType.objects.get_for_model(Unit)
+
+    try:
+        unit = Unit.objects.get(pk=unit_id)
+    except:
+        raise Http404
+
+    collection = Collection.objects.get(
+        host_id=unit.id, host_type=unit_type)
+
+    if request.method == 'POST':
+        from oer import forms
+        edited_unit = forms.EditUnitForm(request.POST, request.user, collection, unit)
+
+        if edited_unit.is_valid():
+            edited_unit.save()
+
+            from django.contrib import messages
+            messages.success(request, 'Unit \'%s\' saved succesfully.' % collection.title)
+
+            return redirect(
+                'user:list_collection', username=collection.creator.username, collection_slug=collection.slug
+            )
+
+    context = {
+        'collection': collection,
+        'unit': unit,
+        'title': 'Edit \'' + collection.title + '\' &lsaquo; ' + collection.creator.get_full_name()
+    }
+    return render(request, 'edit-unit.html', context)
+
+
+def render_editor(request, template):
     if not request.user.is_authenticated():
         return redirect('/?login=true&source=%s' % request.path)
 
@@ -573,7 +592,7 @@ def new_document(request):
         'title': _(settings.STRINGS['resources']['NEW_DOCUMENT_TITLE']) + resource_context['title_extension']
     }.items() + resource_context.items() + form_context.items())
 
-    return render(request, 'document.html', context)
+    return render(request, template, context)
 
 
 def create_document_elements(post_request, document_resource):
@@ -844,6 +863,11 @@ def create_resource(uploaded_file, user, collection, new_filename=None):
 
 def add_resource_to_collection(resource, collection):
     collection.resources.add(resource)
+    collection.save()
+
+
+def add_unit_to_collection(unit, collection):
+    collection.units.add(unit)
     collection.save()
 
 
@@ -1245,8 +1269,8 @@ def new_project_collection(request, project_slug):
 
     new_collection.host = collection
     new_collection.visibility = request.POST.get('collection_visibility')
-    new_collection.slug = _get_fresh_collection_slug(
-        request.POST.get('new_collection_name'), collection, flattened_tree)
+    new_collection.slug = cu._get_fresh_collection_slug(
+        request.POST.get('new_collection_name'), flattened_tree)
     new_collection.creator = request.user    
     new_collection.save()
 
@@ -1287,8 +1311,8 @@ def new_user_collection(request, username):
 
         new_collection.host = collection
         new_collection.visibility = request.POST.get('collection_visibility')
-        new_collection.slug = _get_fresh_collection_slug(
-            request.POST.get('new_collection_name'), collection, flattened_tree)
+        new_collection.slug = cu._get_fresh_collection_slug(
+            request.POST.get('new_collection_name'), flattened_tree)
         new_collection.creator = user
         new_collection.save()
 
@@ -1300,7 +1324,7 @@ def new_user_collection(request, username):
 
         if user.get_profile().collection == collection:
             return redirect(
-                'user:user_profile',
+                'user:user_files',
                 username=username,
             )
         else:
@@ -1317,33 +1341,6 @@ def new_user_collection(request, username):
                 'user:user_profile',
                 username=username,
             )
-
-
-def _get_fresh_collection_slug(title, collection, flattened_tree):
-    from django.template.defaultfilters import slugify
-    slug = slugify(title)
-
-    try:
-        collection = next(
-            tree_item for tree_item in flattened_tree if tree_item.slug == slug)
-
-        if collection:
-            slug = _apply_additional_collection_slug(
-                slug, 1, collection, flattened_tree)
-    except:
-        return slug
-
-    return slug
-
-
-def _apply_additional_collection_slug(slug, depth, collection, flattened_tree):
-    attempted_slug = slug + "-" + str(depth)
-    collections = [col for col in flattened_tree if col.slug == attempted_slug]
-
-    if len(collections) == 0:
-        return attempted_slug
-    else:
-        return _apply_additional_collection_slug(slug, depth + 1, collection, flattened_tree)
 
 
 def file_upload(request):
@@ -2144,12 +2141,14 @@ def get_resource_copy(resource, user, new_name=False):
 
 
 def copy_collection(collection, to_collection, user, flattened_tree, visibility_transform):
+    import oer.CollectionUtilities as cu 
+
     # Make a copy of the collection.
     collection_copy = Collection(
         title='Copy of ' + collection.title,
         host=to_collection,
         visibility=visibility_transform if visibility_transform else collection.visibility,
-        slug=_get_fresh_collection_slug(collection.title, to_collection, flattened_tree),
+        slug=cu._get_fresh_collection_slug(collection.title, flattened_tree),
         creator=user
     )
     collection_copy.save()

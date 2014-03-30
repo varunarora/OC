@@ -909,6 +909,7 @@ def list_collection(request, username, collection_slug):
     if not collection_slug:
         collection = user_profile.collection
         title = 'Files' + ' &lsaquo; ' + user.get_full_name()
+        collection_in_unit = False
     else:
         from oer.models import Collection
         match_collections = Collection.objects.filter(slug=collection_slug)
@@ -920,25 +921,54 @@ def list_collection(request, username, collection_slug):
         collection = next(
             tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
 
+        # Determine if this collection is owned by a unit.
+        from oer.models import Unit
+        from django.contrib.contenttypes.models import ContentType
+        unit_type = ContentType.objects.get_for_model(Unit)
+        if collection.host_type == unit_type:
+            unit = collection.host
+            collection_in_unit = True
+
+        else:
+            collection_in_unit = False
+        
         title = collection.title + ' &lsaquo; ' + user.get_full_name()
 
     root_assets = collection.resources
-    child_collections = cu._get_child_collections(collection)        
+    child_collections = cu._get_child_collections(collection)
+    child_units = cu._get_child_unit_collections(collection.units.all())
 
     resources = root_assets.all()
     cu.set_resources_type(resources)
 
     cu.preprocess_collection_listings(resources, child_collections)
 
-    context = dict({
-        'user_profile': user,
-        'collection': collection,
-        'title': title,
-        'browse_tree': browse_tree,
-        'resources': resources,
-        'collections': child_collections,
-    }.items() + user_context.items())
-    return render(request, 'partials/profile-files.html', context)
+    if collection_in_unit:
+        breadcrumb = cu.build_collection_breadcrumb(collection)
+        context = dict({
+            'user_profile': user,
+            'collection': collection,
+            'title': title,
+            'browse_tree': browse_tree,
+            'resources': resources,
+            'collections': child_collections,
+            'unit': unit,
+            'units': child_units,
+            'breadcrumb': breadcrumb
+        }.items() + user_context.items())
+        return render(request, 'unit.html', context)
+
+    else:
+        context = dict({
+            'user_profile': user,
+            'collection': collection,
+            'title': title,
+            'browse_tree': browse_tree,
+            'resources': resources,
+            'collections': child_collections,
+            'units': child_units
+        }.items() + user_context.items())
+        return render(request, 'partials/profile-files.html', context)
 
 
 def user_groups(request, username):

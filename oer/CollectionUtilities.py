@@ -6,7 +6,9 @@ import itertools
 
 
 def get_collection_root(collection):
-    if collection.host_type.name != 'collection':
+    if collection.host_type.name == 'unit':
+        return get_collection_root(Collection.objects.get(units=collection.host))
+    elif collection.host_type.name != 'collection':
         return (collection.host_type, collection.host)
     else:
         return get_collection_root(collection.host)
@@ -19,14 +21,32 @@ def get_root_private_collection(collection):
         return get_collection_root(collection.host)
 
 
-def _get_child_collections(collection):
+def _get_child_collections(collection, get_units=False):
     # Get all the collections whose parent is the root collection.
     from django.contrib.contenttypes.models import ContentType
     collections_type = ContentType.objects.get_for_model(Collection)
+
     child_collections = Collection.objects.filter(
         host_id=collection.id, host_type=collections_type)
 
-    return child_collections
+    if get_units:
+        # Get the unit collections.
+        child_unit_collections = _get_child_unit_collections(collection.units.all())
+        return list(child_collections) + list(child_unit_collections)
+
+    return list(child_collections)
+
+
+def _get_child_unit_collections(units):
+    from oer.models import Unit
+    from django.contrib.contenttypes.models import ContentType
+    unit_type = ContentType.objects.get_for_model(Unit)
+
+    child_unit_collections = []
+    for unit in units:
+        child_unit_collections.append(Collection.objects.get(
+            host_id=unit.id, host_type=unit_type))
+    return child_unit_collections
 
 
 def _get_child_collections_resources(collection):
@@ -34,7 +54,8 @@ def _get_child_collections_resources(collection):
     try:
         child_resources = collection.resources.all()
         child_collections = _get_child_collections(collection)
-        return list(child_collections) + list(child_resources)
+        child_unit_collections = _get_child_unit_collections(collection.units.all())
+        return list(child_collections) + list(child_unit_collections) + list(child_resources)
 
     except:
         pass
@@ -124,7 +145,7 @@ def _has_immediate_children(collection):
 
 def _hasImmediateCollectionChildren(collection):
     """Adapted from _hasImmediateChildren() in articles.views"""
-    childCollections = list(_get_child_collections(collection))
+    childCollections = list(_get_child_collections(collection, True))
     if len(childCollections) > 0:
         return {collection: childCollections}
     else:
@@ -400,6 +421,10 @@ def preprocess_collection_listings(resources, collections):
                 resource.open_url = resource.revision.content.url
                 resource.type = 'gdoc'
 
+            if ('docs' in hostname and 'google' in hostname) and (
+                'presentation' in url_data.path):
+                resource.type = 'gpres'
+
             elif 'dropbox' in hostname and 'sh' in url_data.path:
                 resource.open_url = resource.revision.content.url
                 resource.type = 'dropbox'
@@ -591,3 +616,98 @@ def build_project_raw_tree(request, browse_tree):
         return root
     else:
         return {}
+
+
+def _get_fresh_collection_slug(title, flattened_tree):
+    from django.template.defaultfilters import slugify
+    slug = slugify(title)
+
+    try:
+        collection = next(
+            tree_item for tree_item in flattened_tree if tree_item.slug == slug)
+
+        if collection:
+            slug = _apply_additional_collection_slug(
+                slug, 1, collection, flattened_tree)
+    except:
+        return slug
+
+    return slug
+
+
+def _apply_additional_collection_slug(slug, depth, collection, flattened_tree):
+    attempted_slug = slug + "-" + str(depth)
+    collections = [col for col in flattened_tree if col.slug == attempted_slug]
+
+    if len(collections) == 0:
+        return attempted_slug
+    else:
+        return _apply_additional_collection_slug(slug, depth + 1, collection, flattened_tree)
+
+
+def build_collection_breadcrumb(collection):
+    # Get the root of this collection ('project' or 'user profile')
+    (collection_root_type, collection_root) = get_collection_root(collection)
+
+    # Create breadcrumb list
+    breadcrumb = []
+
+    while True:
+        if collection.host_type.name == 'collection':
+            breadcrumb.append(host_urlize(
+                collection, collection_root, collection_root_type))
+            collection = collection.host
+        elif collection.host_type.name == 'unit':
+            collection = Collection.objects.get(units=collection.host)
+        else:
+            breadcrumb.append(host_urlize(
+                collection.host, collection_root, collection_root_type))
+            break
+
+    if collection_root_type.name == 'user profile':
+        breadcrumb[-1].title = breadcrumb[-1].user.get_full_name() + '\'s profile'
+
+    # Reverse breadcrumb and return
+    breadcrumb.reverse()
+
+    return breadcrumb
+
+
+def host_urlize(host, collection_root, collection_root_type):
+    if collection_root_type.name == 'user profile':
+        # If this collection is a descendant of the user
+        user = collection_root.user
+
+        if host == collection_root:
+            host.url = reverse(
+                'user:user_files', kwargs={
+                    'username': user.username
+                }
+            )
+        else:
+            host.url = reverse(
+                'user:list_collection', kwargs={
+                    'username': user.username,
+                    'collection_slug': host.slug
+                }
+            )
+
+    elif collection_root_type.name == 'project':
+        # If this collection is a descendant of a project
+        project = collection_root
+
+        if host == collection_root:
+            host.url = reverse(
+                'projects:project_home', kwargs={
+                    'project_slug': project.slug
+                }
+            )
+        else:
+            host.url = reverse(
+                'projects:list_collection', kwargs={
+                    'project_slug': project.slug,
+                    'collection_slug': host.slug
+                }
+            )            
+
+    return host
