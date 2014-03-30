@@ -23,9 +23,79 @@ OC.editor = {
         '<div class="editor-search-result-preview"></div>' +
         '</div>'),
 
+    insertFiveStepLessonTemplate: function(editor, callback){
+        $.get('/resources/template/five-step-lesson-plan/',
+            function(response){
+                var hiddenTemplates = $('.hidden-templates');
+                hiddenTemplates.append(response);
+
+                editor.insertHtml((hiddenTemplates.html()));
+                
+                // Clear all contents.
+                $('div', hiddenTemplates).remove();
+
+                callback();
+            },
+        'html');
+    },
+
+    fiveStepLessonPlanTips: {
+        'lesson-objective-body': 'What will your student be able to do?',
+        'lesson-goal-body': 'How does the objective connect to the summer (big) goal?',
+        'lesson-assessment-body': 'How will you know whether your students have made ' +
+        'progress toward the objective? How and when will you assess mastery?',
+        'lesson-points-body': 'What three-five key points will you emphasize?',
+
+        'lesson-opening-tip': [
+            'How will you communicate <em>what</em> is about to happen? ' +
+            'How will you communicate <em>how</em> it will happen?',
+
+            'How will you communicate its <em>importance?</em> ' +
+            'How will you communicate <em>connections</em> to previous lessons?',
+
+            'How will you engage students and capture their interest?'
+        ],
+
+        'lesson-introduction-tip': [
+            'What key points will you emphasize and reiterate? ',
+            'How will you ensure that students actively take-in information?',
+            'How will you vary your approach to make information accessible to all students?',
+            'Which potential misunderstandings will you anticipate?'
+        ],
+
+        'lesson-guided-practice-tip': [
+            'How will you clearly state and model behavioral expectations?',
+            'How will you ensure that all students have multiple opportunities to practice?',
+            'How will you scaffold practice exercises from easy to hard?',
+            'How will you monitor and correct student performance?'
+        ],
+
+        'lesson-independant-practice-tip': [
+            'How will you clearly state and model behavioral expectations?',
+            'In what ways will students attempt to demonstrate independent mastery of the objective?',
+            'How will you provide opportunities for extension?'
+        ],
+
+        'lesson-closing-tip': [
+            'How will students summarize what they learned?',
+            'How will students be asked to state the significance of what they learned?',
+            'How will you provide all students with opportunities to demonstrate mastery of (or progress toward) the objective?'
+        ]
+    },
+
+    lessonAssist: '',
+    lessonAssistPullout: '',
+    lessonAssistBody: '',
+    editorFrame: '',
+    editorBody: '',
+
     init: function(){
         var editorFrame = $('.editor-frame'),
             editorBody = $('.editor-body');
+
+        OC.editor.editorFrame = editorFrame;
+        OC.editor.editorBody = editorBody;
+
         editorFrame.height(
             $(window).height() - ($('body > header').height() + $(
                 '.editor-header').outerHeight(true) + $(
@@ -34,12 +104,76 @@ OC.editor = {
                 'padding-top'), 10)) + 'px');
 
         editorBody.ckeditor({
-            extraPlugins: 'internallink,sharedspace,resources',
+            extraPlugins: 'internallink,sharedspace,resources,lesson',
             startupFocus: true,
             sharedSpaces: {
                 top: 'editor-toolbar'
-            }
+            },
+            toolbar: 'Full'
         });
+
+        // Open dialog to ask for path choice.
+        if (OC.document_type == 'lesson'){
+            var lessonPathDialog = OC.customPopup('.lesson-path-dialog');
+            var lessonTemplateDialog;
+
+            $('.lesson-path-blank', lessonPathDialog.dialog).click(function(event){
+                lessonPathDialog.close();
+
+                lessonTemplateDialog = OC.customPopup('.lesson-template-dialog');
+
+                $('.lesson-template-option', lessonTemplateDialog.dialog).click(function(){
+                    // Remove all the selected options.
+                    $('.lesson-template-option.selected').removeClass('selected');
+
+                    $(this).addClass('selected');
+                });
+
+                $('.lesson-template-submit-button', lessonTemplateDialog.dialog).click(function(){
+                    lessonTemplateDialog.close();
+
+                    // Initialize lesson assist panel.
+                    OC.editor.lessonAssist = $('.lesson-assist');
+                    OC.editor.lessonAssistPullout = $('.lesson-assist-pullout');
+                    OC.editor.lessonAssistBody = $('.lesson-assist-body');
+                    
+                    var UPPER_SPACE = 40;
+
+                    OC.editor.lessonAssist.css({
+                        'top': OC.editor.editorFrame.outerHeight(
+                            true) + OC.editor.editorFrame.offset().top - OC.editor.lessonAssistPullout.outerHeight(true)
+                    });
+
+                    OC.editor.lessonAssistBody.css({
+                        'height': OC.editor.editorFrame.outerHeight(true) - (
+                            UPPER_SPACE + OC.editor.lessonAssistPullout.outerHeight(true))
+                    });
+
+                    OC.editor.lessonAssistPullout.click(function(event){
+                        if (OC.editor.lessonAssist.hasClass('open')){
+                            OC.editor.closeLessonAssist(true);
+                        } else {
+                            OC.editor.openLessonAssist();
+                        }
+                    });
+
+                    // Initialize the document with the lesson plan template.
+                    var editor = editorBody.ckeditorGet();
+                    
+                    //editor.on('instanceReady', function(){
+                    
+                    function onTemplateLoad(){
+                        // Attach focus handler with fields with suggestions.
+                        OC.editor.attachLPWidgetFocusHandler();
+                    }
+                    OC.editor.insertFiveStepLessonTemplate(editor, onTemplateLoad);
+                    //});
+
+                });
+            });
+        }
+
+        // -----------------------------------------------------
 
         var scrollbarWidth = getScrollbarWidth();
 
@@ -47,78 +181,147 @@ OC.editor = {
         var editorSearch = $('.editor-search'),
             editorSearchPullout = $('.editor-search-pullout');
 
-        editorSearchPullout.css({
-            'margin-right': scrollbarWidth
-        });
+        if (editorSearch.length > 0){
+            editorSearchPullout.css({
+                'margin-right': scrollbarWidth
+            });
 
-        editorSearch.css({
-            'top': $('.editor-toolbar-wrapper').outerHeight(true) + $(
-                '.editor-toolbar-wrapper').offset().top + 5
-        });
+            editorSearch.css({
+                'top': $('.editor-toolbar-wrapper').outerHeight(true) + $(
+                    '.editor-toolbar-wrapper').offset().top + 5
+            });
 
-        editorSearchPullout.click(function(event){
-            if (!$(this).hasClass('pulled-out')){
-                editorSearch.animate({
-                    right: scrollbarWidth,
-                }, {
-                    duration: 'slow'
-                });
-                editorSearchPullout.css({
-                    'margin-right': 0
-                });
-                $(this).addClass('pulled-out');
-            } else {
-                editorSearch.animate({
-                    right: '-' + $('.editor-search-main-panel').width(),
-                }, {
-                    duration: 'slow',
-                    complete: function(){
-                        editorSearchPullout.css({
-                            'margin-right': scrollbarWidth
-                        });
+            editorSearchPullout.click(function(event){
+                if (!$(this).hasClass('pulled-out')){
+                    editorSearch.animate({
+                        right: scrollbarWidth,
+                    }, {
+                        duration: 'slow'
+                    });
+                    editorSearchPullout.css({
+                        'margin-right': 0
+                    });
+                    $(this).addClass('pulled-out');
+                } else {
+                    editorSearch.animate({
+                        right: '-' + $('.editor-search-main-panel').width(),
+                    }, {
+                        duration: 'slow',
+                        complete: function(){
+                            editorSearchPullout.css({
+                                'margin-right': scrollbarWidth
+                            });
+                        }
+                    });
+                    $(this).removeClass('pulled-out');
+                }
+            });
+
+            $('.editor-search-body').css({
+                'height': editorFrame.outerHeight(true) - $(
+                    '.editor-search-bar').height() - 5
+            });
+
+            // Initialize side search experience.
+            OC.tabs('.editor-search-body', { tab: 1 });
+            OC.editor.initEditorSearchAutocomplete();
+
+            $('.editor-search-tabs .editor-search-tab').parent('li').addClass('hide-tab');
+
+            var editorFavoritesBrowser = $('.editor-favorites-browser');
+            if (editorFavoritesBrowser.children().length === 0){
+                $.get('/interactions/favorites/list/',
+                    function(response){
+                        if (response.status == 'true'){
+                            OC.editor.renderListings(response.favorites, editorFavoritesBrowser);
+                            editorFavoritesBrowser.removeClass('loading-browser');
+                        }
+                        else {
+                            OC.popup(response.message, response.title);
+                        }
+                    },
+                'json');
+            }
+
+
+            var projectBrowserTab = $('.editor-search-tabs li a[href=".my-projects"]'),
+                profileBrowserTab = $('.editor-search-tabs li a[href=".my-profile"]');
+
+            if (!projectBrowserTab.hasClickEventListener()){
+                projectBrowserTab.click(OC.editor.searchProjectsTabClickHandler);
+            }
+
+            if (!profileBrowserTab.hasClickEventListener()){
+                profileBrowserTab.click(OC.editor.searchProfileTabClickHandler);
+            }
+        }
+    },
+
+    attachLPWidgetFocusHandler: function(){
+        var lessonClasses, lessonClass, i;
+        $('.cke_widget_editable').click(function(event){
+            if ($(this).hasClass('cke_widget_editable_focused') && !$(this).hasClass('assist-setup')){
+                if (!OC.editor.lessonAssist.hasClass('open') && !OC.editor.lessonAssist.hasClass(
+                    'force-closed')){
+                    OC.editor.openLessonAssist();
+                }
+
+                // Update the tips box.
+
+                // Check if this has a class that is also there in the tips {}.
+                lessonClasses = $(this).attr('class').split(' ');
+                var i;
+                for (i = 0; i < lessonClasses.length; i++){
+                    // Allow looping till the last class, as that is most likely the tip class.
+                    if (lessonClasses[i].match('^lesson-')){
+                        lessonClass = lessonClasses[i];
                     }
+                }
+
+                var tip = OC.editor.fiveStepLessonPlanTips[lessonClass];
+                if (tip){
+                    if (_.isArray(tip)){
+                        var list = $('<ul/>'), j;
+                        for (j = 0; j < tip.length; j++){
+                            list.append('<li>' + tip[j] + '</li>');
+                        }
+                        $('.lesson-assist-body').html(list);
+                    } else
+                        $('.lesson-assist-body').html(tip);
+                }
+
+                $(this).addClass('assist-setup');
+            } else {
+                // Remove all assist setups.
+                $('.assist-setup').each(function(){
+                    $(this).removeClass('assist-setup');
                 });
-                $(this).removeClass('pulled-out');
             }
         });
+    },
 
-        $('.editor-search-body').css({
-            'height': editorFrame.outerHeight(true) - $(
-                '.editor-search-bar').height() - 5
+    openLessonAssist: function(){
+        var UPPER_SPACE = 40;
+        // Move the editor body to the left edge.
+        OC.editor.editorBody.addClass('assisted');
+
+        OC.editor.lessonAssist.css({
+            'top': OC.editor.editorFrame.offset().top + UPPER_SPACE
         });
+        OC.editor.lessonAssistBody.show();
+        OC.editor.lessonAssist.addClass('open');
+    },
 
-        // Initialize side search experience.
-        OC.tabs('.editor-search-body', { tab: 1 });
-        OC.editor.initEditorSearchAutocomplete();
+    closeLessonAssist: function(force){
+        OC.editor.lessonAssistBody.hide();
+        OC.editor.lessonAssist.css({
+            'top': OC.editor.editorFrame.outerHeight(true) + OC.editor.editorFrame.offset(
+                ).top - OC.editor.lessonAssistPullout.outerHeight(true)
+        });
+        OC.editor.lessonAssist.removeClass('open');
+        OC.editor.lessonAssist.addClass('force-closed');
 
-        $('.editor-search-tabs .editor-search-tab').parent('li').addClass('hide-tab');
-
-        var editorFavoritesBrowser = $('.editor-favorites-browser');
-        if (editorFavoritesBrowser.children().length === 0){
-            $.get('/interactions/favorites/list/',
-                function(response){
-                    if (response.status == 'true'){
-                        OC.editor.renderListings(response.favorites, editorFavoritesBrowser);
-                        editorFavoritesBrowser.removeClass('loading-browser');
-                    }
-                    else {
-                        OC.popup(response.message, response.title);
-                    }
-                },
-            'json');
-        }
-
-
-        var projectBrowserTab = $('.editor-search-tabs li a[href=".my-projects"]'),
-            profileBrowserTab = $('.editor-search-tabs li a[href=".my-profile"]');
-
-        if (!projectBrowserTab.hasClickEventListener()){
-            projectBrowserTab.click(OC.editor.searchProjectsTabClickHandler);
-        }
-
-        if (!profileBrowserTab.hasClickEventListener()){
-            profileBrowserTab.click(OC.editor.searchProfileTabClickHandler);
-        }
+        OC.editor.editorBody.removeClass('assisted');
     },
 
     searchProjectsTabClickHandler: function(event){
@@ -184,7 +387,6 @@ OC.editor = {
             var originalEl = $(this);
             var $elShadow = originalEl.clone();
 
-            //$elShadow.addClass('draggable-shadow');
             $elShadow.css({
                 top: originalEl.offset().top - 10,
                 left: originalEl.offset().left
@@ -1035,6 +1237,12 @@ OC.editor = {
             'json');
         }
     },
+
+    initEditUnit: function(){
+        $('form#edit-unit-form textarea[name=description]').ckeditor({
+            skin: 'moono,/static/assets/css/ckeditor/skins/moono/'
+        });
+    }
 };
 
 (function () {
@@ -1257,6 +1465,8 @@ $(document).ready(function(){
     $('span.delete-objective').click(OC.editor.objectiveDeleteHandler);
 
     OC.editor.initDropMenus();
+
+    OC.editor.initEditUnit();
 
     // Initialize document meta collapser.
     //OC.editor.initDocumentMetaCollapser();

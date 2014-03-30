@@ -2497,3 +2497,14 @@ def get_parent_collection_from_collection(request, collection_id):
         }
 
     return APIUtilities._api_success(context)
+
+
+# Templates.
+def template_five_step_lesson_plan(request):
+    from django.template.loader import render_to_string
+    template = render_to_string('partials/five-step-lesson-plan.html')
+
+    return HttpResponse(
+        template, 200,
+        content_type="text/html"
+    )
