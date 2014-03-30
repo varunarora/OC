@@ -201,11 +201,11 @@ def build_user_collection_navigation(browse_tree, user):
     # Get the project that owns the root collection
     root_collection = get_root_key(browse_tree)
 
-    from user_account.models import UserProfile
-    user_profile = UserProfile.objects.get(collection=root_collection)
-
     # HACK(Varun): If there are children
-    if root_collection:
+    if root_collection:    
+        from user_account.models import UserProfile
+        user_profile = UserProfile.objects.get(collection=root_collection)
+        
         userRootElement = ElementTree.Element('li')
 
         profileHref = ElementTree.SubElement(userRootElement, 'a')
