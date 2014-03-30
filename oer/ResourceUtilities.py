@@ -25,16 +25,23 @@ def get_resource_type_from_url(resource):
 
     # In either case, use an appropriate pattern matching to obtain the
     #     video #.
-    resource_type = "video"
     if "youtube" in hostname:
         query = urlparse.parse_qs(url_data.query)
         video = query["v"][0]
         resource.video_tag = video
         resource.provider = "youtube"
+        resource_type = "video"
 
     elif "vimeo" in hostname:
         resource.video_tag = url_data.path.split('/')[1]
         resource.provider = "vimeo"
+        resource_type = "video"
+
+    elif ('docs' in hostname and 'google' in hostname) and (
+        'presentation' in url_data.path):
+        resource.revision.content.url = resource.revision.content.url.replace(
+            'pub', 'embed')
+        resource_type = 'gpres'
 
     else:
         resource_type = "url"

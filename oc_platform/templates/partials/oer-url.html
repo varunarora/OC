@@ -1,12 +1,15 @@
-{% if resource.provider %}
-{% include 'partials/oer-video-snippet.html' %}
+{% if resource_type == 'gpres' %}
+{% include 'partials/oer-google-presentation.html' %}
 {% else %}
-
 <div class="center-stage">
 	<div id="key-panel" class="panel-left">
-		{% include 'partials/oer-url-snippet.html' %}
+        {% if resource.provider %}
+            {% include 'partials/oer-video-snippet.html' %}
+        {% else %}
+		  {% include 'partials/oer-url-snippet.html' %}
+        {% endif  %}
 	</div>
 	<div id="fill-panel" class="panel-right">
 	</div>
 </div>
-{% endif  %}
+{% endif %}
