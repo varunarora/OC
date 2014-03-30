@@ -1680,6 +1680,10 @@ table
 	&.mini-action-button
 		padding: 5px 12px
 
+	&.supporting-action-button
+		padding: 4px 8px
+		font-size: 0.85em
+
 	&.large-action-button
 		font-size: 1.6em
 
@@ -1728,7 +1732,8 @@ table
 	padding-right: 20px
 
 nav#add-resource-menu
-	.add-collection, .add-document, .add-link, .add-video, .add-upload
+	.add-collection, .add-document, .add-link, .add-video,
+	.add-upload, .add-lesson, .add-unit
 		a
 			padding-left: 34px
 			background-position: 12px 5px
@@ -1765,6 +1770,18 @@ nav#add-resource-menu
 		&:hover
 			background-image: url('../images/upload-hover.png')
 
+	.add-lesson a
+		background-image: url('../images/lesson.png')
+
+		&:hover
+			background-image: url('../images/lesson-hover.png')
+
+	.add-unit a
+		background-image: url('../images/unit.png')
+
+		&:hover
+			background-image: url('../images/unit-hover.png')
+
 .browse-page
 	min-height: 100px
 
@@ -1780,7 +1797,7 @@ nav.collections-navigation,
 .add-resource-project-browser,
 .link-resource-profile-browser,
 .link-resource-project-browser,
-.link-resource-project-browser
+.link-resource-project-browser,
 .link-resource-standards-browser
 	ul
 		li
@@ -2170,6 +2187,11 @@ table.reset-password-table
 	background-color: #B6C3DB
 	margin-left: 6px
 	color: $light-font
+
+.coming-soon-label
+	background-color: #D14836
+	margin-left: 6px
+	color: #fff
 
 .label
 	font-size: 0.8em
@@ -2622,6 +2644,18 @@ aside.page-menu-wrapper
 	background: url('../images/spinner.gif') no-repeat center center
 	background-color: #fff
 
+.lesson-path-dialog
+	width: 600px
+	height: 300px
+
+.lesson-template-dialog
+	width: 600px
+	height: 400px
+
+.new-unit-dialog
+	width: 300px
+	height: 200px
+
 .add-collaborator-wrapper
 	overflow: hidden
 	margin-top: 6px
@@ -3066,6 +3100,24 @@ body.editor
 							background-image: url('../images/files.png')
 
 
+	.lesson-assist
+		position: absolute
+		z-index: 2
+		width: 300px
+		right: 40px
+		@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.1))
+
+		.lesson-assist-pullout
+			background-color: #404040
+			color: #ffffff
+			padding: 10px
+			cursor: pointer
+
+		.lesson-assist-body
+			display: none
+			background-color: #fff
+			padding: 10px
+
 
 	.editor-body
 		background-color: #fff
@@ -3095,6 +3147,9 @@ body.editor
 				.foreign-document-element-description-title
 					font-size: 1.4em
 					margin-bottom: 5px
+
+		&.assisted
+			margin-left: 32px
 	
 
 .editor-search-result
@@ -3271,6 +3326,11 @@ blockquote
 				float: right
 
 
+#fill-panel
+	.resource-collection-item
+		.resource-item-description
+			width: 270px
+
 .publicly-shared-icon, .private-shared-icon, .group-shared-icon,
 .personal-shared-icon, .shared-with-me-icon
 	background-repeat: no-repeat
@@ -3301,3 +3361,300 @@ blockquote
 	.favorited
 		.resource-favorite
 			opacity: 1
+
+
+// Lesson plan styling.
+
+.hidden-templates
+	display: none
+
+
+.document-textblock
+	.lesson-objective-goal-wrapper, .lesson-opening-materials-wrapper,
+	.lesson-assessment, .lesson-points,
+	.lesson-introduction-materials-wrapper, .lesson-guided-practice-materials-wrapper,
+	.lesson-independant-practice-materials-wrapper, .lesson-closing-materials-wrapper,
+		border-bottom: 1px solid #efefef
+
+
+.editor-body
+	.lesson-objective-body, .lesson-goal-body,
+	.lesson-assessment-body, .lesson-points-body,
+	.lesson-opening-body, .lesson-opening-materials-body,
+	.lesson-introduction-body, .lesson-introduction-materials-body,
+	.lesson-guided-practice-body, .lesson-guided-practice-materials-body,
+	.lesson-independant-practice-body, .lesson-independant-practice-materials-body,
+	.lesson-closing-body, .lesson-closing-materials-body
+		border: 1px solid #bababa
+
+.lesson-content
+	width: 700px
+
+	.lesson-objective-goal-wrapper, .lesson-opening-materials-wrapper,
+	.lesson-introduction-materials-wrapper, .lesson-guided-practice-materials-wrapper,
+	.lesson-independant-practice-materials-wrapper, .lesson-closing-materials-wrapper
+		overflow: hidden
+		margin-top: 10px
+		margin-bottom: 20px
+		padding: 10px
+		padding-top: 16px
+
+	.lesson-assessment, .lesson-points	
+		margin-bottom: 20px
+
+	.lesson-objective, .lesson-opening,
+	.lesson-introduction, .lesson-guided-practice,
+	.lesson-independant-practice, .lesson-closing
+		float: left
+		width: 300px
+
+	.lesson-goal, .lesson-opening-materials,
+	.lesson-introduction-materials, .lesson-guided-practice-materials,
+	.lesson-independant-practice-materials, .lesson-closing-materials
+		float: right
+		width: 300px
+
+	.lesson-objective-body, .lesson-goal-body,
+	.lesson-assessment-body, .lesson-points-body,
+	.lesson-opening-body, .lesson-opening-materials-body,
+	.lesson-introduction-body, .lesson-introduction-materials-body,
+	.lesson-guided-practice-body, .lesson-guided-practice-materials-body,
+	.lesson-independant-practice-body, .lesson-independant-practice-materials-body,
+	.lesson-closing-body, .lesson-closing-materials-body
+		margin-top: 5px
+		min-height: 100px
+
+		p:nth-child(1)
+			margin-top: 0px
+
+
+.lesson-path-dialog
+	.lesson-path-blank, .lesson-path-wizard
+		cursor: pointer
+		width: 250px
+		padding: 23px
+		padding-top: 80px
+		text-align: center
+		height: 150px
+
+		&:hover
+			h3
+				color: $body-color
+
+	.lesson-path-blank
+		float: left
+
+	.lesson-path-wizard
+		float: right
+		border-left: 1px solid #efefef
+
+
+.lesson-template-dialog
+	.lesson-template-browser
+		border: 1px solid #ddd
+		padding: 10px
+		overflow: auto
+		height: 275px
+
+		.lesson-template-option
+			width: 78px
+			height: 34px
+			float: left
+			margin: 10px
+			cursor: pointer
+			text-align: center
+			font-size: 0.85em
+			padding-top: 86px
+			padding-right: 6px
+			padding-left: 6px
+			color: $light-font
+			background-repeat: no-repeat
+			background-position: center 16px
+
+			&:hover
+				background-color: #efefef
+
+			&.selected
+				background-color: #ddd
+				color: $body-color
+
+			&.lesson-template-option-five-step
+				background-image: url('../images/five-step-lp.png')
+
+			&.lesson-template-option-three-acts
+				background-image: url('../images/three-acts-lp.png')
+
+.profile-new-resource-panel
+	overflow: hidden
+	margin-bottom: 40px
+
+	.profile-browse-lessons, .profile-add-unit, .profile-add-lesson
+		width: 210px
+		background-color: #444
+		height: 65px
+		float: left
+		margin-right: 10px
+		padding-left: 90px
+		padding-top: 15px
+		padding-right: 10px
+		background-repeat: no-repeat
+		background-position: 15px center
+		background-image: url('../images/document-icon.png')
+
+	.profile-browse-lessons
+		background-image: url('../images/browse-icon.png')
+
+	.profile-add-unit
+		background-image: url('../images/unit-trace-icon.png')
+		background-position: 10px center
+
+	.profile-new-resource-caption
+		color: #ddd
+
+	h3
+		margin-bottom: 0px
+
+	a
+		cursor: pointer
+		color: #ddd
+
+		&:hover
+			color: #fff
+
+.new-unit-dialog
+	label
+		cursor: default
+
+.unit-create-resource-collection
+	margin-bottom: 20px
+
+	.add-collection-resource-wrapper
+		.add-resource
+			float: right
+
+.unit-title-wrapper
+	.unit-title
+		display: inline-block
+
+		h2
+			display: inline-block
+			float: left
+		a.action-button
+			float: right
+			margin-left: 20px
+
+
+.unit-big-question
+	margin-bottom: 40px
+
+.edit-icon
+	background-image: url('../images/edit-dark.png')
+	width: 16px
+	height: 16px
+	display: inline-block
+	margin-right: 6px
+	vertical-align: middle
+
+.body-content
+	min-height: 450px
+
+table#edit-unit-form-table
+	width: 100%
+
+	tr.spaced-row
+		td
+			padding-top: 20px
+
+	input[type=text]
+		width: 98%
+
+	textarea
+		border: 1px solid #efefef
+
+	.right
+		overflow: hidden
+
+		button
+			float: right
+
+.empty-folder-suggestion
+	width: 85%
+	height: 300px
+	background-color: #efefef
+	text-align: center
+	padding: 40px
+
+	h3
+		color: $light-font
+
+	table
+		margin: auto
+
+		td
+			text-align: center
+			padding-right: 20px
+
+			a
+				padding: 20px
+				height: 80px
+				display: inline-block
+				color: #999
+				width: 140px
+
+				&:hover
+					color: $light-font
+					background-color: #ddd
+
+				&.new-document-suggestion, &.new-upload-suggestion,
+				&.new-unit-suggestion, &.new-lesson-suggestion
+					background-position: center 5px
+					background-repeat: no-repeat
+
+				&.new-document-suggestion
+					background-image: url('../images/document-icon-dark.png')
+
+				&.new-upload-suggestion
+					background-image: url('../images/upload-icon-dark.png')
+
+				&.new-unit-suggestion
+					background-image: url('../images/unit-icon-dark.png')
+
+				&.new-lesson-suggestion
+					background-image: url('../images/document-icon-dark.png')
+
+				h4
+					font-size: 1.3em
+					padding-top: 70px
+
+
+.worksheet-creator-frame
+	overflow: hidden
+
+.worksheet-panel-left
+	width: 52%
+	float: left
+	padding-left: 40px
+	padding-top: 20px
+	height: 600px
+
+.worksheet-panel-right
+	width: 40%
+	background-color: #efefef
+	float: right
+	padding: 20px
+	height: 600px
+	overflow: auto
+
+.sample-question-list
+	li
+		z-index: 10
+		padding: 10px 0px
+
+		&:hover
+			cursor: pointer
+
+
+.question-clones
+	z-index: 5
+	position: absolute
+	opacity: 0.7
