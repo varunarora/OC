@@ -219,7 +219,7 @@ def _create_user(request):
                                 'new_user': new_user
                             }, True)
 
-                        except Exception, f:
+                        except Exception:
                             # TODO(Varun): Delete user and announce failure.
                             new_user.delete()
 
@@ -229,8 +229,11 @@ def _create_user(request):
                     else:
                         print profile_form.errors
                         new_user.delete()
-            except Exception, e:
-                new_user.delete()
+            except Exception:
+                try:
+                    new_user.delete()
+                except:
+                    pass
 
                 print user_form.errors
                 # TODO(Varun): Create a django error notication.
