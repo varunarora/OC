@@ -1,24 +1,26 @@
 {% include 'partials/header.html' %}
-{% include 'partials/profile-header.html' with page="groups" %}
+<div class="body-content">
+    {% include 'partials/profile-header.html' with page="groups" %}
 
-        <div id="fill-panel" class="panel-left">
-            <a href="{% url projects:new %}" class="page-action-button">+ NEW GROUP</a>
-        </div>
-        <div id="key-panel" class="panel-right">
-            {% if projects %}
-            <div class="profile-projects-listing">
-            {% for project in projects %}    
-                {% include 'partials/project-item.html' %}
-            {% endfor %}
+            <div id="fill-panel" class="panel-left">
+                <a href="{% url projects:new %}" class="page-action-button">+ NEW GROUP</a>
             </div>
-            {% else %}
-            {% if user == user_profile %}
-            You aren't part of any groups. Why wait? Create a <a href="{% url projects:new %}">new group now!</a>
-            {% else %}
-            No groups found.
-            {% endif %}
-            {% endif %}
-        </div>
+            <div id="key-panel" class="panel-right">
+                {% if projects %}
+                <div class="profile-projects-listing">
+                {% for project in projects %}    
+                    {% include 'partials/project-item.html' %}
+                {% endfor %}
+                </div>
+                {% else %}
+                {% if user == user_profile %}
+                You aren't part of any groups. Why wait? Create a <a href="{% url projects:new %}">new group now!</a>
+                {% else %}
+                No groups found.
+                {% endif %}
+                {% endif %}
+            </div>
 
-{% include 'partials/profile-footer.html' %}
+    {% include 'partials/profile-footer.html' %}
+</div>
 {% include 'partials/footer.html' %}

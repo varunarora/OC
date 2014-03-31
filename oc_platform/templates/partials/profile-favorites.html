@@ -1,28 +1,29 @@
 {% include 'partials/header.html' %}
-{% include 'partials/profile-header.html' with page="favorites" %}
+<div class="body-content">
+    {% include 'partials/profile-header.html' with page="favorites" %}
 
-<div id="fill-panel" class="panel-left">
-    <!--<h3>You may also like</h3>-->
-</div>
-<div id="key-panel" class="panel-right">
-    {% if favorites %}
-    <div class="profile-favorites">
-        {% if user != user_profile %}
-        <h3>{{ user_profile.first_name }}'s favorites</h3>
-        {% else %}
-        <h3>My favorites</h3>
-        {% endif %}
-        {% for favorite in favorites %}
-            {% include 'partials/resource-item.html' with item=favorite.resource item_category='resource' %}
-        {% endfor %}
+    <div id="fill-panel" class="panel-left">
+        <!--<h3>You may also like</h3>-->
     </div>
-    {% endif %}
+    <div id="key-panel" class="panel-right">
+        {% if favorites %}
+        <div class="profile-favorites">
+            {% if user != user_profile %}
+            <h3>{{ user_profile.first_name }}'s favorites</h3>
+            {% else %}
+            <h3>My favorites</h3>
+            {% endif %}
+            {% for favorite in favorites %}
+                {% include 'partials/resource-item.html' with item=favorite.resource item_category='resource' %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% include 'partials/profile-footer.html' %}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/resources-collections.js"></script>
+    {% include 'partials/add.html' %}
 </div>
-
-{% include 'partials/profile-footer.html' %}
-
-<script type="text/javascript" src="{{ STATIC_URL }}js/resources-collections.js"></script>
-{% include 'partials/add.html' %}
-
 
 {% include 'partials/footer.html' %}
