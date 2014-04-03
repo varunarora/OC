@@ -186,7 +186,7 @@ ul.tagit
 
 .add-document-widget-dialog
 	width: 500px
-	height: 200px
+	height: 325px
 
 	.add-widget-options
 		.add-widget-option
@@ -228,11 +228,28 @@ ul.tagit
 				.add-widget-thumbnail
 					background-image: url('../images/text-block.png')
 
-	.add-document-widget-submit-wrapper
+			&.video
+				.add-widget-thumbnail
+					background-image: url('../images/video-widget-icon.png')
+
+			&.image
+				.add-widget-thumbnail
+					background-image: url('../images/image-widget-icon.png')
+
+			&.resource
+				.add-widget-thumbnail
+					background-image: url('../images/file-widget-icon.png')
+
+			&.upload
+				.add-widget-thumbnail
+					background-image: url('../images/upload-widget-icon.png')
+
+.oc-popup
+	.add-document-widget-submit-wrapper, .add-video-widget-submit-wrapper
 		margin-top: 10px
 		overflow: hidden
 
-		.add-document-widget-submit-button
+		.oc-popup-submit-button
 			float: right
 
 

@@ -15,6 +15,59 @@ def resource_center(request):
     return HttpResponse("Page under construction")
 
 
+def browse(request, category_slug):
+    categories_slugs = category_slug.split('/')
+
+    from meta.models import Category
+
+    # Determine the depth to figure out what level of page needs to be displayed.
+    import meta.CategoryUtilities as catU
+    try:
+        root_category = Category.objects.get(slug=categories_slugs[-2])
+
+        selected_category = Category.objects.get(slug=categories_slugs[-1])
+
+        return_url = reverse(
+            'browse', kwargs={
+                'category_slug': catU.build_breadcrumb(selected_category.parent.parent)[0].url
+            }
+        )
+    except:
+        # Happens either when the slug is not found or when its the root.
+        root_category = Category.objects.get(slug=categories_slugs[-1])
+        selected_category = root_category
+        return_url = None
+
+    (browse_tree, flattened_tree) = catU.build_child_categories(
+        {'root': [root_category]}, [])
+
+    # Fetch the resources in the current category and everything nested within.
+    (current_browse_tree, current_flattened_tree) = catU.build_child_categories(
+        {'root': [selected_category]}, [])
+
+    all_resources = []
+    for category in current_flattened_tree:
+        resources = Resource.objects.filter(category=category)
+        all_resources += list(resources)
+
+    # Setup each resource's favorites count and type.
+    from interactions.models import Favorite
+    from meta.models import TagCategory
+    for resource in resources:
+        resource.favorites_count = Favorite.objects.filter(resource=resource).count()
+        resource.type = resource.tags.get(
+            category=TagCategory.objects.get(title='Resource type'))
+
+    context = {
+        'title': 'Browse lessons, projects, activities, worksheets &amp; tests',
+        'selected_category': selected_category,
+        'browse_tree': browse_tree,
+        'return_url': return_url,
+        'resources': all_resources
+    }
+    return render(request, 'browse.html', context)
+
+
 def view_resource_by_id(request, resource_id):
     from django.core.exceptions import ObjectDoesNotExist
 
@@ -1362,7 +1415,15 @@ def file_upload(request):
 
         return HttpResponse(json.dumps(
             {
-                new_resource.id: new_resource.revision.content.file.name
+                new_resource.id: {
+                    'title': new_resource.revision.content.file.name,
+                    'url': reverse(
+                        'read', kwargs={
+                            'resource_id': new_resource.id,
+                            'resource_slug': new_resource.slug
+                        }
+                    )
+                }
             }
         ), 200, content_type="application/json")
     else:
@@ -2505,6 +2566,16 @@ def get_parent_collection_from_collection(request, collection_id):
 def template_five_step_lesson_plan(request):
     from django.template.loader import render_to_string
     template = render_to_string('partials/five-step-lesson-plan.html')
+
+    return HttpResponse(
+        template, 200,
+        content_type="text/html"
+    )
+
+
+def template_three_act_lesson(request):
+    from django.template.loader import render_to_string
+    template = render_to_string('partials/three-act-lesson.html')
 
     return HttpResponse(
         template, 200,

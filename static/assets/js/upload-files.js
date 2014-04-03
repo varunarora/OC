@@ -384,7 +384,7 @@ $(document).ready(function() {
         var key;
         var response_object = JSON.parse(response);
         for (key in response_object) {
-            OC.upload.dropzone_uploaded_files[key] = response_object[key];
+            OC.upload.dropzone_uploaded_files[key] = response_object[key]['title'];
         }
 
         // Because there is no hook for the generated HTML, there is no way to

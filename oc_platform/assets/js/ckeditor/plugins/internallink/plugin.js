@@ -6,27 +6,27 @@ CKEDITOR.plugins.add('internallink', {
             allowedContent: 'a[href]',
             exec: function(editor) {
 
-                function hyperlinkWord(url, text){
+                function hyperlinkWord(urlElement, text){
                     var selection = editor.getSelection(),
                         urlToInsert;
 
                     var currentURLSelection = getSelectedLink(editor);
 
                     if (currentURLSelection){
-                        if (url === currentURLSelection.getAttribute('href'))
+                        if (urlElement.attr('href') === currentURLSelection.getAttribute('href'))
                             return;
                         else {
-                            currentURLSelection.setAttribute('href', url);
+                            currentURLSelection.setAttribute('href', urlElement);
                         }
                     } else {
                         if (text){
                             urlToInsert = $('<a/>', {
-                                'href': url,
+                                'href': urlElement.attr('href'),
                                 'text': text
                             });
                         } else {
                             urlToInsert = $('<a/>', {
-                                'href': url,
+                                'href': urlElement.attr('href'),
                                 'text': selection.getSelectedText()
                             });
                         }
@@ -74,10 +74,7 @@ CKEDITOR.plugins.add('internallink', {
         editor.addCommand( 'removeLink', {
             allowedContent: 'span',
             exec: function(editor) {
-                var url = getSelectedLink(editor);
-                var element = CKEDITOR.dom.element.createFromHtml(
-                    '<span>' + url.getText() + '</span>');
-                element.replace(url);
+                OC.editor.initImageUploadDialog(onImageInsert);
             },
             startDisabled : true
         });

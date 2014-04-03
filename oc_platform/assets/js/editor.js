@@ -23,6 +23,14 @@ OC.editor = {
         '<div class="editor-search-result-preview"></div>' +
         '</div>'),
 
+    youtubeVideoTemplate: _.template('<iframe width="573" height="322" ' +
+        'src="http://www.youtube.com/embed/<%= video_tag %>?wmode=opaque" frameborder="0" '+
+        'allowfullscreen></iframe>'),
+
+    vimeoVideoTemplate: _.template('<iframe src="http://player.vimeo.com/video/<%= video_tag %>' +
+        '?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;color=ffffff" width="573" ' +
+        'height="322" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>'),
+
     insertFiveStepLessonTemplate: function(editor, callback){
         $.get('/resources/template/five-step-lesson-plan/',
             function(response){
@@ -34,7 +42,26 @@ OC.editor = {
                 // Clear all contents.
                 $('div', hiddenTemplates).remove();
 
-                callback();
+                callback(OC.editor.fiveStepLessonPlanTips);
+            },
+        'html');
+    },
+
+    insertThreeActLessonTemplate: function(editor, callback){
+        $.get('/resources/template/three-act-lesson/',
+            function(response){
+                var hiddenTemplates = $('.hidden-templates');
+                hiddenTemplates.append(response);
+
+                editor.insertHtml((hiddenTemplates.html()));
+                
+                // Attach click handlers on add widget buttons.
+                OC.editor.bindAddWidgetClickHandler('.insert-widget');
+
+                // Clear all contents.
+                $('div', hiddenTemplates).remove();
+
+                callback(OC.editor.threeActLessonTips);
             },
         'html');
     },
@@ -83,11 +110,82 @@ OC.editor = {
         ]
     },
 
+    threeActLessonTips: {
+        'lesson-act-one-body': '<strong>Introduce the central conflict of your story/task clearly,' +
+            'visually, viscerally, using as few words as possible.</strong>' +
+            '<p>With <em>Jaws</em> your first act looks something like this:</p>' +
+            '<p><img src="/static/assets/images/templates/act-one-1.jpg"></p>' +
+            '<p>The visual is clear. The camera is in focus. It isn\'t bobbing around so much ' +
+            'that you can\'t get your bearings on the scene. There aren\'t any words. And it\'s ' +
+            'visceral. It strikes you right in the terror bone.</p>' +
+            'With <em>math</em>, your first act looks something like this: ' +
+            '<p><img src="/static/assets/images/templates/act-one-2.jpg"></p>' +
+            'The visual is clear. The camera is locked to a tripod and focused. No words are necessary. ' +
+            'I\'m not saying anyone is going to shell out ten dollars on date night to do this math problem ' +
+            'but you have a visceral reaction to the image. It strikes you right in the curiosity bone.' +
+            'Leave no one out of your first act. Your first act should impose as few demands on the students ' +
+            'as possible — either of language or of math. It should ask for little and offer a lot.',
+
+        'lesson-act-two-body': '<strong>The protagonist/student overcomes obstacles, looks for resources, and develops new tools.</strong>' +
+            '<p>Before he resolves his largest conflict, Luke Skywalker resolves a lot of smaller ones — find a pilot, ' +
+            'find a ship, find the princess, get the Death Star plans back to the Rebellion, etc. He builds a ' +
+            'team. He develops new skills.</p>' +
+            '<p><img src="/static/assets/images/templates/act-two-1.jpg"></p>' +
+            'So it is with your second act. What resources will your students need before they can resolve their conflict? ' +
+            'The height of the basketball hoop? The distance to the three-point line? The diameter of a basketball?' +
+            '<p><img src="/static/assets/images/templates/act-one-2.jpg"></p>' +
+            'What tools do they have already? What tools can you help them develop? They\'ll need quadratics, for ' +
+            'instance. Help them with that.',
+
+        'lesson-act-three-body': '<strong>Resolve the conflict and set up a sequel/extension.</strong>' +
+            '<p>The third act pays off on the hard work of act two and the motivation of act one. Here\'s act three ' +
+            'of Star Wars.</p>' +
+            '<p><img src="/static/assets/images/templates/act-three-1.jpg"></p>' +
+            'That\'s a resolution right there. Imagine, though, that Luke fired his last shot and instead of watching ' +
+            'the Death Star explode, we cut to a scene inside the Rebellion control room. No explosion. Just one of ' +
+            'the commanders explaining that "the mission was a success."' +
+            '<p>That what it\'s like for students to encounter the resolution of their conflict in the back of the ' +
+            'teacher\'s edition of the textbook.</p>' +
+            '<p><img src="/static/assets/images/templates/act-three-2.jpg"></p>' +
+            'If we\'ve successfully motivated our students in the first act, the payoff in the third act needs to ' +
+            'meet their expectations. Something like this:' +
+            '<p><img src="/static/assets/images/templates/act-three-3.jpg"></p>' +
+            'Now, remember Vader spinning off into the distance, hurtling off to set the stage for ' +
+            '<em>The Empire Strikes Back</em>. You need to be Vader. Make sure you have extension problems ' +
+            '(sequels, right?) ready for students as they finish.',
+        'lesson-sequel-body': ''
+    },
+
     lessonAssist: '',
     lessonAssistPullout: '',
     lessonAssistBody: '',
     editorFrame: '',
     editorBody: '',
+
+    cke: '',
+
+    onImageInsert: function(url){
+        var image = $('<img/>', {
+            'src': url
+        });
+        OC.editor.cke.insertHtml(image[0].outerHTML);
+    },
+
+    onLinkInsert: function(urlElement, text){
+        var url = $('<a/>', {
+            'href': urlElement.attr('href'),
+            'text': text ? text : urlElement.text()
+        });
+        OC.editor.cke.insertHtml(url[0].outerHTML);
+    },
+
+    onUploadInsert: function(url, text){
+        var urlElement = $('<a/>', {
+            'href': url,
+            'text': text
+        });
+        OC.editor.cke.insertHtml(urlElement[0].outerHTML);
+    },
 
     init: function(){
         var editorFrame = $('.editor-frame'),
@@ -103,14 +201,14 @@ OC.editor = {
                 'padding-top'), 10) + parseInt(editorFrame.css(
                 'padding-top'), 10)) + 'px');
 
-        editorBody.ckeditor({
-            extraPlugins: 'internallink,sharedspace,resources,lesson',
+        OC.editor.cke = editorBody.ckeditor({
+            extraPlugins: 'internallink,sharedspace,resources,lesson,upload',
             startupFocus: true,
             sharedSpaces: {
                 top: 'editor-toolbar'
             },
             toolbar: 'Full'
-        });
+        }).ckeditorGet();
 
         // Open dialog to ask for path choice.
         if (OC.document_type == 'lesson'){
@@ -162,12 +260,20 @@ OC.editor = {
                     
                     //editor.on('instanceReady', function(){
                     
-                    function onTemplateLoad(){
+                    function onTemplateLoad(tips){
                         // Attach focus handler with fields with suggestions.
-                        OC.editor.attachLPWidgetFocusHandler();
+                        OC.editor.attachLPWidgetFocusHandler(tips);
                     }
-                    OC.editor.insertFiveStepLessonTemplate(editor, onTemplateLoad);
-                    //});
+
+                    // Get the selected template option.
+                    var selectedTemplateOption = $(
+                        '.lesson-template-option.selected', lessonTemplateDialog.dialog);
+                    
+                    if (selectedTemplateOption.hasClass('lesson-template-option-five-step')) {
+                        OC.editor.insertFiveStepLessonTemplate(editor, onTemplateLoad);
+                    } else {
+                        OC.editor.insertThreeActLessonTemplate(editor, onTemplateLoad);
+                    }
 
                 });
             });
@@ -257,7 +363,7 @@ OC.editor = {
         }
     },
 
-    attachLPWidgetFocusHandler: function(){
+    attachLPWidgetFocusHandler: function(tips){
         var lessonClasses, lessonClass, i;
         $('.cke_widget_editable').click(function(event){
             if ($(this).hasClass('cke_widget_editable_focused') && !$(this).hasClass('assist-setup')){
@@ -278,7 +384,7 @@ OC.editor = {
                     }
                 }
 
-                var tip = OC.editor.fiveStepLessonPlanTips[lessonClass];
+                var tip = tips[lessonClass];
                 if (tip){
                     if (_.isArray(tip)){
                         var list = $('<ul/>'), j;
@@ -288,6 +394,8 @@ OC.editor = {
                         $('.lesson-assist-body').html(list);
                     } else
                         $('.lesson-assist-body').html(tip);
+                } else {
+                    $('.lesson-assist-body').html('(no tips found)');
                 }
 
                 $(this).addClass('assist-setup');
@@ -556,8 +664,52 @@ OC.editor = {
         );
     },
 
-    createImageUploadDialog: function(callback) {
+    initImageUploadDialog: function(callback) {
         OC.editor.setImageUploadCallback(callback);
+
+        var insertImagePopup = OC.customPopup('.image-upload-dialog');
+
+        imageWidgetSubmit = $('.image-upload-submit-button');
+        imageWidgetSubmit.unbind('click');
+
+        // Bind the 'Done' button on the popup.
+        imageWidgetSubmit.click(function(event){
+            // Close the popup.
+            insertImagePopup.close();
+        });
+
+        Dropzone.forElement('.image-upload-dialog .upload-drag-drop').on('success', function(file, response){
+            if (response.status !== "false") {
+                // Make the name of the file content editable.
+                $('.dz-filename span', file.previewElement).attr(
+                    'contenteditable', true);
+
+                var newFileElement = $(this.element).children().last();
+                var insertImageWrapper = $('<div/>', {
+                    'class': 'image-insert-button'
+                });
+
+                var insertImageButton = $('<button/>', {
+                    'text': 'Insert image',
+                    'class': 'btn dull-button'
+                });
+                insertImageButton.attr('value', JSON.parse(response).url);
+
+                OC.editor.bindClickWithImageInsert(
+                    insertImageButton, OC.editor.getImageUploadCallback(),
+                    insertImagePopup
+                );
+
+                insertImageWrapper.append(insertImageButton);
+                newFileElement.append(insertImageWrapper);
+            } else {
+                OC.popup('The upload process failed due to some errors. ' +
+                    'Contact us if the problem persists. Error description below:' +
+                    response.error, 'Upload image failed'
+                );
+            }
+
+        });
 
         // API to get a list of user images
         if (OC.editor.myImages.length === 0) {
@@ -576,22 +728,13 @@ OC.editor = {
 
                 OC.editor.bindClickWithImageInsert(
                     $('.image-history-set .image-insert-button button'),
-                    OC.editor.getImageUploadCallback()
+                    OC.editor.getImageUploadCallback(),
+                    insertImagePopup
                 );
             }, 'json');
-
         }
 
-        $('#image-upload').dialog({
-            modal: true,
-            open: false,
-            width: 600,
-            buttons: {
-                Ok: function() {
-                    $(this).dialog( "close" );
-                }
-            }
-        });
+        return insertImagePopup;
     },
 
     getImageUploadCallback: function(){
@@ -602,11 +745,73 @@ OC.editor = {
         OC.editor.imageUploadCallback = callback;
     },
 
-    bindClickWithImageInsert: function(button, callback){
+    bindClickWithImageInsert: function(button, callback, popup){
         button.click(function(){
             callback(button.val());
-            $('#image-upload').dialog('close');
+            popup.close();
         });
+    },
+
+    bindClickWithFileInsert: function(button, callback, popup){
+        button.click(function(){
+            callback(button.val(), button.attr('name'));
+            popup.close();
+        });
+    },
+
+    initUploadDialog: function(callback){
+        var uploadPopup = OC.customPopup('.upload-widget-dialog');
+
+        uploadWidgetSubmit = $('.upload-widget-submit-button');
+        uploadWidgetSubmit.unbind('click');
+
+        // Bind the 'Done' button on the popup.
+        uploadWidgetSubmit.click(function(event){
+            // Close the popup.
+            uploadPopup.close();
+        });
+
+        Dropzone.forElement('.upload-widget-dialog .upload-drag-drop').on('success', function(file, response){
+            if (response.status !== "false") {
+                var newFileElement = $(this.element).children().last();
+                var insertUploadWrapper = $('<div/>', {
+                    'class': 'upload-insert-button'
+                });
+
+                var insertUploadButton = $('<button/>', {
+                    'text': 'Insert file',
+                    'class': 'btn dull-button'
+                });
+                
+                var response_object = JSON.parse(response);
+                var key, uploadedFile;
+                for (key in response_object) {
+                    uploadedFile = response_object[key];
+                    break;
+                }
+
+                insertUploadButton.attr('value', uploadedFile['url']);
+                insertUploadButton.attr('name', uploadedFile['title']);
+
+                OC.editor.bindClickWithFileInsert(
+                    insertUploadButton, onUploadInsert, uploadPopup
+                );
+
+                insertUploadWrapper.append(insertUploadButton);
+                newFileElement.append(insertUploadWrapper);
+            } else {
+                OC.popup('The upload process failed due to some errors. ' +
+                    'Contact us if the problem persists. Error description below:' +
+                    response.error, 'Upload image failed'
+                );
+            }
+        });
+
+        return uploadPopup;
+    },
+
+    initImageUploaderTabs: function(){
+        OC.tabs('.article-image-uploader');
     },
 
     updateBreadcrumb: function(category_id){
@@ -649,10 +854,6 @@ OC.editor = {
         });
     },
 
-    initImageUploaderTabs: function(){
-        OC.tabs('.article-image-uploader');
-    },
-
     objectiveDeleteHandler: function(){
         // Get delete button and the block
         var deleteButton = $(this);
@@ -660,39 +861,6 @@ OC.editor = {
 
         // Remove the entire block from the DOM
         objectiveBlock.remove();
-    },
-
-    initDocumentMetaCollapser: function(){
-        var documentMetaCollapser = $('.document-meta-collapser');
-
-        OC.editor.repositionDocumentMetaCollapser(documentMetaCollapser);
-        OC.editor.bindDocumentMetaCollapserClick(documentMetaCollapser);
-    },
-
-    repositionDocumentMetaCollapser: function(documentMetaCollapser){
-        var articleTitle = $('#article-edit #article-title');
-
-        documentMetaCollapser.css('left', articleTitle.position().left - 40);
-        documentMetaCollapser.css('top', articleTitle.position().top + 10);
-    },
-
-    bindDocumentMetaCollapserClick: function(documentMetaCollapser){
-        var itemsToCollapse = $(
-            'table.document-visibility-license, .tags-drop-edit, .document-description-drop-edit');
-
-        documentMetaCollapser.click(function(){
-            if (documentMetaCollapser.hasClass('collapsed')){
-                itemsToCollapse.show();
-                documentMetaCollapser.removeClass('collapsed');
-            } else {
-                itemsToCollapse.hide();
-                documentMetaCollapser.addClass('collapsed');
-            }
-        });
-
-        // Temporarily collapse on page load.
-        itemsToCollapse.hide();
-        documentMetaCollapser.addClass('collapsed');
     },
 
     initExistingWidgets: function(){
@@ -834,79 +1002,123 @@ OC.editor = {
         }
     },
 
-    initAddWidget: function(){
-        var addWidgetButton = $('button.add-widget');
+    bindAddWidgetClickHandler: function(targetSelector){
+        var addWidgetButton = $(targetSelector);
+        addWidgetButton.click(OC.editor.addWidgetClickHandler);
+    },
 
-        addWidgetButton.click(function(event){
-            var addPopup = OC.customPopup('.add-document-widget-dialog');
-
-            var widgetSubmit = $('.add-document-widget-submit-button');
-            widgetSubmit.unbind('click');
-
-            var widgetElement;
-
-            // Bind the 'Done' button on the popup.
-            widgetSubmit.click(function(event){
-                var selectedOption = $(
-                    '.add-document-widget-dialog .add-widget-option.selected');
-
-                if (selectedOption.length >= 1){
-                    if (selectedOption.hasClass('table')){
-                        var tables =  $('.document-body .document-table');
-
-                        var newTable = OC.editor.widgets.table({'tableID': tables.length});
-                        $('.document-body').append(newTable);
-                        var appendedTableWrapper = $('.document-body .document-table:last');
-
-                        // Make cells CKEditor-able.
-                        $('td[contenteditable=true], th[contenteditable=true]', appendedTableWrapper).ckeditor();
-
-                        // Focus on the first cell.
-                        $('th:first', appendedTableWrapper).focus();
-
-                        // Allow resize of the columns.
-                        OC.editor.initTableResize(appendedTableWrapper);
-
-                        // Bind table actions with event handlers.
-                        OC.editor.bindTableActionHandlers(appendedTableWrapper);
-
-                        widget = appendedTableWrapper;
-                        widgetElement = $('table', appendedTableWrapper);
-
-                        // Add widget handlers.
-                        OC.editor.bindWidgetHandlers(widget, widgetElement);
-                        OC.editor.initWidgetSorting();
-                    } else if (selectedOption.hasClass('text-block')){
-                        var newTextBlock = OC.editor.widgets.textBlock();
-                        $('.document-body').append(newTextBlock);
-
-                        var appendedTextBlock = $('.document-body .document-textblock:last');
-                        $('textarea', appendedTextBlock).ckeditor(function(textarea){
-                            widgetElement = $('.cke', appendedTextBlock);
-                            widget = appendedTextBlock;
-
-                            // Add widget handlers.
-                            OC.editor.bindWidgetHandlers(widget, widgetElement);
-                            OC.editor.initWidgetSorting();
-                        });
-                    }
-                }
-
-                addPopup.close();
-            });
-
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
-        });
+    addWidgetClickHandler: function(event){
+        var addPopup = OC.customPopup('.add-document-widget-dialog'),
+            insertTarget = $(event.target);
 
         var widgetOption = $('.add-document-widget-dialog .add-widget-option');
-
         widgetOption.click(function(event){
             // Remove the 'selected' class from all other widget options.
             $('.add-document-widget-dialog .add-widget-option').removeClass('selected');
             $(event.target).closest('.add-widget-option').addClass('selected');
         });
+
+        var widgetSubmit = $('.add-document-widget-submit-button');
+        widgetSubmit.unbind('click');
+
+        var widgetElement;
+
+        // Bind the 'Next' button on the popup.
+        widgetSubmit.click(function(event){
+            var selectedOption = $(
+                '.add-document-widget-dialog .add-widget-option.selected');
+
+            if (selectedOption.length >= 1){
+                addPopup.close();
+
+                if (selectedOption.hasClass('video')){
+                    var addVideoPopup = OC.customPopup('.add-video-widget-dialog');
+
+                    videoWidgetSubmit = $('.add-video-widget-submit-button');
+                    videoWidgetSubmit.unbind('click');
+
+                    // Bind the 'Done' button on the popup.
+                    videoWidgetSubmit.click(function(event){
+                        // Close the popup.
+                        addVideoPopup.close();
+
+                        // Insert the video based on a _ template in the position
+                        //     of the old container block for resources.
+                        var urlInput = $('form#add-video-widget-form input[name=video_url]').val();
+
+                        if (urlInput.length > 0){
+                            var urlElement =  document.createElement('a');
+                            urlElement.href = urlInput;
+
+                            if (urlElement.hostname.indexOf('youtube') != -1){
+                                video_tag = urlElement.search.match('v=[^&]*')[0].substring(2);
+                                OC.editor.cke.insertHtml(OC.editor.youtubeVideoTemplate({'video_tag': video_tag}));
+                            } else if (urlElement.hostname.indexOf('vimeo') != -1) {
+                                // Very stupid way to obtain video URL.
+                                //     If this pathname has a closing '/', then substring until that, else just an
+                                //     open ended substring till the end.
+                                video_tag = urlElement.pathname.substring(1).indexOf(
+                                    '/') == -1 ? urlElement.pathname.substring(1) : urlElement.pathname.substring(
+                                    1, urlElement.pathname.substring(1).indexOf('/'));
+                                OC.editor.cke.insertHtml(OC.editor.vimeoVideoTemplate({'video_tag': video_tag}));
+                            }
+                        }
+                    });
+                } else if (selectedOption.hasClass('image')){
+                    OC.editor.initImageUploadDialog(OC.editor.onImageInsert);
+                } else if (selectedOption.hasClass('resource')){
+                    OC.editor.addInlineLinkPopout(OC.editor.onLinkInsert);
+                }  else if (selectedOption.hasClass('upload')){
+                    OC.editor.initUploadDialog(OC.editor.onUploadInsert);
+                }
+
+                /*
+                if (selectedOption.hasClass('table')){
+                    var tables =  $('.document-body .document-table');
+
+                    var newTable = OC.editor.widgets.table({'tableID': tables.length});
+                    $('.document-body').append(newTable);
+                    var appendedTableWrapper = $('.document-body .document-table:last');
+
+                    // Make cells CKEditor-able.
+                    $('td[contenteditable=true], th[contenteditable=true]', appendedTableWrapper).ckeditor();
+
+                    // Focus on the first cell.
+                    $('th:first', appendedTableWrapper).focus();
+
+                    // Allow resize of the columns.
+                    OC.editor.initTableResize(appendedTableWrapper);
+
+                    // Bind table actions with event handlers.
+                    OC.editor.bindTableActionHandlers(appendedTableWrapper);
+
+                    widget = appendedTableWrapper;
+                    widgetElement = $('table', appendedTableWrapper);
+
+                    // Add widget handlers.
+                    OC.editor.bindWidgetHandlers(widget, widgetElement);
+                    OC.editor.initWidgetSorting();
+                } else if (selectedOption.hasClass('text-block')){
+                    var newTextBlock = OC.editor.widgets.textBlock();
+                    $('.document-body').append(newTextBlock);
+
+                    var appendedTextBlock = $('.document-body .document-textblock:last');
+                    $('textarea', appendedTextBlock).ckeditor(function(textarea){
+                        widgetElement = $('.cke', appendedTextBlock);
+                        widget = appendedTextBlock;
+
+                        // Add widget handlers.
+                        OC.editor.bindWidgetHandlers(widget, widgetElement);
+                        OC.editor.initWidgetSorting();
+                    });
+                }*/
+            }
+
+        });
+
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
     },
 
     widgets: {
@@ -1168,7 +1380,7 @@ OC.editor = {
             linkToPopup.close();
 
             if (toResourceCollection){
-                callback($(toResourceCollection[0]).attr('href'), null);
+                callback($(toResourceCollection[0]), null);
             } else if (toURL){
                 callback(toURL, toURLText);
             }
@@ -1359,8 +1571,60 @@ $(function() {
     });
 });
 
+function attachUserID(file, xhr, formData){
+    formData.append('user', $('form.document-edit-form input[name=user]').val());
+}
+
+function attachCSRFToken(file, xhr, formData){
+    function getCookie(name) {
+        var cookieValue = null, cookies, i, cookie;
+        if (document.cookie && document.cookie !== '') {
+            cookies = document.cookie.split(';');
+            for (i = 0; i < cookies.length; i++) {
+                cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(
+                        cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function sameOrigin(url) {
+        // url could be relative or scheme relative or absolute
+        var host = document.location.host, // host + port
+            protocol = document.location.protocol,
+            sr_origin = '//' + host,
+            origin = protocol + sr_origin;
+
+        // Allow absolute or scheme relative URLs to same origin
+        return (url === origin || url.slice(
+            0, origin.length + 1) === origin + '/') ||
+            (url === sr_origin || url.slice(
+                0, sr_origin.length + 1) === sr_origin + '/') ||
+            // or any other URL that isn't scheme relative or absolute i.e
+            //     relative.
+            !(/^(\/\/|http:|https:).*/.test(url));
+    }
+    function safeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    var url = $(this)[0].options.url;
+
+    // HACK(Varun): Modified from original if statement, because the method
+    //     is not available to us here. Original 'if' below:
+    //     if (!safeMethod(settings.type) && sameOrigin(url))
+
+    if (sameOrigin(url)) {
+        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+    }
+}
+
 $(document).ready(function(){
-    $('.upload-drag-drop').dropzone({
+    $('.image-upload-dialog .upload-drag-drop').dropzone({
         url: '/api/image-upload/',
         createImageThumbnails: false
         /*previewTemplate: '<div class="dz-preview">' +
@@ -1368,95 +1632,24 @@ $(document).ready(function(){
             '<div class="dz-upload" data-dz-uploadprogress></div></div>' +
             '<div data-dz-errormessage></div>',*/
     });
+    Dropzone.forElement('.image-upload-dialog .upload-drag-drop').on('sending', attachUserID);
+    Dropzone.forElement('.image-upload-dialog .upload-drag-drop').on("sending", attachCSRFToken);
+
+    $('.upload-widget-dialog .upload-drag-drop').dropzone({
+        url: '/api/file-upload/',
+        createImageThumbnails: false,
+        maxFilesize: 5
+    });
 
     OC.editor.init();
 
     OC.editor.initImageUploaderTabs();
 
-    Dropzone.forElement('.upload-drag-drop').on('sending', function(file, xhr, formData){
-        formData.append('user_id', $('form.document-edit-form input[name=user]').val());
-    });
-
-    Dropzone.forElement('.upload-drag-drop').on('success', function(file, response){
-        if (response.status !== "false") {
-            // Make the name of the file content editable.
-            $('.dz-filename span', file.previewElement).attr(
-                'contenteditable', true);
-
-            var newFileElement = $(this.element).children().last();
-            var insertImageWrapper = $('<div/>', {
-                'class': 'image-insert-button'
-            });
-
-            var insertImageButton = $('<button/>', {
-                'text': 'Insert image',
-                'class': 'btn dull-button'
-            });
-            insertImageButton.attr('value', JSON.parse(response).url);
-
-            OC.editor.bindClickWithImageInsert(
-                insertImageButton, OC.editor.getImageUploadCallback()
-            );
-
-            insertImageWrapper.append(insertImageButton);
-            newFileElement.append(insertImageWrapper);
-        } else {
-            OC.popup('The upload process failed due to some errors. ' +
-                'Contact us if the problem persists. Error description below:' +
-                response.error, 'Upload image failed'
-            );
-        }
-
-    });
+    // Setup up Dropzone.
+    Dropzone.forElement('.upload-dialog .upload-drag-drop').on('sending', attachUserID);
 
     // TODO(Varun): Move this to a common place to a context agnostic upload lib
-    Dropzone.forElement('.upload-drag-drop').on("sending", function(file, xhr, formData){
-        function getCookie(name) {
-            var cookieValue = null, cookies, i, cookie;
-            if (document.cookie && document.cookie !== '') {
-                cookies = document.cookie.split(';');
-                for (i = 0; i < cookies.length; i++) {
-                    cookie = jQuery.trim(cookies[i]);
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(
-                            cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-        function sameOrigin(url) {
-            // url could be relative or scheme relative or absolute
-            var host = document.location.host, // host + port
-                protocol = document.location.protocol,
-                sr_origin = '//' + host,
-                origin = protocol + sr_origin;
-
-            // Allow absolute or scheme relative URLs to same origin
-            return (url === origin || url.slice(
-                0, origin.length + 1) === origin + '/') ||
-                (url === sr_origin || url.slice(
-                    0, sr_origin.length + 1) === sr_origin + '/') ||
-                // or any other URL that isn't scheme relative or absolute i.e
-                //     relative.
-                !(/^(\/\/|http:|https:).*/.test(url));
-        }
-        function safeMethod(method) {
-            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-        }
-
-        var url = $(this)[0].options.url;
-
-        // HACK(Varun): Modified from original if statement, because the method
-        //     is not available to us here. Original 'if' below:
-        //     if (!safeMethod(settings.type) && sameOrigin(url))
-
-        if (sameOrigin(url)) {
-            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-        }
-    });
+    Dropzone.forElement('.upload-dialog .upload-drag-drop').on("sending", attachCSRFToken);
 
     $('.tagit').tagit({
         allowSpaces: true
@@ -1473,9 +1666,6 @@ $(document).ready(function(){
 
     // Initialize the JS on widgets on page from load, such as in the case of edit.
     //OC.editor.initExistingWidgets();
-
-    // Initialize the add widget functionality.
-    //OC.editor.initAddWidget();
 
     /*
     $('#new-resource-document-form #submission-buttons button').click(function(event){

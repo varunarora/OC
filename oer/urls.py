@@ -57,6 +57,7 @@ urlpatterns = patterns(
     url(r'^api/editor-search/(?P<query>[\w\ ]+)/$', views.editor_autocomplete_search, name='editor-autocomplete'),
 
     url(r'^template/five-step-lesson-plan/$', views.template_five_step_lesson_plan, name='template_five_step_lesson_plan'),
+    url(r'^template/three-act-lesson/$', views.template_three_act_lesson, name='template_three_act_lesson'),
 
     url(r'^unit/(?P<unit_id>\d+)/(?P<unit_slug>[\w\-]+)/edit/$', views.edit_unit, name='edit_unit'),
 

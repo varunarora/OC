@@ -1,7 +1,7 @@
 CKEDITOR.plugins.add('lesson', {
     requires: 'widget',
     init: function(editor){
-        editor.widgets.add('lesson', {
+        editor.widgets.add('fiveStepLessonPlan', {
             allowedContent: 'div(!lesson-content); ' +
                 'div(!lesson-objective-goal-wrapper); ' +
                 'div(!lesson-objective); div(!lesson-objective-body); ' +
@@ -83,6 +83,40 @@ CKEDITOR.plugins.add('lesson', {
                 },
                 closingMaterials: {
                     selector: '.lesson-closing-materials-body'
+                }
+            }
+        });
+
+        editor.widgets.add('threeActLessonPlan', {
+            allowedContent: 'div(!lesson-content); ' +
+                'div(!lesson-act-one-resource-suggestion); div(!alesson-ct-one-body); ' +
+                'div(!lesson-act-two-resource-suggestion); div(!lesson-act-two-body); ' +
+                'div(!lesson-act-three-resource-suggestion); div(!lesson-act-three-body); ' +
+                'div(!lesson-sequel-resource-suggestion); div(!lesson-sequel-body); ',
+            upcast: function(element) {
+                return element.name == 'div' && (
+                    element.hasClass('lesson-act-one-body') ||
+                    element.hasClass('lesson-act-one-resource-suggestion') ||
+                    element.hasClass('lesson-act-two-body') ||
+                    element.hasClass('lesson-act-two-resource-suggestion') ||
+                    element.hasClass('lesson-act-three-body') ||
+                    element.hasClass('lesson-act-three-resource-suggestion') ||
+                    element.hasClass('lesson-sequel-body') ||
+                    element.hasClass('lesson-sequel-resource-suggestion')
+                );
+            },
+            editables: {
+                actOne: {
+                    selector: '.lesson-act-one-body'
+                },
+                actTwo: {
+                    selector: '.lesson-act-two-body'
+                },
+                actThree: {
+                    selector: '.lesson-act-three-body'
+                },
+                sequel: {
+                    selector: '.lesson-sequel-body'
                 }
             }
         });

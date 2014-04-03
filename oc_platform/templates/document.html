@@ -53,7 +53,7 @@
         {% if document_type == 'lesson' %}
         <div class="lesson-assist">
             <div class="lesson-assist-pullout">Tips and tricks</div>
-            <div class="lesson-assist-body">Yeh duniya, yeh duniya pittal di</div>
+            <div class="lesson-assist-body"></div>
         </div>
         {% else %}
         <div class="editor-search">
@@ -120,28 +120,46 @@
     </div>
     <div class="oc-popup-body">
         <div class="add-widget-options">
-            <div class="add-widget-option table">
+            <div class="add-widget-option video">
                 <div class="add-widget-thumbnail"></div>
                 <div class="add-widget-description">
-                    <div class="add-widget-description-title">TABLE</div>
+                    <div class="add-widget-description-title">VIDEO</div>
                     <div class="add-widget-description-info">
-                        Upto 3 column and unlimited row table
+                        An embeddable YouTube or Vimeo video link
                     </div>
                 </div>
             </div>
-            <div class="add-widget-option text-block">
+            <div class="add-widget-option image">
                 <div class="add-widget-thumbnail"></div>
                 <div class="add-widget-description">
-                    <div class="add-widget-description-title">SINGLE TEXT BLOCK</div>
+                    <div class="add-widget-description-title">IMAGE</div>
                     <div class="add-widget-description-info">
-                        Empty text block with formatting options
+                        A picture your previously uploaded or new one
+                    </div>
+                </div>
+            </div>
+            <div class="add-widget-option resource">
+                <div class="add-widget-thumbnail"></div>
+                <div class="add-widget-description">
+                    <div class="add-widget-description-title">MY FILE or FOLDER</div>
+                    <div class="add-widget-description-info">
+                        An existing file/document or folder in your files
+                    </div>
+                </div>
+            </div>
+            <div class="add-widget-option upload">
+                <div class="add-widget-thumbnail"></div>
+                <div class="add-widget-description">
+                    <div class="add-widget-description-title">UPLOAD NEW...</div>
+                    <div class="add-widget-description-info">
+                        A new file attachment upload
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="add-document-widget-submit-wrapper">
-            <button class="action-button add-document-widget-submit-button">Done</button>
+            <button class="action-button add-document-widget-submit-button oc-popup-submit-button">Next <span class="vertical-caret"></span></button>
         </div>
     </div>
 </div>
@@ -191,6 +209,40 @@
         </div>
     </div>
 </div>
+<div class="add-video-widget-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Add video...</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <p>YouTube or Vimeo video URL:</p>
+        <form id="add-video-widget-form">
+            <input type="text" name="video_url" />
+        </form>
+        <div class="add-video-widget-submit-wrapper">
+            <button class="action-button add-video-widget-submit-button oc-popup-submit-button">Done</button>
+        </div>
+    </div>
+</div>
+<div class="upload-widget-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Upload new...</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <div class="upload-new">
+            <div class="upload-drag-drop">
+            </div>
+            <div class="upload-drag-drop-message">
+                DRAG AND DROP YOUR FILES HERE
+            </div>
+        </div>
+        <div class="upload-widget-submit-wrapper oc-popup-submit-wrapper">
+            <button class="action-button upload-widget-submit-button oc-popup-submit-button">Done</button>
+        </div>
+    </div>
+</div>
+
 {% if document_type == 'lesson' %}
 <div class="lesson-path-dialog oc-popup">
     <div class="oc-popup-title-bar">
@@ -220,8 +272,6 @@
     </div>
 </div>
 {% endif %}
-<div class="popup-background"></div>
-
 
 {% include 'partials/image-upload.html' %}
 

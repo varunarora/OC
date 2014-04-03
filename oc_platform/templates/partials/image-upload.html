@@ -1,27 +1,38 @@
-<div title="Image upload" class="dialog" id="image-upload">
-    {% if user.is_authenticated  %}
-    <div class="article-image-uploader">
-        <nav class="article-image-uploader-tabs">
-            <ul>
-                <li><a href=".upload-new">Upload new</a></li>
-                <li><a href=".show-image-history">My Images</a></li>
-            </ul>
-        </nav>
-        <div class="article-image-uploader-content oc-tabs-content">
-            <div class="upload-new">
-                <div class="upload-drag-drop">
-                </div>
-                <div class="upload-drag-drop-message">
-                    DRAG AND DROP YOUR IMAGES HERE
-                </div>
-            </div>
-            <div class="show-image-history">
-                <div class="image-history-set">
-                </div>
-            </div>
-        </div>
+<div class="image-upload-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Insert image...</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
     </div>
-    {% else %}
-    You must be logged in to upload images and add them here.
-    {% endif %}
+    <div class="oc-popup-body">
+        {% if user.is_authenticated  %}
+        <div class="article-image-uploader">
+            <nav class="article-image-uploader-tabs">
+                <ul>
+                    <li><a href=".upload-new">Upload new</a></li>
+                    <li><a href=".show-image-history">My Images</a></li>
+                </ul>
+            </nav>
+            <div class="article-image-uploader-content oc-tabs-content">
+                <div class="upload-new">
+                    <div class="upload-drag-drop">
+                    </div>
+                    <div class="upload-drag-drop-message">
+                        DRAG AND DROP YOUR IMAGES HERE
+                    </div>
+                </div>
+                <div class="show-image-history">
+                    <div class="image-history-set">
+                    </div>
+                </div>
+            </div>
+            <div class="image-upload-submit-wrapper oc-popup-submit-wrapper">
+                <button class="action-button image-upload-submit-button oc-popup-submit-button">Done</button>
+            </div>
+
+        </div>
+        {% else %}
+        You must be logged in to upload images and add them here.
+        {% endif %}        
+    </div>
 </div>
+<div class="popup-background"></div>

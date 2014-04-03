@@ -1,0 +1,82 @@
+.editor-body
+
+    // Five step lesson plan template.
+    .lesson-objective-body, .lesson-goal-body,
+    .lesson-assessment-body, .lesson-points-body,
+    .lesson-opening-body, .lesson-opening-materials-body,
+    .lesson-introduction-body, .lesson-introduction-materials-body,
+    .lesson-guided-practice-body, .lesson-guided-practice-materials-body,
+    .lesson-independant-practice-body, .lesson-independant-practice-materials-body,
+    .lesson-closing-body, .lesson-closing-materials-body
+        border: 1px solid #bababa
+
+    // Three acts template.
+    .lesson-act-one-resource-suggestion, .lesson-act-two-resource-suggestion,
+    .lesson-act-three-resource-suggestion, .lesson-sequel-resource-suggestion
+        background-color: #efefef
+        color: #bababa
+        padding: 40px
+        padding-left: 90px
+        margin-bottom: 10px
+        @include sans-bold
+        font-size: 1.3em
+        background-image: url('../images/add-new-widget-icon.png')
+        background-position: 30px center
+        background-repeat: no-repeat
+
+    .lesson-act-one-body, .lesson-act-two-body, .lesson-act-three-body, .lesson-sequel-body
+        border: 1px solid #bababa
+
+    .cke_widget_wrapper:hover
+        .lesson-act-one-resource-suggestion, .lesson-act-two-resource-suggestion,
+        .lesson-act-three-resource-suggestion, .lesson-sequel-resource-suggestion
+
+            &.cke_widget_element
+            cursor: pointer
+
+
+.lesson-content
+    width: 800px
+
+    .lesson-objective-goal-wrapper, .lesson-opening-materials-wrapper,
+    .lesson-introduction-materials-wrapper, .lesson-guided-practice-materials-wrapper,
+    .lesson-independant-practice-materials-wrapper, .lesson-closing-materials-wrapper
+        overflow: hidden
+        margin-top: 10px
+        margin-bottom: 20px
+        padding: 10px
+        padding-top: 16px
+
+    .lesson-assessment, .lesson-points  
+        margin-bottom: 20px
+
+    .lesson-objective, .lesson-opening,
+    .lesson-introduction, .lesson-guided-practice,
+    .lesson-independant-practice, .lesson-closing
+        float: left
+        width: 300px
+
+    .lesson-goal, .lesson-opening-materials,
+    .lesson-introduction-materials, .lesson-guided-practice-materials,
+    .lesson-independant-practice-materials, .lesson-closing-materials
+        float: right
+        width: 300px
+
+    .lesson-objective-body, .lesson-goal-body,
+    .lesson-assessment-body, .lesson-points-body,
+    .lesson-opening-body, .lesson-opening-materials-body,
+    .lesson-introduction-body, .lesson-introduction-materials-body,
+    .lesson-guided-practice-body, .lesson-guided-practice-materials-body,
+    .lesson-independant-practice-body, .lesson-independant-practice-materials-body,
+    .lesson-closing-body, .lesson-closing-materials-body
+        margin-top: 5px
+        min-height: 100px
+
+        p:nth-child(1)
+            margin-top: 0px
+    
+    .lesson-act-one-body, .lesson-act-two-body, .lesson-act-three-body, .lesson-sequel-body
+        margin-top: 5px
+        min-height: 80px
+        margin-bottom: 30px
+

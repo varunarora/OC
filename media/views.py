@@ -10,7 +10,7 @@ def upload_image(request):
         form = UploadImage(request.POST, request.FILES)
 
         if form.is_valid():
-            user_id = request.POST.get('user_id')
+            user_id = request.POST.get('user')
             user = User.objects.get(pk=int(user_id))
 
             new_image = Image(
