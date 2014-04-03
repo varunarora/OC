@@ -639,7 +639,8 @@ def category_catalog(request, category):
         # If the child category tree and its flattened list structure isn't
         #     present in the cache, construct it again.
         # TODO(Varun): This operation is very slow. Need to optimize.
-        (childCategories, flatCategories) = buildChildCategories(
+        import meta.CategoryUtilities as catU
+        (childCategories, flatCategories) = catU.build_child_categories(
             {'root': [category]}, [])
         cache.set(cc_cache_key, (childCategories, flatCategories))
 
@@ -781,9 +782,10 @@ def catalog(request):
     articles.resources = Resource.objects.filter(
         visibility='public').order_by('-views')[:8]
 
+    import meta.CategoryUtilities as catU
     for category in page_categories:
         catalog_category = CatalogCategory()
-        (childCategories, flatCategories) = buildChildCategories(
+        (childCategories, flatCategories) = catU.build_child_categories(
             {'root': [category]}, []
         )
         categoryArticles = Article.objects.filter(
@@ -804,86 +806,10 @@ def catalog(request):
     return render(request, 'catalog.html', context)
 
 
-def buildChildCategories(categoryModel, flattenedDescendants):
-    """Given a category tree model and a flattened list of categories, build
-    a flushed out tree model recursively downwards.
-
-    This function recursively builds descendant trees and flattens them into
-    lists at every stage.
-
-    Args:
-        categoryModel: A dictionary based data-structure that represents a
-            tree. Comprises of keys mapped to lists or lists of dictionaries
-        flattenedDescendants: A flat list of all descendants to a category.
-
-    Returns:
-        A tuple of the categoryModel object and the flattenedDescendants,
-        after recursively adding all of the descendant categories.
-    """
-    if len(categoryModel) == 0:
-        return (None, flattenedDescendants)
-    else:
-        # Get all child categories whose children need to be found
-        catValues = categoryModel.values()
-
-        # Chain all the contents of the values
-        childCategories = list(itertools.chain.from_iterable(catValues))
-
-        # Create a master list [] of all { parent : [child, child] } mapping
-        children = map(_hasImmediateChildren, childCategories)
-
-        # Flatten the {} objects in the master list into one new dict
-        categoryModel = {}
-        for child in children:
-            try:
-                for k, v in child.iteritems():
-                    categoryModel[k] = v
-            except:
-                pass
-
-        # Call this function recursively to obtain the current models'
-        #     descendant child categories
-
-        (descendantsTree, descendantsFlattened) = buildChildCategories(
-            categoryModel, childCategories
-        )
-
-        # Append "my" descendants to the descendants of "my" children
-        flattenedDescendants += descendantsFlattened
-
-        if descendantsTree is not None:
-            # Iterate through all the dictionary keys, and replace the category
-            #     model items, and return the category model
-            for val in categoryModel.itervalues():
-                for v in val:
-                    for a, b in descendantsTree.iteritems():
-                        if a == v:
-                            val[val.index(v)] = {a: b}
-            return (categoryModel, flattenedDescendants)
-        else:
-            return (categoryModel, flattenedDescendants)
-
-
 def _replaceValues(model, key, newValue):
     model[key] = newValue
     return model
 
-
-def _hasImmediateChildren(category):
-    """Fetches and returns a list of categories who have a certain parent.
-
-    Args:
-        category: Parent category whose child categories are to be looked up.
-
-    Returns:
-        A single item dictionary with the parent as the key and child
-        categories serialized as list as the value
-    """
-    childCategories = list(Category.objects.filter(parent=category))
-    if len(childCategories) > 0:
-        return {category: childCategories}
-    else:
-        return None
 
 
 def categoryURLResolver(request, categories_slugs, n):

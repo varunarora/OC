@@ -1,0 +1,89 @@
+<script src="{{ STATIC_URL }}js/backbone-min.js" type="text/javascript"></script>
+<script src="{{ STATIC_URL }}js/search-results.js" type="text/javascript"></script>
+
+{% load highlight %}
+{% load stripper %}
+
+<div class="content-panel-body-header">
+    <h3>Search results for <span class="search-term">{{ query }}</span></h3>
+</div>
+
+<div class="search-filters">
+    <div class="search-filter">
+        <div class="search-filter-title">Type of content <span class="horizontal-caret-up breadcrumb-caret"></span></div>
+        <div class="search-filter-menu">
+            <label><input type="checkbox" name="type" value="article" checked />OpenCurriculum article</label>
+            <label><input type="checkbox" name="type" value="project" checked />OpenCurriculum project</label>
+            <label><input type="checkbox" name="type" value="audio-clip" checked />Audio clip</label>
+            <label><input type="checkbox" name="type" value="video" checked />Video clip</label>
+            <label><input type="checkbox" name="type" value="app-game" checked />App / game</label>
+            <label><input type="checkbox" name="type" value="image" checked />Image(s) / Graphic(s)</label>
+            <label><input type="checkbox" name="type" value="attachment" checked />PDF / PPT / Document</label>
+            <label><input type="checkbox" name="type" value="url" checked />External Webpage</label>
+        </div>
+    </div>
+    <div class="search-filter">
+        <div class="search-filter-title">License <span class="horizontal-caret-up breadcrumb-caret"></span></div>
+        <div class="search-filter-menu">
+            <label><input type="checkbox" name="license" value="CC-BY-SA" checked />Creative Commons</label>
+            <label><input type="checkbox"  name="license" value="gnu-fdl" checked />GNU / FDL</label>
+        </div>
+    </div>
+</div>
+{% if query %}
+    <div id="search-result-set">
+        <script type="text/javascript">
+        {% for result in page.object_list %}
+            {% if result.content_type == "articles.article" %}              
+            var result = new Result({
+                id: '{{ result.object.id }}',
+                url: '{% url articles:reader category_slug=result.object.category.slug %}?q={{ result.object.slug }}',
+                title: '{{ result.object.title }}',
+                {% with result.object.revision.body_markdown_html|striptags|escapejs as stripped_result %}
+                summary: '{% highlight stripped_result with query %}',
+                {% endwith %}
+                created: '{{ result.object.created }}',
+                user: '{{ result.object.revision.user }}',
+                difficulty: '{{ result.object.difficulty }}',
+                visibility: '{{ result.object.visibility }}',
+                cost: 'free',
+                license: '{{ result.object.license }}',
+                views: '{{ result.object.views }}',
+                type: 'article',
+                thumbnail: '{{ MEDIA_URL }}{{ result.object.image.name }}',
+                favorited: false
+            });
+            {% endif %}
+            {% if result.content_type == "oer.resource" and result.object.visibility == 'public' %}
+            var result = new Result({
+                id: '{{ result.object.id }}',
+                url: '{% url read resource_id=result.object.id resource_slug=result.object.slug %}',
+                title: '{{ result.object.title }}',
+                {% with result.object.description|striptags as stripped_result %}
+                summary: '{% highlight stripped_result with query %}',
+                {% endwith %}
+                created: '{{ result.object.created }}',
+                user: '{{ result.object.user }}',
+                difficulty: '{{ result.object.difficulty }}',
+                visibility: '{{ result.object.visibility }}',
+                cost: 'free',
+                license: '{{ result.object.license }}',
+                type: '{{ result.object.type }}',
+                views: '{{ result.object.views }}',
+                thumbnail: '{{ MEDIA_URL }}{{ result.object.image.name }}',
+                favorited: false
+            });
+            {% endif %}
+            resultSet.add(result);
+        {% empty %}
+            //<p>No results found.</p>
+        {% endfor %}
+        </script>
+
+    </div>
+{% endif %}
+
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<div class="loading-dialog oc-popup"></div>
+{% include 'partials/add.html' %}

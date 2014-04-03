@@ -1,0 +1,119 @@
+{% include 'partials/header.html' with body_class='browse' %}
+
+<script src="{{ STATIC_URL }}js/backbone-min.js" type="text/javascript"></script>
+<script src="{{ STATIC_URL }}js/category-resources.js" type="text/javascript"></script>
+
+<div class="center-spread resource-browse">
+    <div class="category-panel">
+        <div class="category-panel-listing">
+            <div class="category-choice-wrapper">
+                Categories based on <a class="category-choice">Common Core</a>
+            </div>
+            {% if query %}
+                <ul class="category-panel-listing-search-category">
+                    <li class="selected-category"><a href="">Search for '{{ query }}'</a></li>
+                </ul>
+            {% else %}
+            {% if selected_category.parent.slug != 'common-core' and selected_category.parent.slug != 'opencurriculum' %}
+                <a href="{{ return_url }}" class="category-return"><span class="reverse-vertical-caret"></span>Back to {{ selected_category.parent.parent.title }}</a>
+                <div class="category-parent">{{ selected_category.parent.title }}</div>
+            {% endif %}
+            {% endif %}
+
+            {% load browse_tags %}
+            {{ browse_tree|category_resource_navigation:selected_category|safe }}
+
+        </div>
+    </div>
+    <div class="content-panel">
+        <div class="content-panel-body-wrapper">
+            <div class="content-panel-body">
+                {% if query %}
+                <div class="content-panel-body-search">
+                {% include 'partials/search.html' %}
+                </div>
+                {% else %}
+                <div class="content-panel-body-header">
+                    <div class="content-panel-body-header-share action-button mini-action-button">Share new</div>
+                    <div>
+                        <h2>{{ selected_category.title }}</h2>
+                        All grade levels
+                    </div>
+                </div>
+                <div class="content-panel-body-listing">
+                    <div class="content-panel-body-listing-filters">
+                        <div class="content-panel-body-listing-filters-search">
+                            <form>
+                                <input type="text" placeholder="Filter search..." />
+                            </form>
+                        </div>
+                        <div class="content-panel-body-listing-filters-sort">
+                            <span class="sort-by">Sort by: </span><span class="filter-sort-option">Newest</span> <span class="filter-sort-option selected">Popularity</span>
+                            <div class="sort-by-type">All types<span class="sort-by-type-button"></div>
+                            <div class="sort-by-type-menu">
+                                <div class="sort-by-type-menu-content">
+                                    <h4>Content type</h4>
+                                    <label><input type="checkbox" name="type" value="lesson" checked />Lesson</label>
+                                    <label><input type="checkbox" name="type" value="project" checked />Project</label>
+                                    <label><input type="checkbox" name="type" value="worksheet" checked />Worksheet</label>
+                                    <label><input type="checkbox" name="type" value="handout" checked />Handout</label>
+                                    <label><input type="checkbox" name="type" value="activity" checked />Activity</label>
+                                    <label><input type="checkbox" name="type" value="test" checked />Test / assessment</label>
+                                    <label><input type="checkbox" name="type" value="lecture" checked />Lecture</label>
+                                </div>
+                                 <div class="sort-by-type-menu-format">
+                                    <h4>Format type</h4>
+                                    <label><input type="checkbox" name="type" value="document" checked />Document</label>
+                                    <label><input type="checkbox" name="type" value="slideshow" checked />Slideshow</label>
+                                    <label><input type="checkbox" name="type" value="website" checked />Website</label>
+                                    <label><input type="checkbox" name="type" value="video" checked />Video</label>
+                                    <label><input type="checkbox" name="type" value="audio" checked />Audio</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-panel-body-listing-items">
+                    <script type="text/javascript">
+                    {% for resource in resources %}
+                        var resource = new Resource({
+                            id: '{{ resource.id }}',
+                            url: '{% url read resource_id=resource.id resource_slug=resource.slug %}',
+                            title: '{{ resource.title }}',
+                            user: '{% resource.revision.user }}',
+                            user_thumbnail: '{{ MEDIA_URL }}{{ resource.revision.user.get_profile.profile_pic.name }}',
+                            user_url: '{% url user:user_profile username=resource.revision.user.username %}',
+                            favorites: '{{ resource.favorites_count }}',
+                            views: '{{ resource.views }}',
+                            type: '{{ resource.type|upper }}',
+                            thumbnail: '{{ MEDIA_URL }}{{ resource.image.name }}',
+                            favorited: false
+                        });
+                        resourceSet.add(resource);
+                    {% empty %}
+                        //<p>No results found.</p>
+                    {% endfor %}
+                    </script>
+                    </div>
+
+                    <div class="content-panel-body-listing-item">
+                        <div class="content-panel-body-listing-item-label-fold"></div>
+                        <div class="content-panel-body-listing-item-label">ACTIVITY</div>
+                        <div class="content-panel-body-listing-item-favorites">16</div>
+                        <div class="content-panel-body-listing-item-thumbnail"></div>
+                        <div class="content-panel-body-listing-item-thumbnail-shadow"></div>
+                        <div class="content-panel-body-listing-item-user-picture"></div>
+                        <div class="content-panel-body-listing-item-contents">
+                            <a href="" class="content-panel-body-listing-item-contents-caption">Figures of speech</a>
+                            <div class="content-panel-body-listing-item-contents-meta">302 views</div>
+                        </div>
+                    </div>
+
+                </div>
+                {% endif %}
+            </div>
+            {% include 'partials/footer.html' %}
+        </div>
+    </div>
+</div>
+

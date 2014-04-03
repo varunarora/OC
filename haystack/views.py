@@ -12,7 +12,7 @@ RESULTS_PER_PAGE = getattr(settings, 'HAYSTACK_SEARCH_RESULTS_PER_PAGE', 150)
 
 class SearchView(object):
     __name__ = 'SearchView'
-    template = 'search/search.html'
+    template = 'browse.html'
     extra_context = {}
     query = ''
     results = EmptySearchQuerySet()
@@ -273,7 +273,17 @@ class SanitizedSearchView(SearchView):
         filtered_resource_list = [item for item in page.object_list if item.content_type() == 'oer.resource']
         cu.set_resources_type([item.object for item in filtered_resource_list])
 
+        # Get browse tree for Common Core.
+        # TODO(Varun): Clean up hard code.
+        import meta.CategoryUtilities as catU
+        from meta.models import Category
+        default_category = Category.objects.get(slug='common-core')
+        (browse_tree, flattened_tree) = catU.build_child_categories(
+            {'root': [default_category]}, [])
+
         extra['page'] = page
         extra['paginator'] = paginator
         extra['title'] = self.query + " &lsaquo; OpenCurriculum"
+        extra['selected_category'] = default_category
+        extra['browse_tree'] = browse_tree
         return extra

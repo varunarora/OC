@@ -271,3 +271,40 @@ $chief-panel-height: 550px
 	100%
 		opacity: 0.4
 
+.center-spread
+	&.resource-browse
+		height: 700px
+		background-color: #efefef
+
+		.category-panel
+			background-color: #444
+			height: 100%
+			float: left
+
+			.category-panel-listing
+				float: right
+				width: $fill-panel-width
+
+
+		.content-panel
+			overflow: auto
+			float: right
+			height: 100%
+
+			.content-panel-body-wrapper
+				width: $key-panel-width
+
+				.content-panel-body
+					@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
+					margin-bottom: 5px
+					background-color: #ffffff
+
+					.content-panel-body-header
+						background-color: purple
+						height: 50px
+						padding: 20px
+						padding-top: 80px
+						color: #fff
+
+					.content-panel-body-listing
+						padding: 20px

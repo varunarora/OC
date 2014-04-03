@@ -30,6 +30,13 @@ $content-width: 960px
 	font-weight: bold
 	font-style: normal
 
+@mixin h3-styling
+	font-family: 'PT Sans', sans-serif
+	font-size: 1.5em
+	letter-spacing: -1px
+	margin-bottom: 12px
+	color: #444
+
 $header-height: 55px
 $header-prebanner-height: 4px
 
@@ -189,6 +196,18 @@ a
 	border-color: transparent transparent transparent #fff
 	height: 0px
 
+.reverse-vertical-caret
+	margin-left: 4px
+	margin-right: 8px
+	content: ""
+	display: inline-block
+	border-width: 5px 5px 5px 0px
+	border-style: solid
+	/* NEEDS ATTENTION */
+	border-color: transparent #999 transparent transparent
+	height: 0px
+
+
 .breadcrumbs-caret
 	margin-left: 8px
 	margin-right: 8px
@@ -247,11 +266,7 @@ h2
 	letter-spacing: -1px
 
 h3
-	font-family: 'PT Sans', sans-serif
-	font-size: 1.5em
-	letter-spacing: -1px
-	margin-bottom: 12px
-	color: #444
+	@include h3-styling
 
 article select#chapter-select
 	font-family: 'PT Sans', sans-serif
@@ -2656,6 +2671,9 @@ aside.page-menu-wrapper
 	width: 300px
 	height: 200px
 
+.add-video-widget-dialog
+	width: 300px
+
 .add-collaborator-wrapper
 	overflow: hidden
 	margin-top: 6px
@@ -3117,7 +3135,10 @@ body.editor
 			display: none
 			background-color: #fff
 			padding: 10px
+			overflow: auto
 
+			img
+				width: 95%
 
 	.editor-body
 		background-color: #fff
@@ -3377,56 +3398,7 @@ blockquote
 		border-bottom: 1px solid #efefef
 
 
-.editor-body
-	.lesson-objective-body, .lesson-goal-body,
-	.lesson-assessment-body, .lesson-points-body,
-	.lesson-opening-body, .lesson-opening-materials-body,
-	.lesson-introduction-body, .lesson-introduction-materials-body,
-	.lesson-guided-practice-body, .lesson-guided-practice-materials-body,
-	.lesson-independant-practice-body, .lesson-independant-practice-materials-body,
-	.lesson-closing-body, .lesson-closing-materials-body
-		border: 1px solid #bababa
-
-.lesson-content
-	width: 700px
-
-	.lesson-objective-goal-wrapper, .lesson-opening-materials-wrapper,
-	.lesson-introduction-materials-wrapper, .lesson-guided-practice-materials-wrapper,
-	.lesson-independant-practice-materials-wrapper, .lesson-closing-materials-wrapper
-		overflow: hidden
-		margin-top: 10px
-		margin-bottom: 20px
-		padding: 10px
-		padding-top: 16px
-
-	.lesson-assessment, .lesson-points	
-		margin-bottom: 20px
-
-	.lesson-objective, .lesson-opening,
-	.lesson-introduction, .lesson-guided-practice,
-	.lesson-independant-practice, .lesson-closing
-		float: left
-		width: 300px
-
-	.lesson-goal, .lesson-opening-materials,
-	.lesson-introduction-materials, .lesson-guided-practice-materials,
-	.lesson-independant-practice-materials, .lesson-closing-materials
-		float: right
-		width: 300px
-
-	.lesson-objective-body, .lesson-goal-body,
-	.lesson-assessment-body, .lesson-points-body,
-	.lesson-opening-body, .lesson-opening-materials-body,
-	.lesson-introduction-body, .lesson-introduction-materials-body,
-	.lesson-guided-practice-body, .lesson-guided-practice-materials-body,
-	.lesson-independant-practice-body, .lesson-independant-practice-materials-body,
-	.lesson-closing-body, .lesson-closing-materials-body
-		margin-top: 5px
-		min-height: 100px
-
-		p:nth-child(1)
-			margin-top: 0px
-
+@import "lesson"
 
 .lesson-path-dialog
 	.lesson-path-blank, .lesson-path-wizard
@@ -3625,6 +3597,269 @@ table#edit-unit-form-table
 				h4
 					font-size: 1.3em
 					padding-top: 70px
+
+
+.resource-browse
+	.category-panel
+		.category-panel-listing
+			.category-choice-wrapper
+				margin: 20px 0px
+				margin-bottom: 30px
+				color: $light-font
+				text-align: right
+				padding-right: 16px
+
+				.category-choice
+					color: #bababa
+
+			.category-return
+				color: #999
+				margin-bottom: 20px
+				display: block
+				outline: none
+
+				&:hover
+					color: #fff
+					text-decoration: none
+
+					.reverse-vertical-caret
+						border-color: transparent #fff transparent transparent
+
+			.category-parent
+				@include h3-styling
+				font-size: 1.8em
+				color: #bababa
+				margin-bottom: 20px
+
+			> ul
+				> li
+					> a
+						@include h3-styling
+						display: block
+						padding: 6px
+						padding-left: 12px
+						color: #efefef
+						@include border-radius(4px 0px 0px 4px)
+						outline: none
+
+						&:hover
+							color: #fff
+
+					&.selected-category
+						> a
+							background-color: #efefef
+							color: $body-color
+
+							&:hover
+								text-decoration: none
+								color: $body-color
+
+					ul
+						margin-left: 30px
+						margin-bottom: 30px
+
+						a
+							color: #bababa
+							line-height: 1.2em
+							outline: none
+
+							&:hover
+								color: #fff
+
+			ul.category-panel-listing-search-category
+				li.selected-category
+					padding
+					a
+						background-image: url('../images/search-icon-dark.png')
+						background-repeat: no-repeat
+						background-position: 8px center
+						padding-left: 30px
+
+	.content-panel
+		.content-panel-body-wrapper
+			.content-panel-body
+				.content-panel-body-search
+					.search-filters
+						padding: 20px
+
+					.content-panel-body-header
+						padding-top: 40px
+						height: 30px
+
+						h3
+							color: #bababa
+
+					#search-result-set
+						padding: 20px
+						padding-top: 0px
+
+				.content-panel-body-header-share
+					position: relative
+					top: 15px
+					left: 519px
+					margin-bottom: -19px
+					width: 75px
+					margin-left: -99px
+					text-align: center
+
+				.content-panel-body-listing
+					overflow: auto
+
+					.content-panel-body-listing-filters
+						height: 25px
+						margin-bottom: 20px
+
+						.content-panel-body-listing-filters-search
+							float: left
+
+							input
+								padding-left: 30px
+								background: url('../images/search-icon-light.png') no-repeat
+								background-position: 8px center
+
+						.content-panel-body-listing-filters-sort
+							float: right
+
+							.sort-by-type
+								display: inline-block
+								border: 1px solid #efefef
+								padding: 4px 8px
+								margin-left: 4px
+								cursor: pointer
+
+								.sort-by-type-button
+									display: inline-block
+									width: 16px
+									height: 15px
+									background: url('../images/downvote.png') no-repeat
+									background-position: center
+									background-size: 10px 10px
+									position: relative
+									float: right
+
+							.sort-by-type-menu
+								display: none
+								position: absolute
+								overflow: hidden
+								padding: 10px
+								@include box-shadow(0 2px 2px rgba(0, 0, 0, 0.4))
+								background-color: #fff
+								z-index: 10
+
+								&.show
+									display: block
+
+								.sort-by-type-menu-content
+									float: left
+									margin-right: 20px
+
+								.sort-by-type-menu-format
+									float: right
+
+							.filter-sort-option
+								color: $light-font
+
+								&.selected
+									color: $body-color
+									@include sans-bold
+
+							.sort-by
+								color: #bababa
+
+					.content-panel-body-listing-item
+						float: left
+						width: 165px
+						height: 160px
+						margin-right: 12px
+
+						.content-panel-body-listing-item-favorites
+							position: relative
+							top: 75px
+							width: 36px
+							height: 16px
+							margin-bottom: -16px
+							left: 118px
+							color: #666
+							background: url('../images/heart.png') no-repeat
+							background-position: 18px center
+							cursor: pointer
+							color: #fff
+							@include text-shadow(0 0px 1px rgba(0, 0, 0, 1))
+							@include sans-bold
+							z-index: 1
+
+							&.favorited
+								background-image: url('../images/hearted.png')
+
+						.content-panel-body-listing-item-label
+							position: relative
+							top: 10px
+							width: 60px
+							height: 12px
+							margin-bottom: -12px
+							background-color: orange
+							left: 95px
+							font-size: 0.8em
+							padding-left: 10px
+							padding-top: 2px
+							color: #fff
+
+						.content-panel-body-listing-item-label-fold
+							position: relative
+							top: 4px
+							width: 5px
+							height: 3px
+							margin-bottom: -6px
+							left: 160px
+							background-image: url('../images/label-fold.png')
+
+						.content-panel-body-listing-item-thumbnail
+							width: 160px
+							height: 100px
+							background-color: #efefef
+
+						.content-panel-body-listing-item-thumbnail-shadow
+							height: 40px
+							width: 160px
+							top: -40px
+							margin-bottom: -40px
+							position: relative
+							/* TODO: Custom IE styling in ie.sass */
+							@include background-image(linear-gradient(transparent, rgba(0,0,0, 0.2)))
+							//repeat scroll 0 0 rgba(0, 0, 0, 0)
+							z-index: 0
+						
+						.content-panel-body-listing-item-user-picture
+							position: relative
+							top: -45px
+							width: 40px
+							height: 40px
+							@include border-radius(20px)
+							background-image: url('../images/varun-arora.jpg')
+							background-size: cover
+							margin-bottom: -40px
+							left: 5px
+							background-color: #666
+							cursor: pointer
+							display: block
+
+
+						.content-panel-body-listing-item-contents
+							padding: 6px
+							
+							.content-panel-body-listing-item-contents-caption
+								display: block
+								color: $body-color
+								@include sans-bold
+
+							.content-panel-body-listing-item-contents-meta
+								margin-top: 4px
+								color: $light-font
+								font-size: 0.85em
+
+
+		footer
+			margin-top: 0px
 
 
 .worksheet-creator-frame

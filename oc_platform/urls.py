@@ -47,6 +47,9 @@ urlpatterns = patterns(
 
     url(r'^upload/', 'oer.views.upload_page', name='upload'),
 
+    url(r'^browse/(?P<category_slug>.+)/$', 'oer.views.browse', name='browse'),
+
+
     # User stuff
     url(r'^signup-invite/', 'oc_platform.views.signup_invite', name='signupinvite'),
     url(r'^signup/', 'user_account.views.register', name='register'),
