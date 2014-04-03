@@ -23,20 +23,27 @@ def browse(request, category_slug):
     # Determine the depth to figure out what level of page needs to be displayed.
     import meta.CategoryUtilities as catU
     try:
-        root_category = Category.objects.get(slug=categories_slugs[-2])
+        host_category = Category.objects.get(slug=categories_slugs[0])
 
-        selected_category = Category.objects.get(slug=categories_slugs[-1])
+        (host_browse_tree, host_flattened_tree) = catU.build_child_categories(
+            {'root': [host_category]}, [])
+        for category in host_flattened_tree:
+            if category.slug == categories_slugs[-1]:
+                selected_category = category
 
-        return_url = reverse(
-            'browse', kwargs={
-                'category_slug': catU.build_breadcrumb(selected_category.parent.parent)[0].url
-            }
-        )
+        if len(categories_slugs) == 1:
+            root_category = selected_category
+            return_url = None
+        else:
+            root_category = selected_category.parent
+            return_url = reverse(
+                'browse', kwargs={
+                    'category_slug': catU.build_breadcrumb(selected_category.parent.parent)[0].url
+                }
+            )
     except:
-        # Happens either when the slug is not found or when its the root.
-        root_category = Category.objects.get(slug=categories_slugs[-1])
-        selected_category = root_category
-        return_url = None
+        # Happens either when the slug is not found.
+        raise Http404
 
     (browse_tree, flattened_tree) = catU.build_child_categories(
         {'root': [root_category]}, [])
@@ -44,6 +51,7 @@ def browse(request, category_slug):
     # Fetch the resources in the current category and everything nested within.
     (current_browse_tree, current_flattened_tree) = catU.build_child_categories(
         {'root': [selected_category]}, [])
+
 
     all_resources = []
     for category in current_flattened_tree:
