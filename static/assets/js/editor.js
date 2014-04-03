@@ -123,8 +123,8 @@ OC.editor = {
             'The visual is clear. The camera is locked to a tripod and focused. No words are necessary. ' +
             'I\'m not saying anyone is going to shell out ten dollars on date night to do this math problem ' +
             'but you have a visceral reaction to the image. It strikes you right in the curiosity bone.' +
-            'Leave no one out of your first act. Your first act should impose as few demands on the students ' +
-            'as possible — either of language or of math. It should ask for little and offer a lot.',
+            '<p>Leave no one out of your first act. Your first act should impose as few demands on the students ' +
+            'as possible — either of language or of math. It should ask for little and offer a lot.</p>',
 
         'lesson-act-two-body': '<strong>The protagonist/student overcomes obstacles, looks for resources, and develops new tools.</strong>' +
             '<p>Before he resolves his largest conflict, Luke Skywalker resolves a lot of smaller ones — find a pilot, ' +
@@ -1646,10 +1646,10 @@ $(document).ready(function(){
     OC.editor.initImageUploaderTabs();
 
     // Setup up Dropzone.
-    Dropzone.forElement('.upload-dialog .upload-drag-drop').on('sending', attachUserID);
+    Dropzone.forElement('.upload-widget-dialog .upload-drag-drop').on('sending', attachUserID);
 
     // TODO(Varun): Move this to a common place to a context agnostic upload lib
-    Dropzone.forElement('.upload-dialog .upload-drag-drop').on("sending", attachCSRFToken);
+    Dropzone.forElement('.upload-widget-dialog .upload-drag-drop').on("sending", attachCSRFToken);
 
     $('.tagit').tagit({
         allowSpaces: true
