@@ -25,7 +25,7 @@ CKEDITOR.config.toolbar_Full = [
 ['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],
 [ 'NumberedList','BulletedList'],
 ['InternalLink', 'InternalUnlink'],
-['OCImage', 'Attach']
+['OCImage', 'Video', 'Attach']
 ];
 
 CKEDITOR.config.toolbar = 'Basic';
