@@ -941,7 +941,8 @@ def list_collection(request, username, collection_slug):
     child_collections = cu._get_child_collections(collection)
     child_units = cu._get_child_unit_collections(collection.units.all())
 
-    resources = root_assets.all()
+    # TODO(Varun): Fix temporary hack of only listing top 20 files for loading sake.
+    resources = root_assets.all()[:20]
     cu.set_resources_type(resources)
 
     cu.preprocess_collection_listings(resources, child_collections)
