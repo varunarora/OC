@@ -70,20 +70,16 @@ var ResourceView = Backbone.View.extend({
     },
 
     favorite: function(event){
-        this.$('.content-panel-body-listing-item-favorites').toggleClass('favorited');
-        /*
         OC.favoriteClickHandler(
-            this.model.get('id'), OC.config.user.id, this.$(
-                '.resource-favorite-wrapper'), event, this.favoriteCallback, this.unfavoriteCallback);
-            */
+            this.model.get('id'), OC.config.user.id, event, this.favoriteCallback, this.unfavoriteCallback);
     },
 
-    favoriteCallback: function(resourceFavoriteWrapper){
-        $('.resource-favorite', resourceFavoriteWrapper).text('Favorited');
+    favoriteCallback: function(resourceFavorite){
+        resourceFavorite.text(parseInt(resourceFavorite.text(), 10) + 1);
     },
 
     unfavoriteCallback: function(resourceFavoriteWrapper){
-        $('.resource-favorite', resourceFavoriteWrapper).text('Favorite');
+        resourceFavorite.text(parseInt(resourceFavorite.text(), 10) - 1);
     }
 });
 

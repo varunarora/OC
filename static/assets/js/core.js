@@ -952,7 +952,7 @@ var OC = {
     },
 
     emailShareHandler: function(){
-        $('#share-on-email').click(function () {
+        $('.share-on-email').click(function () {
             $("#email-share-dialog").dialog({
                 modal: true,
                 open: false,
@@ -1010,18 +1010,27 @@ var OC = {
     },
 
     setupShareMenu: function(){
+        var sharePopup;
+
         // Do not treat the click action as a regular href click
-        $('li.share-action > a').click(function(event){
+        $('button.share-button').click(function(event){
+            sharePopup = OC.customPopup('.share-dialog');
+
             event.preventDefault();
             event.stopPropagation();
             return false;
         });
 
+         $('.share-on-email').click(function(event){
+            sharePopup.close();
+         });
+
+        /*
         $('li.share-action, nav#share-menu').mouseenter(function () {
             $('#share-menu').addClass('showMenu');
         }).mouseleave(function () {
             $('#share-menu').removeClass('showMenu');
-        });
+        });*/
     },
 
     setupAddTo: function(){
@@ -1619,6 +1628,10 @@ var OC = {
         });
     },
 
+    initResourceView: function(){
+        $('.history-action img').tipsy({gravity: 'w'});
+    },
+
     initFavoriteResource: function(){
         // Determine if this user has favorited this resource.
         var resourceID = $('form#resource-form input[name=resource_id]').val(),
@@ -1628,13 +1641,12 @@ var OC = {
         //     returning the value of the first form (all having the same user ID).
         var profileUserID = $('form.profile-favorite-form input[name=user_id]').val();
 
-        var resourceFavoriteWrapper = $('li.favorite-action'),
-            resourceFavoriteButton = $('a', resourceFavoriteWrapper);
+        var resourceFavoriteButton = $('button.favorite-button');
 
         function setFavoriteState(resourceID, state){
             if (state){
-                resourceFavoriteWrapper.addClass('favorited');
-                resourceFavoriteButton.attr('title', 'Unfavorite');
+                resourceFavoriteButton.addClass('favorited');
+                resourceFavoriteButton.text('Favorited');
             }
         }
 
@@ -1643,11 +1655,9 @@ var OC = {
 
             resourceFavoriteButton.click(function(event){
                 OC.favoriteClickHandler(
-                    resourceID, userID, resourceFavoriteWrapper, event);
+                    resourceID, userID, event);
             });
 
-            // Tipsy the favorite button.
-            resourceFavoriteButton.tipsy({ gravity: 's'});
         } else {
             resourceFavoriteButton.click(function(event){
                 OC.popup('You must be logged in to favorite a resource',
@@ -1660,19 +1670,19 @@ var OC = {
         }
     },
 
-    favoriteClickHandler: function(resourceID, userID, resourceFavoriteWrapper, event, favoriteCallback, unfavoriteCallback){
-        var resourceFavoriteButton = $('a', resourceFavoriteWrapper);
+    favoriteClickHandler: function(resourceID, userID, event, favoriteCallback, unfavoriteCallback){
+        var resourceFavoriteButton = $(event.target);
         $.get('/interactions/favorite/resource/' + resourceID + '/user/' + userID + '/',
             function(response){
                 if (response.status == 'true'){
-                    resourceFavoriteWrapper.addClass('favorited');
+                    resourceFavoriteButton.addClass('favorited');
                     resourceFavoriteButton.text('Favorited');
-                    favoriteCallback(resourceFavoriteWrapper);
+                    favoriteCallback(resourceFavoriteButton);
                 }
                 else if (response.status == 'unfavorite success'){
-                    resourceFavoriteWrapper.removeClass('favorited');
+                    resourceFavoriteButton.removeClass('favorited');
                     resourceFavoriteButton.text('Favorite');
-                    unfavoriteCallback(resourceFavoriteWrapper);
+                    unfavoriteCallback(resourceFavoriteButton);
                 }
             },
         'json');
@@ -1836,6 +1846,23 @@ var OC = {
     },
 
     initExportResource: function(){
+        // Do not treat the click action as a regular href click
+        $('li.download-as a').click(function(event){
+            $('#download-menu').addClass('showMenu');
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+
+        $('li.download-as, nav#download-menu').mouseenter(function () {
+            $('#download-menu').addClass('showMenu');
+        }).mouseleave(function () {
+            $('#download-menu').removeClass('showMenu');
+        });
+
+        OC.setUpMenuPositioning('nav#download-menu', 'li.download-as', false);
+
         $('.export-action a').click(function(event){
             // Pull up a popup showing progress.
             var exportDialog = OC.customPopup('.export-document-pdf-dialog'),
@@ -3315,6 +3342,8 @@ jQuery(document).ready(function ($) {
     OC.comments.initRenderComments();
 
     OC.initUpvoteDownvoteResource();
+
+    OC.initResourceView();
 
     OC.initPrintResource();
 

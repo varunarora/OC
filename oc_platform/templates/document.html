@@ -2,6 +2,7 @@
 
 <script type="text/javascript">
     OC.document_type = '{{ document_type }}';
+    OC.document_act = '{{ act }}'
 </script>
 
 <form id="new-resource-document-form" class="document-edit-form resource-create-edit-form" method="POST">
@@ -95,6 +96,11 @@
         </div>
         {% endif %}
         <div class="center-stage editor-body" contentEditable="true">
+            {% for document_element in resource.data %}
+            <div class="document-textblock document-element">
+                {{ document_element.element.body.data|safe }}
+            </div>
+            {% endfor %}
         </div>
         <div class="editor-frame-result-clones">
         </div>

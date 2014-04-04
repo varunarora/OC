@@ -202,7 +202,7 @@ OC.editor = {
                 'padding-top'), 10)) + 'px');
 
         OC.editor.cke = editorBody.ckeditor({
-            extraPlugins: 'internallink,sharedspace,resources,lesson,upload',
+            extraPlugins: 'internallink,sharedspace,resources,lesson,upload,video',
             startupFocus: true,
             sharedSpaces: {
                 top: 'editor-toolbar'
@@ -212,71 +212,75 @@ OC.editor = {
 
         // Open dialog to ask for path choice.
         if (OC.document_type == 'lesson'){
-            var lessonPathDialog = OC.customPopup('.lesson-path-dialog');
-            var lessonTemplateDialog;
+            // Initialize lesson assist panel.
+            OC.editor.lessonAssist = $('.lesson-assist');
 
-            $('.lesson-path-blank', lessonPathDialog.dialog).click(function(event){
-                lessonPathDialog.close();
+            if (OC.document_act == 'edit' || OC.document_act == 'remix') {
+                OC.editor.lessonAssist.addClass('hide');
 
-                lessonTemplateDialog = OC.customPopup('.lesson-template-dialog');
+            } else if (OC.document_act == 'add') {
+                OC.editor.lessonAssistPullout = $('.lesson-assist-pullout');
+                OC.editor.lessonAssistBody = $('.lesson-assist-body');
+                
+                var UPPER_SPACE = 40;
 
-                $('.lesson-template-option', lessonTemplateDialog.dialog).click(function(){
-                    // Remove all the selected options.
-                    $('.lesson-template-option.selected').removeClass('selected');
-
-                    $(this).addClass('selected');
+                OC.editor.lessonAssist.css({
+                    'top': OC.editor.editorFrame.outerHeight(
+                        true) + OC.editor.editorFrame.offset().top - OC.editor.lessonAssistPullout.outerHeight(true)
                 });
 
-                $('.lesson-template-submit-button', lessonTemplateDialog.dialog).click(function(){
-                    lessonTemplateDialog.close();
+                OC.editor.lessonAssistBody.css({
+                    'height': OC.editor.editorFrame.outerHeight(true) - (
+                        UPPER_SPACE + OC.editor.lessonAssistPullout.outerHeight(true))
+                });
 
-                    // Initialize lesson assist panel.
-                    OC.editor.lessonAssist = $('.lesson-assist');
-                    OC.editor.lessonAssistPullout = $('.lesson-assist-pullout');
-                    OC.editor.lessonAssistBody = $('.lesson-assist-body');
-                    
-                    var UPPER_SPACE = 40;
-
-                    OC.editor.lessonAssist.css({
-                        'top': OC.editor.editorFrame.outerHeight(
-                            true) + OC.editor.editorFrame.offset().top - OC.editor.lessonAssistPullout.outerHeight(true)
-                    });
-
-                    OC.editor.lessonAssistBody.css({
-                        'height': OC.editor.editorFrame.outerHeight(true) - (
-                            UPPER_SPACE + OC.editor.lessonAssistPullout.outerHeight(true))
-                    });
-
-                    OC.editor.lessonAssistPullout.click(function(event){
-                        if (OC.editor.lessonAssist.hasClass('open')){
-                            OC.editor.closeLessonAssist(true);
-                        } else {
-                            OC.editor.openLessonAssist();
-                        }
-                    });
-
-                    // Initialize the document with the lesson plan template.
-                    var editor = editorBody.ckeditorGet();
-                    
-                    //editor.on('instanceReady', function(){
-                    
-                    function onTemplateLoad(tips){
-                        // Attach focus handler with fields with suggestions.
-                        OC.editor.attachLPWidgetFocusHandler(tips);
-                    }
-
-                    // Get the selected template option.
-                    var selectedTemplateOption = $(
-                        '.lesson-template-option.selected', lessonTemplateDialog.dialog);
-                    
-                    if (selectedTemplateOption.hasClass('lesson-template-option-five-step')) {
-                        OC.editor.insertFiveStepLessonTemplate(editor, onTemplateLoad);
+                OC.editor.lessonAssistPullout.click(function(event){
+                    if (OC.editor.lessonAssist.hasClass('open')){
+                        OC.editor.closeLessonAssist(true);
                     } else {
-                        OC.editor.insertThreeActLessonTemplate(editor, onTemplateLoad);
+                        OC.editor.openLessonAssist();
                     }
-
                 });
-            });
+
+                var lessonPathDialog = OC.customPopup('.lesson-path-dialog');
+                var lessonTemplateDialog;
+
+                $('.lesson-path-blank', lessonPathDialog.dialog).click(function(event){
+                    lessonPathDialog.close();
+
+                    lessonTemplateDialog = OC.customPopup('.lesson-template-dialog');
+
+                    $('.lesson-template-option', lessonTemplateDialog.dialog).click(function(){
+                        // Remove all the selected options.
+                        $('.lesson-template-option.selected').removeClass('selected');
+
+                        $(this).addClass('selected');
+                    });
+
+                    $('.lesson-template-submit-button', lessonTemplateDialog.dialog).click(function(){
+                        lessonTemplateDialog.close();
+
+                        // Initialize the document with the lesson plan template.
+                        var editor = editorBody.ckeditorGet();
+                        
+                        function onTemplateLoad(tips){
+                            // Attach focus handler with fields with suggestions.
+                            OC.editor.attachLPWidgetFocusHandler(tips);
+                        }
+
+                        // Get the selected template option.
+                        var selectedTemplateOption = $(
+                            '.lesson-template-option.selected', lessonTemplateDialog.dialog);
+                        
+                        if (selectedTemplateOption.hasClass('lesson-template-option-five-step')) {
+                            OC.editor.insertFiveStepLessonTemplate(editor, onTemplateLoad);
+                        } else {
+                            OC.editor.insertThreeActLessonTemplate(editor, onTemplateLoad);
+                        }
+
+                    });
+                });
+            }
         }
 
         // -----------------------------------------------------
@@ -794,7 +798,7 @@ OC.editor = {
                 insertUploadButton.attr('name', uploadedFile['title']);
 
                 OC.editor.bindClickWithFileInsert(
-                    insertUploadButton, onUploadInsert, uploadPopup
+                    insertUploadButton, callback, uploadPopup
                 );
 
                 insertUploadWrapper.append(insertUploadButton);
@@ -808,6 +812,41 @@ OC.editor = {
         });
 
         return uploadPopup;
+    },
+
+    initInsertVideoDialog: function(){
+       var addVideoPopup = OC.customPopup('.add-video-widget-dialog');
+
+        videoWidgetSubmit = $('.add-video-widget-submit-button');
+        videoWidgetSubmit.unbind('click');
+
+        // Bind the 'Done' button on the popup.
+        videoWidgetSubmit.click(function(event){
+            // Close the popup.
+            addVideoPopup.close();
+
+            // Insert the video based on a _ template in the position
+            //     of the old container block for resources.
+            var urlInput = $('form#add-video-widget-form input[name=video_url]').val();
+
+            if (urlInput.length > 0){
+                var urlElement =  document.createElement('a');
+                urlElement.href = urlInput;
+
+                if (urlElement.hostname.indexOf('youtube') != -1){
+                    video_tag = urlElement.search.match('v=[^&]*')[0].substring(2);
+                    OC.editor.cke.insertHtml(OC.editor.youtubeVideoTemplate({'video_tag': video_tag}));
+                } else if (urlElement.hostname.indexOf('vimeo') != -1) {
+                    // Very stupid way to obtain video URL.
+                    //     If this pathname has a closing '/', then substring until that, else just an
+                    //     open ended substring till the end.
+                    video_tag = urlElement.pathname.substring(1).indexOf(
+                        '/') == -1 ? urlElement.pathname.substring(1) : urlElement.pathname.substring(
+                        1, urlElement.pathname.substring(1).indexOf('/'));
+                    OC.editor.cke.insertHtml(OC.editor.vimeoVideoTemplate({'video_tag': video_tag}));
+                }
+            }
+        });
     },
 
     initImageUploaderTabs: function(){
@@ -1032,38 +1071,7 @@ OC.editor = {
                 addPopup.close();
 
                 if (selectedOption.hasClass('video')){
-                    var addVideoPopup = OC.customPopup('.add-video-widget-dialog');
-
-                    videoWidgetSubmit = $('.add-video-widget-submit-button');
-                    videoWidgetSubmit.unbind('click');
-
-                    // Bind the 'Done' button on the popup.
-                    videoWidgetSubmit.click(function(event){
-                        // Close the popup.
-                        addVideoPopup.close();
-
-                        // Insert the video based on a _ template in the position
-                        //     of the old container block for resources.
-                        var urlInput = $('form#add-video-widget-form input[name=video_url]').val();
-
-                        if (urlInput.length > 0){
-                            var urlElement =  document.createElement('a');
-                            urlElement.href = urlInput;
-
-                            if (urlElement.hostname.indexOf('youtube') != -1){
-                                video_tag = urlElement.search.match('v=[^&]*')[0].substring(2);
-                                OC.editor.cke.insertHtml(OC.editor.youtubeVideoTemplate({'video_tag': video_tag}));
-                            } else if (urlElement.hostname.indexOf('vimeo') != -1) {
-                                // Very stupid way to obtain video URL.
-                                //     If this pathname has a closing '/', then substring until that, else just an
-                                //     open ended substring till the end.
-                                video_tag = urlElement.pathname.substring(1).indexOf(
-                                    '/') == -1 ? urlElement.pathname.substring(1) : urlElement.pathname.substring(
-                                    1, urlElement.pathname.substring(1).indexOf('/'));
-                                OC.editor.cke.insertHtml(OC.editor.vimeoVideoTemplate({'video_tag': video_tag}));
-                            }
-                        }
-                    });
+                    OC.editor.initInsertVideoDialog();
                 } else if (selectedOption.hasClass('image')){
                     OC.editor.initImageUploadDialog(OC.editor.onImageInsert);
                 } else if (selectedOption.hasClass('resource')){

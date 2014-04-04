@@ -79,14 +79,84 @@
 		display: inline-block
 
 .oer-title
+	padding-top: 4px
+
 	h2
 		display: inline-block
+		float: left
 
 	.oer-title-revision
 		font-size: 1.8em
 		font-family: "PT Sans", sans-serif
 		color: #bababa
 		letter-spacing: -1px
+		float: left
+
+	.history-action
+		margin-left: 10px
+
+.oer-title, .resource-big-actions
+	height: 28px
+
+
+.resource-big-actions-wrapper, .resource-actions-wrapper
+	width: 100%
+	overflow: hidden
+
+.resource-big-actions, .resource-actions
+	float: right
+
+.resource-big-actions
+	button.mini-action-button, a.mini-action-button
+		margin-left: 6px
+		padding-left: 28px
+		background-position: 8px center
+		background-repeat: no-repeat
+
+.resource-big-actions
+	button.mini-action-button
+		&.favorite-button
+			background-image: url('../images/heart-light.png')
+
+			&.favorited
+				background-image: url('../images/hearted-light.png')
+
+		&.share-button
+			background-image: url('../images/share-icon.png')
+
+	a.mini-action-button
+		height: 16px
+		padding-top: 6px
+		text-decoration: none
+
+		&.remix-button
+			background-image: url('../images/remix-light.png')
+
+.resource-actions
+	> li
+		float: left
+		margin: 0px 00px 0px 16px
+		padding: 2px 4px
+		@include border-radius(2px 2px 2px 2px)
+
+		a
+			color: #666
+			font-size: 0.87em
+			@include sans-bold
+
+			&:hover
+				text-decoration: none
+				color: #333
+
+.resource-author-thumbnail
+	width: 46px
+	height: 46px
+	margin-left: 4px
+	margin-right: 10px
+	@include border-radius(23px)
+	background-size: cover
+	float: left
+
 
 .oer-info-caption
 	color: #bababa
@@ -111,3 +181,50 @@
 	float: right
 	margin: 10px 10px
 	margin-bottom: -20px
+
+.resource-view
+	background-color: #efefef
+
+.resource-body
+	background-color: #fff
+
+	&.lesson, &.document
+		margin-top: 20px
+		width: 840px
+		padding: 60px
+		@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
+
+.share-options
+	margin-top: 10px
+
+	a
+		display: block
+		width: 94%
+		text-align: center
+		margin: 2px 0px
+		background-position: 10px center
+		background-repeat: no-repeat
+
+		&.share-on-facebook
+			background-image: url('../images/social-icons/f.png')
+
+			&:hover
+				background-image: url('../images/social-icons/f-hover.png')
+
+		&.share-on-email
+			background-image: url('../images/social-icons/e.png')
+
+			&:hover
+				background-image: url('../images/social-icons/e-hover.png')			
+
+		&.share-on-twitter
+			background-image: url('../images/social-icons/t.png')
+
+			&:hover
+				background-image: url('../images/social-icons/t-hover.png')
+
+		&.share-on-plus
+			background-image: url('../images/social-icons/g.png')
+
+			&:hover
+				background-image: url('../images/social-icons/g-hover.png')

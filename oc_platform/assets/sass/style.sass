@@ -735,6 +735,7 @@ nav#authenticate-buttons, nav#user-buttons
 					
 nav#user-menu.showMenu,
 nav#share-menu.showMenu,
+nav#download-menu.showMenu,
 nav#notifications-menu.showMenu,
 nav#add-resource-menu.showMenu,
 nav#license-menu.showMenu,
@@ -743,6 +744,7 @@ nav#tags-menu.showMenu
 
 nav#user-menu,
 nav#share-menu,
+nav#download-menu,
 nav#notifications-menu,
 nav#add-resource-menu,
 nav#license-menu,
@@ -823,7 +825,7 @@ nav#user-menu
 		background-position: 145px bottom
 		z-index: 10
 
-nav#share-menu
+nav#share-menu, nav#download-menu
 	z-index: 5
 	width: 120px
 
@@ -1684,6 +1686,10 @@ table
 .page-action-button
 	background-color: #5ABD02
 
+	&:hover
+		background-color: #3D7F01
+
+
 .action-button
 	background-color: #557799
 	margin-left: 6px
@@ -1692,6 +1698,7 @@ table
 		text-decoration: none
 		background-color: #2D6699
 
+.page-action-button, .action-button
 	&.mini-action-button
 		padding: 5px 12px
 
@@ -3124,6 +3131,9 @@ body.editor
 		width: 300px
 		right: 40px
 		@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.1))
+
+		&.hide
+			display: none
 
 		.lesson-assist-pullout
 			background-color: #404040

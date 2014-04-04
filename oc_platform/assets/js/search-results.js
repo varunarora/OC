@@ -56,9 +56,8 @@ var ResultsView = Backbone.View.extend({
         "<div class=\"search-result-description\"><%= summary %></a></div>" +
         "<div class=\"search-result-meta\"><div class=\"search-result-meta-views\">" +
         "<%= views %> views</div><div class=\"search-result-meta-actions\">" +
-        "<span class=\"resource-favorite-wrapper<% if (favorited) { %> " +
-        "favorited<% } %>\"><a class=\"resource-favorite\">" +
-        "<% if (favorited) {%>Favorited<% } else {%>Favorite<% }%></a></span>" +
+        "<span class=\"resource-favorite<% if (favorited) { %> favorited<% } %>\">" +
+        "<% if (favorited) {%>Favorited<% } else {%>Favorite<% }%></span>" +
         "<a class=\"resource-copy\">Copy</a>" +
         "<a class=\"resource-remix\">Remix</a></div></div></div>"),
 
@@ -81,8 +80,7 @@ var ResultsView = Backbone.View.extend({
 
     favorite: function(event){
         OC.favoriteClickHandler(
-            this.model.get('id'), OC.config.user.id, this.$(
-                '.resource-favorite-wrapper'), event, this.favoriteCallback, this.unfavoriteCallback);
+            this.model.get('id'), OC.config.user.id, event, this.favoriteCallback, this.unfavoriteCallback);
     },
 
     copy: function(event){
@@ -103,12 +101,12 @@ var ResultsView = Backbone.View.extend({
         'json');
     },
 
-    favoriteCallback: function(resourceFavoriteWrapper){
-        $('.resource-favorite', resourceFavoriteWrapper).text('Favorited');
+    favoriteCallback: function(resourceFavorite){
+        resourceFavorite.text('Favorited');
     },
 
-    unfavoriteCallback: function(resourceFavoriteWrapper){
-        $('.resource-favorite', resourceFavoriteWrapper).text('Favorite');
+    unfavoriteCallback: function(resourceFavorite){
+        resourceFavorite.text('Favorite');
     }
 });
 

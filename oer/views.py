@@ -244,6 +244,13 @@ def render_resource(resource_id, request=None):
 
     if resource.revision.content_type == document_content_type:
         resource.data = build_document_view(resource.revision.content_id)
+
+        try:
+            resource.tags.get(title='Lesson')
+            resource.document_type = 'lesson'
+        except:
+            resource.document_type = 'document'
+
         resource_type = "document"
 
     elif resource.revision.content_type == link_content_type:
@@ -408,7 +415,7 @@ def build_return_resource_form_context(request, form, form_context):
     ]
 
     import oc_platform.FormUtilities as fu
-    form_context['original'] = fu._get_original_form_values(request, form_fields_to_return)
+    form_context['resource'] = fu._get_original_form_values(request, form_fields_to_return)
 
     # Clean for tags
     # HACK(Varun): The fu function returns a string if not a list
@@ -416,9 +423,9 @@ def build_return_resource_form_context(request, form, form_context):
         from oc_platform.ModelUtilities import DummyM2M
         original_tags = form_context['original']['tags']
         if isinstance(original_tags, basestring):
-            form_context['original']['tags'] = DummyM2M([original_tags])
+            form_context['resource']['tags'] = DummyM2M([original_tags])
         else:
-            form_context['original']['tags'] = DummyM2M(original_tags)
+            form_context['resource']['tags'] = DummyM2M(original_tags)
     except:
         pass
 
@@ -523,11 +530,11 @@ def add_url(request):
 
 
 def new_document(request):
-    return render_editor(request, 'document.html')
+    return render_editor(request, 'document')
 
 
 def new_lesson(request):
-    return render_editor(request, 'lesson.html')
+    return render_editor(request, 'lesson')
 
 
 def new_unit(request):
@@ -608,7 +615,7 @@ def edit_unit(request, unit_id, unit_slug):
     return render(request, 'edit-unit.html', context)
 
 
-def render_editor(request, template):
+def render_editor(request, document_type):
     if not request.user.is_authenticated():
         return redirect('/?login=true&source=%s' % request.path)
 
@@ -640,7 +647,6 @@ def render_editor(request, template):
 
             # Push a signal for new resource created.
             import oer.CollectionUtilities as cu
-            from oer.models import Resource
             (collection_host_type, collection_host) = cu.get_collection_root(collection)
             Resource.resource_created.send(
                 sender="Resources", resource=document_resource,
@@ -651,11 +657,33 @@ def render_editor(request, template):
         else:
             build_return_resource_form_context(request, new_document, form_context)
 
+    form_context['resource'] = {}
+
+    # Setup remix if remix requested.
+    remix = request.GET.get('remix', None)
+    if remix:
+        resource_to_remix = Resource.objects.get(pk=int(remix))
+        form_context['resource']['data'] = build_document_view(resource_to_remix.revision.content_id)
+        form_context['act'] = 'remix'
+
+    # Add tag for resource type.
+    from meta.models import Tag, TagCategory
+
+    from oc_platform.ModelUtilities import DummyM2M
+    if document_type == 'lesson':
+        form_context['resource']['tags'] = DummyM2M([Tag.objects.get(
+            title='Lesson', category=TagCategory.objects.get(title='Resource type'))])
+    else:
+        form_context['resource']['tags'] = DummyM2M([Tag.objects.get(
+            title='Document', category=TagCategory.objects.get(title='Resource type'))])
+
     context = dict({
-        'title': _(settings.STRINGS['resources']['NEW_DOCUMENT_TITLE']) + resource_context['title_extension']
+        'title': _(settings.STRINGS['resources']['NEW_DOCUMENT_TITLE']) + resource_context['title_extension'],
+        'document_type': document_type,
+
     }.items() + resource_context.items() + form_context.items())
 
-    return render(request, template, context)
+    return render(request, document_type + '.html', context)
 
 
 def create_document_elements(post_request, document_resource):
@@ -1121,9 +1149,16 @@ def edit_document(request, resource, collection):
         resource.data = build_document_view(resource.revision.content_id)
         form_context['resource'] = resource
 
+    try:
+        resource.tags.get(title='Lesson')
+        document_type = 'lesson'
+    except:
+        document_type = 'document'
+
     context = dict({
-        'title': _(settings.STRINGS['resources']['EDIT_DOCUMENT_TITLE'])}.items()
-            + form_context.items() + edit_resource_context.items())
+        'title': _(settings.STRINGS['resources']['EDIT_DOCUMENT_TITLE']),
+        'document_type': document_type
+    }.items() + form_context.items() + edit_resource_context.items())
 
     return render(request, 'document.html', context)
 
