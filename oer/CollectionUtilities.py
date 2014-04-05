@@ -380,7 +380,7 @@ def _get_project_resource_url(project, resource):
 
 def _get_user_profile(user_profile):
     return reverse(
-        'user:user_profile', kwargs={
+        'user:user_files', kwargs={
             'username': user_profile.user.username,
         }
     )
