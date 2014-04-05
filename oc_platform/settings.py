@@ -356,7 +356,7 @@ STRINGS = {
 }
 
 
-STAR_USERS = ['khanacademy']
+STAR_USERS = ['khanacademy', 'ck12', 'joshua', 'ddmeyer']
 
 try:
     from settings_dev import *
