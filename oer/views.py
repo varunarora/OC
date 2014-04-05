@@ -555,12 +555,11 @@ def new_unit(request):
             (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
                 parent_collection)
             slug = cu._get_fresh_collection_slug(
-                request.POST.get('title'), flattened_tree)
+                request.POST.get('title', 'Untitled Unit'), flattened_tree)
 
             # Create and save the unit colleciton.
             new_collection = Collection(
-                title=request.POST.get('title') if request.POST.get(
-                    'title') else 'Untitled Unit',
+                title=request.POST.get('title', 'Untitled Unit'),
                 host=unit,
                 visibility='private',
                 slug=slug,
