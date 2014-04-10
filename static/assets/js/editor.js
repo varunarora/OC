@@ -210,6 +210,12 @@ OC.editor = {
             toolbar: 'Full'
         }).ckeditorGet();
 
+        // Turn off browser table resize.
+        document.execCommand("enableInlineTableEditing", false, "false");
+
+        // Attach click handlers on add widget buttons.
+        OC.editor.bindAddWidgetClickHandler('.insert-widget');
+
         // Open dialog to ask for path choice.
         if (OC.document_type == 'lesson'){
             // Initialize lesson assist panel.
