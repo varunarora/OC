@@ -213,8 +213,10 @@ OC.editor = {
         // Turn off browser table resize.
         document.execCommand("enableInlineTableEditing", false, "false");
 
-        // Attach click handlers on add widget buttons.
-        OC.editor.bindAddWidgetClickHandler('.insert-widget');
+        OC.editor.cke.on('instanceReady', function(){
+            // Attach click handlers on add widget buttons.
+            OC.editor.bindAddWidgetClickHandler('.insert-widget');
+        });
 
         // Open dialog to ask for path choice.
         if (OC.document_type == 'lesson'){
