@@ -1,6 +1,8 @@
+{% if user == user_profile %}
 <div class="create-resource-collection-wrapper">
     {% include 'partials/create-resource-collection.html' %}
 </div>
+{% endif %}
 {% if resources or collections %}
 {% include 'partials/resources-collections-listing.html' with host='profile' %}
 {% else %}
