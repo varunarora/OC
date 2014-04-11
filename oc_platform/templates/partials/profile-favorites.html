@@ -1,29 +1,19 @@
-{% include 'partials/header.html' %}
-<div class="body-content">
-    {% include 'partials/profile-header.html' with page="favorites" %}
-
-    <div id="fill-panel" class="panel-left">
-        <!--<h3>You may also like</h3>-->
-    </div>
-    <div id="key-panel" class="panel-right">
-        {% if favorites %}
-        <div class="profile-favorites">
-            {% if user != user_profile %}
-            <h3>{{ user_profile.first_name }}'s favorites</h3>
-            {% else %}
-            <h3>My favorites</h3>
-            {% endif %}
-            {% for favorite in favorites %}
-                {% include 'partials/resource-item.html' with item=favorite.resource item_category='resource' %}
-            {% endfor %}
-        </div>
-        {% endif %}
-    </div>
-
-    {% include 'partials/profile-footer.html' %}
-
-    <script type="text/javascript" src="{{ STATIC_URL }}js/resources-collections.js"></script>
-    {% include 'partials/add.html' %}
+{% if favorites %}
+<div class="profile-favorites">
+    {% if user != user_profile %}
+    <h3>{{ user_profile.first_name }}'s favorites</h3>
+    {% else %}
+    <h3>My favorites</h3>
+    {% endif %}
+    {% for favorite in favorites %}
+        {% include 'partials/resource-item.html' with item=favorite.resource item_category='resource' %}
+    {% endfor %}
 </div>
+{% else %}
+{% if user != user_profile %}
+{{ user_profile.first_name }} does not have any favorites. Yet. {% if user_profile.get_profile.gender %}He{% else %}She{% endif %}'s on it!
+{% else %}
+You do not have any favorites yet. Favorite some content today to help people visiting your profile know you better!
+{% endif %}
 
-{% include 'partials/footer.html' %}
+{% endif %}

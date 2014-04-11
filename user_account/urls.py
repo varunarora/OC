@@ -8,7 +8,8 @@ urlpatterns = patterns(
     url(r'^api/list/(?P<query>\w+)/$', views.list_users, name='list_users'),
     url(r'^api/headline/(?P<user_id>\d+)/edit/$', views.edit_headline, name='edit_headline'),
     url(r'^api/notifications/dismiss/(?P<user_id>\d+)/$', views.dismiss_notifications, name='dismiss_notifications'),
-    url(r'^api/subscribe/(?P<username>\w+)/$', views.subscribe, name='subscribe'),
+    url(r'^api/subscribe/state/users/$', views.get_subscribe_state, name='get_subscribe_state'),
+    url(r'^api/subscribe/(?P<user_id>\d+)/$', views.subscribe, name='subscribe'),
 
     url(r'^(?P<username>\w+)/reset-password/set-new-password/$', views.reset_password_set, name='reset_password_set'),
     url(r'^reset-password/$', views.reset_password, name='reset_password'),
@@ -20,5 +21,7 @@ urlpatterns = patterns(
     url(r'^(?P<username>\w+)/files/(?P<collection_slug>.+)/$', views.list_collection, name='list_collection'),
     url(r'^(?P<username>\w+)/files/$', views.user_files, name='user_files'),
     url(r'^(?P<username>\w+)/favorites/$', views.user_favorites, name='user_favorites'),
+    url(r'^(?P<username>\w+)/subscribers/$', views.user_subscribers, name='user_subscribers'),
+    url(r'^(?P<username>\w+)/subscriptions/$', views.user_subscriptions, name='user_subscriptions'),
     url(r'^(?P<username>\w+)/$', views.user_profile, name='user_profile'),
 )

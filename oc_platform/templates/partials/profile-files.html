@@ -1,45 +1,25 @@
-{% include 'partials/header.html' %}
-
-<div class="body-content">
-    {% include 'partials/profile-header.html' with page="files" %}
-
-    <div id="fill-panel" class="panel-left">
-        {% if user == user_profile %}
-            {% include 'partials/create-resource-collection.html' with host='profile' %}
-        {% endif %}
-        <nav class="collections-navigation">
-            {% load project_tags %}
-            {{ browse_tree|user_navigation_tree:user|safe }}
-        </nav>
-    </div>
-    <div id="key-panel" class="panel-right">
-        {% if resources or collections %}
-        {% include 'partials/resources-collections-listing.html' with host='profile' %}
-        {% else %}
-        <div class="{{ host }}-resources-added empty-folder-suggestion" id="collection-{{ collection.id }}">
-            {% if user == user_profile %}
-            <h3>Sorry, there is nothing in this folder. Create one of the following now!</h3>
-            <table>
-                <tr>
-                    <td><a href="/resources/new-document/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}" class="new-document-suggestion"><h4>New document</h4></a></td>
-                    <td><a href="/upload/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}" class="new-upload-suggestion"><h4>New upload</h4></a></td>
-                </tr>
-                <tr>
-                    <td><a href="" class="add-unit new-unit-suggestion"><h4>New unit</h4></a></td>
-                    <td><a href="/resources/new-lesson/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}" class="new-lesson-suggestion"><h4>New lesson</h4></a></td>
-                </tr>
-            </table>
-            {% else %}
-            Sorry, there is nothing in this {% if container == 'unit' %}unit{% else %}folder{% endif %}.
-            {% endif %}
-        </div>
-        {% endif %}
-    </div>
-
-    {% include 'partials/profile-footer.html' %}
+<div class="create-resource-collection-wrapper">
+    {% include 'partials/create-resource-collection.html' %}
 </div>
-
+{% if resources or collections %}
+{% include 'partials/resources-collections-listing.html' with host='profile' %}
+{% else %}
+<div class="{{ host }}-resources-added empty-folder-suggestion" id="collection-{{ collection.id }}">
+    {% if user == user_profile %}
+    <h3>Sorry, there is nothing in this folder. Create one of the following now!</h3>
+    <table>
+        <tr>
+            <td><a href="/resources/new-document/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}" class="new-document-suggestion"><h4>New document</h4></a></td>
+            <td><a href="/upload/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}" class="new-upload-suggestion"><h4>New upload</h4></a></td>
+        </tr>
+        <tr>
+            <td><a href="" class="add-unit new-unit-suggestion"><h4>New unit</h4></a></td>
+            <td><a href="/resources/new-lesson/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}" class="new-lesson-suggestion"><h4>New lesson</h4></a></td>
+        </tr>
+    </table>
+    {% else %}
+    Sorry, there is nothing in this {% if container == 'unit' %}unit{% else %}folder{% endif %}.
+    {% endif %}
+</div>
+{% endif %}
 <script type="text/javascript" src="{{ STATIC_URL }}js/resources-collections.js"></script>
-{% include 'partials/add.html' %}
-
-{% include 'partials/footer.html' %}

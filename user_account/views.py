@@ -830,6 +830,7 @@ def user_profile(request, username):
         'feed': feed,
         'collection': user_profile.collection,
         'stars': stars,
+        'page': 'home',
         'title': user.first_name + ' ' + user.last_name + " &lsaquo; OpenCurriculum"
     }.items() + user_context.items())
     return render(request, 'profile.html', context)
@@ -851,6 +852,7 @@ def _prepare_user_context(request, user, user_profile):
     
     from user_account.models import Subscription
     subscriber_count = Subscription.objects.filter(subscribee=user_profile).count()
+    subscription_count = Subscription.objects.filter(subscriber=user_profile).count()
 
     from forms import UploadProfilePicture
     form = UploadProfilePicture(request.POST, request.FILES)
@@ -858,7 +860,8 @@ def _prepare_user_context(request, user, user_profile):
     context = {
         'form': form,
         'user_subscribed': user_subscribed,
-        'subscriber_count': subscriber_count
+        'subscriber_count': subscriber_count,
+        'subscription_count': subscription_count
     }
 
     return context
@@ -886,9 +889,10 @@ def user_favorites(request, username):
         'favorites': favorites,
         'collection': user_profile.collection,
         'user_subscribed': user_subscribed,
-        'title': user.get_full_name() + " &lsaquo; OpenCurriculum"
+        'title': user.get_full_name() + " &lsaquo; OpenCurriculum",
+        'page': 'favorites'
     }.items() + user_context.items())
-    return render(request, 'partials/profile-favorites.html', context)
+    return render(request, 'profile.html', context)
 
 
 def user_files(request, username):
@@ -970,9 +974,10 @@ def list_collection(request, username, collection_slug):
             'browse_tree': browse_tree,
             'resources': resources,
             'collections': child_collections,
-            'units': child_units
+            'units': child_units,
+            'page': 'files'
         }.items() + user_context.items())
-        return render(request, 'partials/profile-files.html', context)
+        return render(request, 'profile.html', context)
 
 
 def user_groups(request, username):
@@ -994,8 +999,54 @@ def user_groups(request, username):
         'collection': user_profile.collection,
         'title': user.get_full_name() + " &lsaquo; OpenCurriculum",
         'projects': projects,
+        'page': 'groups'
     }.items() + user_context.items())
-    return render(request, 'partials/profile-groups.html', context)
+    return render(request, 'profile.html', context)
+
+
+def user_subscribers(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        raise Http404
+
+    user_profile = user.get_profile()
+    user_context = _prepare_user_context(request, user, user_profile)
+
+    from user_account.models import Subscription
+    subscribers = Subscription.objects.filter(subscribee=user_profile)
+
+    context = dict({
+        'user_profile': user,
+        'collection': user_profile.collection,
+        'title': user.get_full_name() + " &lsaquo; OpenCurriculum",
+        'subscribers': subscribers,
+        'page': 'subscribers'
+    }.items() + user_context.items())
+    return render(request, 'profile.html', context)
+
+
+def user_subscriptions(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        raise Http404
+
+    user_profile = user.get_profile()
+    user_context = _prepare_user_context(request, user, user_profile)
+
+    from user_account.models import Subscription
+    subscriptions = Subscription.objects.filter(subscriber=user_profile)
+
+    context = dict({
+        'user_profile': user,
+        'collection': user_profile.collection,
+        'title': user.get_full_name() + " &lsaquo; OpenCurriculum",
+        'subscriptions': subscriptions,
+        'page': 'subscriptions'
+    }.items() + user_context.items())
+    return render(request, 'profile.html', context)
+
 
 
 def _get_user_subscribed(user_profile, visitor):
@@ -1415,10 +1466,10 @@ def dismiss_notifications(request, user_id):
         return APIUtilities._api_failure()
 
 
-def subscribe(request, username):
+def subscribe(request, user_id):
     from user_account.models import Subscription, UserProfile
     try:
-        subscribee = UserProfile.objects.get(user__username=username)
+        subscribee = UserProfile.objects.get(user=user_id)
         subscriber = UserProfile.objects.get(user=request.user)
     except:
         return APIUtilities._api_not_found()
@@ -1447,6 +1498,34 @@ def subscribe(request, username):
         prepopulate_feed(new_subscription)
 
         return APIUtilities._api_success()
+    except:
+        return APIUtilities._api_failure()
+
+
+def get_subscribe_state(request):
+    from user_account.models import Subscription, UserProfile
+    try:
+        subscriber = UserProfile.objects.get(user=request.user)
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        users = map(lambda x: int(x),
+            request.GET.get('ids', None).split(','))
+
+        subscriptions = Subscription.objects.filter(
+            subscriber=subscriber, subscribee__user__in=users)
+
+        subscription_states = {}
+        for user in users:
+            subscription_states[user] = subscriptions.filter(
+                subscribee__user=user).exists()
+
+        context = {
+            'subscription_states': subscription_states
+        }
+        return APIUtilities._api_success(context)
+
     except:
         return APIUtilities._api_failure()
 

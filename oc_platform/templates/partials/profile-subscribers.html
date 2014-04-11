@@ -1,0 +1,22 @@
+<h3>{% if user == user_profile%}Your{% else%}{{ user_profile.first_name }}'s{% endif %} subscribers</h3>
+<div id="subscriber-list" class="user-list">    
+    {% for subscriber in subscribers %}
+    <form class="subscribe-suggestion-form">
+        <input type="hidden" name="user_id" value="{{ subscriber.subscriber.user.id }}" />
+        <div class="subscriber user">
+            <div class="subscriber-info user-info">
+                <div class="subscriber-photo user-photo" style="background-image: url('{{ MEDIA_URL }}{{ subscriber.subscriber.profile_pic.name }}');">
+                </div>
+                <div class="subscriber-description user-description">
+                    <a href="{% url user:user_profile username=subscriber.subscriber.user.username %}">{{ subscriber.subscriber.user.get_full_name }}</a>
+                    {% if user != subscriber.subscriber.user %}
+                    <p><button class="btn dull-button subscribe-button">Subscribe</button></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </form>
+    {% empty %}
+    No one on that list, yet. But you have the chance to change that!
+    {% endfor %}
+</div>

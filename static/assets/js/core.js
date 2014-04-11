@@ -1706,6 +1706,17 @@ var OC = {
         'json');
     },
 
+    getSubscriptionState: function(userList, callback){
+        var userIDs = userList.join();
+        $.get('/user/api/subscribe/state/users/?ids=' + userIDs,
+            function(response){
+                if (response.status == 'true'){
+                    callback(response.subscription_states);
+                }
+            },
+        'json');
+    },
+
     initUpvoteDownvoteResource: function(){
         // Get the user and resource ID for this resource.
         var resourceID = $('form#resource-form input[name=resource_id]').val(),
@@ -2030,6 +2041,30 @@ var OC = {
         });
     },
 
+    initProfileSubscribers: function(){
+        var userIDs = [], i;
+        function updateSubscribeButton(subscriptionStates){
+            var input, button;
+            for (i = 0; i < userIDs.length; i++){
+                input = $('.subscribe-suggestion-form input[name=user_id][value=' + userIDs[i] + ']');
+                button = input.parents('form.subscribe-suggestion-form').find(
+                    'button.subscribe-button');
+                if (subscriptionStates[parseInt(userIDs[i], 10)]){
+                    button.addClass('selected');
+                    button.text('✔ Subscribed');
+                }
+            }
+        }
+
+        $('.subscribe-suggestion-form').each(function(){
+            if ($('button.subscribe-button', this).length > 0){
+                userIDs.push($('input[name=user_id]', this).val());
+            }
+        });
+
+        if (userIDs.length > 0) OC.getSubscriptionState(userIDs, updateSubscribeButton);
+    },
+
     initEditResource: function(){
         $('form.resource-create-edit-form #submission-buttons button[type=submit]').click(
             function(event){
@@ -2074,7 +2109,7 @@ var OC = {
     },
 
     initProfileTabs: function(){
-        OC.tabs('.profile-center-stage', {viewOnly: true});
+        OC.tabs('.profile-view > .center-stage .panel-right', {viewOnly: true});
     },
 
     initEditHandlers: function(){
@@ -3041,11 +3076,11 @@ var OC = {
     },
 
     initSubscribe: function(){
-        var username = $('form.profile-subscribe-form input[name=username]').val(),
+        var userID = $('form.profile-subscribe-form input[name=user_id]').val(),
             button;
         
-        function subscribe_to(username, button){
-            $.get('/user/api/subscribe/' + username + '/',
+        function subscribe_to(userID, button){
+            $.get('/user/api/subscribe/' + userID + '/',
                 function(response){
                     if (response.status == 'true'){
                         if (button.hasClass('subscribed')){
@@ -3064,17 +3099,17 @@ var OC = {
 
         $('.profile-subscribe .subscribe-button').click(function(event){
             button = $(this);
-            subscribe_to(username, button);
+            subscribe_to(userID, button);
 
             event.stopPropagation();
             event.preventDefault();
             return false;
         });
 
-        $('.subscribe-suggestions .subscribe-button').click(function(event){
-            username = $(this).parents('.subscribe-suggestion-form').find(
-                'input[name=username]').val();
-            subscribe_to(username, $(this));
+        $('.subscribe-suggestion-form .subscribe-button').click(function(event){
+            userID = $(this).parents('.subscribe-suggestion-form').find(
+                'input[name=user_id]').val();
+            subscribe_to(userID, $(this));
 
             event.stopPropagation();
             event.preventDefault();
@@ -3350,6 +3385,8 @@ jQuery(document).ready(function ($) {
     OC.initExportResource();
 
     OC.initProfileCreateResource();
+
+    OC.initProfileSubscribers();
 
     //OC.initEditResource();
 
