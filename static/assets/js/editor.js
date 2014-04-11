@@ -353,7 +353,7 @@ OC.editor = {
         OC.editor.editorBody = editorBody;
 
         editorFrame.height(
-            $(window).height() - ($('body > header').height() + $(
+            $(window).height() - ($(
                 '.editor-header').outerHeight(true) + $(
                 '.editor-toolbar-wrapper').height() + parseInt($('.editor-toolbar-wrapper').css(
                 'padding-top'), 10) + parseInt(editorFrame.css(
