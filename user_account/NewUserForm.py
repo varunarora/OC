@@ -140,7 +140,7 @@ class NewUserForm(UserCreationForm):
         import re
         if re.match(r'^[A-Za-z\-\.\' ]+$', name) is None:
             raise forms.ValidationError(
-                _(settings.STRINGS['user']['register']['form']['USERNAME_VALIDATION_ERROR']))
+                _(settings.STRINGS['user']['register']['form']['NAME_VALIDATION_ERROR']))
 
         return name
 
