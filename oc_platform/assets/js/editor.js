@@ -24,7 +24,7 @@ OC.editor = {
         '</div>'),
 
     youtubeVideoTemplate: _.template('<iframe width="573" height="322" ' +
-        'src="http://www.youtube.com/embed/<%= video_tag %>?wmode=opaque" frameborder="0" '+
+        'src="http://www.youtube.com/embed/<%= video_tag %>?wmode=opaque&rel=0" frameborder="0" '+
         'allowfullscreen></iframe>'),
 
     vimeoVideoTemplate: _.template('<iframe src="http://player.vimeo.com/video/<%= video_tag %>' +
