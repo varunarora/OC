@@ -2623,3 +2623,33 @@ def template_three_act_lesson(request):
         template, 200,
         content_type="text/html"
     )
+
+
+def template_understanding_by_design_lesson_plan(request):
+    from django.template.loader import render_to_string
+    template = render_to_string('partials/understanding-by-design-lesson.html')
+
+    return HttpResponse(
+        template, 200,
+        content_type="text/html"
+    )
+
+
+def template_weekly_lesson_plan(request):
+    from django.template.loader import render_to_string
+    template = render_to_string('partials/weekly-lesson.html')
+
+    return HttpResponse(
+        template, 200,
+        content_type="text/html"
+    )
+
+
+def template_simple_lesson_plan(request):
+    from django.template.loader import render_to_string
+    template = render_to_string('partials/simple-lesson.html')
+
+    return HttpResponse(
+        template, 200,
+        content_type="text/html"
+    )

@@ -66,6 +66,53 @@ OC.editor = {
         'html');
     },
 
+    insertUnderstandingByDesignLessonTemplate: function(editor, callback){
+        $.get('/resources/template/understanding-by-design-lesson-plan/',
+            function(response){
+                var hiddenTemplates = $('.hidden-templates');
+                hiddenTemplates.append(response);
+
+                editor.insertHtml((hiddenTemplates.html()));
+
+                // Clear all contents.
+                $('div', hiddenTemplates).remove();
+
+                callback(OC.editor.understandingByDesignLessonTips);
+            },
+        'html');
+    },
+
+    insertWeeklyLessonTemplate: function(editor, callback){
+        $.get('/resources/template/weekly-lesson-plan/',
+            function(response){
+                var hiddenTemplates = $('.hidden-templates');
+                hiddenTemplates.append(response);
+
+                editor.insertHtml((hiddenTemplates.html()));
+
+                // Clear all contents.
+                $('div', hiddenTemplates).remove();
+
+                callback(OC.editor.weeklyLessonTips);
+            },
+        'html');
+    },
+
+    insertSimpleLessonTemplate: function(editor, callback){
+        $.get('/resources/template/simple-lesson-plan/',
+            function(response){
+                var hiddenTemplates = $('.hidden-templates');
+                hiddenTemplates.append(response);
+
+                editor.insertHtml((hiddenTemplates.html()));
+
+                // Clear all contents.
+                $('div', hiddenTemplates).remove();
+
+                callback(OC.editor.simpleLessonTips);
+            },
+        'html');
+    },
     fiveStepLessonPlanTips: {
         'lesson-objective-body': 'What will your student be able to do?',
         'lesson-goal-body': 'How does the objective connect to the summer (big) goal?',
@@ -156,10 +203,119 @@ OC.editor = {
         'lesson-sequel-body': ''
     },
 
+    understandingByDesignLessonTips: {
+        'lesson-established-goals-body': 'What relevant goals (e.g., Content Standards, Course or Program ' +
+            'Objectives, Learning Outcomes etc.) will this design address?',
+        'lesson-understandings-body': [
+            'What are the "big ideas"?',
+            'What specific understandings about them are desired?',
+            'What misunderstandings are predictable?'
+        ],
+        'lesson-questions-body': 'What provocative questions will foster inquiry, understanding, and ' +
+            'transfer of learning?',
+        'lesson-knowledge-body': 'What key knowledge and skills will students acquire as a result of this unit?',
+        'lesson-ability-body': 'What should they eventually be able to do as a result of such knowledge and skill?',
+        'lesson-performance-body': [
+            'Through what authentic performance task(s) will students demonstrate the desired understandings?',
+            'By what criteria will "performances of understanding" be judged?'
+        ],
+        'lesson-evidence-body': [
+            'Through what other evidence (e.g. quizzes, tests, academic prompts, observations, homework, '+
+                'journals, etc.) will students demonstrate achievement of the desired results?',
+            'How will students reflect upon and self-assess their learning?'
+        ],
+        'lesson-activities-body': [
+            '<strong>W</strong> = help the students know where the unit is going and what is expected? Help the teacher' +
+                'know where the students are coming from (prior knowledge, interests)?',
+            '<strong>H</strong> = hook all students and hold their interest?',
+            '<strong>E</strong> = equip students, help them experience the key ideas, and explore the issues?',
+            '<strong>R</strong> = provide opportunities to rethink and revise their understandings and work?',
+            '<strong>E</strong> = allow students to evaluate their work and its implications?',
+            '<strong>T</strong> = be tailored (personalized) to the different needs, interests, abilities of learners',
+            '<strong>O</strong> = be organized to maximize initial and sustained engagement as well as effective learning?'
+        ]
+    },
+
+    weeklyLessonTips: {
+        'lesson-objectives-body': [
+            'What will your students be able to do?',
+            'What relevant content standards and learning outcomes will this address?'
+        ],
+        'lesson-do-now-body': [
+            'What activity will your students do at the beginning of the class to gauge for prior ' +
+                'knowledge and misunderstandings',
+            'What activity will help you set the tone for the class?'
+        ],
+        'lesson-introduction-materials-body': [
+            'What key points will you emphasize and reiterate? ',
+            'How will you ensure that students actively take-in information?',
+            'What key knowledge and skills will students will you introduce in this lesson?'
+        ],
+        'lesson-guided-practice-body': [
+            'How will you clearly state and model behavioral expectations?',
+            'How will you ensure that all students have multiple opportunities to practice?',
+            'How will you scaffold practice exercises from easy to hard?',
+            'How will you monitor and correct student performance?'
+        ],
+        'lesson-independant-practice-body': [
+            'How will you clearly state and model behavioral expectations?',
+            'In what ways will students attempt to demonstrate independent mastery of the objective?',
+            'How will you provide opportunities for extension?'
+        ],
+        'lesson-exit-body': [
+            'What low-stress assessment questions will you give your students to assess for misconceptions ' +
+                'and clarity of understanding?',
+                'How will determine if all all students understood what you taught in the lesson?'
+        ],
+        'lesson-homework-body': 'How will you help students practice at home what you taught in the class?',
+        'lesson-materials-body': 'What materials would you require to conduct the planned class activities',
+        'lesson-modifications-body': ''
+    },
+
+    simpleLessonTips: {
+        'lesson-question-body': 'Big and high-level topical question that helps provoke and foster thought ' +
+            'and guides the lesson',
+        'lesson-objectives-body': [
+            'What will your students be able to do?',
+            'What relevant content standards and learning outcomes will this address?'
+        ],
+        'lesson-activation-body': 'How can you open the lesson by helping students recall their prior knowledge ' +
+            ' and skills to help lead into the topic for the current lesson?' ,
+        'lesson-activity-body': [
+            'How will you engage students in an exercise that directly applies the core essence of your ' +
+                'instruction for the lesson?',
+            'How can students directly apply their thinking and understanding of the topic?'
+        ],
+        'lesson-guided-practice-body': [
+            'How will you clearly state and model behavioral expectations?',
+            'How will you ensure that all students have multiple opportunities to practice?',
+            'How will you scaffold practice exercises from easy to hard?',
+            'How will you monitor and correct student performance?'
+        ],
+        'lesson-independant-practice-body': [
+            'How will you clearly state and model behavioral expectations?',
+            'In what ways will students attempt to demonstrate independent mastery of the objective?',
+            'How will you provide opportunities for extension?'
+        ],
+        'lesson-assessment-body': [
+            'Through what task(s) will students demonstrate the desired understandings?',
+            'By what criteria will students\'s understanding be judged be judged?',
+            'Examples of kinds of assessments include tests/quizzes, oral response, individual products, etc.'
+        ],
+        'lesson-reflection-body': [
+            'What worked in this lesson and what did not work so well?',
+            'Were you able to meet the students where they were and then advance them in adherance to the ' +
+                'objectives you hoped to accomplish?',
+            'Was the perceived understanding of the students reflected in their performance in classroom ' +
+            'activities and formative assessment?'
+        ]
+    },
+
     lessonAssist: '',
     lessonAssistPullout: '',
     lessonAssistBody: '',
     editorFrame: '',
+    editorBodyWrapper: '',
     editorBody: '',
 
     cke: '',
@@ -189,9 +345,11 @@ OC.editor = {
 
     init: function(){
         var editorFrame = $('.editor-frame'),
+            editorBodyWrapper = $('.editor-body-wrapper'),
             editorBody = $('.editor-body');
 
         OC.editor.editorFrame = editorFrame;
+        OC.editor.editorBodyWrapper = editorBodyWrapper;
         OC.editor.editorBody = editorBody;
 
         editorFrame.height(
@@ -282,10 +440,15 @@ OC.editor = {
                         
                         if (selectedTemplateOption.hasClass('lesson-template-option-five-step')) {
                             OC.editor.insertFiveStepLessonTemplate(editor, onTemplateLoad);
-                        } else {
+                        } else if (selectedTemplateOption.hasClass('lesson-template-option-three-acts')) {
                             OC.editor.insertThreeActLessonTemplate(editor, onTemplateLoad);
+                        } else if (selectedTemplateOption.hasClass('lesson-template-option-ubd')) {
+                            OC.editor.insertUnderstandingByDesignLessonTemplate(editor, onTemplateLoad);
+                        } else if (selectedTemplateOption.hasClass('lesson-template-option-weekly')) {
+                            OC.editor.insertWeeklyLessonTemplate(editor, onTemplateLoad);
+                        } else if (selectedTemplateOption.hasClass('lesson-template-option-simple')) {
+                            OC.editor.insertSimpleLessonTemplate(editor, onTemplateLoad);
                         }
-
                     });
                 });
             }
@@ -376,41 +539,45 @@ OC.editor = {
     },
 
     attachLPWidgetFocusHandler: function(tips){
+        function assist(editableElement){
+            if (!OC.editor.lessonAssist.hasClass('open') && !OC.editor.lessonAssist.hasClass(
+                'force-closed')){
+                OC.editor.openLessonAssist();
+            }
+
+            // Update the tips box.
+
+            // Check if this has a class that is also there in the tips {}.
+            lessonClasses = editableElement.attr('class').split(' ');
+            var i;
+            for (i = 0; i < lessonClasses.length; i++){
+                // Allow looping till the last class, as that is most likely the tip class.
+                if (lessonClasses[i].match('^lesson-')){
+                    lessonClass = lessonClasses[i];
+                }
+            }
+
+            var tip = tips[lessonClass];
+            if (tip){
+                if (_.isArray(tip)){
+                    var list = $('<ul/>'), j;
+                    for (j = 0; j < tip.length; j++){
+                        list.append('<li>' + tip[j] + '</li>');
+                    }
+                    $('.lesson-assist-body').html(list);
+                } else
+                    $('.lesson-assist-body').html(tip);
+            } else {
+                $('.lesson-assist-body').html('(no tips found)');
+            }
+
+            $(this).addClass('assist-setup');
+        }
+
         var lessonClasses, lessonClass, i;
         $('.cke_widget_editable').click(function(event){
             if ($(this).hasClass('cke_widget_editable_focused') && !$(this).hasClass('assist-setup')){
-                if (!OC.editor.lessonAssist.hasClass('open') && !OC.editor.lessonAssist.hasClass(
-                    'force-closed')){
-                    OC.editor.openLessonAssist();
-                }
-
-                // Update the tips box.
-
-                // Check if this has a class that is also there in the tips {}.
-                lessonClasses = $(this).attr('class').split(' ');
-                var i;
-                for (i = 0; i < lessonClasses.length; i++){
-                    // Allow looping till the last class, as that is most likely the tip class.
-                    if (lessonClasses[i].match('^lesson-')){
-                        lessonClass = lessonClasses[i];
-                    }
-                }
-
-                var tip = tips[lessonClass];
-                if (tip){
-                    if (_.isArray(tip)){
-                        var list = $('<ul/>'), j;
-                        for (j = 0; j < tip.length; j++){
-                            list.append('<li>' + tip[j] + '</li>');
-                        }
-                        $('.lesson-assist-body').html(list);
-                    } else
-                        $('.lesson-assist-body').html(tip);
-                } else {
-                    $('.lesson-assist-body').html('(no tips found)');
-                }
-
-                $(this).addClass('assist-setup');
+                assist($(this));
             } else {
                 // Remove all assist setups.
                 $('.assist-setup').each(function(){
@@ -418,12 +585,25 @@ OC.editor = {
                 });
             }
         });
+
+        // Account for table templates.
+        $('table.lesson-editable td').click(function(event){
+            if ($(this).hasClass('editable-block') && !$(this).hasClass('assist-setup')){
+                assist($(this));
+            } else {
+                // Remove all assist setups.
+                $('.assist-setup').each(function(){
+                    $(this).removeClass('assist-setup');
+                });
+            }
+        });
+
     },
 
     openLessonAssist: function(){
         var UPPER_SPACE = 40;
         // Move the editor body to the left edge.
-        OC.editor.editorBody.addClass('assisted');
+        OC.editor.editorBodyWrapper.addClass('assisted');
 
         OC.editor.lessonAssist.css({
             'top': OC.editor.editorFrame.offset().top + UPPER_SPACE
@@ -441,7 +621,7 @@ OC.editor = {
         OC.editor.lessonAssist.removeClass('open');
         OC.editor.lessonAssist.addClass('force-closed');
 
-        OC.editor.editorBody.removeClass('assisted');
+        OC.editor.editorBodyWrapper.removeClass('assisted');
     },
 
     searchProjectsTabClickHandler: function(event){

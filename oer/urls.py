@@ -58,6 +58,9 @@ urlpatterns = patterns(
 
     url(r'^template/five-step-lesson-plan/$', views.template_five_step_lesson_plan, name='template_five_step_lesson_plan'),
     url(r'^template/three-act-lesson/$', views.template_three_act_lesson, name='template_three_act_lesson'),
+    url(r'^template/understanding-by-design-lesson-plan/$', views.template_understanding_by_design_lesson_plan, name='template_understanding_by_design_lesson_plan'),
+    url(r'^template/weekly-lesson-plan/$', views.template_weekly_lesson_plan, name='template_weekly_lesson_plan'),
+    url(r'^template/simple-lesson-plan/$', views.template_simple_lesson_plan, name='template_simple_lesson_plan'),
 
     url(r'^unit/(?P<unit_id>\d+)/(?P<unit_slug>[\w\-]+)/edit/$', views.edit_unit, name='edit_unit'),
 
