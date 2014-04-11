@@ -1654,21 +1654,6 @@ OC.editor = {
     }
 };
 
-(function () {
-/*
-    var converter = Markdown.getSanitizingConverter();
-    var editor = new Markdown.Editor(converter);
-
-    editor.hooks.set("insertImageDialog", function (callback) {
-        setTimeout(function(){OC.editor.createImageUploadDialog(callback);}, 0);
-        return true;
-    });
-
-    editor.run();
-*/
-})();
-
-
 $(function() {
     $('.breadcrumbs-edit').click(function () {
         $( "#dialog-message" ).dialog({
