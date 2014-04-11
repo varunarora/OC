@@ -360,7 +360,8 @@ OC.editor = {
                 'padding-top'), 10)) + 'px');
 
         OC.editor.cke = editorBody.ckeditor({
-            extraPlugins: 'internallink,sharedspace,resources,lesson,upload,video',
+            extraPlugins: 'internallink,sharedspace,resources,' +
+                'lesson,upload,video,tableresize,differentiate,toggle',
             startupFocus: true,
             sharedSpaces: {
                 top: 'editor-toolbar'

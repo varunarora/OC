@@ -256,6 +256,31 @@ ul.tagit
 	p:nth-child(1)
 		margin-top: 0px
 
+.toggle-content
+	.toggle-content-title-wrapper
+		min-height: 18px
+		background-color: #efefef
+		padding: 6px
+		background-image: url('../images/arrow-mid.png')
+		background-position: 97% center
+		background-repeat: no-repeat
+		cursor: pointer
+
+		&.open
+			background-image: url('../images/arrow-mid-up.png')
+
+		.toggle-content-title
+			display: inline-block
+			@include sans-bold
+
+	.toggle-content-body
+		min-height: 80px
+		border: 1px solid #efefef
+
+.editor
+	header
+		display: none
+
 /* All styling for widgets inside documents.*/
 #article-edit, article
 	.document-body

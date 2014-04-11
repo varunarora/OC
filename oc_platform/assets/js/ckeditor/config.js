@@ -10,6 +10,7 @@ CKEDITOR.editorConfig = function( config ) {
     config.extraPlugins = 'internallink';
     config.baseFloatZIndex = 4;
     config.removePlugins = 'link';
+    config.title = false;
 };
 
 CKEDITOR.config.contentsCss = '/static/assets/css/ckeditor/contents.css';
@@ -25,7 +26,8 @@ CKEDITOR.config.toolbar_Full = [
 ['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],
 [ 'NumberedList','BulletedList'],
 ['InternalLink', 'InternalUnlink'],
-['OCImage', 'Video', 'Attach']
+['OCImage', 'Video', 'Attach'],
+['Differentiate', 'Toggle']
 ];
 
 CKEDITOR.config.toolbar = 'Basic';
@@ -34,6 +36,8 @@ CKEDITOR.config.allowedContent = true;
 
 CKEDITOR.dtd.$editable.td = 1;
 CKEDITOR.dtd.$editable.th = 1;
+CKEDITOR.dtd.$editable.a = 1;
+
 
 // Turn off automatic editor creation first.
 CKEDITOR.disableAutoInline = true;

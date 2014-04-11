@@ -291,6 +291,89 @@ var OC = {
         }
     },
 
+    tip: function($el, options){
+        var gravity = 'n', title = null, description = false;
+        if (options){
+            gravity = options.gravity || gravity;
+            title = options.title || title;
+            description = options.description || description;
+        }
+
+        // Set tip body+text.
+        var bodyTemplate = _.template('<div class="oc-tip-body-title"><h4><%= title %></h4></div>' +
+            '<div class="oc-tip-body-description"><p><%= description %></p></div>' +
+            '<button class="action-button mini-action-button">Done</button>');
+
+        var tip = $('<div/>', {'class': 'oc-tip show' }),
+            tipBody = $('<div/>', {
+                'class': 'oc-tip-body',
+                'html': bodyTemplate({'title': title, 'description': description})
+            }),
+            floatingSpacer = $('<div/>', {'class': 'floating-menu-spacer' });
+
+        var body = $('body'), appendedTip;
+        switch(gravity){
+            case 'n':
+                tip.append(floatingSpacer);
+                tip.append(tipBody);
+                body.append(tip);
+
+                // Set position.
+                tip.css({
+                    'top': $el.offset().top + $el.outerHeight(),
+                    'left': $el.offset().left + ($el.outerWidth() / 2)
+                });
+                break;
+
+            case 'e':
+                tip.append(tipBody);
+                tip.append(floatingSpacer);
+                body.append(tip);
+
+                // Set position.
+                appendedTip = $('body .oc-tip:last');
+                tip.css({
+                    'top': $el.offset().top,
+                    'left': $el.offset().left - appendedTip.width()
+                });
+                break;
+
+            case 's':
+                tip.append(tipBody);
+                tip.append(floatingSpacer);
+                body.append(tip);
+
+                appendedTip = $('body .oc-tip:last');
+                var left = $el.offset().left - (
+                    (appendedTip.width() - $el.outerWidth()) / 2),
+                    top =  $el.offset().top - appendedTip.height();
+
+                // Set position.
+                tip.css({
+                    'top': top - 10,
+                    'left': left
+                });
+                tip.animate({
+                    top: top,
+                    opacity: 1
+                }, 500);
+                break;
+
+            case 'w':
+                tip.append(floatingSpacer);
+                tip.append(tipBody);
+                body.append(tip);
+
+                // Set position.
+                tip.css({
+                    'top': $el.offset().top,
+                    'left': $el.offset().left + $el.outerWidth()
+                });
+                break;
+        }
+
+    },
+
     /* Beginning of functionality that may be moved into modules */
 
     /**
@@ -1629,7 +1712,25 @@ var OC = {
     },
 
     initResourceView: function(){
+        // Setup history on the view history button.
         $('.history-action img').tipsy({gravity: 'w'});
+
+        // Setup up/down toggle on all togglable content.
+        $('.toggle-content-title-wrapper').click(
+            OC.togglerClickHandler);
+    },
+
+    togglerClickHandler: function(event){
+        var titleWrapper = $(this);
+            body = titleWrapper.parent('.toggle-content').find(
+                '.toggle-content-body');
+        if (titleWrapper.hasClass('open')){
+            titleWrapper.removeClass('open');
+            body.slideUp();
+        } else {
+            titleWrapper.addClass('open');
+            body.slideDown();
+        }
     },
 
     initFavoriteResource: function(){
