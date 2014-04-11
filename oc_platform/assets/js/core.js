@@ -3181,21 +3181,26 @@ var OC = {
             button;
         
         function subscribe_to(userID, button){
-            $.get('/user/api/subscribe/' + userID + '/',
-                function(response){
-                    if (response.status == 'true'){
-                        if (button.hasClass('subscribed')){
-                            button.removeClass('subscribed');
-                            button.text('Subscribe');
+            if (OC.config.user.ID){
+                $.get('/user/api/subscribe/' + userID + '/',
+                    function(response){
+                        if (response.status == 'true'){
+                            if (button.hasClass('subscribed')){
+                                button.removeClass('subscribed');
+                                button.text('Subscribe');
+                            } else {
+                                button.addClass('subscribed');
+                                button.text('✔ Subscribed');
+                            }
                         } else {
-                            button.addClass('subscribed');
-                            button.text('✔ Subscribed');
+                            OC.popup(response.message, response.title);
                         }
-                    } else {
-                        OC.popup(response.message, response.title);
-                    }
-                },
-            'json');
+                    },
+                'json');
+            } else {
+                OC.popup('You must be logged in to subscribe to someone. Please create a ' +
+                    'free account for the same.', 'Log in to subscribe to someone');
+            }
         }
 
         $('.profile-subscribe .page-subscribe-button').click(function(event){
