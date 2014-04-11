@@ -3150,34 +3150,37 @@ body.editor
 			img
 				width: 95%
 
-	.editor-body
-		background-color: #fff
-		min-height: 600px
-		margin-top: 0px
-		@include box-shadow(0 0px 16px rgba(0, 0, 0, 0.1))
-		outline: 0 none
+	.editor-body-wrapper
+		position: relative
 		padding: 60px 65px
 		width: 830px
+		margin-top: 0px
+		@include box-shadow(0 0px 16px rgba(0, 0, 0, 0.1))
+		background-color: #fff
 
-		.foreign-document-element
-			background-color: #efefef
-			padding: 10px
-			overflow: hidden
+		.editor-body
+			min-height: 600px
+			outline: 0 none
 
-			.foreign-document-element-thumbnail
-				background-position: center center
-				background-size: cover
-				float: left
-				height: 60px
-				margin-right: 16px
-				width: 60px
+			.foreign-document-element
+				background-color: #efefef
+				padding: 10px
+				overflow: hidden
 
-			.foreign-document-element-description
-				float: left
+				.foreign-document-element-thumbnail
+					background-position: center center
+					background-size: cover
+					float: left
+					height: 60px
+					margin-right: 16px
+					width: 60px
 
-				.foreign-document-element-description-title
-					font-size: 1.4em
-					margin-bottom: 5px
+				.foreign-document-element-description
+					float: left
+
+					.foreign-document-element-description-title
+						font-size: 1.4em
+						margin-bottom: 5px
 
 		&.assisted
 			margin-left: 32px
@@ -3440,7 +3443,7 @@ blockquote
 
 		.lesson-template-option
 			width: 78px
-			height: 34px
+			height: 44px
 			float: left
 			margin: 10px
 			cursor: pointer
@@ -3465,6 +3468,21 @@ blockquote
 
 			&.lesson-template-option-three-acts
 				background-image: url('../images/three-acts-lp.png')
+
+			&.lesson-template-option-ubd
+				background-image: url('../images/ubd-lp.png')
+
+			&.lesson-template-option-weekly
+				background-image: url('../images/weekly-planner-lp.png')
+
+			&.lesson-template-option-simple
+				background-image: url('../images/simple-lp.png')
+
+			&.lesson-template-option-empty
+				background-image: url('../images/empty-lp.png')
+
+			&.lesson-template-option-five-e
+				background-image: url('../images/five-e-lp.png')
 
 .profile-new-resource-panel
 	overflow: hidden
@@ -3871,6 +3889,34 @@ table#edit-unit-form-table
 		footer
 			margin-top: 0px
 
+
+.oc-tip
+	display: none
+	position: absolute
+	opacity: 0
+
+	.oc-tip-body
+		height: 100px
+		width: 160px
+		@include popout-box
+		padding: 10px
+		background-color: #fff
+
+	&.show
+		display: block
+
+	.floating-menu-spacer
+		width: 180px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		background-position: 82px bottom
+		z-index: 10
+		height: 8px
+		position: relative
+		-webkit-transform: rotate(180deg)
+		-moz-transform: rotate(180deg)
+		-ms-transform: rotate(180deg)
+		-o-transform: rotate(180deg)
+		transform: rotate(180deg)
 
 .worksheet-creator-frame
 	overflow: hidden

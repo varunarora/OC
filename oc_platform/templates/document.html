@@ -95,12 +95,12 @@
             </div>
         </div>
         {% endif %}
-        <div class="center-stage editor-body" contentEditable="true">
-            {% for document_element in resource.data %}
-            <div class="document-textblock document-element">
+        <div class="center-stage editor-body-wrapper">
+            <div class="editor-body" contentEditable="true">
+                {% for document_element in resource.data %}
                 {{ document_element.element.body.data|safe }}
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
         <div class="editor-frame-result-clones">
         </div>
