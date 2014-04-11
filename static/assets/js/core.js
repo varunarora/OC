@@ -3198,7 +3198,7 @@ var OC = {
             'json');
         }
 
-        $('.profile-subscribe .subscribe-button').click(function(event){
+        $('.profile-subscribe .page-subscribe-button').click(function(event){
             button = $(this);
             subscribe_to(userID, button);
 
