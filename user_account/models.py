@@ -734,6 +734,7 @@ class Notification(models.Model):
     @receiver(Subscription.new_subscription)
     def new_subscription_notification(sender, **kwargs):
         subscription = kwargs.get('subscription', None)
+        request = kwargs.get('request', None)
 
         notification = Notification()
         notification.user = subscription.subscribee.user
@@ -748,3 +749,6 @@ class Notification(models.Model):
             subscription.subscriber.user.get_full_name())
 
         notification.save()
+
+        # Send an email about this notification.
+        nu.notify_by_email(notification, request.get_host())

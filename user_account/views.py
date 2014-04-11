@@ -1440,7 +1440,8 @@ def subscribe(request, username):
 
         # Notify the user who has been subscribed to.
         Subscription.new_subscription.send(
-            sender="UserProfile", subscription=new_subscription
+            sender="UserProfile", subscription=new_subscription,
+            request=request
         )
 
         prepopulate_feed(new_subscription)
