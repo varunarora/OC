@@ -45,6 +45,7 @@ var ResourceView = Backbone.View.extend({
         '<div class="content-panel-body-listing-item-favorites"><%= favorites %></div>' +
         '<div class="content-panel-body-listing-item-thumbnail"' +
         'style="background-image: url(\'<%= thumbnail %>\')"></div>' +
+        '<div class="content-panel-body-listing-item-thumbnail-shadow"></div>' +
         '<a href="<%= user_url %>" class="content-panel-body-listing-item-user-picture" ' +
         'style="background-image: url(\'<%= user_thumbnail %>\')"></a>' +
         '<div class="content-panel-body-listing-item-contents">' +
