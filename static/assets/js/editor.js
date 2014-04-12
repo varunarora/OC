@@ -375,6 +375,9 @@ OC.editor = {
         OC.editor.cke.on('instanceReady', function(){
             // Attach click handlers on add widget buttons.
             OC.editor.bindAddWidgetClickHandler('.insert-widget');
+
+            // Bind all toggle clicks.
+            $('.toggle-content-title-wrapper').click(OC.togglerClickHandler);
         });
 
         // Open dialog to ask for path choice.
