@@ -27,8 +27,17 @@ def browse(request, category_slug):
 
         (host_browse_tree, host_flattened_tree) = catU.build_child_categories(
             {'root': [host_category]}, [])
+
+        # Assume that there is a unique pair of child/parent relationship in any
+        #     host category. Breaks on the edge case where this pair is found twice.
+        try:
+            current_category = Category.objects.get(
+                slug=categories_slugs[-1], parent__slug=categories_slugs[-2])
+        except IndexError:
+            current_category = Category.objects.get(slug=categories_slugs[-1])
+
         for category in host_flattened_tree:
-            if category.slug == categories_slugs[-1]:
+            if category == current_category:
                 selected_category = category
 
         if len(categories_slugs) == 1:

@@ -80,7 +80,7 @@
                             id: '{{ resource.id }}',
                             url: '{% url read resource_id=resource.id resource_slug=resource.slug %}',
                             title: '{{ resource.title }}',
-                            user: '{% resource.revision.user }}',
+                            user: '{{ resource.revision.user }}',
                             user_thumbnail: '{{ MEDIA_URL }}{{ resource.revision.user.get_profile.profile_pic.name }}',
                             user_url: '{% url user:user_profile username=resource.revision.user.username %}',
                             favorites: '{{ resource.favorites_count }}',
@@ -94,19 +94,6 @@
                         //<p>No results found.</p>
                     {% endfor %}
                     </script>
-                    </div>
-
-                    <div class="content-panel-body-listing-item">
-                        <div class="content-panel-body-listing-item-label-fold"></div>
-                        <div class="content-panel-body-listing-item-label">ACTIVITY</div>
-                        <div class="content-panel-body-listing-item-favorites">16</div>
-                        <div class="content-panel-body-listing-item-thumbnail"></div>
-                        <div class="content-panel-body-listing-item-thumbnail-shadow"></div>
-                        <div class="content-panel-body-listing-item-user-picture"></div>
-                        <div class="content-panel-body-listing-item-contents">
-                            <a href="" class="content-panel-body-listing-item-contents-caption">Figures of speech</a>
-                            <div class="content-panel-body-listing-item-contents-meta">302 views</div>
-                        </div>
                     </div>
 
                 </div>
