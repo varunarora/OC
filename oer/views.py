@@ -70,7 +70,7 @@ def browse(request, category_slug):
     # Setup each resource's favorites count and type.
     from interactions.models import Favorite
     from meta.models import TagCategory
-    for resource in resources:
+    for resource in all_resources:
         resource.favorites_count = Favorite.objects.filter(resource=resource).count()
         resource.type = resource.tags.get(
             category=TagCategory.objects.get(title='Resource type'))
