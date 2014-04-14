@@ -3181,7 +3181,7 @@ var OC = {
             button;
         
         function subscribe_to(userID, button){
-            if (OC.config.user.ID){
+            if (OC.config.user.id){
                 $.get('/user/api/subscribe/' + userID + '/',
                     function(response){
                         if (response.status == 'true'){
