@@ -221,7 +221,7 @@
     background-color: #efefef
 
     .center-stage
-        margin-top: 10px
+        margin: 10px auto
         @include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
         background-color: #fff
         padding: 20px
@@ -236,23 +236,6 @@
             &.oc-tabs
                 nav.profile-tabs
                     margin-top: 0px
-
-                    li
-                        margin-left: 0px
-                        margin-right: 10px
-
-                        a
-                            @include border-radius(8px)
-                            border-width: 0px
-                            height: 17px
-                            color: $light-font
-
-                            &:hover
-                                background-color: #ddd
-
-                            &.selected
-                                background-color: $link-hover
-                                color: #fff
 
                 .oc-tabs-content
                     border-top-width: 0px

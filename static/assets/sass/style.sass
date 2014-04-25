@@ -108,7 +108,6 @@ footer
 	font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif
 	margin: auto
 	text-align: center
-	margin-top: 40px
 	padding: 40px
 	font-size: 0.95em
 	color: #666666
@@ -604,7 +603,7 @@ h1.developers-title
 
 // TODO: All this form non-sense needs a lot of cleaning up
 
-form input[type=text], form input[type=password], textarea
+form input[type=text], form input[type=password], textarea, select
 
 	&.form-input-error
 		border-color: #E9322D
@@ -639,7 +638,7 @@ form#sign-in-form
 		width: 96%
 		margin: 5px 0px
 		
-	#signinButton
+	#signinButtons
 		text-align: center
 
 textarea
@@ -948,7 +947,7 @@ table#signup-form-table
 	display: none
 
 .registration
-	#signinButton
+	#signinButtons
 		float: left
 		margin-right: 10px
 
@@ -1077,14 +1076,44 @@ header.project-header-wrapper
 		background-repeat: no-repeat
 
 		hgroup#project-info-wrapper
-			background: rgba(0,0,0,0.6)
+			background: rgba(0,0,0,0.3)
 			width: 375px
-			float: right
+			float: left
 			height: 100%
 
 			#project-info
 				padding: 20px
 				color: #fff
+				margin-top: 30px
+				padding-left: 30px
+
+				.project-title-wrapper
+					overflow: hidden
+
+					h2
+						display: inline-block
+						float: left
+
+					.project-info-settings
+						margin-left: 8px
+						width: 24px
+						height: 24px
+						background-position: center center
+						background-repeat: no-repeat
+						background-image: url('../images/settings.png')
+						display: none
+						background-size: 20px
+						float: left
+
+				button.request-button
+					margin-left: 0px
+					margin-top: 6px
+
+					&.loading
+						padding-right: 36px
+						background-image: url('../images/spinner.gif')
+						background-repeat: no-repeat
+						background-position: 118px center
 
 				#project-info-description
 					color: #b2b2b2
@@ -1097,6 +1126,11 @@ header.project-header-wrapper
 			.edit-cover-picture
 				display: block
 				cursor: pointer
+			
+			hgroup#project-info-wrapper
+				#project-info
+					.project-info-settings
+						display: inline-block
 
 	div.project-header-repositioner
 		width: 960px
@@ -1325,6 +1359,9 @@ form#contributor-registration
 	position: relative
 	z-index: 2
 
+	&.hidden
+		display: none
+
 .upload-drag-drop-message
 	color: #BCBCBC
 	font-size: 1.8em
@@ -1332,8 +1369,58 @@ form#contributor-registration
 	position: relative
 	top: -40px
 
+	&.hidden
+		display: none
+
+.upload-drag-drop-replace
+	width: 500px
+	height: 250px
+	text-align: center
+	padding-top: 100px
+	margin-top: 20px
+	margin: auto
+
+	&.hidden
+		display: none
+
+	.single-upload
+		.dz-progress
+			float: none
+			margin: auto
+			margin-top: 2px
+			margin-bottom: 20px
+			width: 300px
+			height: 6px
+
+			.dz-upload
+				height: 6px
+				padding-top: 0px
+
+		input[name="filename"]
+			display: block
+			height: 24px
+			font-size: 1.3em
+			margin: auto
+			width: 300px
+
+		select[name="type"]
+			display: block
+			height: 24px
+			font-size: 1.3em
+			background-color: #efefef
+			border: 1px solid #b2b2b2
+			margin: auto
+
+		.alternative-upload
+			margin-top: 60px
+			cursor: pointer
+
+
 form.files-upload-rename
 	button[type=submit].hidden
+		display: none
+
+	button[name="select-file"].hidden
 		display: none
 
 input.manual-upload
@@ -1380,24 +1467,25 @@ input.manual-upload
 		float: left
 		display: none
 
-	.dz-progress
-		background-color: #bcbcbc
-		@include border-radius(4px)
-		float: left
-		height: 20px
-		margin-left: 10px
-		width: 100px
-		margin-top: 4px
-
-		.dz-upload
-			background-color: #557799
-			padding-top: 4px
-			height: 16px
-			float: left
-			@include border-radius(4px)
-
-	.image-insert-button
+	.image-insert-button, .attach-insert-button
 		float: right
+
+.dz-progress
+	background-color: #bcbcbc
+	@include border-radius(4px)
+	float: left
+	height: 20px
+	margin-left: 10px
+	width: 100px
+	margin-top: 4px
+
+	.dz-upload
+		background-color: #557799
+		padding-top: 4px
+		height: 16px
+		float: left
+		@include border-radius(4px)
+
 
 .upload-services
 	margin-top: 20px
@@ -1565,33 +1653,30 @@ nav#user-buttons > ul > li.user-notification-count
 	height: 36px
 	float: left
 
+
 nav.project-navigation, nav.settings-navigation
-	background-color: #EFEFEF
+	//background-color: #EFEFEF
 
 	ul
 		li
 			a
-				padding: 16px 20px
-				color: $light-font
+				padding: 8px 16px
 				@include sans-bold
 
 				&:hover
 					text-decoration: none
-					background-color: #E0E0E0
 
 nav.project-navigation
-	height: 50px
+	margin-bottom: 20px
+	overflow: hidden
 
 	ul
 		float: left
 
 		li
 			float: left
-			padding: 16px 0px
+			padding: 8px 0px
 
-			a
-				&.current-page
-					color: $link-hover
 
 	ul.project-administration-menu
 		float: right
@@ -1610,6 +1695,25 @@ nav,settings-navigation
 .project-about-body
 	padding: 10px
 	padding-top: 0px
+
+
+.profile-view .oc-tabs nav.profile-tabs li,
+nav.project-navigation li
+	margin-left: 0px
+	margin-right: 10px
+
+	a
+		@include border-radius(8px)
+		border-width: 0px
+		height: 17px
+		color: $light-font
+
+		&:hover
+			background-color: #ddd
+
+		&.selected
+			background-color: $link-hover
+			color: #fff
 
 table
 	td
@@ -1820,7 +1924,9 @@ nav.collections-navigation,
 .link-resource-profile-browser,
 .link-resource-project-browser,
 .link-resource-project-browser,
-.link-resource-standards-browser
+.link-resource-standards-browser,
+.new-discussion-post-attach-resource-project-browser,
+.post-new-file-folder-profile-browser
 	ul
 		li
 			ul
@@ -1894,7 +2000,9 @@ nav.collections-navigation,
 .add-resource-profile-browser,
 .add-resource-project-browser,
 .link-resource-profile-browser,
-.link-resource-project-browser
+.link-resource-project-browser,
+.new-discussion-post-attach-resource-project-browser,
+.post-new-file-folder-profile-browser
 	margin-top: 10px
 	ul
 		li
@@ -2148,6 +2256,9 @@ table.reset-password-table
 	&.show-messages
 		display: inline-block
 
+	&.push-forward
+		z-index: 30
+
 .resource-panel
 	padding-top: 10px
 
@@ -2226,49 +2337,68 @@ table.reset-password-table
 	display: inline
 	margin-top: 0px
 
+.discussion-board-filters-search
+	input[type="text"]
+		background: url("../images/search-icon-light.png") no-repeat scroll 8px center rgba(0, 0, 0, 0)
+		padding-left: 30px
+
+.discussion-board-filters-sort
+	float: right
+
 .discussion-actions
 	float: right
+	position: relative
+	top: 100px
+	left: -20px
 
 .discussion-board
 	margin-top: 10px
+	min-height: 200px		
 
-	.discussion-item
+	.discussion-item-wrapper
 		border: 1px
 		border-bottom: 1px solid #ddd
 		padding: 15px 0px
 		overflow: hidden
 
-		.discussion-user-thumbnail
-			background-size: cover
-			height: 50px
-			width: 50px
-			float: left
+		&:last-child
+			border-bottom-width: 0px
 
-		.discussion-user-info
-			float: left
-			margin-left: 15px
-			width: 302px 
+		.discussion-item
+			.discussion-user-thumbnail
+				background-size: cover
+				height: 60px
+				width: 60px
+				float: left
+				margin-right: 20px
 
-			.user-post-info
+			.discussion-item-post
+				overflow: auto
+
 				.post-datetime
 					color: #bababa
 
-		.user-headline
-			color: $light-font
-			margin-top: 10px
-			font-size: 0.85em
-
-		.post-body
-			p:first-child
-				margin-top: 0px
-
-			.post-actions
-				overflow: hidden
+			.user-headline
+				color: $light-font
 				margin-top: 10px
+				font-size: 0.85em
 
-				.upvote-post, .downvote-post
-					padding-left: 15px
-					background-position: 0px 0px
+			.post-body
+				padding-top: 4px
+
+				p:first-child
+					margin-top: 0px
+
+				.post-actions
+					overflow: hidden
+					margin-top: 10px
+
+					.upvote-post, .downvote-post
+						padding-left: 15px
+						background-position: 0px 0px
+
+.discussion-board-filters
+	margin-top: 25px
 
 .discussion-item, .resource-comments
 	.reply-to-comment, .upvote-comment, .downvote-comment,
@@ -2396,8 +2526,14 @@ ul.tagit
 		margin-top: 10px
 		width: 98%
 
+	.new-discussion-post-prompt-user-thumbnail, .new-comment-reply-prompt-user-thumbnail
+		margin-right: 8px
+
+		&.hide
+			display: none
+
 	.new-discussion-post-prompt, .new-comment-reply-prompt
-		margin-left: 8px
+		margin-left: 0px
 
 	.new-discussion-post-prompt, .new-comment-reply-prompt, .new-comment-reply-original-prompt	
 
@@ -2405,6 +2541,9 @@ ul.tagit
 		.new-comment-original-prompt-suggest
 			color: $light-font
 
+.new-discussion-post-attach-dialog
+	width: 600px
+	height: 500px
 
 .new-discussion-post-dialog
 	.new-discussion-post-prompt
@@ -2413,6 +2552,28 @@ ul.tagit
 .new-discussion-post-submit, .new-comment-reply-submit
 	margin: 10px 0px
 	float: right
+
+.new-discussion-post-attach-wrapper
+	margin-top: 12px
+
+	.new-discussion-post-attachment, .new-discussion-post-attach
+		background-image: url("../images/attach.png")
+		background-repeat: no-repeat
+		background-position: 4px center
+		background-size: 12px 12px
+		padding: 6px 12px
+		padding-left: 20px
+
+	.new-discussion-post-attach
+		color: $light-font
+
+		&:hover
+			background-color: #efefef
+			text-decoration: none
+			color: $body-color
+
+		&.hide
+			display: none
 
 .new-comment-reply-dialog
 	.new-comment-original-reply
@@ -2606,10 +2767,10 @@ ul.tagit
 .reposition-picture
 	background-image: url('../images/crosshair.png')
 
-.project-home
+.project-view
 	.edit-cover-picture
-		top: 110px
-		left: 20px
+		top: 15px
+		left: 515px
 
 .page-submit-button
 	float: right
@@ -2666,6 +2827,12 @@ aside.page-menu-wrapper
 	background: url('../images/spinner.gif') no-repeat center center
 	background-color: #fff
 
+.login-dialog
+	width: 845px
+
+.post-new-file-folder-dialog
+	min-width: 400px
+
 .lesson-path-dialog
 	width: 600px
 	height: 300px
@@ -2679,6 +2846,9 @@ aside.page-menu-wrapper
 	height: 200px
 
 .add-video-widget-dialog
+	width: 300px
+
+.post-new-url-dialog
 	width: 300px
 
 .add-collaborator-wrapper
@@ -2760,6 +2930,10 @@ ul.collaborators
 		cursor: pointer
 
 .confirm-project-delete-dialog
+	width: 400px
+	height: 145px
+
+.confirm-category-delete-dialog
 	width: 400px
 	height: 145px
 
@@ -2850,15 +3024,6 @@ ul.collaborators
 	.easy-signup-form
 		margin: auto
 		margin-top: 60px
-		
-		.google-signin
-			width: 80%
-			margin: auto
-			margin-bottom: 10px
-			height: 40px
-
-			#signinButton
-				text-align: center
 
 		> .form-error
 			width: 80%
@@ -2882,10 +3047,6 @@ ul.collaborators
 			select
 				height: 46px
 
-			td.email-address-input-wrapper
-				input
-					width: 95%
-
 			tr.registration-username-password
 				td[colspan="2"]
 					input[type="text"]
@@ -2901,23 +3062,10 @@ ul.collaborators
 			.form-info-text
 				font-size: 1.8em
 
-			tr.extra-information
-				padding-top: 10px
-
 			label
-				float: left
 				font-size: 1.6em
-				padding-left: 16px
-
-				input[type="radio"]
-					vertical-align: middle
-
-			label:nth-child(1)
-				padding-left: 4px
 
 			.dob-inputs-wrapper
-				float: left
-
 				select[name=dob_month]
 					width: 120px
 
@@ -2927,9 +3075,67 @@ ul.collaborators
 				input[name=dob_year]
 					width: 80px
 
-			.terms-privacy-message
-				color: $light-font
-				font-size: 0.9em
+
+.easy-signup-form
+	.google-signin
+		width: 80%
+		margin: auto
+		margin-bottom: 10px
+		height: 40px
+
+		#signinButtons
+			text-align: center
+
+	table#signup-form-table
+		td.email-address-input-wrapper
+			input
+				width: 98%
+
+		input[name="username"]
+			background-repeat: no-repeat
+			background-position: 186px center
+
+			&.available
+				background-image: url('../images/available.png')
+
+			&.unavailable
+				background-image: url('../images/unavailable.png')
+
+			&.loading
+				background-image: url('../images/spinner.gif')
+
+		tr.extra-information
+			padding-top: 10px
+
+		.terms-privacy-message, .dob-inputs-info
+			color: $light-font
+			font-size: 0.9em
+
+		.dob-inputs-wrapper
+			float: left
+
+		label:nth-child(1)
+			padding-left: 4px
+
+		label
+			float: left
+			padding-left: 16px
+
+			input[type="radio"]
+				vertical-align: middle
+
+#facebook-signup-button, #facebook-signin-button
+	width: 145px
+	background-image: url('../images/facebook.png')
+	background-repeat: no-repeat
+	height: 33px
+	background-size: 145px 33px
+	cursor: pointer
+	display: inline-block
+	vertical-align: top
+
+	&:hover
+		background-image: url('../images/facebook-hover.png')
 
 .or-wrapper
 	background-image: url("../images/signup-flank.png")
@@ -3353,7 +3559,7 @@ blockquote
 					margin-left: 0px
 
 					&.is-owner, &.is-collaborator
-						cursor:pointer
+						cursor: pointer
 
 			.resource-item-description-actions-common
 				padding-top: 5px
@@ -3696,7 +3902,6 @@ table#edit-unit-form-table
 
 			ul.category-panel-listing-search-category
 				li.selected-category
-					padding
 					a
 						background-image: url('../images/search-icon-dark.png')
 						background-repeat: no-repeat
@@ -3724,11 +3929,18 @@ table#edit-unit-form-table
 				.content-panel-body-header-share
 					position: relative
 					top: 15px
-					left: 519px
+					left: 532px
 					margin-bottom: -19px
-					width: 75px
+					width: 65px
 					margin-left: -99px
 					text-align: center
+					background-color: transparent
+					@include border-radius(2px)
+					border: 1px solid #fff
+
+					&:hover
+						color: #800080
+						background-color: #fff
 
 				.content-panel-body-listing
 					overflow: auto
@@ -3783,16 +3995,6 @@ table#edit-unit-form-table
 
 								.sort-by-type-menu-format
 									float: right
-
-							.filter-sort-option
-								color: $light-font
-
-								&.selected
-									color: $body-color
-									@include sans-bold
-
-							.sort-by
-								color: #bababa
 
 					.content-panel-body-listing-item
 						float: left
@@ -3884,11 +4086,79 @@ table#edit-unit-form-table
 								margin-top: 4px
 								color: $light-font
 								font-size: 0.85em
+	
+					.content-panel-body-listing-requests
+						padding-top: 20px
+						margin-top: 20px
+						border-top: 1px solid #efefef
+						clear: left
 
+						.content-panel-body-listing-requests-title
+							overflow: hidden
+
+							h3
+								float: left
+
+							.content-panel-body-listing-requests-new-request
+								float: right
+								color: #800080
+								border: 1px solid #800080
+								text-align: center
+								border-radius: 2px
+								background-color: #fff
+								margin-right: 8px
+
+								&:hover
+									color: #fff
+									background-color: #800080
+
+						.content-panel-body-listing-request
+							padding: 6px
+							display: block
+							overflow: hidden
+							color: $body-color
+
+							.content-panel-body-listing-request-thumbnail
+								width: 40px
+								height: 40px
+								background-size: cover
+								float: left
+								margin-right: 12px
+
+							.content-panel-body-listing-request-body
+								float: left
+								width: 440px
+
+								.content-panel-body-listing-request-body-user
+									color: #bababa
+									margin-right: 8px
+
+								p
+									margin-top: 0px
+									display: inline
+
+							&:hover
+								background-color: #efefef
+								background-image: url('../images/request-open.png')
+								background-repeat: no-repeat
+								background-position: 500px center
+								padding-right: 32px
 
 		footer
 			margin-top: 0px
 
+
+.content-panel-body-listing-filters-sort, .discussion-board-filters-sort
+	.filter-sort-option
+		color: $light-font
+		cursor: pointer
+
+		&.selected
+			color: $body-color
+			@include sans-bold
+
+	.sort-by
+		color: #bababa
 
 .oc-tip
 	display: none
@@ -3917,6 +4187,142 @@ table#edit-unit-form-table
 		-ms-transform: rotate(180deg)
 		-o-transform: rotate(180deg)
 		transform: rotate(180deg)
+
+
+.project-view
+	background-color: #efefef
+
+	.primary-center-stage
+		margin: 10px auto
+		@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
+		background-color: #fff
+
+		#key-panel, #fill-panel
+			float: left		
+
+		#key-panel
+			//width: $key-panel-width - 10
+			width: 620px
+
+		#fill-panel
+			//width: $fill-panel-width - 10
+			width: 300px
+
+		.project-body
+			padding: 10px
+
+.user-post-attachment
+	overflow: hidden
+	margin-top: 6px
+
+	.user-post-attachment-photo
+		float: left
+		background-position: center center
+		width: 60px
+		height: 60px
+		margin-right: 12px
+		background-repeat: no-repeat
+		background-size: 100%
+
+	.user-post-attachment-description
+		padding-top: 10px
+
+		a
+			font-size: 1.2em
+
+.category-listing
+	overflow: hidden
+
+	li
+		overflow: hidden
+		padding: 6px 0px
+
+		input[type='text']
+			float: left
+
+		.category-delete-button
+			height: 26px
+
+.new-discussion-post-attach-resource-project-browser
+	height: 325px
+
+.browse-post-new-options
+	overflow: hidden
+	margin-top: 10px
+
+	.browse-post-new-option
+		float: left
+		width: 130px
+		height: 130px
+		margin: 10px
+		text-align: center
+		cursor: pointer
+
+		.browse-post-new-option-thumbnail
+			background-repeat: no-repeat
+			background-position: center center
+			padding-top: 40px
+			height: 60px
+
+		&.upload-option
+			.browse-post-new-option-thumbnail
+				background-image: url('../images/upload-icon-dark.png')
+
+		&.file-folder-option
+			.browse-post-new-option-thumbnail
+				background-image: url('../images/unit-icon-dark.png')
+				background-size: 60px 60px
+
+		&.url-option
+			.browse-post-new-option-thumbnail
+				background-image: url('../images/earth.png')
+				background-size: 50px 50px
+
+		&:hover
+			background-color: #efefef
+
+		.browse-post-new-option-description
+			@include sans-bold
+			color: $light-font
+
+.login-dialog
+	.registration-title
+		margin: auto
+		margin-bottom: 20px
+		font-size: 1.3em
+
+	#key-panel
+		width: 450px
+
+	#fill-panel
+		width: 275px
+		border-right: 1px solid #efefef
+
+	.panel-left
+		padding-right: 80px
+
+	.easy-signup-form
+		table#signup-form-table
+			width: 300px
+			margin: auto
+
+			tr
+				height: auto
+
+			.large-action-button
+				font-size: 1em
+				float: right
+
+				&.loading
+					padding-right: 30px
+					background-image: url('../images/spinner.gif')
+					background-repeat: no-repeat
+					background-position: 74px center
+
+.post-new-url-dialog
+	form
+		input[type="text"]
+			width: 200px
 
 .worksheet-creator-frame
 	overflow: hidden
