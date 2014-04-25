@@ -9,6 +9,7 @@ class Category(models.Model):
     project = models.NullBooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True, editable=False)
     slug = models.SlugField(max_length=256, blank=True)
+    position = models.IntegerField(default=0, null=True, blank=True)
 
     def __unicode__(self):
         return self.title
