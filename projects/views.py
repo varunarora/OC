@@ -470,8 +470,17 @@ def post_discussion(request, project_slug):
             parent_type=project_ct.id, request=request
         )
 
+        # If there is a redirect parameter, redirect to that page.
+        redirect_to = request.POST.get('redirect_to', None)
+        if redirect_to:
+            from django.contrib import messages
+            messages.success(request,
+                'Hurray! You created a new post successfully')
+
+            return redirect(redirect_to)
+
     # Redirect to discussions page
-    return redirect('projects:project_discussions', project_slug=project_slug)
+    return redirect('projects:project_home', project_slug=project_slug)
 
 
 def list_collection(request, project_slug, collection_slug):

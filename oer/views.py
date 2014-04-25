@@ -63,24 +63,61 @@ def browse(request, category_slug):
 
 
     all_resources = []
+    all_collections = []
     for category in current_flattened_tree:
         resources = Resource.objects.filter(category=category)
         all_resources += list(resources)
 
+        collections = Collection.objects.filter(category=category)
+        all_collections += list(collections)
+
     # Setup each resource's favorites count and type.
     from interactions.models import Favorite
     from meta.models import TagCategory
+    from django.contrib.contenttypes.models import ContentType
+    resource_ct = ContentType.objects.get_for_model(Resource)
+    collection_ct = ContentType.objects.get_for_model(Collection)
+
     for resource in all_resources:
-        resource.favorites_count = Favorite.objects.filter(resource=resource).count()
+        resource.favorites_count = Favorite.objects.filter(
+            parent_id=resource.id, parent_type=resource_ct).count()
         resource.type = resource.tags.get(
             category=TagCategory.objects.get(title='Resource type'))
+        resource.item_type = 'resource'
+
+    for collection in all_collections:
+        collection.favorites_count = Favorite.objects.filter(
+            parent_id=collection.id, parent_type=collection_ct).count()
+        resource.type = resource.tags.get(
+            category=TagCategory.objects.get(title='Resource type'))
+        resource.item_type = 'collection'
+
+    requests = []
+    try:
+        # Fetch all requests in the selected category.
+        from projects.models import Project
+        project_ct = ContentType.objects.get_for_model(Project)
+        category_group = Project.objects.get(pk=settings.CATEGORY_GROUPS[selected_category.id])
+
+        from interactions.models import Comment
+        requests = Comment.objects.filter(
+            category__slug='requests', parent_id=category_group.id,
+            parent_type=project_ct.id
+        )
+    except KeyError:
+        pass
+
+    # Set the URL for the current page for redirect situations.
+    selected_category.url = request.path
 
     context = {
         'title': 'Browse lessons, projects, activities, worksheets &amp; tests',
         'selected_category': selected_category,
         'browse_tree': browse_tree,
         'return_url': return_url,
-        'resources': all_resources
+        'items': list(all_resources) + list(all_collections),
+        'requests': requests,
+        'category_group': category_group
     }
     return render(request, 'browse.html', context)
 
@@ -838,6 +875,9 @@ def file_upload_submit(request):
         user_id = request.POST.get('user', None)
         project_id = request.POST.get('project', None)
         collection_id = request.POST.get('collection', None)
+        is_post = request.POST.get('post', None) == 'true'
+        resource_type = request.POST.get('type', None)
+        category_id = request.POST.get('category_id', None)
 
         try:
             ###########################################################
@@ -874,7 +914,11 @@ def file_upload_submit(request):
 
             if resource_formset.is_valid():
                 for file_name, original_file in request.FILES.items():
-                    create_resource(original_file, request.user, collection, file_name)
+                    new_resource = create_resource(original_file, request.user, collection, file_name)
+
+                    # Add the necessary tags to the resource if this is a post upload.
+                    if is_post:
+                        add_type_category_to_resource(new_resource, category_id, resource_type)
 
             ###########################################################
             # Now, handle name changes for pre-uploaded files
@@ -890,25 +934,55 @@ def file_upload_submit(request):
                 del post_data['collection']
 
             try:
-                for id in post_data:
+                del post_data['post']
+                del post_data['key']
+                del post_data['upload_service']
+                del post_data['type']
+                del post_data['category_id']
+                del post_data['MAX_FILE_SIZE']
+                del post_data['filename']
+                del post_data['submit']
+                del post_data['file']
+            except:
+                pass
+
+            for id in post_data:
+                try:
                     resource = Resource.objects.get(pk=id)
                     # If the title has changed, persist it
                     if (resource.id != post_data[id]):
                         resource.title = post_data[id]
                         resource.save()
-            except:
-                # TODO(Sri): Django message thingy
-                k = True
-                k = not k
+
+                    # Add the necessary tags to the resource if this is a post upload.
+                    if is_post:
+                        add_type_category_to_resource(resource, category_id, resource_type)
+        
+                except:
+                    pass
 
         except:
             from django.contrib import messages
             messages.error(request, 'Files were unable to be uploaded. Please try again.')
         
-        return redirect_to_collection(user_id, project_id, collection_id)
+        # If this is a sent from a POST page, redirect to the same referrer, else to collection.
+        if is_post:
+            return redirect(request.META.get('HTTP_REFERER'))
+        else:
+            return redirect_to_collection(user_id, project_id, collection_id)
 
     else:
         return Http404
+
+
+def add_type_category_to_resource(resource, category_id, resource_type):
+    from meta.models import TagCategory, Category, Tag
+    resource_type = Tag.objects.get(title__iexact=resource_type,
+        category=TagCategory.objects.get(title='Resource type'))
+
+    resource.tags.add(resource_type)
+    resource.category = Category.objects.get(pk=int(category_id))
+    resource.save()
 
 
 def create_resource(uploaded_file, user, collection, new_filename=None):
@@ -1467,7 +1541,8 @@ def file_upload(request):
         return HttpResponse(json.dumps(
             {
                 new_resource.id: {
-                    'title': new_resource.revision.content.file.name,
+                    'id': new_resource.id,
+                    'title': new_resource.title,
                     'url': reverse(
                         'read', kwargs={
                             'resource_id': new_resource.id,
@@ -2662,3 +2737,100 @@ def template_simple_lesson_plan(request):
         template, 200,
         content_type="text/html"
     )
+
+
+def post_existing_resource_collection(request):
+    try:
+        is_resource = request.POST.get('is_resource', None) == 'true'
+        resource_collection_id = request.POST.get('resource_collection_ID', None)
+
+        if is_resource and resource_collection_id:
+            resource_collection = Resource.objects.get(pk=resource_collection_id)
+        else:
+            resource_collection = Collection.objects.get(pk=resource_collection_id)
+
+        from meta.models import TagCategory, Tag
+        tag = Tag.objects.get(title__iexact=request.POST.get(
+            'type', None), category=TagCategory.objects.get(title='Resource type'))
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        from meta.models import Category
+        category = Category.objects.get(pk=request.POST.get('category_id', None))
+
+        resource_collection.category = category
+        resource_collection.tags.add(tag)
+        resource_collection.save()
+
+        from django.contrib import messages
+        messages.success(request, 'Successfully posted your %s  \'%s\'.' % (
+            'file' if is_resource else 'folder', resource_collection.title))
+
+        return redirect(request.META.get('HTTP_REFERER'))
+
+    except:
+        return APIUtilities._api_failure()
+
+
+def post_url(request):
+    DEFAULT_COST = 0
+
+    try:
+        from meta.models import TagCategory, Tag, Category
+        tag = Tag.objects.get(title__iexact=request.POST.get(
+            'type', None), category=TagCategory.objects.get(title='Resource type'))
+
+        category = Category.objects.get(pk=request.POST.get('category_id', None))
+
+        posted_title = request.POST.get('title', None)        
+        title = posted_title if posted_title else 'Untitled website'
+
+        from django.template.defaultfilters import slugify
+
+        # Create a new resource
+        new_resource = Resource(
+            title=title,
+            cost=DEFAULT_COST,
+            user=request.user,
+            slug=slugify(title),
+            visibility='public',
+            description='',
+            category=category
+        )
+
+        new_url = Link(url=request.POST.get('url', None))
+        new_url.save()
+
+        new_resource_revision = ResourceRevision()
+        new_resource_revision.content = new_url
+        new_resource_revision.user = request.user
+        new_resource_revision.save()
+
+        new_resource.revision = new_resource_revision
+        new_resource.save()
+
+        new_resource.tags.add(tag)
+
+        # Push a signal for new resource created.     
+        import oer.CollectionUtilities as cu
+        (collection_host_type, collection_host) = cu.get_collection_root(
+            request.user.get_profile().collection)
+        Resource.resource_created.send(
+            sender="Resources", resource=new_resource,
+            context_type='user profile', context=request.user.get_profile()
+        )
+
+        # Assign this resource to the revision created.
+        new_resource.revision.resource = new_resource
+        new_resource.revision.save()
+
+        # Now add this resource to the collection it belongs to
+        request.user.get_profile().collection.resources.add(new_resource)
+        request.user.get_profile().collection.save()
+
+        return redirect(request.META.get('HTTP_REFERER'))
+
+    except Exception, e:
+        print e
+        return APIUtilities._api_failure()

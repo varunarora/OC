@@ -193,7 +193,34 @@ OC.projects = {
 
         OC.comments.bindVotingButtons('.discussion-item');
 
-        OC.projects.bindPostDeleteButtons();
+        $('.project-info-settings').tipsy({gravity: 's'});
+
+        // If there is a new post request, open the new post dialog.
+        var params = window.location.search === '' ? [] : window.location.search.substring(
+            1).split('&');
+
+        if (params){
+            var postParameter = _.find(params, function(param){
+                return param.indexOf('post=') !== -1;
+            }),
+                redirectToParameter = _.find(params, function(param){
+                return param.indexOf('redirect_to=') !== -1;
+            });
+
+            if (postParameter){
+                var post = postParameter.substring(postParameter.indexOf('post=') + 5);
+                if (post === 'new'){
+                    OC.projects.postRedirectTo = redirectToParameter.substring(
+                        redirectToParameter.indexOf('redirect_to=') + 12);
+
+                    OC.projects.newPostButtonClickHandler();
+
+                    // Bind submit button click.
+                    $('.new-discussion-post-submit').click(
+                        OC.projects.newPostSubmitButtonClickHandler);
+                }
+            }
+        }
     },
 
     bindNewPostButton: function(){
@@ -310,10 +337,32 @@ OC.projects = {
 
     newPostSubmitButtonClickHandler: function(event){
         if ($('.new-discussion-post-body').val() !== ''){
-            $('form#new-discussion-post-form').submit();
+            var newDiscussionPostForm = $('form#new-discussion-post-form');
+
+            if (OC.config.user.id){
+                newDiscussionPostForm.submit();
+            } else {
+                OC.launchSignupDialog(function(){
+                    // Add a redirect_to in the form.
+                    if (OC.projects.postRedirectTo){
+                        var redirectToInput = $('<input/>', {
+                            'type': 'hidden',
+                            'name': 'redirect_to',
+                            'value': OC.projects.postRedirectTo
+                        });
+                        newDiscussionPostForm.prepend(redirectToInput);
+                    }
+
+                    newDiscussionPostForm.submit();
+                });
+            }
         } else {
             $('.new-discussion-post-body').addClass('form-input-error');
         }
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
     },
 
     getDiscussionID: function(target){

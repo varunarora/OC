@@ -18,6 +18,7 @@ OC.upload = {
     fp_uploaded_files: {},
     dropzone_uploaded_files: {},
     manual_to_upload_files: [],
+    isPost: false,
 
     launchFilepickerDialog: function(event, service) {
         // Allow multiple files at once, store to S3, and the callback is fpPost
@@ -76,7 +77,7 @@ OC.upload = {
             data[key] = filename;
         }
 
-        data['user'] = $('form input[name=user]').val();
+        data['user'] = OC.config.user.id;
         
         if ($('form input[name=project]').length > 0){
             data['project'] = $('form input[name=project]').val();
@@ -117,15 +118,35 @@ OC.upload = {
         '<div class="dz-error-message"><span data-dz-errormessage></span></div>' +
         '</div>'),
 
+    singleFileTemplate: _.template('<div class="single-upload <%= process %>">' +
+        '<input type="hidden" name="key" value="<%= key %>" />' +
+        '<input type="text" name="filename" value="<%= filename %>" />' +
+        '<input type="hidden" name="upload_service" value="<%= process %>" />' +
+        '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
+        '<select name="type"><option value="lesson">Lesson</option><option value="project">Project</option>' +
+        '<option value="worksheet">Worksheet</option><option value="handout">Handout</option><option value="activity">Activity</option>' +
+        '<option value="assessment">Test / assessment</option><option value="lecture">Lecture</option></select>' +
+        '<div class="alternative-upload"><a>Upload something else instead...</a></div></div>'),
+
     newFileUploadListener: function(){
-        var formDoneButton = $('form.files-upload-rename button[type=submit]');
+        var formDoneButton = $('form.files-upload-rename button[type=submit]'),
+            formUploadComputerButton = $('form.files-upload-rename button[name="select-file"]');
         if (formDoneButton.hasClass('hidden')){
             if (! $.isEmptyObject(OC.upload.fp_uploaded_files) ||
                 ! $.isEmptyObject(OC.upload.dropzone_uploaded_files) ||
                 OC.upload.manual_to_upload_files.length){
                 formDoneButton.removeClass('hidden');
+
+                // Hide the upload button if this is a single upload environment.
+                if (OC.upload.isPost){
+                    formUploadComputerButton.addClass('hidden');
+                }
             }
         }
+    },
+
+    updateSingleItemKey: function(key){
+        $('.post-new-upload-dialog .upload-drag-drop-replace input[name=key]').val(key);
     },
 
     addToUploadList: function(key, filename, filesize, process){
@@ -135,8 +156,52 @@ OC.upload = {
             filesize: filesize,
             process: process
         };
-        var newElement = OC.upload.dzTemplate(newFile);
-        $('.upload-drag-drop').append(newElement);
+
+        if (OC.upload.isPost){
+            // Hide dropzone.
+            var dropzoneElement = $('.post-new-upload-dialog .upload-drag-drop,' +
+                '.post-new-upload-dialog .upload-drag-drop-message');
+            dropzoneElement.addClass('hidden');
+
+            // Show element similar to dropzone dimensions with file.
+            var singleFile = OC.upload.singleFileTemplate(newFile);
+            var dragDropReplace = $('.post-new-upload-dialog .upload-drag-drop-replace');
+            dragDropReplace.html(singleFile);
+            dragDropReplace.removeClass('hidden');
+
+            // Focus on input text.
+            $('input[type="filename"]', dragDropReplace).focus();
+
+            // Bind click handler on uploading something else.
+            $('.alternative-upload a', dragDropReplace).click(function(){
+                dragDropReplace.addClass('hidden');
+                dropzoneElement.removeClass('hidden');
+
+                // Delete the original file from the manual listing.
+                var allManualUploads = $('input[class="manual-upload"]');
+                $(allManualUploads[allManualUploads.length - 2]).remove();
+                
+                OC.upload.manual_to_upload_files = [];
+
+                // Delete the original files from the dropzone listing.
+                OC.upload.dropzone_uploaded_files = {};
+                Dropzone.forElement('.upload-drag-drop').removeAllFiles();
+
+                // Delete the original files from Filepicker.
+                OC.upload.fp_uploaded_files = {};
+
+                // Reset buttons at the bottom to original state.
+                var formDoneButton = $('form.files-upload-rename button[type=submit]'),
+                    formUploadComputerButton = $('form.files-upload-rename button[name="select-file"]');
+                
+                formUploadComputerButton.removeClass('hidden');
+                formDoneButton.addClass('hidden');
+            });
+
+        } else {
+            var newElement = OC.upload.dzTemplate(newFile);
+            $('.upload-drag-drop').append(newElement);
+        }
     },
 
     onFileInputChange: function(event){
@@ -185,64 +250,89 @@ OC.upload = {
     },
 
     preSubmissionHandler: function(event){
-        var preparedFiles = $('.upload-drag-drop .dz-preview');
+        if (OC.upload.isPost){
+            var dragDropReplace = $('.upload-drag-drop-replace'),
+                key = $('input[name="key"]', dragDropReplace).val(),
+                newFilename = $('input[name="filename"]', dragDropReplace).val(),
+                service = $('input[name="upload_service"]', dragDropReplace).val();
 
-        var fp_key, dz_key, i, j, file_item, element_key, element_value;
-        var formFiles = $('.files-upload-rename input[type=file]');
-        for (i = 0; i < preparedFiles.length; i++) {
-            file_item = preparedFiles[i];
-            element_key = $('.dz-filename span:first', file_item).attr('class');
-            element_value = $('.dz-filename span:first', file_item).text().trim();
-
-            // Capture Filepicker.io file renames and update {} before passing
-            //     to form
-            if ($(file_item).hasClass('filepicker-item')) {
-                if (OC.upload.fp_uploaded_files[element_key] != element_value){
-                    OC.upload.fp_uploaded_files[element_key] = element_value;
-                }
+            if (service == 'filepicker-item'){
+                $('<input/>').attr('type', 'hidden')
+                    .attr('name', key)
+                    .attr('value', newFilename)
+                    .appendTo('.files-upload-rename');
+            } else if (service == 'dropzone-item'){
+                $('<input/>').attr('type', 'hidden')
+                    .attr('name', key)
+                    .attr('value', newFilename)
+                    .appendTo('.files-upload-rename');
+            } else {
+                var allManualUploads = $('.files-upload-rename input[class=manual-upload]');
+                $(allManualUploads[allManualUploads.length - 2]).attr('name', newFilename);
             }
 
-            // Capture manual file renames and update {} before passing to
-            //     form
-            else if ($(file_item).hasClass('manual-item')) {
-                for (j = 0; j < formFiles.length; j++){
-                    // NOTE(Varun): Originally, name on input element was being
-                    //     added only in the case when the file name had
-                    //     changed,
-                    //if (element_value !=  element_key){
-                    if ($(formFiles[j]).val() == element_key) {
-                        $(formFiles[j]).attr('name', element_value);
+        } else {
+            var preparedFiles = $('.upload-drag-drop .dz-preview');
+
+            var fp_key, dz_key, i, j, file_item, element_key, element_value;
+            var formFiles = $('.files-upload-rename input[type=file]');
+            for (i = 0; i < preparedFiles.length; i++) {
+                file_item = preparedFiles[i];
+                element_key = $('.dz-filename span:first', file_item).attr('class');
+                element_value = $('.dz-filename span:first', file_item).text().trim();
+
+                // Capture Filepicker.io file renames and update {} before passing
+                //     to form
+                if ($(file_item).hasClass('filepicker-item')) {
+                    if (OC.upload.fp_uploaded_files[element_key] != element_value){
+                        OC.upload.fp_uploaded_files[element_key] = element_value;
                     }
-                    //}
+                }
+
+                // Capture manual file renames and update {} before passing to
+                //     form
+                else if ($(file_item).hasClass('manual-item')) {
+                    for (j = 0; j < formFiles.length; j++){
+                        // NOTE(Varun): Originally, name on input element was being
+                        //     added only in the case when the file name had
+                        //     changed,
+                        //if (element_value !=  element_key){
+                        if ($(formFiles[j]).val() == element_key) {
+                            $(formFiles[j]).attr('name', element_value);
+                        }
+                        //}
+                    }
+                }
+
+                // Capture Dropzone file renames and update {} before passing to
+                //     form
+                else {
+                    if (OC.upload.dropzone_uploaded_files[element_key] != element_value){
+                        OC.upload.dropzone_uploaded_files[element_key] = element_value;
+                    }
                 }
             }
 
-            // Capture Dropzone file renames and update {} before passing to
-            //     form
-            else {
-                if (OC.upload.dropzone_uploaded_files[element_key] != element_value){
-                    OC.upload.dropzone_uploaded_files[element_key] = element_value;
-                }
+            for (fp_key in OC.upload.fp_uploaded_files) {
+                $('<input/>').attr('type', 'hidden')
+                    .attr('name', fp_key)
+                    .attr('value', OC.upload.fp_uploaded_files[fp_key])
+                    .appendTo('.files-upload-rename');
             }
-        }
 
-        for (fp_key in OC.upload.fp_uploaded_files) {
-            $('<input/>').attr('type', 'hidden')
-                .attr('name', fp_key)
-                .attr('value', OC.upload.fp_uploaded_files[fp_key])
-                .appendTo('.files-upload-rename');
-        }
-
-        for (dz_key in OC.upload.dropzone_uploaded_files) {
-            $('<input/>').attr('type', 'hidden')
-                .attr('name', dz_key)
-                .attr('value', OC.upload.dropzone_uploaded_files[dz_key])
-                .appendTo('.files-upload-rename');
+            for (dz_key in OC.upload.dropzone_uploaded_files) {
+                $('<input/>').attr('type', 'hidden')
+                    .attr('name', dz_key)
+                    .attr('value', OC.upload.dropzone_uploaded_files[dz_key])
+                    .appendTo('.files-upload-rename');
+            }
         }
     }
 };
 
 $(document).ready(function() {
+    OC.upload.isPost = $('form.files-upload-rename input[name="post"]').val() == "true";
+
     // Prevent form being submitted on hitting enter
     $('form').bind('keypress', function (e) {
         if (e.keyCode === 13) {
@@ -250,49 +340,22 @@ $(document).ready(function() {
         }
     });
 
-    /**
-     * @function on-click
-     * @desc On-click handler for the upload button.
-     * @return none
-     */
-    $('.uploadfiles').click(function(e) {
-        OC.upload.launchFilepickerDialog(e, 'COMPUTER');
-    });
+    var uploadButtonServicesMap = {
+        '.uploadfiles': 'COMPUTER',
+        '.gdrive-upload': 'GOOGLE_DRIVE',
+        '.skydrive-upload': 'SKYDRIVE',
+        '.dropbox-upload': 'DROPBOX',
+        '.gmail-upload': 'GMAIL',
+        '.box-upload': 'BOX',
+        '.picasa-upload': 'PICASA',
+        '.ftp-upload': 'FTP',
+        '.webdav-upload': 'WEBDAV',
+        '.facebook-upload': 'FACEBOOK'
+    };
 
-    $('.gdrive-upload').click(function(e) {
-        OC.upload.launchFilepickerDialog(e, 'GOOGLE_DRIVE');
-    });
-
-    $('.skydrive-upload').click(function(e) {
-        OC.upload.launchFilepickerDialog(e, 'SKYDRIVE');
-    });
-
-    $('.dropbox-upload').click(function(e) {
-        OC.upload.launchFilepickerDialog(e, 'DROPBOX');
-    });
-
-    $('.gmail-upload').click(function(e) {
-        OC.upload.launchFilepickerDialog(e, 'GMAIL');
-    });
-
-    $('.box-upload').click(function(e) {
-        OC.upload.launchFilepickerDialog(e, 'BOX');
-    });
-
-    $('.picasa-upload').click(function(e) {
-        OC.upload.launchFilepickerDialog(e, 'PICASA');
-    });
-
-    $('.ftp-upload').click(function(e) {
-        OC.upload.launchFilepickerDialog(e, 'FTP');
-    });
-
-    $('.webdav-upload').click(function(e) {
-        OC.upload.launchFilepickerDialog(e, 'WEBDAV');
-    });
-
-    $('.facebook-upload').click(function(e) {
-        OC.upload.launchFilepickerDialog(e, 'FACEBOOK');
+    _.each(uploadButtonServicesMap, function(value, key, list){
+        $(key).click(function(event){ OC.upload.launchFilepickerDialog(
+            event, value); });
     });
 
     $('form.files-upload-rename button[type=submit]').click(function(event) {
@@ -361,8 +424,7 @@ $(document).ready(function() {
         }
 
         // Append the values of user, project and collection ID
-        formData.append('user', $(
-            'form.files-upload-rename input[name=user]').val());
+        formData.append('user', OC.config.user.id);
         if ($('form input[name=project]').length > 0){
             formData.append('project', $(
             'form.files-upload-rename input[name=project]').val());
@@ -371,10 +433,20 @@ $(document).ready(function() {
             formData.append('collection', $(
                 'form.files-upload-rename input[name=collection]').val());
         }
+
+        if (OC.upload.isPost) {
+            OC.upload.addToUploadList(null, file.name, 0, 'dropzone-item');
+        }
     });
 
     // TODO(Varun): Add the project/user + collection ID to the Dropzone request
 
+    // In the case of posting a single item, bind upload progress event with template.
+    if (OC.upload.isPost){
+        Dropzone.forElement('.upload-drag-drop').on('uploadprogress', function(file, progress, bytesSent){
+            $('.single-upload .dz-progress .dz-upload').css('width', progress + '%');
+        });
+    }
 
     Dropzone.forElement('.upload-drag-drop').on("success", function(file, response){
         // Make the name of the file content editable.
@@ -393,6 +465,10 @@ $(document).ready(function() {
         $('.dz-preview:last .dz-filename > span').addClass(key);
 
         OC.upload.newFileUploadListener();
+
+        if (OC.upload.isPost) {
+            OC.upload.updateSingleItemKey(key);
+        }
     });
 
     $('input[type=file]').change(OC.upload.onFileInputChange);

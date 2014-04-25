@@ -3640,6 +3640,132 @@ var OC = {
         $('.content-panel-body-listing-item-favorites').click(function(event){
             $(this).toggleClass('favorited');
         });
+
+        // Attach click handler with share button.
+        $('.content-panel-body-header-share').click(function(){
+            if (OC.config.user.id) OC.initNewPostDialog();
+            else {
+                OC.launchSignupDialog(function(response){
+                    OC.initNewPostDialog();
+                });
+            }
+        });
+
+        // Attach CSS class toggler on the sort-filter options.
+        $('.filter-sort-option').click(function(event){
+            var option = $(this);
+            if (! option.hasClass('selected')){
+                $('.filter-sort-option').removeClass('selected');
+                option.addClass('selected');
+            }
+        });
+
+    },
+
+    initNewPostDialog: function(){
+        var postDialog = OC.customPopup('.browse-post-new-dialog');
+
+        $('.browse-post-new-option.upload-option', postDialog.dialog).click(function(){
+            postDialog.close();
+
+            // Launch the upload popup.
+            var uploadPopup = OC.customPopup('.post-new-upload-dialog');
+        });
+
+        $('.browse-post-new-option.file-folder-option', postDialog.dialog).click(function(){
+            postDialog.close();
+
+            // Launch the upload popup.
+            var fileFolderPopup = OC.customPopup('.post-new-file-folder-dialog'),
+                filesBrowser = $('.post-new-file-folder-profile-browser');
+
+            $.get('/resources/tree/all/user/',
+                function(response){
+                    if (response.status == 'true'){
+                        OC.renderBrowser(response.tree, filesBrowser);
+                        filesBrowser.removeClass('loading-browser');
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+
+                },
+            'json');
+
+            // Bind 'attach' button click handler.
+            $('.post-new-file-folder-submit').click(function(event){
+                var toResourceCollection;
+
+                // If the active tab is projects.
+                 selectedResourceCollection = filesBrowser.find(
+                    '.selected-destination-collection, .selected-destination-resource');
+
+                 if (selectedResourceCollection.length > 0)
+                    toResourceCollection = $(selectedResourceCollection[0]);
+
+                if (toResourceCollection){
+                    var elementID = toResourceCollection.attr('id'),
+                        resource = elementID.indexOf('resource') != -1;
+
+                    var resourceCollectionID = resource ? elementID.substring(9) : elementID.substring(11);
+                    
+                    // Append the resource/collection ID to the form.
+                    $('#post-new-file-folder-profile-form input[name=is_resource]').val(
+                        resource);
+                    $('#post-new-file-folder-profile-form input[name=resource_collection_ID]').val(
+                        resourceCollectionID);
+
+                    $('#post-new-file-folder-profile-form').submit();
+                }
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+        });
+
+        $('.browse-post-new-option.url-option', postDialog.dialog).click(function(){
+            postDialog.close();
+
+            // Launch the upload popup.
+            var newURLPopup = OC.customPopup('.post-new-url-dialog');
+        });
+    },
+
+    launchSignupDialog: function(successCallback){
+        var signupDialog = OC.customPopup('.login-dialog'),
+            signinButtons = $('.easy-signup-form, #sign-in-form'),
+            sessionStateElement = $('.easy-signup-form #session-state');
+
+        OC.signupDialog = signupDialog;
+
+        // Load the template for the signup and signin forms.
+        $.get('/user/api/registeration-context/',
+            function(response){
+                if (response.status == 'true'){
+                    // Fill the session state.
+                    var i; for (i = 0; i < signinButtons.length; i++){
+                        $('#session-state', $(signinButtons[i])).attr('data-state', response.state);
+
+                        // Generate the Google+ button.
+                        $('span.g-signin', $(signinButtons[i])).attr('data-clientid', response.client_id);
+                    }
+
+                    OC.initializeGooglePlusButtons();
+
+                    OC.registerationSuccessCallback = successCallback;
+                }
+            },
+        'json');
+    },
+
+    initializeGooglePlusButtons: function(){
+        var po = document.createElement('script'),
+            s = document.getElementsByTagName('script')[0];
+        po.type = 'text/javascript';
+        po.async = true;
+        po.src = 'https://plus.google.com/js/client:plusone.js?onload=start';
+        s.parentNode.insertBefore(po, s);
     },
 
     resource: {

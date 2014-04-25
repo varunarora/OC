@@ -56,6 +56,9 @@ urlpatterns = patterns(
     url(r'^api/search/(?P<query>[\w\ ]+)/$', views.autocomplete_search, name='autocomplete'),
     url(r'^api/editor-search/(?P<query>[\w\ ]+)/$', views.editor_autocomplete_search, name='editor-autocomplete'),
 
+    url(r'^api/post-existing/$', views.post_existing_resource_collection, name='post_existing_resource_collection'),
+    url(r'^api/post-url/$', views.post_url, name='post_url'),
+
     url(r'^template/five-step-lesson-plan/$', views.template_five_step_lesson_plan, name='template_five_step_lesson_plan'),
     url(r'^template/three-act-lesson/$', views.template_three_act_lesson, name='template_three_act_lesson'),
     url(r'^template/understanding-by-design-lesson-plan/$', views.template_understanding_by_design_lesson_plan, name='template_understanding_by_design_lesson_plan'),

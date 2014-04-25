@@ -94,6 +94,7 @@ class Collection(models.Model):
     changed = models.DateTimeField(auto_now=True, editable=False)
     slug = models.SlugField(max_length=256)
     creator = models.ForeignKey(User)
+    category = models.ForeignKey('meta.Category', null=True, blank=True)
 
     def __unicode__(self):
         return self.title

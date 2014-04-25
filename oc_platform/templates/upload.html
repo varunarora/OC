@@ -13,6 +13,7 @@
                     <div class="upload-drag-drop-message">DRAG AND DROP FILES HERE</div>
                     <button class="projects-success-button" type="file" name="select-file">UPLOAD FROM COMPUTER</button>
                     <button class="projects-progress-button hidden" type="submit" name="submit">DONE</button>
+                    <input type="hidden" name="post" value="false" />
                     <input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
                     <input type="file" class="manual-upload" name="file" />
                 </form>
@@ -59,7 +60,6 @@
         </div>
     </div>
 </div>
-<div class="popup-background"></div>
 
 <script type="text/javascript" src="http://api.filepicker.io/v1/filepicker.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/dropzone.min.js"></script>
