@@ -480,10 +480,6 @@ def list_user_favorites(request):
             'user_url': reverse('user:user_profile', kwargs={
                 'username': favorite.user.username }),
             'url': url,
-                'read', kwargs={
-                    'resource_id': favorite.resource.id,
-                    'resource_slug': favorite.resource.slug
-                }),
             'title': favorite.parent.title,
             'user': favorite.user.get_full_name(),
             'username': favorite.user.username,
