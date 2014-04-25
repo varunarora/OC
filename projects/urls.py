@@ -32,7 +32,9 @@ urlpatterns = patterns(
     url(r'^(?P<project_id>\d+)/change-cover/$', views.change_cover_picture, name='change_cover_picture'),
     url(r'^(?P<project_id>\d+)/reposition-cover/$', views.reposition_cover_picture, name='reposition_cover_picture'),
     url(r'^(?P<project_id>\d+)/request-invite/$', views.request_invite, name='request_invite'),
+    url(r'^(?P<project_id>\d+)/category/(?P<category_id>\d+)/delete/', views.delete_category, name='delete_category'),
 
+    url(r'^(?P<project_slug>[\w\-]+)/settings/categories/', views.categories, name='project_categories'),
     url(r'^(?P<project_slug>[\w\-]+)/settings/administration/', views.administration, name='project_administration'),
     url(r'^(?P<project_slug>[\w\-]+)/settings/requests/', views.requests, name='project_requests'),
     url(r'^(?P<project_slug>[\w\-]+)/settings/', views.project_settings, name='project_settings'),

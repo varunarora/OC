@@ -1,0 +1,41 @@
+{% include 'partials/header.html' with body_class='project-view' %}
+{% include 'project/header.html' with page="categories" %}
+
+<div class="center-stage">
+    <div id="fill-panel" class="panel-left">
+        {% include 'project/partials/settings-submenu.html' with submenu='categories' %}
+    </div>
+    <div id="key-panel" class="panel-right">
+        <h2>Categories</h2>
+        <p><h4>Edit, delete or add post categories</h4></p>
+        <form class="categories-form" method="POST" action="{% url projects:project_categories project_slug=project.slug %}">
+        {% csrf_token %}
+        <input type="hidden" name="project_id" value="{{ project.id }}" />
+        <ul class="category-listing">
+            {% for category in categories %}
+            <li><input type="text" name="{{ category.id }}" value="{{ category.title }}" /><span class="delete-button category-delete-button" title="Delete category"></span></li>
+            {% endfor %}
+        </ul>
+        <p><button class="action-button page-submit-button save-categories-button" />Save</button><button class="action-button secondary-button page-submit-button add-group-category-button" />+ Add new category</button></p>
+        </form>
+    </div>
+</div>
+
+<div class="confirm-category-delete-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Are you sure you want to delete this category?</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        Are you sure you want to delete this category? Deleting this category would delete all the posts belonging to this category. Please note that this action is irreversible.
+        <div class="confirm-category-delete-submit-wrapper oc-popup-submit-wrapper-set">
+            <div class="oc-popup-submit-button-set">
+                <button class="collection-button confirm-category-delete-submit-button oc-popup-submit-button-set-button">Confirm delete</button>
+                <button class="action-button cancel-category-delete-submit-button oc-popup-submit-button-set-button oc-popup-exit">Cancel</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'project/footer.html' %}
+{% include 'partials/footer.html' %}

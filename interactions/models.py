@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.dispatch import Signal
 from meta.models import Tag
+from projects.models import GroupCategory
 
 
 class Vote(models.Model):

@@ -2,7 +2,7 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 from django.utils.translation import ugettext as _
 from django.conf import settings
-from projects.models import Project, Membership
+from projects.models import Project, Membership, GroupCategory
 from interactions.models import Comment
 from django.core.exceptions import PermissionDenied
 from oc_platform import APIUtilities
@@ -142,6 +142,15 @@ def new_project(request):
                 # Set default cover pic if not uploaded by user
                 if not new_project.cover_pic:
                     _set_cover_picture(new_project, new_project_form)
+
+
+                # Add a default category in the project.
+                group_category = GroupCategory(
+                    parent=new_project,
+                    title='General',
+                    slug='general'
+                )
+                group_category.save()
 
                 Project.project_created.send(
                     sender="Project", project=new_project, creator=request.user)
@@ -558,6 +567,47 @@ def administration(request, project_slug):
     return render(request, 'project/delete.html', context)
 
 
+def categories(request, project_slug):
+    project = Project.objects.get(slug=project_slug)
+    categories = GroupCategory.objects.filter(parent=project)
+
+    from django.template.defaultfilters import slugify
+
+    if request.method == "POST":
+        categories_pairs = request.POST.copy()
+        del categories_pairs['csrfmiddlewaretoken']
+        del categories_pairs['project_id']
+
+        for key, value in categories_pairs.items():
+            if key == 'new' and value != '':
+                new_category = GroupCategory(
+                    parent=project,
+                    title=value.strip(),
+                    slug=slugify(value)
+                )
+                new_category.save()
+            else:
+                current_category = next(
+                    category for category in categories if category.id == int(key))
+                if current_category.title != value.strip():
+                    current_category.title = value.strip()
+                    current_category.save()
+
+        from django.contrib import messages
+        messages.success(request,
+            'Categories have been saved successfully.')
+
+        categories = GroupCategory.objects.filter(parent=project)
+
+    context = {
+        'project': project,
+        'categories': categories,
+        'title': (_(settings.STRINGS['projects']['CATEGORIES']) +
+                  ' &lsaquo; ' + project.title)
+    }
+    return render(request, 'project/categories.html', context)
+
+
 def view_project_resource_by_id(request, project_slug, resource_id):
     from django.core.exceptions import ObjectDoesNotExist
 
@@ -867,6 +917,47 @@ def decline_request(request, request_id):
         context = {
             'title': 'Could not accept the request.',
             'message': 'We failed to make a decline the invite request into the project '
+            + 'due to an internal problem. Please contact us if this problem persists.'
+        }
+        return APIUtilities._api_failure(context)
+
+
+def delete_category(request, project_id, category_id):
+    try:
+        category = GroupCategory.objects.get(pk=category_id)
+        project = Project.objects.get(pk=project_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    if not request.user.is_authenticated() or request.user not in project.admins.all():
+        context = {
+            'title': 'You are not authorized to delete the category',
+            'message': 'You need to be logged in as an administrator of the group ' +
+                'to remove a member from the group.'
+        }
+        return APIUtilities._api_unauthorized_failure(context)
+
+    group_categories = GroupCategory.objects.filter(parent=project).count()
+    if group_categories == 1:
+        context = {
+            'title': 'Could not delete the only category.',
+            'message': 'We failed to delete the category you marked for deletion ' +
+                'as this is the only category in the group and you need to have atleast ' +
+                'one category in a group. Create another category before you delete this one.'
+        }
+        return APIUtilities._api_failure(context)
+
+    try:
+        # Delete all the posts in this category.
+        Comment.objects.filter(category=category).delete()
+
+        category.delete()
+
+        return APIUtilities._api_success()
+    except:
+        context = {
+            'title': 'Could not delete the category.',
+            'message': 'We failed to delete the category of this group '
             + 'due to an internal problem. Please contact us if this problem persists.'
         }
         return APIUtilities._api_failure(context)

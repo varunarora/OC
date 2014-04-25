@@ -2,6 +2,7 @@
     <nav class="settings-navigation">
         <ul class="settings-submenu">
             <li{% if submenu == "general" %} class="selected-submenu-item"{% endif %}><a href="{% url projects:project_settings project_slug=project.slug %}">General settings</a></li>
+            <li{% if submenu == "categories" %} class="selected-submenu-item"{% endif %}><a href="{% url projects:project_categories project_slug=project.slug %}">Categories</a></li>
             <li{% if submenu == "requests" %} class="selected-submenu-item"{% endif %}><a href="{% url projects:project_requests project_slug=project.slug %}">Pending requests</a></li>
             <li{% if submenu == "administration" %} class="selected-submenu-item"{% endif %}><a href="{% url projects:project_administration project_slug=project.slug %}">Administration</a></li>
         </ul>

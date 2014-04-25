@@ -329,6 +329,7 @@ STRINGS = {
         'SETTINGS_TITLE': 'Settings',
         'REQUESTS_TITLE': 'Pending requests',
         'ADMINISTRATION': 'Administration',
+        'CATEGORIES': 'Categories',
         'invite': {
             'SUCCESS_TITLE': 'Successfully received your projects invite',
             'FAILURE': 'Failed to submit form'
