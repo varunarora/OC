@@ -46,7 +46,8 @@
 		<script type="text/javascript">
 			OC.config.user = {
 				id: {% if user.is_authenticated %}'{{ user.id }}'{% else %}undefined{% endif %},
-				username: '{{ user.username }}'
+				username: '{{ user.username }}',
+				thumbnail: '{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}'
 			}
 		</script>
 		<link rel="icon" href="{{ STATIC_URL }}favicon.ico" type="image/x-icon"/>
