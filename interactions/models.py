@@ -48,6 +48,8 @@ class CommentReference(models.Model):
 class Favorite(models.Model):
     user = models.ForeignKey(User)
     created = models.DateTimeField(auto_now_add=True, editable=False)    
-    resource = models.ForeignKey(Resource)
+    parent_type = models.ForeignKey(ContentType)
+    parent_id = models.PositiveIntegerField()
+    parent = generic.GenericForeignKey('parent_type', 'parent_id')
 
-    resource_favorited = Signal(providing_args=["favorite", "request"])
+    item_favorited = Signal(providing_args=["favorite", "request"])
