@@ -14,7 +14,7 @@
 
         <div class="new-comment-reply-response">
             <div class="new-comment-reply-response-user">
-                <div style="background-image: url('{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}')" class="user-thumbnail-xsmall"></div>
+                <div style="background-image: url('{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}')" class="user-thumbnail-xsmall new-comment-reply-prompt-user-thumbnail"></div>
                 <div class="new-comment-reply-prompt">{{ user.get_full_name }}<span class="new-comment-reply-prompt-suggest"> says:</span></div>
             </div>
             <form id="new-comment-reply-form" action="/project/{{ project.slug }}/discussions/post/" method="POST">
