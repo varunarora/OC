@@ -541,6 +541,78 @@ OC.projects = {
         });
     },
 
+    bindNewCategoryButton: function(){
+        $('.add-group-category-button').click(function(event){
+
+            var categoryItem = '<li><input type="text" name="new" value="" />' +
+                '<span class="delete-button category-delete-button" title="Delete category">'+
+                '</span></li>';
+            $('.category-listing').append(categoryItem);
+
+            $('.category-listing li:last .category-delete-button').tipsy({gravity: 's'});
+            $('.category-listing li:last .category-delete-button').click(
+                OC.projects.categoryDeleteButtonClickHandler);
+
+            $('.category-listing li:last input[type="text"]').focus();
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+    },
+
+    bindCategoryDeleteButton: function(){
+        // Add tipsy to the delete button.
+        $('.category-listing li .category-delete-button').tipsy({gravity: 's'});
+
+        $('.category-listing li .category-delete-button').click(
+            OC.projects.categoryDeleteButtonClickHandler);
+    },
+
+    categoryDeleteButtonClickHandler: function(){
+        categoryDeletePopup = OC.customPopup('.confirm-category-delete-dialog');
+        var categoryDeleteButton = $(this),
+            categoryItem = categoryDeleteButton.parents('li');
+
+        $('.confirm-category-delete-submit-button', categoryDeletePopup.dialog).click(function(event){
+            categoryDeletePopup.close();
+
+            var categoryInput = $(categoryDeleteButton.siblings('input[type="text"]')[0]),
+                projectID = $('form.categories-form input[name=project_id]').val();
+
+            // If this isn't a freshly created category
+            if (categoryInput.attr('name') !== 'new'){
+
+                var category_id = categoryInput.attr('name');
+                $.get('/group/' + projectID + '/category/' + category_id + '/delete/',
+                    function(response){
+                        if (response.status == 'true'){
+                            categoryDeleteButton.tipsy('hide');
+                            categoryItem.remove();
+
+                            OC.setMessageBoxMessage(
+                                'Deleted the category successfully.');
+                            OC.showMessageBox();
+                        }
+                        else {
+                            OC.popup(response.message, response.title);
+                        }
+                    },
+                'json');
+
+            } else {
+                categoryDeleteButton.tipsy('hide');
+
+                // Just remove the list element.
+                categoryItem.remove();
+            }
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+    },
+
     launch: {
         init: function(){
             this.bindClickScrolls();

@@ -46,3 +46,13 @@ class Membership(models.Model):
 
     def __unicode__(self):
         return str(self.project.title) + ":" + str(self.user.id)
+
+
+class GroupCategory(models.Model):
+    title = models.CharField(max_length=256)
+    parent = models.ForeignKey(Project)
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    slug = models.SlugField(max_length=256, blank=True)
+
+    def __unicode__(self):
+        return self.title
