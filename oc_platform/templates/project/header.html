@@ -1,14 +1,18 @@
-<div id="chief-panel-container" class="project-home">
-    <div id="chief-panel">
-        <header class="project-header-wrapper">
-            <form id="project-cover-reposition-form">
-                <input type="hidden" name="project_id" value="{{ project.id }}"/>
-            </form>
-            <hgroup id="project-header" style="background: url('{{ MEDIA_URL }}{{ project.cover_pic }}'); background-position: {{ project.cover_pic_position.left }}% {{ project.cover_pic_position.top }}%;">
-                <hgroup id="project-info-wrapper">
-                    <div id="project-info">
-                        <h2>{{ project.title }}</h2>
-                        <p id="project-info-description">{{ project.short_description }}</p>
+<script type="text/javascript" src="{{ STATIC_URL }}js/dropzone.min.js"></script>
+<script src="{{ STATIC_URL }}js/backbone-min.js" type="text/javascript"></script>
+<script src="{{ STATIC_URL }}js/projects.js" type="text/javascript"></script>
+
+<div class="center-stage primary-center-stage">
+    <header class="project-header-wrapper">
+        <form id="project-cover-reposition-form">
+            <input type="hidden" name="project_id" value="{{ project.id }}"/>
+        </form>
+        <hgroup id="project-header" style="background: url('{{ MEDIA_URL }}{{ project.cover_pic }}'); background-position: {{ project.cover_pic_position.left }}% {{ project.cover_pic_position.top }}%;">
+            <hgroup id="project-info-wrapper">
+                <div id="project-info">
+                    <div class="project-title-wrapper">
+                    <h2>{{ project.title }}</h2>{% if user in project.admins.all %}<a href="{% url projects:project_settings project_slug=project.slug %}" class="project-info-settings{% if page == "settings" %} selected{% endif %}" title="Settings"></a>{% endif %}</div>
+                    <div id="project-info-description">{{ project.short_description }}  &#183; {{ project.confirmed_members.count }} members, {{ posts.count }} posts</div>
                     {% if user not in project.confirmed_members %}
                     <form id="project-invite-form">
                         <input type="hidden" name="project_id" value="{{ project.id }}">
@@ -19,33 +23,31 @@
                         {% endif %}
                     </form>
                     {% endif %}
-                    </div>
-                </hgroup>
-                {% if user in project.admins.all %}
-                <div class="edit-picture edit-cover-picture">
-                    <div class="change-picture" title="Change picture"></div>
-                    <div class="reposition-picture" title="Reposition picture"></div>
                 </div>
-            </hgroup>
-            {% endif %}
-            <div class="project-header-repositioner"></div>
-        </header>
 
+            </hgroup>
+            {% if user in project.admins.all %}
+            <div class="edit-picture edit-cover-picture">
+                <div class="change-picture" title="Change picture"></div>
+                <div class="reposition-picture" title="Reposition picture"></div>
+            </div>
+
+        {% if page == "home" or page == "about" %}
+            {% if user in project.confirmed_members %}
+            <div class="discussion-actions">
+                <div class="page-action-button new-discussion-post-button">+ NEW POST</div>
+            </div>
+            {% endif %}
+        {% endif %}
+        </hgroup>
+        {% endif %}
+        <div class="project-header-repositioner"></div>
+    </header>
+
+    <div class="project-body">
         <nav class="project-navigation">
             <ul>
-                <li><a href="{% url projects:project_home project_slug=project.slug %}"{% if page == "home" %} class="current-page"{% endif %}>Home</a></li>
-                <li><a href="{% url projects:project_about project_slug=project.slug %}"{% if page == "about" %} class="current-page"{% endif %}>About</a></li>
-                <li><a href="{% url projects:project_browse project_slug=project.slug %}"{% if page == "browse" %} class="current-page"{% endif %}>Files</a></li>
-                {% if user in project.confirmed_members %}
-                <li><a href="{% url projects:project_discussions project_slug=project.slug %}"{% if page == "discussions" %} class="current-page"{% endif %}>Discussions</a></li>
-                {% endif %}
+                <li><a href="{% url projects:project_home project_slug=project.slug %}"{% if page == "home" %} class="selected"{% endif %}>Home</a></li>
+                <li><a href="{% url projects:project_about project_slug=project.slug %}"{% if page == "about" %} class="selected"{% endif %}>About</a></li>
             </ul>
-
-            {% if user in project.admins.all %}
-            <ul class="project-administration-menu">
-                <li><a href="{% url projects:project_settings project_slug=project.slug %}"{% if page == "settings" %} class="current-page"{% endif %}>Settings</a></li>
-            </ul>
-            {% endif %}
         </nav>
-    </div>
-</div>

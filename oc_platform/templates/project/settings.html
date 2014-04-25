@@ -1,4 +1,4 @@
-{% include 'partials/header.html' %}
+{% include 'partials/header.html' with body_class='project-view' %}
 {% include 'project/header.html' with page="settings" %}
 
 <div class="center-stage">
@@ -15,7 +15,7 @@
             {% endif %}
             {% csrf_token %}
             <table>
-                <tr><td>Project name</td><td><input type="text" value="{{ project.title }}" name="title" /></td></tr>
+                <tr><td>Group name</td><td><input type="text" value="{{ project.title }}" name="title" /></td></tr>
                 <tr><td>Tagline</td><td><input type="text" value="{{ project.short_description }}" name="short_description" /></td></tr>
                 <tr><td>Description</td><td><textarea name="description">{{ project.description }}</textarea></td></tr>
                 <tr><td>Visibility</td><td>

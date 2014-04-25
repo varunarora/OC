@@ -371,26 +371,24 @@ OC.projects = {
             '.discussion-item').attr('id').substring(11);
     },
 
-    bindPostDeleteButtons: function(){
-        $('.discussion-item .post-body-wrapper > .delete-button').click(function(event){
-            var commentID = OC.projects.getDiscussionID(event.target);
-            
-            $.get('/interactions/comment/' + commentID + '/delete/',
-                function(response){
-                    if (response.status == 'true'){
-                        OC.projects.postDeleteHandler(event.target);
-                    } else {
-                        OC.popup(
-                            'Sorry, your comment could not be deleted.' +
-                            'Please try again later.');
-                    }
-                },
-            'json');
-        });
+    bindPostDeleteButtons: function(event){
+        var commentID = OC.projects.getDiscussionID(event.target);
+
+        $.get('/interactions/comment/' + commentID + '/delete/',
+            function(response){
+                if (response.status == 'true'){
+                    OC.projects.postDeleteHandler(event.target);
+                } else {
+                    OC.popup(
+                        'Sorry, your comment could not be deleted.' +
+                        'Please try again later.');
+                }
+            },
+        'json');
     },
 
     postDeleteHandler: function(target){
-        $(target).closest('.discussion-item').remove();
+        $(target).closest('.discussion-item-wrapper').remove();
     },
 
     bindInviteRequestButton: function(){
@@ -742,4 +740,335 @@ jQuery(document).ready(function ($) {
 
     // Initialize the projects deletion button on settings page.
     OC.projects.bindProjectDeleteButton();
+
+    // Initialize the category creation and delete button.
+    OC.projects.bindNewCategoryButton();
+
+    OC.projects.bindCategoryDeleteButton();
+
+
+    function attachUserID(file, xhr, formData){
+        formData.append('user', OC.config.user.id);
+    }
+
+    // Setup up Dropzone.
+    $('.new-discussion-post-attach-dialog .upload-drag-drop').dropzone({
+        url: '/api/file-upload/',
+        createImageThumbnails: false,
+        maxFilesize: 5
+    });
+    Dropzone.forElement('.new-discussion-post-attach-dialog .upload-drag-drop').on('sending', attachUserID);
+    Dropzone.forElement('.new-discussion-post-attach-dialog .upload-drag-drop').on("sending", attachCSRFToken);
+    Dropzone.forElement('.new-discussion-post-attach-dialog .upload-drag-drop').on('success', function(file, response){
+        if (response.status !== "false") {
+            // Make the name of the file content editable.
+            $('.dz-filename span', file.previewElement).attr(
+                'contenteditable', true);
+
+            var newFileElement = $(this.element).children().last();
+            var attachFileWrapper = $('<div/>', {
+                'class': 'attach-insert-button'
+            });
+
+            var attachButton = $('<button/>', {
+                'text': 'Attach',
+                'class': 'btn dull-button'
+            });
+
+            var response_object = JSON.parse(response);
+            var key, uploadedFile;
+            for (key in response_object) {
+                uploadedFile = response_object[key];
+                break;
+            }
+
+            attachButton.click(function(event){
+                OC.projects.insertAttachment(
+                    uploadedFile['id'], uploadedFile['title'],
+                    true
+                );
+            });
+
+            attachFileWrapper.append(attachButton);
+            newFileElement.append(attachFileWrapper);
+        } else {
+            OC.popup('The upload process failed due to some errors. ' +
+                'Contact us if the problem persists. Error description below:' +
+                response.error, 'Upload image failed'
+            );
+        }
+    });
+
+    // Construct a collection view using the post objects built in
+    postCollectionView = new PostCollectionView({collection: postSet});
+
+    // Render the collection view
+    postCollectionView.render();
+
+    // Initiatialize the Backbone models/collection/view
+    init_mvc();
+
 });
+
+function init_mvc() {
+    // Listen to changes on all options in the filters panel
+    var filterCheckboxes = $('.discussion-board-filters input:checkbox');
+
+    // Bind change listeners on function that repopulates the resources
+    _.each(filterCheckboxes, function (filter) {
+        $(filter).change(function () {
+            repopulatePosts(this, postCollectionView);
+        });
+    });
+
+    // Bind click listeners on main sorting.
+    $('.filter-sort-option').click(function(event){
+        if ($(event.target).hasClass('filter-sort-option-newest')){
+            postSet.sortByNewest();
+            postCollectionView.render();
+        } else {
+            postSet.sortByPopularity();
+            postCollectionView.render();
+        }
+    });
+
+    // Bind text input field as filter.
+    $('.discussion-board-filters-search input').keyup(function(event){
+        var currentInput = $(this).val();
+        var collectionToRender = new PostSet(postSet.filter(function (post) {
+            return post.get('body').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+        }));
+
+        // Recreate the view (clears previous view)
+        postCollectionView.render(collectionToRender);
+    });
+
+}
+
+function repopulatePosts(target, resourceCollectionView) {
+    /* Filter from current results */
+    // Get target filter type and value
+    var targetFilterType = $(target).attr("name"),
+        targetFilterValue = $(target).attr("value"),
+
+    // Add or remove the value of filter from the filters object based on target modified
+        targetType = $(target).attr("type");
+
+    if (typeof targetType !== "undefined" && $(target).attr("type") === "checkbox") {
+        if (!target.checked) {
+            filters[targetFilterType].push(targetFilterValue);
+        } else {
+            filters[targetFilterType].splice(
+                _.indexOf(filters[targetFilterType], targetFilterValue), 1);
+        }
+    }
+
+    var collectionToRender = new PostSet(postSet.reject(function (post) {
+        return _.some(filters, function(filterValues, filterType){
+            return _.indexOf(filterValues, post.get(filterType).toLowerCase()) !== -1;
+        });
+    }));
+
+    // Recreate the view (clears previous view)
+    postCollectionView.render(collectionToRender);
+}
+
+// Initialize Group posts Model.
+var Post = Backbone.Model.extend({
+    // ID of the post.
+    id: "",
+
+    // User who created the resource.
+    user: "",
+
+    // Thumbnail of user who created the resource.
+    userThumbnail: "",
+
+    // Profile URL of user who created the resource.
+    userURL: "",
+
+    // Group category this post belongs to.
+    category: "",
+
+    // The post body..
+    body: "",
+
+    // Comment thread.
+    comments: "",
+
+    // If the post has an attachment.
+    hasAttachment: '',
+
+    // The host of the attachment, usually 'user profile'.
+    attachmentHost: '',
+
+    // Post attachment title.
+    attachmentTitle: "",
+
+    // Thumbnail of attachment on the post.
+    attachmentThumbnail: "",
+
+    // Thumbnail of attachment on the post.
+    attachmentURL: "",
+
+    // Upvotes on the post.
+    upvotes: "",
+
+    // Whether or not the visiting user has upvoted the post.
+    userInUpvotes: "",
+
+    // Downvotes on the post.
+    downvotes: "",
+
+    // Whether or not the visiting user has downvoted the post.
+    userInDownvotes: "",
+
+    // Epoch date when this post was created.
+    created_raw: "",
+
+    // Formatted date/time of post.
+    created: ""
+});
+
+// Initialize post set Collection
+var PostSet = Backbone.Collection.extend({
+    model: Post,
+    sortByPopularity: function(){
+        this.comparator = this.popularityComparator;
+        this.sort();
+    },
+    sortByNewest: function(){
+        this.comparator = this.newestComparator;
+        this.sort();
+    },
+    newestComparator: function(post){
+        return -post.get('created_raw');
+    },
+    popularityComparator: function(post){
+        return -post.get('upvotes');
+    }
+});
+
+// Initialize post view.
+var PostView = Backbone.View.extend({
+    tagName: "div",
+    className: "discussion-item-wrapper",
+    template: _.template('<div class="discussion-item" id="discussion-<%= id %>">' +
+        '<div style="background-image: url(\'<%= userThumbnail %>\')"' +
+        'class="discussion-user-thumbnail"></div><div class="discussion-item-post">' +
+        '<div class="post-body-wrapper">' +
+        '<div class="delete-button" title="Delete post"></div>' +
+        '<div class="post-body">' +
+        '<a href="<%= userURL %>" class="bold user-post-info-name"><%= user %></a> ' +
+        'posted in <span class="label coming-soon-label"><%= category %></span>' +
+        '<span class="post-datetime"> on <%= created %></span><%= body %>' +
+        '<% if (hasAttachment){ %>' +
+        '<div class="user-post-attachment">' +
+        '<div class="user-post-attachment-photo" style="background-image: url' +
+        '(\'<%= attachmentThumbnail %>\');"></div>' +
+        '<div class="user-post-attachment-description"><a href="<%= attachmentURL %>">' +
+        '<%= attachmentTitle %></a></div></div><% } %><div class="post-actions">' +
+        '<div class="upvote-post <% if (userInUpvotes){ %>user-upvoted<% } %>">' +
+        '<%= upvotes %></div>' +
+        '<div class="downvote-post <% if (userInDownvotes){ %>user-upvoted<% } %>">' +
+        '<%= downvotes %></div></div></div></div>' +
+
+        '<div class="post-comments comment-thread"><%= comments %>' +
+        '<div class="post-comment">' +
+        '<div class="post-comment-user-thumbnail">' +
+        '<div style="background-image: url(\'<%= loggedInUserThumbnail %>\')" ' +
+        'class="discussion-response-thumbnail"></div></div>' +
+        '<div class="post-comment-body"><form>' +
+        '<input type="hidden" name="user" value="<%= loggedInUserID %>" />' +
+        '<input type="hidden" name="parent_type" value="<%= commentsContentType %>" />' +
+        '<input type="hidden" name="parent_id" value="<%= id %>" />' +
+        '<textarea name="body_markdown" placeholder="Say something..."></textarea>' +
+        '<div class="post-comment-button-wrapper">' +
+        '<div class="action-button post-comment-button">Post comment</div>' +
+        '</div></form></div></div></div></div></div>'),
+
+    events: {
+        'click .upvote-post': OC.comments.upvotePostClickHandler,
+        'click .downvote-post': OC.comments.downvotePostClickHandler,
+        'click .post-body-wrapper > .delete-button': OC.projects.bindPostDeleteButtons,
+
+        'focus textarea': OC.comments.focusCommentInput,
+        'blur textarea': OC.comments.blurCommentInput,
+
+        'click .post-comment-button': OC.comments.postCommentClickHandler,
+        'click .upvote-comment': OC.comments.upvoteCommentClickHandler,
+        'click .downvote-comment': OC.comments.downvoteCommentClickHandler,
+        'click .reply-to-comment': OC.comments.commentReplyButtonClickHandler
+    },
+
+    initialize: function() {
+        this.listenTo(this.model, "change", this.render);
+    },
+
+    render: function () {
+        this.$el.html(this.template(_.extend(this.model.toJSON(), {
+            loggedInUserID: OC.config.user.id,
+            loggedInUserThumbnail: OC.config.user.thumbnail,
+            commentsContentType:  OC.config.contentTypes.comment
+        })));
+        $('.discussion-board').append(this.$el);
+
+        return this;
+    },
+
+    upvoteCallback: function(resourceFavorite){
+        //resourceFavorite.text(parseInt(resourceFavorite.text(), 10) + 1);
+    },
+
+    downvoteCallback: function(resourceFavoriteWrapper){
+        //resourceFavorite.text(parseInt(resourceFavorite.text(), 10) - 1);
+    }
+});
+
+// Initialize the post collection view
+var PostCollectionView = Backbone.View.extend({
+    render: function (newCollection) {
+        this.clearView();
+        this.prepareView();
+        var collectionToRender = newCollection || this.collection;
+        this.collection = collectionToRender;
+
+        // If no resources found.
+        if (collectionToRender.length === 0) {
+            this.showNullView();
+        } else {
+        // Create a new view object for each object in the collection and render it
+            _.each(collectionToRender.models, function(item) {
+                new PostView({model: item}).render();
+            });
+        }
+        this.revealView();
+    },
+
+    clearView: function () {
+        $('.discussion-board').html('');
+    },
+
+    prepareView: function () {
+        $('.discussion-board').addClass('spinner-background');
+    },
+
+    revealView: function () {
+        $('.discussion-board').removeClass('spinner-background');
+        $('.discussion-board').css('display', 'none');
+        $('.discussion-board').fadeIn("fast");
+    },
+
+    showNullView: function () {
+        $('.discussion-board').html('<p>No post matching your criteria found. Sorry!</p>');
+    },
+});
+
+
+var filters = {
+    category: [],
+    // type: [], // Type of the content
+};
+
+var postSet = new PostSet();
+var postCollectionView;

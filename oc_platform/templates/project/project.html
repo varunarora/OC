@@ -1,67 +1,65 @@
-{% include 'partials/header.html' %}
+{% include 'partials/header.html' with body_class='project-view' %}
 {% include 'project/header.html' with page="home" %}
 
-<div class="center-stage">
+<div class="center-midstage">
     <div id="key-panel" class="panel-left">
-        <h3>Recent activity</h3>
-        <div class="user-list">
-        {% for item in feed %}
-        {% include 'partials/feed-item.html' %}
-        {% endfor %}
+        <div class="discussion-board-filters-search">
+            <form>
+                <input type="text" placeholder="Search..." />
+            </form>
+        </div>
+    </div>
+
+    <div id="fill-panel" class="panel-right">
+        <div class="discussion-board-filters-sort">
+            <span class="sort-by">Sort by: </span><span class="filter-sort-option filter-sort-option-newest selected">Newest</span> <span class="filter-sort-option filter-sort-option-popularity">Popularity</span>
+            <!--
+            <div class="sort-by-type">All types<span class="sort-by-type-button"></div>
+            <div class="sort-by-type-menu">
+                <div class="sort-by-type-menu-content">
+                    <h4>Content type</h4>
+                    <label><input type="checkbox" name="type" value="lesson" checked />Lesson</label>
+                    <label><input type="checkbox" name="type" value="project" checked />Project</label>
+                    <label><input type="checkbox" name="type" value="worksheet" checked />Worksheet</label>
+                    <label><input type="checkbox" name="type" value="handout" checked />Handout</label>
+                    <label><input type="checkbox" name="type" value="activity" checked />Activity</label>
+                    <label><input type="checkbox" name="type" value="test" checked />Test / assessment</label>
+                    <label><input type="checkbox" name="type" value="lecture" checked />Lecture</label>
+                </div>
+                 <div class="sort-by-type-menu-format">
+                    <h4>Format type</h4>
+                    <label><input type="checkbox" name="type" value="document" checked />Document</label>
+                    <label><input type="checkbox" name="type" value="slideshow" checked />Slideshow</label>
+                    <label><input type="checkbox" name="type" value="website" checked />Website</label>
+                    <label><input type="checkbox" name="type" value="video" checked />Video</label>
+                    <label><input type="checkbox" name="type" value="audio" checked />Audio</label>
+                </div>
+            </div>
+            -->
+        </div>
+    </div>
+</div>
+
+<div class="center-substage">
+    <div id="key-panel" class="panel-left">
+        <div class="discussion-board">
+            <script type="text/javascript">
+                OC.config.contentTypes.comment = '{{ host_content_type.id }}'
+            </script>
+            {% include 'project/partials/discussion.html' %}
         </div>
     </div>
     <div id="fill-panel" class="panel-right">
-        <h3>Members</h3>
-
-        {% if user in project.admins.all %}
-        <form id="project-add-member">
-            <input type="hidden" name="project_id" value="{{ project.id }}" />
-            <label>Invite a user</label><input type="text" name="add-member" />
-            <button name="add" class="btn success-button">Add</button>
-            <div class="form-spinner"></div>
-        </form>
-        {% endif %}
-
-        <!-- If this changes, make changes to the associated JavaScript as well -->
-        <div id="member-list" class="user-list">
-        {% for member in project.confirmed_members %}
-            <div class="member user">
-                <div class="member-info user-info">
-                    <div class="member-photo user-photo" style="background-image: url('{{ MEDIA_URL }}{{ member.get_profile.profile_pic.name }}');">
-                    </div>
-                    <div class="member-description user-description">
-                        <a href="{% url user:user_profile username=member.username %}">{{ member.get_full_name }}</a>
-                        {% if member in project.admins.all %}<br/><span class="admin-label label">ADMINISTRATOR</span>{% endif %}
-                    </div>
-                </div>
-                <div class="member-actions user-actions">
-                {% if user in project.admins.all %}
-                    {% if member in project.admins.all %}
-                        {% if member != user %}
-                        <form>
-                            <input type="hidden" name="user_id" value="{{ member.id }}" />
-                            <input type="hidden" name="project_id" value="{{ project.id }}" />
-                            <button class="btn dull-button admin-toggle remove-admin">Remove admin</button>
-                        </form>
-                        {% endif %}
-                    {% else %}
-                        <form>
-                            <input type="hidden" name="user_id" value="{{ member.id }}" />
-                            <input type="hidden" name="project_id" value="{{ project.id }}" />
-                            <button class="btn dull-button admin-toggle make-admin">Make admin</button>
-                        </form>
-                    {% endif %}
-                    {% if user in project.admins.all %}
-                        <span class="delete-member delete-button" id="project-{{ project.id }}-user-{{ member.id }}" title="Remove member"></span>
-                    {% endif %}
-                {% endif %}
-                </div>
-            </div>
+        <div class="discussion-board-filters">
+            <h4>Show posts in</h4>
+            {% for category in categories %}
+            <label><input type="checkbox" name="category" value="{{ category.title|lower }}" checked />{{ category.title }}</label>
         {% endfor %}
         </div>
-        <!-- End of changes from JS -->
-
     </div>
 </div>
+
+{% include 'project/partials/discussion-footer.html' %}
+
 {% include 'project/footer.html' %}
 {% include 'partials/footer.html' %}

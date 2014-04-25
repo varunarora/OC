@@ -1,79 +1,66 @@
-{% include 'partials/header.html' %}
+{% include 'partials/header.html' with body_class='project-view' %}
 {% include 'project/header.html' with page="about" %}
 
 <div class="center-stage">
-    <div id="fill-panel" class="panel-left">
-    {% if user.is_authenticated %}
-
-        {% if user not in project.confirmed_members %}
-            {% if user not in project.members.all %}
-            <div class="request-to-join">
-                Want to become a member of this group?
-                <div class="request-button-wrapper">
-                    <form>
-                        <input type="hidden" name="project_id" value="{{ project.id }}">
-                        <button class="request-button action-button">Request to join</button>
-                    </form>
-                </div>
-            </div>
-            {% else %}
-            <div class="request-to-join">
-                Your request to join this group has been sent.
-            </div>
-            {% endif %}     
-        {% endif %}
-
-    {% else %}
-        <div class="request-to-join">
-            You must be logged in to request an invite to this group.
-        </div>
-    {% endif %}
-
-        <div class="project-about-box">
-            <div class="project-about-box-title">Highlights</div>
-            <div class="project-about-box-body">
-                <div class="project-about-member-count">
-                    <h1>{{ project.members.count }}</h1>
-                    member(s)
-                </div>
-                <div class="project-about-visibility">
-                    <div class="project-about-visibility-{{ project.visibility }}"></div>
-                    <span class="project-visibility-support">{{ project.visibility|title }}</span>
-                </div>
-            </div>
-        </div>
-        <div class="project-about-box">
-            <div class="project-about-box-title">Tagline</div>
-            <div class="project-about-box-body">
-                {{ project.short_description }}
-            </div>
-        </div>
-        <div class="project-about-box">
-            <div class="project-about-box-title">URL</div>
-            <div class="project-about-box-body">
-                <a href="{% url projects:project_home project_slug=project.slug %}">opencurriculum.org{% url projects:project_home project_slug=project.slug %}</a>
-            </div>
-        </div>
-        <div class="project-about-box">
-            <div class="project-about-box-title">Administrator(s)</div>
-            <div class="project-about-box-body">
-                <div class="project-admins">
-                {% for admin in project.admins.all %}
-                    <a href="{% url user:user_profile username=admin.username %}"><div class="project-admin-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ admin.get_profile.profile_pic.name }}'); " title="{{ admin.get_full_name }}"></div></a>
-                {% endfor %}
-                </div>
-                <div class="project-about-members"><a href="{% url projects:project_members project_slug=project.slug %}">View all members &rsaquo;</a></div>
-            </div>
-        </div>
-        <div class="project-datetimestamp">
-            Created on {{ project.created }}
-        </div>
-    </div>
-    <div id="key-panel" class="panel-right">
+    <div id="key-panel" class="panel-left">
         <article>
-            <h3>About {{ project.title }}</h3>
+            <h4>About {{ project.title }}</h4>
             {{ project.description_html|safe }}
         </article>
+    </div>
+
+
+    <div id="fill-panel" class="panel-right">
+        <h4>Members</h4>
+
+        {% if user in project.admins.all %}
+        <form id="project-add-member">
+            <input type="hidden" name="project_id" value="{{ project.id }}" />
+            <label>Invite a user</label><input type="text" name="add-member" />
+            <button name="add" class="btn success-button">Add</button>
+            <div class="form-spinner"></div>
+        </form>
+        {% endif %}
+
+        <!-- If this changes, make changes to the associated JavaScript as well -->
+        <div id="member-list" class="user-list">
+        {% for member in project.confirmed_members %}
+            <div class="member user">
+                <div class="member-info user-info">
+                    <div class="member-photo user-photo" style="background-image: url('{{ MEDIA_URL }}{{ member.get_profile.profile_pic.name }}');">
+                    </div>
+                    <div class="member-description user-description">
+                        <a href="{% url user:user_profile username=member.username %}">{{ member.get_full_name }}</a>
+                        {% if member in project.admins.all %}<br/><span class="admin-label label">ADMINISTRATOR</span>{% endif %}
+                    </div>
+                </div>
+                <div class="member-actions user-actions">
+                {% if user in project.admins.all %}
+                    {% if member in project.admins.all %}
+                        {% if member != user %}
+                        <form>
+                            <input type="hidden" name="user_id" value="{{ member.id }}" />
+                            <input type="hidden" name="project_id" value="{{ project.id }}" />
+                            <button class="btn dull-button admin-toggle remove-admin">Remove admin</button>
+                        </form>
+                        {% endif %}
+                    {% else %}
+                        <form>
+                            <input type="hidden" name="user_id" value="{{ member.id }}" />
+                            <input type="hidden" name="project_id" value="{{ project.id }}" />
+                            <button class="btn dull-button admin-toggle make-admin">Make admin</button>
+                        </form>
+                    {% endif %}
+                    {% if user in project.admins.all %}
+                        <span class="delete-member delete-button" id="project-{{ project.id }}-user-{{ member.id }}" title="Remove member"></span>
+                    {% endif %}
+                {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+        <!-- End of changes from JS -->
+
     </div>
 </div>
 

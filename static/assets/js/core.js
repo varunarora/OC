@@ -58,6 +58,9 @@ var OC = {
             formSpinner: '.form-spinner',
             formError: '.form-error'
         },
+        contentTypes: {
+            comment: ''
+        }
     },
 
     registerationSuccessCallback: '',
@@ -2947,16 +2950,23 @@ var OC = {
             }
 
             var commentInput = 'textarea[name=body_markdown]';
+            OC.comments.bindCommentsInputClickHandler(commentInput);
+        },
 
-            $(commentInput).on('focus', function(){
-                $(this).addClass('expanded');
-            });
+        bindCommentsInputClickHandler: function(commentInput){
+            $(commentInput).on('focus', OC.comments.focusComment);
 
-            $(commentInput).on('blur', function(){
-                if ($(this).val() === ''){
-                    $(this).removeClass('expanded');
-                }
-            });
+            $(commentInput).on('blur',  OC.comments.blurCommentInput);
+        },
+
+        focusCommentInput: function(event){
+            $(event.target).addClass('expanded');
+        },
+
+        blurCommentInput: function(event){
+            if ($(event.target).val() === ''){
+                $(event.target).removeClass('expanded');
+            }
         },
 
         resourceCommentsSuccess: function(){
@@ -2992,26 +3002,29 @@ var OC = {
         },
 
         bindNewCommentButton: function(){
-            $('.post-comment-button-wrapper .post-comment-button').click(function(event){
-                var commentTextarea = $(event.target).parents('.post-comments').find('textarea[name=body_markdown]');
+            $('.post-comment-button-wrapper .post-comment-button').click(
+                OC.comments.postCommentClickHandler);
+        },
 
-                if (commentTextarea.val() !== ''){
-                    $.post('/interactions/comment/',  $(this).parents('form').serialize(),
-                        function(response){
-                            // Hide the resource
-                            if (response.status == 'success'){
-                                OC.comments.newCommentSuccessHandler(response, event.target);
-                            }
-                            else {
-                                OC.popup(
-                                    'Sorry, the comment could not be posted. Please try again later.');
-                            }
-                        },
-                    'json');
-                } else {
-                    commentTextarea.focus();
-                }
-            });
+        postCommentClickHandler:function(event){
+            var commentTextarea = $(event.target).parents('.post-comments').find('textarea[name=body_markdown]');
+
+            if (commentTextarea.val() !== ''){
+                $.post('/interactions/comment/',  $(event.target).parents('form').serialize(),
+                    function(response){
+                        // Hide the resource
+                        if (response.status == 'success'){
+                            OC.comments.newCommentSuccessHandler(response, event.target);
+                        }
+                        else {
+                            OC.popup(
+                                'Sorry, the comment could not be posted. Please try again later.');
+                        }
+                    },
+                'json');
+            } else {
+                commentTextarea.focus();
+            }
         },
 
         bindCommentReplyButton: function(){
@@ -3020,22 +3033,33 @@ var OC = {
 
         bindVotingButtons: function(targetParent){
             var commentID;
-            $('.upvote-post', targetParent).click(function(event){
-                commentID = OC.projects.getDiscussionID(event.target);
-                OC.comments.newVote(commentID, true, event.target);
-            });
-            $('.downvote-post', targetParent).click(function(event){
-                commentID = OC.projects.getDiscussionID(event.target);
-                OC.comments.newVote(commentID, false, event.target);
-            });
-            $('.upvote-comment', targetParent).click(function(event){
-                commentID = OC.comments.getCommentID(event.target);
-                OC.comments.newVote(commentID, true, event.target);
-            });
-            $('.downvote-comment', targetParent).click(function(event){
-                commentID = OC.comments.getCommentID(event.target);
-                OC.comments.newVote(commentID, false, event.target);
-            });
+            $('.upvote-post', targetParent).click(
+                OC.comments.upvotePostClickHandler);
+            $('.downvote-post', targetParent).click(
+                OC.comments.downvotePostClickHandler);
+
+            $('.upvote-comment', targetParent).click(
+                OC.comments.upvoteCommentClickHandler);
+            $('.downvote-comment', targetParent).click(
+                OC.comments.downvoteCommentClickHandler);
+        },
+
+        upvotePostClickHandler: function(event){
+            commentID = OC.projects.getDiscussionID(event.target);
+            OC.comments.newVote(commentID, true, event.target);
+        },
+        downvotePostClickHandler: function(event){
+            commentID = OC.comments.getCommentID(event.target);
+            OC.comments.newVote(commentID, true, event.target);
+        },
+
+        upvoteCommentClickHandler: function(event){
+            commentID = OC.comments.getCommentID(event.target);
+            OC.comments.newVote(commentID, true, event.target);
+        },
+        downvoteCommentClickHandler: function(event){
+            commentID = OC.comments.getCommentID(event.target);
+            OC.comments.newVote(commentID, false, event.target);
         },
 
         getCommentID: function(target){

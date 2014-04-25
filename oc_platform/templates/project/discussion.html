@@ -1,8 +1,15 @@
-{% include 'partials/header.html' %}
+{% include 'partials/header.html' with body_class='project-view' %}
 {% include 'project/header.html' %}
 
+
 <div class="center-stage discussion-board individual-discussion">
-    {% include 'project/partials/discussion.html' %}
+    <div id="key-panel" class="panel-left">
+        <div class="discussion-board">
+        {% include 'project/partials/discussion.html' %}
+        </div>
+    </div>
+    <div id="fill-panel" class="panel-right">
+    </div>
 </div>
 
 {% include 'project/partials/discussion-footer.html' %}

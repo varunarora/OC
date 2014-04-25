@@ -1,4 +1,4 @@
-{% include 'partials/header.html' %}
+{% include 'partials/header.html' with body_class='project-view' %}
 {% include 'project/header.html' with page="settings" %}
 
 <div class="center-stage">
@@ -32,7 +32,6 @@
         </div>
     </div>
 </div>
-<div class="popup-background"></div>
 
 {% include 'project/footer.html' %}
 {% include 'partials/footer.html' %}
