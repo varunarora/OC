@@ -44,7 +44,9 @@ OC.resourcesCollections = {
 
             resourceFavoriteButton.click(function(event){
                 OC.favoriteClickHandler(
-                    resourceID, OC.config.user.id, resourceFavoriteWrapper, event);
+                    'resource', resourceID,
+                    OC.config.user.id, resourceFavoriteWrapper, event
+                );
             });
 
         }
@@ -54,7 +56,7 @@ OC.resourcesCollections = {
         var i, resourceID;
         for (i = 0; i < resourcesCollections.length; i++){
             resourceID = $(resourcesCollections[i]).attr('id').substring(9);
-            OC.getFavoriteState(resourceID, setFavoriteState);
+            OC.getFavoriteState('resource', resourceID, setFavoriteState);
         }
     },
 

@@ -200,18 +200,16 @@ def delete_comment_tree(comment):
         child_comment.delete()
 
 
-def get_favorite_state(request, resource_id, user_id):
+def get_favorite_state(request, favorite_type, parent_id):
     try:
-        from oer.models import Resource
-        resource = Resource.objects.get(pk=resource_id)
+        from oer.models import Resource, Collection
+        from django.contrib.contenttypes.models import ContentType
+        resource_ct = ContentType.objects.get_for_model(Resource)
+        collection_ct = ContentType.objects.get_for_model(Collection)
 
-        from django.contrib.auth.models import User
-        user = User.objects.get(pk=user_id)
-    except:
-        return APIUtilities._api_not_found()
-
-    try:
-        favorite = Favorite.objects.get(user=user, resource=resource)
+        favorite = Favorite.objects.get(
+            user=request.user, parent_id=parent_id, parent_type=(
+                resource_ct if favorite_type == 'resource' else collection_ct))
 
         context = {
             'favorite': {
@@ -230,20 +228,17 @@ def get_favorite_state(request, resource_id, user_id):
         return APIUtilities._api_success(context)
 
 
-def favorite_resource(request, resource_id, user_id):
-    try:
-        from oer.models import Resource
-        resource = Resource.objects.get(pk=resource_id)
-
-        from django.contrib.auth.models import User
-        user = User.objects.get(pk=user_id)
-    except:
-        return APIUtilities._api_not_found()
-
+def favorite_resource(request, favorite_type, parent_id):
     # Check if the favorite already exists
     try:
+        from oer.models import Resource, Collection        
+        from django.contrib.contenttypes.models import ContentType
+        resource_ct = ContentType.objects.get_for_model(Resource)
+        collection_ct = ContentType.objects.get_for_model(Collection)
+
         existing_favorite = Favorite.objects.get(
-            user=user, resource=resource)
+            user=request.user, parent_id=parent_id, parent_type=(
+                resource_ct.id if favorite_type == 'resource' else collection_ct.id))
 
         existing_favorite.delete()
 
@@ -253,17 +248,17 @@ def favorite_resource(request, resource_id, user_id):
 
     except Favorite.DoesNotExist:
         try:
-            if request.user != user:
-                return APIUtilities._api_unauthorized_failure()
-
             # Create the favorite and save it
-            new_favorite = Favorite(user=user, resource=resource)
+            new_favorite = Favorite(user=request.user,
+                parent_id=parent_id, parent_type=(
+                    resource_ct if favorite_type == 'resource' else collection_ct))
             new_favorite.save()
 
-            if resource.user != user:
+            if (favorite_type == 'resource' and new_favorite.parent.user != request.user) or (
+                favorite_type == 'collection' and new_favorite.parent.creator != request.user):
                 # Send out a notification to the person who originally made
                 # the resource.
-                Favorite.resource_favorited.send(
+                Favorite.item_favorited.send(
                     sender="Favorite", favorite=new_favorite, request=request)
 
             return APIUtilities._api_success()
@@ -463,21 +458,37 @@ def list_user_favorites(request):
 
     serialized_favorites = list()
     for favorite in user_favorites:
+        if favorite.parent_type.name == 'resource':
+            url = reverse(
+                'read', kwargs={
+                    'resource_id': favorite.parent.id,
+                    'resource_slug': favorite.parent.slug
+            })
+            thumbnail = 'http://' + request.get_host(
+                ) + settings.MEDIA_URL + favorite.resource.image.name
+        else:
+            url = reverse(
+                'user:list_collection', kwargs={
+                    'username': favorite.parent.creator.username,
+                    'collection_slug': favorite.parent.slug
+            })
+            thumbnail = 'http://' + request.get_host(
+                ) + settings.STATIC_URL + 'images/folder-icon.png'
+
         serialized_favorites.append({
-            'id': favorite.resource.id,
+            'id': favorite.parent.id,
             'user_url': reverse('user:user_profile', kwargs={
                 'username': favorite.user.username }),
-            'url': reverse(
+            'url': url,
                 'read', kwargs={
                     'resource_id': favorite.resource.id,
                     'resource_slug': favorite.resource.slug
                 }),
-            'title': favorite.resource.title,
+            'title': favorite.parent.title,
             'user': favorite.user.get_full_name(),
             'username': favorite.user.username,
-            'views': favorite.resource.views,
-            'thumbnail': 'http://' + request.get_host(
-                ) + settings.MEDIA_URL + favorite.resource.image.name
+            'views': favorite.parent.views,
+            'thumbnail': thumbnail
         })
 
     context = {

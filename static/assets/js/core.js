@@ -2137,11 +2137,11 @@ var OC = {
         }
 
         if (userID){
-            OC.getFavoriteState(resourceID, setFavoriteState);
+            OC.getFavoriteState('resource', resourceID, setFavoriteState);
 
             resourceFavoriteButton.click(function(event){
                 OC.favoriteClickHandler(
-                    resourceID, userID, event);
+                    'resource', resourceID, userID, event);
             });
 
         } else {
@@ -2156,9 +2156,9 @@ var OC = {
         }
     },
 
-    favoriteClickHandler: function(resourceID, userID, event, favoriteCallback, unfavoriteCallback){
+    favoriteClickHandler: function(type, resourceID, userID, event, favoriteCallback, unfavoriteCallback){
         var resourceFavoriteButton = $(event.target);
-        $.get('/interactions/favorite/resource/' + resourceID + '/user/' + userID + '/',
+        $.get('/interactions/favorite/' + type + '/' + resourceID + '/',
             function(response){
                 if (response.status == 'true'){
                     resourceFavoriteButton.addClass('favorited');
@@ -2178,9 +2178,8 @@ var OC = {
         return false;
     },
 
-    getFavoriteState: function(resourceID, callback){
-        $.get('/interactions/favorite/state/resource/' + resourceID + '/user/' +
-            OC.config.user.id + '/',
+    getFavoriteState: function(type, resourceID, callback){
+        $.get('/interactions/favorite/state/' + type + '/' + resourceID + '/',
             function(response){
                 if (response.status == 'true'){
                     var state;

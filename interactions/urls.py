@@ -19,8 +19,8 @@ urlpatterns = patterns(
     url(r'^votes/count/resource/(?P<resource_id>.+)/revision/(?P<revision_id>.+)/$', views.get_resource_revision_vote_count, name='get_resource_revision_vote_count'),
     url(r'^votes/count/resource/(?P<resource_id>.+)/$', views.get_resource_vote_count, name='get_resource_vote_count'),
 
-    url(r'^favorite/state/resource/(?P<resource_id>.+)/user/(?P<user_id>.+)/$', views.get_favorite_state, name='get_favorite_state'),
-    url(r'^favorite/resource/(?P<resource_id>.+)/user/(?P<user_id>.+)/$', views.favorite_resource, name='favorite_resource'),
+    url(r'^favorite/state/(?P<favorite_type>[\w\-]+)/(?P<parent_id>.+)/$', views.get_favorite_state, name='get_favorite_state'),
+    url(r'^favorite/(?P<favorite_type>[\w\-]+)/(?P<parent_id>.+)/$', views.favorite_resource, name='favorite_resource'),
     
     url(r'^favorites/list/$', views.list_user_favorites, name='list_user_favorites'),
 )

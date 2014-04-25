@@ -6,7 +6,11 @@
     <h3>My favorites</h3>
     {% endif %}
     {% for favorite in favorites %}
-        {% include 'partials/resource-item.html' with item=favorite.resource item_category='resource' %}
+        {% if favorite.parent_type.name == 'resource' %}
+        {% include 'partials/resource-item.html' with item=favorite.parent item_category='resource' %}
+        {% else %}
+        {% include 'partials/resource-item.html' with item=favorite.parent item_category='collection' %}
+        {% endif %}
     {% endfor %}
 </div>
 {% else %}

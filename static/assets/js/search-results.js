@@ -79,8 +79,10 @@ var ResultsView = Backbone.View.extend({
     },
 
     favorite: function(event){
-        OC.favoriteClickHandler(
-            this.model.get('id'), OC.config.user.id, event, this.favoriteCallback, this.unfavoriteCallback);
+        OC.favoriteClickHandler('resource',
+            this.model.get('id'), OC.config.user.id, event,
+            this.favoriteCallback, this.unfavoriteCallback
+        );
     },
 
     copy: function(event){
@@ -322,7 +324,7 @@ function initSearchFilterMenus(){
 function initFavoriteState(resultSet){
     var i, state;
     for (i = 0; i < resultSet.length; i++){
-        OC.getFavoriteState(resultSet.models[i].get('id'), setFavoriteState);
+        OC.getFavoriteState('resource', resultSet.models[i].get('id'), setFavoriteState);
     }
 }
 

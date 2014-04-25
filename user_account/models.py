@@ -565,22 +565,32 @@ class Notification(models.Model):
         nu.notify_by_email(notification, request.get_host())
 
 
-    @receiver(Favorite.resource_favorited)
+    @receiver(Favorite.item_favorited)
     def my_resource_favorited_notification(sender, **kwargs):
         favorite = kwargs.get('favorite', None)
         request = kwargs.get('request', None)
 
         notification = Notification()
-        notification.user = favorite.resource.user
-        notification.url = reverse(
-            'read', kwargs={
-                'resource_id': favorite.resource.id,
-                'resource_slug': favorite.resource.slug
-            }
-        )
 
-        notification.description = '%s favorited your resource "%s"' % (
-            favorite.user.get_full_name(), favorite.resource.title)
+        if favorite.parent_type.name == 'resource':
+            notification.user = favorite.parent.user
+            notification.url = reverse(
+                'read', kwargs={
+                    'resource_id': favorite.parent.id,
+                    'resource_slug': favorite.parent.slug
+                }
+            )
+        else:
+            notification.user = favorite.parent.creator
+            notification.url = reverse(
+                'user:list_collection', kwargs={
+                    'username': favorite.parent.creator,
+                    'collection_slug': favorite.parent.slug
+                }
+            )
+
+        notification.description = '%s favorited "%s"' % (
+            favorite.user.get_full_name(), favorite.parent.title)
 
         notification.save()
 
@@ -654,19 +664,22 @@ class Notification(models.Model):
                 new_activity.recipients.add(recipient)
 
 
-    @receiver(Favorite.resource_favorited)
+    @receiver(Favorite.item_favorited)
     def new_resource_favorite_activity(sender, **kwargs):
         favorite = kwargs.get('favorite', None)
 
         import oer.CollectionUtilities as cu
         import oer.ResourceUtilities as ru
 
-        from django.core.exceptions import MultipleObjectsReturned
-        try:
-            collection = Collection.objects.get(resources__id=favorite.resource.id)
-        except MultipleObjectsReturned:
-            collection = Collection.objects.filter(
-                resources__id=favorite.resource.id)[0]
+        if favorite.parent_type.name == 'resource':
+            from django.core.exceptions import MultipleObjectsReturned
+            try:
+                collection = Collection.objects.get(resources__id=favorite.resource.id)
+            except MultipleObjectsReturned:
+                collection = Collection.objects.filter(
+                    resources__id=favorite.resource.id)[0]
+        else:
+            collection = favorite.parent.host
 
         (collection_host_type, collection_host) = ru.get_resource_root(
             favorite.resource)
@@ -674,7 +687,7 @@ class Notification(models.Model):
         new_activity = Activity(
             actor=favorite.user,
             action=favorite,
-            target=favorite.resource,
+            target=favorite.parent,
             context=collection_host
         )
         new_activity.save()
@@ -689,32 +702,32 @@ class Notification(models.Model):
         if subscriptions.count() >= 1:
             if (collection_host_type.name == 'project' and (
                 collection_host.visibility == 'public') and (
-                favorite.resource.visibility != 'private')):
+                favorite.parent.visibility != 'private')):
                     recipients = [x.subscriber.user for x in subscriptions]
 
             elif (collection_host_type.name == 'project' and (
                 collection_host.visibility == 'private')):
-                    if favorite.resource.visibility == 'project':
+                    if favorite.parent.visibility == 'project':
                         recipients = [x.subscriber.user for x in subscriptions
                             if x in collection_host.confirmed_members]
 
-                    elif favorite.resource.visibility == 'private':
+                    elif favorite.parent.visibility == 'private':
                         recipients = [x.subscriber.user for x in subscriptions
-                            if x in favorite.resource.collaborators.all()]
+                            if x in favorite.parent.collaborators.all()]
 
-                    elif favorite.resource.visibility == 'collection':
+                    elif favorite.parent.visibility == 'collection':
                         root_private_collection = cu.get_root_private_collection(collection)
                         recipients = [x.subscriber.user for x in subscriptions
                             if x in root_private_collection.collaborators.all()]
 
-            elif favorite.resource.visibility == 'public':
+            elif favorite.parent.visibility == 'public':
                 recipients = [x.subscriber.user for x in subscriptions]
 
-            elif favorite.resource.visibility == 'private':
+            elif favorite.parent.visibility == 'private':
                 recipients = [x.subscriber.user for x in subscriptions
-                    if x in favorite.resource.collaborators.all()]
+                    if x in favorite.parent.collaborators.all()]
 
-            elif favorite.resource.visibility == 'collection':
+            elif favorite.parent.visibility == 'collection':
                 root_private_collection = cu.get_root_private_collection(collection)
                 recipients = [x.subscriber.user for x in subscriptions
                     if x in root_private_collection.collaborators.all()]

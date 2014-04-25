@@ -72,7 +72,10 @@ var ResourceView = Backbone.View.extend({
 
     favorite: function(event){
         OC.favoriteClickHandler(
-            this.model.get('id'), OC.config.user.id, event, this.favoriteCallback, this.unfavoriteCallback);
+            'resource', this.model.get('id'),
+            OC.config.user.id, event, this.favoriteCallback,
+            this.unfavoriteCallback
+        );
     },
 
     favoriteCallback: function(resourceFavorite){
