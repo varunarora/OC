@@ -269,7 +269,7 @@ def _create_user(request):
                         except:
                             pass
 
-            except Exception, e:
+            except:
                 try:
                     new_user.delete()
                     profile.delete()
