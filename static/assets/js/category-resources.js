@@ -29,11 +29,28 @@ var Resource = Backbone.Model.extend({
 
     // Whether or not the resource has been favorited by the logged in user.
     favorited: "",
+
+    // Epoch date when this resource was created.
+    created: ""
 });
 
 // Initialize resource results set Collection
 var ResourceSet = Backbone.Collection.extend({
-    model: Resource
+    model: Resource,
+    sortByPopularity: function(){
+        this.comparator = this.popularityComparator;
+        this.sort();
+    },
+    sortByNewest: function(){
+        this.comparator = this.newestComparator;
+        this.sort();
+    },
+    newestComparator: function(resource){
+        return resource.get('created');
+    },
+    popularityComparator: function(resource){
+        return -resource.get('favorites');
+    },
 });
 
 // Initialize resources view.
@@ -121,7 +138,7 @@ function repopulateResources(target, resourceCollectionView) {
     //     into the function, or gotten reference to using a setter
     var collectionToRender = new ResourceSet(resourceSet.reject(function (resource) {
         return _.some(filters, function(filterValues, filterType){
-            return _.indexOf(filterValues, resource.get(filterType)) !== -1;
+            return _.indexOf(filterValues, resource.get(filterType).toLowerCase()) !== -1;
         });
     }));
 
@@ -178,6 +195,29 @@ function init_mvc() {
             repopulateResources(this, resourceCollectionView);
         });
     });
+
+    // Bind click listeners on main sorting.
+    $('.filter-sort-option').click(function(event){
+        if ($(event.target).hasClass('filter-sort-option-newest')){
+            resourceSet.sortByNewest();
+            resourceCollectionView.render();
+        } else {
+            resourceSet.sortByPopularity();
+            resourceCollectionView.render();
+        }
+    });
+
+    // Bind text input field as filter.
+    $('.content-panel-body-listing-filters-search input').keyup(function(event){
+        var currentInput = $(this).val();
+        var collectionToRender = new ResourceSet(resourceSet.filter(function (resource) {
+            return resource.get('title').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+        }));
+
+        // Recreate the view (clears previous view)
+        resourceCollectionView.render(collectionToRender);
+    });
+
 }
 
 jQuery(document).ready(function($){
@@ -186,7 +226,18 @@ jQuery(document).ready(function($){
 
     // Render the collection view
     resourceCollectionView.render();
+
+    // Initiatialize the Backbone models/collection/view
+    init_mvc();
 });
+
+// The word "filters" is used in the traditional sense here, and not as described in the spec of
+    // _.js. Here, the filter is used to eliminate results that don't pass the truth test, as
+    // opposed to creating a white list, as in the case of _.js
+var filters = {
+    type: [], // Type of the content
+};
+
 // Initialize the resource results collection before page loads.
 var resourceSet = new ResourceSet();
 
