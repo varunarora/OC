@@ -9,6 +9,8 @@ OC.projects = {
             '<span class="delete-member delete-button" title="Remove collaborator"></span>' +
             '</div></li>'),
 */
+    attachPopup: '',
+    postRedirectTo: '',
     addMemberHandler: function(response) {
         if (response.status === 'true') {
             var newMemberTemplate = _.template('<div class="member user">' +
@@ -203,8 +205,107 @@ OC.projects = {
     },
 
     newPostButtonClickHandler: function(event){
-        OC.customPopup('.new-discussion-post-dialog');
+        // Clear previous attachment (form data) / text from post dialog.
+
+        var writePostPopup = OC.customPopup('.new-discussion-post-dialog'),
+            attachWrapper;
         $('.new-discussion-post-body').focus();
+
+        // If user is not logged in, hide attachment option and post meta information.
+        if (! OC.config.user.id){
+            $('.new-discussion-post-prompt-user-thumbnail').addClass('hide');
+            $('.new-discussion-post-prompt-suggest-post-as').text('Post');
+
+            $('.new-discussion-post-attach').addClass('hide');
+        } else {
+            // Bind the click handler to attach files.
+            $('a.new-discussion-post-attach').click(function(event){
+                attachPopup = OC.customPopup('.new-discussion-post-attach-dialog');
+                OC.projects.attachPopup = attachPopup;
+
+                var filesBrowser = $('.new-discussion-post-attach-resource-project-browser');
+
+                OC.tabs('.new-discussion-post-attach-resource-browser');
+
+                var filesBrowserTab = $('.new-discussion-post-attach-resource-tabs li a[href=".my-files"]');
+
+                if (!filesBrowserTab.hasClickEventListener()){
+                    filesBrowserTab.click(function(event){
+                        $.get('/resources/tree/all/user/',
+                            function(response){
+
+                                if (response.status == 'true'){
+                                    OC.renderBrowser(response.tree, filesBrowser);
+                                    filesBrowser.removeClass('loading-browser');
+                                }
+                                else {
+                                    OC.popup(response.message, response.title);
+                                }
+
+                            },
+                        'json');
+
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return false;
+                    });
+                }
+
+                // Bind 'attach' button click handler.
+                $('.new-discussion-post-attach-submit').click(function(event){
+                    // Capture the actively selected tab.
+                    var activeTab = $('.new-discussion-post-attach-dialog .new-discussion-post-attach-resource-tabs li a.selected');
+
+                    var toResourceCollection;
+
+                    // If the active tab is projects.
+                    if (activeTab.attr('href') === '.my-files'){
+                         selectedResourceCollection = filesBrowser.find(
+                            '.selected-destination-collection, .selected-destination-resource');
+
+                         if (selectedResourceCollection.length > 0)
+                            toResourceCollection = $(selectedResourceCollection[0]);
+                    }
+
+                    if (toResourceCollection){
+                        var elementID = toResourceCollection.attr('id'),
+                            resource = elementID.indexOf('resource') != -1;
+
+                        var resourceCollectionID = resource ? elementID.substring(9) : elementID.substring(11);
+                        OC.projects.insertAttachment(
+                            resourceCollectionID, toResourceCollection.text(),
+                            resource
+                        );
+                    }
+
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return false;
+                });
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+        }
+    },
+
+    insertAttachment: function(id, title, isResource){
+        attachWrapper = $('.new-discussion-post-dialog .new-discussion-post-attach-wrapper');
+
+        var attachmentReference = $('<span/>', {
+            'text': title,
+            'class': 'new-discussion-post-attachment'
+        });
+        var newDiscussionPostForm = $('form#new-discussion-post-form');
+
+        $('input[name=attachment_id]', newDiscussionPostForm).val(id);
+        $('input[name=is_resource]', newDiscussionPostForm).val(isResource);
+
+        attachWrapper.html(attachmentReference);
+
+        // Close the popup.
+        OC.projects.attachPopup.close();
     },
 
     newPostSubmitButtonClickHandler: function(event){

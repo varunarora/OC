@@ -3640,6 +3640,132 @@ var OC = {
         $('.content-panel-body-listing-item-favorites').click(function(event){
             $(this).toggleClass('favorited');
         });
+
+        // Attach click handler with share button.
+        $('.content-panel-body-header-share').click(function(){
+            if (OC.config.user.id) OC.initNewPostDialog();
+            else {
+                OC.launchSignupDialog(function(response){
+                    OC.initNewPostDialog();
+                });
+            }
+        });
+
+        // Attach CSS class toggler on the sort-filter options.
+        $('.filter-sort-option').click(function(event){
+            var option = $(this);
+            if (! option.hasClass('selected')){
+                $('.filter-sort-option').removeClass('selected');
+                option.addClass('selected');
+            }
+        });
+
+    },
+
+    initNewPostDialog: function(){
+        var postDialog = OC.customPopup('.browse-post-new-dialog');
+
+        $('.browse-post-new-option.upload-option', postDialog.dialog).click(function(){
+            postDialog.close();
+
+            // Launch the upload popup.
+            var uploadPopup = OC.customPopup('.post-new-upload-dialog');
+        });
+
+        $('.browse-post-new-option.file-folder-option', postDialog.dialog).click(function(){
+            postDialog.close();
+
+            // Launch the upload popup.
+            var fileFolderPopup = OC.customPopup('.post-new-file-folder-dialog'),
+                filesBrowser = $('.post-new-file-folder-profile-browser');
+
+            $.get('/resources/tree/all/user/',
+                function(response){
+                    if (response.status == 'true'){
+                        OC.renderBrowser(response.tree, filesBrowser);
+                        filesBrowser.removeClass('loading-browser');
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                    }
+
+                },
+            'json');
+
+            // Bind 'attach' button click handler.
+            $('.post-new-file-folder-submit').click(function(event){
+                var toResourceCollection;
+
+                // If the active tab is projects.
+                 selectedResourceCollection = filesBrowser.find(
+                    '.selected-destination-collection, .selected-destination-resource');
+
+                 if (selectedResourceCollection.length > 0)
+                    toResourceCollection = $(selectedResourceCollection[0]);
+
+                if (toResourceCollection){
+                    var elementID = toResourceCollection.attr('id'),
+                        resource = elementID.indexOf('resource') != -1;
+
+                    var resourceCollectionID = resource ? elementID.substring(9) : elementID.substring(11);
+                    
+                    // Append the resource/collection ID to the form.
+                    $('#post-new-file-folder-profile-form input[name=is_resource]').val(
+                        resource);
+                    $('#post-new-file-folder-profile-form input[name=resource_collection_ID]').val(
+                        resourceCollectionID);
+
+                    $('#post-new-file-folder-profile-form').submit();
+                }
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+        });
+
+        $('.browse-post-new-option.url-option', postDialog.dialog).click(function(){
+            postDialog.close();
+
+            // Launch the upload popup.
+            var newURLPopup = OC.customPopup('.post-new-url-dialog');
+        });
+    },
+
+    launchSignupDialog: function(successCallback){
+        var signupDialog = OC.customPopup('.login-dialog'),
+            signinButtons = $('.easy-signup-form, #sign-in-form'),
+            sessionStateElement = $('.easy-signup-form #session-state');
+
+        OC.signupDialog = signupDialog;
+
+        // Load the template for the signup and signin forms.
+        $.get('/user/api/registeration-context/',
+            function(response){
+                if (response.status == 'true'){
+                    // Fill the session state.
+                    var i; for (i = 0; i < signinButtons.length; i++){
+                        $('#session-state', $(signinButtons[i])).attr('data-state', response.state);
+
+                        // Generate the Google+ button.
+                        $('span.g-signin', $(signinButtons[i])).attr('data-clientid', response.client_id);
+                    }
+
+                    OC.initializeGooglePlusButtons();
+
+                    OC.registerationSuccessCallback = successCallback;
+                }
+            },
+        'json');
+    },
+
+    initializeGooglePlusButtons: function(){
+        var po = document.createElement('script'),
+            s = document.getElementsByTagName('script')[0];
+        po.type = 'text/javascript';
+        po.async = true;
+        po.src = 'https://plus.google.com/js/client:plusone.js?onload=start';
+        s.parentNode.insertBefore(po, s);
     },
 
     resource: {
@@ -3932,6 +4058,54 @@ $(document).ajaxSend(function (event, xhr, settings) {
         xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
     }
 });
+
+function attachCSRFToken(file, xhr, formData){
+    function getCookie(name) {
+        var cookieValue = null, cookies, i, cookie;
+        if (document.cookie && document.cookie !== '') {
+            cookies = document.cookie.split(';');
+            for (i = 0; i < cookies.length; i++) {
+                cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(
+                        cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function sameOrigin(url) {
+        // url could be relative or scheme relative or absolute
+        var host = document.location.host, // host + port
+            protocol = document.location.protocol,
+            sr_origin = '//' + host,
+            origin = protocol + sr_origin;
+
+        // Allow absolute or scheme relative URLs to same origin
+        return (url === origin || url.slice(
+            0, origin.length + 1) === origin + '/') ||
+            (url === sr_origin || url.slice(
+                0, sr_origin.length + 1) === sr_origin + '/') ||
+            // or any other URL that isn't scheme relative or absolute i.e
+            //     relative.
+            !(/^(\/\/|http:|https:).*/.test(url));
+    }
+    function safeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    var url = $(this)[0].options.url;
+
+    // HACK(Varun): Modified from original if statement, because the method
+    //     is not available to us here. Original 'if' below:
+    //     if (!safeMethod(settings.type) && sameOrigin(url))
+
+    if (sameOrigin(url)) {
+        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+    }
+}
 
 
 /* All IIFEs below */

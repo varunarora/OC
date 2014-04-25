@@ -26,9 +26,13 @@ class Comment(models.Model):
     body_markdown = MarkdownTextField()
     created = models.DateTimeField(auto_now_add=True, editable=False)
     user = models.ForeignKey(User)
-    parent_type = models.ForeignKey(ContentType)
+    parent_type = models.ForeignKey(ContentType, related_name='comment_parent_type')
     parent_id = models.PositiveIntegerField()
     parent = generic.GenericForeignKey('parent_type', 'parent_id')
+    category = models.ForeignKey(GroupCategory, null=True, blank=True, default=None)
+    attachment_type = models.ForeignKey(ContentType, null=True, blank=True)
+    attachment_id = models.PositiveIntegerField(null=True, blank=True)
+    attachment = generic.GenericForeignKey('attachment_type', 'attachment_id')
     #tags=models.ForeignKey(Tag)
 
     def __unicode__(self):

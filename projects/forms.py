@@ -60,7 +60,15 @@ class NewDiscussionPost(forms.ModelForm):
         from django.contrib.contenttypes.models import ContentType
         project_ct = ContentType.objects.get_for_model(Project)
 
+        from oer.models import Resource, Collection
+        resource_ct = ContentType.objects.get_for_model(Resource)
+        collection_ct = ContentType.objects.get_for_model(Collection)
+
         newRequest.__setitem__('parent_type', project_ct.id)
+
+        if newRequest.get('attachment_id', None):
+            newRequest.__setitem__('attachment_type', resource_ct.id if request.get(
+                'is_resource') == 'true' else collection_ct.id)
 
         super(NewDiscussionPost, self).__init__(newRequest)
 
