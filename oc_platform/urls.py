@@ -58,6 +58,7 @@ urlpatterns = patterns(
     url(r'^logout/', 'user_account.views.logout_view', name='logout'),
     url(r'^gauth/', 'user_account.views.googleplus_login', name='gplus_login'),
     url(r'^glogin/', 'user_account.views.glogin', name='glogin'),
+    url(r'^fblogin/', 'user_account.views.fb_login', name='fb_login'),
     url(r'^404testing/', 'oc_platform.views.t404'),
     url(r'^500testing/', 'oc_platform.views.t500'),
 

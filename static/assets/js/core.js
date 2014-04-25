@@ -44,6 +44,7 @@ var OC = {
                 socialLogin: '.social-login-hide',
                 profilePicture: 'input[name=profile_pic]',
                 socialFlag: 'form#signup-form input[name=social_login]',
+                socialService: 'form#signup-form input[name=social_service]',
                 socialID: 'form#signup-form input[name=social_id]'
             },
             googleAuthURL: '/gauth/',
@@ -58,6 +59,9 @@ var OC = {
             formError: '.form-error'
         },
     },
+
+    registerationSuccessCallback: '',
+    signupDialog: null,
 
     initSearchOptions: function(){
         $('.search-options-button').click(function(event){
@@ -152,13 +156,15 @@ var OC = {
         // Launch popup on init.
         launchPopup(blockToPopup);
 
-        // Attach handler to close popup.
-        attachEscapePopupHandler(blockToPopup);
-
-        return {
+        var popup = {
             dialog: blockToPopup,
             close: closePopup
         };
+
+        // Attach handler to close popup.
+        attachEscapePopupHandler(popup);
+
+        return popup;
 
         function launchPopup(blockToPopup){
             $('.popup-background').addClass('show-popup-background');
@@ -182,27 +188,34 @@ var OC = {
             var windowHeight = $(window).height();
 
             // With an assumption that the block is smaller than the window size
-            $('.oc-popup').css('left', (windowWidth - popup.width()) / 2);
-            $('.oc-popup').css('top', (windowHeight - popup.height()) / 2.5);
+            $(popup).css('left', (windowWidth - popup.width()) / 2);
+            $(popup).css('top', (windowHeight - popup.height()) / 2.5);
         }
 
         function attachEscapePopupHandler(popup){
-            $('.oc-popup-exit', popup).click(function(){
-                closePopup();
+            $('.oc-popup-exit', popup.dialog).click(function(){
+                popup.close();
             });
 
             $(document).keyup(function(event) {
-                if ($('.oc-popup').hasClass('show-popup')){
+                if (popup.dialog.hasClass('show-popup')){
                     if (event.which == 27) { // 'Esc' on keyboard
-                        closePopup();
+                        popup.close();
                     }
                 }
             });
         }
 
-        function closePopup(){
-            $('.oc-popup').removeClass('show-popup');
+        function closePopup(popup){
+            this.dialog.removeClass('show-popup');
             $('.popup-background').removeClass('show-popup-background');
+
+            // If any other popup is still open, show popup background again.
+            var allPopups = $('.oc-popup'), i;
+            for (i = 0; i < allPopups.length; i++){
+                if ($(allPopups[i]).hasClass('show-popup'))
+                    $('.popup-background').addClass('show-popup-background');
+            }
 
             if (closeCallback){
                 closeCallback();
@@ -676,8 +689,41 @@ var OC = {
         }, 200000);
     },
 
+    asynchronousLogin: function(service, user_id){
+        $.get('/user/api/social-availability/' +  service + '/' + user_id + '/',
+            function(response){
+                if (response.status == 'false'){
+                    // If this an asynchronous login page.
+                    if (OC.signupDialog){
+                        OC.config.user.id = response.id;
+                        $('input[name="user"]').val(response.id);
+
+                        OC.config.user.username = response.username;
+
+                        // Dismiss login window and proceed to next step.
+                        OC.signupDialog.close();
+
+                        OC.registerationSuccessCallback();
+
+                        // Show signed up message.
+                        OC.setMessageBoxMessage('You have successfully logged in.');
+                        OC.showMessageBox();
+
+                        OC.pushMessageBoxForward();
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            },
+        'json');
+    },
+
     /*jslint nomen: true */
     expediteGLogin: function(profile) {
+        // Check to see if the social ID already has an account linked.
+        //    If so, just log them in and redirect to current location.
+        OC.asynchronousLogin('plus', profile.id);
+
         var first_name = profile.name.givenName || "",
             last_name = profile.name.familyName || "";
 
@@ -717,6 +763,7 @@ var OC = {
         // Set a new hidden form item to communicate to the server that no
         //    reCaptcha verification is required
         $(OC.config.registration.fields.socialFlag).attr('value', 'true');
+        $(OC.config.registration.fields.socialService).attr('value', 'plus');
         $(OC.config.registration.fields.socialID).attr('value', profile.id);
     },
     /*jslint nomen: false */
@@ -822,6 +869,115 @@ var OC = {
         }
     },
 
+    facebookRegistrationCallback: function(){
+        FB.api('/me', function(response) {
+            // Eliminate fields that aren't required as a part
+            //     of social login and populate hidden fields
+            //     with necessary values
+            OC.expediteFbLogin(response);
+        });
+
+        // Set user message conveyed success with Google+
+        //     login
+        $(OC.config.registration.googleAuthResult).html(
+            '<p>You have successfully connected to your Facebook account. Kindly complete the ' +
+                'the form below to complete your sign up.</p>'
+        );
+        $(OC.config.registration.orWrapper).hide();
+    },
+
+    expediteFbLogin: function(profile) {
+        // Check to see if the social ID already has an account linked.
+        //    If so, just log them in and redirect to current location.
+        OC.asynchronousLogin('facebook', profile.id);
+
+        var first_name = profile.first_name || "",
+            last_name = profile.last_name || "";
+
+        var location;
+        if (profile.location) {
+            location = profile.location.name || "";
+        } else {
+            location = '';
+        }
+
+        // Fill editable inputs
+        $(OC.config.registration.fields.first_name).attr(
+            'value', first_name);
+        $(OC.config.registration.fields.last_name).attr(
+            'value', last_name);
+
+        $(OC.config.registration.fields.location).attr('value', location);
+
+        // Hide fields that do not need to be filled
+        // $(OC.config.registration.fields.socialLogin).slideUp('slow');
+        $('tr.registration-username-password td:first').attr('colspan', '2');
+        $('tr.registration-username-password td:last').remove();
+
+        // Set the hidden field value for profile picture with the URL from gapi
+        FB.api('/me/picture?width=300', function(response) {
+            $(OC.config.registration.fields.profilePicture).attr(
+                'value', response.data.url);
+        });
+
+        // Set the user email address & username
+        $(OC.config.registration.fields.email).attr('value', profile.email);
+        $(OC.config.registration.fields.username).attr('value', profile.username);
+
+        // Set a new hidden form item to communicate to the server that no
+        //    reCaptcha verification is required
+        $(OC.config.registration.fields.socialFlag).attr('value', 'true');
+        $(OC.config.registration.fields.socialService).attr('value', 'facebook');
+        $(OC.config.registration.fields.socialID).attr('value', profile.id);
+    },
+
+    facebookSignInCallback: function() {
+        FB.api('/me', function(profile) {
+            // Fill the hidden Google form object holding the user Fb ID.
+            $('form.facebook-login input[name=facebook_id]').val(
+                profile.id);
+
+            // Send a POST request for authenticating the user ID.
+            $.post('/fblogin/', $('form.facebook-login').serialize(),
+                function(response){
+                    // If authentication success, capture the source page and
+                    //     redirect the page.
+                    if (response.status === "true"){
+                        var redirect_to = $(
+                            '.facebook-login input[name=redirect_to]').val();
+                        if (redirect_to !== 'False' && redirect_to !== ''){
+                            window.location.href = redirect_to;
+                        } else if (OC.signupDialog){
+                            OC.config.user.id = response.id;
+                            $('input[name="user"]').val(response.id);
+
+                            OC.config.user.username = response.username;
+
+                            // Dismiss login window and proceed to next step.
+                            OC.signupDialog.close();
+
+                            OC.registerationSuccessCallback();
+
+                            // Show signed up message.
+                            OC.setMessageBoxMessage('You have successfully logged in.');
+                            OC.showMessageBox();
+
+                            OC.pushMessageBoxForward();
+                        } else {
+                            window.location.href = '/';
+                        }
+                    } else {
+                        OC.popup('Your Facebook account is not linked to any user ' +
+                            'account. Please signup using Facebook before you can login. ',
+                            'Facebook login failure'
+                        );
+                    }
+                },
+            'json');
+        });
+    },
+
+
     initInviteSignup: function() {
         $(OC.config.invite.formSelector).submit(function () {
             var form = $(this),
@@ -922,6 +1078,230 @@ var OC = {
                 // Hide the description box.
                 $('#new-account-signup-info').hide();
             }
+        }
+
+        $('#facebook-signup-button').click(function(event){
+            FB.login(function(response){
+                OC.facebookRegistrationCallback(response);
+            }, {
+                scope: 'basic_info,email'
+            });
+        });
+
+        $('#facebook-signin-button').click(function(event){
+            OC.facebookSignInCallback();
+        });
+
+        if ($('#session-state').length > 0){
+            if ($('#session-state').attr('data-state') !== '')
+                OC.initializeGooglePlusButtons();
+        }
+
+        // Hack submit button.
+        $('form#signup-form button.large-action-button').click(function(event){
+            var submitButton = $(this);
+
+            var fields = [
+                'input[name="first_name"]', 'input[name="last_name"]',
+                'input[name="email"]',
+                'input[name="username"]', 'input[name="password"]',
+                'input[name="dob_date"]', 'input[name="dob_year"]',
+                'select[name="dob_month"]'
+            ];
+
+            var i, element, errorneousInputs = [];
+            for (i = 0; i < fields.length; i++){
+                element = $('form#signup-form ' + fields[i]);
+                if (element.val() === '' || element.val() === '0'){
+                    element.addClass('form-input-error');
+                    errorneousInputs.push(element);
+                }
+            }
+
+            if (errorneousInputs.length === 0){
+                var form = $('form#signup-form').serialize();
+
+                // Add spinner to submit button.
+                submitButton.addClass('loading');
+                
+                $.post('/user/api/register-asynchronously/', form,
+                    function (response) {
+                        submitButton.removeClass('loading');
+                        OC.signupDialog.close();
+
+                        OC.registerationSuccessCallback();
+
+                        OC.config.user.id = response.id;
+                        $('input[name="user"]').val(response.id);
+
+                        OC.config.user.username = response.username;
+
+                        // Show signed up message.
+                        OC.setMessageBoxMessage(response.name + ', your account has successfully been set up.');
+                        OC.showMessageBox();
+
+                        OC.pushMessageBoxForward();
+                    }, 'json');
+            }
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+
+        // Bind change validation handlers with all fields.
+        OC.liveValidateRegistrationForm();
+    },
+
+    liveValidateRegistrationForm: function(){
+        // Bind first name to validation.
+        OC.validate.text(
+            '#signup-form input[name="first_name"], #signup-form input[name="last_name"]',
+            '[A-Za-z-]{3,16}',
+            'The name must contain only letters and not be more than 16 letters.'
+        );
+
+        // Validate the email address.
+        OC.validate.text(
+            '#signup-form input[name="email"]',
+            /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/,
+            'The email address is invalid'
+        );
+
+        // Validate the username.
+        OC.validate.text(
+            '#signup-form input[name="username"]',
+            /^[a-z]\w{3,}/,
+            'Username should be all lowercase, cannot begin with ' +
+                'a number and must only have letters and digits and/or underscores.'
+        );
+
+        // Validate the password.
+        OC.validate.text(
+            '#signup-form input[name="password"]',
+            /\w+/,
+            'Password should contain valid characters'
+        );
+
+        $('#signup-form input[name="username"]').blur(function(event) {
+            var usernameInput = $(this);
+            if (usernameInput.val() !== ''){
+                usernameInput.addClass('loading');
+
+                $.get('/user/api/username-availability/' +  usernameInput.val() + '/',
+                    function(response){
+                        usernameInput.removeClass('loading');
+
+                        if (response.status == 'false'){
+                            usernameInput.addClass('unavailable');
+                            usernameInput.attr('title', 'This username is not available');
+                            usernameInput.tipsy({trigger: 'manual', gravity: 'n', fade: true });
+                            usernameInput.tipsy('show');
+                        } else {
+                            usernameInput.tipsy('hide');
+                            usernameInput.removeClass('unavailable');
+                            usernameInput.addClass('available');
+                        }
+                    },
+                'json');
+            }
+        });
+
+        // Validate the birthdate.
+        OC.validate.date(
+            '#signup-form select[name="dob_month"]', '#signup-form input[name="dob_date"]',
+            '#signup-form input[name="dob_year"]',
+            {
+                'DOB_OUT_OF_RANGE': 'The date of birth is out of range',
+                'DOB_AFTER_TODAY': 'The date of birth cannot be later than today',
+                'DOB_LESS_THAN_THIRTEEN': 'You need to be above 13 years of age to sign up',
+                'DOB_INCORRECT': 'The date of birth is incorrect',
+                'DOB_NO_MONTH': 'You need to select a month of birth'
+            }
+        );
+    },
+
+    validate: {
+        invalidate: function(input, error){
+            input.addClass('form-input-error');
+            input.attr('title', error);
+            input.tipsy({trigger: 'manual', gravity: 'n', fade: true });
+            input.tipsy('show');
+        },
+
+        pass: function(input){
+            input.removeClass('form-input-error');
+            input.tipsy('hide');
+        },
+
+        text: function(selector, pattern, error){
+            var input = $(selector),
+                currentInput;
+            input.keyup(function(event){
+                currentInput = $(event.target);
+                if (currentInput.hasClass('form-input-error') && currentInput.val().match(pattern)) {
+                    if (currentInput.val().match(pattern)[0] === currentInput.val()){
+                        OC.validate.pass(currentInput);
+                    }
+                }
+            });
+
+            input.blur(function(event){
+                currentInput = $(event.target);
+                if (!currentInput.val().match(pattern)){
+                    OC.validate.invalidate(currentInput, error);
+                } else if (currentInput.val().match(pattern)[0] !== currentInput.val()){
+                    OC.validate.invalidate(currentInput, error);
+                }
+            });
+        },
+
+        date: function(monthSelector, dateSelector, yearSelector, errorMap){
+            var monthInput = $(monthSelector),
+                dateInput = $(dateSelector),
+                yearInput = $(yearSelector),
+                currentInput;
+
+            monthInput.blur(function(event){
+                currentInput = $(event.target);
+                if (parseInt(currentInput.val(), 10) === 0){
+                    OC.validate.invalidate(currentInput, errorMap['DOB_NO_MONTH']);
+                } else if (currentInput.hasClass('form-input-error')) {
+                    OC.validate.pass(currentInput);
+                }
+            });
+
+            // TODO(Varun): Need to have better month/year validation.
+            dateInput.blur(function(event){
+                currentInput = $(event.target);
+                if (! dateInput.val().match(/[3][0-1]|[0-2]\d|^[1-9]$/)){
+                    OC.validate.invalidate(currentInput, errorMap['DOB_INCORRECT']);
+                } else if (currentInput.hasClass('form-input-error')) {
+                    OC.validate.pass(currentInput);
+                }
+            });
+
+            yearInput.blur(function(event){
+                currentInput = $(event.target);
+                if (currentInput.val().match(/\d{4}/)){
+                    if (currentInput.val().match(/\d{4}/) == currentInput.val()){                 var year = parseInt(currentInput.val(), 10);
+                        var currentDate = new Date();
+
+                        if (year < 1900)
+                            OC.validate.invalidate(currentInput, errorMap['DOB_OUT_OF_RANGE']);
+                        else if (year > currentDate.getFullYear())
+                            OC.validate.invalidate(currentInput, errorMap['DOB_AFTER_TODAY']);
+                        else if ((currentDate.getFullYear() - year) <= 12)
+                            OC.validate.invalidate(currentInput, errorMap['DOB_LESS_THAN_THIRTEEN']);
+                        else if (currentInput.hasClass('form-input-error'))
+                            OC.validate.pass(currentInput);
+
+                    } else {
+                        OC.validate.invalidate(currentInput, errorMap['DOB_INCORRECT']);
+                    }
+                }
+            });
+
         }
     },
 
@@ -1660,6 +2040,11 @@ var OC = {
         var messageElement = $('.login-messages-wrapper');
         messageElement.addClass('show-messages');
         OC.repositionMessageBox();
+    },
+
+    pushMessageBoxForward: function(){
+        var messageElement = $('.login-messages-wrapper');
+        messageElement.addClass('push-forward');
     },
 
     dismissMessageBox: function(){
@@ -3552,6 +3937,7 @@ $(document).ajaxSend(function (event, xhr, settings) {
 
 /* All IIFEs below */
 
+/*
 // Function to initialize the Google+ login button.
 (function () {
     var po = document.createElement('script'),
@@ -3561,6 +3947,57 @@ $(document).ajaxSend(function (event, xhr, settings) {
     po.src = 'https://plus.google.com/js/client:plusone.js?onload=start';
     s.parentNode.insertBefore(po, s);
 })();
+*/
+// Function to initialize the Facebook button.
+window.fbAsyncInit = function() {
+    FB.init({
+        appId      : '639282532755047',
+        status     : true, // check login status
+        cookie     : true, // enable cookies to allow the server to access the session
+        xfbml      : true  // parse XFBML
+    });
+
+    /*
+    // Here we subscribe to the auth.authResponseChange JavaScript event. This event is fired
+    // for any authentication related change, such as login, logout or session refresh. This means that
+    // whenever someone who was previously logged out tries to log in again, the correct case below 
+    // will be handled. 
+    FB.Event.subscribe('auth.authResponseChange', function(response) {
+        // Here we specify what we do with the response anytime this event occurs. 
+        if (response.status === 'connected') {
+          // The response object is returned with a status field that lets the app know the current
+          // login status of the person. In this case, we're handling the situation where they 
+          // have logged in to the app.
+          //OC.facebookRegistrationCallback();
+        } else if (response.status === 'not_authorized') {
+          // In this case, the person is logged into Facebook, but not into the app, so we call
+          // FB.login() to prompt them to do so. 
+          // In real-life usage, you wouldn't want to immediately prompt someone to login 
+          // like this, for two reasons:
+          // (1) JavaScript created popup windows are blocked by most browsers unless they 
+          // result from direct interaction from people using the app (such as a mouse click)
+          // (2) it is a bad experience to be continually prompted to login upon page load.
+          FB.login();
+        } else {
+          // In this case, the person is not logged into Facebook, so we call the login() 
+          // function to prompt them to do so. Note that at this stage there is no indication
+          // of whether they are logged into the app. If they aren't then they'll see the Login
+          // dialog right after they log in to Facebook. 
+          // The same caveats as above apply to the FB.login() call here.
+          FB.login();
+        }
+    });
+    */
+};
+
+// Load the SDK asynchronously
+(function(d){
+   var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+   if (d.getElementById(id)) {return;}
+   js = d.createElement('script'); js.id = id; js.async = true;
+   js.src = "//connect.facebook.net/en_US/all.js";
+   ref.parentNode.insertBefore(js, ref);
+}(document));
 
 /*jslint nomen: true */
 // Initialize Google Analytics.

@@ -167,9 +167,10 @@ class NewUserProfileForm(ModelForm):
     """
     profile_pic_tmp = open(settings.MEDIA_ROOT + 'profile/' + 'default.jpg')
     social_id = forms.IntegerField(required=False)
+    social_service = forms.CharField(required=False)    
     # gender = forms.BooleanField(required=True)
 
-    def __init__(self, request, social_login, new_user, dob, social_id):
+    def __init__(self, request, social_login, new_user, dob, social_id, social_service):
         """Initializes the profile form object after setting a profile picture,
         date of birth, and the User object it is associated with.
 
@@ -200,6 +201,8 @@ class NewUserProfileForm(ModelForm):
 
             newRequest.__setitem__(
                 'social_id', social_id if social_login else None)
+            newRequest.__setitem__(
+                'social_service', social_service if social_login else None)
 
             # Set profile picture default position.
             from media.models import ImagePosition
@@ -262,6 +265,7 @@ class NewUserProfileForm(ModelForm):
                 characters or if it already exists.
         """
         social_id = self.cleaned_data['social_id']
+        social_service = self.cleaned_data['social_service']
 
         if social_id:
             # Try locating the username, and if found, raise error.
@@ -270,7 +274,9 @@ class NewUserProfileForm(ModelForm):
             except UserProfile.DoesNotExist:
                 return social_id
             raise forms.ValidationError(
-                u'You Google+ account is already linked to a user account. Please refresh and retry.')
+                u'You % account is already linked to a user account. Please refresh and retry.'
+                % ('Google+' if social_service == 'plus' else 'Facebook')
+            )
 
         else:
             return social_id

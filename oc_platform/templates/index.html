@@ -42,43 +42,7 @@
 		</div>
 		<div id="fill-panel" class="panel-right">
 			<div class="register-box">New to OpenCurriculum? <a href="{% url register %}">Sign up here</a></div>
-			<form method="POST" action="/authenticate/" id="sign-in-form">
-				{% if source %}
-				<input type="hidden" name="redirect_to" value="{{ source }}" />
-				{% endif %}
-				{% csrf_token %}
-				<div>Username or Email address</div>
-				<div><input type="text" name="username" placeholder="Username or Email address"/></div>
-				<div>Password</div>
-				<div><input type="password" name="password" placeholder="Password" /></div>
-				<div class="login-authentication-failure">{% if login_error_message %}{{ login_error_message }}{% endif %}</div>
-				<div id="loggedin-button">
-					<input type="checkbox" name="stay-logged-in" />Keep me logged in
-					<button class="btn success-button">Log in<span class="vertical-caret"></span></button>
-				</div>
-				<div id="forgot-username-password">Forgot username or password? <a href="">Click here</a></div>
-				<table id="signup-or">
-					<tr><td class="signup-or-flank"></td><td>OR</td><td class="signup-or-flank"></td></tr>
-				</table>
-				<div data-state="{{ state }}" id="session-state"></div>
-				<div id="signinButton">
-					<span class="g-signin"
-						data-scope="https://www.googleapis.com/auth/plus.login"
-						data-clientid="{{ client_id }}"
-						data-redirecturi="postmessage"
-						data-accesstype="offline"
-						data-cookiepolicy="single_host_origin"
-						data-callback="gPlusSignInCallback"
-						data-theme="dark"
-						data-width="wide">
-					</span>
-				</div>
-				<div id="result"></div>
-			</form>
-			<form class="google-plus-login">
-				<input type="hidden" name="google_id" />
-				<input type="hidden" name="redirect_to" value={{ source}} />
-			</form>
+            {% include 'partials/signin-form.html' %}
 		</div>
 	</div>
 </div>
@@ -147,143 +111,12 @@
 	</div>
 </div>
 
-<!--
-<div class="center-stage">
-    <div class="home-tripanel">
-        <div id="locally-relevant">
-        	<div class="tripanel-image"></div>
-            <span class="bold">Instant Feedback</span>
-            <p>Resources aligned by community to local education standards around the world.
-            </p>
-        </div>
-        <div id="high-quality-content">
-            <div class="tripanel-image"></div>
-            <span class="bold">Take it away</span>
-            <p>Peer reviewed and moderated content to ensure that you get only the best.</p>
-        </div>
-        <div id="social">
-            <div class="tripanel-image"></div>
-            <span class="bold">Collaborate as groups</span>
-            <p>Create and share with friends and education communities, easier than ever before.
-            </p>
-        </div>
-    </div>
-</div>
--->
-
 <div class="center-stage testimonial-wrapper">
 	<div class="testimonial">"A tool like this is a godsend for teachers who might be hard-pressed to come up with lesson plans from scratch" - Tyson S., Rukmini Foundation</div>
 	<a href="{% url register %}" class="action-button site-action-button">Sign up for free</a>
 	<p>Have a question or suggestion? Contact us at hello@opencurriculum.org</p>
 </div>
 
-<!--
-<div id="chief-panel-container" class="home">
-	<div id="chief-panel-wrapper"></div>
-	<div id="chief-panel">
-		<div id="key-panel" class="panel-left">
-			<h2>Open K-12 educational content, <br/>created by you</h2>
-			<div class="home-title-caption">Thousands of open educational articles, related videos, audio, worksheets, documents, etc. produced and curated by the community!
-
-				<div class="actions-wrapper">
-					<a href="articles" onclick="javascript:window.location=this.href"><button class="success-button btn">Get more FREE content <span class="vertical-caret"></span></button></a>
-					<div class="fine-print">No sign-up or log-in required.</div>
-				</div>
-			</div>
-		</div>
-		
-		
-		<div id="fill-panel" class="panel-right">
-			<ul id="article-panel">
-				{% for article in top_articles %}
-				<li>
-					<div class="chapter-thumbnail-wrapper">
-						{% include 'partials/article_image.html' %}
-					</div>
-					
-					<a href="{% url articles:reader category_slug=article.category.slug %}?q={{ article.slug }}" title="{{ article.title }}" alt="{{ article.title }}"><div class="chapter-info">
-						<div class="chapter-info-title">{{ article.title }}</div>
-						<div class="chapter-info-caption">{{ article.views }} views</div> 
-					</div></a>
-				</li>
-				{% endfor %}
-			</ul>
-		</div>
-	</div>
-	<div class="chief-panel-container-cover"></div>
-</div>
--->
 {% endif %}
 
-<!--
-<div class="center-stage">
-    <div class="home-tripanel">
-        <div id="locally-relevant">
-        	<div class="tripanel-image"></div>
-            <span class="bold">LOCALLY RELEVANT</span>
-            <p>Resources aligned by community to local education standards around the world.
-            </p>
-        </div>
-        <div id="high-quality-content">
-            <div class="tripanel-image"></div>
-            <span class="bold">HIGH QUALITY</span>
-            <p>Peer reviewed and moderated content to ensure that you get only the best.</p>
-        </div>
-        <div id="social">
-            <div class="tripanel-image"></div>
-            <span class="bold">SOCIAL</span>
-            <p>Create and share with friends and education communities, easier than ever before.
-            </p>
-        </div>
-    </div>
-</div>
-
-<div class="center-stage">
-	<div id="key-panel" class="panel-left">
-
-		<div class="content-gallery">
-			<h3>Featured Resources</h3>
-			<ul class="resource-panel">
-			{% for resource in top_resources %}
-				<li>
-					<a href="{% url read resource_id=resource.id resource_slug=resource.slug %}">
-						<div class="resource-panel-thumbnail" style="background-image: url('{{ MEDIA_URL}}{{ resource.image.name }}')" ></div>
-					<div class="resource-title-wrapper">{{ resource.title }}</div></a>
-				</li>
-			{% endfor %}
-			</ul>
-		</div>
-
-	</div>
-		
-	<div id="fill-panel" class="panel-right moe-audience">
-		<aside id="support" class="teacher-contributor-invite">
-			<h2>Are you a teacher?</h2>
-			<img src="{{ STATIC_URL }}images/moe.png" class="moe-teachers" />
-			<div id="mini-key-panel" class="panel-left mini">
-				<p>Do you have what it takes to be a core contributor on our content team? We, led by Moe, are looking for the smartest, sharpest and most versatile education minds to lead our content efforts as volunteers.</p>
-				<p>If you think you have what it takes to be a core contributor, sign-up below and we will reach out to you with further details.</p>
-				<p>
-					<div id="contributor-invite-error" class="form-error"></div>
-					<div id="contributor-invite-success" class="form-success"></div>
-					<form id="contributor-invite" action="/signup-invite/" class="signup">
-						{% csrf_token %}
-						<table>
-							<tr><td class="input-description">Name</td><td><input type="text" name="name" id="id_name" max_length="100" placeholder="Your name"/><br/>							
-							<div class="name-error form-error"></div></td></tr>
-							<tr><td class="input-description">Email</td><td><input type="text" name="email" id="id_email" placeholder="Your email address" /><br/>							
-							<div class="email-error form-error"></div></td></tr>
-						</table>
-						<p class="center"><button class="btn dull-button">Submit</button></p>
-						<input type="hidden" name="purpose" id="id_purpose" value="Contribute" /> 
-						<div class="form-spinner"></div>
-					</form>
-				</p>
-			</div>
-			<div id="mini-fill-panel" class="panel-right mini">
-			</div>
-		</aside>
-	</div>
-</div>
--->
 {% include 'partials/footer.html' %}

@@ -10,6 +10,11 @@ urlpatterns = patterns(
     url(r'^api/notifications/dismiss/(?P<user_id>\d+)/$', views.dismiss_notifications, name='dismiss_notifications'),
     url(r'^api/subscribe/state/users/$', views.get_subscribe_state, name='get_subscribe_state'),
     url(r'^api/subscribe/(?P<user_id>\d+)/$', views.subscribe, name='subscribe'),
+    url(r'^api/registeration-context/$', views.get_registration_context, name='get_registration_context'),
+    url(r'^api/username-availability/(?P<username>\w+)/$', views.username_availability, name='username_availability'),
+    url(r'^api/social-availability/(?P<service>\w+)/(?P<social_id>\d+)/$', views.social_availability, name='social_availability'),
+
+    url(r'^api/register-asynchronously/$', views.register_asynchronously, name='register_asynchronously'),
 
     url(r'^(?P<username>\w+)/reset-password/set-new-password/$', views.reset_password_set, name='reset_password_set'),
     url(r'^reset-password/$', views.reset_password, name='reset_password'),

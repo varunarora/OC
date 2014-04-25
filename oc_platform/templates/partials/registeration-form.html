@@ -1,0 +1,117 @@
+<div class="easy-signup-form">
+    {% if not social_id %}
+    <aside class="google-signin">
+        <div data-state="{{ state }}" id="session-state"></div>
+        <div id="signinButtons">
+            <span class="g-signin"
+                data-scope="https://www.googleapis.com/auth/userinfo.email "
+                data-clientid="{{ client_id }}"
+                data-redirecturi="postmessage"
+                data-accesstype="offline"
+                data-cookiepolicy="single_host_origin"
+                data-callback="gPlusRegistrationCallback"
+                data-theme="dark"
+                data-approvalprompt="force"
+                data-width="wide">
+            </span>
+            <span id="facebook-signup-button"></span>
+        </div>
+        
+
+        <!--<fb:login-button show-faces="true" size='large' data-width="200" max-rows="1" scope="basic_info,email"></fb:login-button>-->
+
+        <div id="results"></div>
+    </aside>
+
+
+    <div class="or-wrapper">
+        <span class="or-text">OR</span>
+    </div>
+    {% endif %}
+    {% if profile_form.social_id.errors %}
+    <div class="form-error">{{ profile_form.social_id.errors|first }}</div>
+    {% endif %}
+
+    <form method="POST" action="/signup/" id="signup-form">
+        <input type="hidden" name="social_login" value="{{ social_login }}" />
+        <input type="hidden" name="social_service" value="{{ social_service }}" />
+        <input type="hidden" name="social_id" value="{{ social_id }}" />
+        <input type="hidden" name="no-recaptcha" value="true" />
+        <input type="hidden" name="profile_pic" />
+        {% csrf_token %}
+        <table id="signup-form-table">
+            <tr><td><input type="text" name="first_name" placeholder="First name" value="{{ form.first_name }}"{% if user_form.first_name.errors %} title="{{ user_form.first_name.errors|first }}" class="form-input-error"{% endif %}></td><td><input type="text" name="last_name" placeholder="Last name" value="{{ form.last_name }}" {% if user_form.last_name.errors %}title="{{ user_form.last_name.errors|first }}" class="form-input-error"{% endif %}></td></tr>
+            
+            <tr><td colspan="2" class="email-address-input-wrapper"><input type="text" name="email" placeholder="Email address" value="{{ form.email }}"{% if user_form.email.errors %} title="{{ user_form.email.errors|first }}" class="form-input-error"{% endif %}></tr>
+            
+            <tr class="registration-username-password">
+                <td{% if social_id %} colspan="2"{% endif %}>
+                    <!--<input type="text" name="username" placeholder="Username" value="{{ form.username }}"{% if user_form.username.errors %} title="{{ user_form.username.errors|first }}" class="form-input-error"{% else %} title="Username should be all lowercase, and must only have letters and digits and/or underscores."{% endif %}>--><input type="text" name="username" placeholder="Username" value="{{ form.username }}" />
+                </td>
+                {% if not social_id %}
+                <td>
+                    <!--<input type="password" name="password" placeholder="Password"{% if user_form.password.errors %} title="{{ user_form.password.errors|first }}" class="form-input-error"{% else %} title="Password must contain at least 6 characters."{% endif %}>-->
+                    <input type="password" name="password" placeholder="Password" />
+                </td>
+                {% endif %}
+            </tr>
+            
+            <tr class="extra-information"><td></td></td></td></tr>
+            <tr><td colspan="2"><span class='form-info-text'>I am a</span>
+            <!--<select name="profession">
+                {% for p in professions %}
+                <option name="{{ p }}" {% ifequal form.profession p %}selected{% endifequal %}>{{ p }}</option>
+                {% endfor %}                
+            </select>-->
+            <select name="profession">
+                <option name="Teacher" selected>Teacher</option>
+                <option name="Student">Student</option>
+                <option name="Administrator">Administrator</option>
+                <option name="Publisher">Publisher</option>
+                <option name="Other">Other</option>
+            </select>
+            </td></tr>
+            <tr><td><input type="text" name="location" value="{{ form.location }}" placeholder="Location"></td><td>
+                <!--
+                <label><input type="radio" name="gender" value="1" {% ifequal form.gender "1" %}checked{% endifequal %}> MALE</label>
+                <label><input type="radio" name="gender" value="0" {% ifequal form.gender "0" %}checked{% endifequal %}> FEMALE</label>
+                -->
+                <label><input type="radio" name="gender" value="1"> MALE</label>
+                <label><input type="radio" name="gender" value="0" checked> FEMALE</label>
+                
+            </td></tr>
+            <tr><td class="dob-inputs-info">Date of birth</td><td></td></tr>
+            <tr><td colspan="2">
+                <div class="dob-inputs-wrapper">
+                    <!--
+                    <select name="dob_month" placeholder="Month">
+                        <option value="0">Month</option>
+                        {% for key, value in months %}
+                        <option value="{{ key }}" {% ifequal form.dob_month key %}selected{% endifequal %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>-->
+                    <select name="dob_month" placeholder="Month">
+                        <option value="0">Month</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>                        
+                    </select>
+                    <input type="text" placeholder="Date" name="dob_date" value="{{ form.dob_date }}" {% if profile_form.dob.errors %} title="{{ profile_form.dob.errors }}" class="form-input-error"{% endif %}/>
+                    <input type="text" placeholder="Year" name="dob_year" value="{{ form.dob_year }}"/>
+                </div>
+            
+                <button class="action-button large-action-button">Submit &rarr;</button>
+            </td></tr>
+            <tr><td colspan="3" class="terms-privacy-message">By clicking submit, you agree to our <a href="{% url terms %}" target="_blank">Terms</a> and <a href="{% url privacy %}" target="_blank">Privacy Policy</a>.</td></tr>
+        </table>
+    </form>
+</div>

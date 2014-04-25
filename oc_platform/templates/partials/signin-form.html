@@ -1,0 +1,42 @@
+<form method="POST" action="/authenticate/" id="sign-in-form">
+    {% if source %}
+    <input type="hidden" name="redirect_to" value="{{ source }}" />
+    {% endif %}
+    {% csrf_token %}
+    <div>Username or Email address</div>
+    <div><input type="text" name="username" placeholder="Username or Email address"/></div>
+    <div>Password</div>
+    <div><input type="password" name="password" placeholder="Password" /></div>
+    <div class="login-authentication-failure">{% if login_error_message %}{{ login_error_message }}{% endif %}</div>
+    <div id="loggedin-button">
+        <input type="checkbox" name="stay-logged-in" />Keep me logged in
+        <button class="btn success-button">Log in<span class="vertical-caret"></span></button>
+    </div>
+    <div id="forgot-username-password">Forgot username or password? <a href="">Click here</a></div>
+    <table id="signup-or">
+        <tr><td class="signup-or-flank"></td><td>OR</td><td class="signup-or-flank"></td></tr>
+    </table>
+    <div data-state="{{ state }}" id="session-state"></div>
+    <div id="signinButtons">
+        <span class="g-signin"
+            data-scope="https://www.googleapis.com/auth/plus.login"
+            data-clientid="{{ client_id }}"
+            data-redirecturi="postmessage"
+            data-accesstype="offline"
+            data-cookiepolicy="single_host_origin"
+            data-callback="gPlusSignInCallback"
+            data-theme="dark"
+            data-width="wide">
+        </span>
+        <span id="facebook-signin-button"></span>
+    </div>
+    <div id="result"></div>
+</form>
+<form class="google-plus-login">
+    <input type="hidden" name="google_id" />
+    <input type="hidden" name="redirect_to" value="{{ source }}" />
+</form>
+<form class="facebook-login">
+    <input type="hidden" name="facebook_id" />
+    <input type="hidden" name="redirect_to" value="{{ source }}" />
+</form>

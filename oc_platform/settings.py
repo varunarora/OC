@@ -300,7 +300,7 @@ STRINGS = {
                 'DOB_INCORRECT': 'The date of birth is incorrect',
                 'RECAPTCHA_VALIDATION_FAILURE': 'reCaptcha validation failed. Please try again or contact us for support',
                 'PASSWORD_MISMATCH': 'The two passwords did not match',
-                'USERNAME_VALIDATION_ERROR': 'Username should be all lowercase, and must only have letters and digits and/or underscores.',
+                'USERNAME_VALIDATION_ERROR': 'Username should be all lowercase, cannot begin with a number and must only have letters and digits and/or underscores.',
                 'PASSWORD_VALIDATION_ERROR': 'Password must contain at least 6 characters, with atleast one lowercase and one uppercase character and atleast one digit or symbol.',
                 'NAME_VALIDATION_ERROR': 'This field must only have letters.'
             }
@@ -354,7 +354,6 @@ STRINGS = {
         'REPLY': 'Reply'
     }
 }
-
 
 STAR_USERS = ['khanacademy', 'ck12', 'joshua', 'ddmeyer']
 

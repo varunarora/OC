@@ -39,12 +39,14 @@ def register(request):
     fields_context = {}
 
     if request.method == "POST":
+        is_asynchronous = request.POST.get('view', None) == 'asynchronous'
+
         # Capture only thse inputs from the original form that need to be
         #     returned in the case of an error with form validation.
         form_fields_to_return = [
             'first_name', 'last_name', 'email', 'dob_month', 'dob_date',
             'dob_year', 'profile_pic', 'social_login', 'location',
-            'profession', 'username', 'gender', 'social_id'
+            'profession', 'username', 'gender', 'social_id', 'social_service'
         ]
         # TODO(Varun): Turn this into a non-short statement.
         original_form_inputs = _get_original_form_values(
@@ -64,15 +66,24 @@ def register(request):
 
             social_login = request.POST.get('social_login').lower() == "true"
             if social_login:
-                authenticated_user = authenticate(social_id=int(request.POST.get('social_id')))
+                authenticated_user = authenticate(social_id=int(
+                    request.POST.get('social_id')), social_service=request.POST.get('social_service'))
                 login(request, authenticated_user)
             else:
                 authenticated_user = authenticate(
                     username=new_user.username, password=request.POST.get('password'))
                 login(request, authenticated_user)
 
-            return redirect(
-                'user:user_files', username=fields_context['new_user'].username)
+            if is_asynchronous:
+                context = {
+                    'id': new_user.id,
+                    'name': new_user.get_full_name(),
+                    'username': new_user.username
+                }
+                return APIUtilities._api_success(context)
+            else:
+                return redirect(
+                    'user:user_files', username=fields_context['new_user'].username)
 
         fields_context['form'] = original_form_inputs
 
@@ -83,6 +94,25 @@ def register(request):
         AuthHelper.generateGPlusContext(request).items() + page_context.items()
         + fields_context.items() + form_context.items())
     return render(request, registration_template, context)
+
+
+def get_registration_context(request):
+    form_context = _prepare_registration_form_context()
+
+    from AuthHelper import AuthHelper
+    context = dict(
+        AuthHelper.generateGPlusContext(request).items() + form_context.items())
+
+    return APIUtilities._api_success(context)
+
+
+def register_asynchronously(request):
+    request_post_copy = request.POST.copy()
+    request_post_copy.__setitem__('view', 'asynchronous')
+
+    request.POST = request_post_copy
+
+    return register(request)
 
 
 def _prepare_registration_form_context():
@@ -161,8 +191,9 @@ def _create_user(request):
             # Check if the captcha entries were valid.
             recaptcha_success = _check_recaptcha(request, profile_form)
 
-    # If social login, get social ID
+    # If social login, get social ID, service.
     social_id = request.POST.get('social_id') if social_login else None
+    social_service = request.POST.get('social_service') if social_login else None
 
     # Only if passwords match, reCaptcha is successful and DoB is created,
     #     move forward with creating a user and connected Profile model.
@@ -184,7 +215,7 @@ def _create_user(request):
                     profile_form = NewUserForm.NewUserProfileForm(
                         request.POST, social_login,
                         new_user, profile_form.dob,
-                        social_id
+                        social_id, social_service
                     )
 
                     if profile_form.is_valid():
@@ -221,17 +252,27 @@ def _create_user(request):
 
                         except Exception:
                             # TODO(Varun): Delete user and announce failure.
-                            new_user.delete()
+                            try:
+                                new_user.delete()
+                                profile.delete()
+                            except:
+                                pass
 
                             print profile_form.errors
                             # TODO(Varun): Create a django error notication.
                             print "Profile object failed to be created"
                     else:
                         print profile_form.errors
-                        new_user.delete()
-            except Exception:
+                        try:
+                            new_user.delete()
+                            profile.delete()
+                        except:
+                            pass
+
+            except Exception, e:
                 try:
                     new_user.delete()
+                    profile.delete()
                 except:
                     pass
 
@@ -245,7 +286,8 @@ def _create_user(request):
     return ({
         'user_form': user_form, 'profile_form': profile_form,
         'social_login': social_login,
-        'social_id': social_id
+        'social_id': social_id,
+        'social_service': social_service
     }, False)
 
 
@@ -761,7 +803,8 @@ def glogin(request):
     try:
         # Look for Google ID in the user profiles.
         from django.contrib.auth import authenticate, login
-        auth_user = authenticate(social_id=int(google_id))
+        auth_user = authenticate(
+            social_id=int(google_id), social_service='plus')
         login(request, auth_user)
 
         response = {"status": "true"}
@@ -775,6 +818,21 @@ def glogin(request):
             response), 401, content_type="application/json"
         )
 
+
+def fb_login(request):
+    facebook_id = request.POST.get('facebook_id')
+
+    try:
+        # Look for Google ID in the user profiles.
+        from django.contrib.auth import authenticate, login
+        auth_user = authenticate(
+            social_id=int(facebook_id), social_service='facebook')
+        login(request, auth_user)
+
+        return APIUtilities._api_success()
+
+    except:
+        return APIUtilities._api_not_found()
 
 def user_profile(request, username):
     """Renders the user profile page
@@ -1545,3 +1603,30 @@ def prepopulate_feed(subscription):
         if activity.context_type.name == 'user profile' and activity.action.visibility == 'public':
             # Push into the feed of the subscriber.
             activity.recipients.add(subscription.subscriber.user)
+
+
+def username_availability(request, username):
+    try:
+        User.objects.get(username=username)
+        return APIUtilities._api_failure()
+
+    except User.DoesNotExist:
+        return APIUtilities._api_success()
+
+
+def social_availability(request, service, social_id):
+    try:
+
+        from django.contrib.auth import authenticate, login
+        authenticated_user = authenticate(social_id=social_id, social_service=service)
+        login(request, authenticated_user)
+
+        context = {
+            'id': authenticated_user.id,
+            'username': authenticated_user.username,
+            'name': authenticated_user.get_full_name()
+        }
+        return APIUtilities._api_failure(context)
+
+    except:
+        return APIUtilities._api_success()

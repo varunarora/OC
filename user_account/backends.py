@@ -3,10 +3,11 @@ from django.core.exceptions import MultipleObjectsReturned
 
 class SocialModelBackend(object):
 
-    def authenticate(self, social_id=None):
+    def authenticate(self, social_id=None, social_service=None):
         try:
             from user_account.models import UserProfile
-            user_profile = UserProfile.objects.get(social_id=social_id)
+            user_profile = UserProfile.objects.get(
+                social_id=social_id, social_service=social_service)
             return user_profile.user
         except MultipleObjectsReturned:
             return MultipleObjectsReturned
