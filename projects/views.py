@@ -817,13 +817,22 @@ def request_invite(request, project_id):
         return APIUtilities._api_failure(context)
 
     except Membership.DoesNotExist:
-        new_membership = Membership(
-            user=request.user, project=project, confirmed=False)
-        new_membership.save()
+        if project.visibility != 'public':
+            new_membership = Membership(
+                user=request.user, project=project, confirmed=False)
+            new_membership.save()
 
-        # Create a notification for the admins about this request.
-        Membership.new_invite_request.send(
-            sender="Projects", membership_id=new_membership.id, request=request)
+            # Create a notification for the admins about this request.
+            Membership.new_invite_request.send(
+                sender="Projects", membership_id=new_membership.id, request=request)
+        else:
+            new_membership = Membership(
+                user=request.user, project=project, confirmed=True)
+            new_membership.save()
+
+            # Create a notification for the admins about this membership.
+            Membership.new_member.send(
+                sender="Projects", membership_id=new_membership.id, request=request)
 
         return APIUtilities._api_success()
 

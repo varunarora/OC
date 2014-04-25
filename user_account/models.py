@@ -381,6 +381,29 @@ class Notification(models.Model):
             nu.notify_by_email(notification, request.get_host())
 
 
+    @receiver(Membership.new_member)
+    def new_membership_notification(sender, **kwargs):
+        membership_id = kwargs.get('membership_id', None)
+
+        membership = Membership.objects.get(pk=int(membership_id))
+        project = membership.project
+
+        for admin in project.admins.all():
+            notification = Notification()
+            notification.user = admin
+
+            notification.url = reverse(
+                'projects:project_requests', kwargs={
+                    'project_slug': project.slug,
+                }
+            )
+
+            notification.description = "%s has joined %s" % (
+                membership.user.get_full_name(), project.title)
+
+            notification.save()
+
+
     @receiver(Membership.invite_request_accepted)
     def accept_project_invite_notification(sender, **kwargs):
         membership_id = kwargs.get('membership_id', None)

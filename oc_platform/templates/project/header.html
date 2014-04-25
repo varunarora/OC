@@ -9,6 +9,16 @@
                     <div id="project-info">
                         <h2>{{ project.title }}</h2>
                         <p id="project-info-description">{{ project.short_description }}</p>
+                    {% if user not in project.confirmed_members %}
+                    <form id="project-invite-form">
+                        <input type="hidden" name="project_id" value="{{ project.id }}">
+                        {% if user not in project.members.all %}
+                        <button class="request-button join-button action-button mini-action-button">{% if project.visibility == 'public' %}Join group{% else %}Request to join{% endif %}</button>
+                        {% else %}
+                        <button class="request-button action-button mini-action-button disabled-action-button" disabled>Request sent</button>
+                        {% endif %}
+                    </form>
+                    {% endif %}
                     </div>
                 </hgroup>
                 {% if user in project.admins.all %}

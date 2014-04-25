@@ -39,6 +39,7 @@ class Membership(models.Model):
 
     new_invite_request = Signal(providing_args=["membership_id", "request"])
     invite_request_accepted = Signal(providing_args=["membership_id", "request"])
+    new_member = Signal(providing_args=["membership_id", "request"])
 
     new_member_added = Signal(providing_args=["membership_id"])
     member_turned_admin = Signal(providing_args=["project", "user", "request"])

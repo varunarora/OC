@@ -244,20 +244,41 @@ OC.projects = {
     },
 
     bindInviteRequestButton: function(){
-        $('.request-to-join .request-button').click(function(event){
-            project_id = $(event.target).parents('form').find(
-                'input[name=project_id]').val();
+        $('.disabled-action-button').click(function(event){
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+
+        function makeRequest(){
+            var requestButton = $('#project-invite-form button.request-button');
+            requestButton.addClass('loading');
+
+            var project_id = $('#project-invite-form input[name=project_id]').val();
 
             $.get('/group/' + project_id + '/request-invite/',
                 function(response){
+                    requestButton.removeClass('loading');
                     if (response.status == 'true'){
-                        OC.projects.inviteRequestSuccessHandler(event.target);
+                        if (requestButton.hasClass('join-button')){
+                            requestButton.fadeOut();
+
+                            // Reload the page.
+                            window.location.reload();
+                        }
+                        else OC.projects.inviteRequestSuccessHandler(
+                            requestButton);
                     }
                     else {
                         OC.popup(response.message, response.title);
                     }
                 },
             'json');
+        }
+
+        $('#project-info .request-button:not(.disabled-action-button)').click(function(event){
+            if (OC.config.user.id) makeRequest();
+            else OC.launchSignupDialog(makeRequest);
 
             event.stopPropagation();
             event.preventDefault();
@@ -265,21 +286,21 @@ OC.projects = {
         });
     },
 
-    inviteRequestSuccessHandler: function(target){
+    inviteRequestSuccessHandler: function(targetElement){
         // Change the text in the button box.
-        $(target).text('Request sent');
-        
+        targetElement.text('Request sent');
+
         // Disable the button.
-        $(target).disabled = true;
+        targetElement.disabled = true;
 
         // Fade the button out.
-        $(target).addClass('disabled-action-button');
+        targetElement.addClass('disabled-action-button');
 
         // Unbind the click handler previously attached to this.
-        $(target).unbind();
+        targetElement.unbind();
 
         // Bind a return none handler with this.
-        $(target).click(function(event){
+        targetElement.click(function(event){
             event.stopPropagation();
             event.preventDefault();
             return false;
