@@ -20,19 +20,41 @@ def project_home(request, project_slug):
         #     if the requestee of the page is a member of the project. If not,
         #     have a flag that blocks the page contents from being listed, or has
         #     an alternative view.
-
-        if request.user not in project.confirmed_members:
-            return redirect('projects:project_about', project_slug=project.slug)
+        if project.visibility == 'private':
+            if request.user not in project.confirmed_members:
+                return redirect('projects:project_about', project_slug=project.slug)
 
         # Get activity feed related to this project.
         from django.contrib.contenttypes.models import ContentType
         project_ct = ContentType.objects.get_for_model(Project)
 
-        feed = Activity.objects.filter(
-            context_type=project_ct, context_id=project.id).order_by('-pk')[:10]
+        posts = Comment.objects.filter(
+            parent_id=project.id, parent_type=project_ct).order_by('-created')
+
+        # For each of the comments, get its child comments recursively
+        comments_ct = ContentType.objects.get_for_model(Comment)
+
+        build_posts_social(posts, request.user)
+
+        categories = GroupCategory.objects.filter(parent=project)
+
+        import oer.CollectionUtilities as cu
+        # Setup attachments on posts.
+        for post in posts:
+            if post.attachment:
+                if post.attachment_type.name == 'collection':
+                    (root_host_type, root_host) = cu.get_collection_root(
+                        post.attachment)
+                    post.attachment.host_type = root_host_type
+                    post.attachment.host = root_host
+
         context = {
             'title': project.title + ' &lsaquo; OpenCurriculum',
-            'project': project, 'feed': feed
+            'project': project,
+            'posts': posts,
+            'categories': categories,
+            'host_content_type': comments_ct,
+            'comments_content_type': comments_ct,            
         }
         return render(request, 'project/project.html', context)
     except:
@@ -484,7 +506,10 @@ def post_discussion(request, project_slug):
 
 
 def list_collection(request, project_slug, collection_slug):
-    project = Project.objects.get(slug=project_slug)
+    try:
+        project = Project.objects.get(slug=project_slug)
+    except:
+        raise Http404
 
     (browse_tree, flattened_tree) = _get_browse_tree(project.collection)
 
@@ -709,7 +734,7 @@ def remove_member(request, project_id, user_id):
         context = {
             'title': 'You are not logged in',
             'message': 'You need to be logged in to remove a member from the' +
-                       'project.'
+                       'group.'
         }
         return APIUtilities._api_failure(context)
 
@@ -718,7 +743,7 @@ def remove_member(request, project_id, user_id):
     if request.user not in project.admins.all():
         context = {
             'title': 'You are not the administrator',
-            'message': 'You must be an administrator of the project to remove a'
+            'message': 'You must be an administrator of the group to remove a'
             + 'member'
         }
         return APIUtilities._api_failure(context)
@@ -751,7 +776,7 @@ def add_admin(request, project_id, user_id):
         context = {
             'title': 'You are not logged in',
             'message': 'You need to be logged in to add an administrator to ' +
-                       'the project.'
+                       'the group.'
         }
         return APIUtilities._api_failure(context)
 
@@ -760,7 +785,7 @@ def add_admin(request, project_id, user_id):
     if request.user not in project.admins.all():
         context = {
             'title': 'You are not the administrator',
-            'message': 'You must be an administrator of the project to add an'
+            'message': 'You must be an administrator of the group to add an'
             + 'administrator'
         }
         return APIUtilities._api_failure(context)
@@ -802,7 +827,7 @@ def add_admin(request, project_id, user_id):
     except:
         context = {
             'title': 'Cannot add new administrator',
-            'message': 'We failed to add this administrator to this project. '
+            'message': 'We failed to add this administrator to this group. '
             + 'We apologize for the inconvenience. Visit our Help center to '
             + 'look for a solution.'
         }
@@ -814,7 +839,7 @@ def remove_admin(request, project_id, user_id):
         context = {
             'title': 'You are not logged in',
             'message': 'You need to be logged in to remove an administrator ' +
-                       'from the project.'
+                       'from the group.'
         }
         return APIUtilities._api_failure(context)
 
@@ -823,7 +848,7 @@ def remove_admin(request, project_id, user_id):
     if request.user not in project.admins.all():
         context = {
             'title': 'You are not the administrator',
-            'message': 'You must be an administrator of the project to remove '
+            'message': 'You must be an administrator of the group to remove '
             + 'another administrator'
         }
         return APIUtilities._api_failure(context)
@@ -910,7 +935,7 @@ def accept_request(request, request_id):
     except:
         context = {
             'title': 'Could not accept the request.',
-            'message': 'We failed to make a accept the invite request into the project '
+            'message': 'We failed to make a accept the invite request into the group '
             + 'due to an internal problem. Please contact us if this problem persists.'
         }
         return APIUtilities._api_failure(context)        
@@ -925,7 +950,7 @@ def decline_request(request, request_id):
     except:
         context = {
             'title': 'Could not accept the request.',
-            'message': 'We failed to make a decline the invite request into the project '
+            'message': 'We failed to make a decline the invite request into the group '
             + 'due to an internal problem. Please contact us if this problem persists.'
         }
         return APIUtilities._api_failure(context)
