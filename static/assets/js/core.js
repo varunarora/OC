@@ -1121,7 +1121,7 @@ var OC = {
                 }
             }
 
-            if (errorneousInputs.length === 0){
+            if (errorneousInputs.length === 0 && OC.signupDialog) {
                 var form = $('form#signup-form').serialize();
 
                 // Add spinner to submit button.
@@ -1145,6 +1145,9 @@ var OC = {
 
                         OC.pushMessageBoxForward();
                     }, 'json');
+            } else {
+                if (errorneousInputs.length === 0)
+                    submitButton.parents('form#signup-form').submit();
             }
 
             event.stopPropagation();
