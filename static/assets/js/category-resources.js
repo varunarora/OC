@@ -46,7 +46,7 @@ var ResourceSet = Backbone.Collection.extend({
         this.sort();
     },
     newestComparator: function(resource){
-        return resource.get('created');
+        return -resource.get('created');
     },
     popularityComparator: function(resource){
         return -resource.get('favorites');
