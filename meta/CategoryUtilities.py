@@ -71,7 +71,8 @@ def _has_immediate_children(category):
         A single item dictionary with the parent as the key and child
         categories serialized as list as the value
     """
-    child_categories = list(Category.objects.filter(parent=category))
+    child_categories = list(Category.objects.filter(
+        parent=category).order_by('-position'))
     if len(child_categories) > 0:
         return {category: child_categories}
     else:
