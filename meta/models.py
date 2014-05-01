@@ -10,6 +10,7 @@ class Category(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     slug = models.SlugField(max_length=256, blank=True)
     position = models.IntegerField(default=0, null=True, blank=True)
+    tags = models.ManyToManyField('meta.Tag', null=True, blank=True, related_name='tags')
 
     def __unicode__(self):
         return self.title
