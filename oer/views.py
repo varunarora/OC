@@ -63,40 +63,42 @@ def browse(request, category_slug):
 
 
     all_resources = []
+    all_raw_resources = []
     all_collections = []
+    all_raw_collections = []
     for category in current_flattened_tree:
         category_resources = Resource.objects.filter(category=category)
         tagged_resources = Resource.objects.filter(tags__in=category.tags.all())
-        all_resources += list(category_resources | tagged_resources)
+        all_raw_resources += list(category_resources | tagged_resources)
 
         collections = Collection.objects.filter(category=category)
-        all_collections += list(collections)
+        all_raw_collections += list(collections)
 
     # Setup each resource's favorites count and type.
     from interactions.models import Favorite
-    from meta.models import TagCategory
+    from meta.models import TagCategory, Tag
     from django.contrib.contenttypes.models import ContentType
     resource_ct = ContentType.objects.get_for_model(Resource)
     collection_ct = ContentType.objects.get_for_model(Collection)
 
-    from django.core.exceptions import ObjectDoesNotExist
-
-    for resource in all_resources:
+    for resource in all_raw_resources:
         try:
             resource.favorites_count = Favorite.objects.filter(
                 parent_id=resource.id, parent_type=resource_ct).count()
             resource.type = resource.tags.get(
                 category=TagCategory.objects.get(title='Resource type'))
             resource.item_type = 'resource'
-        except ObjectDoesNotExist:
-            all_resources.remove(resource)
+            all_resources.append(resource)
+        except Tag.DoesNotExist:
+            pass
 
-    for collection in all_collections:
+    for collection in all_raw_collections:
         collection.favorites_count = Favorite.objects.filter(
             parent_id=collection.id, parent_type=collection_ct).count()
-        resource.type = resource.tags.get(
+        collection.type = resource.tags.get(
             category=TagCategory.objects.get(title='Resource type'))
-        resource.item_type = 'collection'
+        collection.item_type = 'collection'
+        all_collections.append(collection)
 
     requests = []
     try:
