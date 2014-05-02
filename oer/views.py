@@ -68,8 +68,15 @@ def browse(request, category_slug):
     all_raw_collections = []
     for category in current_flattened_tree:
         category_resources = Resource.objects.filter(category=category)
-        tagged_resources = Resource.objects.filter(tags__in=category.tags.all())
-        all_raw_resources += list(category_resources | tagged_resources)
+        category_resources_count = category_resources.count()
+
+        if category_resources_count < 40:
+            tagged_resources = Resource.objects.filter(tags__in=category.tags.all(
+                ))[:40 - category_resources_count]
+
+            all_raw_resources += list(category_resources | tagged_resources)
+        else:
+            all_raw_resources += list(category_resources)
 
         collections = Collection.objects.filter(category=category)
         all_raw_collections += list(collections)
