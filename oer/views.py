@@ -67,19 +67,26 @@ def browse(request, category_slug):
     all_collections = []
     all_raw_collections = []
     for category in current_flattened_tree:
-        category_resources = Resource.objects.filter(category=category)[:40]
-        category_resources_count = category_resources.count()
+        current_item_count = len(all_raw_resources) + len(all_raw_collections)
+        
+        if current_item_count < 40:
+            category_resources = Resource.objects.filter(category=category)[:40 - current_item_count]
+            category_resources_count = category_resources.count()
+            current_item_count += category_resources_count
 
-        if category_resources_count < 40:
-            tagged_resources = Resource.objects.filter(tags__in=category.tags.all(
-                ))[:40 - category_resources_count]
+            if current_item_count < 40:
+                tagged_resources = Resource.objects.filter(tags__in=category.tags.all(
+                    ))[:40 - current_item_count]
 
-            all_raw_resources += list(category_resources) + list(tagged_resources)
+                all_raw_resources += list(category_resources) + list(tagged_resources)
+            else:
+                all_raw_resources += list(category_resources)
+
+            collections = Collection.objects.filter(category=category)
+            all_raw_collections += list(collections)
         else:
-            all_raw_resources += list(category_resources)
+            break
 
-        collections = Collection.objects.filter(category=category)
-        all_raw_collections += list(collections)
 
     # Setup each resource's favorites count and type.
     from interactions.models import Favorite
