@@ -65,8 +65,9 @@ def browse(request, category_slug):
     all_resources = []
     all_collections = []
     for category in current_flattened_tree:
-        resources = Resource.objects.filter(category=category)
-        all_resources += list(resources)
+        category_resources = Resource.objects.filter(category=category)
+        tagged_resources = Resource.objects.filter(tags__in=category.tags.all())
+        all_resources += list(category_resources | tagged_resources)
 
         collections = Collection.objects.filter(category=category)
         all_collections += list(collections)
@@ -2834,3 +2835,85 @@ def post_url(request):
     except Exception, e:
         print e
         return APIUtilities._api_failure()
+
+
+def load_resources(request, collection_id, resource_count):
+    try:
+        collection = Collection.objects.get(pk=collection_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    resource_list = collection.resources.all()[(int(resource_count) + 1):(
+        int(resource_count) + 20)]
+
+    serialized_resources = {}
+    import datetime
+
+    import oer.CollectionUtilities as cu
+    cu.set_resources_type(resource_list)
+    cu.preprocess_collection_listings(resource_list)
+
+    (collection_root_host_type, collection_root) = cu.get_collection_root(
+        collection)
+
+    for resource in resource_list:
+
+        # Run through general visibility filter
+        if resource.visibility != 'public':
+            if request.user != collection_root and request.user not in resource.collaborators.all():
+                continue
+
+        visibility_classes = ''
+        if request.user == collection_root:
+            visibility_classes += ' profile-collection is-owner'
+        elif request.user == resource.user:
+            visibility_classes += ' is-owner'
+        elif resource.visibility == 'private' and request.user in resource.collaborators.all():
+            visibility_classes += ' is-collaborator'
+
+        if request.user != resource.user:
+            visibility_classes += 'unclickable'
+        elif resource.visibility == 'private' and request.user not in resource.collaborators.all(
+            ) and request.user != resource.user:
+            visibility_classes += 'unclickable'
+
+        # TODO(Varun): Merge this into the upper logic block.
+        if resource.visibility == 'public':
+            visibility_title = 'Public'
+            visibility_classes += ' publicly-shared-icon'
+        elif resource.user != request.user and resource.visibility == 'private':
+                visibility_title = 'Shared with me'
+                visibility_classes += ' Shared-with-me-icon'
+        else:
+            if resource.visibility == 'private':
+                if len(resource.collaborators.all()) == 0:
+                    visibility_title = 'Only me'
+                    visibility_classes += ' personal-shared-icon'
+                else:
+                    visibility_title = 'Shared'
+                    visibility_classes += ' private-shared-icon'
+
+        serialized_resources[resource.id] = {
+            'id': resource.id,
+            'title': resource.title,
+            'category': 'resource',
+            'thumbnail': settings.MEDIA_URL + resource.image.name,
+            'type': resource.type,
+            'visibility': resource.visibility,
+            'modified':  datetime.datetime.strftime(resource.created, '%b. %d, %Y, %I:%M %P'),
+            'url': resource.open_url if hasattr(resource, 'open_url') else reverse(
+                'read', kwargs={
+                    'resource_id': resource.id,
+                    'resource_slug': resource.slug
+                }
+            ),
+            'host': 'profile',
+            'open_url': resource.open_url if hasattr(resource, 'open_url') else None,
+            'visibility_classes': visibility_classes,
+            'visibility_title': visibility_title
+        }
+
+    context = {
+        'resources': serialized_resources
+    }
+    return APIUtilities._api_success(context)
