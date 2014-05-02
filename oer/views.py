@@ -74,7 +74,7 @@ def browse(request, category_slug):
             tagged_resources = Resource.objects.filter(tags__in=category.tags.all(
                 ))[:40 - category_resources_count]
 
-            all_raw_resources += list(category_resources | tagged_resources)
+            all_raw_resources += list(category_resources) + list(tagged_resources)
         else:
             all_raw_resources += list(category_resources)
 
