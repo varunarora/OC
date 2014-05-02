@@ -79,12 +79,17 @@ def browse(request, category_slug):
     resource_ct = ContentType.objects.get_for_model(Resource)
     collection_ct = ContentType.objects.get_for_model(Collection)
 
+    from django.core.exceptions import ObjectDoesNotExist
+
     for resource in all_resources:
-        resource.favorites_count = Favorite.objects.filter(
-            parent_id=resource.id, parent_type=resource_ct).count()
-        resource.type = resource.tags.get(
-            category=TagCategory.objects.get(title='Resource type'))
-        resource.item_type = 'resource'
+        try:
+            resource.favorites_count = Favorite.objects.filter(
+                parent_id=resource.id, parent_type=resource_ct).count()
+            resource.type = resource.tags.get(
+                category=TagCategory.objects.get(title='Resource type'))
+            resource.item_type = 'resource'
+        except ObjectDoesNotExist:
+            all_resources.remove(resource)
 
     for collection in all_collections:
         collection.favorites_count = Favorite.objects.filter(
