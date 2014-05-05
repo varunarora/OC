@@ -52,7 +52,6 @@
                         <div class="resource-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ comment.user.get_profile.profile_pic.name }}')">
                         </div>
                         <div class="description">
-                            {# comment.user.get_profile.profile_pic #}
                             <span class="bold">{{ comment.user.get_full_name }}</span> on {{ comment.created }}
                             {{ comment.body_markdown_html|safe }}
                         </div>
