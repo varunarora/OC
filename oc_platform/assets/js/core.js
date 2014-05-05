@@ -3635,30 +3635,6 @@ var OC = {
     },
 
     initBrowse: function(){
-        // Set the height of the page.
-        $('.resource-browse').height(
-            $(window).height() - $('header').height()
-        );
-
-        // Set the width of the left panel.
-        var leftPanelWidth = ($(window).width() - 960)/2 + 367;
-        $('.category-panel').width(leftPanelWidth);
-
-        var scrollbarWidth = getScrollbarWidth();
-        $('.content-panel').width($(window).width() - leftPanelWidth - scrollbarWidth);
-
-
-        // Setup menu positioning (and adjust for scrollbar width) for content type filter.
-        OC.setUpMenuPositioning('.sort-by-type-menu', '.sort-by-type');
-
-        // Dirty, hackish way, but only solution known right now.
-        if (navigator.userAgent.toLowerCase().indexOf('firefox') != -1){
-            $('.sort-by-type-menu').css({
-                'left': parseInt($('.sort-by-type-menu').css(
-                    'left'), 10) - scrollbarWidth
-            });
-        }
-
         $('.sort-by-type').click(function(event){
             $('.sort-by-type-menu').toggleClass('show');
         });

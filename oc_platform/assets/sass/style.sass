@@ -3571,24 +3571,38 @@ blockquote
 		.resource-item-description
 			width: 270px
 
-.publicly-shared-icon, .private-shared-icon, .group-shared-icon,
-.personal-shared-icon, .shared-with-me-icon
-	background-repeat: no-repeat
-	background-position: center center
-	width: 16px
-	height: 16px
-	margin-right: 6px
-	display: inline-block
-	float: left
+.action-button
+	.publicly-shared-icon, .private-shared-icon, .group-shared-icon,
+	.personal-shared-icon, .shared-with-me-icon
+		background-repeat: no-repeat
+		background-position: center center
+		width: 16px
+		height: 16px
+		margin-right: 6px
+		display: inline-block
+		float: left
 
-.publicly-shared-icon
-	background-image: url('../images/public-visibility-hover.png')
+	&.publicly-shared-icon, &.private-shared-icon, &.group-shared-icon,
+	&.personal-shared-icon, &.shared-with-me-icon
+		.visibility-icon
+			background-repeat: no-repeat
+			background-position: center center
+			width: 16px
+			height: 16px
+			margin-right: 6px
+			display: inline-block
+			float: left
 
-.private-shared-icon, .personal-shared-icon
-	background-image: url('../images/private-visibility-hover.png')
+	.publicly-shared-icon, &.publicly-shared-icon .visibility-icon
+		background-image: url('../images/public-visibility-hover.png')
 
-.group-shared-icon, .shared-with-me-icon
-	background-image: url('../images/project-visibility-hover.png')
+	.private-shared-icon, .personal-shared-icon,
+	&.private-shared-icon .visibility-icon, &.personal-shared-icon .visibility-icon
+		background-image: url('../images/private-visibility-hover.png')
+
+	.group-shared-icon, .shared-with-me-icon,
+	&.group-shared-icon .visibility-icon, &.shared-with-me-icon .visibility-icon
+		background-image: url('../images/project-visibility-hover.png')
 
 
 .resources-collections-added
@@ -3865,40 +3879,44 @@ table#edit-unit-form-table
 				color: #bababa
 				margin-bottom: 20px
 
-			> ul
-				> li
-					> a
-						@include h3-styling
-						display: block
-						padding: 6px
-						padding-left: 12px
-						color: #efefef
-						@include border-radius(4px 0px 0px 4px)
-						outline: none
+			.category-panel-listing-categories
+				.scroll-pane
+					margin-right: 10px
 
-						&:hover
-							color: #fff
-
-					&.selected-category
+				> ul
+					> li
 						> a
-							background-color: #efefef
-							color: $body-color
-
-							&:hover
-								text-decoration: none
-								color: $body-color
-
-					ul
-						margin-left: 30px
-						margin-bottom: 30px
-
-						a
-							color: #bababa
-							line-height: 1.2em
+							@include h3-styling
+							display: block
+							padding: 6px
+							padding-left: 12px
+							color: #efefef
+							@include border-radius(4px 0px 0px 4px)
 							outline: none
 
 							&:hover
 								color: #fff
+
+						&.selected-category
+							> a
+								background-color: #efefef
+								color: $body-color
+
+								&:hover
+									text-decoration: none
+									color: $body-color
+
+						ul
+							margin-left: 30px
+							margin-bottom: 30px
+
+							a
+								color: #bababa
+								line-height: 1.2em
+								outline: none
+
+								&:hover
+									color: #fff
 
 			ul.category-panel-listing-search-category
 				li.selected-category
@@ -3996,98 +4014,110 @@ table#edit-unit-form-table
 								.sort-by-type-menu-format
 									float: right
 
-					.content-panel-body-listing-item
-						float: left
-						width: 165px
-						height: 160px
-						margin-right: 12px
-						background-size: cover
+					.content-panel-body-listing-items
+						overflow: hidden
 
-						.content-panel-body-listing-item-favorites
-							position: relative
-							top: 75px
-							width: 36px
-							height: 16px
-							margin-bottom: -16px
-							left: 118px
-							color: #666
-							background: url('../images/heart.png') no-repeat
-							background-position: 18px center
-							cursor: pointer
-							color: #fff
-							@include text-shadow(0 0px 1px rgba(0, 0, 0, 1))
-							@include sans-bold
-							z-index: 1
-
-							&.favorited
-								background-image: url('../images/hearted.png')
-
-						.content-panel-body-listing-item-label
-							position: relative
-							top: 10px
-							width: 60px
-							height: 12px
-							margin-bottom: -12px
-							background-color: orange
-							left: 95px
-							font-size: 0.8em
-							padding-left: 10px
-							padding-top: 2px
-							color: #fff
-
-						.content-panel-body-listing-item-label-fold
-							position: relative
-							top: 4px
-							width: 5px
-							height: 3px
-							margin-bottom: -6px
-							left: 160px
-							background-image: url('../images/label-fold.png')
-
-						.content-panel-body-listing-item-thumbnail
-							width: 160px
-							height: 100px
-							background-color: #efefef
-
-						.content-panel-body-listing-item-thumbnail-shadow
-							height: 40px
-							width: 160px
-							top: -40px
-							margin-bottom: -40px
-							position: relative
-							/* TODO: Custom IE styling in ie.sass */
-							@include background-image(linear-gradient(transparent, rgba(0,0,0, 0.2)))
-							//repeat scroll 0 0 rgba(0, 0, 0, 0)
-							z-index: 0
-						
-						.content-panel-body-listing-item-user-picture
-							position: relative
-							top: -45px
-							width: 40px
-							height: 40px
-							@include border-radius(20px)
-							background-image: url('../images/varun-arora.jpg')
+						.content-panel-body-listing-item
+							float: left
+							width: 165px
+							height: 190px
+							margin-right: 12px
 							background-size: cover
-							margin-bottom: -40px
-							left: 5px
-							background-color: #666
-							cursor: pointer
-							display: block
 
-
-						.content-panel-body-listing-item-contents
-							padding: 6px
-							
-							.content-panel-body-listing-item-contents-caption
-								display: block
-								color: $body-color
+							.content-panel-body-listing-item-favorites
+								position: relative
+								top: 75px
+								width: 36px
+								height: 16px
+								margin-bottom: -16px
+								left: 118px
+								color: #666
+								background: url('../images/heart.png') no-repeat
+								background-position: 18px center
+								cursor: pointer
+								color: #fff
+								@include text-shadow(0 0px 1px rgba(0, 0, 0, 1))
 								@include sans-bold
+								z-index: 1
 
-							.content-panel-body-listing-item-contents-meta
-								margin-top: 4px
-								color: $light-font
-								font-size: 0.85em
-	
+								&.favorited
+									background-image: url('../images/hearted.png')
+
+							.content-panel-body-listing-item-label
+								position: relative
+								top: 10px
+								width: 60px
+								height: 12px
+								margin-bottom: -12px
+								background-color: orange
+								left: 95px
+								font-size: 0.8em
+								padding-left: 10px
+								padding-top: 2px
+								color: #fff
+
+							.content-panel-body-listing-item-label-fold
+								position: relative
+								top: 4px
+								width: 5px
+								height: 3px
+								margin-bottom: -6px
+								left: 160px
+								background-image: url('../images/label-fold.png')
+
+							.content-panel-body-listing-item-thumbnail
+								width: 160px
+								height: 100px
+								background-color: #efefef
+
+							.content-panel-body-listing-item-thumbnail-shadow
+								height: 40px
+								width: 160px
+								top: -40px
+								margin-bottom: -40px
+								position: relative
+								/* TODO: Custom IE styling in ie.sass */
+								@include background-image(linear-gradient(transparent, rgba(0,0,0, 0.2)))
+								//repeat scroll 0 0 rgba(0, 0, 0, 0)
+								z-index: 0
+							
+							.content-panel-body-listing-item-user-picture
+								position: relative
+								top: -45px
+								width: 40px
+								height: 40px
+								@include border-radius(20px)
+								background-image: url('../images/varun-arora.jpg')
+								background-size: cover
+								margin-bottom: -40px
+								left: 5px
+								background-color: #666
+								cursor: pointer
+								display: block
+
+
+							.content-panel-body-listing-item-contents
+								padding: 6px
+								
+								.content-panel-body-listing-item-contents-caption
+									display: block
+									color: $body-color
+									@include sans-bold
+
+								.content-panel-body-listing-item-contents-meta
+									margin-top: 4px
+									color: $light-font
+									font-size: 0.85em
+
+								.content-panel-body-listing-item-contents-labels
+									margin-top: 4px
+
+									.content-panel-body-listing-item-contents-label
+										background-color: #999
+										color: #fff
+										margin-right: 4px
+
+		
 					.content-panel-body-listing-requests
 						padding-top: 20px
 						margin-top: 20px
@@ -4339,6 +4369,38 @@ table#edit-unit-form-table
 	form
 		input[type="text"]
 			width: 200px
+
+.lazy-load-button
+	text-align: center
+	padding: 20px 0px
+	background-color: #E4F7D2
+
+	&.loading
+		background-image: url('../images/spinner.gif')
+		background-repeat: no-repeat
+		background-position: 210px center
+
+	&.hide
+		display: none
+
+.filter-search-placeholder
+	text-align: center
+	background-image: url('../images/spinner.gif')
+	display: none
+	background-repeat: no-repeat
+	background-position: center 60px
+	color: $light-font
+	height: 100px
+	padding-top: 100px
+
+	&.show
+		display: block
+
+.no-results-message
+	&.hide
+		display: none
+
+@import "scroll"
 
 .worksheet-creator-frame
 	overflow: hidden

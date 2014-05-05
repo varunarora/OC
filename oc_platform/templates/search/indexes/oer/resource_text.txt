@@ -2,6 +2,7 @@
 {{ object.description }}
 {{ object.revision.content.body }}
 {{ object.visibility }}
+{{ object.category }}
 {% for tag in object.tags.all %}
     {{ tag }}
 {% endfor %}

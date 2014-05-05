@@ -16,6 +16,7 @@ class ResourceIndex(SearchIndex):
     text = CharField(document=True, use_template=True, model_attr='title')
     date = DateTimeField(model_attr='created')
     visibility = CharField(model_attr='visibility')
+    category = CharField(model_attr='category', null=True)
     tags = MultiValueField(null=True)
     content_auto = EdgeNgramField(model_attr='title')
 
@@ -25,6 +26,9 @@ class ResourceIndex(SearchIndex):
         
     def prepare_tags(self, obj):
         return [tag.title for tag in obj.tags.all()]
+
+    def prepare_category(self, obj):
+        return obj.category.title if hasattr(obj.category, 'title') else None
 
 site.register(Article, ArticleIndex)
 site.register(Resource, ResourceIndex)

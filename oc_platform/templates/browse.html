@@ -1,7 +1,11 @@
 {% include 'partials/header.html' with body_class='browse' %}
 
+<script src="{{ STATIC_URL }}js/jquery.nanoscroller.min.js" type="text/javascript"></script>
 <script src="{{ STATIC_URL }}js/backbone-min.js" type="text/javascript"></script>
 <script src="{{ STATIC_URL }}js/category-resources.js" type="text/javascript"></script>
+<script type="text/javascript">
+    OC.categoryResources.currentCategoryID = '{{ current_category_id.id }}'
+</script>
 
 <div class="center-spread resource-browse">
     <div class="category-panel">
@@ -19,15 +23,15 @@
                 <div class="category-parent">{{ selected_category.parent.title }}</div>
             {% endif %}
             {% endif %}
-
-            {% load browse_tags %}
-            {{ browse_tree|category_resource_navigation:selected_category|safe }}
-
+            <div class="category-panel-listing-categories scrollable-block">
+                {% load browse_tags %}
+                {{ browse_tree|category_resource_navigation:selected_category|safe }}
+            </div>
         </div>
     </div>
     <div class="content-panel">
         <div class="content-panel-body-wrapper">
-            <div class="content-panel-body">
+            <div class="content-panel-body" id="category-{{ selected_category.id }}">
                 {% if query %}
                 <div class="content-panel-body-search">
                 {% include 'partials/search.html' %}
@@ -89,7 +93,8 @@
                             type: '{{ item.type|upper }}',
                             thumbnail: '{{ MEDIA_URL }}{{ item.image.name }}',
                             favorited: false,
-                            created: '{{ item.created|date:"U" }}'
+                            created: '{{ item.created|date:"U" }}',
+                            tags: ["{{ item.tags.all|join:'","' }}"]
                         });
                         resourceSet.add(resource);
                         {% else %}
@@ -105,7 +110,8 @@
                             type: '{{ item.type|upper }}',
                             thumbnail: '{{ STATIC_URL }}images/folder-icon.png',
                             favorited: false,
-                            created: '{{ item.created|date:"U" }}'
+                            created: '{{ item.created|date:"U" }}',
+                            tags: []
                         });
                         resourceSet.add(collection);                        
                         {% endif %}
@@ -114,6 +120,11 @@
                     {% endfor %}
                     </script>
                     </div>
+
+                    <div class="filter-search-placeholder">Searching for your happiness...</div>
+                    {% if current_category_id %}
+                        <div class="lazy-load-button enabled">Load more...</div>
+                    {% endif %}
 
                     {% if requests %}
                     <div class="content-panel-body-listing-requests">

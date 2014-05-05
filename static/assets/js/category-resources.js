@@ -1,3 +1,96 @@
+OC.categoryResources = {
+    currentCategoryID: null,
+    lastInputTimestamp: null,
+    searchFilterTimeout: null,
+    filterAsyncSearchOn: true,
+
+    initBrowseView: function(){
+        // Set the height of the page.
+        $('.resource-browse').height(
+            $(window).height() - $('header').height()
+        );
+
+        // Set the width of the left panel.
+        var leftPanelWidth = ($(window).width() - 960)/2 + 367;
+        $('.category-panel').width(leftPanelWidth);
+
+        var scrollbarWidth = getScrollbarWidth();
+        $('.content-panel').width($(window).width() - leftPanelWidth - scrollbarWidth);
+
+        // Setup menu positioning (and adjust for scrollbar width) for content type filter.
+        OC.setUpMenuPositioning('.sort-by-type-menu', '.sort-by-type');
+
+        // Dirty, hackish way, but only solution known right now.
+        if (navigator.userAgent.toLowerCase().indexOf('firefox') != -1){
+            $('.sort-by-type-menu').css({
+                'left': parseInt($('.sort-by-type-menu').css(
+                    'left'), 10) - scrollbarWidth
+            });
+        }
+
+        // Make the menu on the left nano'ed, conditional on the size of the content.
+        $('.category-panel-listing-categories > ul').addClass('scroll-content');
+
+        $('.category-panel-listing-categories').height(
+            $('.resource-browse').height() - 200
+        );
+        $('.category-panel-listing-categories').nanoScroller({
+            paneClass: 'scroll-pane',
+            sliderClass: 'scroll-slider',
+            contentClass: 'scroll-content',
+            flash: true
+        });
+
+        // Clear the filter search box.
+        $('.content-panel-body-listing-filters-search input').val('');
+    },
+
+    initInfiniteScroll: function(){
+        if (OC.categoryResources.currentCategoryID){
+            var loadButton = $('.lazy-load-button'),
+                categoryID, i, resource;
+            $('.content-panel').on('DOMContentLoaded load resize scroll', function(event){
+                categoryID = $('.content-panel-body').attr('id').substring(9);
+
+                // If the load button is attached to the document.
+                if ($.contains(document, loadButton[0]) && loadButton.hasClass('enabled')){
+                    if (isElementInViewport(loadButton) && !loadButton.hasClass('loading')){
+                        loadButton.addClass('loading');
+
+                        $.get('/resources/api/load-browse-resources/' + categoryID +
+                                '/from/' + OC.categoryResources.currentCategoryID + '/',
+                            function(response){
+                                if (response.status == 'true'){
+                                    var keys = Object.keys(response.resources);
+
+                                    if (response.current_category_id){
+                                        for (i = 0; i < keys.length; i++){
+                                            resource = response.resources[keys[i]];
+                                            resourceModel = new Resource(resource);
+
+                                            resourceCollectionView.collection.add(
+                                                resourceModel);
+                                        }
+                                        OC.categoryResources.currentCategoryID = response.current_category_id;
+
+                                    } else {
+                                        loadButton.remove();
+                                    }
+                                }
+                                else {
+                                    OC.popup(response.message, response.title);
+                                }
+                                loadButton.removeClass('loading');
+
+                            },
+                        'json');
+                    }
+                }
+            });
+        }
+    }
+};
+
 // Initialize Category resources Model
 var Resource = Backbone.Model.extend({
     // ID of the resource.
@@ -53,6 +146,17 @@ var ResourceSet = Backbone.Collection.extend({
     },
 });
 
+var Tag = Backbone.Model.extend({ tag: '' });
+var TagView = Backbone.View.extend({
+    tagName: 'span',
+    className: 'content-panel-body-listing-item-contents-label label',
+    template: _.template('<%= tag %>'),
+    render: function(tag){
+        this.$el.html(this.template(this.model.toJSON()));
+        return this.el;
+    }
+});
+
 // Initialize resources view.
 var ResourceView = Backbone.View.extend({
     tagName: "div",
@@ -69,6 +173,7 @@ var ResourceView = Backbone.View.extend({
         '<a href="<%= url %>" class="content-panel-body-listing-item-contents-caption">' +
         '<%= title %></a>' +
         '<div class="content-panel-body-listing-item-contents-meta"><%= views %> views</div>' +
+        '<%= tags %>' +
         '</div>'),
 
     events: {
@@ -77,11 +182,27 @@ var ResourceView = Backbone.View.extend({
     },
 
     initialize: function() {
+        // Prepare tag labels.
+        var i,
+            tags = $('<div/>', {
+                'class': 'content-panel-body-listing-item-contents-labels'
+            });
+        existingTags = this.model.get('tags');
+        for (i = 0; i < existingTags.length; i++){
+            tags.append(new TagView({
+                model: new Tag({tag: existingTags[i]})
+            }).render());
+        }
+        this.$tagsView = tags;
+
         this.listenTo(this.model, "change", this.render);
     },
 
     render: function () {
-        this.$el.html(this.template(this.model.toJSON()));
+        modelJSON = this.model.toJSON();
+        modelJSON['tags'] = String(this.$tagsView[0].outerHTML);
+
+        this.$el.html(this.template(modelJSON));
         $('.content-panel-body-listing-items').append(this.$el);
 
         return this;
@@ -99,7 +220,7 @@ var ResourceView = Backbone.View.extend({
         resourceFavorite.text(parseInt(resourceFavorite.text(), 10) + 1);
     },
 
-    unfavoriteCallback: function(resourceFavoriteWrapper){
+    unfavoriteCallback: function(resourceFavorite){
         resourceFavorite.text(parseInt(resourceFavorite.text(), 10) - 1);
     }
 });
@@ -166,6 +287,10 @@ var ResourceCollectionView = Backbone.View.extend({
         this.revealView();
     },
 
+    initialize: function() {
+        this.listenTo(this.collection, "add", this.lateRender);
+    },
+
     clearView: function () {
         $('.content-panel-body-listing-items').html('');
     },
@@ -181,8 +306,18 @@ var ResourceCollectionView = Backbone.View.extend({
     },
 
     showNullView: function () {
-        $('.content-panel-body-listing-items').html('<p>No results matching your criteria found.</p>');
+        $('.content-panel-body-listing-items').html('<p class="no-results-message">' +
+            'Couldn\'t find a thing! Have you tried requesting for something?</p>');
+
+        if (OC.categoryResources.filterAsyncSearchOn){
+            // Prevent showing no results message until search completed.
+            $('.no-results-message').addClass('hide');
+        }
     },
+
+    lateRender: function(model, collection, options) {
+        new ResourceView({model: model}).render();
+    }
 });
 
 function init_mvc() {
@@ -209,13 +344,91 @@ function init_mvc() {
 
     // Bind text input field as filter.
     $('.content-panel-body-listing-filters-search input').keyup(function(event){
-        var currentInput = $(this).val();
+        var currentInput = $(this).val(),
+            loadButton = $('.lazy-load-button');
+
         var collectionToRender = new ResourceSet(resourceSet.filter(function (resource) {
             return resource.get('title').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
         }));
 
         // Recreate the view (clears previous view)
         resourceCollectionView.render(collectionToRender);
+        resourceCollectionView.initialize();
+
+        if (currentInput.length > 0) {
+            if (loadButton.length > 0) {
+                loadButton.addClass('hide');
+                loadButton.removeClass('enabled');
+            }
+
+            // If there are categories that haven't been rendered yet.
+            if (OC.categoryResources.currentCategoryID){
+                var loadingPlaceholder = $('.filter-search-placeholder');
+                loadingPlaceholder.addClass('show');
+
+                // Calculate time since last key entered.
+                currentTime = new Date().getTime();
+                if (OC.categoryResources.lastInputTimestamp){
+                    // Calculate delta between the current time and last timestamp.
+                    delta = (currentTime - OC.categoryResources.lastInputTimestamp) / 1000;
+
+                    if (delta < 1.5){
+                        clearTimeout(OC.categoryResources.searchFilterTimeout);
+                        OC.categoryResources.filterAsyncSearchOn = false;
+                    }
+
+                    OC.categoryResources.searchFilterTimeout = setTimeout(function(){
+                        var i, resource, currentCategoryID,
+                            categoryID = $('.content-panel-body').attr('id').substring(9);
+
+                        // Perform search.
+                        $.get('/resources/api/search-category/' + categoryID +
+                                '/from/' + OC.categoryResources.currentCategoryID + '/query/' +
+                                currentInput + '/',
+                            function(response){
+                                loadingPlaceholder.removeClass('show');
+                                OC.categoryResources.filterAsyncSearchOn = false;
+
+                                if (response.status == 'true'){
+                                    var keys = Object.keys(response.resources);
+
+                                    // Clear nothing found message, if nothing in original collection.
+                                    if (resourceCollectionView.collection.length === 0 && (
+                                        keys.length === 0))
+                                        resourceCollectionView.showNullView();
+
+                                    else if (resourceCollectionView.collection.length === 0)
+                                        resourceCollectionView.clearView();
+
+                                    for (i = 0; i < keys.length; i++){
+                                        resource = response.resources[keys[i]];
+                                        resourceModel = new Resource(resource);
+
+                                        resourceCollectionView.collection.add(
+                                            resourceModel);
+                                    }
+                                }
+                                else {
+                                    OC.popup(response.message, response.title);
+                                }
+
+                                $('.no-results-message').removeClass('hide');
+
+                            },
+                        'json');
+                    }, 1500);
+                    OC.categoryResources.filterAsyncSearchOn = true;
+                }
+                OC.categoryResources.lastInputTimestamp = currentTime;
+            }
+        } else {
+            clearTimeout(OC.categoryResources.searchFilterTimeout);
+            if (loadButton.length > 0) {
+                loadButton.removeClass('hide');
+                loadButton.addClass('enabled');
+            }
+            OC.categoryResources.filterAsyncSearchOn = false;
+        }
     });
 
 }
@@ -229,6 +442,11 @@ jQuery(document).ready(function($){
 
     // Initiatialize the Backbone models/collection/view
     init_mvc();
+
+    // Initialize loading more resources on scroll down.
+    OC.categoryResources.initInfiniteScroll();
+
+    OC.categoryResources.initBrowseView();
 });
 
 // The word "filters" is used in the traditional sense here, and not as described in the spec of
