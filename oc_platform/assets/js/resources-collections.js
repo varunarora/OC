@@ -16,6 +16,25 @@ OC.resourcesCollections = {
         'Who has access: <%= access %>"></span><div class="<%= host %>-resource-delete resource-collection-delete" id="resource-<%= id %>" title="Delete"></div>' +
         '</div></a></div>'),
 
+    resourceCollectionItemTemplate: _.template('<div class="resource-collection-item <%= category %>" id="<%= category %>-<%= id %>">' +
+        '<input type="checkbox" name="resource_collection_id" value="<%= id %>"/>' +
+        '<div class="resource-item-thumbnail" style="background-image: url(\'<%= thumbnail %>\');">' +
+        '<div class="resource-item-thumbnail-selector"></div>' +
+        '<div class="resource-item-thumbnail-<%= type %>"></div>' +
+        '</div><div class="resource-item-description">' +
+        '<div class="resource-item-description-title"><a href="<%= url %>"<% if (open_url){ %> ' +
+        'target="_blank"<% } %>><%= title %></a>' +
+        '<div class="resource-item-description-meta">Last modified at: <%= modified %></div>' +
+        '</div><div class="resource-item-description-actions">' +
+        '<div class="resource-item-description-actions-visibility">' +
+        '<button class="action-button secondary-button mini-action-button ' +
+        '<%= host %>-browse-item-visibility browse-item-visibility visibility-<%= visibility %> <%= visibility_classes %>">' +
+        '<span class="visibility-icon"></span><%= visibility_title %></button></div>' +
+        '<div class="resource-item-description-actions-common">' +
+        '<span class="resource-favorite-wrapper"><a class="resource-favorite">Favorite</a></span>' +
+        '<a class="resource-copy">Copy</a><a class="resource-remix">Remix</a>' +
+        '</div></div></div></div>'),
+
     collectionItemTemplate: _.template('<div class="<%= host %>-browse-item resource-collection-item directory " id="collection-<%= id %>">' +
         '<input type="checkbox" name="collection_id" value="<%= id %>"/>' +
         '<a href="<%= url %>"><%= title %> <span class="<%= host %>-browse-item-date"><%= created %></span>' +
@@ -25,6 +44,8 @@ OC.resourcesCollections = {
         '</div></a></div>'),
 
     currentResourceCollectionVisibility: '',
+    resourceCount: 0,
+    currentCount: 0,
 
     initFavoriteStates: function(){
         var resourceCollectionItem, resourceFavoriteWrapper, resourceFavoriteButton;
@@ -57,6 +78,49 @@ OC.resourcesCollections = {
         for (i = 0; i < resourcesCollections.length; i++){
             resourceID = $(resourcesCollections[i]).attr('id').substring(9);
             OC.getFavoriteState('resource', resourceID, setFavoriteState);
+        }
+    },
+
+    infiniteScroll: function(){
+        if (OC.resourcesCollections.resourceCount > 20){
+            var loadButton = $('.lazy-load-button'),
+                currentCollectionID, i;
+            $(window).on('DOMContentLoaded load resize scroll', function(event){
+                currentCollectionID = $('.resources-collections-added').attr('id').substring(11);
+
+                // If the load button is attached to the document.
+                if ($.contains(document, loadButton[0])){
+                    if (isElementInViewport(loadButton) && !loadButton.hasClass('loading')){
+                        loadButton.addClass('loading');
+
+                        $.get('/resources/api/load-resources/' + currentCollectionID +
+                                '/from/' + OC.resourcesCollections.currentCount + '/',
+                            function(response){
+                                if (response.status == 'true'){
+                                    var keys = Object.keys(response.resources);
+
+                                    if (keys.length !== 0){
+                                        for (i = 0; i < keys.length; i++){
+                                            $('.resources-collections-added').append(
+                                                OC.resourcesCollections.resourceCollectionItemTemplate(
+                                                    response.resources[keys[i]]));
+                                        }
+                                        OC.resourcesCollections.currentCount += keys.length;
+
+                                    } else {
+                                        loadButton.remove();
+                                    }
+                                }
+                                else {
+                                    OC.popup(response.message, response.title);
+                                }
+                                loadButton.removeClass('loading');
+
+                            },
+                        'json');
+                    }
+                }
+            });
         }
     },
 

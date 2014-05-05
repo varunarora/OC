@@ -1,3 +1,9 @@
+<script type="text/javascript" src="{{ STATIC_URL }}js/resources-collections.js"></script>
+<script type="text/javascript">
+    OC.resourcesCollections.resourceCount = '{{ resource_count }}';
+    OC.resourcesCollections.currentCount = {{ resources.count }};
+</script>
+
 {% if user == user_profile %}
 <div class="create-resource-collection-wrapper">
     {% include 'partials/create-resource-collection.html' %}
@@ -24,4 +30,3 @@
     {% endif %}
 </div>
 {% endif %}
-<script type="text/javascript" src="{{ STATIC_URL }}js/resources-collections.js"></script>

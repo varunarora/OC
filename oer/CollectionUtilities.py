@@ -404,7 +404,7 @@ def set_resources_type(resources):
             resource.type = "attachment"
 
 
-def preprocess_collection_listings(resources, collections):
+def preprocess_collection_listings(resources):
     from oer.models import Link, Attachment
     from django.contrib.contenttypes.models import ContentType
     link_content_type = ContentType.objects.get_for_model(Link)

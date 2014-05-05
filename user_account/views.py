@@ -1005,9 +1005,9 @@ def list_collection(request, username, collection_slug):
 
     # TODO(Varun): Fix temporary hack of only listing top 20 files for loading sake.
     resources = root_assets.all()[:20]
+    resource_count = root_assets.count()
     cu.set_resources_type(resources)
-
-    cu.preprocess_collection_listings(resources, child_collections)
+    cu.preprocess_collection_listings(resources)
 
     if collection_in_unit:
         breadcrumb = cu.build_collection_breadcrumb(collection)
@@ -1020,7 +1020,8 @@ def list_collection(request, username, collection_slug):
             'collections': child_collections,
             'unit': unit,
             'units': child_units,
-            'breadcrumb': breadcrumb
+            'breadcrumb': breadcrumb,
+            'resource_count': resource_count
         }.items() + user_context.items())
         return render(request, 'unit.html', context)
 
@@ -1033,7 +1034,8 @@ def list_collection(request, username, collection_slug):
             'resources': resources,
             'collections': child_collections,
             'units': child_units,
-            'page': 'files'
+            'page': 'files',
+            'resource_count': resource_count
         }.items() + user_context.items())
         return render(request, 'profile.html', context)
 

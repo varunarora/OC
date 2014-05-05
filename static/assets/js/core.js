@@ -2005,6 +2005,8 @@ var OC = {
             OC.resourcesCollections.initCopyAction();
 
             OC.resourcesCollections.bindThumbnailSelect();
+
+            OC.resourcesCollections.infiniteScroll();
         }
 
         if ($('.resources-collections-added').length >= 1){
@@ -4242,6 +4244,21 @@ getScrollbarWidth = function() {
     $outer.remove();
  
     return (width1 - width2);
+};
+
+isElementInViewport = function(el){
+    if (el instanceof jQuery) {
+        el = el[0];
+    }
+
+    var rect = el.getBoundingClientRect();
+
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /*or $(window).height() */
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth) /*or $(window).width() */
+    );
 };
 
 /**
