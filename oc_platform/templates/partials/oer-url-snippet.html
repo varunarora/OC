@@ -2,13 +2,13 @@
     <div id="oer-info">
         <div id="oer-details">
             <ul>
-                <li><span class="oer-info-caption">URL:</span> <span class="oer-info-detail"><a href="{{ resource.revision.content.url }}">{{ resource.revision.content.url|slice:":30" }}...</a></span></li>
+                <li><span class="oer-info-caption">URL:</span> <span class="oer-info-detail"><a href="{{ resource.revision.content.url }}">{{ resource.revision.content.url|slice:":80" }}...</a></span></li>
                 <li><span class="oer-info-caption">License:</span> <span class="oer-info-detail"> {{ resource.license.title }}</span></li>
                 <li><span class="oer-info-caption">Posted on:</span> <span class="oer-info-detail"> {{ resource.created }}</span></li>
             </ul>
         </div>
         <div id="oer-get">
-            <a href="{{ resource.revision.content.url }}" target="_blank"><button class="action-button">Open website</button></a>
+            <a href="{{ resource.revision.content.url }}"><button class="action-button">Open website</button></a>
         </div>
     </div>
 </div>

@@ -10,89 +10,99 @@
         <span class="vertical-caret breadcrumbs-caret"></span> 
         {% endif %}
     {% endfor %}
-    </div>
-    <div id="fill-panel" class="panel-right">
-        <div class="resource-big-actions-wrapper">
-            <div class="resource-big-actions">
-                <button class="page-action-button mini-action-button favorite-button">Favorite</button>
-                <button class="page-action-button mini-action-button share-button">Share</button>
-                <a href="{% if resource_type == 'document' %}{% if resource.document_type == 'lesson' %}{% url resource:new_lesson %}{% else %}{% url resource:new_document %}{% endif %}{% endif %}?remix={{ resource.id }}" class="page-action-button mini-action-button remix-button">Remix</a>
-            </div>
+    </section>
+</div>
+<div id="fill-panel" class="panel-right">
+    <div class="resource-big-actions-wrapper">
+        <div class="resource-big-actions">
+            <button class="page-action-button mini-action-button favorite-button">Favorite</button>
+            <button class="page-action-button mini-action-button share-button">Share</button>
+            <a href="{% if resource_type == 'document' %}{% if resource.document_type == 'lesson' %}{% url resource:new_lesson %}{% else %}{% url resource:new_document %}{% endif %}{% endif %}?remix={{ resource.id }}" class="page-action-button mini-action-button remix-button">Remix</a>
         </div>
-        <div class="resource-actions-wrapper">
-            {% if resource_type == 'document' %}
-            <ul class="resource-actions">
-                <li class="print-action"><a href="">Print</a></li>
-                <li class="download-as"><a href="">Download as... <span class="horizontal-caret-up breadcrumb-caret"></span></a></li>
-            </ul>
-
+    </div>
+    <div class="resource-actions-wrapper">
+        {% if resource_type == 'attachment' and resource.extension == '.pdf' %}
+        <ul class="resource-actions">
+            <li class="download-as"><a href="">Download as... <span class="horizontal-caret-up breadcrumb-caret"></span></a></li>
             <nav id="download-menu">
                 <div class="floating-menu-spacer"></div>
                 <ul>
-                    <li class="word-action"><a href="">Word (.odt)</a></li>
-                    <li class="export-action"><a href="">PDF</a></li>
+                    <li class="download-as-pdf"><a href="{% url resource:download resource_id=resource.id %}">PDF</a></li>
                 </ul>
             </nav>
 
-            <div class="export-document-pdf-dialog oc-popup">
-                <div class="oc-popup-title-bar">
-                    <div class="oc-popup-title"><h3>Export to PDF</h3></div>
-                    <div class="delete-button oc-popup-exit"></div>
-                </div>
-                <div class="oc-popup-body">
-                    <div class="export-document-pdf-status">Exporting to PDF...</div>
-                    <div class="export-document-pdf-progress oc-progressbar">
-                        <div class="export-document-pdf-progress-indicator oc-progressbar-indicator"></div>
-                    </div>
-                </div>
-            </div>
+        {% elif resource_type == 'document' %}
+        <ul class="resource-actions">
+            <li class="print-action"><a href="">Print</a></li>
+            <li class="download-as"><a href="">Download as... <span class="horizontal-caret-up breadcrumb-caret"></span></a></li>
+        </ul>
 
-            <div class="export-document-word-dialog oc-popup">
-                <div class="oc-popup-title-bar">
-                    <div class="oc-popup-title"><h3>Export to Word</h3></div>
-                    <div class="delete-button oc-popup-exit"></div>
-                </div>
-                <div class="oc-popup-body">
-                    <div class="export-document-word-status">Exporting to Word...</div>
-                    <div class="export-document-word-progress oc-progressbar">
-                        <div class="export-document-word-progress-indicator oc-progressbar-indicator"></div>
-                    </div>
-                </div>
+        <nav id="download-menu">
+            <div class="floating-menu-spacer"></div>
+            <ul>
+                <li class="word-action"><a href="">Word (.odt)</a></li>
+                <li class="export-action"><a href="">PDF</a></li>
+            </ul>
+        </nav>
+
+        <div class="export-document-pdf-dialog oc-popup">
+            <div class="oc-popup-title-bar">
+                <div class="oc-popup-title"><h3>Export to PDF</h3></div>
+                <div class="delete-button oc-popup-exit"></div>
             </div>
-            {% endif %}
-            <div class="share-dialog oc-popup">
-                <div class="oc-popup-title-bar">
-                    <div class="oc-popup-title"><h3>Share '{{ resource.title }}'</h3></div>
-                    <div class="delete-button oc-popup-exit"></div>
+            <div class="oc-popup-body">
+                <div class="export-document-pdf-status">Exporting to PDF...</div>
+                <div class="export-document-pdf-progress oc-progressbar">
+                    <div class="export-document-pdf-progress-indicator oc-progressbar-indicator"></div>
                 </div>
-                <div class="oc-popup-body">
-                    <p>Share this resource using...</p>
-                    <div class="share-options">
-                        <a class="action-button large-action-button secondary-button share-on-email">Email</a>
-                        <a href="https://www.facebook.com/dialog/feed?app_id=639282532755047&link={{ current_path }}&picture={{ thumbnail }}&name={{ obj.title }}&caption={{ caption }} &lsaquo; OpenCurriculum&description={{ obj.body_markdown_html|striptags|safe|truncatewords_html:40 }}&redirect_uri=http://www.opencurriculum.org/" target="_blank" class="action-button large-action-button secondary-button share-on-facebook">Facebook</a>
-                        <a href="https://plus.google.com/share?url={{ current_path }}" onclick="javascript:window.open(this.href, '','menubar=no,toolbar=no,height=600,width=600');return false;"class="action-button large-action-button secondary-button share-on-plus">Google+</a>
-                        <a href="https://twitter.com/share?url={{ current_path }}" data-lang="en" onclick="javascript:window.open(this.href, '','menubar=no,toolbar=no,height=300,width=650');return false;"class="action-button large-action-button secondary-button share-on-twitter">Twitter</a>
-                    </div>
-                </div>
-            </div>
-            <div id="email-share-dialog" class="dialog" title="Send email">
-                <form id="share-via-email">
-                    <div id="email-share-dialog-wrapper">
-                        Enter email address (separate with comma for multiple addresses):
-                        <p><input type="text" id="email-share-address" class="full-width"/></p>
-                        <p><textarea id="email-share-message" class="full-width">Hey!&#10;&#10;I would like to share with you with this resource from OpenCurriculum:&#10;&#10;{{ current_path }}</textarea></p>
-                        <p>
-                            <table>
-                                <tr><td>Your name:</td><td><input type="text" id="email-from-name"  value="{{ user.get_full_name }}"/></td></tr>
-                                <tr><td>Your email address:</td><td><input type="text" id="email-from-address" value="{{ user.email }}" /></td></tr>
-                            </table>
-                        </p>
-                        <div id="email-share-error" class="form-error"></div>
-                        <div id="email-share-success" class="form-success"></div>
-                    </div>
-                    <div class="form-spinner"></div>
-                </form>
             </div>
         </div>
+
+        <div class="export-document-word-dialog oc-popup">
+            <div class="oc-popup-title-bar">
+                <div class="oc-popup-title"><h3>Export to Word</h3></div>
+                <div class="delete-button oc-popup-exit"></div>
+            </div>
+            <div class="oc-popup-body">
+                <div class="export-document-word-status">Exporting to Word...</div>
+                <div class="export-document-word-progress oc-progressbar">
+                    <div class="export-document-word-progress-indicator oc-progressbar-indicator"></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="share-dialog oc-popup">
+            <div class="oc-popup-title-bar">
+                <div class="oc-popup-title"><h3>Share '{{ resource.title }}'</h3></div>
+                <div class="delete-button oc-popup-exit"></div>
+            </div>
+            <div class="oc-popup-body">
+                <p>Share this resource using...</p>
+                <div class="share-options">
+                    <a class="action-button large-action-button secondary-button share-on-email">Email</a>
+                    <a href="https://www.facebook.com/dialog/feed?app_id=639282532755047&link={{ current_path }}&picture={{ thumbnail }}&name={{ obj.title }}&caption={{ caption }} &lsaquo; OpenCurriculum&description={{ obj.body_markdown_html|striptags|safe|truncatewords_html:40 }}&redirect_uri=http://www.opencurriculum.org/" target="_blank" class="action-button large-action-button secondary-button share-on-facebook">Facebook</a>
+                    <a href="https://plus.google.com/share?url={{ current_path }}" onclick="javascript:window.open(this.href, '','menubar=no,toolbar=no,height=600,width=600');return false;"class="action-button large-action-button secondary-button share-on-plus">Google+</a>
+                    <a href="https://twitter.com/share?url={{ current_path }}" data-lang="en" onclick="javascript:window.open(this.href, '','menubar=no,toolbar=no,height=300,width=650');return false;"class="action-button large-action-button secondary-button share-on-twitter">Twitter</a>
+                </div>
+            </div>
+        </div>
+        <div id="email-share-dialog" class="dialog" title="Send email">
+            <form id="share-via-email">
+                <div id="email-share-dialog-wrapper">
+                    Enter email address (separate with comma for multiple addresses):
+                    <p><input type="text" id="email-share-address" class="full-width"/></p>
+                    <p><textarea id="email-share-message" class="full-width">Hey!&#10;&#10;I would like to share with you with this resource from OpenCurriculum:&#10;&#10;{{ current_path }}</textarea></p>
+                    <p>
+                        <table>
+                            <tr><td>Your name:</td><td><input type="text" id="email-from-name"  value="{{ user.get_full_name }}"/></td></tr>
+                            <tr><td>Your email address:</td><td><input type="text" id="email-from-address" value="{{ user.email }}" /></td></tr>
+                        </table>
+                    </p>
+                    <div id="email-share-error" class="form-error"></div>
+                    <div id="email-share-success" class="form-success"></div>
+                </div>
+                <div class="form-spinner"></div>
+            </form>
+        </div>
     </div>
-</section>
+</div>
