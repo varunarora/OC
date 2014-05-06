@@ -435,7 +435,7 @@ def discussion(request, project_slug, discussion_id):
     comments_ct = ContentType.objects.get_for_model(Comment)
 
     context = {
-        'post': post,
+        'posts': [post],
         'host_content_type': comments_ct,
         'comments_content_type': comments_ct,
         'project': project,
