@@ -20,19 +20,19 @@
 		<input type="hidden" name="user_id" value="{% if user.id %}{{ user.id }}{% endif %}" />
 	</form>
 
+	{% if resource.revision.content_type.name == "attachment" %}
+		{% include 'partials/oer-attachment.html' %}
+	{% elif resource.revision.content_type.name == "link" %}
+		{% include 'partials/oer-url.html' %}
+	{% elif resource.revision.content_type.name == "document" %}
 	<div class="center-midstage resource-body{% if resource_type %} {{ resource_type }}{% endif %}">
 		<section id="oer">
-			{% if resource.revision.content_type.name == "document" %}
-				<div class="oer-document document-body">
-					{% include 'partials/oer-document.html' %}
-				</div>
-			{% elif resource.revision.content_type.name == "link" %}
-				{% include 'partials/oer-url.html' %}
-			{% elif resource.revision.content_type.name == "attachment" %}
-				{% include 'partials/oer-attachment.html' %}
-			{% endif %}
+			<div class="oer-document document-body">
+				{% include 'partials/oer-document.html' %}
+			</div>
 		</section>
 	</div>
+	{% endif %}
 
 	<div class="center-stage resource-footer">
 		<div id="key-panel" class="panel-left">
