@@ -243,7 +243,7 @@ class AttachmentEditForm(forms.ModelForm):
 
 
 class NewDocumentForm(forms.ModelForm):
-    def __init__(self, request, user):
+    def __init__(self, request, user, resource_revision_id):
         newRequest = request.copy()
 
         default_cost = 0
@@ -257,16 +257,7 @@ class NewDocumentForm(forms.ModelForm):
         from django.template.defaultfilters import slugify
         newRequest.setdefault('slug', slugify(newRequest.get('title')))
 
-        # Create and save new Document.
-        new_document = Document()
-        new_document.save()
-
-        new_resource_revision = ResourceRevision()
-        new_resource_revision.content = new_document
-        new_resource_revision.user = user
-        new_resource_revision.save()
-
-        newRequest.setdefault('revision', new_resource_revision.id);
+        newRequest.setdefault('revision', resource_revision_id);
 
         from meta.models import TagCategory
         tag_category = TagCategory.objects.get(title='Document')

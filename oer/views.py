@@ -704,16 +704,25 @@ def render_editor(request, document_type):
         collection_id = request.POST.get('collection', None)
 
         from oer import forms
-        new_document = forms.NewDocumentForm(request.POST, request.user)
+        # Create and save new Document.
+        content = Document()
+        content.save()
+
+        new_resource_revision = ResourceRevision()
+        new_resource_revision.content = content
+        new_resource_revision.user = request.user
+        new_resource_revision.save()
+
+        new_document = forms.NewDocumentForm(request.POST, request.user, new_resource_revision.id)
 
         if new_document.is_valid():
+            create_document_elements(request.POST, content)
+
             document_resource = new_document.save()
 
             # Assign this document to the revision created.
             document_resource.revision.resource = document_resource
             document_resource.revision.save()
-
-            create_document_elements(request.POST, document_resource)
 
             # Add to the necessary collection.
             collection = get_collection(user_id, project_id, collection_id)
@@ -731,6 +740,9 @@ def render_editor(request, document_type):
 
             return redirect_to_collection(user_id, project_id, collection_id)
         else:
+            new_document.delete()
+            new_resource_revision.delete()
+
             build_return_resource_form_context(request, new_document, form_context)
 
     form_context['resource'] = {}
@@ -762,7 +774,7 @@ def render_editor(request, document_type):
     return render(request, document_type + '.html', context)
 
 
-def create_document_elements(post_request, document_resource):
+def create_document_elements(post_request, content):
     # Unserialize the DocumentElement objects.
     serialized_document_elements = post_request.get('serialized-document-body');
     document_elements = json.loads(serialized_document_elements)
@@ -771,7 +783,7 @@ def create_document_elements(post_request, document_resource):
         # Create a new document element.
         new_document_element = DocumentElement()
 
-        new_document_element.document = document_resource.revision.content
+        new_document_element.document = content
         
         new_element = Element(body=element)
         new_element.save()
