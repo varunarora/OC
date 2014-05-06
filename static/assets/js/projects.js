@@ -203,6 +203,9 @@ OC.projects = {
             var postParameter = _.find(params, function(param){
                 return param.indexOf('post=') !== -1;
             }),
+                categoryParameter = _.find(params, function(param){
+                return param.indexOf('category=') !== -1;
+            }),
                 redirectToParameter = _.find(params, function(param){
                 return param.indexOf('redirect_to=') !== -1;
             });
@@ -212,6 +215,18 @@ OC.projects = {
                 if (post === 'new'){
                     OC.projects.postRedirectTo = redirectToParameter.substring(
                         redirectToParameter.indexOf('redirect_to=') + 12);
+
+                    if (categoryParameter){
+                        var category = categoryParameter.substring(
+                            categoryParameter.indexOf('category=') + 9);
+
+                        var camelCaseCategory = category.charAt(0).toUpperCase() + category.slice(
+                            1);
+                        var categoryElement = $('.new-discussion-post-dialog select[name="category"] option:contains("' +
+                            camelCaseCategory + '")');
+
+                        categoryElement.attr('selected', 'true');
+                    }
 
                     OC.projects.newPostButtonClickHandler();
 
@@ -799,15 +814,16 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    // Construct a collection view using the post objects built in
-    postCollectionView = new PostCollectionView({collection: postSet});
+    if ($('.discussion-board').length > 0){
+         // Construct a collection view using the post objects built in
+        postCollectionView = new PostCollectionView({collection: postSet});
 
-    // Render the collection view
-    postCollectionView.render();
+        // Render the collection view
+        postCollectionView.render();
 
-    // Initiatialize the Backbone models/collection/view
-    init_mvc();
-
+        // Initiatialize the Backbone models/collection/view
+        init_mvc();
+    }
 });
 
 function init_mvc() {
@@ -1015,14 +1031,6 @@ var PostView = Backbone.View.extend({
 
         return this;
     },
-
-    upvoteCallback: function(resourceFavorite){
-        //resourceFavorite.text(parseInt(resourceFavorite.text(), 10) + 1);
-    },
-
-    downvoteCallback: function(resourceFavoriteWrapper){
-        //resourceFavorite.text(parseInt(resourceFavorite.text(), 10) - 1);
-    }
 });
 
 // Initialize the post collection view
