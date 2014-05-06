@@ -36,7 +36,7 @@
     </div>
     {% endif %}
     <div class="resource-item-description">
-        <div class="resource-item-description-title"><a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id  resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %}>{{ item.title }}</a>
+        <div class="resource-item-description-title"><a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %}>{{ item.title }}</a>
         <div class="resource-item-description-meta">Last modified at: {% if item_category == 'resource' %}{{ item.revision.created }}{% else %}{{ item.changed|date:"M nS, 'y P"}}{% endif %}</div>
         </div>
         <div class="resource-item-description-actions">
