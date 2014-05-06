@@ -140,7 +140,7 @@
                         {% endfor %}
                     </div>
                     {% else %}
-                        <a href="{% url projects:project_home project_slug=category_group.slug %}?post=new&redirect_to={{ selected_category.url }}" class="no-request-found">Can't find what you are looking for? Don't worry - just ask for it!</a>
+                        <a href="{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}" class="no-request-found">Can't find what you are looking for? Don't worry - just ask for it!</a>
                     {% endif %}
 
                 </div>
