@@ -16,9 +16,6 @@
             </span>
             <span id="facebook-signup-button"></span>
         </div>
-        
-
-        <!--<fb:login-button show-faces="true" size='large' data-width="200" max-rows="1" scope="basic_info,email"></fb:login-button>-->
 
         <div id="results"></div>
     </aside>
@@ -46,11 +43,10 @@
             
             <tr class="registration-username-password">
                 <td{% if social_id %} colspan="2"{% endif %}>
-                    <!--<input type="text" name="username" placeholder="Username" value="{{ form.username }}"{% if user_form.username.errors %} title="{{ user_form.username.errors|first }}" class="form-input-error"{% else %} title="Username should be all lowercase, and must only have letters and digits and/or underscores."{% endif %}>--><input type="text" name="username" placeholder="Username" value="{{ form.username }}" />
+                    <input type="text" name="username" placeholder="Username" value="{{ form.username }}" />
                 </td>
                 {% if not social_id %}
                 <td>
-                    <!--<input type="password" name="password" placeholder="Password"{% if user_form.password.errors %} title="{{ user_form.password.errors|first }}" class="form-input-error"{% else %} title="Password must contain at least 6 characters."{% endif %}>-->
                     <input type="password" name="password" placeholder="Password" />
                 </td>
                 {% endif %}
@@ -58,11 +54,6 @@
             
             <tr class="extra-information"><td></td></td></td></tr>
             <tr><td colspan="2"><span class='form-info-text'>I am a</span>
-            <!--<select name="profession">
-                {% for p in professions %}
-                <option name="{{ p }}" {% ifequal form.profession p %}selected{% endifequal %}>{{ p }}</option>
-                {% endfor %}                
-            </select>-->
             <select name="profession">
                 <option name="Teacher" selected>Teacher</option>
                 <option name="Student">Student</option>
@@ -72,10 +63,6 @@
             </select>
             </td></tr>
             <tr><td><input type="text" name="location" value="{{ form.location }}" placeholder="Location"></td><td>
-                <!--
-                <label><input type="radio" name="gender" value="1" {% ifequal form.gender "1" %}checked{% endifequal %}> MALE</label>
-                <label><input type="radio" name="gender" value="0" {% ifequal form.gender "0" %}checked{% endifequal %}> FEMALE</label>
-                -->
                 <label><input type="radio" name="gender" value="1"> MALE</label>
                 <label><input type="radio" name="gender" value="0" checked> FEMALE</label>
                 
@@ -83,13 +70,6 @@
             <tr><td class="dob-inputs-info">Date of birth</td><td></td></tr>
             <tr><td colspan="2">
                 <div class="dob-inputs-wrapper">
-                    <!--
-                    <select name="dob_month" placeholder="Month">
-                        <option value="0">Month</option>
-                        {% for key, value in months %}
-                        <option value="{{ key }}" {% ifequal form.dob_month key %}selected{% endifequal %}>{{ value }}</option>
-                        {% endfor %}
-                    </select>-->
                     <select name="dob_month" placeholder="Month">
                         <option value="0">Month</option>
                         <option value="1">January</option>
