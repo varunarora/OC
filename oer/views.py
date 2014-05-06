@@ -104,6 +104,7 @@ def get_category_tree_resources_collections(current_flattened_tree):
     all_raw_collections = []
     current_category_id = None
 
+    from collections import OrderedDict
     for category in current_flattened_tree:
         current_item_count = len(all_raw_resources) + len(all_raw_collections)
         
@@ -112,7 +113,8 @@ def get_category_tree_resources_collections(current_flattened_tree):
             tagged_resources = Resource.objects.filter(tags__in=category.tags.all(
                 ))[:42 - current_item_count]
 
-            all_raw_resources += list(category_resources) + list(tagged_resources)
+            all_raw_resources += list(OrderedDict.fromkeys(
+                category_resources | tagged_resources))
 
             collections = Collection.objects.filter(category=category)
             all_raw_collections += list(collections)
@@ -130,7 +132,7 @@ def get_category_tree_resources_collections(current_flattened_tree):
 
     for resource in all_raw_resources:
         try:
-            resource.revision.user = resource.user
+            #resource.revision.user = resource.user
             resource.favorites_count = Favorite.objects.filter(
                 parent_id=resource.id, parent_type=resource_ct).count()
             resource.type = resource.tags.get(
