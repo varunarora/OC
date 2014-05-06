@@ -2959,7 +2959,7 @@ var OC = {
         },
 
         bindCommentsInputClickHandler: function(commentInput){
-            $(commentInput).on('focus', OC.comments.focusComment);
+            $(commentInput).on('focus', OC.comments.focusCommentInput);
 
             $(commentInput).on('blur',  OC.comments.blurCommentInput);
         },
