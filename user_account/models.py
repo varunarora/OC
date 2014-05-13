@@ -674,15 +674,15 @@ class Notification(models.Model):
         if favorite.parent_type.name == 'resource':
             from django.core.exceptions import MultipleObjectsReturned
             try:
-                collection = Collection.objects.get(resources__id=favorite.resource.id)
+                collection = Collection.objects.get(resources__id=favorite.parent.id)
             except MultipleObjectsReturned:
                 collection = Collection.objects.filter(
-                    resources__id=favorite.resource.id)[0]
+                    resources__id=favorite.parent.id)[0]
         else:
             collection = favorite.parent.host
 
         (collection_host_type, collection_host) = ru.get_resource_root(
-            favorite.resource)
+            favorite.parent)
 
         new_activity = Activity(
             actor=favorite.user,
