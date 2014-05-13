@@ -21,6 +21,7 @@ class Tag(models.Model):
     description = models.TextField(blank=True)
     category = models.ForeignKey('meta.TagCategory', default=get_default_tagcategory)
     created = models.DateTimeField(auto_now_add=True, editable=False)
+    position = models.IntegerField(default=0, null=True, blank=True)
 
     def __unicode__(self):
         return self.title
