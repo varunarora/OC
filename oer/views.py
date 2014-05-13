@@ -45,11 +45,17 @@ def browse(request, category_slug):
             return_url = None
         else:
             root_category = selected_category.parent
-            return_url = reverse(
-                'browse', kwargs={
-                    'category_slug': catU.build_breadcrumb(selected_category.parent.parent)[0].url
-                }
-            )
+            
+            return_category_slug = catU.build_breadcrumb(selected_category.parent.parent)[0].url
+            if return_category_slug != '':
+                return_url = reverse(
+                    'browse', kwargs={
+                        'category_slug': return_category_slug
+                    }
+                )
+            else:
+                return_url = reverse('browse_default')
+
     except Exception, e:
         from django.core.mail import mail_admins
         mail_admins('Browse failed to render category', e)
@@ -155,6 +161,12 @@ def get_category_tree_resources_collections(current_flattened_tree):
 
     return (all_resources, all_collections, current_category_id)
 
+
+def browse_default(request):
+    # For now, default browse without a category to Common Core.
+    return redirect('browse',
+        category_slug='common-core'
+    )
 
 def view_resource_by_id(request, resource_id):
     from django.core.exceptions import ObjectDoesNotExist
