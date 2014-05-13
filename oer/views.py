@@ -776,8 +776,11 @@ def render_editor(request, document_type):
 
 def create_document_elements(post_request, content):
     # Unserialize the DocumentElement objects.
-    serialized_document_elements = post_request.get('serialized-document-body');
-    document_elements = json.loads(serialized_document_elements)
+    serialized_document_elements = post_request.get('serialized-document-body', None);
+    if serialized_document_elements:
+        document_elements = json.loads(serialized_document_elements)
+    else:
+        document_elements = {}
 
     for counter, element in enumerate(document_elements):
         # Create a new document element.
@@ -1257,7 +1260,7 @@ def edit_document(request, resource, collection):
         if document_edit.is_valid():
             saved_document = document_edit.save()
 
-            create_document_elements(request.POST, saved_document)
+            create_document_elements(request.POST, saved_document.revision.content)
 
             # Add Django message on success of save.
             from django.contrib import messages
@@ -3092,5 +3095,28 @@ def search_category(request, category_id, last_category_id, query):
 
     context = {
         'resources': serialized_resources
+    }
+    return APIUtilities._api_success(context)
+
+
+def get_child_categories(request, category_id):
+    from meta.models import Category
+    root_category = Category.objects.get(pk=category_id)
+
+    # Get all categories whose parent is root_category.
+    child_categories = Category.objects.filter(parent=root_category).order_by(
+        'position')
+
+    serialized_categories = {}
+    for category in child_categories:
+        serialized_categories[category.id] = {
+            'id': category.id,
+            'title': category.title,
+            'slug': category.slug,
+            'position': category.position,
+        }
+
+    context = {
+        'categories': serialized_categories
     }
     return APIUtilities._api_success(context)
