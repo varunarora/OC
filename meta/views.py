@@ -1,18 +1,23 @@
-from django.http import HttpResponse
+from meta.models import Tag, TagCategory, Category
+from django.http import Http404
 from django.shortcuts import render
-from meta.models import Tag, TagCategory
+from django.core.urlresolvers import reverse
 from oc_platform import APIUtilities
 from xml.etree import ElementTree
+import meta.CategoryUtilities as catU
 import itertools
 
 
 def get_standards_tree(request):
-    tag_category = TagCategory.objects.get(title='Standards')
-
     try:
-        (browse_tree, flattened_tree) = get_tag_browse_tree(tag_category)
+        standards_category = Category.objects.get(title='Standards')
 
-        tree = build_tag_navigation(browse_tree)       
+        from meta.CategoryUtilities import TreeBuilder
+        category_builder = TreeBuilder('category_tags')
+        (browse_tree, flattened_tree) = category_builder.build_tree(
+            {'root': [standards_category]}, [])
+
+        tree = build_standards_navigation(browse_tree)
 
         context = { 'tree': tree }
         return APIUtilities._api_success(context)
@@ -25,58 +30,7 @@ def get_standards_tree(request):
         return APIUtilities._api_failure(context)
 
 
-def get_tag_browse_tree(tag_category):
-    return build_child_tags({'root': [tag_category]}, [])
-
-
-
-def build_child_tags(tags_model, flattened_descendants):
-    """Adapted from buildChildCategories() in articles.views"""
-    # Get the child tags of this tag categort recursively
-    if len(tags_model) == 0:
-        return (None, flattened_descendants)
-    else:
-        # Get all child categories whose children need to be found
-        tag_values = tags_model.values()
-
-        # Chain all the contents of the values
-        child_tags = list(itertools.chain.from_iterable(tag_values))
-
-        # Create a master list [] of all { parent : [child, child] } mapping
-        children = map(_has_immediate_tag_children, child_tags)
-
-        # Flatten the {} objects in the master list into one new dict
-        tags_model = {}
-        for child in children:
-            try:
-                for k, v in child.iteritems():
-                    tags_model[k] = v
-            except:
-                pass
-
-        # Call this function recursively to obtain the current models'
-        #     descendant child categories
-        (descendants_tree, descendants_flattened) = build_child_tags(
-            tags_model, child_tags
-        )
-
-        # Append "my" descendants to the descendants of "my" children
-        flattened_descendants += descendants_flattened
-
-        if descendants_tree is not None:
-            # Iterate through all the dictionary keys, and replace the category
-            #     model items, and return the category model
-            for val in tags_model.itervalues():
-                for v in val:
-                    for a, b in descendants_tree.iteritems():
-                        if a == v:
-                            val[val.index(v)] = {a: b}
-            return (tags_model, flattened_descendants)
-        else:
-            return (tags_model, flattened_descendants)
-
-
-def build_tag_navigation(browse_tree):
+def build_standards_navigation(browse_tree):
     root = ElementTree.Element('ul')
     standard = get_root_key(browse_tree)
 
@@ -114,18 +68,24 @@ def build_child_tree(root_node):
         else:
             current_node = node
 
+        # Determine whether the node is a tag or category.
+        if type(current_node).__name__.lower() == 'category':
+            node_type = 'category'
+        else:
+            node_type = 'tag'
+
         # If this child has other children, build child tree.
         # Has to be the case of our tag category.
         if type(node) is dict:
             # Set a class to indicate that this element has child collections.
-            node_element.set('class', 'parent-tag-category')
+            node_element.set('class', 'parent-category')
 
             node_toggler = ElementTree.SubElement(node_element, 'span')
-            node_toggler.set('class', 'toggle-tag-category')
+            node_toggler.set('class', 'toggle-category')
             node_toggler.text = ' '
 
             node_href = ElementTree.SubElement(node_element, 'a')
-            node_href.set('id', 'tag-category-' + str(current_node.id))            
+            node_href.set('id', 'category-' + str(current_node.id))            
             node_href.text = current_node.title
 
             nodeList = ElementTree.SubElement(node_element, 'ul')
@@ -138,16 +98,26 @@ def build_child_tree(root_node):
         # Can be a tag category or a tag.
         else:
             # Set a class to indicate that this element does not have child collections.
-            node_element.set('class', 'empty-category')
+            node_element.set('class', 'empty-category' if node_type == 'category' else 'empty-tag')
 
             node_toggler = ElementTree.SubElement(node_element, 'span')
-            node_toggler.set('class', 'toggle-tag-tag-category')
+            node_toggler.set(
+                'class', 'toggle-category' if node_type == 'category' else 'toggle-tag')
             node_toggler.text = ' '
 
             node_href = ElementTree.SubElement(node_element, 'a')
 
-            node_href.set('id', 'tag-' + str(current_node.id))
-            node_href.text = node.title
+            if node_type == 'category':
+                node_href.set('href', reverse('browse', kwargs={
+                    'category_slug': current_node.url}))
+            else:
+                node_href.set('href', reverse('meta:standard', kwargs={
+                    'tag_title': current_node.title }))
+
+            node_href.set(
+                'id', ('category-' if node_type == 'category' else 'tag-') + str(current_node.id))
+            node_href.text = current_node.title if node_type == 'category' else (
+                current_node.title + ': ' + current_node.description)
 
         node_elements.append(node_element)
 
@@ -185,3 +155,108 @@ def get_root_key(value):
         return root_elements[0]
     except:
         return None
+
+
+def get_standards(request):
+    from meta.models import Category
+    root_category = Category.objects.get(title='Standards')
+
+    # Get all categories whose parent is root_category.
+    child_categories = Category.objects.filter(parent=root_category).order_by(
+        'position')
+
+    serialized_standards = {}
+    for standard in child_categories:
+        serialized_standards[standard.id] = {
+            'id': standard.id,
+            'title': standard.title,
+            'slug': standard.slug,
+            'position': standard.position
+        }
+        subjects = Category.objects.filter(parent=standard).order_by('position')
+
+        serialized_subjects = {}
+        for subject in subjects:
+            serialized_subjects[subject.id] = {
+                'id': subject.id,
+                'title': subject.title,
+                'slug': subject.slug,
+                'position': subject.position
+            }
+        serialized_standards[standard.id]['subjects'] = serialized_subjects
+
+    context = {
+        'standards': serialized_standards
+    }
+    return APIUtilities._api_success(context)
+
+
+def get_child_tags_from_category(request, category_id):
+    from meta.models import Category, TagCategory
+    category = Category.objects.get(pk=category_id)
+
+    # Get all tags in order that belong to this category.
+    from meta.CategoryUtilities import TreeBuilder
+    tag_category_builder = TreeBuilder('tag_category')
+    (browse_tree, flattened_tree) = tag_category_builder.build_tree(
+        {'root': [TagCategory.objects.get(title='Standards')]}, [])
+
+    tags = category.tags.filter(category__in=flattened_tree).order_by('position')
+
+    serialized_tags = {}
+    for tag in tags:
+        serialized_tags[tag.id] = {
+            'id': tag.id,
+            'title': tag.title,
+            'description': tag.description,            
+            'position': tag.position,
+            'url': reverse(
+                'meta:standard', kwargs={
+                    'tag_title': tag.title
+            })
+        }
+
+    context = {
+        'tags': serialized_tags
+    }
+    return APIUtilities._api_success(context)
+
+
+def standard(request, tag_title):
+    # Get the tag.
+    try:
+        tag = Tag.objects.get(title=tag_title)
+    except:
+        raise Http404
+
+    # Get public resources associated with the tag.
+    from oer.models import Resource
+    resources = Resource.objects.filter(tags=tag)[:20]
+
+    category = Category.objects.filter(tags=tag)[0]
+
+    breadcrumb = catU.build_breadcrumb(category)
+    breadcrumb_urlized = []
+    for breadcrumb_category in breadcrumb:
+        if breadcrumb_category.parent.slug == 'standards':
+            break
+        breadcrumb_urlized.append(standard_urlize(breadcrumb_category.parent))
+
+    breadcrumb_urlized.reverse()
+
+    context = {
+        'tag': tag,
+        'resources': resources,
+        'breadcrumb': breadcrumb_urlized,
+        'title': tag.title + " &lsaquo; OpenCurriculum"
+    }
+    return render(request, 'standard.html', context)
+
+
+def standard_urlize(category):
+    category.url = reverse(
+        'browse', kwargs={
+            'category_slug': category.url
+        }
+    )
+    return category

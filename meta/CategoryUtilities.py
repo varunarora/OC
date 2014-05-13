@@ -1,4 +1,4 @@
-from meta.models import Category
+from meta.models import Category, TagCategory
 import itertools
 
 def build_child_categories(category_model, flattened_descendants):
@@ -27,7 +27,7 @@ def build_child_categories(category_model, flattened_descendants):
         child_categories = list(itertools.chain.from_iterable(catValues))
 
         # Create a master list [] of all { parent : [child, child] } mapping
-        children = map(_has_immediate_children, child_categories)
+        children = map(_has_immediate_category_children, child_categories)
 
         # Flatten the {} objects in the master list into one new dict
         category_model = {}
@@ -61,7 +61,7 @@ def build_child_categories(category_model, flattened_descendants):
             return (category_model, flattened_descendants)
 
 
-def _has_immediate_children(category):
+def _has_immediate_category_children(category):
     """Fetches and returns a list of categories who have a certain parent.
 
     Args:
@@ -87,7 +87,7 @@ def build_breadcrumb(category):
     while True:
         breadcrumb.append(category.parent)
         # HACK: Need to look for root object using something unique like PK
-        if category.parent.title == "OpenCurriculum":
+        if category.parent.title == "Standards" or category.parent.title == "OpenCurriculum":
             break
         else:
             category = category.parent
@@ -102,6 +102,8 @@ def urlize(breadcrumb):
     for cat in reversed(breadcrumb):
         if cat.title == "OpenCurriculum":
             cat.url = 'opencurriculum'
+        elif cat.title == "Standards":
+            cat.url = '/'
         else:
             current_parent += cat.slug + '/'
             cat.url = current_parent
@@ -113,3 +115,76 @@ def urlize(breadcrumb):
 
     return breadcrumb
 
+
+class TreeBuilder():
+    model = ''
+
+    def __init__(self, model):
+        self.model = model
+
+    def build_tree(self, model, flattened_descendants):
+        if len(model) == 0:
+            return (None, flattened_descendants)
+        else:
+            # Get all child categories whose children need to be found
+            catValues = model.values()
+
+            # Chain all the contents of the values
+            child_categories = list(itertools.chain.from_iterable(catValues))
+
+            # Create a master list [] of all { parent : [child, child] } mapping
+            children = map(self._has_immediate_children, child_categories)
+
+            # Flatten the {} objects in the master list into one new dict
+            model = {}
+            for child in children:
+                try:
+                    for k, v in child.iteritems():
+                        model[k] = v
+                except:
+                    pass
+
+            # Call this function recursively to obtain the current models'
+            #     descendant child categories
+
+            (descendantsTree, descendantsFlattened) = self.build_tree(
+                model, child_categories
+            )
+
+            # Append "my" descendants to the descendants of "my" children
+            flattened_descendants += descendantsFlattened
+
+            if descendantsTree is not None:
+                # Iterate through all the dictionary keys, and replace the category
+                #     model items, and return the category model
+                for val in model.itervalues():
+                    for v in val:
+                        for a, b in descendantsTree.iteritems():
+                            if a == v:
+                                val[val.index(v)] = {a: b}
+                return (model, flattened_descendants)
+            else:
+                return (model, flattened_descendants)
+
+
+    def _has_immediate_children(self, node):
+        if self.model == 'category':
+            child_nodes = list(Category.objects.filter(
+            parent=node).order_by('position'))
+        elif self.model == 'tag_category':
+            child_nodes = list(TagCategory.objects.filter(
+            parent=node))
+        elif self.model == 'category_tags':
+            node_type = type(node).__name__.lower()
+
+            if node_type == 'category':
+                child_categories = Category.objects.filter(
+                    parent=node).order_by('position')
+                child_nodes = list(node.tags.all()) + list(child_categories)
+            else:
+                child_nodes = []
+
+        if len(child_nodes) > 0:
+            return {node: child_nodes}
+        else:
+            return None

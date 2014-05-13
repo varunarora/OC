@@ -1660,7 +1660,7 @@ var OC = {
             OC.parentCollectionClickHandler);
 
         // Toggle tag categories if it has child tag categories.
-        $('ul li.parent-tag-category > .toggle-tag-category', parentElement).click(
+        $('ul li.parent-category > .toggle-category', parentElement).click(
             OC.parentCollectionClickHandler);
     },
 

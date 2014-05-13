@@ -7,4 +7,8 @@ urlpatterns = patterns(
     #url(r'^$', views.index, name='index'),
     url(r'^standards/tree/', views.get_standards_tree, name='get_standards_tree'),
     #url(r'^(?P<number>\d+)/$', views.match, name='match')
+    url(r'^api/standards/$', views.get_standards, name='get_standards'),
+    url(r'^api/get-child-tags-from-category/(?P<category_id>\d+)/$', views.get_child_tags_from_category, name='get_child_tags_from_category'),
+
+    url(r'^standard/(?P<tag_title>[\w\-\.]+)/$', views.standard, name='standard'),
 )
