@@ -465,7 +465,7 @@ def list_user_favorites(request):
                     'resource_slug': favorite.parent.slug
             })
             thumbnail = 'http://' + request.get_host(
-                ) + settings.MEDIA_URL + favorite.resource.image.name
+                ) + settings.MEDIA_URL + favorite.parent.image.name
         else:
             url = reverse(
                 'user:list_collection', kwargs={
