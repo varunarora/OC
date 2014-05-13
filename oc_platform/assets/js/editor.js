@@ -570,7 +570,7 @@ OC.editor = {
                         $.get('/resources/api/get-child-categories/' + standardSubjectID + '/',
                             function(response){
                                 if (response.status == 'true'){
-                                    var list = _.values(response.categories),
+                                    var list = response.categories,
                                         i,
                                         gradeList = $('.lesson-wizard-grade-level-list');
                                     for (i = 0; i < list.length; i++){

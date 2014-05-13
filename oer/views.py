@@ -3122,14 +3122,14 @@ def get_child_categories(request, category_id):
     child_categories = Category.objects.filter(parent=root_category).order_by(
         'position')
 
-    serialized_categories = {}
+    serialized_categories = []
     for category in child_categories:
-        serialized_categories[category.id] = {
+        serialized_categories.append({
             'id': category.id,
             'title': category.title,
             'slug': category.slug,
-            'position': category.position,
-        }
+            'position': category.position
+        })
 
     context = {
         'categories': serialized_categories
