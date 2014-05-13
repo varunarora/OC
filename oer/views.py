@@ -50,7 +50,10 @@ def browse(request, category_slug):
                     'category_slug': catU.build_breadcrumb(selected_category.parent.parent)[0].url
                 }
             )
-    except:
+    except Exception, e:
+        from django.core.mail import mail_admins
+        mail_admins('Browse failed to render category', e)
+
         # Happens either when the slug is not found.
         raise Http404
 
