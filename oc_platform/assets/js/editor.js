@@ -31,6 +31,16 @@ OC.editor = {
         '?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;color=ffffff" width="573" ' +
         'height="322" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>'),
 
+    onTemplateLoad: function(tips, lpMap){
+        // Attach focus handler with fields with suggestions.
+        OC.editor.attachLPWidgetFocusHandler(tips);
+
+        if (OC.editor.lwOptions.standards) OC.editor.prefillLPContent(lpMap);
+
+        // Scroll the editor to the top.
+        OC.editor.editorFrame.animate({ scrollTop: 0 }, 500);
+    },
+
     insertFiveStepLessonTemplate: function(editor, callback){
         $.get('/resources/template/five-step-lesson-plan/',
             function(response){
@@ -41,8 +51,11 @@ OC.editor = {
                 
                 // Clear all contents.
                 $('div', hiddenTemplates).remove();
-
-                callback(OC.editor.fiveStepLessonPlanTips);
+                
+                var lpMap = {
+                    'standards': $('.cke_widget_editable.lesson-objectives-body')
+                };
+                callback(OC.editor.fiveStepLessonPlanTips, lpMap);
             },
         'html');
     },
@@ -77,7 +90,10 @@ OC.editor = {
                 // Clear all contents.
                 $('div', hiddenTemplates).remove();
 
-                callback(OC.editor.understandingByDesignLessonTips);
+                var lpMap = {
+                    'standards': $('.cke_widget_editable.lesson-established-goals-body')
+                };
+                callback(OC.editor.understandingByDesignLessonTips, lpMap);
             },
         'html');
     },
@@ -109,12 +125,15 @@ OC.editor = {
                 // Clear all contents.
                 $('div', hiddenTemplates).remove();
 
-                callback(OC.editor.simpleLessonTips);
+                var lpMap = {
+                    'standards': $('.cke_widget_editable.lesson-objectives-body')
+                };
+                callback(OC.editor.simpleLessonTips, lpMap);
             },
         'html');
     },
     fiveStepLessonPlanTips: {
-        'lesson-objective-body': 'What will your student be able to do?',
+        'lesson-objectives-body': 'What will your student be able to do?',
         'lesson-goal-body': 'How does the objective connect to the summer (big) goal?',
         'lesson-assessment-body': 'How will you know whether your students have made ' +
         'progress toward the objective? How and when will you assess mastery?',
@@ -319,6 +338,7 @@ OC.editor = {
     editorBody: '',
 
     cke: '',
+    lwOptions: {},
 
     onImageInsert: function(url){
         var image = $('<img/>', {
@@ -357,7 +377,8 @@ OC.editor = {
                 '.editor-header').outerHeight(true) + $(
                 '.editor-toolbar-wrapper').height() + parseInt($('.editor-toolbar-wrapper').css(
                 'padding-top'), 10) + parseInt(editorFrame.css(
-                'padding-top'), 10)) + 'px');
+                'padding-top'), 10) + parseInt(editorFrame.css(
+                'padding-bottom'), 10)) + 'px');
 
         OC.editor.cke = editorBody.ckeditor({
             extraPlugins: 'internallink,sharedspace,resources,' +
@@ -432,28 +453,319 @@ OC.editor = {
 
                         // Initialize the document with the lesson plan template.
                         var editor = editorBody.ckeditorGet();
-                        
-                        function onTemplateLoad(tips){
-                            // Attach focus handler with fields with suggestions.
-                            OC.editor.attachLPWidgetFocusHandler(tips);
-                        }
 
                         // Get the selected template option.
                         var selectedTemplateOption = $(
                             '.lesson-template-option.selected', lessonTemplateDialog.dialog);
                         
                         if (selectedTemplateOption.hasClass('lesson-template-option-five-step')) {
-                            OC.editor.insertFiveStepLessonTemplate(editor, onTemplateLoad);
+                            OC.editor.insertFiveStepLessonTemplate(editor, OC.editor.onTemplateLoad);
                         } else if (selectedTemplateOption.hasClass('lesson-template-option-three-acts')) {
-                            OC.editor.insertThreeActLessonTemplate(editor, onTemplateLoad);
+                            OC.editor.insertThreeActLessonTemplate(editor, OC.editor.onTemplateLoad);
                         } else if (selectedTemplateOption.hasClass('lesson-template-option-ubd')) {
-                            OC.editor.insertUnderstandingByDesignLessonTemplate(editor, onTemplateLoad);
+                            OC.editor.insertUnderstandingByDesignLessonTemplate(editor, OC.editor.onTemplateLoad);
                         } else if (selectedTemplateOption.hasClass('lesson-template-option-weekly')) {
-                            OC.editor.insertWeeklyLessonTemplate(editor, onTemplateLoad);
+                            OC.editor.insertWeeklyLessonTemplate(editor, OC.editor.onTemplateLoad);
                         } else if (selectedTemplateOption.hasClass('lesson-template-option-simple')) {
-                            OC.editor.insertSimpleLessonTemplate(editor, onTemplateLoad);
+                            OC.editor.insertSimpleLessonTemplate(editor, OC.editor.onTemplateLoad);
                         }
                     });
+                });
+    
+                $('.lesson-path-wizard', lessonPathDialog.dialog).click(function(event){
+                    lessonPathDialog.close();
+
+                    lessonWizardDialog = OC.customPopup('.lesson-wizard-dialog');
+
+                    var standards;
+                    function moveTo(step, callback){
+                        steps = ['one', 'two', 'three', 'four', 'five'];
+
+                        // Hide all bodies and deselect all steps.
+                        var stepBodies = $('.lesson-wizard-step-body'),
+                            stepsIndicators = $('.lesson-wizard-steps-step');
+
+                        stepBodies.removeClass('visible');
+                        stepsIndicators.removeClass('selected');
+
+                        var currentStepIndicator = $('.lesson-wizard-step-' + steps[step - 1]),
+                            currentStepBody = $('.lesson-wizard-step-' + steps[step - 1] + '-body');
+
+                        currentStepIndicator.addClass('selected');
+                        currentStepBody.addClass('visible');
+
+                        // Mark previous indicator as complete.
+                        var previousStepIndicator = $('.lesson-wizard-step-' + steps[step - 2]);
+                        if (previousStepIndicator.length !== 0) previousStepIndicator.addClass('completed');
+
+                        if (callback) callback();
+                    }
+
+                    function renderTopicsBrowser(list, browser){
+                        // Clear browser.
+                        browser.html('');
+
+                        // Create new list in browser.
+                        var browserList = $('<ul/>', {
+                            'class': 'lesson-wizard-grade-level-topic-list'
+                        });
+                        var i;
+                        for (i = 0; i < list.length; i++){
+                            browserList.append($('<li/>', {
+                                'text': list[i].title,
+                                'id': list[i].id,
+                                'class': 'lesson-wizard-grade-level-topic-list-item'
+                            }));
+                        }
+
+                        browser.append(browserList);
+
+                        // Handle clicks for subjects.                        
+                        $('.lesson-wizard-grade-level-topic-list-item').click(
+                            bindTopicClickHandler);
+                    }
+
+                    function bindTopicClickHandler(event){
+                        $('.lesson-wizard-grade-level-topic-list-item').removeClass('selected');
+                        var topicSelected = $(event.target);
+                        topicSelected.addClass('selected');
+
+                        var nextButton = $('.lesson-wizard-step-three-body .lesson-wizard-next-button');
+                        nextButton.removeClass('disabled-action-button');
+                        nextButton.removeAttr('disabled');
+                    }
+
+
+                    function gradeTopicClickHandler(event){
+                        $('.lesson-wizard-grade-level-list-item').removeClass('selected');
+                        var gradeSelected = $(event.target);
+                        gradeSelected.addClass('selected');
+
+                        // Render the tree in the browser.
+                        var topicBrowser = $('.lesson-wizard-grade-level-topic-browser');
+                        topicBrowser.addClass('loading-browser');
+
+                        $.get('/resources/api/get-child-categories/' + gradeSelected.attr('id') + '/',
+                            function(response){
+                                if (response.status == 'true'){
+                                    renderTopicsBrowser(_.values(response.categories), topicBrowser);
+                                    topicBrowser.removeClass('loading-browser');
+                                }
+                                else {
+                                    OC.popup(response.message, response.title);
+                                }
+
+                            },
+                        'json');
+                    }
+
+                    // Handle clicks for standards..
+                    function renderGrades(){
+                        // Get subject from standardID.
+                        standardSubjectID = _.find(_.find(standards, function(standard){
+                            return standard.id === OC.editor.lwOptions['standardID'];
+                        }).subjects, function(subject) { return subject.title === OC.editor.lwOptions['subject']; }).id;
+
+                        // Find the subject title in the standards list.
+                        $.get('/resources/api/get-child-categories/' + standardSubjectID + '/',
+                            function(response){
+                                if (response.status == 'true'){
+                                    var list = _.values(response.categories),
+                                        i,
+                                        gradeList = $('.lesson-wizard-grade-level-list');
+                                    for (i = 0; i < list.length; i++){
+                                        gradeList.append($('<li/>', {
+                                            'class': 'lesson-wizard-grade-level-list-item',
+                                            'id': list[i].id,
+                                            'text': list[i].title,
+                                        }));
+                                    }
+                                    // Handle clicks for grade & topic.
+                                    $('.lesson-wizard-grade-level-list-item').click(
+                                        gradeTopicClickHandler);
+                                }
+                                else {
+                                    OC.popup(response.message, response.title);
+                                }
+
+                            },
+                        'json');
+                    }
+
+                    function standardsClickHandler(event){
+                        var standardSelected = $(event.target);
+
+                        if (standardSelected.hasClass('selected'))
+                            standardSelected.removeClass('selected');
+                        else standardSelected.addClass('selected');
+
+                        var nextButton = $('.lesson-wizard-step-four-body .lesson-wizard-next-button');
+                        nextButton.removeClass('disabled-action-button');
+                        nextButton.removeAttr('disabled');
+                    }
+
+                    // Bind click on next button on the topic -> standards option.
+                    $('.lesson-wizard-step-three-body .lesson-wizard-next-button').click(function(event){
+                        if (! $(event.target).hasClass('disabled-action-button')){
+                            moveTo(4, function(){
+                                var topicCategory = $('.lesson-wizard-grade-level-topic-list-item.selected').attr('id');
+
+                                var standardsBrowser = $('.lesson-wizard-standards-browser');
+                                standardsBrowser.addClass('loading-browser');
+                                $.get('/meta/api/get-child-tags-from-category/' + topicCategory + '/',
+                                    function(response){
+                                        if (response.status == 'true'){
+                                            standardsBrowser.removeClass('loading-browser');
+                                            var list = _.values(response.tags),
+                                                i,
+                                                standardsList = $('.lesson-wizard-standards-list');
+                                            for (i = 0; i < list.length; i++){
+                                                standardsList.append($('<li/>', {
+                                                    'class': 'lesson-wizard-standards-list-item',
+                                                    'id': list[i].id,
+                                                    'title': list[i].description,
+                                                    'name': list[i].title,
+                                                    'data-url': list[i].url,
+                                                    'html': '<span class=\"bold\">' + list[i].title + '</span>: ' +
+                                                        list[i].description,
+                                                }));
+                                            }
+                                            // Handle clicks for standards.
+                                            $('.lesson-wizard-standards-list-item').click(
+                                                standardsClickHandler);
+                                        }
+                                        else {
+                                            OC.popup(response.message, response.title);
+                                        }
+
+                                    },
+                                'json');
+                            });
+                        }
+                    });
+
+                    $('.lesson-wizard-step-four-body .lesson-wizard-next-button').click(function(event){
+                        if (! $(event.target).hasClass('disabled-action-button')){
+                            moveTo(5, function(){
+                                // Set the selected standards.
+                                OC.editor.lwOptions['standards'] = [];
+                                var selectedStandards =  $('.lesson-wizard-standards-list-item.selected');
+
+                                var  i, currentStandard;
+                                for (i = 0; i < selectedStandards.length; i++){
+                                    currentStandard = $(selectedStandards[i]);
+                                    OC.editor.lwOptions['standards'].push({
+                                        'url': currentStandard.attr('data-url'),
+                                        'title': $(selectedStandards[i]).attr('name'),
+                                        'description': $(selectedStandards[i]).attr('title')
+                                    });
+                                }
+
+                                // Bind click handler with options.
+                                $('.lesson-wizard-lesson-type').click(function(event){
+                                    // Remove the class 'selected' from all buttons.
+                                    $('.lesson-wizard-lesson-type').removeClass('selected');
+                                    $(event.target).addClass('selected');
+                                    
+                                    $('.lesson-wizard-templates-browser-wrapper').addClass('show');
+                                
+                                    // Activate 'Done'.
+                                    var doneButton = $('.lesson-wizard-step-five-body .lesson-wizard-done-button');
+                                    doneButton.removeClass('disabled-action-button');
+                                    doneButton.removeAttr('disabled');
+
+                                    $('.lesson-wizard-templates-browser .lesson-template-option').click(function(){
+                                        // Remove all the selected options.
+                                        $('.lesson-template-option.selected').removeClass('selected');
+                                        $(this).addClass('selected');
+                                    });
+                                });
+                            });
+                        }
+                    });
+
+                    // Bind the Done button the final screen.
+                    $('.lesson-wizard-step-five-body .lesson-wizard-done-button').click(function(event){
+                        lessonWizardDialog.close();
+
+                        // Determine the template and insert it.
+                        var editor = editorBody.ckeditorGet(),
+                            selectedTemplateOption = $(
+                            '.lesson-wizard-templates-browser .lesson-template-option.selected');
+
+                        if (selectedTemplateOption.hasClass('lesson-template-option-five-step')) {
+                            OC.editor.insertFiveStepLessonTemplate(editor, OC.editor.onTemplateLoad);
+                        } else if (selectedTemplateOption.hasClass('lesson-template-option-ubd')) {
+                            OC.editor.insertUnderstandingByDesignLessonTemplate(editor, OC.editor.onTemplateLoad);
+                        } else if (selectedTemplateOption.hasClass('lesson-template-option-simple')) {
+                            OC.editor.insertSimpleLessonTemplate(editor, OC.editor.onTemplateLoad);
+                        }
+                    });
+
+                    function subjectClickHandler(){
+                        // Find all standards which have the subject.
+                        filteredStandards = _.filter(standards, function(standard){
+                            return _.filter(standard.subjects, function(subject){
+                                return subject.title === OC.editor.lwOptions['subject'];
+                            }).length !== 0;
+                        });
+                        var stepTwoBodyContent = $(
+                            '.lesson-wizard-step-two-body .lesson-wizard-step-body-content');
+                        var i;
+                        for (i = 0; i < filteredStandards.length; i++){
+                            stepTwoBodyContent.append($('<button/>', {
+                                'class': 'lesson-wizard-button',
+                                'text': filteredStandards[i].title
+                            }));
+                        }
+                        // Attach click handler with buttons.
+                        stepTwoBodyContent.find(
+                            '.lesson-wizard-button').click(function(){
+                                OC.editor.lwOptions['standard'] = $(this).text();
+
+                                // Find ID from the list standard.
+                                OC.editor.lwOptions['standardID'] = _.find(standards, function(standard){
+                                    return standard.title === OC.editor.lwOptions['standard'];
+                                }).id;
+                                moveTo(3, renderGrades);
+                        });
+                    }
+
+
+                    moveTo(1, function(){
+                        $.get('/meta/api/standards/',
+                            function(response){
+                                if (response.status == 'true'){
+                                    standards = _.values(response.standards);
+                                    var i, j, subjects = [];
+                                    for (i = 0; i < standards.length; i++){
+                                        subjects = _.union(_.pluck(standards[i].subjects, 'title'));
+                                    }
+
+                                    // Render the subjects as buttons.
+                                    var stepOneBodyContent = $(
+                                        '.lesson-wizard-step-one-body .lesson-wizard-step-body-content');
+                                    for (j = 0; j < subjects.length; j++){
+                                        stepOneBodyContent.append($('<button/>', {
+                                            'class': 'lesson-wizard-button',
+                                            'text': subjects[j]
+                                        }));
+                                    }
+                                    // Attach click handler with buttons.
+                                    stepOneBodyContent.find(
+                                        '.lesson-wizard-button').click(function(){
+                                            OC.editor.lwOptions['subject'] = $(this).text();
+                                            moveTo(2, subjectClickHandler);
+                                    });
+                                }
+                                else {
+                                    OC.popup(response.message, response.title);
+                                }
+
+                            },
+                        'json');
+                    });
+
                 });
             }
         }
@@ -626,6 +938,22 @@ OC.editor = {
         OC.editor.lessonAssist.addClass('force-closed');
 
         OC.editor.editorBodyWrapper.removeClass('assisted');
+    },
+
+    prefillLPContent: function(lpMap){
+
+        /************* Standards *****************/
+
+        // Map the standards field to objectives determined from the standards
+        //     and insert the objectives, standards.
+        lpMap.standards.html(
+            '<p>(enter objectives here)</p><p><span class="bold">Standards</span></p>');
+        var i;
+        for (i = 0; i < OC.editor.lwOptions['standards'].length; i++){
+            lpMap.standards.append('<p><a href="' + OC.editor.lwOptions['standards'][i].url +
+                '" target="_blank">' + OC.editor.lwOptions['standards'][i].title +
+                '</a>: ' + OC.editor.lwOptions['standards'][i].description + '</p>');
+        }
     },
 
     searchProjectsTabClickHandler: function(event){
