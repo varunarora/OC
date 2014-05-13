@@ -85,6 +85,9 @@ def build_child_tree(root_node):
             node_toggler.text = ' '
 
             node_href = ElementTree.SubElement(node_element, 'a')
+    
+            node_href.set('href', reverse('browse', kwargs={
+                    'category_slug': catU.build_breadcrumb(current_node)[0].url }))
             node_href.set('id', 'category-' + str(current_node.id))            
             node_href.text = current_node.title
 
@@ -109,7 +112,7 @@ def build_child_tree(root_node):
 
             if node_type == 'category':
                 node_href.set('href', reverse('browse', kwargs={
-                    'category_slug': current_node.url}))
+                    'category_slug': catU.build_breadcrumb(current_node)[0].url }))
             else:
                 node_href.set('href', reverse('meta:standard', kwargs={
                     'tag_title': current_node.title }))
