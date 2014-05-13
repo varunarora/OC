@@ -1715,6 +1715,23 @@ nav.project-navigation li
 			background-color: $link-hover
 			color: #fff
 
+
+.profile-view, .tag-view
+	background-color: #efefef
+
+	.center-stage
+		margin: 10px auto
+		@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
+		background-color: #fff
+		padding: 20px
+
+	#fill-panel
+		width: 300px
+
+	#key-panel
+		width: 630px
+
+
 table
 	td
 		&.column-20
@@ -1971,7 +1988,7 @@ nav.collections-navigation,
 .current-navigation-collection
 	@include sans-bold
 
-.toggle-collection, .toggle-resource, .toggle-tag-category
+.toggle-collection, .toggle-resource, .toggle-category, .toggle-tag
 	width: 10px
 	height: 16px
 	background-repeat: no-repeat
@@ -1980,20 +1997,20 @@ nav.collections-navigation,
 	float: left
 	padding-right: 10px
 
-.empty-collection .toggle-collection, .empty-tag-category .toggle-tag-category
+.empty-collection .toggle-collection, .empty-category > .toggle-category
 	background-image: url('../images/empty-collection.png')
 	background-position: 2px 5px
 
-.parent-collection > .toggle-collection, .parent-tag-category .toggle-tag-category
+.parent-collection > .toggle-collection, .parent-category > .toggle-category
 	background-image: url('../images/arrow-right-small.png')
 	background-position: 5px 4px
 
-.opened-collection > .toggle-collection, , .opened-tag-category .toggle-tag-category
+.opened-collection > .toggle-collection, , .opened-category > .toggle-category
 	background-image: url('../images/arrow-bottom-small.png')				
 	background-position: 3px 6px
 
-.empty-resource > .toggle-resource
-	background-image: url('../images/all-subjects.png')
+.empty-resource > .toggle-resource, .empty-tag > .toggle-tag
+	background-image: url('../images/empty-collection.png')
 	background-position: 2px 4px
 
 .move-resource-collection-browser,
@@ -2002,7 +2019,8 @@ nav.collections-navigation,
 .link-resource-profile-browser,
 .link-resource-project-browser,
 .new-discussion-post-attach-resource-project-browser,
-.post-new-file-folder-profile-browser
+.post-new-file-folder-profile-browser,
+.link-resource-standards-browser
 	margin-top: 10px
 	ul
 		li
@@ -2652,7 +2670,7 @@ ul.tagit
 	background: #000000
 	top: 0px
 	left: 0px
-	opacity: 0.8
+	opacity: 0.5
 
 	&.show-popup-background
 		display: block
@@ -2840,6 +2858,10 @@ aside.page-menu-wrapper
 .lesson-template-dialog
 	width: 600px
 	height: 400px
+
+.lesson-wizard-dialog
+	width: 800px
+	min-height: 400px
 
 .new-unit-dialog
 	width: 300px
@@ -3242,11 +3264,12 @@ ul.collaborators
 		margin: auto
 
 body.editor
-	overflow-x: hidden
+	overflow: hidden
 
 .editor-frame
 	background-color: #efefef
 	padding-top: 40px
+	padding-bottom: 20px
 	overflow-y: scroll
 	overflow-x: initial
 
@@ -3363,6 +3386,7 @@ body.editor
 		margin-top: 0px
 		@include box-shadow(0 0px 16px rgba(0, 0, 0, 0.1))
 		background-color: #fff
+		margin-bottom: 40px
 
 		.editor-body
 			min-height: 600px
@@ -3654,12 +3678,10 @@ blockquote
 		border-left: 1px solid #efefef
 
 
-.lesson-template-dialog
+.lesson-template-dialog, .lesson-wizard-dialog
 	.lesson-template-browser
-		border: 1px solid #ddd
 		padding: 10px
 		overflow: auto
-		height: 275px
 
 		.lesson-template-option
 			width: 78px
@@ -3703,6 +3725,178 @@ blockquote
 
 			&.lesson-template-option-five-e
 				background-image: url('../images/five-e-lp.png')
+
+.lesson-template-dialog
+	.lesson-template-browser
+		height: 275px
+		border: 1px solid #ddd
+
+@mixin wizard-button
+	background-color: transparent
+	padding: 30px 40px
+	@include border-radius(4px)
+	border: 1px solid #999
+	font-size: 1.3em
+	@include sans-bold
+	color: $light-font
+	margin: 0px 10px
+	margin-bottom: 10px
+
+	&:hover
+		background-color: $link-hover
+		color: #fff
+		border-color: $link-hover
+		@include box-shadow(0 0 4px rgba(0, 0, 0, 0.2))
+
+	&:active
+		@include box-shadow(0 0 8px rgba(0, 0, 0, 0.2))
+		background-color: #0B357F
+		border-color: #0B357F
+		color: #fff
+
+.lesson-wizard-dialog
+	nav.lesson-wizard-steps
+		margin: auto
+		text-align: center
+
+		.lesson-wizard-steps-step
+			height: 18px
+			width: 24px
+			color: #5ABD02
+			@include border-radius(16px)
+			border: 1px solid #ddd
+			display: inline-block
+			text-align: center
+			margin-right: 140px
+			padding-top: 6px
+			background-color: #fff
+
+			&.selected
+				background-color: #5ABD02
+				color: #fff
+				@include sans-bold
+				border-color: #5ABD02
+
+			&:last-child
+				margin-right: 0px
+
+			&.completed
+				background-color: #efefef
+				color: $light-font
+
+	.lesson-wizard-steps-flow
+		background-image: url('../images/signup-flank.png')
+		background-repeat: repeat-x
+		width: 675px
+		position: relative
+		top: -22px
+		height: 24px
+		margin: auto
+		z-index: -1
+
+	.lesson-wizard-step-body
+		display: none
+
+		.lesson-wizard-step-body-title
+			text-align: center
+
+		.lesson-wizard-step-body-content
+			margin: auto 40px
+			text-align: center
+			margin-top: 40px
+
+		&.visible
+			display: block
+
+	.lesson-wizard-button
+		@include wizard-button
+
+	.lesson-wizard-grade-level
+		overflow: hidden
+
+		.lesson-wizard-grade-level-list
+			float: left
+
+			li
+				text-align: left
+				background-image: url('../images/unchecked-radio-button.png')
+				background-position: 6px center
+				background-repeat: no-repeat
+				margin-bottom: 6px
+				padding-left: 36px
+				font-size: 1.2em
+				cursor: pointer
+
+				&.selected
+					background-image: url('../images/checked-radio-button.png')
+
+		.lesson-wizard-grade-level-topic-browser
+			border: 1px solid #ddd
+			height: 300px
+			float: right
+			overflow: auto
+			width: 500px
+
+			&.loading-browser
+				background: url('../images/spinner.gif') no-repeat center center
+
+			.lesson-wizard-grade-level-topic-list
+				padding: 12px
+
+				.lesson-wizard-grade-level-topic-list-item
+					text-align: left
+					text-transform: uppercase
+					@include sans-bold
+					color: $light-font
+					padding: 6px
+					cursor: pointer
+
+					&.selected
+						background-color: #efefef
+
+	.lesson-wizard-standards-browser
+		border: 1px solid #ddd
+		width: 100%
+		height: 300px
+		overflow: auto
+
+		&.loading-browser
+			background: url('../images/spinner.gif') no-repeat center center
+
+		.lesson-wizard-standards-list
+			padding: 12px
+
+			.lesson-wizard-standards-list-item
+				text-align: left
+				color: $light-font
+				padding: 6px
+				cursor: pointer
+				margin-bottom: 2px
+
+				&.selected
+					background-color: #efefef
+
+	.lesson-wizard-lesson-types
+		overflow: hidden
+
+		button.lesson-wizard-lesson-type
+			@include wizard-button
+			width: 215px
+			height: 120px
+			float: left
+
+			&.selected
+				@include box-shadow(0 0 8px rgba(0, 0, 0, 0.2))
+				background-color: #0B357F
+				border-color: #0B357F
+				color: #fff
+
+	.lesson-wizard-templates-browser-wrapper
+		margin-top: 10px
+		display: none
+
+		&.show
+			display: block
 
 .profile-new-resource-panel
 	overflow: hidden
@@ -3883,41 +4077,6 @@ table#edit-unit-form-table
 				.scroll-pane
 					margin-right: 10px
 
-				> ul
-					> li
-						> a
-							@include h3-styling
-							display: block
-							padding: 6px
-							padding-left: 12px
-							color: #efefef
-							@include border-radius(4px 0px 0px 4px)
-							outline: none
-
-							&:hover
-								color: #fff
-
-						&.selected-category
-							> a
-								background-color: #efefef
-								color: $body-color
-
-								&:hover
-									text-decoration: none
-									color: $body-color
-
-						ul
-							margin-left: 30px
-							margin-bottom: 30px
-
-							a
-								color: #bababa
-								line-height: 1.2em
-								outline: none
-
-								&:hover
-									color: #fff
-
 			ul.category-panel-listing-search-category
 				li.selected-category
 					a
@@ -3925,6 +4084,42 @@ table#edit-unit-form-table
 						background-repeat: no-repeat
 						background-position: 8px center
 						padding-left: 30px
+
+		.category-panel-listing, .category-panel-listing-categories
+			> ul
+				> li
+					> a
+						@include h3-styling
+						display: block
+						padding: 6px
+						padding-left: 12px
+						color: #efefef
+						@include border-radius(4px 0px 0px 4px)
+						outline: none
+
+						&:hover
+							color: #fff
+
+					&.selected-category
+						> a
+							background-color: #efefef
+							color: $body-color
+
+							&:hover
+								text-decoration: none
+								color: $body-color
+
+					ul
+						margin-left: 30px
+						margin-bottom: 30px
+
+						a
+							color: #bababa
+							line-height: 1.2em
+							outline: none
+
+							&:hover
+								color: #fff
 
 	.content-panel
 		.content-panel-body-wrapper
@@ -4402,6 +4597,11 @@ table#edit-unit-form-table
 		display: none
 
 @import "scroll"
+
+.tag-view
+	.standard-resources-list
+		margin-top: 40px
+
 
 .worksheet-creator-frame
 	overflow: hidden

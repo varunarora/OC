@@ -220,25 +220,14 @@
 .profile-view
     background-color: #efefef
 
-    .center-stage
-        margin: 10px auto
-        @include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
-        background-color: #fff
-        padding: 20px
+    #key-panel
+        // Overwrite tab default styling.
+        &.oc-tabs
+            nav.profile-tabs
+                margin-top: 0px
 
-        #fill-panel
-            width: 300px
-
-        #key-panel
-            width: 630px
-
-            // Overwrite tab default styling.
-            &.oc-tabs
-                nav.profile-tabs
-                    margin-top: 0px
-
-                .oc-tabs-content
-                    border-top-width: 0px
+            .oc-tabs-content
+                border-top-width: 0px
 
 .page-subscribe-button
     display: block

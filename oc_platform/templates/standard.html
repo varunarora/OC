@@ -1,0 +1,41 @@
+{% include 'partials/header.html' with body_class='tag-view' %}
+
+<div class="center-stage">
+    <div id="fill-panel" class="panel-left">
+        <h2>{{ tag.title }}</h2>
+        {% for category in breadcrumb %}
+            <a href="{{ category.url }}">{{ category.title }}</a> 
+            {% if not forloop.last %}
+            <span class="vertical-caret breadcrumbs-caret"></span> 
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div id="key-panel" class="panel-right">
+        {{ tag.description }}
+
+        {% if resources %}
+        <div class="standard-resources-list">
+        <h3>Resource we found that are aligned to this standard</h3>
+        {% for resource in resources %}
+            <div class="search-result">
+                <div class="search-result-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ resource.image.name }}');"></div>
+                <div class="description">
+                    <div class="search-result-title"><a href="{% url read resource_id=resource.id resource_slug=resource.slug %}">{{ resource.title }}</a></div>
+                    <div class="search-result-description">{{ resource.description|truncatechars:200 }}</a></div>
+                    <div class="search-result-meta">
+                        <div class="search-result-meta-views">{{ resource.views }} views</div>
+                        <div class="search-result-meta-actions">
+                            <span class="resource-favorite{% if favorited %} favorited{% endif %}">{% if favorited %}Favorited{% else %}Favorite{% endif %}</span>
+                            <a class="resource-copy">Copy</a>
+                            <a class="resource-remix">Remix</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% include 'partials/footer.html' %}
