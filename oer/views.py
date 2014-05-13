@@ -738,7 +738,7 @@ def render_editor(request, document_type):
                 context_type=collection_host_type.name, context=collection_host
             )
 
-            return redirect_to_collection(user_id, project_id, collection_id)
+            return view_resource(request, document_resource.id, document_resource.slug)
         else:
             new_document.delete()
             new_resource_revision.delete()
