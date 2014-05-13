@@ -1515,7 +1515,10 @@ def edit_headline(request, user_id):
 
 
 def dismiss_notifications(request, user_id):
-    notification_ids = request.GET.get('ids').split(',')
+    try:
+        notification_ids = request.GET.get('ids').split(',')
+    except:
+        return APIUtilities._api_not_found()
 
     try:
         from user_account.models import Notification
