@@ -13,7 +13,7 @@
             <div class="category-choice-wrapper">
                 Categories based on <a class="category-choice">Common Core</a>
             </div>
-            {% if query %}
+            {% if query or query == '' %}
                 <ul class="category-panel-listing-search-category">
                     <li class="selected-category"><a href="">Search for '{{ query }}'</a></li>
                 </ul>
@@ -32,7 +32,7 @@
     <div class="content-panel">
         <div class="content-panel-body-wrapper">
             <div class="content-panel-body" id="category-{{ selected_category.id }}">
-                {% if query %}
+                {% if query or query == '' %}
                 <div class="content-panel-body-search">
                 {% include 'partials/search.html' %}
                 </div>
@@ -126,7 +126,7 @@
                         <div class="lazy-load-button enabled">Load more...</div>
                     {% endif %}
 
-                    {% if not query %}
+                    {% if not query and query != '' %}
                     {% if requests %}
                     <div class="content-panel-body-listing-requests">
                         <div class="content-panel-body-listing-requests-title">
