@@ -646,12 +646,13 @@ def new_unit(request):
             import oer.CollectionUtilities as cu
             (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
                 parent_collection)
+            title = request.POST.get('title', None)
             slug = cu._get_fresh_collection_slug(
-                request.POST.get('title', 'Untitled Unit'), flattened_tree)
+               title if title != '' else 'Untitled Unit', flattened_tree)
 
             # Create and save the unit colleciton.
             new_collection = Collection(
-                title=request.POST.get('title', 'Untitled Unit'),
+                title=title if title != '' else 'Untitled Unit',
                 host=unit,
                 visibility='private',
                 slug=slug,
