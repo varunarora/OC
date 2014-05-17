@@ -2004,7 +2004,7 @@ var OC = {
         
             OC.resourcesCollections.initCopyAction();
 
-            OC.resourcesCollections.bindThumbnailSelect();
+            OC.resourcesCollections.bindItemSelect();
 
             OC.resourcesCollections.infiniteScroll();
         }
@@ -2148,8 +2148,15 @@ var OC = {
             OC.getFavoriteState('resource', resourceID, setFavoriteState);
 
             resourceFavoriteButton.click(function(event){
+                var currentResourceFavoriteButton = $(this);
                 OC.favoriteClickHandler(
-                    'resource', resourceID, userID, event);
+                    'resource', resourceID, userID, function(){
+                        currentResourceFavoriteButton.addClass('favorited');
+                        currentResourceFavoriteButton.text('Favorited');
+                    }, function(resourceFavoriteButton){
+                        currentResourceFavoriteButton.removeClass('favorited');
+                        currentResourceFavoriteButton.text('Favorite');
+                    });
             });
 
         } else {
@@ -2164,26 +2171,17 @@ var OC = {
         }
     },
 
-    favoriteClickHandler: function(type, resourceID, userID, event, favoriteCallback, unfavoriteCallback){
-        var resourceFavoriteButton = $(event.target);
+    favoriteClickHandler: function(type, resourceID, userID, favoriteCallback, unfavoriteCallback){
         $.get('/interactions/favorite/' + type + '/' + resourceID + '/',
             function(response){
                 if (response.status == 'true'){
-                    resourceFavoriteButton.addClass('favorited');
-                    resourceFavoriteButton.text('Favorited');
-                    favoriteCallback(resourceFavoriteButton);
+                    favoriteCallback();
                 }
                 else if (response.status == 'unfavorite success'){
-                    resourceFavoriteButton.removeClass('favorited');
-                    resourceFavoriteButton.text('Favorite');
-                    unfavoriteCallback(resourceFavoriteButton);
+                    unfavoriteCallback();
                 }
             },
         'json');
-
-        event.preventDefault();
-        event.stopPropagation();
-        return false;
     },
 
     getFavoriteState: function(type, resourceID, callback){

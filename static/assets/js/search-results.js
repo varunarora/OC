@@ -78,14 +78,14 @@ var ResultsView = Backbone.View.extend({
         return this;
     },
 
-    favorite: function(event){
+    favorite: function(){
         OC.favoriteClickHandler('resource',
-            this.model.get('id'), OC.config.user.id, event,
+            this.model.get('id'), OC.config.user.id,
             this.favoriteCallback, this.unfavoriteCallback
         );
     },
 
-    copy: function(event){
+    copy: function(){
         var loadingPopup = OC.customPopup('.loading-dialog'),
             resourceView = this;
 
@@ -103,12 +103,16 @@ var ResultsView = Backbone.View.extend({
         'json');
     },
 
-    favoriteCallback: function(resourceFavorite){
+    favoriteCallback: function(){
+        var resourceFavorite = this.$el.find('.resource-favorite');
         resourceFavorite.text('Favorited');
+        resourceFavorite.addClass('favorited');
     },
 
-    unfavoriteCallback: function(resourceFavorite){
+    unfavoriteCallback: function(){
+        var resourceFavorite = this.$el.find('.resource-favorite');
         resourceFavorite.text('Favorite');
+        resourceFavorite.removeClass('favorited');
     }
 });
 

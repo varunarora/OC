@@ -3489,7 +3489,26 @@ blockquote
 	padding-top: 20px
 
 .resource-collection-item
-	height: 100px
+	overflow: hidden
+	margin: 10px 0px
+	padding: 5px
+
+	&.selected, &.selected:hover
+		background-color: #E9EFFA
+
+	&:hover
+		background-color: #f2f2f2
+
+		.resource-item-thumbnail
+
+			.resource-item-thumbnail-selector
+				visibility: visible
+				opacity: 0.4
+				cursor: pointer
+
+				&.selected
+					visibility: visible
+					opacity: 1
 
 	input[name=resource_collection_id]
 		display: none
@@ -3498,6 +3517,7 @@ blockquote
 		width: 80px
 		height: 80px
 		float: left
+		display: inline-block
 
 		.resource-item-thumbnail-selector
 			background: url('../images/select.png') no-repeat center center
@@ -3510,16 +3530,6 @@ blockquote
 			&.selected
 				visibility: visible
 				opacity: 1
-
-		&:hover
-			.resource-item-thumbnail-selector
-				visibility: visible
-				opacity: 0.4
-				cursor: pointer
-
-				&.selected
-					visibility: visible
-					opacity: 1
 
 		.resource-item-thumbnail-drive, .resource-item-thumbnail-dropbox,
 		.resource-item-thumbnail-image, .resource-item-thumbnail-pdf,
@@ -3816,14 +3826,14 @@ blockquote
 
 		.lesson-wizard-grade-level-list
 			float: left
-			width: 200px
+			width: 250px
 
 			li
 				text-align: left
 				background-image: url('../images/unchecked-radio-button.png')
 				background-position: 6px center
 				background-repeat: no-repeat
-				margin-bottom: 6px
+				margin-bottom: 2px
 				padding-left: 36px
 				font-size: 1.2em
 				cursor: pointer
@@ -3836,7 +3846,7 @@ blockquote
 			height: 300px
 			float: right
 			overflow: auto
-			width: 500px
+			width: 450px
 
 			&.loading-browser
 				background: url('../images/spinner.gif') no-repeat center center

@@ -1,7 +1,7 @@
 <div class="resource-collection-item {{ item_category }}" id="{{ item_category }}-{{ item.id }}">
     <input type="checkbox" name="resource_collection_id" value="{{ item.id }}"/>
     {% if item_category == 'resource' and item.type != 'gfolder' and item.type != 'dropbox' %}
-    <div class="resource-item-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ item.image.name }}');">
+    <a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %} class="resource-item-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ item.image.name }}');">
         <div class="resource-item-thumbnail-selector"></div>
         {% if item.type == 'image' %}
         <div class="resource-item-thumbnail-image"></div>
@@ -22,7 +22,7 @@
         {% elif item.type == 'gdoc' %}
         <div class="resource-item-thumbnail-drive"></div>  
         {% endif %}
-    </div>
+    </a>
     {% elif item_type == 'unit' %}
     <div class="resource-item-thumbnail" style="background-image: url('{{ STATIC_URL }}images/unit-icon.png');"></div>
     {% else %}

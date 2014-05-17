@@ -18,10 +18,10 @@ OC.resourcesCollections = {
 
     resourceCollectionItemTemplate: _.template('<div class="resource-collection-item <%= category %>" id="<%= category %>-<%= id %>">' +
         '<input type="checkbox" name="resource_collection_id" value="<%= id %>"/>' +
-        '<div class="resource-item-thumbnail" style="background-image: url(\'<%= thumbnail %>\');">' +
+        '<a href="<%= url %>"<% if (open_url){ %> target="_blank"<% } %>> class="resource-item-thumbnail" style="background-image: url(\'<%= thumbnail %>\');">' +
         '<div class="resource-item-thumbnail-selector"></div>' +
         '<div class="resource-item-thumbnail-<%= type %>"></div>' +
-        '</div><div class="resource-item-description">' +
+        '</a><div class="resource-item-description">' +
         '<div class="resource-item-description-title"><a href="<%= url %>"<% if (open_url){ %> ' +
         'target="_blank"<% } %>><%= title %></a>' +
         '<div class="resource-item-description-meta">Last modified at: <%= modified %></div>' +
@@ -64,10 +64,23 @@ OC.resourcesCollections = {
             }
 
             resourceFavoriteButton.click(function(event){
+                var currentResourceFavoriteButton = $(this),
+                    currentResourceFavoriteButtonWrapper = currentResourceFavoriteButton.parent('.resource-favorite-wrapper');
+
                 OC.favoriteClickHandler(
                     'resource', resourceID,
-                    OC.config.user.id, resourceFavoriteWrapper, event
+                    OC.config.user.id, function(){
+                        currentResourceFavoriteButtonWrapper.addClass('favorited');
+                        currentResourceFavoriteButton.text('Favorited');
+                    }, function(){
+                        currentResourceFavoriteButtonWrapper.removeClass('favorited');
+                        currentResourceFavoriteButton.text('Favorite');
+                    }
                 );
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
             });
 
         }
@@ -179,7 +192,6 @@ OC.resourcesCollections = {
                 '.resource-collection-item').find('input[name=resource_collection_id]')[0];
 
             if (resourceCollectionCheckbox.checked){
-                console.log(thumbnail);
                 thumbnail.addClass('selected');
             } else {
                 thumbnail.removeClass('selected');
@@ -188,17 +200,22 @@ OC.resourcesCollections = {
 
     },
 
-    bindThumbnailSelect: function(){
-        var thumbnail, resourceCollectionCheckbox,
-            thumbnails = $('.resource-item-thumbnail');
+    bindItemSelect: function(){
+        var thumbnail, resourceCollectionCheckbox;
 
-        $('.resource-item-thumbnail').click(function(event){
-            thumbnail = $(event.target);
-            resourceCollectionCheckbox = $(event.target).parents(
-                '.resource-collection-item').find('input[name=resource_collection_id]');
+        $('.resource-collection-item').click(function(event){
+            resourceCollection = $(this);
+            resourceCollectionCheckbox = $('input[name=resource_collection_id]', resourceCollection);
 
             resourceCollectionCheckbox.trigger('click');
-            thumbnail.toggleClass('selected');
+            resourceCollection.toggleClass('selected');
+            resourceCollection.find('.resource-item-thumbnail-selector').toggleClass('selected');
+        });
+
+        // Do not let checkbox, thumbnail link click triggers propogate back to the resource item.
+        $('input[name=resource_collection_id]', 'a.resource-item-thumbnail',
+            '.resource-item-description-title a').click(function(event){
+            event.stopPropagation();
         });
     },
 

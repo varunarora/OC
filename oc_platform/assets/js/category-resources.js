@@ -208,20 +208,24 @@ var ResourceView = Backbone.View.extend({
         return this;
     },
 
-    favorite: function(event){
+    favorite: function(){
         OC.favoriteClickHandler(
             'resource', this.model.get('id'),
-            OC.config.user.id, event, this.favoriteCallback,
+            OC.config.user.id, this.favoriteCallback,
             this.unfavoriteCallback
         );
     },
 
-    favoriteCallback: function(resourceFavorite){
-        resourceFavorite.text(parseInt(resourceFavorite.text(), 10) + 1);
+    favoriteCallback: function(){
+        var resourceFavoriteButton = this.$el.find('.content-panel-body-listing-item-favorites');
+        resourceFavoriteButton.text(parseInt(resourceFavorite.text(), 10) + 1);
+        resourceFavoriteButton.addClass('favorited');
     },
 
-    unfavoriteCallback: function(resourceFavorite){
-        resourceFavorite.text(parseInt(resourceFavorite.text(), 10) - 1);
+    unfavoriteCallback: function(){
+        var resourceFavoriteButton = this.$el.find('.content-panel-body-listing-item-favorites');
+        resourceFavoriteButton.text(parseInt(resourceFavorite.text(), 10) - 1);
+        resourceFavoriteButton.removeClass('favorited');
     }
 });
 
