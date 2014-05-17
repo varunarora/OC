@@ -2126,6 +2126,10 @@ $(document).ready(function(){
 
     OC.editor.initEditUnit();
 
+    window.onbeforeunload = function(event) {
+        return 'If you quit, you will loose all your work. Would you still like to leave?';
+    };
+
     // Initialize document meta collapser.
     //OC.editor.initDocumentMetaCollapser();
 
