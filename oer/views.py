@@ -1388,7 +1388,7 @@ def delete_individual_resource(resource):
     resource_content_type = ContentType.objects.get_for_model(Resource)
     revision_content_type = ContentType.objects.get_for_model(ResourceRevision)
 
-    from interactions.models import CommentReference, Comment
+    from interactions.models import CommentReference, Comment, Favorite
 
     for revision in revisions:
         if revision.content_type == document_content_type:
@@ -1431,8 +1431,6 @@ def delete_individual_resource(resource):
         for revision_comment in revision_comments:
             revision_comment.delete()
 
-    resource.delete()
-
     # Delete all the comments on this document.
     resource_comments = Comment.objects.filter(
         parent_type=resource_content_type, parent_id=resource.id
@@ -1440,6 +1438,14 @@ def delete_individual_resource(resource):
 
     for resource_comment in resource_comments:
         resource_comment.delete()
+
+    # Delete all favorites associated with this resource.
+    resource_favorites = Favorite.objects.filter(
+        parent_type=resource_content_type, parent_id=resource.id)
+    for resource_favorite in resource_favorites:
+        resource_favorite.delete()
+
+    resource.delete()
 
 
 def delete_collection(request, collection_id):
