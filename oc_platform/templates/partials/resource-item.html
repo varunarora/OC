@@ -26,14 +26,14 @@
     {% elif item_type == 'unit' %}
     <div class="resource-item-thumbnail" style="background-image: url('{{ STATIC_URL }}images/unit-icon.png');"></div>
     {% else %}
-    <div class="resource-item-thumbnail" style="background-image: url('{{ STATIC_URL }}images/folder-icon.png');">
+    <a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %} class="resource-item-thumbnail" style="background-image: url('{{ STATIC_URL }}images/folder-icon.png');">
         <div class="resource-item-thumbnail-selector"></div>
         {% if item.type == 'gfolder' or item.type == 'gdoc' %}
         <div class="resource-item-thumbnail-drive"></div>
         {% elif item.type == 'dropbox' %}
         <div class="resource-item-thumbnail-dropbox"></div>
         {% endif %}
-    </div>
+    </a>
     {% endif %}
     <div class="resource-item-description">
         <div class="resource-item-description-title"><a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %}>{{ item.title }}</a>
