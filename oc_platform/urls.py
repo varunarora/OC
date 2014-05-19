@@ -47,8 +47,9 @@ urlpatterns = patterns(
 
     url(r'^upload/', 'oer.views.upload_page', name='upload'),
 
-    url(r'^browse/$', 'oer.views.browse_default', name='browse_default'),
     url(r'^browse/(?P<category_slug>.+)/$', 'oer.views.browse', name='browse'),
+
+    url(r'^browse/$', 'oer.views.browse_default', name='browse_default'),
 
 
     # User stuff
@@ -57,6 +58,7 @@ urlpatterns = patterns(
     url(r'^authenticate/', 'user_account.views.authenticate', name='authenticate'),
     url(r'^confirm-account/', 'user_account.views.confirm_account', name='confirm_account'),
     url(r'^logout/', 'user_account.views.logout_view', name='logout'),
+    url(r'^dashboard/', 'user_account.views.dashboard_view', name='dashboard'),
     url(r'^gauth/', 'user_account.views.googleplus_login', name='gplus_login'),
     url(r'^glogin/', 'user_account.views.glogin', name='glogin'),
     url(r'^fblogin/', 'user_account.views.fb_login', name='fb_login'),
