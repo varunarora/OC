@@ -243,34 +243,44 @@ def read_article(request, article):
         The article's HttpResponse page with breadcrumbs, resources, and
         navigate-able sibling articles.
     """
-    # Get the built (and hopefully cached) article revision object.
-    articleRevision = fetch_cached_article_revision(article.revision)
-    breadcrumb = fetch_cached_breadcrumb(article.revision)
+    try:
+        return redirect(
+            reverse(
+                'read', kwargs={
+                    'resource_id': article.resource.id,
+                    'resource_slug': article.resource.slug
+                }
+            )
+        )
+    except:
+        # Get the built (and hopefully cached) article revision object.
+        articleRevision = fetch_cached_article_revision(article.revision)
+        breadcrumb = fetch_cached_breadcrumb(article.revision)
 
-    # Generate the title of the page from the breadcrumb.
-    title = _get_title_from_breadcrumb(breadcrumb, article)
+        # Generate the title of the page from the breadcrumb.
+        title = _get_title_from_breadcrumb(breadcrumb, article)
 
-    breadcrumb.reverse()
+        breadcrumb.reverse()
 
-    # Get sibling articles of current article.
-    siblings = Article.objects.filter(category=article.category)
+        # Get sibling articles of current article.
+        siblings = Article.objects.filter(category=article.category)
 
-    # Limit the body size of all resources descriptions to 200 chars.
-    for resource in articleRevision.resources.all():
-        resource.description = resource.description[0:200]
+        # Limit the body size of all resources descriptions to 200 chars.
+        for resource in articleRevision.resources.all():
+            resource.description = resource.description[0:200]
 
-    # Increment page views (always remains -1 based on current view).
-    Article.objects.filter(id=article.id).update(views=article.views+1)
+        # Increment page views (always remains -1 based on current view).
+        Article.objects.filter(id=article.id).update(views=article.views+1)
 
-    # TODO(Varun): Pass URLs for siblings and cache list
+        # TODO(Varun): Pass URLs for siblings and cache list
 
-    context = {
-        'article': articleRevision, 'breadcrumb': breadcrumb, 'title': title,
-        'siblings': siblings,
-        'current_path': 'http://' + request.get_host() + request.get_full_path(),  # request.get_host()
-        'thumbnail': 'http://' + request.get_host() + settings.MEDIA_URL + article.image.name
-    }
-    return render(request, 'article.html', context)
+        context = {
+            'article': articleRevision, 'breadcrumb': breadcrumb, 'title': title,
+            'siblings': siblings,
+            'current_path': 'http://' + request.get_host() + request.get_full_path(),  # request.get_host()
+            'thumbnail': 'http://' + request.get_host() + settings.MEDIA_URL + article.image.name
+        }
+        return render(request, 'article.html', context)
 
 
 def edit_article(request, article, revision_id):

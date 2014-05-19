@@ -54,6 +54,7 @@ class Article(models.Model):
     difficulty = models.PositiveIntegerField(editable=True, default=0)
     published = models.NullBooleanField()
     citation = models.CharField(max_length=1024, blank=True, null=True)
+    resource = models.ForeignKey('oer.Resource', related_name='resource_redirect')
 
     def __unicode__(self):
         return self.title
