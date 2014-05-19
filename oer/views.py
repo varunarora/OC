@@ -2828,6 +2828,11 @@ def post_existing_resource_collection(request):
         category = Category.objects.get(pk=request.POST.get('category_id', None))
 
         resource_collection.category = category
+
+        # Remove the original resource type tag to avoid conflicts. 
+        resource_collection.tags.remove(Tag.objects.get(
+            category=TagCategory.objects.get(title='Resource type')))
+
         resource_collection.tags.add(tag)
         resource_collection.save()
 
