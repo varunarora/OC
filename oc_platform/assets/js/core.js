@@ -2941,7 +2941,7 @@ var OC = {
         initRenderComments: function(){
             // If this is a resource, render after async load.
             if ($('form#resource-form').length > 0){
-                OC.renderDocumentComments();
+                // OC.renderDocumentComments();
                 
                 OC.comments.renderResourceComments(
                     OC.comments.resourceCommentsSuccess);
