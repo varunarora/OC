@@ -18,7 +18,7 @@ OC.resourcesCollections = {
 
     resourceCollectionItemTemplate: _.template('<div class="resource-collection-item <%= category %>" id="<%= category %>-<%= id %>">' +
         '<input type="checkbox" name="resource_collection_id" value="<%= id %>"/>' +
-        '<a href="<%= url %>"<% if (open_url){ %> target="_blank"<% } %>> class="resource-item-thumbnail" style="background-image: url(\'<%= thumbnail %>\');">' +
+        '<a href="<%= url %>"<% if (open_url){ %> target="_blank"<% } %> class="resource-item-thumbnail" style="background-image: url(\'<%= thumbnail %>\');">' +
         '<div class="resource-item-thumbnail-selector"></div>' +
         '<div class="resource-item-thumbnail-<%= type %>"></div>' +
         '</a><div class="resource-item-description">' +
@@ -213,7 +213,7 @@ OC.resourcesCollections = {
         });
 
         // Do not let checkbox, thumbnail link click triggers propogate back to the resource item.
-        $('input[name=resource_collection_id]', 'a.resource-item-thumbnail',
+        $('input[name=resource_collection_id], a.resource-item-thumbnail, ' +
             '.resource-item-description-title a').click(function(event){
             event.stopPropagation();
         });
