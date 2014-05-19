@@ -1124,6 +1124,46 @@ def _get_user_subscribed(user_profile, visitor):
     return user_subscribed
 
 
+def user_preferences(request):
+    try:
+        user = User.objects.get(username=request.user.username)
+    except User.DoesNotExist:
+        raise Http404
+
+    from django.core.exceptions import PermissionDenied
+    if request.user != user:
+        raise PermissionDenied
+
+    user_profile = user.get_profile()
+    user_context = _prepare_user_context(request, user, user_profile)
+
+    submit_context = {}
+    if request.method == "POST":
+        from forms import UserPreferences
+        preferences_form = UserPreferences(request.POST, user)
+
+        if preferences_form.is_valid():
+            preferences_form.save()
+            user_profile.location = request.POST.get('location', None)
+            user_profile.save()
+
+            submit_context = {
+                'success': 'Successfully saved your preferences.'
+            }            
+        else:
+            submit_context = {
+                'error': 'Yikes! Profile and preferences failed to save.'
+            }
+            print preferences_form.errors
+
+    context = dict({
+        'user_profile': user,
+        'title': 'Preferences for ' + user.get_full_name() + " &lsaquo; OpenCurriculum",
+        'page': 'preferences',
+    }.items() + user_context.items() + submit_context.items())
+    return render(request, 'profile.html', context)
+
+
 def contributor_registration(request):
     # Prepare context to render the form / form response.
     registration_template = 'contributor-registration.html'
@@ -1330,6 +1370,32 @@ def reset_password(request):
 
     # Redirect to login page
     return redirect('/?login=true')
+
+
+def change_password(request):
+    from django.contrib import messages
+    try:
+        current_password = request.POST.get('current_password', None)
+        new_password = request.POST.get('new_password', None)
+
+        from django.contrib.auth import authenticate
+        authenticated_user = authenticate(
+            username=request.user.username, password=current_password)
+
+        if not authenticated_user:
+            messages.error(request, 'Oops! You entered the wrong current password.')
+
+        else:
+            request.user.set_password(new_password)
+            request.user.save()
+            messages.success(request, 'Hurray! Changed to your password to the ultra-secure new one.')
+
+    except:
+        messages.error(request, 'Dang it! Something went wrong. Couldn\'t change the password')
+
+    # Redirect to login page
+    from django.core.urlresolvers import reverse
+    return redirect(reverse('user:user_preferences'))
 
 
 def reset_password_set(request, username):

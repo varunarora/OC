@@ -717,7 +717,7 @@ nav#authenticate-buttons, nav#user-buttons
 					display: inline-block
 					float: left
 					height: 24px
-					margin: 6px 14px
+					margin: 9px 14px
 
 				.user-firstname-assistant
 					display: inline-block
@@ -787,7 +787,7 @@ nav#user-menu
 			padding: 0px
 
 			a
-				.profile-icon, .dashboard-icon, .logout-icon
+				.profile-icon, .dashboard-icon, .logout-icon, .preferences-icon
 					width: 13px
 					height: 15px
 					margin-right: 10px
@@ -802,6 +802,14 @@ nav#user-menu
 				&:hover
 					span.profile-icon
 						background-image: url('../images/user-icon-hover.png')
+
+				span.preferences-icon
+					background-position: 0px 3px
+					background-image: url('../images/preferences.png')
+
+				&:hover
+					span.preferences-icon
+						background-image: url('../images/preferences-hover.png')
 
 				span.dashboard-icon
 					background-image: url('../images/dashboard-icon.png')
@@ -1879,7 +1887,7 @@ nav#add-resource-menu
 	.add-upload, .add-lesson, .add-unit
 		a
 			padding-left: 34px
-			background-position: 12px 5px
+			background-position: 12px 3px
 			@include sans-bold
 			background-repeat: no-repeat
 
@@ -2793,15 +2801,25 @@ ul.tagit
 .page-submit-button
 	float: right
 
-form#project-settings-form, .requestor-list
+form#project-settings-form, .requestor-list, #user-preferences-form
 	margin-top: 20px
 
-form#project-settings-form
+form#project-settings-form, #user-preferences-form
 	input[type="text"], input[type="password"], textarea
 		width: 95%
 
 	table
 		width: 100%
+
+#user-preferences-form
+	col.label
+		width: 30%
+
+	.value-caption
+		font-size: 0.85em
+
+	#change-password
+		cursor: pointer
 
 aside.page-menu-wrapper
 	min-height: 450px

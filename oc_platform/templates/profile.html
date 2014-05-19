@@ -118,6 +118,8 @@
             {% include 'partials/feed-item.html' with host='profile' %}
             {% endfor %}
 
+            </div>
+
         {% elif page == 'favorites' %}
             {% include 'partials/profile-favorites.html' %}
 
@@ -133,10 +135,10 @@
         {% elif page == 'subscriptions' %}
             {% include 'partials/profile-subscriptions.html' %}
 
+        {% elif page == 'preferences' %}
+            {% include 'partials/profile-preferences.html' %}
+
         {% endif %}
-
-
-            </div>
 
     {% include 'partials/add-unit.html' %}
     {% include 'partials/profile-footer.html' %}

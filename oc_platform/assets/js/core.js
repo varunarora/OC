@@ -1185,7 +1185,7 @@ var OC = {
         // Validate the password.
         OC.validate.text(
             '#signup-form input[name="password"]',
-            /\w+/,
+            /[\w\.\!\@\#\$\%\^\*\&]+/,
             'Password should contain valid characters'
         );
 
@@ -1258,6 +1258,21 @@ var OC = {
                     OC.validate.invalidate(currentInput, error);
                 } else if (currentInput.val().match(pattern)[0] !== currentInput.val()){
                     OC.validate.invalidate(currentInput, error);
+                }
+            });
+        },
+
+        confirm: function(selector, baseSelector, error){
+            var input = $(selector),
+                baseInput = $(baseSelector),
+                currentInput;
+
+            input.blur(function(event){
+                currentInput = $(event.target);
+                if (currentInput.val() !== baseInput.val()){
+                    OC.validate.invalidate(currentInput, error);
+                } else {
+                    OC.validate.pass(currentInput);
                 }
             });
         },
@@ -2095,6 +2110,39 @@ var OC = {
                     Cancel: function () {
                         $(this).dialog("close");
                     }
+                }
+            });
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+    },
+
+    initChangePassword: function(){
+        $('#change-password').click(function(event){
+            var changePasswordDialog = OC.customPopup('.change-password-dialog');
+
+            OC.validate.text(
+                '.change-password-dialog input[name="new_password"]',
+                /[\w\.\!\@\#\$\%\^\*\&]+/,
+                'Password should contain valid characters'
+            );
+
+            OC.validate.confirm(
+                '.change-password-dialog input[name="confirm_password"]',
+                '.change-password-dialog input[name="new_password"]',
+                'Both passwords do not match'
+            );
+
+            $('.change-password-submit-button').click(function(event){
+                var confirmPassword = $('.change-password-dialog input[name="confirm_password"]');
+                if (confirmPassword.hasClass('form-input-error')){
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
+                } else {
+                    $('#change-password-form').submit();
                 }
             });
 
@@ -4010,6 +4058,8 @@ jQuery(document).ready(function ($) {
     //OC.initEditResource();
 
     OC.initForgotAuth();
+
+    OC.initChangePassword();
 
     OC.renderShowMore();
 

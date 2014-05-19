@@ -18,6 +18,7 @@ urlpatterns = patterns(
 
     url(r'^(?P<username>\w+)/reset-password/set-new-password/$', views.reset_password_set, name='reset_password_set'),
     url(r'^reset-password/$', views.reset_password, name='reset_password'),
+    url(r'^change-password/$', views.change_password, name='change_password'),
 
     url(r'^(?P<username>\w+)/change-picture/$', views.change_profile_picture, name='change_profile_picture'),
     url(r'^(?P<username>\w+)/reposition-picture/$', views.reposition_profile_picture, name='reposition_profile_picture'),
@@ -28,5 +29,7 @@ urlpatterns = patterns(
     url(r'^(?P<username>\w+)/favorites/$', views.user_favorites, name='user_favorites'),
     url(r'^(?P<username>\w+)/subscribers/$', views.user_subscribers, name='user_subscribers'),
     url(r'^(?P<username>\w+)/subscriptions/$', views.user_subscriptions, name='user_subscriptions'),
+    url(r'^preferences/$', views.user_preferences, name='user_preferences'),
+
     url(r'^(?P<username>\w+)/$', views.user_profile, name='user_profile'),
 )
