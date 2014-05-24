@@ -19,19 +19,16 @@
                         <li class="selected-category"><a href="">Search for '{{ query }}'</a></li>
                     </ul>
                 {% else %}
-                {% if selected_category.parent.slug != 'common-core' and selected_category.parent.slug != 'opencurriculum' %}
-                    <a href="{{ return_url }}" class="category-return"><span class="reverse-vertical-caret"></span>Back to {{ selected_category.parent.parent.title }}</a>
-                    <div class="category-parent">{{ selected_category.parent.title }}</div>
-                {% endif %}
-                {% endif %}
                 <div class="category-panel-listing-categories scrollable-block">
                     <div class="category-panel-listing-categories-body">
+                        {% if child_categories %}
                         <h4>{{ selected_category.title }}</h4>
                         <ul>
                         {% for child_category in child_categories %}
                             <li><a href="{{ child_category.url }}">{{ child_category.title }}</a></li>
                         {% endfor %}
                         </ul>
+                        {% endif %}
                         {% if selected_category.parent.slug != 'opencurriculum' %}
                         <h4 class="category-panel-listing-categories-body-others">Others in {{ selected_category.parent.title }}</h4>
                         <ul>
@@ -42,18 +39,24 @@
                         {% endif %}
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
         <div class="wide-center-stage-key-panel content-panel">
             <div class="content-panel-body-wrapper">
                 <div class="content-panel-body" id="category-{{ selected_category.id }}">
                     {% if query or query == '' %}
-                    <div class="content-panel-body-search">
+                    <div class="content-panel-body-header">
+                        <div class="content-panel-body-header-title">
+                            <h3>Search results for <span class="search-term">{{ query }}</span></h3>
+                        </div>
+                    </div>
+                    <div class="content-panel-body-search content-panel-body-listing">
                     {% include 'partials/search.html' %}
                     </div>
                     {% else %}
                     <div class="content-panel-body-header">
-                        <div class="content-panel-body-header-title"><h2>{{ selected_category.title }}</h2>
+                        <div class="content-panel-body-header-title"><h3>{{ selected_category.title }}</h3>
                             <div class="breadcrumb">
                                 {% for breadcrumb_category in breadcrumb %}
                                     <a href="{{ breadcrumb_category.url }}">{{ breadcrumb_category.title }}</a> 
@@ -117,7 +120,7 @@
                                 favorited: '{{ item.favorited }}' === 'True',
                                 created: '{{ item.created|date:"U" }}',
                                 tags: {% if item.filtered_tags %}["{{ item.filtered_tags|join:'","' }}"]{% else %}[]{% endif %},
-                                description: 'This resource is a genius of a lorem ipsum resource I tell you. Because honestly it allows you to find whatever you are looking for...',
+                                description: {% if item.description %}'{{ item.description }}'{% else %}'No description found.'{% endif %},
                                 stars: 3.5,
                                 review_count: 6
                             });
