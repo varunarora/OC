@@ -63,3 +63,14 @@ class City(models.Model):
     region = models.CharField(max_length=2)
     latitude = models.FloatField()
     longitude = models.FloatField()
+
+
+class Topic(models.Model):
+    title = models.CharField(max_length=256)
+    description = models.TextField(null=True, blank=True)
+
+
+class Concept(models.Model):
+    topic = models.ForeignKey('meta.Topic')
+    concept = models.CharField(max_length=256)
+    categories = models.ManyToManyField('meta.Category', null=True, blank=True)

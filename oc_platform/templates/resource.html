@@ -26,6 +26,29 @@
 		{% include 'partials/oer-url.html' %}
 	{% elif resource.revision.content_type.name == "document" %}
 	<div class="center-midstage resource-body{% if resource_type %} {{ resource_type }}{% endif %}">
+		{% if resource.meta %}
+		<section class="oer-meta">
+			<div class="oer-meta-key">
+				<h3>Objectives</h3>
+				<ul>
+					{% for objective in resource.meta.objectives %}
+					<li>{{ objective }}</li>
+					{% endfor %}
+				</ul>
+			</div>
+			<div class="oer-meta-fill">
+				<h3>Prior Knowledge</h3>
+				<ul>
+					{% for prior in resource.meta.prior.all %}
+					<li>{{ prior.topic.title }}{% if prior.concept %}<span class="vertical-caret breadcrumbs-caret"></span>{{ prior.concept }}{% endif %}</li>
+					{% endfor %}
+				</ul>
+			</div>
+		</section>
+		<section class="oer-meta-support">
+			{% if resource.meta.time %}<span class="oer-meta-time-icon"></span>{{ resource.meta.time }} mins{% endif %}{% if resource.meta.materials %}<span class="oer-meta-materials-icon"></span>{{ resource.meta.materials|join:', ' }}{% endif %}{% if standards %}<span class="oer-meta-tag-icon"></span>{% for standard in standards %}<a href="{% url meta:standard tag_title=standard.title %}" class="oer-meta-support-tag" title="{{ standard.description }}">{{ standard.title }}</a>{% endfor %}{% endif %}
+		</section>
+		{% endif %}
 		<section id="oer">
 			<div class="oer-document document-body">
 				{% include 'partials/oer-document.html' %}

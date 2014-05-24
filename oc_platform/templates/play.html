@@ -1,0 +1,9 @@
+{% include 'partials/header.html' %}
+
+<div class="center-stage">
+    <h3>Play</h3>
+    Progress: {{ resources|length }} to go
+    {% for resource in resources %}
+        <h4><a href="{% url resource:edit_resource_meta resource_id=resource.id category_id=category.id %}">{{ resource.title }}</a></h4>
+    {% endfor %}
+</div>

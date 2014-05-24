@@ -290,9 +290,21 @@ def view_resource(request, resource_id, resource_slug):
 
         breadcrumb = cu.build_collection_breadcrumb(collection)
 
+        document_type = None
+        from meta.models import TagCategory
+        if resource_type == 'document':
+            document_type = resource.tags.get(
+                category=TagCategory.objects.get(title='Resource type'))
+
+        # Get standards associated with this resource.
+        standards = resource.tags.filter(
+            category=TagCategory.objects.get(title='Standards'))
+
         context = {
             'resource': resource,
             'resource_type': resource_type,
+            'document_type': document_type,
+            'standards': standards,
             'host_content_type': resource_ct,
             'comments_content_type': comments_ct,
             'document_element_content_type': document_element_content_type,
@@ -1660,6 +1672,147 @@ def view_history(request, resource_id):
     return render(request, 'resource-history.html', context)
 
 
+def edit_resource_meta(request, category_id, resource_id):
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+    except:
+        raise Http404
+
+    try:
+        resource.objectives = resource.meta.objectives
+        resource.prior = resource.meta.prior
+        resource.materials = resource.meta.materials
+        resource.time = resource.meta.time
+
+    except:
+        resource.objectives = {}
+        resource.prior = {}
+        resource.materials = {}
+        resource.time = {}
+
+    if request.method == 'POST':
+        description = request.POST.get('description', None)
+        objectives = request.POST.get('objectives', None)
+        prior = request.POST.get('priors', None)
+        materials = request.POST.get('materials', None)
+        time = request.POST.get('time', None)
+        
+        from meta.models import Concept, Topic
+
+        # Create the prior concept and assign object.
+        concepts = []
+        for topic_concept in json.loads(prior):
+            # Attempt to find topic and topic/concept pairs.
+            topic = Topic.objects.filter(title=topic_concept['topic'])
+            if topic.count() == 0:
+                topic = Topic(title=topic_concept['topic'])
+                topic.save()
+            else:
+                topic = topic[0]
+
+            concept = Concept.objects.filter(topic=topic, concept=topic_concept['concept'])
+            if concept.count() == 0:
+                concept = Concept(
+                    topic=topic,
+                    concept=topic_concept['concept']
+                )
+                concept.save()
+                concepts.append(concept)
+            else:
+                concepts.append(concept[0])
+
+        if resource.meta:
+            resource.meta.objectives = json.loads(objectives)
+            resource.meta.materials = json.loads(materials)
+            resource.meta.time = time
+
+            resource.meta.prior.clear()
+            resource.meta.prior.add(*concepts)
+
+            resource.meta.save()
+
+        else:
+            from oer.models import ResourceMeta
+            
+            resource_meta = ResourceMeta(
+                objectives=json.loads(objectives),
+                time=time,
+                materials=json.loads(materials)
+            )
+            resource_meta.save()
+            resource_meta.prior.add(*concepts)
+
+            resource.meta = resource_meta  
+
+        resource.description = description
+        resource.save()
+        from django.contrib import messages
+
+        messages.success(request, 'Successfully edited \'%s\'.' % (
+            resource.title))
+
+        return redirect(
+            reverse('resource:play_category', kwargs={
+                'category_id': category_id
+            })
+        )
+
+    context = {
+        'resource': resource,
+        'title': 'Edit resource meta'
+    }
+    return render(request, 'edit-resource-meta.html', context)
+
+
+def play_category(request, category_id):
+    # Get the top 30 resources that do not have meta in a certain category.
+    from meta.models import Category
+    import meta.CategoryUtilities as catU
+    category = Category.objects.get(pk=category_id)
+    (current_browse_tree, current_flattened_tree) = catU.build_child_categories(
+        {'root': [category]}, [])
+
+    (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections(
+        current_flattened_tree, request.user)
+
+    filtered_resources = []
+    for resource in all_resources:
+        if not resource.meta:
+            filtered_resources.append(resource)
+
+    context = {
+        'resources': filtered_resources,
+        'category': category,
+        'title': 'Play: the easy way to volunteer for K-12 education'
+    }
+    return render(request, 'play.html', context)
+
+
+def delete_resource_prior(request, concept_id, resource_id):
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+
+        from meta.models import Concept
+        concept = Concept.objects.get(pk=concept_id)
+    except:
+        raise Http404
+
+    # Remove this concept from the resource.
+    resource.meta.prior.remove(concept)
+
+    # Remove topic if its unique.
+    topic_resources = Resource.objects.filter(meta__prior__topic=concept.topic)
+    if topic_resources.count() == 0:
+        concept.topic.delete()
+
+    # Remove concept if its unique.
+    concept_resources = Resource.objects.filter(meta__prior=concept)
+    if concept_resources.count() == 0:
+        concept.delete()
+
+    return APIUtilities._api_success()
+
+
 # API Stuff
 
 def add_user_to_collection(request, collection_id, user_id):
@@ -2904,8 +3057,7 @@ def post_url(request):
 
         return redirect(request.META.get('HTTP_REFERER'))
 
-    except Exception, e:
-        print e
+    except Exception:
         return APIUtilities._api_failure()
 
 

@@ -57,7 +57,7 @@ class Resource(models.Model):
     language = models.ForeignKey('meta.Language', default=get_default_language)
     slug = models.SlugField(max_length=256)
     stage = models.CharField(max_length=64, null=True, blank=True)
-
+    meta = models.ForeignKey('oer.ResourceMeta', null=True, blank=True)
 
     def __unicode__(self):
         return self.title
@@ -78,6 +78,13 @@ def generate_thumnbnail(sender, instance, created, raw, **kwargs):
 
 from django.db.models.signals import post_save
 post_save.connect(generate_thumnbnail, sender=Resource)
+
+
+class ResourceMeta(models.Model):
+    objectives = JSONField(null=True, blank=True)
+    prior = models.ManyToManyField('meta.Concept', null=True, blank=True)
+    time = models.PositiveIntegerField()
+    materials = JSONField(null=True, blank=True)
 
 
 class Collection(models.Model):

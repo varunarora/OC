@@ -55,6 +55,8 @@
 	margin-bottom: 18px
 
 #oer
+	padding: 60px
+
 	.center-stage
 		margin-top: 0px
 
@@ -86,9 +88,64 @@
 	height: 30px
 
 .oer-meta
-	margin-top: 10px
-	background-color: #efefef
+	background-color: /*#F7E8FF*/ #FFF8E7
+	padding: 30px 60px
+	color: #7F7C73
 	overflow: hidden
+
+	h3
+		color: #7F7C73
+
+	.oer-meta-key
+		width: 507px
+		float: left
+		padding-right: 10px
+
+	.oer-meta-fill
+		width: 323px
+		float: right		
+
+.oer-meta-support
+	background-color: #FFECDA
+	color: #7F7C73
+	padding: 10px 60px
+
+	.oer-meta-support-tag
+		border: 1px solid #E8CABB
+		padding: 4px 8px
+		@include border-radius(2px)
+		color: #7F7C73
+		margin-right: 4px
+
+		&:hover
+			background-color: #FFD6CD
+			text-decoration: none
+			color: #403E3A
+
+	.oer-meta-time-icon,
+	.oer-meta-tag-icon,
+	.oer-meta-materials-icon
+		background-position: center
+		width: 12px
+		height: 12px
+		margin-right: 4px
+		display: inline-block
+		background-size: 12px 12px
+		background-repeat: no-repeat
+
+	.oer-meta-tag-icon,
+	.oer-meta-materials-icon
+		margin-left: 24px
+
+	.oer-meta-time-icon
+		background-image: url('../images/time.png')
+
+	.oer-meta-tag-icon
+		background-image: url('../images/tag.png')
+
+	.oer-meta-materials-icon
+		background-image: url('../images/cart.png')
+
 
 #oer-get
 	text-align: center
@@ -103,6 +160,15 @@
 	h2
 		display: inline-block
 		float: left
+
+	.oer-title-resource-type
+		@include border-radius(2px)
+		background-color: #aaa
+		color: #fff
+		padding: 5px 12px
+		float: left
+		font-weight: bold
+		margin-left: 12px
 
 	.oer-title-revision
 		font-size: 1.8em
@@ -144,8 +210,8 @@
 			background-image: url('../images/share-icon.png')
 
 	a.mini-action-button
-		height: 16px
-		padding-top: 6px
+		height: 14px
+		padding-top: 5px
 		text-decoration: none
 
 		&.remix-button
@@ -209,8 +275,7 @@
 
 	&.lesson, &.document
 		margin-top: 20px
-		width: 840px
-		padding: 60px
+		width: 960px
 		@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
 
 .share-options

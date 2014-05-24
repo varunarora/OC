@@ -1,0 +1,98 @@
+{% include 'partials/header.html' %}
+<script src="{{ STATIC_URL }}js/internal.js" type="text/javascript"></script>
+
+
+<div class="center-stage resource-meta-edit">
+    <div class="resource-meta-edit-section">
+        <h3><a href="{% url read resource_id=resource.id resource_slug=resource.slug %}" target="_blank">{{ resource.title }} <img src="{{ STATIC_URL}}images/new_window.png"></a></h3>
+    </div>
+
+    <form method="POST" id="resource-meta-edit-form">
+        {% csrf_token %}
+        <input type="hidden" name="resource-id" value="{{ resource.id }}" />
+
+        <div class="resource-meta-edit-section">
+            <h3>Description</h3>
+            <textarea name="description">{{ resource.description }}</textarea>
+        </div>
+
+        <div class="resource-meta-edit-section">
+            <h3>Objectives</h3>
+            <div class="objective-wrappers">
+                {% for objective in resource.objectives %}
+                <div class="objective-wrapper">
+                    <input type="text" name="objective" value="{{ objective }}"/>
+                    <div class="delete-button"></div>
+                </div>
+                {% empty %}
+                <div class="objective-wrapper">
+                    <input type="text" name="objective" value="Students will be able to "/>
+                    <div class="delete-button"></div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="resource-meta-edit-section-button-wrapper">
+                <button class="action-button secondary-button add-objective-button">Add objective</button>
+            </div>
+            <textarea name="objectives" class="hide"></textarea>
+        </div>
+
+        <div class="resource-meta-edit-section">
+            <h3>Prior knowledge</h3>
+            <div class="prior-topic-pairs">
+                {% for prior in resource.prior.all %}
+                <div class="prior-topic-pair existing-prior-topic-pair" id="{{ prior.id }}">
+                    <input type="text" name="prior-topic" value="{{ prior.topic.title }}"/>
+                    <input type="text" name="prior-concept" value="{{ prior.concept }}"/>
+                    <div class="delete-button"></div>
+                </div>
+                {% empty %}
+                <div class="prior-topic-pair">
+                    <input type="text" name="prior-topic" />
+                    <input type="text" name="prior-concept" />
+                    <div class="delete-button"></div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="resource-meta-edit-section-button-wrapper">
+                <button class="action-button secondary-button add-topic-button">Add topic - concept</button>
+            </div>
+            <textarea name="priors" class="hide"></textarea>
+        </div>
+
+        <div class="resource-meta-edit-section">
+            <h3>Time</h3>
+            <select name="time">
+                <option value="15"{% if resource.time == 15 %} selected{% endif %}>15 mins</option>
+                <option value="30"{% if resource.time == 30 %} selected{% endif %}>30 mins</option>
+                <option value="45"{% if resource.time == 45 %} selected{% endif %}>45 mins</option>
+                <option value="60"{% if resource.time == 60 %} selected{% endif %}>1 hour</option>
+            </select>
+        </div>
+
+        <div class="resource-meta-edit-section resource-meta-edit-materials-section">
+            <h3>Materials</h3>
+            <div class="material-wrappers">
+                {% for material in resource.materials %}
+                <div class="material-wrapper">
+                    <input type="text" name="material" value="{{ material }}"/>
+                    <div class="delete-button"></div>
+                </div>
+                {% empty %}
+                <div class="material-wrapper">
+                    <input type="text" name="material" />
+                    <div class="delete-button"></div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="resource-meta-edit-section-button-wrapper">
+                <button class="action-button secondary-button add-material-button">Add material</button>
+            </div>
+            <textarea name="materials" class="hide"></textarea>
+        </div>
+
+        <div class="resource-meta-submit-wrapper">
+            <button type="submit" class="action-button">Submit</button>
+        </div>
+    </form>
+</div>

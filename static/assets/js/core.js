@@ -2159,6 +2159,9 @@ var OC = {
         // Setup up/down toggle on all togglable content.
         $('.toggle-content-title-wrapper').click(
             OC.togglerClickHandler);
+
+        // Setup standard tags labels tooltip.
+        $('.oer-meta-support-tag').tipsy({gravity: 's'});
     },
 
     togglerClickHandler: function(event){

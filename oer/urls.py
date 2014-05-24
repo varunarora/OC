@@ -71,5 +71,10 @@ urlpatterns = patterns(
 
     url(r'^unit/(?P<unit_id>\d+)/(?P<unit_slug>[\w\-]+)/edit/$', views.edit_unit, name='edit_unit'),
 
+    # Internal tools.
+    url(r'^play/(?P<category_id>\d+)/$', views.play_category, name='play_category'),
+    url(r'^(?P<category_id>\d+)/(?P<resource_id>\d+)/meta-edit/$', views.edit_resource_meta, name='edit_resource_meta'),
+    url(r'^api/delete-prior/(?P<concept_id>\d+)/from/(?P<resource_id>\d+)/$', views.delete_resource_prior, name='delete_resource_prior'),
+
     url(r'^$', views.resource_center, name='resource_center'),
 )
