@@ -3,30 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>{{ title|safe }}</title>
-		<script type="text/javascript">
-			// Initialize WebFont from typography website.
-			var WebFontConfig = {
-			    fontdeck: { id: '25967' },
-			    fontactive: function(familyName, fvd) {
-			        OC.onFontLoad();
-			    }
-			};
-			(function(){
-				document.getElementsByTagName("html")[0].setAttribute("class","wf-loading")
-  				//  NEEDED to push the wf-loading class to your head
-  				document.getElementsByTagName("html")[0].setAttribute("className","wf-loading")
-        		// for IE…
-
-			    var wf = document.createElement('script'),
-			        s = document.getElementsByTagName('script')[0];
-			    wf.src = ('https:' === document.location.protocol ? 'https' : 'http') +
-			        '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-			    wf.type = 'text/javascript';
-			    wf.async = 'false';
-			    s.parentNode.insertBefore(wf, s);
-			})();
-		</script>
-		<link href='http://fonts.googleapis.com/css?family=PT+Sans:700,700italic,400italic,400' rel='stylesheet' type='text/css'>
+		<link href='http://fonts.googleapis.com/css?family=PT+Sans:700,400' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui-1.10.3.custom.css" type="text/css" />
 		<!--[if lt IE 9]>
 			<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ie.css" />
@@ -102,3 +79,4 @@
 	    <div class="login-messages-wrapper">
 	        <span class="login-messages{% if message.tags %} {{ message.tags }}{% endif %}">{% for message in messages %}{{ message }}{% endfor %}</span><span class="close-message-box"></span>
 	    </div>
+	    {% endif %}

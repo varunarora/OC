@@ -456,27 +456,6 @@ var OC = {
         3000);
     },
 
-    renderArticlePanel: function() {
-        if (!Modernizr.cssanimations) {
-            $(OC.config.articlePanel.item).show();
-        } else {
-            $(OC.config.articlePanel.item).shuffleElements().each(
-                function (i) {
-                    $(this).attr(
-                        "style", "-webkit-animation-delay:" + i * 300 + "ms; \
-                        -moz-animation-delay:" + i * 300 + "ms; \
-                        -o-animation-delay:" + i * 300 + "ms; \
-                        animation-delay:" + i * 300 + "ms;");
-                    if (i === $("ul[data-liffect] li").size() - 1) {
-                        $("ul[data-liffect]").addClass("play");
-                    }
-                }
-            );
-
-            $(OC.config.articlePanel.list).attr('data-liffect', 'slideRight');
-            $(OC.config.articlePanel.list).addClass("play");
-        }
-    },
 
     /**
      * Initializes the article/chapter <select> element with on change redirect
@@ -1461,13 +1440,6 @@ var OC = {
             });
             return false;
         });
-    },
-
-    onFontLoad: function(){
-        OC.setupUserMenu();
-        OC.initAddResource();
-
-        $('.chief-panel-container-cover').addClass('play');
     },
 
     setupUserMenu: function(){
@@ -3944,6 +3916,11 @@ var OC = {
 };
 
 jQuery(document).ready(function ($) {
+    OC.setupUserMenu();
+
+    $('.chief-panel-container-cover').addClass('play');
+
+
     OC.initSearchOptions();
 
     OC.initSearchAutocomplete();
@@ -3973,8 +3950,6 @@ jQuery(document).ready(function ($) {
 
     OC.initSubscribe();
 
-    // Set up flashing (liffect) article panel.
-    OC.renderArticlePanel();
 
     // Instantiate AJAX submit handler for invite sign-ups
     OC.initInviteSignup();
@@ -4033,6 +4008,7 @@ jQuery(document).ready(function ($) {
     });
 
     /* Other initializers/renderers/handlers */
+    OC.initAddResource();
 
     OC.initCreateCollection();
 
