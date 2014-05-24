@@ -55,7 +55,7 @@
                 id: '{{ result.object.id }}',
                 url: '{% url read resource_id=result.object.id resource_slug=result.object.slug %}',
                 title: '{{ result.object.title }}',
-                {% with result.object.description|striptags as stripped_result %}
+                {% with result.object.description|striptags|escapejs as stripped_result %}
                 summary: '{% highlight stripped_result with query %}',
                 {% endwith %}
                 created: '{{ result.object.created }}',
