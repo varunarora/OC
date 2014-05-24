@@ -372,13 +372,17 @@ OC.editor = {
         OC.editor.editorBodyWrapper = editorBodyWrapper;
         OC.editor.editorBody = editorBody;
 
-        editorFrame.height(
-            $(window).height() - ($(
-                '.editor-header').outerHeight(true) + $(
-                '.editor-toolbar-wrapper').height() + parseInt($('.editor-toolbar-wrapper').css(
-                'padding-top'), 10) + parseInt(editorFrame.css(
-                'padding-top'), 10) + parseInt(editorFrame.css(
-                'padding-bottom'), 10)) + 'px');
+        function setEditorFrameHeight(){
+            editorFrame.height(
+                $(window).height() - ($(
+                    '.editor-header').outerHeight(true) + $(
+                    '.editor-toolbar-wrapper').height() + parseInt($('.editor-toolbar-wrapper').css(
+                    'padding-top'), 10) + parseInt(editorFrame.css(
+                    'padding-top'), 10) + parseInt(editorFrame.css(
+                    'padding-bottom'), 10)) + 'px');
+        }
+        setEditorFrameHeight();
+        $(window).resize(setEditorFrameHeight);
 
         OC.editor.cke = editorBody.ckeditor({
             extraPlugins: 'internallink,sharedspace,resources,' +
@@ -1144,12 +1148,12 @@ OC.editor = {
 
     initDropMenus: function(){
         OC.setUpMenuPositioning('nav#license-menu', '.editor-button-wrapper .license-button');
-        OC.setUpMenuPositioning('nav#tags-menu', '.editor-button-wrapper .tags-button');
+        OC.setUpMenuPositioning('nav#tags-menu', '.editor-button-wrapper .tags-button', true);
         OC.setUpMenuPositioning('nav#share-menu', '.editor-button-wrapper .share-button');
 
         $(window).resize(function () {
             OC.setUpMenuPositioning('nav#license-menu', '.editor-button-wrapper .license-menu');
-            OC.setUpMenuPositioning('nav#tags-menu', '.editor-button-wrapper .tags-menu');
+            OC.setUpMenuPositioning('nav#tags-menu', '.editor-button-wrapper .tags-menu', true);
             OC.setUpMenuPositioning('nav#share-menu', '.editor-button-wrapper .share-button');
         });
 

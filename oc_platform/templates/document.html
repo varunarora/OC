@@ -23,21 +23,25 @@
 
                 <nav id="license-menu">
                     <div class="floating-menu-spacer"></div>
-                    <select name="license">
-                        {% for license in licenses.all %}
-                        <option value="{{ license.id }}">{{ license.title }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="menu-body">
+                        <select name="license">
+                            {% for license in licenses.all %}
+                            <option value="{{ license.id }}">{{ license.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </nav>
                 <nav id="tags-menu">
                     <div class="floating-menu-spacer"></div>
-                    <ul class="tagit document-tags">
-                        {% if resource.tags %}
-                        {% for tag in resource.tags.all %}
-                        <li>{{ tag }}</li>
-                        {% endfor %}
-                        {% endif %}
-                    </ul>
+                    <div class="menu-body">
+                        <ul class="tagit document-tags">
+                            {% if resource.tags %}
+                            {% for tag in resource.tags.all %}
+                            <li>{{ tag }}</li>
+                            {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </div>
                 </nav>
                 <nav id="share-menu">
                     <div class="floating-menu-spacer"></div>
