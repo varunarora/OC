@@ -53,6 +53,31 @@
 		<link rel="icon" href="{{ STATIC_URL }}favicon.ico" type="image/x-icon"/>
 	</head>
 	<body{% if body_class %} class="{{ body_class }}"{% endif %}>
+		{% if body_class == 'browse' %}
+		<header class="wide-header">
+			<div id="header-prebanner"></div>
+			<div class="wide-center-stage">
+				<div class="wide-center-stage-fill-panel header-brand-wrapper">
+					<a href="/" class="site-logo"><img src="{{ STATIC_URL }}images/logo.png" id="logo" alt="OpenCurriculum" title="OpenCurriculum" /></a>
+				</div>
+				<div class="wide-center-stage-key-panel">
+					<hgroup class="header-search-users-wrapper">
+						<hgroup id="search-bar">
+							<form method="GET" action="/search" id="search-form">
+								<input type="search" name="q" title="Search">
+								<input type="submit" value="" />
+								<div class="search-options-button"></div>
+								<div class="search-options"></div>
+							</form>
+						</hgroup>
+						<hgroup id="header-right">
+							{% include 'partials/header-user.html' %}
+						</hgroup>
+					</hgroup>
+				</div>
+			</div>
+		</header>
+		{% else %}
 		<header>
 			<div id="header-prebanner"></div>
 			<hgroup id="header-center">
@@ -70,49 +95,7 @@
 						</div>
 					</hgroup>
 					<hgroup id="header-right">
-						<nav id="user-buttons">
-							<ul>
-							{% if user.is_authenticated %}
-								<li class="user-firstname-wrapper"><a href="{% url user:user_profile username=user.username %}" id="user-dropdown">
-									<div style="background-image: url('{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}')" class="header-user-picture"></div>
-									<div class="user-firstname">{{ user.first_name }}</div> 
-									<div class="horizontal-caret username-caret user-firstname-assistant"></div>
-									</a>
-
-								</li>
-								<li class="user-notification-count {% if notification_count > 0 %}unread-notifications {% else %}no-notifications{% endif %}" title="Notifications">
-									<a href="">{% if notification_count > 0 %}{{ notification_count }}{% endif %}</a>
-								</li>
-								<nav id="user-menu">
-									<div class="floating-menu-spacer"></div>
-									<ul>
-										<li><a href="{% url user:user_profile username=user.username %}"><span class="profile-icon"></span>My profile</a></li>
-										<li><a href="{% url user:user_preferences %}"><span class="preferences-icon"></span>My preferences</a></li>
-										<!--<li><a href=""><span class="dashboard-icon"></span>My dashboard</a></li>-->
-										<li><a href="/logout/"><span class="logout-icon"></span>Logout</a></li>
-									</ul>
-								</nav>
-								<nav id="notifications-menu">
-									<div class="floating-menu-spacer"></div>
-									<ul>
-										<form id="user-info"><input type="hidden" value="{{ user.id }}" name="user_id" /></form>
-										{% for notification in top_notifications %}
-											<li><a {% if not notification.read %} class="new-notification" {% endif %}id="notification-{{ notification.id }}" href="{{ notification.url }}">{{ notification.description }}</a></li>
-										{% empty %}
-											<li class="no-notification-contents">You have no notifications.</li>
-										{% endfor %}
-									</ul>
-								</nav>
-							</ul>
-						</nav>
-					{% else %}
-						<nav id="authenticate-buttons">
-							<ul>
-								<li id="sign-up-button"><a href="{% url register %}">Sign up</a></li>
-								<li id="login"><a href="{% url home %}?login=true">Login</a></li>
-							</ul>
-						</nav>
-					{% endif %}
+						{% include 'partials/header-user.html' %}
 					</hgroup>
 			</hgroup>
 		</header>

@@ -1841,7 +1841,7 @@ var OC = {
         OC.setupNotificationsMenu();
 
         // Set a tooltip to indicate the purpose of the notifications box.
-        $('.user-notification-count').tipsy({gravity:'w'});
+        $('.user-notification-count').tipsy({gravity:'e'});
     },
 
     setupNotificationsMenu: function(){
@@ -2222,14 +2222,14 @@ var OC = {
         }
     },
 
-    favoriteClickHandler: function(type, resourceID, userID, favoriteCallback, unfavoriteCallback){
+    favoriteClickHandler: function(type, resourceID, userID, favoriteCallback, unfavoriteCallback, element){
         $.get('/interactions/favorite/' + type + '/' + resourceID + '/',
             function(response){
                 if (response.status == 'true'){
-                    favoriteCallback();
+                    favoriteCallback(element);
                 }
                 else if (response.status == 'unfavorite success'){
-                    unfavoriteCallback();
+                    unfavoriteCallback(element);
                 }
             },
         'json');
@@ -2592,7 +2592,7 @@ var OC = {
                 button = input.parents('form.subscribe-suggestion-form').find(
                     'button.subscribe-button');
                 if (subscriptionStates[parseInt(userIDs[i], 10)]){
-                    button.addClass('selected');
+                    button.addClass('subscribed');
                     button.text('✔ Subscribed');
                 }
             }
@@ -3641,33 +3641,10 @@ var OC = {
     initSubscribe: function(){
         var userID = $('form.profile-subscribe-form input[name=user_id]').val(),
             button;
-        
-        function subscribe_to(userID, button){
-            if (OC.config.user.id){
-                $.get('/user/api/subscribe/' + userID + '/',
-                    function(response){
-                        if (response.status == 'true'){
-                            if (button.hasClass('subscribed')){
-                                button.removeClass('subscribed');
-                                button.text('Subscribe');
-                            } else {
-                                button.addClass('subscribed');
-                                button.text('✔ Subscribed');
-                            }
-                        } else {
-                            OC.popup(response.message, response.title);
-                        }
-                    },
-                'json');
-            } else {
-                OC.popup('You must be logged in to subscribe to someone. Please create a ' +
-                    'free account for the same.', 'Log in to subscribe to someone');
-            }
-        }
 
         $('.profile-subscribe .page-subscribe-button').click(function(event){
             button = $(this);
-            subscribe_to(userID, button);
+            OC.subscribeTo(userID, button);
 
             event.stopPropagation();
             event.preventDefault();
@@ -3677,12 +3654,35 @@ var OC = {
         $('.subscribe-suggestion-form .subscribe-button').click(function(event){
             userID = $(this).parents('.subscribe-suggestion-form').find(
                 'input[name=user_id]').val();
-            subscribe_to(userID, $(this));
+            OC.subscribeTo(userID, $(this));
 
             event.stopPropagation();
             event.preventDefault();
             return false;
         });
+    },
+
+    subscribeTo: function(userID, button){
+        if (OC.config.user.id){
+            $.get('/user/api/subscribe/' + userID + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        if (button.hasClass('subscribed')){
+                            button.removeClass('subscribed');
+                            button.text('Subscribe');
+                        } else {
+                            button.addClass('subscribed');
+                            button.text('✔ Subscribed');
+                        }
+                    } else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        } else {
+            OC.popup('You must be logged in to subscribe to someone. Please create a ' +
+                'free account for the same.', 'Log in to subscribe to someone');
+        }
     },
 
     initBrowse: function(){
@@ -3714,6 +3714,8 @@ var OC = {
             }
         });
 
+        // Attach tooltip on the Common Core.
+        $('.category-choice').tipsy({gravity: 's'});
     },
 
     initNewPostDialog: function(){

@@ -81,7 +81,8 @@ var ResultsView = Backbone.View.extend({
     favorite: function(){
         OC.favoriteClickHandler('resource',
             this.model.get('id'), OC.config.user.id,
-            this.favoriteCallback, this.unfavoriteCallback
+            this.favoriteCallback, this.unfavoriteCallback,
+            this.$el.find('.resource-favorite')
         );
     },
 
@@ -103,14 +104,12 @@ var ResultsView = Backbone.View.extend({
         'json');
     },
 
-    favoriteCallback: function(){
-        var resourceFavorite = this.$el.find('.resource-favorite');
+    favoriteCallback: function(resourceFavorite){
         resourceFavorite.text('Favorited');
         resourceFavorite.addClass('favorited');
     },
 
-    unfavoriteCallback: function(){
-        var resourceFavorite = this.$el.find('.resource-favorite');
+    unfavoriteCallback: function(resourceFavorite){
         resourceFavorite.text('Favorite');
         resourceFavorite.removeClass('favorited');
     }

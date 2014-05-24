@@ -6,16 +6,23 @@ OC.categoryResources = {
 
     initBrowseView: function(){
         // Set the height of the page.
-        $('.resource-browse').height(
-            $(window).height() - $('header').height()
-        );
+        function setBrowseHeight(){
+            $('.resource-browse').height(
+                $(window).height() - $('header').height()
+            );
+        }
 
+        setBrowseHeight();
+        $(window).resize(setBrowseHeight);
+
+        var scrollbarWidth = getScrollbarWidth();
+
+        /*
         // Set the width of the left panel.
         var leftPanelWidth = ($(window).width() - 960)/2 + 367;
         $('.category-panel').width(leftPanelWidth);
 
-        var scrollbarWidth = getScrollbarWidth();
-        $('.content-panel').width($(window).width() - leftPanelWidth - scrollbarWidth);
+        $('.content-panel').width($(window).width() - leftPanelWidth - scrollbarWidth);*/
 
         // Setup menu positioning (and adjust for scrollbar width) for content type filter.
         OC.setUpMenuPositioning('.sort-by-type-menu', '.sort-by-type');
@@ -29,7 +36,7 @@ OC.categoryResources = {
         }
 
         // Make the menu on the left nano'ed, conditional on the size of the content.
-        $('.category-panel-listing-categories > ul').addClass('scroll-content');
+        $('.category-panel-listing-categories-body').addClass('scroll-content');
 
         $('.category-panel-listing-categories').height(
             $('.resource-browse').height() - 200
@@ -105,6 +112,9 @@ var Resource = Backbone.Model.extend({
     // User who created the resource.
     user: "",
 
+    // ID of user who created the resource.
+    user_id: "",
+
     // Thumbnail of user who created the resource.
     user_thumbnail: "",
 
@@ -124,7 +134,13 @@ var Resource = Backbone.Model.extend({
     favorited: "",
 
     // Epoch date when this resource was created.
-    created: ""
+    created: "",
+
+    // Resource rating.
+    stars: "",
+
+    // Number of reviews this resource has gotten.
+    review_count: ""
 });
 
 // Initialize resource results set Collection
@@ -159,11 +175,16 @@ var TagView = Backbone.View.extend({
 
 // Initialize resources view.
 var ResourceView = Backbone.View.extend({
-    tagName: "div",
+    tagName: "a",
     className: "content-panel-body-listing-item",
+    attributes: function(){
+        return {
+            'href': this.model.get('url'),
+        };
+    },
     template: _.template('<div class="content-panel-body-listing-item-label-fold"></div>' +
         '<div class="content-panel-body-listing-item-label"><%= type %></div>' +
-        '<div class="content-panel-body-listing-item-favorites"><%= favorites %></div>' +
+        '<div class="content-panel-body-listing-item-favorites<% if (favorited){ %> favorited<% } %>"><%= favorites %></div>' +
         '<div class="content-panel-body-listing-item-thumbnail"' +
         'style="background-image: url(\'<%= thumbnail %>\')"></div>' +
         '<div class="content-panel-body-listing-item-thumbnail-shadow"></div>' +
@@ -173,12 +194,17 @@ var ResourceView = Backbone.View.extend({
         '<a href="<%= url %>" class="content-panel-body-listing-item-contents-caption">' +
         '<%= title %></a>' +
         '<div class="content-panel-body-listing-item-contents-meta"><%= views %> views</div>' +
-        '<%= tags %>' +
-        '</div>'),
+        '<%= tags %><div class="content-panel-body-listing-item-contents-description"><%= description %></div>' +
+        '<div class="content-panel-body-listing-item-contents-reviews"><%= stars %>' +
+        '<div class="content-panel-body-listing-item-contents-review-count">' +
+        '(<a class="content-panel-body-listing-item-contents-review-count-value"><%= review_count %></a>)</div>' +
+        '</div></div>'),
 
     events: {
         // Bind the favorite button.
         'click .content-panel-body-listing-item-favorites': 'favorite',
+        'mouseenter .content-panel-body-listing-item-user-picture': 'showUserTip',
+        'mouseleave .content-panel-body-listing-item-user-picture': 'hideUserTip'
     },
 
     initialize: function() {
@@ -195,12 +221,40 @@ var ResourceView = Backbone.View.extend({
         }
         this.$tagsView = tags;
 
+
+        // Prepare review stars.
+        var star, j,
+            starsView = $('<div/>', {
+                'class': 'content-panel-body-listing-item-contents-reviews-stars'
+            });
+
+        var stars = this.model.get('stars');
+        var trailingHalf = false;
+
+        if (parseInt(stars / 0.5, 10) % 2 !== 0){
+            trailingHalf = true;
+        }
+        for (j = 0; j < parseInt(stars, 10); j++){
+            star = $('<div/>', {
+                'class': 'content-panel-body-listing-item-contents-review-star'
+            });
+            starsView.append(star);
+        }
+
+        if (trailingHalf){
+            starsView.append($('<div/>', {
+                'class': 'content-panel-body-listing-item-contents-review-halfstar'
+            }));
+        }
+        this.$starsView = starsView;
+
         this.listenTo(this.model, "change", this.render);
     },
 
     render: function () {
         modelJSON = this.model.toJSON();
         modelJSON['tags'] = String(this.$tagsView[0].outerHTML);
+        modelJSON['stars'] = String(this.$starsView[0].outerHTML);
 
         this.$el.html(this.template(modelJSON));
         $('.content-panel-body-listing-items').append(this.$el);
@@ -212,20 +266,108 @@ var ResourceView = Backbone.View.extend({
         OC.favoriteClickHandler(
             'resource', this.model.get('id'),
             OC.config.user.id, this.favoriteCallback,
-            this.unfavoriteCallback
+            this.unfavoriteCallback, this.$el.find('.content-panel-body-listing-item-favorites')
         );
+
+        return false;
     },
 
-    favoriteCallback: function(){
-        var resourceFavoriteButton = this.$el.find('.content-panel-body-listing-item-favorites');
-        resourceFavoriteButton.text(parseInt(resourceFavorite.text(), 10) + 1);
+    favoriteCallback: function(resourceFavoriteButton){
+        resourceFavoriteButton.text(parseInt(resourceFavoriteButton.text(), 10) + 1);
         resourceFavoriteButton.addClass('favorited');
     },
 
-    unfavoriteCallback: function(){
-        var resourceFavoriteButton = this.$el.find('.content-panel-body-listing-item-favorites');
-        resourceFavoriteButton.text(parseInt(resourceFavorite.text(), 10) - 1);
+    unfavoriteCallback: function(resourceFavoriteButton){
+        resourceFavoriteButton.text(parseInt(resourceFavoriteButton.text(), 10) - 1);
         resourceFavoriteButton.removeClass('favorited');
+    },
+
+    showUserTip: function(){
+        // Find if there is already a tooltip generated for the user.
+        var userTooltip = $('.user-tooltips #user-' + this.model.get('user_id'));
+        var userPicture = this.$el.find('.content-panel-body-listing-item-user-picture');
+
+        function repositionShowTip(element){
+            element.css({
+                top: userPicture.offset().top - element.outerHeight(true) - 5,
+                left: userPicture.offset().left + (userPicture.width() / 2) - (
+                    element.width() / 2)
+            });
+            element.addClass('show');
+
+            // Undelegate all mouseleave and mouseenter events.
+            element.undelegate('mouseleave');
+            element.undelegate('mouseenter');
+
+            // Bind mouseleave handler on image and tooltip to hide tooltip.
+            element.mouseleave(function(event){
+                $(this).removeClass('show');
+                $(this).removeClass('hovered');
+            });
+
+            element.mouseenter(function(event){
+                element.addClass('show');
+                element.addClass('hovered');
+            });
+
+        }
+
+        // If preexisting tooltip generated, reposition and show.
+        if (userTooltip.length !== 0){
+            repositionShowTip(userTooltip);
+        } else {
+            // If not preexisting tooltip, generate, reposition and show.
+            tooltipTemplate = _.template('<div class="user-tooltip-wrapper" id="user-<%= id %>">' +
+                '<div class="floating-tooltip-spacer"></div>' +
+                '<div class="user-tooltip">' +
+                '<div class="user-tooltip-thumbnail" style="background-image: url(\'<%= thumbnail %>\');"></div>' +
+                '<div class="user-tooltip-description">' +
+                '<div class="user-tooltip-description-name"><a href="<%= url %>"><%= name %></a></div>' +
+                '<div class="user-tooltip-description-subscribe">' +
+                    '<button class="btn dull-button subscribe-button">Subscribe</button>' +
+                '</div></div></div></div>');
+
+            var userID = this.model.get('user_id');
+
+            var newTooltip = tooltipTemplate({
+                id: userID,
+                thumbnail: this.model.get('user_thumbnail'),
+                url: this.model.get('user_url'),
+                name: this.model.get('user'),
+            });
+            $('.user-tooltips').append(newTooltip);
+
+            var appendedTooltip = $('.user-tooltips #user-' + userID),
+                subscribeButton = $('button.subscribe-button', appendedTooltip);
+
+            // Asynchronously determine if the user has subscribed to the resource creator.
+            // TODO(Varun): Needs to happen when the page loads before user hovers.
+            if (userID === OC.config.user.id){
+                subscribeButton.addClass('hide');
+            }
+
+            OC.getSubscriptionState([userID], function(states){
+                if (states[parseInt(userID, 10)]){
+                    subscribeButton.addClass('subscribed');
+                    subscribeButton.text('✔ Subscribed');
+                }
+            });
+
+            // Bind the subscribe button click on the tooltip.
+            subscribeButton.click(function(){
+                OC.subscribeTo(userID, $(this));
+            });
+
+            repositionShowTip(appendedTooltip);
+        }
+    },
+
+    hideUserTip: function(){
+        var element = $('.user-tooltips .user-tooltip-wrapper.show');
+
+        if (! element.hasClass('hovered')){
+            element.removeClass('show');
+        }
     }
 });
 

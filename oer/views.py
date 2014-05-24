@@ -41,10 +41,10 @@ def browse(request, category_slug):
                 selected_category = category
 
         if len(categories_slugs) == 1:
-            root_category = selected_category
+            # root_category = selected_category
             return_url = None
         else:
-            root_category = selected_category.parent
+            # root_category = selected_category.parent
             
             return_category_slug = catU.build_breadcrumb(selected_category.parent.parent)[0].url
             if return_category_slug != '':
@@ -63,15 +63,28 @@ def browse(request, category_slug):
         # Happens either when the slug is not found.
         raise Http404
 
-    (browse_tree, flattened_tree) = catU.build_child_categories(
-        {'root': [root_category]}, [])
+    """(browse_tree, flattened_tree) = catU.build_child_categories(
+        {'root': [root_category]}, [])"""
+
+    child_categories = list(Category.objects.filter(
+        parent=selected_category).order_by('position'))
+    parent_categories = list(Category.objects.filter(
+        parent=selected_category.parent).order_by('position'))
+
+    for category in (child_categories + parent_categories):
+        breadcrumb = catU.build_breadcrumb(category)
+        category.url = reverse(
+            'browse', kwargs={
+                'category_slug': breadcrumb[0].url
+            }
+        )
 
     # Fetch the resources in the current category and everything nested within.
     (current_browse_tree, current_flattened_tree) = catU.build_child_categories(
         {'root': [selected_category]}, [])
 
     (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections(
-        current_flattened_tree)
+        current_flattened_tree, request.user)
 
     from django.contrib.contenttypes.models import ContentType
 
@@ -90,23 +103,30 @@ def browse(request, category_slug):
     except KeyError:
         pass
 
+    # Build breadcrumb for selected category.
+    breadcrumb = catU.build_breadcrumb(selected_category)[1:-1]
+    breadcrumb.reverse()
+
     # Set the URL for the current page for redirect situations.
     selected_category.url = request.path
 
     context = {
         'title': 'Browse lessons, projects, activities, worksheets &amp; tests',
         'selected_category': selected_category,
-        'browse_tree': browse_tree,
+        # 'browse_tree': browse_tree,
+        'child_categories': child_categories,
+        'parent_categories': parent_categories,
         'return_url': return_url,
         'items': list(all_resources) + list(all_collections),
         'requests': requests,
         'category_group': category_group,
-        'current_category_id': current_category_id
+        'current_category_id': current_category_id,
+        'breadcrumb': breadcrumb
     }
     return render(request, 'browse.html', context)
 
 
-def get_category_tree_resources_collections(current_flattened_tree):
+def get_category_tree_resources_collections(current_flattened_tree, user):
     all_resources = []
     all_raw_resources = []
     all_collections = []
@@ -141,12 +161,20 @@ def get_category_tree_resources_collections(current_flattened_tree):
 
     for resource in all_raw_resources:
         try:
-            #resource.revision.user = resource.user
+            # resource.revision.user = resource.user
             resource.favorites_count = Favorite.objects.filter(
                 parent_id=resource.id, parent_type=resource_ct).count()
             resource.type = resource.tags.get(
                 category=TagCategory.objects.get(title='Resource type'))
             resource.item_type = 'resource'
+            resource.filtered_tags = resource.tags.exclude(
+                category=TagCategory.objects.get(title='Resource type'))
+            try:
+                resource.favorited = Favorite.objects.get(
+                    parent_id=resource.id, parent_type=resource_ct, user=user) != None
+            except:
+                resource.favorited = False
+
             all_resources.append(resource)
         except Tag.DoesNotExist:
             pass

@@ -21,11 +21,11 @@ $content-width: 960px
 	@include box-shadow(0 0 4px rgba(0, 0, 0, 0.4))
 
 @mixin sans-font-family
-	font-family: "Proxima Nova Regular", 'Helvetica Neue', Arial, Helvetica, sans-serif
+	font-family: 'Arial', 'Helvetica Neue', sans-serif
 	font-weight: normal
 
 @mixin sans-bold
-	font-family: "Proxima Nova Bold", 'Helvetica Neue', Arial, Helvetica, sans-serif
+	font-family: 'Arial', 'Helvetica Neue', sans-serif
 	font-size-adjust: 0.488
 	font-weight: bold
 	font-style: normal
@@ -80,12 +80,26 @@ body
 		float: left
 		
 		#header-brand-wrapper
-			padding-top: 10px			
+			padding-top: 10px
 		
 	#header-right
 		float: right
 		width: 337px
+
+header.wide-header
+	.header-brand-wrapper
+		padding-top: 10px
+		text-align: right
 	
+		a.site-logo
+			float: right
+
+	#search-bar
+		padding-top: 10px
+
+	.header-search-users-wrapper
+		width: 92%
+
 #logo
 	height: 25px
 	float: left
@@ -184,6 +198,9 @@ a
 	/* Custom IE styling in ie.sass */
 	@include background-image(linear-gradient(center top, #FFFFFF 0%, #E6E6E6 100%))
 	background-color: #F5F5F5
+
+	&.hide
+		display: none
 
 .vertical-caret
 	margin-left: 8px
@@ -375,7 +392,7 @@ section#history
 
 p
 	margin-top: 12px
-	font-size: 0.9em
+	font-size: 0.95em
 
 #social-panel
 	min-height: 54px
@@ -701,11 +718,11 @@ nav#authenticate-buttons, nav#user-buttons
 			height: $header-height - $header-prebanner-height
 		
 			a
-				padding: 12px 20px 0px 20px
+				padding: 14px 20px 0px 20px
 				color: #666666
 				@include sans-bold
 				display: inline-block
-				height: 36px
+				height: 34px
 			
 				&:hover, &.hover
 					background-color: #f8f8f8
@@ -755,11 +772,11 @@ nav#tags-menu
 		height: 8px
 		position: relative
 
-	ul
+	> ul, .menu-body
 		@include popout-box
 		z-index: 6
 		
-		li
+		> li
 			height: 44px
 			padding-top: 8px
 		
@@ -850,7 +867,7 @@ nav#share-menu, nav#download-menu
 
 nav#add-resource-menu
 	z-index: 5
-	width: 135px
+	width: 125px
 
 	.floating-menu-spacer
 		width: 140px
@@ -878,7 +895,7 @@ nav#notifications-menu
 
 			a
 				height: auto
-				font-size: 0.9em
+				font-size: 0.95em
 				padding-top: 6px
 				padding-bottom: 6px
 
@@ -894,6 +911,33 @@ nav#notifications-menu
 	.no-notification-contents
 		padding-left: 12px
 		border-width: 0px
+
+nav#license-menu
+	z-index: 10
+
+	.floating-menu-spacer
+		width: 200px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		background-position: 160px bottom
+		z-index: 10
+
+	.menu-body
+		width: 200px
+		height: 100px
+
+nav#tags-menu
+	z-index: 10
+
+	.floating-menu-spacer
+		width: 200px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		background-position: 140px bottom
+		z-index: 10
+
+	ul
+		.menu-body
+			width: 200px
+			height: 100px
 
 #forgot-username-password
 	text-align: right
@@ -1802,7 +1846,7 @@ table
 	color: #B94A48
 
 .add-resource
-	width: 115px
+	width: 105px
 
 .page-action-button, .action-button, .collection-button
 	padding: 10px
@@ -1833,7 +1877,7 @@ table
 
 	&.supporting-action-button
 		padding: 4px 8px
-		font-size: 0.85em
+		font-size: 0.87em
 
 	&.large-action-button
 		font-size: 1.6em
@@ -2432,7 +2476,7 @@ table.reset-password-table
 		float: left
 		color: $light-font
 		margin: 0px 6px
-		font-size: 0.85em
+		font-size: 0.87em
 		cursor: pointer
 		background-repeat: no-repeat
 
@@ -2467,24 +2511,12 @@ table.reset-password-table
 		overflow: hidden
 		margin-top: 3px
 
-		.post-comment-user-thumbnail
-			.discussion-response-thumbnail
-				background-size: cover
-				height: 30px
-				width: 30px
-				float: left
-
 		ul
 			margin-left: 38px
 			clear: both
 
 		.post-comment-body
-			margin-left: 10px
-			float: left
 			width: 84%
-			border-top: 1px solid #e2e2e2
-			padding-bottom: 3px
-			min-height: 30px
 
 			&.new-post-comment-body
 				border-top: 0px
@@ -2492,19 +2524,6 @@ table.reset-password-table
 			p:nth-child(2)
 				@include display-post-inline
 				margin-left: 6px
-
-			form textarea
-				width: 500px
-				height: 20px
-
-				&.expanded
-					height: 80px
-
-			.post-comment-button-wrapper
-				padding: 6px 0px
-
-				.action-button
-					float: right
 
 		.comment-actions
 			overflow: hidden
@@ -2519,6 +2538,42 @@ table.reset-password-table
 	.post-comment:first-child
 		.post-comment-body
 			border-width: 0px
+
+	.post-new-comment
+		overflow: hidden
+
+		form textarea
+			width: 468px
+			height: 20px
+
+			&.expanded
+				height: 80px
+
+		.post-comment-button-wrapper
+			padding: 6px 0px
+
+			.action-button
+				float: right
+
+
+.post-comment-user-thumbnail
+	.discussion-response-thumbnail
+		background-size: cover
+		height: 30px
+		width: 30px
+		float: left
+
+.post-comment-body
+	margin-left: 10px
+	float: left
+	border-top: 1px solid #e2e2e2
+	padding-bottom: 3px
+	min-height: 30px
+
+.resource-comments
+	.post-new-comment
+		form textarea
+			width: 500px
 
 .individual-discussion
 	margin-top: 20px
@@ -3273,9 +3328,9 @@ ul.collaborators
 			float: right
 
 .editor-toolbar-wrapper
-	background-color: #ddd
-	height: 40px
-	padding-top: 8px
+	background-color: #f6f6f6
+	height: 32px
+	padding-top: 6px
 
 	#editor-toolbar
 		width: $content-width
@@ -3717,7 +3772,7 @@ blockquote
 			margin: 10px
 			cursor: pointer
 			text-align: center
-			font-size: 0.85em
+			font-size: 0.87em
 			padding-top: 86px
 			padding-right: 6px
 			padding-left: 6px
@@ -4076,11 +4131,27 @@ table#edit-unit-form-table
 				margin: 20px 0px
 				margin-bottom: 30px
 				color: $light-font
-				text-align: right
-				padding-right: 16px
 
 				.category-choice
-					color: #bababa
+					color: #999
+					border: 1px solid #999
+					padding: 5px 12px
+					float: none
+					background-color: transparent
+					margin: 0px
+
+					.category-choice-button
+						display: inline-block
+						width: 16px
+						height: 11px
+						background: url('../images/downvote.png') no-repeat
+						background-position: center
+						background-size: 10px 10px
+						cursor: pointer
+
+					&:hover
+						background-color: #ddd
+						color: #666
 
 			.category-return
 				color: #999
@@ -4113,41 +4184,21 @@ table#edit-unit-form-table
 						background-position: 8px center
 						padding-left: 30px
 
-		.category-panel-listing, .category-panel-listing-categories
+		.category-panel-listing, .category-panel-listing-categories-body
 			> ul
 				> li
 					> a
-						@include h3-styling
 						display: block
-						padding: 6px
-						padding-left: 12px
-						color: #efefef
 						@include border-radius(4px 0px 0px 4px)
 						outline: none
+						color: $light-font
 
 						&:hover
-							color: #fff
+							color: $link-hover
+							text-decoration: none
 
-					&.selected-category
-						> a
-							background-color: #efefef
-							color: $body-color
-
-							&:hover
-								text-decoration: none
-								color: $body-color
-
-					ul
-						margin-left: 30px
-						margin-bottom: 30px
-
-						a
-							color: #bababa
-							line-height: 1.2em
-							outline: none
-
-							&:hover
-								color: #fff
+			.category-panel-listing-categories-body-others
+				margin-top: 40px
 
 	.content-panel
 		.content-panel-body-wrapper
@@ -4156,32 +4207,33 @@ table#edit-unit-form-table
 					.search-filters
 						padding: 20px
 
-					.content-panel-body-header
-						padding-top: 40px
-						height: 30px
+				.content-panel-body-header
+					height: 30px
+					width: 92%
 
-						h3
-							color: #bababa
+					h3
+						color: #bababa
+
+					.content-panel-body-header-title
+						width: 80%
+						float: left
+
+					.content-panel-body-header-share
+						width: 65px
+						text-align: center
+						background-color: transparent
+						@include border-radius(2px)
+						border: 1px solid #5abd02
+						color: #5abd02
+						float: right
+
+						&:hover
+							color: #fff
+							background-color: #5abd02
 
 					#search-result-set
 						padding: 20px
 						padding-top: 0px
-
-				.content-panel-body-header-share
-					position: relative
-					top: 15px
-					left: 532px
-					margin-bottom: -19px
-					width: 65px
-					margin-left: -99px
-					text-align: center
-					background-color: transparent
-					@include border-radius(2px)
-					border: 1px solid #fff
-
-					&:hover
-						color: #800080
-						background-color: #fff
 
 				.content-panel-body-listing
 					overflow: auto
@@ -4197,6 +4249,7 @@ table#edit-unit-form-table
 								padding-left: 30px
 								background: url('../images/search-icon-light.png') no-repeat
 								background-position: 8px center
+								width: 220px
 
 						.content-panel-body-listing-filters-sort
 							float: right
@@ -4242,18 +4295,26 @@ table#edit-unit-form-table
 
 						.content-panel-body-listing-item
 							float: left
-							width: 165px
-							height: 190px
-							margin-right: 12px
-							background-size: cover
+							width: 210px
+							height: 300px
+							margin-right: 20px
+							outline: none
+							color: $body-color
+
+							&:hover
+								text-decoration: none
+
+								.content-panel-body-listing-item-contents
+									background-color: #efefef
+
 
 							.content-panel-body-listing-item-favorites
 								position: relative
-								top: 75px
+								top: 120px
 								width: 36px
 								height: 16px
 								margin-bottom: -16px
-								left: 118px
+								left: 158px
 								color: #666
 								background: url('../images/heart.png') no-repeat
 								background-position: 18px center
@@ -4272,12 +4333,13 @@ table#edit-unit-form-table
 								width: 60px
 								height: 12px
 								margin-bottom: -12px
-								background-color: orange
-								left: 95px
+								background-color: #5ABD02
+								left: 140px
 								font-size: 0.8em
 								padding-left: 10px
 								padding-top: 2px
 								color: #fff
+								font-weight: bold
 
 							.content-panel-body-listing-item-label-fold
 								position: relative
@@ -4285,17 +4347,18 @@ table#edit-unit-form-table
 								width: 5px
 								height: 3px
 								margin-bottom: -6px
-								left: 160px
+								left: 205px
 								background-image: url('../images/label-fold.png')
 
 							.content-panel-body-listing-item-thumbnail
-								width: 160px
-								height: 100px
+								width: 205px
+								height: 150px
 								background-color: #efefef
+								background-size: cover
 
 							.content-panel-body-listing-item-thumbnail-shadow
 								height: 40px
-								width: 160px
+								width: 205px
 								top: -40px
 								margin-bottom: -40px
 								position: relative
@@ -4321,24 +4384,54 @@ table#edit-unit-form-table
 
 							.content-panel-body-listing-item-contents
 								padding: 6px
+								border: 1px solid #ddd
+								margin-right: 5px
+								border-top-width: 0px
 								
 								.content-panel-body-listing-item-contents-caption
 									display: block
-									color: $body-color
-									@include sans-bold
+									color: $link-hover
+									font-weight: bold
+									font-size: 1.2em
 
-								.content-panel-body-listing-item-contents-meta
+								.content-panel-body-listing-item-contents-meta,
+								.content-panel-body-listing-item-contents-description
 									margin-top: 4px
 									color: $light-font
-									font-size: 0.85em
+									font-size: 0.9em
 
 								.content-panel-body-listing-item-contents-labels
-									margin-top: 4px
+									margin: 6px 0px
 
 									.content-panel-body-listing-item-contents-label
 										background-color: #999
 										color: #fff
 										margin-right: 4px
+
+								.content-panel-body-listing-item-contents-reviews
+									margin-top: 6px
+
+									.content-panel-body-listing-item-contents-reviews-stars
+										display: inline-block
+										vertical-align: middle
+
+										.content-panel-body-listing-item-contents-review-star,
+										.content-panel-body-listing-item-contents-review-halfstar
+											display: inline-block
+											background-repeat: no-repeat
+											background-position: center center
+											width: 14px
+											height: 14px
+
+										.content-panel-body-listing-item-contents-review-star
+											background-image: url('../images/favorited.png')
+
+										.content-panel-body-listing-item-contents-review-halfstar
+											background-image: url('../images/half-star.png')
+
+									.content-panel-body-listing-item-contents-review-count
+										display: inline-block
+										margin-left: 6px
 
 		
 					.content-panel-body-listing-requests
@@ -4429,6 +4522,39 @@ table#edit-unit-form-table
 		background-color: #5ABD02
 		color: #fff
 		text-decoration: none
+
+
+.user-tooltip-wrapper
+	position: absolute
+	//top: 260px
+	//left: 500px
+	z-index: 10
+	display: none
+
+	&.show
+		display: block
+
+	.user-tooltip
+		@include popout-box
+		width: 200px
+		height: 40px
+		padding: 10px
+
+		.user-tooltip-thumbnail
+			width: 40px
+			height: 40px
+			float: left
+			margin-right: 10px
+			background-size: cover
+
+	.floating-tooltip-spacer
+		width: 200px
+		height: 8px
+		position: relative
+		background-image: url('../images/menu-pointer-reverse.png')
+		background-repeat: no-repeat
+		background-position: 105px center
+		top: 67px
 
 .oc-tip
 	display: none
@@ -4629,6 +4755,88 @@ table#edit-unit-form-table
 .tag-view
 	.standard-resources-list
 		margin-top: 40px
+
+.editor-button-wrapper
+	.license-button,
+	.tags-button,
+	.share-button
+		background: linear-gradient(#FFFFFF, #EEEEEE) repeat scroll 0 0 rgba(0, 0, 0, 0)
+		text-shadow: 0 1px 0 #FFFFFF
+		color: #4b4b4b
+		box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), -1px -1px 0 0 #FFFFFF inset
+		border: 1px solid rgba(0, 0, 0, 0.2)
+		padding: 8px
+		margin-left: -1px
+
+		&:hover
+			background: linear-gradient(#FAFAFA, #E9E9E9) repeat scroll 0 0 rgba(0, 0, 0, 0)
+
+
+
+/***** INTERNAL TOOLS *************/
+
+.resource-meta-edit
+	textarea
+		height: 100px
+		width: 90%
+
+		&.hide
+			display: none
+
+.resource-meta-edit-section
+	margin-bottom: 20px
+	width: 70%
+	overflow: hidden
+
+	input[type='text']
+		width: 90%
+		margin-bottom: 2px
+		float: left
+
+		&[name="prior-topic"], &[name="prior-concept"]
+			width: 300px
+			float: left
+			margin-right: 6px
+
+		&.loading
+			background-image: url('../images/spinner.gif')
+			background-repeat: no-repeat
+			background-position: 280px center
+
+	.prior-topic-pair
+		overflow: hidden
+
+	.resource-meta-edit-section-button-wrapper
+		margin-top: 6px
+		overflow: hidden
+
+		button
+			float: right
+
+	.objective-wrapper, .material-wrapper
+		overflow: auto
+
+	&.resource-meta-edit-materials-section
+		margin-bottom: 60px
+
+.resource-meta-submit-wrapper
+	position: fixed
+	overflow: hidden
+	background-color: #fff
+	background: linear-gradient(#FFFFFF, #EEEEEE) repeat scroll 0 0 rgba(0, 0, 0, 0)
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), -1px -1px 0 0 #FFFFFF inset
+	width: 70%
+	margin: auto
+	bottom: 0px
+	padding: 8px 0px
+	border: 1px solid rgba(0, 0, 0, 0.2)
+	border-bottom-width: 0px
+
+	button
+		float: right
+		margin-right: 10px
+
+/***** EXPERIMENTS *************/
 
 
 .worksheet-creator-frame

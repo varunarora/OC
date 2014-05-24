@@ -1,0 +1,42 @@
+{% if user.is_authenticated %}
+    <nav id="user-buttons">
+        <ul>
+            <li class="user-firstname-wrapper"><a href="{% url user:user_profile username=user.username %}" id="user-dropdown">
+                <div style="background-image: url('{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}')" class="header-user-picture"></div>
+                <div class="user-firstname">{{ user.first_name }}</div> 
+                <div class="horizontal-caret username-caret user-firstname-assistant"></div>
+                </a>
+
+            </li>
+            <li class="user-notification-count {% if notification_count > 0 %}unread-notifications {% else %}no-notifications{% endif %}" title="Notifications">
+                <a href="">{% if notification_count > 0 %}{{ notification_count }}{% endif %}</a>
+            </li>
+            <nav id="user-menu">
+                <div class="floating-menu-spacer"></div>
+                <ul>
+                    <li><a href="{% url user:user_profile username=user.username %}"><span class="profile-icon"></span>My profile</a></li>
+                    <li><a href="{% url user:user_preferences %}"><span class="preferences-icon"></span>My preferences</a></li>
+                    <li><a href="/logout/"><span class="logout-icon"></span>Logout</a></li>
+                </ul>
+            </nav>
+            <nav id="notifications-menu">
+                <div class="floating-menu-spacer"></div>
+                <ul>
+                    <form id="user-info"><input type="hidden" value="{{ user.id }}" name="user_id" /></form>
+                    {% for notification in top_notifications %}
+                        <li><a {% if not notification.read %} class="new-notification" {% endif %}id="notification-{{ notification.id }}" href="{{ notification.url }}">{{ notification.description }}</a></li>
+                    {% empty %}
+                        <li class="no-notification-contents">You have no notifications.</li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        </ul>
+    </nav>
+    {% else %}
+    <nav id="authenticate-buttons">
+        <ul>
+            <li id="sign-up-button"><a href="{% url register %}">Sign up</a></li>
+            <li id="login"><a href="{% url home %}?login=true">Login</a></li>
+        </ul>
+    </nav>
+{% endif %}
