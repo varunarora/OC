@@ -57,3 +57,8 @@ class Favorite(models.Model):
     parent = generic.GenericForeignKey('parent_type', 'parent_id')
 
     item_favorited = Signal(providing_args=["favorite", "request"])
+
+
+class Review(models.Model):
+    comment = models.ForeignKey('interactions.Comment', null=True, blank=True)
+    rating = models.PositiveIntegerField()
