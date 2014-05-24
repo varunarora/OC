@@ -990,7 +990,7 @@ var PostView = Backbone.View.extend({
         '<%= downvotes %></div></div></div></div>' +
 
         '<div class="post-comments comment-thread"><%= comments %>' +
-        '<div class="post-comment">' +
+        '<div class="post-new-comment">' +
         '<div class="post-comment-user-thumbnail">' +
         '<div style="background-image: url(\'<%= loggedInUserThumbnail %>\')" ' +
         'class="discussion-response-thumbnail"></div></div>' +
