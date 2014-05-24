@@ -297,7 +297,7 @@ OC.upload = {
                         //     added only in the case when the file name had
                         //     changed,
                         //if (element_value !=  element_key){
-                        if ($(formFiles[j]).val() == element_key) {
+                        if ($(formFiles[j]).val() !== element_key) {
                             $(formFiles[j]).attr('name', element_value);
                         }
                         //}
