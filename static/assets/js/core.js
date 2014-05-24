@@ -2167,7 +2167,7 @@ var OC = {
             }
         }
 
-        if (userID){
+        if (userID && resourceID){
             OC.getFavoriteState('resource', resourceID, setFavoriteState);
 
             resourceFavoriteButton.click(function(event){
