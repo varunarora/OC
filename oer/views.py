@@ -3182,7 +3182,7 @@ def load_browse_resources(request, category_id, last_category_id):
         Category.objects.get(pk=last_category_id)):]
 
     (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections(
-        flattened_sub_tree)
+        flattened_sub_tree, request.user)
 
     import time
 
