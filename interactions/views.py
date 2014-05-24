@@ -231,7 +231,7 @@ def get_favorite_state(request, favorite_type, parent_id):
 def favorite_resource(request, favorite_type, parent_id):
     # Check if the favorite already exists
     try:
-        from oer.models import Resource, Collection        
+        from oer.models import Resource, Collection
         from django.contrib.contenttypes.models import ContentType
         resource_ct = ContentType.objects.get_for_model(Resource)
         collection_ct = ContentType.objects.get_for_model(Collection)
