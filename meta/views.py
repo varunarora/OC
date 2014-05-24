@@ -1,5 +1,5 @@
-from meta.models import Tag, TagCategory, Category
-from django.http import Http404
+from meta.models import Tag, TagCategory, Category, Topic, Concept
+from django.http import Http404, HttpResponse
 from django.shortcuts import render
 from django.core.urlresolvers import reverse
 from oc_platform import APIUtilities
@@ -263,3 +263,27 @@ def standard_urlize(category):
         }
     )
     return category
+
+
+def autocomplete_topic(request, query):
+    topics = Topic.objects.filter(title__contains=query)
+
+    result_set = set()
+    for topic in topics:
+        result_set.add(topic.title)
+
+    import json
+    return HttpResponse(
+        json.dumps(list(result_set)), 200, content_type="application/json")
+
+
+def autocomplete_concept(request, query):
+    concepts = Concept.objects.filter(concept__contains=query)
+
+    result_set = set()
+    for concept in concepts:
+        result_set.add(concept.concept)
+
+    import json
+    return HttpResponse(
+        json.dumps(list(result_set)), 200, content_type="application/json")
