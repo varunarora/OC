@@ -3209,7 +3209,7 @@ def load_browse_resources(request, category_id, last_category_id):
             'favorites': resource.favorites_count,
             'views': resource.views,
             'type': str(resource.type).upper(),
-            'tags': [','.join([tag.title for tag in filtered_tag_list])] if resource.filtered_tags else [],
+            'tags': [tag.title for tag in filtered_tag_list] if resource.filtered_tags else [],
             'description': resource.description,
             'thumbnail': settings.MEDIA_URL + resource.image.name,
             'favorited': False,
