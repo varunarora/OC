@@ -319,10 +319,13 @@ def view_resource(request, resource_id, resource_slug):
         breadcrumb = cu.build_collection_breadcrumb(collection)
 
         document_type = None
-        from meta.models import TagCategory
+        from meta.models import TagCategory, Tag
         if resource_type == 'document':
-            document_type = resource.tags.get(
-                category=TagCategory.objects.get(title='Resource type'))
+            try:
+                document_type = resource.tags.get(
+                    category=TagCategory.objects.get(title='Resource type'))
+            except:
+                document_type = Tag.objects.get(title='Document')
 
         # Get standards associated with this resource.
         standards = resource.tags.filter(
