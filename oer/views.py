@@ -3191,6 +3191,7 @@ def load_browse_resources(request, category_id, last_category_id):
 
     serialized_resources = {}
     for resource in all_resources:
+        filtered_tag_list = list(resource.filtered_tags)
         serialized_resources[resource.id] = {
             'id': resource.id,
             'url': reverse(
@@ -3208,10 +3209,13 @@ def load_browse_resources(request, category_id, last_category_id):
             'favorites': resource.favorites_count,
             'views': resource.views,
             'type': str(resource.type).upper(),
-            'tags': [tag.title for tag in resource.tags.all()],
+            'tags': ','.join([tag.title for tag in filtered_tag_list]) if resource.filtered_tags else [],
+            'description': resource.description,
             'thumbnail': settings.MEDIA_URL + resource.image.name,
             'favorited': False,
-            'created': int(time.mktime(resource.created.timetuple()))
+            'created': int(time.mktime(resource.created.timetuple())),
+            'stars': 3.5,
+            'review_count': 6
         }
 
     context = {
