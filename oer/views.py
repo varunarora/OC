@@ -3297,7 +3297,7 @@ def search_category(request, category_id, last_category_id, query):
             'favorites': resource.object.favorites_count,
             'views': resource.object.views,
             'type': str(resource.object.type).upper(),
-            'tags': [tag.title for tag in resource.tags.all()],
+            'tags': [tag.title for tag in resource.object.tags.all()],
             'thumbnail': settings.MEDIA_URL + resource.object.image.name,
             'favorited': False,
             'created': int(time.mktime(resource.object.created.timetuple()))
