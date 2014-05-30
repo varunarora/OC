@@ -7,6 +7,7 @@ from django.core.exceptions import PermissionDenied
 from oer.models import Resource, ResourceRevision, Collection, Document, Element, DocumentElement, Link, Attachment
 from django.core.files import File
 from oc_platform import APIUtilities
+from interactions.models import Review
 import json
 
 
@@ -138,14 +139,14 @@ def get_category_tree_resources_collections(current_flattened_tree, user):
         current_item_count = len(all_raw_resources) + len(all_raw_collections)
         
         if current_item_count < 42:
-            category_resources = Resource.objects.filter(category=category)
+            category_resources = Resource.objects.filter(category=category).order_by('-created')
             tagged_resources = Resource.objects.filter(tags__in=category.tags.all(
-                ))[:42 - current_item_count]
+                )).order_by('-created')[:42 - current_item_count]
 
             all_raw_resources += list(OrderedDict.fromkeys(
                 category_resources | tagged_resources))
 
-            collections = Collection.objects.filter(category=category)
+            collections = Collection.objects.filter(category=category).order_by('-created')
             all_raw_collections += list(collections)
         else:
             current_category_id = category
@@ -156,25 +157,11 @@ def get_category_tree_resources_collections(current_flattened_tree, user):
     from interactions.models import Favorite
     from meta.models import TagCategory, Tag
     from django.contrib.contenttypes.models import ContentType
-    resource_ct = ContentType.objects.get_for_model(Resource)
     collection_ct = ContentType.objects.get_for_model(Collection)
 
     for resource in all_raw_resources:
         try:
-            # resource.revision.user = resource.user
-            resource.favorites_count = Favorite.objects.filter(
-                parent_id=resource.id, parent_type=resource_ct).count()
-            resource.type = resource.tags.get(
-                category=TagCategory.objects.get(title='Resource type'))
-            resource.item_type = 'resource'
-            resource.filtered_tags = resource.tags.exclude(
-                category=TagCategory.objects.get(title='Resource type'))
-            try:
-                resource.favorited = Favorite.objects.get(
-                    parent_id=resource.id, parent_type=resource_ct, user=user) != None
-            except:
-                resource.favorited = False
-
+            build_browse_resource(resource, user)
             all_resources.append(resource)
         except Tag.DoesNotExist:
             pass
@@ -188,6 +175,39 @@ def get_category_tree_resources_collections(current_flattened_tree, user):
         all_collections.append(collection)
 
     return (all_resources, all_collections, current_category_id)
+
+
+def build_browse_resource(resource, user):
+    from django.contrib.contenttypes.models import ContentType
+    resource_ct = ContentType.objects.get_for_model(Resource)
+    from interactions.models import Favorite
+    from meta.models import TagCategory
+
+    resource.revision.user = resource.user
+    resource.favorites_count = Favorite.objects.filter(
+        parent_id=resource.id, parent_type=resource_ct).count()
+    resource.type = resource.tags.get(
+        category=TagCategory.objects.get(title='Resource type'))
+    resource.item_type = 'resource'
+    resource.filtered_tags = resource.tags.exclude(
+        category=TagCategory.objects.get(title='Resource type'))
+    try:
+        resource.favorited = Favorite.objects.get(
+            parent_id=resource.id, parent_type=resource_ct, user=user) != None
+    except:
+        resource.favorited = False
+
+    try:
+        resource.objectives = resource.meta.objectives
+    except:
+        resource.objectives = None
+
+    from django.db.models import Avg
+    review_average = Review.objects.filter(
+        comment__parent_id=resource.id, comment__classification='review').aggregate(Avg('rating'))['rating__avg']
+    resource.rating = review_average if review_average else 0
+    resource.review_count = Review.objects.filter(
+        comment__parent_id=resource.id, comment__classification='review').count()
 
 
 def browse_default(request):
@@ -331,6 +351,12 @@ def view_resource(request, resource_id, resource_slug):
         standards = resource.tags.filter(
             category=TagCategory.objects.get(title='Standards'))
 
+        # Get resource reviews.
+        from interactions.models import Review
+        reviews = Review.objects.filter(comment__parent_id=resource.id, comment__classification='review')
+        for review in reviews:
+            review.rating = range(review.rating)
+
         context = {
             'resource': resource,
             'resource_type': resource_type,
@@ -343,6 +369,7 @@ def view_resource(request, resource_id, resource_slug):
             'revision_view': resource.revision == revision,
             'breadcrumb': breadcrumb,
             'resource_collection': collection,
+            'reviews': reviews,
             "user_resource_count": user_resource_count,
             'current_path': 'http://' + request.get_host() + request.get_full_path(),  # request.get_host()
             'thumbnail': 'http://' + request.get_host() + settings.MEDIA_URL + resource.image.name
@@ -2805,7 +2832,8 @@ def get_resource_comments(request, resource_id):
 
         return APIUtilities._api_success(context)
 
-    except:
+    except Exception, e:
+        print e
         context = {
             'title': 'Could not fetch the resource comments.',
             'message': 'We failed to fetch some of the comments of this resources. '
@@ -3211,11 +3239,12 @@ def load_browse_resources(request, category_id, last_category_id):
             'type': str(resource.type).upper(),
             'tags': [tag.title for tag in filtered_tag_list] if resource.filtered_tags else [],
             'description': resource.description,
+            'objectives': resource.objectives if resource.objectives else [],            
             'thumbnail': settings.MEDIA_URL + resource.image.name,
             'favorited': False,
             'created': int(time.mktime(resource.created.timetuple())),
-            'stars': 3.5,
-            'review_count': 6
+            'stars': resource.rating,
+            'review_count': resource.review_count
         }
 
     context = {
@@ -3256,27 +3285,18 @@ def search_category(request, category_id, last_category_id, query):
         sqs_tags = SearchQuerySet().filter(content=query, visibility='public', tags__in=categories_tags)
         all_raw_resources += list(sqs | sqs_tags)
     elif len(categories) > 0:
-        sqs = SearchQuerySet().autocomplete(
-            content_auto=query).filter(visibility='public', category__in=categories)
+        sqs = SearchQuerySet().filter(
+            content=query, visibility='public', category__in=categories)
         all_raw_resources = list(sqs)
     elif len(categories_tags) > 0:
         sqs_tags = SearchQuerySet().filter(content=query, visibility='public', tags__in=categories_tags)
         all_raw_resources = list(sqs)
 
     # Setup each resource's favorites count and type.
-    from interactions.models import Favorite
-    from meta.models import TagCategory, Tag
-    from django.contrib.contenttypes.models import ContentType
-    resource_ct = ContentType.objects.get_for_model(Resource)
-
+    from meta.models import Tag
     for resource in all_raw_resources:
         try:
-            resource.object.revision.user = resource.object.user
-            resource.object.favorites_count = Favorite.objects.filter(
-                parent_id=resource.object.id, parent_type=resource_ct).count()
-            resource.object.type = resource.object.tags.get(
-                category=TagCategory.objects.get(title='Resource type'))
-            resource.item_type = 'resource'
+            build_browse_resource(resource.object, request.user)
             all_resources.append(resource)
         except Tag.DoesNotExist:
             pass
@@ -3302,9 +3322,13 @@ def search_category(request, category_id, last_category_id, query):
             'views': resource.object.views,
             'type': str(resource.object.type).upper(),
             'tags': [tag.title for tag in resource.object.tags.all()],
+            'objectives': resource.object.objectives if resource.object.objectives else [],
+            'description': resource.object.description,
             'thumbnail': settings.MEDIA_URL + resource.object.image.name,
             'favorited': False,
-            'created': int(time.mktime(resource.object.created.timetuple()))
+            'created': int(time.mktime(resource.object.created.timetuple())),
+            'stars': resource.rating,
+            'review_count': resource.review_count
         }
 
     context = {

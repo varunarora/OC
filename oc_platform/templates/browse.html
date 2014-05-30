@@ -76,7 +76,7 @@
                                 </form>
                             </div>
                             <div class="content-panel-body-listing-filters-sort">
-                                <span class="sort-by">Sort by: </span><span class="filter-sort-option filter-sort-option-newest">Newest</span> <span class="filter-sort-option selected">Popularity</span>
+                                <span class="sort-by">Sort by: </span><span class="filter-sort-option filter-sort-option-newest selected">Newest</span> <span class="filter-sort-option">Popularity</span>
                                 <div class="sort-by-type">All types<span class="sort-by-type-button"></div>
                                 <div class="sort-by-type-menu">
                                     <div class="sort-by-type-menu-content">
@@ -108,7 +108,7 @@
                             var resource = new Resource({
                                 id: '{{ item.id }}',
                                 url: '{% url read resource_id=item.id resource_slug=item.slug %}',
-                                title: '{{ item.title|truncatechars:40 }}',
+                                title: '{{ item.title }}',
                                 user: '{{ item.revision.user.get_full_name }}',
                                 user_id: '{{ item.revision.user.id }}',
                                 user_thumbnail: '{{ MEDIA_URL }}{{ item.revision.user.get_profile.profile_pic.name }}',
@@ -120,9 +120,10 @@
                                 favorited: '{{ item.favorited }}' === 'True',
                                 created: '{{ item.created|date:"U" }}',
                                 tags: {% if item.filtered_tags %}["{{ item.filtered_tags|join:'","' }}"]{% else %}[]{% endif %},
-                                description: {% if item.description %}'{{ item.description }}'{% else %}'No description found.'{% endif %},
-                                stars: 3.5,
-                                review_count: 6
+                                description: {% if item.description %}'{{ item.description|escapejs }}'{% else %}''{% endif %},
+                                stars: '{{ item.rating }}',
+                                review_count: {{ item.review_count }},
+                                objectives: {% if item.objectives %}["{{ item.objectives|join:'","' }}"]{% else %}[]{% endif %}
                             });
                             resourceSet.add(resource);
                             {% else %}
@@ -141,8 +142,10 @@
                                 favorited: false,
                                 created: '{{ item.created|date:"U" }}',
                                 tags: [],
+                                description: {% if item.description %}'{{ item.description|escapejs }}'{% else %}''{% endif %},
                                 stars: 3.5,
-                                review_count: 6
+                                review_count: 6,
+                                objectives: []
                             });
                             resourceSet.add(collection);                        
                             {% endif %}
@@ -158,8 +161,8 @@
                         {% endif %}
 
                         {% if not query and query != '' %}
-                        {% if requests %}
                         <div class="content-panel-body-listing-requests">
+                        {% if requests %}
                             <div class="content-panel-body-listing-requests-title">
                                 <h3>Top requests</h3>
                                 <a href="{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}" class="action-button mini-action-button content-panel-body-listing-requests-new-request">New request</a>
@@ -170,12 +173,13 @@
                                 <div class="content-panel-body-listing-request-body"><span class="bold content-panel-body-listing-request-body-user">{{ request.user.get_full_name }}</span>{{ request.body_markdown_html|safe }}</div>
                             </a>
                             {% endfor %}
-                        </div>
+                        
                         {% else %}
-                        <a href="{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}" class="no-request-found">Can't find what you are looking for? Don't worry - just ask for it!</a>
+                        Can't find what you are looking for? <span class="no-request-found-teacher-count"></span> teachers are currently online waiting to help you for free!
+                        <a href="{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}" class="no-request-found">Ask for help right now</a>
                         {% endif %}
+                        </div>
                         {% endif %}
-
                     </div>
                 </div>
                 {% endif %}

@@ -25,7 +25,7 @@ class CommentsBuilder:
     def _get_child_comments(self, comment):
         # Get all the collections whose parent is the root collection.
         child_comments = Comment.objects.filter(
-            parent_id=comment.id, parent_type=self.host_type)
+            parent_id=comment.id, parent_type=self.host_type, classification=None)
 
         # HACK(Varun): Change the flag of the host_type to comment type
         # after descending one step down in the comment tree i.e. after

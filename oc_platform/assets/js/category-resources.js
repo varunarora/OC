@@ -27,14 +27,6 @@ OC.categoryResources = {
         // Setup menu positioning (and adjust for scrollbar width) for content type filter.
         OC.setUpMenuPositioning('.sort-by-type-menu', '.sort-by-type');
 
-        // Dirty, hackish way, but only solution known right now.
-        if (navigator.userAgent.toLowerCase().indexOf('firefox') != -1){
-            $('.sort-by-type-menu').css({
-                'left': parseInt($('.sort-by-type-menu').css(
-                    'left'), 10) - scrollbarWidth
-            });
-        }
-
         // Make the menu on the left nano'ed, conditional on the size of the content.
         $('.category-panel-listing-categories-body').addClass('scroll-content');
 
@@ -50,6 +42,9 @@ OC.categoryResources = {
 
         // Clear the filter search box.
         $('.content-panel-body-listing-filters-search input').val('');
+
+        // Set number of teachers waiting online.
+        $('.no-request-found-teacher-count').text(String(_.random(6, 14)));
     },
 
     initInfiniteScroll: function(){
@@ -67,7 +62,7 @@ OC.categoryResources = {
                         $.get('/resources/api/load-browse-resources/' + categoryID +
                                 '/from/' + OC.categoryResources.currentCategoryID + '/',
                             function(response){
-                                if (response.status == 'true'){
+                                if (response.status === 'true'){
                                     var keys = Object.keys(response.resources);
 
                                     if (response.current_category_id){
@@ -123,6 +118,9 @@ var Resource = Backbone.Model.extend({
 
     // The number of favorites the resource has gotten thus far.
     favorites: "",
+
+    // Tags associated with this resource.
+    tags: "",
 
     // Type of content.
     type: "",
@@ -195,10 +193,10 @@ var ResourceView = Backbone.View.extend({
         '<%= title %></a>' +
         '<div class="content-panel-body-listing-item-contents-meta"><%= views %> views</div>' +
         '<%= tags %><div class="content-panel-body-listing-item-contents-description"><%= description %></div>' +
-        '<div class="content-panel-body-listing-item-contents-reviews"><%= stars %>' +
+        '<% if (review_count !== 0) { %><div class="content-panel-body-listing-item-contents-reviews"><%= stars %>' +
         '<div class="content-panel-body-listing-item-contents-review-count">' +
         '(<a class="content-panel-body-listing-item-contents-review-count-value"><%= review_count %></a>)</div>' +
-        '</div></div>'),
+        '</div><% } %></div>'),
 
     events: {
         // Bind the favorite button.
@@ -254,7 +252,18 @@ var ResourceView = Backbone.View.extend({
     render: function () {
         modelJSON = this.model.toJSON();
         modelJSON['tags'] = String(this.$tagsView[0].outerHTML);
+ 
         modelJSON['stars'] = String(this.$starsView[0].outerHTML);
+
+        var originalTitleLength = modelJSON['title'].length;
+        if (originalTitleLength > 40)
+            modelJSON['title'] = modelJSON['title'].substring(0, 40).trim() + '&hellip;';
+
+        var originalDescriptionLength = modelJSON['description'].length;
+        if (originalDescriptionLength > 100)
+            modelJSON['description'] = modelJSON['description'].substring(0, 100).trim() + '&hellip;';
+        else if (originalDescriptionLength === 0)
+            modelJSON['description'] = 'No description found.';
 
         this.$el.html(this.template(modelJSON));
         $('.content-panel-body-listing-items').append(this.$el);
@@ -264,8 +273,7 @@ var ResourceView = Backbone.View.extend({
 
     favorite: function(){
         OC.favoriteClickHandler(
-            'resource', this.model.get('id'),
-            OC.config.user.id, this.favoriteCallback,
+            'resource', this.model.get('id'), this.favoriteCallback,
             this.unfavoriteCallback, this.$el.find('.content-panel-body-listing-item-favorites')
         );
 
@@ -494,7 +502,15 @@ function init_mvc() {
             loadButton = $('.lazy-load-button');
 
         var collectionToRender = new ResourceSet(resourceSet.filter(function (resource) {
-            return resource.get('title').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+            return (
+                resource.get('title').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1 ||
+                resource.get('description').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1 ||
+                _.filter(resource.get('tags'), function(tag){
+                    return tag.toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+                }).length !== 0 ||
+                _.filter(resource.get('objectives'), function(objective){
+                    return objective.toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+                }).length !== 0);
         }));
 
         // Recreate the view (clears previous view)

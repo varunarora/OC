@@ -3815,8 +3815,18 @@ var OC = {
     },
 
     initBrowse: function(){
+        var sortByTypeMenu = $('.sort-by-type-menu');
+        $('.content-panel').on('scroll click', function(event){
+            if (sortByTypeMenu.hasClass('show'))
+                $('.sort-by-type-menu').removeClass('show');
+        });
+
         $('.sort-by-type').click(function(event){
             $('.sort-by-type-menu').toggleClass('show');
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
         });
 
         // Attach click handler with favorite 'heart'.
@@ -3828,7 +3838,9 @@ var OC = {
         $('.content-panel-body-header-share').click(function(){
             if (OC.config.user.id) OC.initNewPostDialog();
             else {
-                OC.launchSignupDialog(function(response){
+                var message = 'To post something into the community, you must ' +
+                'login or create a free account (takes 30 seconds!).';
+                OC.launchSignupDialog(message, function(response){
                     OC.initNewPostDialog();
                 });
             }
