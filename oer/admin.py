@@ -1,6 +1,6 @@
 from django.contrib import admin
 from oer.models import Resource, Collection
-from oer.models import ResourceOld, ResourceRevision, Document, DocumentElement, Element, Link, Attachment, Unit
+from oer.models import ResourceOld, ResourceRevision, Document, DocumentElement, Element, Link, Attachment, Unit, ResourceMeta
 
 admin.site.register(Resource)
 admin.site.register(Collection)
@@ -13,3 +13,5 @@ admin.site.register(Element)
 admin.site.register(Link)
 admin.site.register(Attachment)
 admin.site.register(Unit)
+
+admin.site.register(ResourceMeta)
