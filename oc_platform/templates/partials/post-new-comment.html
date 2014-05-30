@@ -1,6 +1,10 @@
 <div class="post-new-comment">
     <div class="post-comment-user-thumbnail">
+        {% if user.is_authenticated %}
         <div style="background-image: url('{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}')" class="discussion-response-thumbnail"></div>
+        {% else %}
+        <div style="background-image: url('{{ STATIC_URL }}images/moe-thumbnail.png')" class="discussion-response-thumbnail"></div>
+        {% endif %}
     </div>
     <div class="post-comment-body">
         <form>
