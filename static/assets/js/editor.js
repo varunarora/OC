@@ -2207,6 +2207,8 @@ $(document).ready(function(){
     */
 
     $('#new-resource-document-form .editor-button-wrapper .save-button').click(function(event){
+        window.onbeforeunload = null;
+
         // Add all element JSONs into strings.
         var newDocumentForm = $('#new-resource-document-form');
 
