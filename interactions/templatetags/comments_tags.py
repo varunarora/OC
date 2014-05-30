@@ -135,8 +135,8 @@ def add_comment_data_to_element(node, node_element, user, root, host_type):
 
     # If comment is created by the user or the requester is the admin,
     #     add a delete button
-    if host_type.name == 'project' or host_type.name == 'resource':
-        if user == node.user or user in root.admins.all():
+    if (host_type.name == 'project' and user in root.admins.all()) or (
+        host_type.name == 'resource' and user == node.user):
             delete_button = ElementTree.SubElement(node_element, 'div')
             delete_button.set('class', 'delete-button')
             delete_button.set('title', 'Delete comment')
