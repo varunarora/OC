@@ -6,3 +6,6 @@
 {% for tag in object.tags.all %}
     {{ tag }}
 {% endfor %}
+{% for objective in object.meta.objectives %}
+    {{ objective }}
+{% endfor %}
