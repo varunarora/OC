@@ -3799,7 +3799,7 @@ var OC = {
     },
 
     subscribeTo: function(userID, button){
-        if (OC.config.user.id){
+        function subscribe(){
             $.get('/user/api/subscribe/' + userID + '/',
                 function(response){
                     if (response.status == 'true'){
@@ -3815,9 +3815,13 @@ var OC = {
                     }
                 },
             'json');
+        }
+
+        if (OC.config.user.id){
+            subscribe();
         } else {
-            OC.popup('You must be logged in to subscribe to someone. Please create a ' +
-                'free account for the same.', 'Log in to subscribe to someone');
+            var message = 'To subscribe and get frequent updates, please login or create a free account instantly.';
+            OC.launchSignupDialog(message, subscribe);
         }
     },
 
@@ -3936,12 +3940,16 @@ var OC = {
         });
     },
 
-    launchSignupDialog: function(successCallback){
+    launchSignupDialog: function(message, successCallback){
         var signupDialog = OC.customPopup('.login-dialog'),
             signinButtons = $('.easy-signup-form, #sign-in-form'),
-            sessionStateElement = $('.easy-signup-form #session-state');
+            sessionStateElement = $('.easy-signup-form #session-state'),
+            signupMessage = $('.login-dialog-message', signupDialog.dialog);
 
         OC.signupDialog = signupDialog;
+
+        // Set the specific context message in the dialog.
+        signupMessage.html(message);
 
         // Load the template for the signup and signin forms.
         $.get('/user/api/registeration-context/',

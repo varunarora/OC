@@ -357,7 +357,9 @@ OC.projects = {
             if (OC.config.user.id){
                 newDiscussionPostForm.submit();
             } else {
-                OC.launchSignupDialog(function(){
+                var message = 'To complete this post, please login or create ' +
+                'a free account (takes 30 seconds!). Don\'t worry, we\'ll keep your posting safe';
+                OC.launchSignupDialog(message, function(){
                     // Add a redirect_to in the form.
                     if (OC.projects.postRedirectTo){
                         var redirectToInput = $('<input/>', {
@@ -441,7 +443,10 @@ OC.projects = {
 
         $('#project-info .request-button:not(.disabled-action-button)').click(function(event){
             if (OC.config.user.id) makeRequest();
-            else OC.launchSignupDialog(makeRequest);
+            else {
+                var message = 'To become a member, please login or create a free account (takes 30 seconds!).';
+                OC.launchSignupDialog(message, makeRequest);
+            }
 
             event.stopPropagation();
             event.preventDefault();
