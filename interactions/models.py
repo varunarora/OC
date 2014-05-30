@@ -34,6 +34,7 @@ class Comment(models.Model):
     attachment_id = models.PositiveIntegerField(null=True, blank=True)
     attachment = generic.GenericForeignKey('attachment_type', 'attachment_id')
     #tags=models.ForeignKey(Tag)
+    classification = models.CharField(max_length=64, null=True, blank=True)
 
     def __unicode__(self):
         return str(self.parent_type) + ": " + str(self.parent_id)

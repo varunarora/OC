@@ -312,3 +312,87 @@
 
 			&:hover
 				background-image: url('../images/social-icons/g-hover.png')
+
+
+.need-more-info
+	background-color: #E9EFFA
+	text-align: center
+	position: relative
+	margin-bottom: -48px
+	top: -56px
+	height: 36px
+	padding-top: 12px
+	color: #72757A
+	@include box-shadow(0 1px 3px 1px rgba(0, 0, 0, 0.1))
+
+	.need-more-info-button
+		float: none
+		border: 1px solid #557799
+		border-radius: 2px
+		background-color: transparent
+		color: #557799
+
+		&:hover
+			background-color: #2D6699
+			color: #fff
+			border-color: #2D6699
+
+
+.request-resource-review
+	background-color: #F9EDBE
+	text-align: center
+	position: relative
+	margin-bottom: -56px
+	top: 0px
+	height: 28px
+	padding-top: 12px
+	color: #72757A
+
+	.empty-star
+		cursor: pointer
+
+	.request-resource-review-stars
+		display: inline-block
+
+.full-star, .empty-star
+	display: inline-block
+	background-repeat: no-repeat
+	background-position: center center
+	width: 14px
+	height: 14px
+	margin-right: 2px
+
+.empty-star
+	background-image: url('../images/empty-star.png')
+
+
+.full-star, .empty-star.hover
+	background-image: url('../images/favorited.png')	
+
+.comment-thread.resource-comments
+	margin: 0px
+	padding: 0px
+
+
+.resource-review
+	margin-bottom: 20px
+
+	.resource-review-user
+		overflow: hidden
+		margin-bottom: 6px
+
+		.resource-review-user-thumbnail
+			width: 30px
+			height: 30px
+			float: left
+			background-size: cover
+			margin-right: 10px
+
+		.resource-review-user-date
+			color: $light-font
+			font-size: 0.93em
+			margin-top: 2px
+
+		.resource-review-user-description-stars
+			margin-left: 8px
+			display: inline-block

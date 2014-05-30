@@ -491,3 +491,45 @@ def list_user_favorites(request):
         'favorites': serialized_favorites
     }
     return APIUtilities._api_success(context)
+
+
+def review_resource(request):
+    if request.method == "POST":
+        from django.core.urlresolvers import reverse
+        from interactions.models import Review
+
+        try:
+            modified_request = request.POST.copy()
+            modified_request.setdefault('user', request.user.id)
+
+            comment = create_comment(request, modified_request)
+            review = Review(
+                comment=comment, rating=int(request.POST.get('stars', None))
+            )
+            review.save()
+
+            import datetime
+            serialized_review = {
+                'user_url': reverse('user:user_profile', kwargs={
+                    'username': comment.user.username
+                }),
+                'name': str(comment.user.get_full_name()),
+                'username': comment.user.username,
+                'created': datetime.datetime.strftime(comment.created, '%b. %d, %Y, %I:%M %P'),
+                'profile_pic': settings.MEDIA_URL + comment.user.get_profile().profile_pic.name,
+                'body': comment.body_markdown_html,
+                'stars': review.rating
+            }
+            context = {
+                'review': serialized_review
+            }
+            return APIUtilities._api_success(context)
+        except:
+            context = {
+                'title': 'Unable to post your review',
+                'message': 'We apologize as we failed to post your highly useful review. '
+                + 'Please contact us if the problem persists.'            
+            }
+            return APIUtilities._api_failure(context)
+    else:
+        return APIUtilities._api_not_found()

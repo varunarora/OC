@@ -8,6 +8,7 @@ urlpatterns = patterns(
     url(r'^comment/(?P<comment_id>.+)/downvote/$', views.downvote_comment, name='downvote_comment'),
     url(r'^comment/(?P<comment_id>.+)/delete/$', views.delete_comment, name='delete_comment'),
     url(r'^comment/$', views.post_comment, name='post_comment'),
+    url(r'^review-resource/$', views.review_resource, name='review_resource'),
 
     url(r'^comment-reference/$', views.post_comment_reference, name='post_comment_reference'),
 

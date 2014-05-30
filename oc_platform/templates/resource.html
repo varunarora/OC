@@ -48,29 +48,67 @@
 		<section class="oer-meta-support">
 			{% if resource.meta.time %}<span class="oer-meta-time-icon"></span>{{ resource.meta.time }} mins{% endif %}{% if resource.meta.materials %}<span class="oer-meta-materials-icon"></span>{{ resource.meta.materials|join:', ' }}{% endif %}{% if standards %}<span class="oer-meta-tag-icon"></span>{% for standard in standards %}<a href="{% url meta:standard tag_title=standard.title %}" class="oer-meta-support-tag" title="{{ standard.description }}">{{ standard.title }}</a>{% endfor %}{% endif %}
 		</section>
+		{% else %}
+		<div class="need-more-info">Confused about what the purpose of this resource is? Click <button class="action-button mini-action-button need-more-info-button">Need more information</button></div>
 		{% endif %}
 		<section id="oer">
 			<div class="oer-document document-body">
 				{% include 'partials/oer-document.html' %}
 			</div>
 		</section>
+		<div class="request-resource-review">From a star rating of 1 star to 5 stars, how useful was this resource? <div class="request-resource-review-stars"><span class="empty-star"></span><span class="empty-star"></span><span class="empty-star"></span><span class="empty-star"></span><span class="empty-star"></span></div></div>
 	</div>
 	{% endif %}
 
 	<div class="center-stage resource-footer">
 		<div id="key-panel" class="panel-left">
-			<div class="resource-comments comment-thread">
+			<div class="comment-thread resource-comments">
             	{% include 'partials/post-new-comment.html' %}
 			</div>
 		</div>
 		<div id="fill-panel" class="panel-right">
-			<h3>Related resources</h3>
-			No related resources found.
+			<h3>Reviews ({{ reviews|length }})</h3>
+			<div class="resource-reviews">
+				{% for review in reviews %}
+				<div class="resource-review">
+					<div class="resource-review-user">
+						<div class="resource-review-user-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ review.comment.user.get_profile.profile_pic.name }}');"></div>
+						<div class="resource-review-user-description">
+							<div><a href="{% url user:user_profile username=review.comment.user.username %}">{{ review.comment.user.get_full_name }}</a><div class="resource-review-user-description-stars">{% for rating in review.rating %}<span class="full-star"></span>{% endfor %}</div></div>
+							<div class="resource-review-user-date">{{ review.comment.created }}</div>
+						</div>
+					</div>
+					<div class="resource-review-body">{{ review.comment.body_markdown|safe }}</div>
+				</div>
+				{% empty %}
+				No reviews found.
+				{% endfor %}
+			</div>
 		</div>
 	</div>
 </article>
 
 {% include 'partials/post-new-comment-reply.html' %}
+
+<div class="review-comment-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Leave some comments with your review</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+    	<p>Would you like to share why you left these many stars?</p>
+    	<form id="review-comment-form">
+    		<input type="hidden" name="stars" value="0" />
+    		<input type="hidden" name="classification" value="review" />
+            <input type="hidden" name="parent_type" value="{{ host_content_type.id }}" />
+            <input type="hidden" name="parent_id" value="{{ resource.id }}" />
+    		<textarea name="body_markdown"></textarea>
+        </form>
+        <div class="review-comment-submit-wrapper oc-popup-submit-wrapper">
+        	<button class="action-button review-comment-done-button oc-popup-submit-button">Done</button>
+		</div>
+    </div>
+</div>
 
 <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>	
 <script type="text/javascript" src="{{ STATIC_URL }}js/article.js"></script>

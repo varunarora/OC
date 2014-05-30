@@ -2134,6 +2134,152 @@ var OC = {
 
         // Setup standard tags labels tooltip.
         $('.oer-meta-support-tag').tipsy({gravity: 's'});
+
+        // Animate 'need more info' bar and make useful.
+        setTimeout(function(){
+            $('.need-more-info').animate({
+                top: 0
+            }, 1500);
+        }, 3000);
+
+        var needInfoPanel = $(this).parents('.need-more-info'),
+            resourceID = $('form#resource-form input[name="resource_id"]').val();
+
+        $('.need-more-info-button').click(function(){
+            function request(){
+                $.get('/resources/api/request-for-information/' + resourceID + '/',
+                    function(response){
+                        if (response.status === 'true'){
+                            needInfoPanel.animate({
+                                opacity: 0,
+                            }, 500, function(){
+                                $(this).text('Your request for more information has been sent. ' +
+                                    'You will receive an email once the information is ready for you');
+                            }).animate({
+                                opacity: 1,
+                                height: 28,
+                               'margin-bottom': -40
+                            }, 500, function(){
+                                setTimeout(function(){
+                                    needInfoPanel.animate({
+                                        top: -56,
+                                    });
+                                }, 6000);
+                            });
+                        }
+                    },
+                'json');
+            }
+            if (OC.config.user.id){
+                request();
+            } else {
+                var message = 'We can send you the info only if you have a free account, so please sign up. ' +
+                    'It takes only 30 seconds!';
+                OC.launchSignupDialog(message, request);
+            }
+        });
+
+        // Bring the request to review into view when resource comments are in sight.
+        var resourceComments = $('.resource-comments'),
+            reviewPanel = $('.request-resource-review');
+        $(window).on('DOMContentLoaded load resize scroll', function(event){
+            // If the load button is attached to the document.
+            if (isElementInViewport(resourceComments) && ! resourceComments.hasClass('visible')){
+                reviewPanel.animate({
+                    top: -56
+                }, 1500);
+                reviewPanel.addClass('visible');
+            }
+        });
+
+        // Bind star review click with popups.
+        var allStars = $('.request-resource-review-stars .empty-star');
+        allStars.hover(function(){
+            allStars.removeClass('hover');
+
+            var hoveredStar = this,
+                i, currentStar;
+            for (i = 0; i < allStars.length; i++){
+                currentStar = $(allStars[i]);
+                currentStar.addClass('hover');
+
+                if (allStars[i] === hoveredStar) break;
+            }
+            $(this).addClass('');
+        });
+        $('.request-resource-review-stars').mouseleave(function(){
+            allStars.removeClass('hover');
+        });
+
+        var reviewTemplate = _.template('<div class="resource-review">' +
+            '<div class="resource-review-user">' +
+                '<div class="resource-review-user-thumbnail" style="background-image: url(\'<%= profile_pic %>\');"></div>' +
+                '<div class="resource-review-user-description">' +
+                    '<div><a href="<%= user_url %>"><%= name %></a><%= stars %></div>' +
+                    '<div class="resource-review-user-date"><%= created %></div>' +
+                '</div></div>' +
+            '<div class="resource-review-body"><%= body %></div></div>');
+        $('.request-resource-review .empty-star').click(function(event){
+            var reviewCommentPopup = OC.customPopup('.review-comment-dialog'),
+                selectedStar = this;
+
+            var reviewCommentForm = $('form#review-comment-form', reviewCommentPopup.dialog);
+
+            // Set the number of stars permanently, after finding star position.
+            $('input[name="stars"]', reviewCommentForm).val(allStars.index(selectedStar) + 1);
+
+            // Bind the 'Done' click button.
+            var submitButton = $('.review-comment-done-button', reviewCommentPopup.dialog);
+            submitButton.click(function(){
+                function review(){
+                    reviewCommentPopup.close();
+
+                    $.post('/interactions/review-resource/', reviewCommentForm.serialize(),
+                        function(response){
+                            if (response.status === 'true'){
+                                // Hide the review panel.
+                                reviewPanel.animate({
+                                    top: 0,
+                                }, 500);
+
+                                // Put the review in the reviews section.
+                                var starsWrapper = $('<div/>', {
+                                    'class': 'resource-review-user-description-stars'
+                                }), i;
+                                for (i = 0; i < response.review['stars']; i++){
+                                    starsWrapper.append($('<span/>', {'class': 'full-star'}));
+                                }
+
+                                response.review['stars'] = starsWrapper.get(0).outerHTML;
+
+                                var review = reviewTemplate(response.review);
+
+                                var resourceReviews = $('.resource-review');
+                                if (resourceReviews.length > 0)
+                                    $('.resource-reviews').append(review);
+                                else
+                                    $('.resource-reviews').html(review);
+
+                                // Set message and show box.
+                                OC.setMessageBoxMessage('Successfully posted your review!');
+                                OC.showMessageBox();
+                            } else {
+                                OC.popup(response.message, response.title);
+                            }
+                        },
+                    'json');
+                }
+
+                if (OC.config.user.id){
+                    // Perform post of the review with the comment.
+                    review();
+                } else {
+                    var message = 'Please login or create an account (takes 30 seconds!) to complete ' +
+                    'posting of the review.';
+                    OC.launchSignupDialog(message, review);
+                }
+            });
+        });
     },
 
     togglerClickHandler: function(event){
@@ -3033,24 +3179,35 @@ var OC = {
         },
 
         postCommentClickHandler:function(event){
-            var commentTextarea = $(event.target).parents('.post-comments').find('textarea[name=body_markdown]');
+            function post(){
+                var commentTextarea = $(event.target).parents('.post-comments').find('textarea[name=body_markdown]');
 
-            if (commentTextarea.val() !== ''){
-                $.post('/interactions/comment/',  $(event.target).parents('form').serialize(),
-                    function(response){
-                        // Hide the resource
-                        if (response.status == 'success'){
-                            OC.comments.newCommentSuccessHandler(response, event.target);
-                        }
-                        else {
-                            OC.popup(
-                                'Sorry, the comment could not be posted. Please try again later.');
-                        }
-                    },
-                'json');
-            } else {
-                commentTextarea.focus();
+                if (commentTextarea.val() !== ''){
+                    $.post('/interactions/comment/',  $(event.target).parents('form').serialize(),
+                        function(response){
+                            // Hide the resource
+                            if (response.status == 'success'){
+                                OC.comments.newCommentSuccessHandler(response, event.target);
+                            }
+                            else {
+                                OC.popup(
+                                    'Sorry, the comment could not be posted. Please try again later.');
+                            }
+                        },
+                    'json');
+                } else {
+                    commentTextarea.focus();
+                }
             }
+
+            if (OC.config.user.id){
+                post();
+            } else {
+                var message = 'Oops - you aren\'t logged in! No worries - let us keep your comment safe, while you ' +
+                'login or create a free account (takes 30 seconds!)';
+                OC.launchSignupDialog(message, post);
+            }
+
         },
 
         bindCommentReplyButton: function(){

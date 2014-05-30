@@ -3334,3 +3334,17 @@ def get_child_categories(request, category_id):
         'categories': serialized_categories
     }
     return APIUtilities._api_success(context)
+
+
+def request_for_information(request, resource_id):
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    from django.core.mail import mail_admins
+    mail_admins('Request for information', 
+        '%s wants info on %s' % (request.user.username + ':' +
+            request.user.email, str(resource.id) + ':' + resource.title))
+
+    return APIUtilities._api_success()
