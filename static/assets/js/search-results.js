@@ -80,9 +80,8 @@ var ResultsView = Backbone.View.extend({
 
     favorite: function(){
         OC.favoriteClickHandler('resource',
-            this.model.get('id'), OC.config.user.id,
-            this.favoriteCallback, this.unfavoriteCallback,
-            this.$el.find('.resource-favorite')
+            this.model.get('id'), this.favoriteCallback,
+            this.unfavoriteCallback, this.$el.find('.resource-favorite')
         );
     },
 

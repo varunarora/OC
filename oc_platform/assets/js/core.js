@@ -2297,8 +2297,7 @@ var OC = {
 
     initFavoriteResource: function(){
         // Determine if this user has favorited this resource.
-        var resourceID = $('form#resource-form input[name=resource_id]').val(),
-            userID = $('form#resource-form input[name=user_id]').val();
+        var resourceID = $('form#resource-form input[name=resource_id]').val();
 
         // If this is a user profile, several instances of this form should exist
         //     returning the value of the first form (all having the same user ID).
@@ -2313,13 +2312,13 @@ var OC = {
             }
         }
 
-        if (userID && resourceID){
+        if (resourceID){
             OC.getFavoriteState('resource', resourceID, setFavoriteState);
 
             resourceFavoriteButton.click(function(event){
                 var currentResourceFavoriteButton = $(this);
                 OC.favoriteClickHandler(
-                    'resource', resourceID, userID, function(){
+                    'resource', resourceID, function(){
                         currentResourceFavoriteButton.addClass('favorited');
                         currentResourceFavoriteButton.text('Favorited');
                     }, function(resourceFavoriteButton){
@@ -2340,17 +2339,26 @@ var OC = {
         }
     },
 
-    favoriteClickHandler: function(type, resourceID, userID, favoriteCallback, unfavoriteCallback, element){
-        $.get('/interactions/favorite/' + type + '/' + resourceID + '/',
-            function(response){
-                if (response.status == 'true'){
-                    favoriteCallback(element);
-                }
-                else if (response.status == 'unfavorite success'){
-                    unfavoriteCallback(element);
-                }
-            },
-        'json');
+    favoriteClickHandler: function(type, resourceID, favoriteCallback, unfavoriteCallback, element){
+        function favorite(){
+            $.get('/interactions/favorite/' + type + '/' + resourceID + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        favoriteCallback(element);
+                    }
+                    else if (response.status == 'unfavorite success'){
+                        unfavoriteCallback(element);
+                    }
+                },
+            'json');
+        }
+        
+        if (OC.config.user.id){
+            favorite();
+        } else {
+            var message = 'To favorite this resource to your account, please login or create a free account (takes 30 seconds!).';
+            OC.launchSignupDialog(message, favorite);
+        }
     },
 
     getFavoriteState: function(type, resourceID, callback){
@@ -3181,7 +3189,6 @@ var OC = {
         postCommentClickHandler:function(event){
             function post(){
                 var commentTextarea = $(event.target).parents('.post-comments').find('textarea[name=body_markdown]');
-
                 if (commentTextarea.val() !== ''){
                     $.post('/interactions/comment/',  $(event.target).parents('form').serialize(),
                         function(response){

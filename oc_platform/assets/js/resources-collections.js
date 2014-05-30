@@ -68,8 +68,7 @@ OC.resourcesCollections = {
                     currentResourceFavoriteButtonWrapper = currentResourceFavoriteButton.parent('.resource-favorite-wrapper');
 
                 OC.favoriteClickHandler(
-                    'resource', resourceID,
-                    OC.config.user.id, function(){
+                    'resource', resourceID, function(){
                         currentResourceFavoriteButtonWrapper.addClass('favorited');
                         currentResourceFavoriteButton.text('Favorited');
                     }, function(){
