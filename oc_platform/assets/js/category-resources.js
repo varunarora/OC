@@ -42,9 +42,6 @@ OC.categoryResources = {
 
         // Clear the filter search box.
         $('.content-panel-body-listing-filters-search input').val('');
-
-        // Set number of teachers waiting online.
-        $('.no-request-found-teacher-count').text(String(_.random(6, 14)));
     },
 
     initInfiniteScroll: function(){
@@ -170,6 +167,96 @@ var TagView = Backbone.View.extend({
         return this.el;
     }
 });
+
+// Initialize request Model
+var Request = Backbone.Model.extend({
+    // URL of the request.
+    url: "",
+
+    // Body of the request.
+    body: "",
+
+    // User who created the request.
+    user: "",
+
+    // Thumbnail of user who created the request.
+    user_thumbnail: ""
+});
+
+
+// Initialize requests set Collection
+var RequestSet = Backbone.Collection.extend({
+    model: Request,
+    comparator: function(){
+        return -resource.get('created');
+    }
+});
+
+// Initialize request view.
+var RequestView = Backbone.View.extend({
+    tagName: "a",
+    className: "content-panel-body-listing-request",
+    attributes: function(){
+        return {
+            'href': this.model.get('url'),
+        };
+    },
+    template: _.template('<div style="background-image: url(\'<%= user_thumbnail %>\')" ' +
+        'class="content-panel-body-listing-request-thumbnail"></div>' +
+        '<div class="content-panel-body-listing-request-body">' +
+        '<span class="bold content-panel-body-listing-request-body-user"><%= user %></span>' +
+        '<%= body %></div>'),
+
+    render: function () {
+        this.$el.html(this.template(this.model.toJSON()));
+        $('.content-panel-body-listing-requests').append(this.$el);
+
+        return this;
+    }
+});
+
+// Initialize the request collection view
+var RequestCollectionView = Backbone.View.extend({
+    requestURL: '',
+    render: function (newCollection) {
+        this.clearView();
+        var collectionToRender = newCollection || this.collection;
+        this.collection = collectionToRender;
+
+        // If no resources found.
+        if (collectionToRender.length === 0) {
+            this.showNullView();
+        } else {
+            this.showNonNullView();
+            // Create a new view object for each object in the collection and render it
+            _.each(collectionToRender.models, function(item) {
+                new RequestView({model: item}).render();
+            });
+        }
+    },
+
+    clearView: function () {
+        $('.content-panel-body-listing-requests').html('');
+    },
+
+    showNullView: function () {
+        $('.content-panel-body-listing-requests').html('Can\'t find what you are looking ' +
+            'for? <span class="no-request-found-teacher-count">' + this.randomUserCount() + '</span> teachers are currently ' +
+            'online waiting to help you for free! <a href="' + this.options.requestURL + '" class="no-request-found">Ask for help right now</a>');
+    },
+
+    randomUserCount: function () {
+        return String(_.random(6, 14));
+    },
+
+    showNonNullView: function (){
+        $('.content-panel-body-listing-requests').html('<div class="content-panel-body-listing-requests-title">' +
+            '<h3>Top requests</h3><a href="' + this.options.requestURL + '" class="action-button mini-action-button content-panel-body-listing-requests-new-request">' +
+            'New request</a></div>');
+    }
+});
+
+
 
 // Initialize resources view.
 var ResourceView = Backbone.View.extend({
@@ -591,16 +678,28 @@ function init_mvc() {
             }
             OC.categoryResources.filterAsyncSearchOn = false;
         }
+
+        // Filter the requests.
+        var requestsToRender = new RequestSet(requestSet.filter(function (request) {
+            return request.get('body').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+        }));
+        requestCollectionView.render(requestsToRender);
+
     });
 
 }
 
 jQuery(document).ready(function($){
-    // Construct a collection view using the resources objects built in
+    // Construct collection views using the resources and requests objects built in
     resourceCollectionView = new ResourceCollectionView({collection: resourceSet});
+    requestCollectionView = new RequestCollectionView({
+        collection: requestSet,
+        requestURL: requestURL
+    });
 
-    // Render the collection view
+    // Render the collection views
     resourceCollectionView.render();
+    requestCollectionView.render();
 
     // Initiatialize the Backbone models/collection/view
     init_mvc();
@@ -621,5 +720,9 @@ var filters = {
 // Initialize the resource results collection before page loads.
 var resourceSet = new ResourceSet();
 
-// Initialize the ResourceCollectionView global
-var resourceCollectionView;
+// Initialize the requests collection before page loads.
+var requestSet = new RequestSet();
+
+// Initialize the ResourceCollectionView, RequestCollectionView global
+var resourceCollectionView, RequestCollectionView;
+var requestURL;

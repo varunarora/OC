@@ -162,23 +162,19 @@
 
                         {% if not query and query != '' %}
                         <div class="content-panel-body-listing-requests">
-                        {% if requests %}
-                            <div class="content-panel-body-listing-requests-title">
-                                <h3>Top requests</h3>
-                                <a href="{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}" class="action-button mini-action-button content-panel-body-listing-requests-new-request">New request</a>
-                            </div>
+                        <script type="text/javascript">
+                            requestURL = '{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}';
                             {% for request in requests %}
-                            <a href="{% url projects:project_discussion project_slug=request.parent.slug discussion_id=request.id %}" class="content-panel-body-listing-request">
-                                <div style="background-image: url('{{ MEDIA_URL }}{{ request.user.get_profile.profile_pic.name }}')" class="content-panel-body-listing-request-thumbnail"></div>
-                                <div class="content-panel-body-listing-request-body"><span class="bold content-panel-body-listing-request-body-user">{{ request.user.get_full_name }}</span>{{ request.body_markdown_html|safe }}</div>
-                            </a>
+                            var newRequest = new Request({
+                                url: '{% url projects:project_discussion project_slug=request.parent.slug discussion_id=request.id %}',
+                                body: '{{ request.body_markdown_html|safe|escapejs }}',
+                                user: '{{ request.user.get_full_name }}',
+                                user_thumbnail: '{{ MEDIA_URL }}{{ request.user.get_profile.profile_pic.name }}'
+                            });
+                            requestSet.add(newRequest);
+
                             {% endfor %}
-                        
-                        {% else %}
-                        Can't find what you are looking for? <span class="no-request-found-teacher-count"></span> teachers are currently online waiting to help you for free!
-                        <a href="{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}" class="no-request-found">Ask for help right now</a>
-                        {% endif %}
-                        </div>
+                        </script>
                         {% endif %}
                     </div>
                 </div>
