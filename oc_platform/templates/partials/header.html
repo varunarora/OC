@@ -26,6 +26,9 @@
 				username: '{{ user.username }}',
 				thumbnail: '{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}'
 			}
+			{% if user.is_authenticated %}
+			ga('set', '&uid', {{ user.id }});
+			{% endif %};
 		</script>
 		<script>
 		// Include the UserVoice JavaScript SDK (only needed once on a page)
