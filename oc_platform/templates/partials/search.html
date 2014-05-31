@@ -29,6 +29,8 @@
 {% if query %}
     <div id="search-result-set">
         <script type="text/javascript">
+        ga('set', 'dimension1', '{{ query }}');
+
         {% for result in page.object_list %}
             {% if result.content_type == "articles.article" %}              
             var result = new Result({
