@@ -54,8 +54,10 @@ def add_to_mailing_list(sender, instance, created, raw, **kwargs):
                 None, None,
                 False
             )
-        except:
-            pass
+        except Exception, e:
+            from django.core.mail import mail_admins
+            mail_admins('Couldn\'t add user to Mailchimp', e)
+            
 
 from django.db.models.signals import post_save
 post_save.connect(add_to_mailing_list, sender=UserProfile)
