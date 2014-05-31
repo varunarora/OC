@@ -82,8 +82,14 @@ def register(request):
                 }
                 return APIUtilities._api_success(context)
             else:
+                from django.core.urlresolvers import reverse
                 return redirect(
-                    'user:user_files', username=fields_context['new_user'].username)
+                    reverse(
+                        'user:user_files', kwargs={
+                            'username': fields_context['new_user'].username
+                        }
+                    ) + '?new_user=true'
+                )
 
         fields_context['form'] = original_form_inputs
 
