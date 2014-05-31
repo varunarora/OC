@@ -28,7 +28,7 @@
 			}
 			{% if user.is_authenticated %}
 			ga('set', '&uid', {{ user.id }});
-			ga('set', 'dimension2', {{ user.dob.year }});
+			ga('set', 'dimension2', {{ user.get_profile.dob.year }});
 			{% endif %};
 		</script>
 
