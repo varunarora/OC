@@ -108,6 +108,13 @@ def browse(request, category_slug):
     breadcrumb = catU.build_breadcrumb(selected_category)[1:-1]
     breadcrumb.reverse()
 
+    for breadcrumb_category in breadcrumb:
+        breadcrumb_category.url = reverse(
+            'browse', kwargs={
+                'category_slug': breadcrumb_category.url
+            }
+        )
+
     # Set the URL for the current page for redirect situations.
     selected_category.url = request.path
 
