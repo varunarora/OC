@@ -2142,7 +2142,7 @@ var OC = {
             }, 1500);
         }, 3000);
 
-        var needInfoPanel = $(this).parents('.need-more-info'),
+        var needInfoPanel = $('.need-more-info'),
             resourceID = $('form#resource-form input[name="resource_id"]').val();
 
         if (resourceID){
