@@ -18,7 +18,7 @@ NOTIFICATIONS_EMAIL = "notifications@opencurriculum.org"  # This needs to filled
 EMAIL_USE_TLS = True
 
 MAILCHIMP_API_KEY = 'f8cfcc0cca3214a9894a8c8a58d733f5-us7'
-MAILCHIMP_MASTER_LIST_ID = '461b507c12'
+MAILCHIMP_MASTER_LIST_ID = 'e8e8015feb'
 
 MANAGERS = ADMINS
 
