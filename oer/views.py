@@ -708,42 +708,45 @@ def new_lesson(request):
 
 def new_unit(request):
     if request.method == 'POST':
-        project_id = request.POST.get('project', None)
-        collection_id = request.POST.get('collection', None)
+        try:
+            project_id = request.POST.get('project', None)
+            collection_id = request.POST.get('collection', None)
 
-        from oer import forms
-        new_unit = forms.UnitForm(request.POST, request.user)
+            from oer import forms
+            new_unit = forms.UnitForm(request.POST, request.user)
 
-        if new_unit.is_valid():
-            unit = new_unit.save()
+            if new_unit.is_valid():
+                unit = new_unit.save()
 
-            parent_collection = Collection.objects.get(
-                pk=int(request.POST.get('collection')))
+                parent_collection = Collection.objects.get(
+                    pk=int(request.POST.get('collection')))
 
-            import oer.CollectionUtilities as cu
-            (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
-                parent_collection)
-            title = request.POST.get('title', None)
-            slug = cu._get_fresh_collection_slug(
-               title if title != '' else 'Untitled Unit', flattened_tree)
+                import oer.CollectionUtilities as cu
+                (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
+                    parent_collection)
+                title = request.POST.get('title', None)
+                slug = cu._get_fresh_collection_slug(
+                   title if title != '' else 'Untitled Unit', flattened_tree)
 
-            # Create and save the unit colleciton.
-            new_collection = Collection(
-                title=title if title != '' else 'Untitled Unit',
-                host=unit,
-                visibility='private',
-                slug=slug,
-                creator=request.user
-            )
-            new_collection.save()
+                # Create and save the unit colleciton.
+                new_collection = Collection(
+                    title=title if title != '' else 'Untitled Unit',
+                    host=unit,
+                    visibility='private',
+                    slug=slug,
+                    creator=request.user
+                )
+                new_collection.save()
 
-            # Add unit to the necessary collection.
-            collection = get_collection(request.user.id, project_id, collection_id)
-            add_unit_to_collection(unit, collection)
+                # Add unit to the necessary collection.
+                collection = get_collection(request.user.id, project_id, collection_id)
+                add_unit_to_collection(unit, collection)
 
-            return redirect(
-                'user:list_collection', username=new_collection.creator.username, collection_slug=new_collection.slug
-            )
+                return redirect(
+                    'user:list_collection', username=new_collection.creator.username, collection_slug=new_collection.slug
+                )
+        except:
+            return redirect('user:user_profile', username=request.user.username)
 
     else:
         raise Http404
@@ -3027,6 +3030,7 @@ def template_simple_lesson_plan(request):
 
 
 def post_existing_resource_collection(request):
+    from django.contrib import messages
     try:
         is_resource = request.POST.get('is_resource', None) == 'true'
         resource_collection_id = request.POST.get('resource_collection_ID', None)
@@ -3040,7 +3044,8 @@ def post_existing_resource_collection(request):
         tag = Tag.objects.get(title__iexact=request.POST.get(
             'type', None), category=TagCategory.objects.get(title='Resource type'))
     except:
-        return APIUtilities._api_not_found()
+        messages.success(request, 'Oops! Something went wrong')
+        return redirect(request.META.get('HTTP_REFERER'))
 
     try:
         from meta.models import Category
@@ -3049,25 +3054,26 @@ def post_existing_resource_collection(request):
         resource_collection.category = category
 
         # Remove the original resource type tag to avoid conflicts. 
-        resource_collection.tags.remove(Tag.objects.get(
+        resource_collection.tags.remove(resource_collection.tags.get(
             category=TagCategory.objects.get(title='Resource type')))
 
         resource_collection.tags.add(tag)
         resource_collection.save()
 
-        from django.contrib import messages
         messages.success(request, 'Successfully posted your %s  \'%s\'.' % (
             'file' if is_resource else 'folder', resource_collection.title))
 
         return redirect(request.META.get('HTTP_REFERER'))
 
     except:
-        return APIUtilities._api_failure()
+        messages.success(request, 'Oops! Something went wrong')
+        return redirect(request.META.get('HTTP_REFERER'))
 
 
 def post_url(request):
     DEFAULT_COST = 0
 
+    from django.contrib import messages
     try:
         from meta.models import TagCategory, Tag, Category
         tag = Tag.objects.get(title__iexact=request.POST.get(
@@ -3121,10 +3127,12 @@ def post_url(request):
         request.user.get_profile().collection.resources.add(new_resource)
         request.user.get_profile().collection.save()
 
+        messages.success(request, 'Successfully posted that link')
         return redirect(request.META.get('HTTP_REFERER'))
 
-    except Exception:
-        return APIUtilities._api_failure()
+    except:
+        messages.success(request, 'Oops! Something went wrong')
+        return redirect(request.META.get('HTTP_REFERER'))
 
 
 def load_resources(request, collection_id, resource_count):
