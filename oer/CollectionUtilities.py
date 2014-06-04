@@ -665,7 +665,7 @@ def build_collection_breadcrumb(collection):
             break
 
     if collection_root_type.name == 'user profile':
-        breadcrumb[-1].title = breadcrumb[-1].user.get_full_name() + '\'s profile'
+        breadcrumb[-1].title = breadcrumb[-1].user.get_full_name() + '\'s files'
 
     # Reverse breadcrumb and return
     breadcrumb.reverse()
