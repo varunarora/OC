@@ -3,30 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Oopsie - something wen't wrong!</title>
-		<script type="text/javascript">
-			// Initialize WebFont from typography website.
-			var WebFontConfig = {
-			    fontdeck: { id: '25967' },
-			    fontactive: function(familyName, fvd) {
-			        OC.onFontLoad();
-			    }
-			};
-			(function(){
-				document.getElementsByTagName("html")[0].setAttribute("class","wf-loading")
-  				//  NEEDED to push the wf-loading class to your head
-  				document.getElementsByTagName("html")[0].setAttribute("className","wf-loading")
-        		// for IE…
-
-			    var wf = document.createElement('script'),
-			        s = document.getElementsByTagName('script')[0];
-			    wf.src = ('https:' === document.location.protocol ? 'https' : 'http') +
-			        '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-			    wf.type = 'text/javascript';
-			    wf.async = 'false';
-			    s.parentNode.insertBefore(wf, s);
-			})();
-		</script>
-		<link href='http://fonts.googleapis.com/css?family=PT+Sans:700,700italic,400italic,400' rel='stylesheet' type='text/css'>
+		<link href='http://fonts.googleapis.com/css?family=PT+Sans:700,400' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" href="/static/assets/css/jquery-ui-1.10.3.custom.css" type="text/css" />
 		<!--[if lt IE 9]>
 			<link rel="stylesheet" type="text/css" href="/static/assets/css/ie.css" />
@@ -83,7 +60,7 @@
 
 
 		<footer>
-			OpenCurriculum, Inc. &#183; <a href="/about">About</a> &#183; <a href="http://blog.theopencurriculum.org" target="_blank">Blog</a> &#183;  <a href="http://opencurriculum.uservoice.com" target="_blank">Help</a> &#183; <a href="/developers">Developers</a> &#183; <a href="/jobs">Jobs</a> &#183; <a href="/terms">Terms of Use</a> &#183; <a href="/privacy">Privacy Policy</a> &#183; <a href="/license"><img src="/static/assets/images/by-sa.png" /></a>
+			OpenCurriculum, Inc. &#183; <a href="/about">About</a> &#183; <a href="http://blog.opencurriculum.org" target="_blank">Blog</a> &#183;  <a href="http://opencurriculum.uservoice.com" target="_blank">Help</a> &#183; <a href="/developers">Developers</a> &#183; <a href="/jobs">Jobs</a> &#183; <a href="/terms">Terms of Use</a> &#183; <a href="/privacy">Privacy Policy</a> &#183; <a href="/license"><img src="/static/assets/images/by-sa.png" /></a>
 		</footer>
 	</body>
 </html>
