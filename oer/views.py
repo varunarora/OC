@@ -59,7 +59,7 @@ def browse(request, category_slug):
 
     except Exception, e:
         from django.core.mail import mail_admins
-        mail_admins('Browse failed to render category', e)
+        mail_admins('Browse failed to render category', e + category_slug)
 
         # Happens either when the slug is not found.
         raise Http404
