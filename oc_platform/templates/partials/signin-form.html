@@ -10,7 +10,7 @@
     <div class="login-authentication-failure">{% if login_error_message %}{{ login_error_message }}{% endif %}</div>
     <div id="loggedin-button">
         <input type="checkbox" name="stay-logged-in" />Keep me logged in
-        <button class="btn success-button">Log in<span class="vertical-caret"></span></button>
+        <button class="action-button new-action-button">Log in<span class="vertical-caret"></span></button>
     </div>
     <div id="forgot-username-password">Forgot username or password? <a href="">Click here</a></div>
     <table id="signup-or">
@@ -18,17 +18,13 @@
     </table>
     <div data-state="{{ state }}" id="session-state"></div>
     <div id="signinButtons">
-        <span class="g-signin"
-            data-scope="https://www.googleapis.com/auth/plus.login"
-            data-clientid="{{ client_id }}"
-            data-redirecturi="postmessage"
-            data-accesstype="offline"
-            data-cookiepolicy="single_host_origin"
-            data-callback="gPlusSignInCallback"
-            data-theme="dark"
-            data-width="wide">
-        </span>
-        <span id="facebook-signin-button"></span>
+        <button class="google-plus-button" id="custom-plus-button">Log in with Google+</button>
+        <button class="facebook-button">Log in with Facebook</button>
+
+        <script type="text/javascript">
+            var GPlusClientID = '{{ client_id }}',
+                fbAppID = '{{ FB_APP_ID }}'
+        </script>
     </div>
     <div id="result"></div>
 </form>
@@ -40,3 +36,11 @@
     <input type="hidden" name="facebook_id" />
     <input type="hidden" name="redirect_to" value="{{ source }}" />
 </form>
+
+<div class="new-account-redirect-dialog oc-popup">
+    <div class="oc-popup-body">
+        <div class="new-account-redirect-body">
+        <h3>Redirecting you to complete account setup...</h3>
+        </div>
+    </div>
+</div>

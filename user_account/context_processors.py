@@ -14,3 +14,13 @@ def notifications(request):
         return context
     except:
         pass
+
+
+
+def social_auth(request):
+    from django.conf import settings
+    context = {
+        'FB_APP_ID': settings.FB_APP_ID,
+        'PLUS_APP_ID': settings.PLUS_APP_ID
+    }
+    return context

@@ -55,6 +55,7 @@ urlpatterns = patterns(
     # User stuff
     url(r'^signup-invite/', 'oc_platform.views.signup_invite', name='signupinvite'),
     url(r'^signup/', 'user_account.views.register', name='register'),
+    url(r'^login/', 'oc_platform.views.login', name='login'),
     url(r'^authenticate/', 'user_account.views.authenticate', name='authenticate'),
     url(r'^confirm-account/', 'user_account.views.confirm_account', name='confirm_account'),
     url(r'^logout/', 'user_account.views.logout_view', name='logout'),

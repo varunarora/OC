@@ -1,64 +1,5 @@
 {% include 'partials/header.html' %}
 
-{% if login %}
-<div id="chief-panel-container" class="sign-up">
-	<div id="chief-panel-wrapper"></div>
-	<div id="chief-panel">
-		<div id="key-panel" class="panel-left">
-			<h1 class="strong">Connect to your learning world.</h1>
-			<p>We bring the newest features, tools and updates so that your world continues to grow.</p>
-			
-			<div class="row-set">
-				<div class="row-item">
-					<div class="row-item-thumbnail">
-						<img src="{{ STATIC_URL }}images/resources.png" />
-					</div>
-					<div class="row-item-description">
-						<div class="bold">Resource collections and sharing</div>
-						<div class="row-item-description-detail">Create or upload resources and organize in collections before you share. Free 2GB of learning resource storage when you sign up</div>
-					</div>
-				</div>
-
-				<div class="row-item">
-					<div class="row-item-thumbnail">
-						<img src="{{ STATIC_URL }}images/social.png" />
-					</div>
-					<div class="row-item-description">					
-						<div class="bold">Get a little social</div>
-						<div class="row-item-description-detail">Comment, vote and participate in user discussions with an identity worth bragging about</div>
-						</div>
-				</div>
-			
-				<div class="row-item">
-					<div class="row-item-thumbnail">
-						<img src="{{ STATIC_URL }}images/notifications.png" />
-					</div>
-					<div class="row-item-description">
-						<div class="bold">Stay up-to-date</div>
-						<div class="row-item-description-detail">Customize preferences and receive notifications on all your contributions and general community updates</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div id="fill-panel" class="panel-right">
-			<div class="register-box">New to OpenCurriculum? <a href="{% url register %}">Sign up here</a></div>
-            {% include 'partials/signin-form.html' %}
-		</div>
-	</div>
-</div>
-<div id="chief-panel-footer">
-	<img src="{{ STATIC_URL }}images/plant.png" id="plant" />
-</div>
-
-<div class="forgot-username-password-dialog dialog" title="Forgot username or password">
-	<form method="POST" class="forgot-username-password-form" action="user/reset-password/">
-		{% csrf_token %}
-		Enter your email address below, and we will send you a link to reset your password:
-		<p>Email address: <input type="textbox" name="email" /></p>
-	</form>
-</div>
-
-{% else %}
 <div id="chief-panel-container" class="home">
 	<div id="chief-panel">
 		<h1>Create better <span class="animated-learning-item">curriculum</span></h1>
@@ -116,7 +57,4 @@
 	<a href="{% url register %}" class="action-button site-action-button">Sign up for free</a>
 	<p>Have a question or suggestion? Contact us at hello@opencurriculum.org</p>
 </div>
-
-{% endif %}
-
 {% include 'partials/footer.html' %}

@@ -1,42 +1,32 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.utils.translation import ugettext as _
 from django.conf import settings
-from articles.models import Article
 import json
 
 
 def home(request):
-    """Fetches the top articles, a count and the sign-in form"""
-    login = request.GET.get('login', False)
-
     if request.user.is_authenticated():
-        login = False
         return redirect('user:user_profile', username=request.user.username)
 
+    context = {
+            'title': _(settings.STRINGS['global']['TITLE']),
+    }
+    return render(request, 'index.html', context)
+
+
+def login(request):
+    if request.user.is_authenticated():
+        return redirect('user:user_profile', username=request.user.username)
 
     login_error_message = None
     source = None
-    if login:
-        login_error = request.GET.get('error', False)
-        if login_error == 'auth':
-            login_error_message = _(settings.STRINGS['user']['AUTHENTICATION_ERROR'])
-        elif login_error == 'inactive':
-            login_error_message = _(settings.STRINGS['user']['INACTIVE_ACCOUNT_ERROR'])
-        source = request.GET.get('source', False)
 
-    # Get the top 10 articles ordered in descending order of views.
-    top_articles = Article.objects.order_by('title').order_by('-views')[:10]
-
-    # Get the count of the total number of articles in the database.
-    article_count = Article.objects.all().count()
-
-    # Get the top 12 resources ordered in descending order of views.
-    from oer.models import Resource
-    top_resources = Resource.objects.order_by('title').order_by('-views')[:12]
-
-    # Get the top 10 projects ordered in descending order of views.
-    from projects.models import Project
-    #top_projects = Project.objects.filter(visibility='public').order_by('title').order_by('-created')[:10]
+    login_error = request.GET.get('error', False)
+    if login_error == 'auth':
+        login_error_message = _(settings.STRINGS['user']['AUTHENTICATION_ERROR'])
+    elif login_error == 'inactive':
+        login_error_message = _(settings.STRINGS['user']['INACTIVE_ACCOUNT_ERROR'])
+    source = request.GET.get('source', False)
 
     # Get the sign-in form.
     import SignupForm
@@ -45,21 +35,17 @@ def home(request):
     # Fetch context variables by importing and invoking Google Plus function
     #     in AuthHelper library.
     from user_account.AuthHelper import AuthHelper
-
     context = dict(
         AuthHelper.generateGPlusContext(request).items() + {
-            'top_articles': top_articles,
-            'top_resources': top_resources,
-            #'top_projects': top_projects,
-            'title': _(settings.STRINGS['global']['TITLE']),
-            'count': article_count,
             'form': form,
             'login': True if login else False,
             'login_error_message': login_error_message,
+            'title': 'Log in to OpenCurriculum',
             'source': source
         }.items()
     )
-    return render(request, 'index.html', context)
+    return render(request, 'login.html', context)
+
 
 
 def t404(request):

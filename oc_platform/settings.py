@@ -20,6 +20,9 @@ EMAIL_USE_TLS = True
 MAILCHIMP_API_KEY = 'f8cfcc0cca3214a9894a8c8a58d733f5-us7'
 MAILCHIMP_MASTER_LIST_ID = 'e8e8015feb'
 
+FB_APP_ID = 639282532755047
+PLUS_APP_ID = '747453362533.apps.googleusercontent.com'
+
 MANAGERS = ADMINS
 
 DATABASES = {
@@ -125,6 +128,7 @@ TEMPLATE_LOADERS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
+    'user_account.context_processors.social_auth',
     'user_account.context_processors.notifications',
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
@@ -356,7 +360,7 @@ STRINGS = {
     }
 }
 
-STAR_USERS = ['khanacademy', 'ck12', 'joshua', 'ddmeyer']
+STAR_USERS = ['khanacademy', 'ck12', 'joshua', 'ddmeyer', 'illustrativemathematics']
 
 try:
     from settings_dev import *

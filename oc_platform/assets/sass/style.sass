@@ -633,9 +633,8 @@ form#share-via-email,
 form#contributor-registration,
 form#project-add-member
 	input[type=text], input[type=password], textarea
-		background-color: #f5f5f5
+		background-color: #f9f9f9
 		width: 200px
-		font-size: 0.9em
 
 		&:focus
 			background-color: #ffffff
@@ -1858,12 +1857,18 @@ table
 
 
 .action-button
-	background-color: #557799
+	background-color: #55acee
 	margin-left: 6px
 
 	&:hover
 		text-decoration: none
-		background-color: #2D6699
+
+.new-action-button
+	border: 1px solid #55acee
+		
+	&:hover
+		@include background-image(linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.15)))
+		border-color: #3b88c3
 
 .page-action-button, .action-button
 	&.mini-action-button
@@ -2744,6 +2749,7 @@ ul.tagit
 
 .oc-popup-body
 	margin-top: 10px
+	overflow: hidden
 
 .user-thumbnail-xsmall
 	background-size: cover
@@ -3106,16 +3112,71 @@ ul.collaborators
 			&.favorited
 				background-image: url("../images/hearted.png")
 
-.easy-signup
+.authenticate-form
+	.google-plus-button, .facebook-button
+		color: #fff
+		padding: 8px 16px
+		border: 0px solid #fff
+		font-weight: bold
+
+	.google-plus-button
+		background-color: #dd4b39 
+
+		&:hover
+			background-color: #be3e2e
+
+	.facebook-button
+		background-color: #3b5998
+
+		&:hover
+			background-color: #2e4679
+
+
+.authenticate-panel
+	width: 420px
+
+	.authenticate-header
+		text-align: center
+
+		.easy-sign-header-logo
+			width: 80px
+			height: 80px
+			margin-bottom: 10px
+
+		h3
+			margin-bottom: 6px
+
+		p
+			margin-top: 0px
+
 	.row-set
-		margin-top: 40px
 		background-color: #efefef
 		padding: 20px
-		padding-top: 40px
+		padding-top: 20px
 
-	.easy-signup-form
+	.authenticate-form
 		margin: auto
-		margin-top: 60px
+		margin-top: 30px
+
+		.registration-cover
+			display: none
+			position: relative
+			height: 400px
+			width: 420px
+			top: 0px
+			left: 0px
+			margin-bottom: -400px
+			background-color: #efefef
+
+			&.visible
+				display: block
+				background-image: url('../images/spinner.gif')
+				background-repeat: no-repeat
+				background-position: center center
+
+		#signinButtons
+			iframe
+				display: none
 
 		> .form-error
 			width: 80%
@@ -3126,29 +3187,36 @@ ul.collaborators
 			display: block
 			background-color: transparent
 
-		table#signup-form-table
-			width: 80%
+		table#signup-form-table, #sign-in-form
 			margin: auto
 			margin-bottom: 20px
 
 			input[type="text"], input[type="password"], select
-				height: 36px
+				height: 24px
 				padding-left: 8px
-				font-size: 1.8em
+				font-size: 1.3em
+				width: 180px
+			
+			td.email-address-input-wrapper
+				input[type="text"]
+					width: 384px
 
 			select
-				height: 46px
+				height: 32px
 
 			tr.registration-username-password
 				td[colspan="2"]
 					input[type="text"]
-						width: 95%
+						width: 384px
 
 			.action-button
-				float: right
+				height: 32px
+				font-size: 1.3em
+				padding: 6px 10px
+				width: 96px
 
 			select[name="profession"]
-				width: 360px
+				width: 320px
 				margin-left: 15px
 
 			.form-info-text
@@ -3167,21 +3235,26 @@ ul.collaborators
 				input[name=dob_year]
 					width: 80px
 
+		#sign-in-form
+			input[type="text"], input[type="password"]
+				width: 404px
 
-.easy-signup-form
+.new-account-redirect-body
+	text-align: center
+	margin: 40px
+
+.authenticate-form
 	.google-signin
-		width: 80%
+		width: 98%
 		margin: auto
-		margin-bottom: 10px
 		height: 40px
+		text-align: center
 
 		#signinButtons
 			text-align: center
 
 	table#signup-form-table
-		td.email-address-input-wrapper
-			input
-				width: 98%
+
 
 		input[name="username"]
 			background-repeat: no-repeat
@@ -3199,9 +3272,12 @@ ul.collaborators
 		tr.extra-information
 			padding-top: 10px
 
-		.terms-privacy-message, .dob-inputs-info
-			color: $light-font
-			font-size: 0.9em
+		.terms-privacy-message-wrapper, .dob-inputs-info-wrapper
+			height: 10px
+
+			td
+				color: $light-font
+				font-size: 0.9em
 
 		.dob-inputs-wrapper
 			float: left
@@ -3234,12 +3310,25 @@ ul.collaborators
 	height: 15px
 	text-align: center
 	width: 80%
-	margin: 20px auto
+	margin: 10px auto
 
 	.or-text
-		background-color: #fff
+		background-color: #efefef
 		color: #666
 		padding: 6px
+
+		&.hidden
+			display: none
+
+	.or-loading
+		background: url('../images/spinner.gif') no-repeat center center
+		width: 30px
+		height: 26px
+		background-color: #efefef
+		display: none
+
+		&.visible
+			display: inline-block
 
 .reposition-overlay
 	z-index: 2
@@ -4692,14 +4781,23 @@ table#edit-unit-form-table
 	#key-panel
 		width: 450px
 
+		&.center
+			float: none
+			margin: auto
+
 	#fill-panel
-		width: 275px
+		width: 300px
 		border-right: 1px solid #efefef
 
 	.panel-left
-		padding-right: 80px
+		padding-right: 50px
 
-	.easy-signup-form
+	.oc-popup-body
+		&.faded
+			opacity: 0.5
+			cursor: progress
+
+	.authenticate-form
 		table#signup-form-table
 			width: 300px
 			margin: auto
@@ -4716,6 +4814,7 @@ table#edit-unit-form-table
 					background-image: url('../images/spinner.gif')
 					background-repeat: no-repeat
 					background-position: 74px center
+
 
 .post-new-url-dialog
 	form
@@ -4843,6 +4942,9 @@ table#edit-unit-form-table
 		margin-top: 10px
 		width: 98%
 		height: 200px
+
+body.signup, body.login
+	background-color: #efefef
 
 /***** EXPERIMENTS *************/
 

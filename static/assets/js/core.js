@@ -750,29 +750,18 @@ var OC = {
     },
     /*jslint nomen: false */
 
-    googleRegistrationCallback: function(authResult){
+    googleSignInCallback: function(authResult){
+        var registrationCover = $('.registration-cover'),
+            signUpForm = $('#signup-form'),
+            signInForm = $('#sign-in-form'),
+            loginDialog = $('.login-dialog'),
+            loginDialogBody = $('.oc-popup-body', loginDialog);
+
         function success(result, profile){
-            // Handle or verify the server response if
-            //     necessary.
+            if (loginDialog.length > 0){
+                loginDialogBody.removeClass('faded');
+            }
 
-            // Eliminate fields that aren't required as a part
-            //     of social login and populate hidden fields
-            //     with necessary values
-            OC.expediteGLogin(profile);
-
-            // Set user message conveyed success with Google+
-            //     login
-            $(OC.config.registration.googleAuthResult).html(
-                '<p>You have successfully connected to Google. Kindly complete the ' +
-                    'the form below to complete your sign up.</p>'
-            );
-            $(OC.config.registration.orWrapper).hide();
-        }
-        OC.googleAuthenticationCallback(authResult, success);
-    },
-
-    googleSignInCallback: function(authResult) {
-        function success(result, profile){
             // Fill the hidden Google form object holding the user Google ID.
             $('.google-plus-login input[name=google_id]').val(
                 profile.id);
@@ -791,17 +780,61 @@ var OC = {
                             window.location.href = '/';
                         }
                     } else {
-                        if (authResult['g-oauth-window']){
-                            OC.popup('Your Google account is not linked to any user ' +
-                                'account. Please signup before you can connect through ' +
-                                'Google.', 'Google login failure'
-                            );
+                        if (loginDialog.length === 0 && authResult['g-oauth-window'] && signInForm.length > 0){
+                            OC.customPopup('.new-account-redirect-dialog');
+                            
+                            // In the synchronous login scenario, redirect to new account
+                            //     create functionality where fields are prefilled.
+                            setTimeout(function(){
+                                window.location.href = '/signup/?expedite=plus';
+                            }, 3000);
                         }
                     }
                 },
             'json');
+
+            if (signUpForm.length > 0 || loginDialog.length > 0){
+                // Handle or verify the server response if
+                //     necessary.
+
+                // Eliminate fields that aren't required as a part
+                //     of social login and populate hidden fields
+                //     with necessary values
+                OC.expediteGLogin(profile);
+
+                // Remove the loading spinner.
+                $('.or-wrapper .or-text').removeClass('hidden');
+                $('.or-wrapper .or-loading').removeClass('visible');
+
+                registrationCover.removeClass('visible');
+
+                // Set user message conveyed success with Google+
+                //     login
+                $(OC.config.registration.googleAuthResult).html(
+                    '<p>You have successfully connected to Google. Just need to ' +
+                        'confirm a few more details below...</p>'
+                );
+                $(OC.config.registration.orWrapper).hide();
+
+                if (loginDialog.length > 0){
+                    $('.login-dialog #fill-panel').remove();
+                    $('.login-dialog #key-panel').addClass('center');
+                }
+            }
         }
-        OC.googleAuthenticationCallback(authResult, success);
+
+        if (authResult['g-oauth-window'] ||
+            (registrationCover.length > 0 && registrationCover.attr('title') === 'plus')){
+            // Set a loading spinner.
+            $('.or-wrapper .or-text').addClass('hidden');
+            $('.or-wrapper .or-loading').addClass('visible');
+
+            OC.googleAuthenticationCallback(authResult, success);
+
+            if (loginDialog.length > 0){
+                loginDialogBody.addClass('faded');
+            }
+        }
     },
 
     googleAuthenticationCallback: function(authResult, successCallback){
@@ -851,21 +884,36 @@ var OC = {
         }
     },
 
-    facebookRegistrationCallback: function(){
-        FB.api('/me', function(response) {
-            // Eliminate fields that aren't required as a part
-            //     of social login and populate hidden fields
-            //     with necessary values
-            OC.expediteFbLogin(response);
-        });
+    facebookRegistrationCallback: function(response){
+        var registrationCover = $('.registration-cover');
 
-        // Set user message conveyed success with Google+
-        //     login
-        $(OC.config.registration.googleAuthResult).html(
-            '<p>You have successfully connected to your Facebook account. Kindly complete the ' +
-                'the form below to complete your sign up.</p>'
-        );
-        $(OC.config.registration.orWrapper).hide();
+        if (response.status === 'connected' ||
+            (registrationCover.length > 0 && registrationCover.attr('title') === 'facebook')){
+            // Set a loading spinner.
+            $('.or-wrapper .or-text').addClass('hidden');
+            $('.or-wrapper .or-loading').addClass('visible');
+
+            FB.api('/me', function(response) {
+                // Eliminate fields that aren't required as a part
+                //     of social login and populate hidden fields
+                //     with necessary values
+                OC.expediteFbLogin(response);
+
+                // Remove the loading spinner.
+                $('.or-wrapper .or-text').removeClass('hidden');
+                $('.or-wrapper .or-loading').removeClass('visible');
+
+                registrationCover.removeClass('visible');
+            });
+
+            // Set user message conveyed success with Facebook
+            //     login
+            $(OC.config.registration.googleAuthResult).html(
+                '<p>You have successfully connected to your Facebook account.  Just need to ' +
+                        'confirm a few more details below...</p>'
+            );
+            $(OC.config.registration.orWrapper).hide();
+        }
     },
 
     expediteFbLogin: function(profile) {
@@ -914,6 +962,15 @@ var OC = {
     },
 
     facebookSignInCallback: function() {
+        var signUpForm = $('#signup-form'),
+            signInForm = $('#sign-in-form'),
+            loginDialog = $('.login-dialog'),
+            loginDialogBody = $('.oc-popup-body', loginDialog);
+
+        if (loginDialog.length > 0){
+            loginDialogBody.addClass('faded');
+        }
+
         FB.api('/me', function(profile) {
             // Fill the hidden Google form object holding the user Fb ID.
             $('form.facebook-login input[name=facebook_id]').val(
@@ -949,10 +1006,22 @@ var OC = {
                             window.location.href = '/';
                         }
                     } else {
-                        OC.popup('Your Facebook account is not linked to any user ' +
-                            'account. Please signup using Facebook before you can login. ',
-                            'Facebook login failure'
-                        );
+                        if (loginDialog.length === 0 && signInForm.length > 0){
+                            OC.customPopup('.new-account-redirect-dialog');
+                            
+                            // In the synchronous login scenario, redirect to new account
+                            //     create functionality where fields are prefilled.
+                            setTimeout(function(){
+                                window.location.href = '/signup/?expedite=facebook';
+                            }, 3000);
+                        } else if (loginDialog.length > 0){
+                            loginDialogBody.removeClass('faded');
+
+                            OC.expediteFbLogin(profile);
+
+                            $('.login-dialog #fill-panel').remove();
+                            $('.login-dialog #key-panel').addClass('center');
+                        }
                     }
                 },
             'json');
@@ -1062,21 +1131,34 @@ var OC = {
             }
         }
 
-        $('#facebook-signup-button').click(function(event){
+        $('.synchronous-signup .facebook-button').click(function(event){
             FB.login(function(response){
-                OC.facebookRegistrationCallback(response);
+                if (response.status === 'connected')
+                    OC.facebookRegistrationCallback(response);
             }, {
-                scope: 'basic_info,email'
+                scope: 'public_profile, email'
             });
         });
 
-        $('#facebook-signin-button').click(function(event){
+        $('#sign-in-form .facebook-button, .login-dialog .facebook-button').click(function(event){
             OC.facebookSignInCallback();
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+
+        $('.google-plus-button').click(function(event){
+           
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
         });
 
         if ($('#session-state').length > 0){
-            if ($('#session-state').attr('data-state') !== '')
+            if ($('#session-state').attr('data-state') !== ''){
                 OC.initializeGooglePlusButtons();
+            }
         }
 
         // Hack submit button.
@@ -3979,7 +4061,7 @@ var OC = {
             s = document.getElementsByTagName('script')[0];
         po.type = 'text/javascript';
         po.async = true;
-        po.src = 'https://plus.google.com/js/client:plusone.js?onload=start';
+        po.src = 'https://plus.google.com/js/client:plusone.js?onload=renderPlus';
         s.parentNode.insertBefore(po, s);
     },
 
@@ -4236,6 +4318,63 @@ jQuery(document).ready(function ($) {
     $('.new-resource-tags').tagit({
         allowSpaces: true
     });
+
+    // Function to initialize the Facebook button.
+    window.fbAsyncInit = function() {
+        FB.init({
+            appId      : fbAppID,
+            status     : true, // check login status
+            cookie     : true, // enable cookies to allow the server to access the session
+            xfbml      : true  // parse XFBML
+        });
+
+        FB.Event.subscribe('auth.authResponseChange', function(response) {
+            var registrationCover = $('.registration-cover');
+            if (registrationCover.length > 0 && registrationCover.attr('title') === 'facebook'){
+                OC.facebookRegistrationCallback({'status': 'false'});
+            }
+        });
+        /*
+        // Here we subscribe to the auth.authResponseChange JavaScript event. This event is fired
+        // for any authentication related change, such as login, logout or session refresh. This means that
+        // whenever someone who was previously logged out tries to log in again, the correct case below 
+        // will be handled. 
+        FB.Event.subscribe('auth.authResponseChange', function(response) {
+            // Here we specify what we do with the response anytime this event occurs. 
+            if (response.status === 'connected') {
+              // The response object is returned with a status field that lets the app know the current
+              // login status of the person. In this case, we're handling the situation where they 
+              // have logged in to the app.
+              //OC.facebookRegistrationCallback();
+            } else if (response.status === 'not_authorized') {
+              // In this case, the person is logged into Facebook, but not into the app, so we call
+              // FB.login() to prompt them to do so. 
+              // In real-life usage, you wouldn't want to immediately prompt someone to login 
+              // like this, for two reasons:
+              // (1) JavaScript created popup windows are blocked by most browsers unless they 
+              // result from direct interaction from people using the app (such as a mouse click)
+              // (2) it is a bad experience to be continually prompted to login upon page load.
+              FB.login();
+            } else {
+              // In this case, the person is not logged into Facebook, so we call the login() 
+              // function to prompt them to do so. Note that at this stage there is no indication
+              // of whether they are logged into the app. If they aren't then they'll see the Login
+              // dialog right after they log in to Facebook. 
+              // The same caveats as above apply to the FB.login() call here.
+              FB.login();
+            }
+        });
+        */
+    };
+
+    // Load the SDK asynchronously
+    (function(d){
+       var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+       if (d.getElementById(id)) {return;}
+       js = d.createElement('script'); js.id = id; js.async = true;
+       js.src = "//connect.facebook.net/en_US/all.js";
+       ref.parentNode.insertBefore(js, ref);
+    }(document));
 });
 
 $(document).ajaxSend(function (event, xhr, settings) {
@@ -4330,68 +4469,6 @@ function attachCSRFToken(file, xhr, formData){
 
 
 /* All IIFEs below */
-
-/*
-// Function to initialize the Google+ login button.
-(function () {
-    var po = document.createElement('script'),
-        s = document.getElementsByTagName('script')[0];
-    po.type = 'text/javascript';
-    po.async = true;
-    po.src = 'https://plus.google.com/js/client:plusone.js?onload=start';
-    s.parentNode.insertBefore(po, s);
-})();
-*/
-// Function to initialize the Facebook button.
-window.fbAsyncInit = function() {
-    FB.init({
-        appId      : '639282532755047',
-        status     : true, // check login status
-        cookie     : true, // enable cookies to allow the server to access the session
-        xfbml      : true  // parse XFBML
-    });
-
-    /*
-    // Here we subscribe to the auth.authResponseChange JavaScript event. This event is fired
-    // for any authentication related change, such as login, logout or session refresh. This means that
-    // whenever someone who was previously logged out tries to log in again, the correct case below 
-    // will be handled. 
-    FB.Event.subscribe('auth.authResponseChange', function(response) {
-        // Here we specify what we do with the response anytime this event occurs. 
-        if (response.status === 'connected') {
-          // The response object is returned with a status field that lets the app know the current
-          // login status of the person. In this case, we're handling the situation where they 
-          // have logged in to the app.
-          //OC.facebookRegistrationCallback();
-        } else if (response.status === 'not_authorized') {
-          // In this case, the person is logged into Facebook, but not into the app, so we call
-          // FB.login() to prompt them to do so. 
-          // In real-life usage, you wouldn't want to immediately prompt someone to login 
-          // like this, for two reasons:
-          // (1) JavaScript created popup windows are blocked by most browsers unless they 
-          // result from direct interaction from people using the app (such as a mouse click)
-          // (2) it is a bad experience to be continually prompted to login upon page load.
-          FB.login();
-        } else {
-          // In this case, the person is not logged into Facebook, so we call the login() 
-          // function to prompt them to do so. Note that at this stage there is no indication
-          // of whether they are logged into the app. If they aren't then they'll see the Login
-          // dialog right after they log in to Facebook. 
-          // The same caveats as above apply to the FB.login() call here.
-          FB.login();
-        }
-    });
-    */
-};
-
-// Load the SDK asynchronously
-(function(d){
-   var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-   if (d.getElementById(id)) {return;}
-   js = d.createElement('script'); js.id = id; js.async = true;
-   js.src = "//connect.facebook.net/en_US/all.js";
-   ref.parentNode.insertBefore(js, ref);
-}(document));
 
 /*jslint nomen: true */
 // Initialize Google Analytics.
@@ -4556,7 +4633,11 @@ function gPlusSignInCallback(authResult){
     return OC.googleSignInCallback(authResult);
 }
 
-function gPlusRegistrationCallback(authResult){
-    // Calls the handler specific to registration with G+.
-    return OC.googleRegistrationCallback(authResult);
+function renderPlus(){
+    gapi.signin.render('custom-plus-button', {
+      'callback': 'gPlusSignInCallback',
+      'clientid': GPlusClientID,
+      'cookiepolicy': 'single_host_origin',
+      'scope': 'email',
+    });
 }

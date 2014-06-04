@@ -29,8 +29,11 @@ def register(request):
 
     # TODO(Varun): Make this more "function"al.
     registration_template = 'register.html'
+    expedite = request.GET.get('expedite', None)
+
     page_context = {
-        'title': _(settings.STRINGS['user']['REGISTER_TITLE'])
+        'title': _(settings.STRINGS['user']['REGISTER_TITLE']),
+        'expedite': expedite
     }
 
     form_context = _prepare_registration_form_context()

@@ -1,3 +1,4 @@
+        {% if body_class != 'login' %}
         <div class="login-dialog oc-popup">
             <div class="oc-popup-title-bar">
                 <div class="oc-popup-title"><h3>Login or Sign up to experience the awesome</h3></div>
@@ -7,18 +8,27 @@
                 <div class="login-dialog-message"></div>
                 <div id="fill-panel" class="panel-left">
                     <div class="registration-title">Already have an account? Sign in</div>
+                    <div class="authenticate-form">
                     {% include 'partials/signin-form.html' %}
+                    </div>
                 </div>
                 <div id="key-panel" class="panel-right">
                     <div class="registration-title">Create a new free account</div>
-                    {% include 'partials/registeration-form.html' %}
+                    {% include 'partials/registeration-form.html' with social_buttons='False' %}
                 </div>
             </div>
         </div>
+        <script type="text/javascript">
+            if (!GPlusClientID || !fbAppID){
+                var GPlusClientID = '{{ PLUS_APP_ID }}',
+                    fbAppID = '{{ FB_APP_ID }}';
+            }
+        </script>
+        {% endif %}
 
         <div class="popup-background"></div>
 		<footer>
-			<a href="{% url about %}">About</a> &#183; <a href="http://blog.opencurriculum.org" target="_blank">Blog</a> &#183;  <a href="http://opencurriculum.uservoice.com" target="_blank">Feedback</a> &#183; <a href="{% url developers %}">Developers</a> &#183; <a href="{% url jobs %}">Jobs</a> &#183; <a href="{% url terms %}">Terms of Use</a> &#183; <a href="{% url privacy %}">Privacy Policy</a> &#183; <a href="{% url license %}">License</a>
+			<a href="{% url about %}">About</a> &#183; <a href="http://blog.opencurriculum.org" target="_blank">Blog</a> &#183;  <a href="http://opencurriculum.uservoice.com" target="_blank">Feedback</a> &#183; <a href="{% url developers %}">Developers</a> &#183; <!--<a href="{% url jobs %}">Jobs</a> &#183; --><a href="{% url terms %}">Terms of Use</a> &#183; <a href="{% url privacy %}">Privacy Policy</a> &#183; <a href="{% url license %}">License</a>
 		</footer>
 	</body>
 </html>

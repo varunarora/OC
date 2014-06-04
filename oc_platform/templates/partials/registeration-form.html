@@ -1,27 +1,24 @@
-<div class="easy-signup-form">
-    {% if not social_id %}
+<div class="authenticate-form">
+    {% if not social_id and not social_buttons %}
+    {% if expedite %}
+    <div class="registration-cover visible" title="{{ expedite }}"></div>
+    {% endif %}
     <aside class="google-signin">
         <div data-state="{{ state }}" id="session-state"></div>
         <div id="signinButtons">
-            <span class="g-signin"
-                data-scope="https://www.googleapis.com/auth/userinfo.email "
-                data-clientid="{{ client_id }}"
-                data-redirecturi="postmessage"
-                data-accesstype="offline"
-                data-cookiepolicy="single_host_origin"
-                data-callback="gPlusRegistrationCallback"
-                data-theme="dark"
-                data-approvalprompt="force"
-                data-width="wide">
-            </span>
-            <span id="facebook-signup-button"></span>
+            <button class="google-plus-button" id="custom-plus-button">Log in with Google+</button>
+            <button class="facebook-button">Log in with Facebook</button>
+            <script type="text/javascript">
+                var GPlusClientID = '{{ client_id }}',
+                    fbAppID = '{{ FB_APP_ID }}'
+            </script>
         </div>
 
         <div id="results"></div>
     </aside>
 
-
     <div class="or-wrapper">
+        <span class="or-loading"></span>
         <span class="or-text">OR</span>
     </div>
     {% endif %}
@@ -67,7 +64,7 @@
                 <label><input type="radio" name="gender" value="0" checked> FEMALE</label>
                 
             </td></tr>
-            <tr><td class="dob-inputs-info">Date of birth</td><td></td></tr>
+            <tr class="dob-inputs-info-wrapper"><td class="dob-inputs-info">Date of birth</td><td></td></tr>
             <tr><td colspan="2">
                 <div class="dob-inputs-wrapper">
                     <select name="dob_month" placeholder="Month">
@@ -89,9 +86,9 @@
                     <input type="text" placeholder="Year" name="dob_year" value="{{ form.dob_year }}"/>
                 </div>
             
-                <button class="action-button large-action-button">Submit &rarr;</button>
+                <button class="action-button large-action-button new-action-button">Sign up</button>
             </td></tr>
-            <tr><td colspan="3" class="terms-privacy-message">By clicking submit, you agree to our <a href="{% url terms %}" target="_blank">Terms</a> and <a href="{% url privacy %}" target="_blank">Privacy Policy</a>.</td></tr>
+            <tr class="terms-privacy-message-wrapper"><td colspan="3" class="terms-privacy-message">By clicking submit, you agree to our <a href="{% url terms %}" target="_blank">Terms</a> and <a href="{% url privacy %}" target="_blank">Privacy Policy</a>.</td></tr>
         </table>
     </form>
 </div>

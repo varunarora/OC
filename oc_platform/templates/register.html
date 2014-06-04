@@ -1,46 +1,12 @@
-{% include 'partials/header.html' %}
-<div class="center-stage easy-signup">
-    <div id="fill-panel" class="panel-left">
-        <h2>Sign up for an account</h2>
-        <p>We bring the newest features, tools and updates so that your world continues to grow.</p>
-        <div class="row-set">
-            <div class="row-item">
-                <div class="row-item-thumbnail">
-                    <img src="{{ STATIC_URL }}images/resources.png" />
-                </div>
-                <div class="row-item-description">
-                    <div class="bold">Uploading educational resources</div>
-                    <div class="row-item-description-detail">Create or upload resources and organize in folders before you share. Free unlimited storage of learning resources when you sign up</div>
-                </div>
-            </div>
-
-            <div class="row-item">
-                <div class="row-item-thumbnail">
-                    <img src="{{ STATIC_URL }}images/social.png" />
-                </div>
-                <div class="row-item-description">                  
-                    <div class="bold">Get a little social</div>
-                    <div class="row-item-description-detail">Comment, vote and participate in user discussions with an identity worth bragging about</div>
-                    </div>
-            </div>
-        
-            <div class="row-item">
-                <div class="row-item-thumbnail">
-                    <img src="{{ STATIC_URL }}images/notifications.png" />
-                </div>
-                <div class="row-item-description">
-                    <div class="bold">Stay up-to-date</div>
-                    <div class="row-item-description-detail">Customize preferences and receive notifications on all your contributions and general community updates</div>
-                </div>
-            </div>
-        </div>
+{% include 'partials/header.html' with header_type='vanilla' body_class='signup' %}
+<div class="center-stage synchronous-signup authenticate-panel">
+    <div class="authenticate-header">
+        <img src="{{ STATIC_URL }}images/logo_shine.png" class="easy-sign-header-logo" />
+        <h3>Create a free account</h3>
+        <p>Its free and takes 30 seconds!</p>
     </div>
-
-    <div id="key-panel" class="panel-right">
-        {% include 'partials/registeration-form.html' %}
-
-    </div>
-
+    {% include 'partials/registeration-form.html' %}
 </div>
 
-{% include 'partials/footer.html' %}
+    </body>
+</html>

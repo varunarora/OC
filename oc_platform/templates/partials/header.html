@@ -29,12 +29,13 @@
 			{% if user.is_authenticated %}
 			ga('set', '&uid', {{ user.id }});
 			ga('set', 'dimension2', {{ user.get_profile.dob.year }});
-			{% endif %};
+			{% endif %}
 		</script>
 
 		<link rel="icon" href="{{ STATIC_URL }}favicon.ico" type="image/x-icon"/>
 	</head>
 	<body{% if body_class %} class="{{ body_class }}"{% endif %}>
+		{% if header_type != 'vanilla' %}
 		{% if body_class == 'browse' %}
 		<header class="wide-header">
 			<div id="header-prebanner"></div>
@@ -81,7 +82,8 @@
 					</hgroup>
 			</hgroup>
 		</header>
-	    <div class="login-messages-wrapper">
+	    {% endif %}
+	   	<div class="login-messages-wrapper">
 	        <span class="login-messages{% if message.tags %} {{ message.tags }}{% endif %}">{% for message in messages %}{{ message }}{% endfor %}</span><span class="close-message-box"></span>
 	    </div>
 	    {% endif %}
