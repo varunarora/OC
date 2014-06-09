@@ -679,12 +679,12 @@ def authenticate(request):
                 return redirect('user:user_profile', username=user.username)
         else:
             # HACK(Varun): These GET parameters need to be moved to settings
-            redirect_url = '/?login=true&error=inactive'
+            redirect_url = '/login/error=inactive'
             if redirect_to:
                 return redirect(redirect_url + ('&source=%s' % redirect_to))
             return redirect(redirect_url)
     else:
-        redirect_url = '/?login=true&error=auth'
+        redirect_url = '/login/error=auth'
         if redirect_to:
             return redirect(redirect_url + ('&source=%s' % redirect_to))
         return redirect(redirect_url)
