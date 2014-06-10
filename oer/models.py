@@ -149,7 +149,7 @@ class Link(models.Model):
 
 
 class Attachment(models.Model):
-    file = models.FileField(upload_to='resources', null=True, blank=True)
+    file = models.FileField(upload_to='resources', max_length=256, null=True, blank=True)
 
 
 class Unit(models.Model):
