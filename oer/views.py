@@ -1683,8 +1683,13 @@ def file_upload(request):
         collection = get_collection(user_id, project_id, collection_id)
 
         if form.is_valid():
+            try:
+                name = request.FILES['file'].name[:request.FILES['file'].name.rfind('.')]
+            except:
+                name = request.FILES['file'].name
+
             # Get the Project ID / User ID & Collection name from the URL / form
-            new_resource = create_resource(request.FILES['file'], request.user, collection)
+            new_resource = create_resource(request.FILES['file'], request.user, collection, name)
 
         return HttpResponse(json.dumps(
             {
