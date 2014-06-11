@@ -61,6 +61,28 @@
         </div>
 
         <div class="resource-meta-edit-section">
+            <h3>Context</h3>
+            <div class="context-wrappers">
+                {% for single_context in resource.context %}
+                <div class="context-wrapper">
+                    <input type="text" name="context" value="{{ single_context }}"/>
+                    <div class="delete-button"></div>
+                </div>
+                {% empty %}
+                <div class="context-wrapper">
+                    <input type="text" name="context" />
+                    <div class="delete-button"></div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="resource-meta-edit-section-button-wrapper">
+                <button class="action-button secondary-button add-context-button">Add context</button>
+            </div>
+            <textarea name="contexts" class="hide"></textarea>
+        </div>
+
+
+        <div class="resource-meta-edit-section">
             <h3>Time</h3>
             <select name="time">
                 <option value="15"{% if resource.time == 15 %} selected{% endif %}>15 mins</option>
@@ -68,6 +90,27 @@
                 <option value="45"{% if resource.time == 45 %} selected{% endif %}>45 mins</option>
                 <option value="60"{% if resource.time == 60 %} selected{% endif %}>1 hour</option>
             </select>
+        </div>
+
+        <div class="resource-meta-edit-section">
+            <h3>Standards</h3>
+            <div class="standard-wrappers">
+                {% for standard in resource.standards.all %}
+                <div class="standard-wrapper existing-standard" id="{{ standard.id }}">
+                    <input type="text" name="standard" value="{{ standard.title }}" />
+                    <div class="delete-button"></div>
+                </div>
+                {% empty %}
+                <div class="standard-wrapper">
+                    <input type="text" name="standard" />
+                    <div class="delete-button"></div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="resource-meta-edit-section-button-wrapper">
+                <button class="action-button secondary-button add-standard-button">Add standard</button>
+            </div>
+            <textarea name="standards" class="hide"></textarea>
         </div>
 
         <div class="resource-meta-edit-section resource-meta-edit-materials-section">

@@ -1745,30 +1745,58 @@ def view_history(request, resource_id):
     return render(request, 'resource-history.html', context)
 
 
-def edit_resource_meta(request, category_id, resource_id):
+def edit_resource_meta_category(request, category_id, resource_id):
+    return edit_resource_meta(request, resource_id, redirect(
+            reverse('resource:play_category', kwargs={
+                'category_id': category_id
+            })
+        )
+    )
+
+
+def edit_resource_meta_collection(request, collection_id, resource_id):
+    return edit_resource_meta(request, resource_id, redirect(
+            reverse('resource:play_collection', kwargs={
+                'collection_id': collection_id
+            })
+        )
+    )
+
+
+def edit_resource_meta(request, resource_id, redirect_to):
     try:
         resource = Resource.objects.get(pk=resource_id)
     except:
         raise Http404
 
+    from meta.models import TagCategory, Tag
+
     try:
         resource.objectives = resource.meta.objectives
         resource.prior = resource.meta.prior
         resource.materials = resource.meta.materials
+        resource.context = resource.meta.context
         resource.time = resource.meta.time
 
     except:
         resource.objectives = {}
         resource.prior = {}
         resource.materials = {}
+        resource.context = {}
         resource.time = {}
+        resource.standards = {}
+
+    resource.standards = resource.tags.filter(
+        category=TagCategory.objects.get(title='Standards'))
 
     if request.method == 'POST':
         description = request.POST.get('description', None)
         objectives = request.POST.get('objectives', None)
         prior = request.POST.get('priors', None)
         materials = request.POST.get('materials', None)
+        context = request.POST.get('contexts', None)
         time = request.POST.get('time', None)
+        raw_standards = request.POST.get('standards', None)
         
         from meta.models import Concept, Topic
 
@@ -1794,9 +1822,23 @@ def edit_resource_meta(request, category_id, resource_id):
             else:
                 concepts.append(concept[0])
 
+        standards = []
+        for standard in json.loads(raw_standards):
+            try:
+                existing_standard = Tag.objects.get(title=standard, category=TagCategory.objects.get(title='Standards'))
+                standards.append(existing_standard)
+            except:
+                new_standard = Tag(
+                    title=standard,
+                    category=TagCategory.objects.get(title='Standards')
+                )
+                new_standard.save()
+                standards.append(new_standard)
+
         if resource.meta:
             resource.meta.objectives = json.loads(objectives)
             resource.meta.materials = json.loads(materials)
+            resource.meta.context = json.loads(context)
             resource.meta.time = time
 
             resource.meta.prior.clear()
@@ -1810,7 +1852,8 @@ def edit_resource_meta(request, category_id, resource_id):
             resource_meta = ResourceMeta(
                 objectives=json.loads(objectives),
                 time=time,
-                materials=json.loads(materials)
+                materials=json.loads(materials),
+                context=json.loads(context)
             )
             resource_meta.save()
             resource_meta.prior.add(*concepts)
@@ -1818,17 +1861,15 @@ def edit_resource_meta(request, category_id, resource_id):
             resource.meta = resource_meta  
 
         resource.description = description
+        resource.tags.add(*standards)
+
         resource.save()
         from django.contrib import messages
 
         messages.success(request, 'Successfully edited \'%s\'.' % (
             resource.title))
 
-        return redirect(
-            reverse('resource:play_category', kwargs={
-                'category_id': category_id
-            })
-        )
+        return redirect_to
 
     context = {
         'resource': resource,
@@ -1861,6 +1902,23 @@ def play_category(request, category_id):
     return render(request, 'play.html', context)
 
 
+def play_collection(request, collection_id):
+    collection = Collection.objects.get(pk=collection_id)
+
+    filtered_resources = []
+    for resource in collection.resources.all():
+        filtered_resources.append(resource)
+
+    context = {
+        'resources': filtered_resources,
+        'collection': collection,
+        'title': 'Play: the easy way to volunteer for K-12 education'
+    }
+    return render(request, 'play.html', context)
+
+
+# API Stuff
+
 def delete_resource_prior(request, concept_id, resource_id):
     try:
         resource = Resource.objects.get(pk=resource_id)
@@ -1886,7 +1944,20 @@ def delete_resource_prior(request, concept_id, resource_id):
     return APIUtilities._api_success()
 
 
-# API Stuff
+def delete_resource_tag(request, tag_id, resource_id):
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+
+        from meta.models import Tag
+        tag = Tag.objects.get(pk=tag_id)
+    except:
+        raise Http404
+
+    # Remove this concept from the resource.
+    resource.tags.remove(tag)
+
+    return APIUtilities._api_success()
+
 
 def add_user_to_collection(request, collection_id, user_id):
     try:

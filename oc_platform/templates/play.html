@@ -4,6 +4,10 @@
     <h3>Play</h3>
     Progress: {{ resources|length }} to go
     {% for resource in resources %}
-        <h4><a href="{% url resource:edit_resource_meta resource_id=resource.id category_id=category.id %}">{{ resource.title }}</a></h4>
+        {% if category %}
+        <h4><a href="{% url resource:edit_resource_meta_category resource_id=resource.id category_id=category.id %}">{{ resource.title }}</a></h4>
+        {% else %}
+        <h4><a href="{% url resource:edit_resource_meta_collection resource_id=resource.id collection_id=collection.id %}">{{ resource.title }}</a></h4>
+        {% endif %}
     {% endfor %}
 </div>

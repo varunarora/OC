@@ -85,6 +85,7 @@ class ResourceMeta(models.Model):
     prior = models.ManyToManyField('meta.Concept', null=True, blank=True)
     time = models.PositiveIntegerField()
     materials = JSONField(null=True, blank=True)
+    context = JSONField(null=True, blank=True)
 
 
 class Collection(models.Model):

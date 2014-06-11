@@ -287,3 +287,16 @@ def autocomplete_concept(request, query):
     import json
     return HttpResponse(
         json.dumps(list(result_set)), 200, content_type="application/json")
+
+
+def autocomplete_standard(request, query):
+    standards = Tag.objects.filter(
+        title__contains=query, category=TagCategory.objects.get(title='Standards'))
+
+    result_set = set()
+    for standard in standards:
+        result_set.add(standard.title)
+
+    import json
+    return HttpResponse(
+        json.dumps(list(result_set)), 200, content_type="application/json")

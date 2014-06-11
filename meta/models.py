@@ -21,9 +21,20 @@ class Tag(models.Model):
     category = models.ForeignKey('meta.TagCategory', default=get_default_tagcategory)
     created = models.DateTimeField(auto_now_add=True, editable=False)
     position = models.IntegerField(default=0, null=True, blank=True)
+    links = models.ManyToManyField(
+        'self', blank=True, related_name='relatives', through='TagMapping', symmetrical=False)
 
     def __unicode__(self):
         return self.title
+
+
+class TagMapping(models.Model):
+    from_node = models.ForeignKey(Tag, related_name='origin')
+    to_node = models.ForeignKey(Tag)
+    deviation = models.TextField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.from_node.title + ':' + self.to_node.title
 
 
 class TagCategory(models.Model):
