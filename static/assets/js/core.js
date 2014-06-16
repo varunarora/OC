@@ -1893,9 +1893,6 @@ var OC = {
         });
 
         OC.setupNotificationsMenu();
-
-        // Set a tooltip to indicate the purpose of the notifications box.
-        $('.user-notification-count').tipsy({gravity:'e'});
     },
 
     setupNotificationsMenu: function(){

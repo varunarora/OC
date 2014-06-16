@@ -9,7 +9,8 @@
 
             </li>
             <li class="user-notification-count {% if notification_count > 0 %}unread-notifications {% else %}no-notifications{% endif %}" title="Notifications">
-                <a href="">{% if notification_count > 0 %}{{ notification_count }}{% endif %}</a>
+                {% if notification_count > 0 %}<span class="user-notification-count-box">{{ notification_count }}</span>{% endif %}
+                <a href=""></a>
             </li>
             <nav id="user-menu">
                 <div class="floating-menu-spacer"></div>

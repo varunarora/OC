@@ -1664,33 +1664,44 @@ input.manual-upload
 
 nav#user-buttons > ul > li.user-notification-count
 	&.unread-notifications
-		a
-			color: #fff
-			background-color: #5abd02
-			border-bottom: 2px solid #5abd02
-			&:hover
-				background-color: #4fa602
-				border-bottom: 2px solid #4fa602
+		.user-notification-count-box
+			visibility: visible
+			pointer-events: none
 
-	border-width: 0px
 	text-decoration: none
 
 	&.menu-open
 		a
 			background-color: #E0E0E0
-			border-bottom: 2px solid #E0E0E0
+			background-image: url('../images/notifications-hover.png')
+
 			&:hover
 				color: $light-font
 
 	&.no-notifications
-		a
-			background-image: url('../images/oc-notifications.png')
-			background-repeat: no-repeat
-			background-position: center center
-			width: 25px
 
 	a
 		outline: 0
+		width: 25px
+		background-image: url('../images/notifications.png')
+		background-position: center
+		background-repeat: no-repeat
+
+		&:hover
+			border-bottom-width: 0px
+			background-image: url('../images/notifications-hover.png')
+
+	.user-notification-count-box
+		background-color: #d14836
+		font-size: 0.9em
+		padding: 2px 4px
+		color: #fff
+		font-weight: bold
+		position: relative
+		top: -28px
+		left: 54px
+		visibility: hidden
+		display: inline
 
 .header-user-picture
 	background-size: cover
@@ -4286,6 +4297,18 @@ table#edit-unit-form-table
 			.category-panel-listing-categories-body-others
 				margin-top: 40px
 
+			.category-panel-listing-categories-body-filters
+				color: $light-font
+
+				.category-panel-listing-categories-body-filters-description
+					color: #fff
+					font-size: 0.8em
+					background-color: #aaa
+					@include border-radius(8px)
+					margin-left: 6px
+					padding: 2px 5px
+					font-weight: bold
+
 	.content-panel
 		.content-panel-body-wrapper
 			.content-panel-body
@@ -4322,11 +4345,12 @@ table#edit-unit-form-table
 						padding-top: 0px
 
 				.content-panel-body-listing
-					overflow: auto
+					//overflow: auto
 
 					.content-panel-body-listing-filters
 						height: 25px
 						margin-bottom: 20px
+						padding-left: 10px
 
 						.content-panel-body-listing-filters-search
 							float: left
@@ -4335,14 +4359,15 @@ table#edit-unit-form-table
 								padding-left: 30px
 								background: url('../images/search-icon-light.png') no-repeat
 								background-position: 8px center
-								width: 220px
+								width: 240px
+								background-color: #f9f9f9
 
 						.content-panel-body-listing-filters-sort
 							float: right
 
 							.sort-by-type
 								display: inline-block
-								border: 1px solid #efefef
+								border: 1px solid #ddd
 								padding: 4px 8px
 								margin-left: 4px
 								cursor: pointer
@@ -4379,27 +4404,84 @@ table#edit-unit-form-table
 					.content-panel-body-listing-items
 						overflow: hidden
 
+						.content-panel-body-listing-category
+							overflow: hidden
+							margin-top: 20px
+
+							.content-panel-body-listing-category-title
+								margin-bottom: 20px
+								font-weight: bold
+								padding-left: 10px
+
+							.content-panel-body-listing-category-resources
+								overflow: hidden
+								padding-left: 10px
+								padding-top: 10px
+
+							.content-panel-body-listing-category-show
+								padding: 12px 0px
+								width: 98%
+								background-color: #F9F9F9
+								margin-bottom: 60px
+								border: 2px solid #ddd
+								font-weight: bold
+								@include border-radius(2px)
+								text-align: center
+								overflow: hidden
+								cursor: pointer
+								display: block
+								color: $light-font
+								margin-left: 10px
+
+								&:hover
+									color: $body-color
+									background-color: #FFFFFF
+									border-color: #bababa
+									text-decoration: none
+
+								&.loading
+									background-image: url('../images/spinner.gif')
+									background-position: 40% center
+									background-repeat: no-repeat
+
+								&.hide
+									display: none
+
 						.content-panel-body-listing-item
 							float: left
-							width: 210px
-							height: 320px
-							margin-right: 20px
-							outline: none
 							color: $body-color
+							margin-bottom: 10px
+							display: block
 
-							&:hover
-								text-decoration: none
+							&.expanded
+								height: auto
+								min-height: 320px
 
-								.content-panel-body-listing-item-contents
-									background-color: #efefef
+							> a
+								outline: none
 
+								&:hover
+									text-decoration: none
+
+							a.content-panel-body-listing-item-anchor
+								background-color: #f9f9f9
+								@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
+								display: inline-block
+								width: 205px
+
+								&:hover
+									@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.2))
+									background-color: #fff
+
+									.content-panel-body-listing-item-contents-caption
+										text-decoration: underline
 
 							.content-panel-body-listing-item-favorites
 								position: relative
 								top: 120px
 								width: 36px
-								height: 16px
-								margin-bottom: -16px
+								height: 12px
+								margin-bottom: -12px
 								left: 158px
 								color: #666
 								background: url('../images/heart.png') no-repeat
@@ -4455,7 +4537,7 @@ table#edit-unit-form-table
 							
 							.content-panel-body-listing-item-user-picture
 								position: relative
-								top: -45px
+								top: 100px
 								width: 40px
 								height: 40px
 								@include border-radius(20px)
@@ -4466,12 +4548,12 @@ table#edit-unit-form-table
 								background-color: #666
 								cursor: pointer
 								display: block
+								z-index: 1
 
 
 							.content-panel-body-listing-item-contents
 								padding: 6px
 								border: 1px solid #ddd
-								margin-right: 5px
 								border-top-width: 0px
 								
 								.content-panel-body-listing-item-contents-caption
@@ -4527,8 +4609,9 @@ table#edit-unit-form-table
 					.content-panel-body-listing-requests
 						padding-top: 20px
 						margin-top: 20px
-						border-top: 1px solid #efefef
+						border-top: 1px solid #ddd
 						clear: left
+						padding-left: 10px
 
 						.content-panel-body-listing-requests-title
 							overflow: hidden
@@ -4542,19 +4625,20 @@ table#edit-unit-form-table
 								border: 1px solid #800080
 								text-align: center
 								border-radius: 2px
-								background-color: #fff
 								margin-right: 8px
+								background-color: #efefef
 
 								&:hover
 									color: #fff
 									background-color: #800080
 
 						.content-panel-body-listing-request
-							padding: 6px
+							padding: 12px
 							display: block
 							overflow: hidden
 							color: $body-color
 							padding-right: 32px
+							background-color: #F9F9F9
 
 							.content-panel-body-listing-request-thumbnail
 								width: 40px
@@ -4576,7 +4660,7 @@ table#edit-unit-form-table
 									display: inline
 
 							&:hover
-								background-color: #efefef
+								background-color: #ffffff
 								background-image: url('../images/request-open.png')
 								background-repeat: no-repeat
 								background-position: 97% center
@@ -4584,6 +4668,11 @@ table#edit-unit-form-table
 		footer
 			margin-top: 0px
 
+.content-panel-body-listing-item
+	width: 210px
+	height: 320px
+	margin-right: 20px
+	display: none
 
 .content-panel-body-listing-filters-sort, .discussion-board-filters-sort
 	.filter-sort-option
@@ -4848,6 +4937,8 @@ table#edit-unit-form-table
 		display: block
 
 .no-results-message
+	padding-left: 10px
+
 	&.hide
 		display: none
 
