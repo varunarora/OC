@@ -81,11 +81,21 @@ def browse(request, category_slug):
         )
 
     # Fetch the resources in the current category and everything nested within.
-    (current_browse_tree, current_flattened_tree) = catU.build_child_categories(
-        {'root': [selected_category]}, [])
+    #(current_browse_tree, current_flattened_tree) = catU.build_child_categories(
+    #    {'root': [selected_category]}, [])
 
-    (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections(
-        current_flattened_tree, request.user)
+    # Determine if this is a catalog page or not.
+    grand_children_categories = Category.objects.filter(parent__in=child_categories)
+    if grand_children_categories.count() > 0:
+        is_catalog = True
+    else:
+        is_catalog = False
+
+    #(all_resources, all_collections, current_category_id) = get_category_tree_resources_collections(
+    #    current_flattened_tree, request.user)
+
+    (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections_catalog(
+        child_categories, request.user)
 
     from django.contrib.contenttypes.models import ContentType
 
@@ -118,6 +128,12 @@ def browse(request, category_slug):
     # Set the URL for the current page for redirect situations.
     selected_category.url = request.path
 
+    # Get all the categories from the resources rendered.
+    category_tags = set()
+    if not is_catalog:
+        for resource in all_resources:
+            category_tags |= set(resource.filtered_tags.all())
+
     context = {
         'title': 'Browse lessons, projects, activities, worksheets &amp; tests',
         'selected_category': selected_category,
@@ -128,6 +144,8 @@ def browse(request, category_slug):
         'items': list(all_resources) + list(all_collections),
         'requests': requests,
         'category_group': category_group,
+        'is_catalog': is_catalog,
+        'category_tags': category_tags,
         'current_category_id': current_category_id,
         'breadcrumb': breadcrumb
     }
@@ -159,6 +177,62 @@ def get_category_tree_resources_collections(current_flattened_tree, user):
             current_category_id = category
             break
 
+
+    # Setup each resource's favorites count and type.
+    from interactions.models import Favorite
+    from meta.models import TagCategory, Tag
+    from django.contrib.contenttypes.models import ContentType
+    collection_ct = ContentType.objects.get_for_model(Collection)
+
+    for resource in all_raw_resources:
+        try:
+            build_browse_resource(resource, user)
+            all_resources.append(resource)
+        except Tag.DoesNotExist:
+            pass
+
+    for collection in all_raw_collections:
+        collection.favorites_count = Favorite.objects.filter(
+            parent_id=collection.id, parent_type=collection_ct).count()
+        collection.type = resource.tags.get(
+            category=TagCategory.objects.get(title='Resource type'))
+        collection.item_type = 'collection'
+        all_collections.append(collection)
+
+    return (all_resources, all_collections, current_category_id)
+
+
+def get_category_tree_resources_collections_catalog(child_categories, user):
+    all_resources = []
+    all_raw_resources = []
+    all_collections = []
+    all_raw_collections = []
+    current_category_id = None
+
+    from meta.models import Tag, TagCategory
+
+    # Get the top 10 resources of each child category.
+    for category in child_categories:
+        category_resources = Resource.objects.filter(category=category).order_by('-created')[:6]
+        category_resources_count = category_resources.count()
+
+        if category_resources_count < 6:
+            tagged_resources = Resource.objects.filter(tags__in=category.tags.all(
+                )).filter(tags__in=Tag.objects.filter(category=TagCategory.objects.get(
+                    title='Resource type'))).order_by('-created')[:6 - category_resources_count]
+
+            unordered_category_tagged_resources = list(set(list(category_resources) + list(tagged_resources)))
+ 
+            category_tagged_resources = sorted(
+                unordered_category_tagged_resources, key=lambda resource: resource.created, reverse=True)
+        else:
+            category_tagged_resources = category_resources
+
+        def categorize_resource(r):
+            r.category = category
+            return r
+
+        all_raw_resources += map(categorize_resource, category_tagged_resources)
 
     # Setup each resource's favorites count and type.
     from interactions.models import Favorite
@@ -3305,10 +3379,60 @@ def load_browse_resources(request, category_id, last_category_id):
     (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections(
         flattened_sub_tree, request.user)
 
+    serialized_resources = get_serialized_resources(all_resources)
+
+    context = {
+        'resources': serialized_resources,
+        'current_category_id': current_category_id.id if current_category_id else None
+    }
+    return APIUtilities._api_success(context)
+
+
+def load_category_resources(request, category_id, resource_count):
+    from meta.models import Category, Tag, TagCategory
+    from collections import OrderedDict
+
+    category = Category.objects.get(pk=category_id)
+
+    all_raw_resources = []
+    all_resources = []
+
+    category_resources = Resource.objects.filter(category=category).order_by('-created')
+    tagged_resources = Resource.objects.filter(tags__in=category.tags.all()).filter(
+        tags__in=Tag.objects.filter(category=TagCategory.objects.get(title='Resource type'))).order_by('-created')
+    category_resource_count = category_resources.count()
+
+    def categorize_resource(r):
+        r.category = category
+        return r
+
+    if resource_count <= category_resource_count:
+        all_raw_resources += list(OrderedDict.fromkeys(
+            category_resources[(resource_count):] | map(categorize_resource, tagged_resources)))
+    else:
+        all_raw_resources += map(categorize_resource, tagged_resources[int(resource_count) - category_resource_count:])
+
+    for resource in all_raw_resources:
+        try:
+            build_browse_resource(resource, request.user)
+            all_resources.append(resource)
+            print resource.category
+        except Tag.DoesNotExist:
+            pass
+
+    serialized_resources = get_serialized_resources(all_resources)
+
+    context = {
+        'resources': serialized_resources,
+    }
+    return APIUtilities._api_success(context)
+
+
+def get_serialized_resources(resources):
     import time
 
     serialized_resources = {}
-    for resource in all_resources:
+    for resource in resources:
         filtered_tag_list = list(resource.filtered_tags)
         serialized_resources[resource.id] = {
             'id': resource.id,
@@ -3319,7 +3443,8 @@ def load_browse_resources(request, category_id, last_category_id):
                 }
             ),
             'title': resource.title,
-            'user': resource.user.username,
+            'user': resource.user.get_full_name(),
+            'user_id': resource.user.id,
             'user_thumbnail': settings.MEDIA_URL + resource.user.get_profile(
                 ).profile_pic.name,
             'user_url': reverse('user:user_profile', kwargs={
@@ -3331,20 +3456,17 @@ def load_browse_resources(request, category_id, last_category_id):
             'description': resource.description,
             'objectives': resource.objectives if resource.objectives else [],            
             'thumbnail': settings.MEDIA_URL + resource.image.name,
-            'favorited': False,
+            'favorited': resource.favorited,
             'created': int(time.mktime(resource.created.timetuple())),
             'stars': resource.rating,
+            'category': resource.category.title,
             'review_count': resource.review_count
         }
 
-    context = {
-        'resources': serialized_resources,
-        'current_category_id': current_category_id.id if current_category_id else None
-    }
-    return APIUtilities._api_success(context)
+    return serialized_resources
 
 
-def search_category(request, category_id, last_category_id, query):
+def search_category_old(request, category_id, last_category_id, query):
     from haystack.query import SearchQuerySet
     import meta.CategoryUtilities as catU
     from meta.models import Category
@@ -3391,35 +3513,99 @@ def search_category(request, category_id, last_category_id, query):
         except Tag.DoesNotExist:
             pass
 
-    import time
-    serialized_resources = {}
     for resource in all_resources:
-        serialized_resources[resource.object.id] = {
-            'id': resource.object.id,
-            'url': reverse(
-                'read', kwargs={
-                    'resource_id': resource.object.id,
-                    'resource_slug': resource.object.slug
-                }
-            ),
-            'title': resource.object.title,
-            'user': resource.object.user.username,
-            'user_thumbnail': settings.MEDIA_URL + resource.object.user.get_profile(
-                ).profile_pic.name,
-            'user_url': reverse('user:user_profile', kwargs={
-                'username': resource.object.user.username }),
-            'favorites': resource.object.favorites_count,
-            'views': resource.object.views,
-            'type': str(resource.object.type).upper(),
-            'tags': [tag.title for tag in resource.object.tags.all()],
-            'objectives': resource.object.objectives if resource.object.objectives else [],
-            'description': resource.object.description,
-            'thumbnail': settings.MEDIA_URL + resource.object.image.name,
-            'favorited': False,
-            'created': int(time.mktime(resource.object.created.timetuple())),
-            'stars': resource.rating,
-            'review_count': resource.review_count
-        }
+        resource = resource.object
+
+    serialized_resources = get_serialized_resources(all_resources)
+
+    context = {
+        'resources': serialized_resources
+    }
+    return APIUtilities._api_success(context)
+
+
+def search_category(request, category_id, query):
+    from haystack.query import SearchQuerySet
+    import meta.CategoryUtilities as catU
+    from meta.models import Category, TagCategory
+
+    current_category = Category.objects.get(pk=category_id)
+    (browse_tree, flattened_tree) = catU.build_child_categories(
+        {'root': [current_category]}, [])
+
+    all_resources = []
+    all_raw_resources = []
+
+    child_categories = Category.objects.filter(parent=current_category)
+
+    # Remove the current category as this a downward searchself.
+    flattened_tree.remove(next(current for current in flattened_tree if current.id == current_category.id))
+    
+    categories = [category.title for category in flattened_tree]
+    categories_tags = []
+    for category in flattened_tree:
+        categories_tags += category.tags.all()
+
+
+    def set_child_category(resource, immediate_category):
+        while True:
+            if immediate_category in child_categories:
+                resource.category = immediate_category
+                return None
+            else:
+                immediate_category = immediate_category.parent
+
+    def set_category_on_categoried_resource(resource):
+        set_child_category(resource.object, resource.object.category)
+        return resource
+
+
+    def categorize_resource(searched_resource):
+        # Find the child category this is a descendant in.
+        filtered_tags = searched_resource.object.tags.exclude(
+            category=TagCategory.objects.get(title='Resource type'))
+
+        for tag in filtered_tags:
+            if tag in categories_tags:
+                for category in flattened_tree:
+                    if tag in category.tags.all():
+                        immediate_category = category
+                        break
+
+        set_child_category(searched_resource.object, immediate_category)
+
+        return searched_resource
+
+    # TODO(Varun): Rope in collection search.
+    if len(categories) > 0 and len(categories_tags) > 0:
+        sqs = SearchQuerySet().filter(content_auto=query, visibility='public', category__in=categories)
+        sqs_tags = SearchQuerySet().filter(content_auto=query, visibility='public', tags__in=categories_tags)
+
+        all_raw_resources += sorted(
+            set(map(set_category_on_categoried_resource, sqs) + map(
+                categorize_resource, sqs_tags)), key=lambda searched_resource: searched_resource.object.created, reverse=True)
+    elif len(categories) > 0:
+        sqs = SearchQuerySet().filter(
+            content_auto=query, visibility='public', category__in=categories)
+        all_raw_resources = map(set_category_on_categoried_resource, sqs)
+    elif len(categories_tags) > 0:
+        sqs_tags = SearchQuerySet().filter(content_auto=query, visibility='public', tags__in=categories_tags)
+        all_raw_resources = list(map(categorize_resource, sqs_tags))
+
+    # Setup each resource's favorites count and type.
+    from meta.models import Tag
+    for resource in all_raw_resources:
+        try:
+            build_browse_resource(resource.object, request.user)
+            all_resources.append(resource)
+        except Tag.DoesNotExist:
+            pass
+
+    unserialized_resources = []
+    for resource in all_resources:
+        unserialized_resources.append(resource.object)
+
+    serialized_resources = get_serialized_resources(unserialized_resources)
 
     context = {
         'resources': serialized_resources

@@ -3908,20 +3908,6 @@ var OC = {
     },
 
     initBrowse: function(){
-        var sortByTypeMenu = $('.sort-by-type-menu');
-        $('.content-panel').on('scroll click', function(event){
-            if (sortByTypeMenu.hasClass('show'))
-                $('.sort-by-type-menu').removeClass('show');
-        });
-
-        $('.sort-by-type').click(function(event){
-            $('.sort-by-type-menu').toggleClass('show');
-
-            event.stopPropagation();
-            event.preventDefault();
-            return false;
-        });
-
         // Attach click handler with favorite 'heart'.
         $('.content-panel-body-listing-item-favorites').click(function(event){
             $(this).toggleClass('favorited');
