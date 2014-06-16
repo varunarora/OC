@@ -10,6 +10,7 @@
     <form method="POST" id="resource-meta-edit-form">
         {% csrf_token %}
         <input type="hidden" name="resource-id" value="{{ resource.id }}" />
+        <input type="hidden" name="redirect-to" value="{{ redirect_to }}" />
 
         <div class="resource-meta-edit-section">
             <h3>Description</h3>
@@ -85,6 +86,7 @@
         <div class="resource-meta-edit-section">
             <h3>Time</h3>
             <select name="time">
+                <option value="0"{% if resource.time == 0 %} selected{% endif %}>NA</option>
                 <option value="15"{% if resource.time == 15 %} selected{% endif %}>15 mins</option>
                 <option value="30"{% if resource.time == 30 %} selected{% endif %}>30 mins</option>
                 <option value="45"{% if resource.time == 45 %} selected{% endif %}>45 mins</option>

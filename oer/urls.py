@@ -77,7 +77,7 @@ urlpatterns = patterns(
     url(r'^play/(?P<category_id>\d+)/$', views.play_category, name='play_category'),
     url(r'^play-folder/(?P<collection_id>\d+)/$', views.play_collection, name='play_collection'),
     url(r'^(?P<category_id>\d+)/(?P<resource_id>\d+)/meta-edit/$', views.edit_resource_meta_category, name='edit_resource_meta_category'),
-    url(r'^(?P<collection_id>\d+)/(?P<resource_id>\d+)/meta-edit/$', views.edit_resource_meta_collection, name='edit_resource_meta_collection'),
+    url(r'^(?P<collection_id>\d+)/(?P<resource_id>\d+)/meta-edit-folder/$', views.edit_resource_meta_collection, name='edit_resource_meta_collection'),
 
     url(r'^api/delete-prior/(?P<concept_id>\d+)/from/(?P<resource_id>\d+)/$', views.delete_resource_prior, name='delete_resource_prior'),
     url(r'^api/delete-standard/(?P<tag_id>\d+)/from/(?P<resource_id>\d+)/$', views.delete_resource_tag, name='delete_resource_tag'),

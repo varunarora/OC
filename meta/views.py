@@ -291,7 +291,7 @@ def autocomplete_concept(request, query):
 
 def autocomplete_standard(request, query):
     standards = Tag.objects.filter(
-        title__contains=query, category=TagCategory.objects.get(title='Standards'))
+        title__icontains=query, category=TagCategory.objects.get(title='Standards'))
 
     result_set = set()
     for standard in standards:

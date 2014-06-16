@@ -1746,19 +1746,17 @@ def view_history(request, resource_id):
 
 
 def edit_resource_meta_category(request, category_id, resource_id):
-    return edit_resource_meta(request, resource_id, redirect(
-            reverse('resource:play_category', kwargs={
+    return edit_resource_meta(request, resource_id, reverse('resource:play_category', kwargs={
                 'category_id': category_id
-            })
+            }
         )
     )
 
 
 def edit_resource_meta_collection(request, collection_id, resource_id):
-    return edit_resource_meta(request, resource_id, redirect(
-            reverse('resource:play_collection', kwargs={
+    return edit_resource_meta(request, resource_id, reverse('resource:play_collection', kwargs={
                 'collection_id': collection_id
-            })
+            }
         )
     )
 
@@ -1869,10 +1867,11 @@ def edit_resource_meta(request, resource_id, redirect_to):
         messages.success(request, 'Successfully edited \'%s\'.' % (
             resource.title))
 
-        return redirect_to
+        return redirect(request.POST.get('redirect-to', None))
 
     context = {
         'resource': resource,
+        'redirect_to': redirect_to,
         'title': 'Edit resource meta'
     }
     return render(request, 'edit-resource-meta.html', context)

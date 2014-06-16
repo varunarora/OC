@@ -181,9 +181,13 @@ OC.internal = {
 
             var i, j, k, l, m;
             for (i = 0; i < inputObjs.length; i++){
-                objectives.push("\"" + $(inputObjs[i]).attr('value') + "\"");
+                if ($(inputObjs[i]).attr('value').trim() !== 'Students will be able to')
+                    objectives.push("\"" + $(inputObjs[i]).attr('value') + "\"");
             }
-            $('textarea[name=objectives]').html("[" + objectives.join(',') + "]");
+            if (objectives.length !== 0)
+                $('textarea[name=objectives]').html("[" + objectives.join(',') + "]");
+            else
+                $('textarea[name=objectives]').html("[]");
 
             for (j = 0; j < inputMaterials.length; j++){
                 if ($(inputMaterials[j]).attr('value') !== '')
