@@ -20,6 +20,7 @@ def browse(request, category_slug):
     categories_slugs = category_slug.split('/')
 
     from meta.models import Category
+    from django.core.exceptions import MultipleObjectsReturned
 
     # Determine the depth to figure out what level of page needs to be displayed.
     import meta.CategoryUtilities as catU
@@ -36,6 +37,10 @@ def browse(request, category_slug):
                 slug=categories_slugs[-1], parent__slug=categories_slugs[-2])
         except IndexError:
             current_category = Category.objects.get(slug=categories_slugs[-1])
+        except MultipleObjectsReturned:
+            # Find the unique combinator inside the host tree.
+            current_category = next(category for category in host_flattened_tree if(
+                category.slug == categories_slugs[-1] and category.parent.slug == categories_slugs[-2]))
 
         for category in host_flattened_tree:
             if category == current_category:
