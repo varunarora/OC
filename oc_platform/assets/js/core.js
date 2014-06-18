@@ -2644,7 +2644,7 @@ var OC = {
                             exportStatus.text('Building document...');
                             exportProgress.advanceTo(50);
 
-                            var exportSocket = new WebSocket("ws://127.0.0.1:1337/");
+                            var exportSocket = new WebSocket("ws://services.opencurriculum.org:1337/");
 
                             exportSocket.onopen =  function(event){
                                 response.type = 'pdf';
@@ -2722,7 +2722,7 @@ var OC = {
                             exportStatus.text('Building document...');
                             exportProgress.advanceTo(50);
 
-                            var exportSocket = new WebSocket("ws://127.0.0.1:1337/");
+                            var exportSocket = new WebSocket("ws://services.opencurriculum.org:1337/");
 
                             exportSocket.onopen =  function(event){
                                 response.type = 'word';
