@@ -73,15 +73,29 @@ class ResourceThumbnail:
             if ext in ms:
                 thumbnailSrcName = "ms.jpg"
             elif ext in pdf:
+                call(
+                    ["convert", "-density", "300",
+                    settings.MEDIA_ROOT + resource.revision.content.file.name + '[0]',
+                    thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
+
+                call(
+                    ["convert", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT,
+                        '-resize', '30%', '-gravity', 'center', '-crop', '120x120+0+0',
+                        thumbnail + ResourceThumbnail.THUMBNAIL_EXT, thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
+
+                # Now delete the temporary retrived image thumbnail
+                call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
+
                 thumbnailSrcName = "pdf.jpg"
             elif ext in image:
                 thumbnailSrcName = "image.jpg"
             else:
                 thumbnailSrcName = "blank.jpg"
 
-            call(
-                ["cp", settings.MEDIA_ROOT + 'resource_thumbnail/defaults/' + thumbnailSrcName,
-                    thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
+            if ext not in pdf:
+                call(
+                    ["cp", settings.MEDIA_ROOT + 'resource_thumbnail/defaults/' + thumbnailSrcName,
+                        thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
         from django.core.files.images import ImageFile
         thumbnail_to_assign = ImageFile(
