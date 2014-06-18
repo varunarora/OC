@@ -286,7 +286,9 @@ var CategoryView = Backbone.View.extend({
                 if (response.status === 'true'){
                     // Render all hidden resources.
                     currentCategory.model.set('loaded', true);
-                    currentCategory.render();
+
+                    currentCategory.clearResources();
+                    currentCategory.renderResources();
 
                     var keys = Object.keys(response.resources);
 
@@ -365,8 +367,10 @@ var CategoryView = Backbone.View.extend({
                 model: model
             }).silentRender()
         );
+    },
+    clearResources: function() {
+        this.$('.content-panel-body-listing-category-resources').html('');
     }
-
 });
 
 
