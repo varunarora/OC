@@ -27,13 +27,7 @@
                         <ul>
                         {% for child_category in child_categories %}
                             {% if is_catalog %}
-                            <li><a href="{{ child_category.url }}">{{ child_category.title }}</a></li>
-                            {% else %}
-                            <div class="category-panel-listing-categories-body-filters">
-                                {% for tag in category_tags %}
-                                    <label><input type="checkbox" name="tags" value="{{ tag.title }}" checked />{{ tag.title }}<span class="category-panel-listing-categories-body-filters-description" title="{{ tag.description }}">?</span></label>
-                                {% endfor %}
-                            </div>
+                            <li><a href="{{ child_category.url }}">{{ child_category.title }}</a></li>                            
                             {% endif %}
                             <script type="text/javascript">
                                 OC.categoryResources.childCategories.push(new Category({
@@ -45,6 +39,14 @@
                             </script>
                         {% endfor %}
                         </ul>
+                        {% if not is_catalog %}
+                        <div class="category-panel-listing-categories-body-filters">
+                            {% for tag in category_tags %}
+                                <label><input type="checkbox" name="tags" value="{{ tag.title }}" checked />{{ tag.title }}<span class="category-panel-listing-categories-body-filters-description" title="{{ tag.description }}">?</span></label>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
                         {% endif %}
                         {% if selected_category.parent.slug != 'opencurriculum' %}
                         <h4 class="category-panel-listing-categories-body-others">Others in {{ selected_category.parent.title }}</h4>

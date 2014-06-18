@@ -139,8 +139,7 @@ def browse(request, category_slug):
         for resource in all_resources:
             category_tags_unsorted |= set(resource.filtered_tags.all())
 
-    category_tags = list(category_tags_unsorted)
-    category_tags.sort()
+    category_tags = sorted(list(category_tags_unsorted), key=lambda c: c.title)
 
     context = {
         'title': 'Browse lessons, projects, activities, worksheets &amp; tests',
