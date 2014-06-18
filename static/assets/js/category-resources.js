@@ -2,7 +2,7 @@ OC.categoryResources = {
     currentCategoryID: null,
     lastInputTimestamp: null,
     searchFilterTimeout: null,
-    filterAsyncSearchOn: true,
+    filterAsyncSearchOn: false,
     childCategories: [],
     visibleResourceCount: null,
 
@@ -33,7 +33,7 @@ OC.categoryResources = {
         $('.category-panel-listing-categories-body').addClass('scroll-content');
 
         $('.category-panel-listing-categories').height(
-            $('.resource-browse').height() - 200
+            $('.resource-browse').height() - 100
         );
         $('.category-panel-listing-categories').nanoScroller({
             paneClass: 'scroll-pane',
@@ -290,15 +290,13 @@ var CategoryView = Backbone.View.extend({
 
                     var keys = Object.keys(response.resources);
 
+                    var newResources = [];
                     for (i = 0; i < keys.length; i++){
                         resource = response.resources[keys[i]];
                         resourceModel = new Resource(resource);
 
                         // NOTE(Varun): This shouldn't be redundant.
                         currentCategory.model.get('resources').add(resourceModel);
-
-                        // Add additional category tag filters to list.
-                        addTagFiltersFromResource(resourceModel);
 
                         // If it passes filter test and is not previously in resource set, add.
                         if (!_.some(filters, function(filterValues, filterType){
@@ -313,7 +311,11 @@ var CategoryView = Backbone.View.extend({
                         }
                         
                         resourceSet.add(resourceModel);
+                        newResources.push(resourceModel);
                     }
+                    // Add additional category tag filters to list.
+                    addTagFiltersFromResources(newResources);
+
                     showMore.remove();
                 }
                 else {
@@ -335,9 +337,11 @@ var CategoryView = Backbone.View.extend({
 
         if (existingResources){
             for (i = 0; i < existingResources.length; i++){
-                new ResourceView({
-                    model: existingResources[i]
-                }).silentRender(this.$('.content-panel-body-listing-category-resources'));
+                this.$('.content-panel-body-listing-category-resources').append(
+                    new ResourceView({
+                        model: existingResources[i]
+                    }).silentRender()
+                );
             }
         }
     },
@@ -356,10 +360,13 @@ var CategoryView = Backbone.View.extend({
         return this;
     },
     lateRender: function(model) {
-        new ResourceView({
-            model: model
-        }).silentRender(this.$('.content-panel-body-listing-category-resources'));
+        this.$('.content-panel-body-listing-category-resources').append(
+            new ResourceView({
+                model: model
+            }).silentRender()
+        );
     }
+
 });
 
 
@@ -480,9 +487,9 @@ var ResourceView = Backbone.View.extend({
         '<div class="content-panel-body-listing-item-contents-caption"><%= title %></div>' +
         '<div class="content-panel-body-listing-item-contents-meta"><%= views %> views</div>' +
         '<%= tags %><div class="content-panel-body-listing-item-contents-description"><%= description %></div>' +
-        '<% if (review_count !== 0) { %><div class="content-panel-body-listing-item-contents-reviews"><%= stars %>' +
+        '<% if (review_count !== 0) { %><div class="content-panel-body-listing-item-contents-reviews">' +
         '<div class="content-panel-body-listing-item-contents-review-count">' +
-        '(<a class="content-panel-body-listing-item-contents-review-count-value"><%= review_count %></a>)</div>' +
+        '(<span class="content-panel-body-listing-item-contents-review-count-value"><%= review_count %></span>)</div>' +
         '</div><% } %></div></a>'
         ),
 
@@ -559,14 +566,14 @@ var ResourceView = Backbone.View.extend({
             trailingHalf = true;
         }
         for (j = 0; j < parseInt(stars, 10); j++){
-            star = $('<div/>', {
+            star = $('<span/>', {
                 'class': 'content-panel-body-listing-item-contents-review-star'
             });
             starsView.append(star);
         }
 
         if (trailingHalf){
-            starsView.append($('<div/>', {
+            starsView.append($('<span/>', {
                 'class': 'content-panel-body-listing-item-contents-review-halfstar'
             }));
         }
@@ -583,16 +590,17 @@ var ResourceView = Backbone.View.extend({
     silentRender: function(elementWrapper){
         modelJSON = this.model.toJSON();
         modelJSON['tags'] = String(this.$tagsView[0].outerHTML);
- 
-        modelJSON['stars'] = String(this.$starsView[0].outerHTML);
 
         modelJSON['title'] = this.getTrucatedTitle();
         modelJSON['description'] = this.getTrucatedDescription();
 
         this.$el.html(this.template(modelJSON));
         
-        elementWrapper.append(this.$el);
-        //return this.$el;
+        //elementWrapper.append(this.$el);
+        this.$('.content-panel-body-listing-item-contents-reviews').prepend(
+            this.$starsView);
+
+        return this.el;
     },
 
     favorite: function(){
@@ -779,35 +787,51 @@ function filterResources(collection){
     }));
 }
 
-function addTagFiltersFromResource(resource){
-    var i, resourceTags = resource.get('tags'),
+function addTagFiltersFromResources(resources){
+    var i, resourcesTags = _.union(_.flatten(_.map(resources, function(resource) { return resource.get('tags'); } ))),
         currentTags = $('.category-panel-listing-categories-body-filters input[name="tags"]'),
-        isTagPresent = function(tagEl){ return $(tagEl).val() === resourceTags[i]; };
+        newResourceTagList = _.map(currentTags, function(tagEl){ return $(tagEl).val(); });
 
-    for (i = 0; i < resourceTags.length; i++){
-        if (!_.find(currentTags, isTagPresent)){
-            var newLabel = $('<label/>', { 'text': resourceTags[i] }),
-                newCheckbox = $('<input/>', {
-                    'type': 'checkbox',
-                    'name': 'tags',
-                    'checked': 'true',
-                    'value': resourceTags[i],
-                }),
-                newLabelTip = $('<span/>', {
-                    'class': 'category-panel-listing-categories-body-filters-description',
-                    'text': '?',
-                    'title': ''
-                });
+    // Build a checked status map of the original tags.
+    var j, currentTagsMap = {};
+    for (j = 0; j < currentTags.length; j++){
+        currentTagsMap[$(currentTags[j]).val()] = currentTags[j].checked;
+    }
 
-            newLabel.prepend(newCheckbox);
-            newLabel.append(newLabelTip);
-
-            $('.category-panel-listing-categories-body-filters').append(newLabel);
-
-            // Bind click on label/input checkbox.
-            $('.category-panel-listing-categories-body-filters label:last').click(
-                filterClickHandler);
+    // Add the resourceTags to the current list of tags if not present.
+    _.each(resourcesTags, function(resourceTag){
+        if (newResourceTagList.indexOf(resourceTag) === -1){
+            newResourceTagList.push(resourceTag);
         }
+    });
+
+    // Sort the list and clear the existing view.
+    newResourceTagList.sort();
+    $('.category-panel-listing-categories-body-filters').html('');
+
+    for (i = 0; i < newResourceTagList.length; i++){
+        var newLabel = $('<label/>', { 'text': newResourceTagList[i] }),
+            newCheckbox = $('<input/>', {
+                'type': 'checkbox',
+                'name': 'tags',
+                'checked': _.has(currentTagsMap, newResourceTagList[i]) ? (
+                    currentTagsMap[newResourceTagList[i]]) : 'true',
+                'value': newResourceTagList[i],
+            }),
+            newLabelTip = $('<span/>', {
+                'class': 'category-panel-listing-categories-body-filters-description',
+                'text': '?',
+                'title': ''
+            });
+
+        newLabel.prepend(newCheckbox);
+        newLabel.append(newLabelTip);
+
+        $('.category-panel-listing-categories-body-filters').append(newLabel);
+
+        // Bind click on label/input checkbox.
+        $('.category-panel-listing-categories-body-filters label:last').click(
+            filterClickHandler);
     }
 }
 

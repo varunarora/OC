@@ -133,11 +133,14 @@ def browse(request, category_slug):
     # Set the URL for the current page for redirect situations.
     selected_category.url = request.path
 
-    # Get all the categories from the resources rendered.
-    category_tags = set()
+    # Get all the categories from the resources rendered, and then order.
+    category_tags_unsorted = set()
     if not is_catalog:
         for resource in all_resources:
-            category_tags |= set(resource.filtered_tags.all())
+            category_tags_unsorted |= set(resource.filtered_tags.all())
+
+    category_tags = list(category_tags_unsorted)
+    category_tags.sort()
 
     context = {
         'title': 'Browse lessons, projects, activities, worksheets &amp; tests',
@@ -3421,7 +3424,6 @@ def load_category_resources(request, category_id, resource_count):
         try:
             build_browse_resource(resource, request.user)
             all_resources.append(resource)
-            print resource.category
         except Tag.DoesNotExist:
             pass
 
