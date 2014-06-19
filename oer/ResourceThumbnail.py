@@ -81,7 +81,7 @@ class ResourceThumbnail:
                 call(
                     ["convert", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT,
                         '-resize', '30%', '-gravity', 'center', '-crop', '120x120+0+0',
-                        thumbnail + ResourceThumbnail.THUMBNAIL_EXT, thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
+                        thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
                 # Now delete the temporary retrived image thumbnail
                 call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
