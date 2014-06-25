@@ -22,7 +22,7 @@ var Result = Backbone.Model.extend({
     difficulty: "",
 
     // Visibility of result
-    Visibility: "",
+    visibility: "",
 
     // Cost of the search result
     cost: "",
@@ -38,6 +38,9 @@ var Result = Backbone.Model.extend({
 
     // Whether or not the resource has been favorited by the logged in user.
     favorited: "",
+
+    // Profile URL of user who created the resource.
+    user_url: ''
 });
 
 // Initialize Search results set Collection
@@ -48,18 +51,25 @@ var ResultsSet = Backbone.Collection.extend({
 // Initialize Search results View
 var ResultsView = Backbone.View.extend({
     tagName: "div",
-    className: "search-result",
-    template: _.template("<div class=\"search-result-thumbnail\"" +
-        "style=\"background-image: url('<%= thumbnail %>');\"></div>" +
-        "<div class=\"description\"><div class=\"search-result-title\">" +
-        "<a href=\"<%= url %>\"><%= title %></a></div>" +
-        "<div class=\"search-result-description\"><%= summary %></a></div>" +
-        "<div class=\"search-result-meta\"><div class=\"search-result-meta-views\">" +
-        "<%= views %> views</div><div class=\"search-result-meta-actions\">" +
-        "<span class=\"resource-favorite<% if (favorited) { %> favorited<% } %>\">" +
-        "<% if (favorited) {%>Favorited<% } else {%>Favorite<% }%></span>" +
-        "<a class=\"resource-copy\">Copy</a>" +
-        "<a class=\"resource-remix\">Remix</a></div></div></div>"),
+    className: "content-panel-body-listing-thumbnail-item",
+
+    template: _.template(
+        '<a href="<%= user_url %>" class="content-panel-body-listing-item-user-picture" ' +
+        'style="background-image: url(\'<%= user_thumbnail %>\')"></a>' +
+        '<a href="<%= url %>" class="content-panel-body-listing-item-anchor"><div class="content-panel-body-listing-item-label-fold"></div>' +
+        '<div class="content-panel-body-listing-item-label"><%= type %></div>' +
+        '<div class="content-panel-body-listing-item-favorites<% if (favorited){ %> favorited<% } %>"><%= favorites %></div>' +
+        '<div class="content-panel-body-listing-item-thumbnail"' +
+        'style="background-image: url(\'<%= thumbnail %>\')"></div>' +
+        '<div class="content-panel-body-listing-item-thumbnail-shadow"></div>' +
+        '<div class="content-panel-body-listing-item-contents">' +
+        '<div class="content-panel-body-listing-item-contents-caption"><%= title %></div>' +
+        '<div class="content-panel-body-listing-item-contents-meta"><%= views %> views</div>' +
+        '<%= tags %><div class="content-panel-body-listing-item-contents-description"><%= description %></div>' +
+        '<% if (review_count !== 0) { %><div class="content-panel-body-listing-item-contents-reviews">' +
+        '<div class="content-panel-body-listing-item-contents-review-count">' +
+        '(<span class="content-panel-body-listing-item-contents-review-count-value"><%= review_count %></span>)</div>' +
+        '</div><% } %></div></a>'),
 
     events: {
         // Bind the favorite button.
@@ -68,7 +78,11 @@ var ResultsView = Backbone.View.extend({
     },
 
     initialize: function() {
-        this.listenTo(this.model, "change", this.render);
+        this.listenTo(this.model, "change", this.silentRender);
+    },
+
+    silentRender: function () {
+        this.$el.html(this.template(this.model.toJSON()));
     },
 
     render: function () {
@@ -240,6 +254,15 @@ jQuery(document).ready(function ($) {
         // Initialize the favorite state of the search results.
         initFavoriteState(resultSet);
     }
+
+    function setBrowseHeight(){
+        $('.resource-browse').height(
+            $(window).height() - $('header').height()
+        );
+    }
+
+    setBrowseHeight();
+    $(window).resize(setBrowseHeight);
 
     // Construct a collection view using the search result objects built in
     resultCollectionView = new ResultsCollectionView({collection: resultSet});

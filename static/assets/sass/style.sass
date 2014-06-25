@@ -84,6 +84,7 @@ body
 		float: right
 		width: 337px
 
+
 header.wide-header
 	.header-brand-wrapper
 		padding-top: 10px
@@ -98,6 +99,30 @@ header.wide-header
 	.header-search-users-wrapper
 		width: 92%
 
+	nav#authenticate-buttons, nav#user-buttons
+		> ul
+			> li
+				a
+					color: #ddd
+					outline: none
+					height: 37px
+				
+					&:hover, &.hover
+						background-color: #555
+						border-bottom-width: 0px
+						color: #fff
+					
+					.horizontal-caret-hover
+						border-color: #ddd transparent transparent
+
+		> ul > li.user-notification-count
+			&.menu-open
+				a
+					background-color: #555
+
+			&.empty-notifications
+				a
+					background-image: url('../images/notifications-hover.png')
 #logo
 	height: 25px
 	float: left
@@ -115,6 +140,26 @@ header.wide-header
 
 @import "search_bar"
 @import "scaffolds"
+
+body.browse
+	> header
+		background-color: #333
+		height: $header-height - 7
+
+	#header-prebanner
+		height: 0px
+
+	#logo
+		height: 32px
+		float: left
+		margin-top: -2px
+
+	#search-bar 
+		margin-left: 24px
+
+		input[type="search"]
+			border: 1px solid #333
+			font-size: 1.2em
 
 footer
 	font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif
@@ -1678,6 +1723,8 @@ nav#user-buttons > ul > li.user-notification-count
 				color: $light-font
 
 	&.no-notifications
+		a
+			background-image: url('../images/notifications-hover.png')
 
 	a
 		outline: 0
@@ -1688,7 +1735,7 @@ nav#user-buttons > ul > li.user-notification-count
 
 		&:hover
 			border-bottom-width: 0px
-			background-image: url('../images/notifications-hover.png')
+			//background-image: url('../images/notifications-hover.png')
 
 	.user-notification-count-box
 		background-color: #d14836
@@ -2036,6 +2083,8 @@ nav.collections-navigation,
 
 	a
 		color: $body-color
+		display: inline-block
+		height: 18px
 
 		&:hover
 			color: $link-hover
@@ -2060,19 +2109,19 @@ nav.collections-navigation,
 
 .empty-collection .toggle-collection, .empty-category > .toggle-category
 	background-image: url('../images/empty-collection.png')
-	background-position: 2px 5px
+	background-position: 2px 3px
 
 .parent-collection > .toggle-collection, .parent-category > .toggle-category
 	background-image: url('../images/arrow-right-small.png')
-	background-position: 5px 4px
+	background-position: 5px 2px
 
 .opened-collection > .toggle-collection, , .opened-category > .toggle-category
 	background-image: url('../images/arrow-bottom-small.png')				
-	background-position: 3px 6px
+	background-position: 3px 4px
 
 .empty-resource > .toggle-resource, .empty-tag > .toggle-tag
 	background-image: url('../images/empty-collection.png')
-	background-position: 2px 4px
+	background-position: 2px 2px
 
 .move-resource-collection-browser,
 .add-resource-profile-browser,
@@ -4224,7 +4273,7 @@ table#edit-unit-form-table
 	.category-panel
 		.category-panel-listing
 			.category-choice-wrapper
-				margin: 20px 0px
+				margin: 32px 0px
 				margin-bottom: 30px
 				color: $light-font
 
@@ -4272,6 +4321,12 @@ table#edit-unit-form-table
 				.scroll-pane
 					margin-right: 10px
 
+				ul.category-panel-listing-categories-children,
+				ul.category-panel-listing-categories-body-siblings
+					li
+						a:hover
+							text-decoration: underline
+
 			ul.category-panel-listing-search-category
 				li.selected-category
 					a
@@ -4315,6 +4370,98 @@ table#edit-unit-form-table
 					.search-filters
 						padding: 20px
 
+				.content-panel-body-feature
+					width: 100%
+					background: url('../images/mathematics-cover.jpg') no-repeat center center
+					background-size: cover
+					height: 200px
+
+					.content-panel-body-feature-title
+						color: #fff
+						margin-left: 20px
+						position: relative
+
+						.breadcrumb
+							a
+								color: #5abd02
+								//color: #2F7AFF
+
+				.content-panel-body-grades-topics
+					overflow: hidden
+
+					.content-panel-body-grades-wrapper
+						float: left
+						width: 35%
+
+						ul.content-panel-body-grades
+							li
+								a
+									padding: 10px 20px
+									background-color: #5adb02
+									color: #fff
+									width: 100%
+									display: block
+									border-bottom: 1px solid #60CA02
+									outline: none
+
+									&:hover
+										background-color: #4EA302
+
+									&.current
+										background-color: #428A01									
+
+									&:hover, &.current
+										text-decoration: none
+										background-image: url('../images/grade-selector-arrow.png')
+										background-repeat: no-repeat
+										background-position: 95% center
+
+					.content-panel-body-grades-topics-list
+						float: right
+						width: 61%
+						margin: auto
+
+						.content-panel-body-grades-topics-list-empty
+							text-align: center
+							margin-top: 50px
+							left: 30px
+							position: relative
+							opacity: 0
+
+							&.hidden
+								display: none
+
+							.content-panel-body-grades-topics-list-empty-arrow
+								width: 11px
+								height: 20px
+								margin-right: 10px
+								display: inline-block
+								background: url('../images/grade-topic-arrow.png') no-repeat center center
+								background-size: 80%
+
+						ul.content-panel-body-grades-topics-list-filled
+							li
+								a
+									padding: 10px 20px
+									background-color: #f9f9f9
+									color: $body-color
+									font-weight: bold
+									width: 100%
+									display: block
+									border-bottom: 1px solid #ddd
+									outline: none
+
+									&:hover
+										text-decoration: none
+										background-color: #fff
+
+						h1
+							color: #aaa
+							font-size: 2.2em
+							letter-spacing: -2px
+							text-align: center
+							margin-top: 20px
+
 				.content-panel-body-header
 					height: 30px
 					width: 92%
@@ -4322,83 +4469,126 @@ table#edit-unit-form-table
 					h3
 						color: $light-font
 
-					.content-panel-body-header-title
+					.content-panel-body-header-title-wrapper
 						width: 80%
 						float: left
 
-					.content-panel-body-header-share
-						width: 65px
-						text-align: center
-						background-color: transparent
-						@include border-radius(2px)
-						border: 1px solid #5abd02
-						color: #5abd02
+						.content-panel-body-header-title
+							overflow: hidden
+
+							&.show-share
+								height: 28px
+
+							h2
+								float: left
+
+							.content-panel-body-header-share
+								text-align: center
+								background-color: transparent
+								@include border-radius(2px)
+								border: 1px solid #5abd02
+								color: #5abd02
+								float: left
+								margin-left: 12px
+								padding: 4px 12px
+
+								&:hover
+									color: #fff
+									background-color: #5abd02
+
+					.content-panel-body-listing-filters-sort
 						float: right
+						margin-top: 10px
 
-						&:hover
-							color: #fff
-							background-color: #5abd02
+						.sort-by-type
+							display: inline-block
+							border: 1px solid #ddd
+							padding: 4px 8px
+							margin-left: 4px
+							cursor: pointer
 
-					#search-result-set
-						padding: 20px
-						padding-top: 0px
+							.sort-by-type-button
+								display: inline-block
+								width: 16px
+								height: 15px
+								background: url('../images/downvote.png') no-repeat
+								background-position: center
+								background-size: 10px 10px
+								position: relative
+								float: right
+
+						.sort-by-type-menu
+							display: none
+							position: absolute
+							overflow: hidden
+							padding: 10px
+							@include box-shadow(0 2px 2px rgba(0, 0, 0, 0.4))
+							background-color: #fff
+							z-index: 10
+
+							&.show
+								display: block
+
+							.sort-by-type-menu-content
+								float: left
+								margin-right: 20px
+
+							.sort-by-type-menu-format
+								float: right
+
+				#search-result-set
+					padding: 20px
+					padding-top: 0px
+					overflow: hidden
+
+				.content-panel-body-listing-types
+					margin-left: 25px
+					border-bottom: 1px solid #ddd
+					margin-top: 20px
+					margin-bottom: 10px
+					//padding-bottom: 8px
+
+					ul
+						overflow: hidden
+
+						li
+							float: left
+							margin-right: 28px
+
+							a
+								color: $light-font
+								font-size: 1.3em
+								padding-bottom: 6px
+								outline: none
+								display: inline-block
+
+								&:hover
+									text-decoration: none
+									color: $body-color
+
+								&.current
+									border-bottom: 2px solid $body-color
+									color: $body-color
+									font-weight: bold
 
 				.content-panel-body-listing
 					//overflow: auto
 
-					.content-panel-body-listing-filters
-						height: 25px
-						margin-bottom: 20px
-						padding-left: 10px
+					//.content-panel-body-listing-filters
+						//height: 25px
+						//margin-bottom: 20px
+						//padding-left: 20px
 
-						.content-panel-body-listing-filters-search
-							float: left
+						//.content-panel-body-listing-filters-search
+							//float: left
 
-							input
-								padding-left: 30px
-								background: url('../images/search-icon-light.png') no-repeat
-								background-position: 8px center
-								width: 240px
-								background-color: #f9f9f9
+							//input
+								//padding-left: 30px
+								//background: url('../images/search-icon-light.png') no-repeat
+								//background-position: 8px center
+								//width: 240px
+								//background-color: #f9f9f9
 
-						.content-panel-body-listing-filters-sort
-							float: right
-
-							.sort-by-type
-								display: inline-block
-								border: 1px solid #ddd
-								padding: 4px 8px
-								margin-left: 4px
-								cursor: pointer
-
-								.sort-by-type-button
-									display: inline-block
-									width: 16px
-									height: 15px
-									background: url('../images/downvote.png') no-repeat
-									background-position: center
-									background-size: 10px 10px
-									position: relative
-									float: right
-
-							.sort-by-type-menu
-								display: none
-								position: absolute
-								overflow: hidden
-								padding: 10px
-								@include box-shadow(0 2px 2px rgba(0, 0, 0, 0.4))
-								background-color: #fff
-								z-index: 10
-
-								&.show
-									display: block
-
-								.sort-by-type-menu-content
-									float: left
-									margin-right: 20px
-
-								.sort-by-type-menu-format
-									float: right
 
 					.content-panel-body-listing-items
 						overflow: hidden
@@ -4410,16 +4600,16 @@ table#edit-unit-form-table
 							.content-panel-body-listing-category-title
 								margin-bottom: 20px
 								font-weight: bold
-								padding-left: 10px
+								padding-left: 20px
 
 							.content-panel-body-listing-category-resources
 								overflow: hidden
-								padding-left: 10px
 								padding-top: 10px
+								padding-left: 20px
 
 							.content-panel-body-listing-category-show
 								padding: 12px 0px
-								width: 98%
+								width: 96%
 								background-color: #F9F9F9
 								margin-bottom: 60px
 								border: 2px solid #ddd
@@ -4430,7 +4620,8 @@ table#edit-unit-form-table
 								cursor: pointer
 								display: block
 								color: $light-font
-								margin-left: 10px
+								margin-left: 20px
+								outline: none
 
 								&:hover
 									color: $body-color
@@ -4446,15 +4637,43 @@ table#edit-unit-form-table
 								&.hide
 									display: none
 
-						.content-panel-body-listing-item
-							float: left
-							color: $body-color
-							margin-bottom: 10px
+						.content-panel-body-listing-item-show
+							height: 140px
+							width: 195px
+							background-color: #ddd
 							display: block
+							float: left
+							@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
+							color: #999
+							font-size: 1.6em
+							text-align: center
+							padding-top: 80px
+							background-image: url('../images/category-show-arrow.png')
+							background-repeat: no-repeat
+							background-position: 85% center
+							border: 5px solid #d2d2d2
+							outline: none
 
+							.content-panel-body-listing-item-show-count
+								font-size: 2em
+
+							&:hover
+								background-color: #F9F9F9
+								@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.2))
+								text-decoration: none
+								color: $light-font
+
+
+
+						.content-panel-body-listing-banner-item
+							color: $body-color
+							display: block
+							width: 800px
+							padding-top: 10px
+							padding-left: 10px
+													
 							&.expanded
 								height: auto
-								min-height: 320px
 
 							> a
 								outline: none
@@ -4462,155 +4681,42 @@ table#edit-unit-form-table
 								&:hover
 									text-decoration: none
 
-							a.content-panel-body-listing-item-anchor
-								background-color: #f9f9f9
-								@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
-								display: inline-block
-								width: 205px
-
-								&:hover
-									@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.2))
-									background-color: #fff
-
-									.content-panel-body-listing-item-contents-caption
-										text-decoration: underline
-
-							.content-panel-body-listing-item-favorites
-								position: relative
-								top: 120px
-								width: 36px
-								height: 12px
-								margin-bottom: -12px
-								left: 158px
-								color: #666
-								background: url('../images/heart.png') no-repeat
-								background-position: 18px center
-								cursor: pointer
-								color: #fff
-								@include text-shadow(0 0px 1px rgba(0, 0, 0, 1))
-								@include sans-bold
-								z-index: 1
-
-								&.favorited
-									background-image: url('../images/hearted.png')
-
 							.content-panel-body-listing-item-label
-								position: relative
-								top: 10px
-								width: 60px
-								height: 12px
-								margin-bottom: -12px
-								background-color: #5ABD02
-								left: 140px
-								font-size: 0.87em
-								padding-left: 10px
-								padding-top: 2px
-								color: #fff
-								font-weight: bold
+								left: -5px
 
 							.content-panel-body-listing-item-label-fold
-								position: relative
-								top: 4px
-								width: 5px
-								height: 3px
-								margin-bottom: -6px
-								left: 205px
-								background-image: url('../images/label-fold.png')
+								background-image: url('../images/label-fold-flip.png')
+								left: -5px
 
-							.content-panel-body-listing-item-thumbnail
-								width: 205px
+							a.content-panel-body-listing-item-anchor
 								height: 150px
-								background-color: #efefef
-								background-size: cover
+								width: 100%
+								overflow: hidden
 
-							.content-panel-body-listing-item-thumbnail-shadow
-								height: 40px
-								width: 205px
-								top: -40px
-								margin-bottom: -40px
-								position: relative
-								/* TODO: Custom IE styling in ie.sass */
-								@include background-image(linear-gradient(transparent, rgba(0,0,0, 0.2)))
-								//repeat scroll 0 0 rgba(0, 0, 0, 0)
-								z-index: 0
-							
-							.content-panel-body-listing-item-user-picture
-								position: relative
-								top: 100px
-								width: 40px
-								height: 40px
-								@include border-radius(20px)
-								background-image: url('../images/varun-arora.jpg')
-								background-size: cover
-								margin-bottom: -40px
-								left: 5px
-								background-color: #666
-								cursor: pointer
-								display: block
-								z-index: 1
+								.content-panel-body-listing-item-thumbnail-wrapper
+									float: left
+									width: 205px
 
-
-							.content-panel-body-listing-item-contents
-								padding: 6px
-								border: 1px solid #ddd
-								border-top-width: 0px
-								
-								.content-panel-body-listing-item-contents-caption
-									display: block
-									color: $link-hover
-									font-weight: bold
+								.content-panel-body-listing-item-contents
+									float: right
+									width: 569px
+									padding-left: 15px
+									padding-top: 10px
 									font-size: 1.2em
 
-								.content-panel-body-listing-item-contents-meta,
-								.content-panel-body-listing-item-contents-description
-									margin-top: 4px
-									color: $light-font
-									font-size: 0.9em
+									.content-panel-body-listing-item-contents-caption
+										letter-spacing: -1px
 
-								.content-panel-body-listing-item-contents-labels
-									margin: 6px 0px
-									max-height: 45px
-									overflow: hidden
+									.content-panel-body-listing-item-contents-description
+										margin-top: 16px
 
-									.content-panel-body-listing-item-contents-label
-										background-color: #999
-										color: #fff
-										margin-right: 4px
-										margin-bottom: 2px
-										display: inline-block
 
-								.content-panel-body-listing-item-contents-reviews
-									margin-top: 6px
-
-									.content-panel-body-listing-item-contents-reviews-stars
-										display: inline-block
-										vertical-align: middle
-
-										.content-panel-body-listing-item-contents-review-star,
-										.content-panel-body-listing-item-contents-review-halfstar
-											display: inline-block
-											background-repeat: no-repeat
-											background-position: center center
-											width: 14px
-											height: 14px
-
-										.content-panel-body-listing-item-contents-review-star
-											background-image: url('../images/favorited.png')
-
-										.content-panel-body-listing-item-contents-review-halfstar
-											background-image: url('../images/half-star.png')
-
-									.content-panel-body-listing-item-contents-review-count
-										display: inline-block
-										margin-left: 6px
-
-		
 					.content-panel-body-listing-requests
 						padding-top: 20px
 						margin-top: 20px
 						border-top: 1px solid #ddd
 						clear: left
-						padding-left: 10px
+						margin-left: 20px
 
 						.content-panel-body-listing-requests-title
 							overflow: hidden
@@ -4638,6 +4744,7 @@ table#edit-unit-form-table
 							color: $body-color
 							padding-right: 32px
 							background-color: #F9F9F9
+							@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
 
 							.content-panel-body-listing-request-thumbnail
 								width: 40px
@@ -4667,11 +4774,176 @@ table#edit-unit-form-table
 		footer
 			margin-top: 0px
 
-.content-panel-body-listing-item
+.content-panel-body-listing-thumbnail-item
 	width: 210px
 	height: 320px
 	margin-right: 20px
 	display: none
+
+.content-panel-body-listing-item-favorites
+	position: relative
+	top: 120px
+	width: 36px
+	height: 12px
+	margin-bottom: -12px
+	left: 158px
+	color: #666
+	background: url('../images/heart.png') no-repeat
+	background-position: 18px center
+	cursor: pointer
+	color: #fff
+	@include text-shadow(0 0px 1px rgba(0, 0, 0, 1))
+	@include sans-bold
+	z-index: 1
+
+	&.favorited
+		background-image: url('../images/hearted.png')
+
+.content-panel-body-listing-item-label
+	position: relative
+	top: 10px
+	width: 60px
+	height: 12px
+	margin-bottom: -12px
+	background-color: #5ABD02
+	font-size: 0.87em
+	padding-left: 10px
+	padding-top: 2px
+	color: #fff
+	font-weight: bold
+
+.content-panel-body-listing-item-label-fold
+	position: relative
+	top: 4px
+	width: 5px
+	height: 3px
+	margin-bottom: -6px
+	background-image: url('../images/label-fold.png')
+
+#search-result-set, .content-panel-body-listing
+	.content-panel-body-listing-thumbnail-item
+		float: left
+		color: $body-color
+		margin-bottom: 10px
+		display: block
+
+		&.expanded
+			height: auto
+			min-height: 320px
+
+		> a
+			outline: none
+
+			&:hover
+				text-decoration: none
+
+		.content-panel-body-listing-item-label
+			left: 140px
+
+		.content-panel-body-listing-item-label-fold
+			left: 205px
+
+		.content-panel-body-listing-item-contents
+			border: 1px solid #ddd
+
+a.content-panel-body-listing-item-anchor
+	background-color: #f9f9f9
+	@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
+	display: inline-block
+	width: 205px
+
+	&:hover
+		@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.2))
+		background-color: #fff
+
+		.content-panel-body-listing-item-contents-caption
+			text-decoration: underline
+
+.content-panel-body-listing-item-thumbnail
+	width: 205px
+	height: 150px
+	background-color: #efefef
+	background-size: cover
+
+.content-panel-body-listing-item-thumbnail-shadow
+	height: 40px
+	width: 205px
+	top: -40px
+	margin-bottom: -40px
+	position: relative
+	/* TODO: Custom IE styling in ie.sass */
+	@include background-image(linear-gradient(transparent, rgba(0,0,0, 0.2)))
+	//repeat scroll 0 0 rgba(0, 0, 0, 0)
+	z-index: 0
+
+.content-panel-body-listing-item-user-picture
+	position: relative
+	top: 100px
+	width: 40px
+	height: 40px
+	@include border-radius(20px)
+	background-image: url('../images/varun-arora.jpg')
+	background-size: cover
+	margin-bottom: -40px
+	left: 5px
+	background-color: #666
+	cursor: pointer
+	display: block
+	z-index: 1
+
+.content-panel-body-listing-item-contents
+	padding: 6px
+	border-top-width: 0px
+	
+	.content-panel-body-listing-item-contents-caption
+		display: block
+		color: $link-hover
+		font-weight: bold
+		font-size: 1.2em
+
+	.content-panel-body-listing-item-contents-meta,
+	.content-panel-body-listing-item-contents-description
+		margin-top: 4px
+		color: $light-font
+		font-size: 0.9em
+
+	.content-panel-body-listing-item-contents-labels
+		margin: 6px 0px
+		max-height: 45px
+		overflow: hidden
+
+		.content-panel-body-listing-item-contents-label
+			background-color: #999
+			color: #fff
+			margin-right: 4px
+			margin-bottom: 2px
+			display: inline-block
+
+	.content-panel-body-listing-item-contents-reviews
+		margin-top: 6px
+
+		.content-panel-body-listing-item-contents-reviews-stars
+			display: inline-block
+			vertical-align: middle
+
+			.content-panel-body-listing-item-contents-review-star,
+			.content-panel-body-listing-item-contents-review-halfstar
+				display: inline-block
+				background-repeat: no-repeat
+				background-position: center center
+				width: 14px
+				height: 14px
+
+			.content-panel-body-listing-item-contents-review-star
+				background-image: url('../images/favorited.png')
+
+			.content-panel-body-listing-item-contents-review-halfstar
+				background-image: url('../images/half-star.png')
+
+		.content-panel-body-listing-item-contents-review-count
+			display: inline-block
+			margin-left: 6px
+
 
 .content-panel-body-listing-filters-sort, .discussion-board-filters-sort
 	.filter-sort-option
@@ -4684,6 +4956,10 @@ table#edit-unit-form-table
 
 	.sort-by
 		color: #bababa
+
+.no-request-found-message
+	font-weight: bold
+	color: #D14836
 
 .no-request-found
 	text-align: center
@@ -4936,7 +5212,7 @@ table#edit-unit-form-table
 		display: block
 
 .no-results-message
-	padding-left: 10px
+	padding-left: 20px
 
 	&.hide
 		display: none
@@ -5037,6 +5313,52 @@ body.signup, body.login
 		float: right
 		margin-right: 10px
 
+
+.standards-play
+	height: 100%
+
+	.category-selection-bar
+		height: 18px
+		border-bottom: 1px solid #efefef
+		padding: 14p
+
+	.left-menu
+		color: #fff
+		width: 24%
+		height: 100%
+		background: #011c33 /* Old browsers */
+		background: -moz-linear-gradient(top, #011c33 0%, #073d30 100%) /* FF3.6+ */
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#011c33), color-stop(100%,#073d30)) /* Chrome,Safari4+ */
+		background: -webkit-linear-gradient(top, #011c33 0%,#073d30 100%) /* Chrome10+,Safari5.1+ */
+		background: -o-linear-gradient(top, #011c33 0%,#073d30 100%) /* Opera 11.10+ */
+		background: -ms-linear-gradient(top, #011c33 0%,#073d30 100%) /* IE10+ */
+		background: linear-gradient(to bottom, #011c33 0%,#073d30 100%) /* W3C */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#011c33', endColorstr='#073d30',GradientType=0 ) /* IE6-9 */
+		padding-left: 14px
+		padding-top: 30px
+		float: left
+
+		ul
+			margin-right: 10px
+
+			li
+				padding: 4px
+
+				&:hover
+					background-color: #011c33
+
+	.middle-menu
+		width: 32%
+		background-color: #efefef
+		height: 100%
+		float: left
+		padding-top: 30px
+		padding-left: 14px
+
+		&.loading
+			background-image: url('../images/spinner.gif')
+			background-repeat: no-repeat
+			background-position: center center
 
 /***** EXPERIMENTS *************/
 

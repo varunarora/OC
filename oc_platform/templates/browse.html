@@ -1,13 +1,25 @@
 {% include 'partials/header.html' with body_class='browse' %}
 
-<script src="{{ STATIC_URL }}js/jquery.nanoscroller.min.js" type="text/javascript"></script>
 <script src="{{ STATIC_URL }}js/backbone-min.js" type="text/javascript"></script>
+{% if not query %}
+<script src="{{ STATIC_URL }}js/jquery.nanoscroller.min.js" type="text/javascript"></script>
 <script src="{{ STATIC_URL }}js/category-resources.js" type="text/javascript"></script>
 <script type="text/javascript">
     OC.categoryResources.currentCategoryID = '{{ current_category_id.id }}';
     OC.categoryResources.isCatalog = '{{ is_catalog }}' === 'True' ? true : false;
-</script>
+    OC.categoryResources.isSubjectHome = {% if child_categories_map %}true{% else %}false{% endif %};
 
+    {% for key, value in child_categories_map.items %}
+        OC.categoryResources.gradeCategoryMap['{{ key }}'] = []
+        {% for child_categories_child in value %}
+        OC.categoryResources.gradeCategoryMap['{{ key }}'].push({
+            title: '{{ child_categories_child }}',
+            url: '{{ child_categories_child.url }}'
+        });
+        {% endfor %}
+    {% endfor %}
+</script>
+{% endif %}
 <div class="center-spread resource-browse">
     <div class="wide-center-stage">
         <div class="wide-center-stage-fill-panel category-panel">
@@ -22,9 +34,9 @@
                 {% else %}
                 <div class="category-panel-listing-categories scrollable-block">
                     <div class="category-panel-listing-categories-body">
-                        {% if child_categories %}
+                        {% if not child_categories_map %}
                         <h4>{{ selected_category.title }}</h4>
-                        <ul>
+                        <ul class="category-panel-listing-categories-children">
                         {% for child_category in child_categories %}
                             {% if is_catalog %}
                             <li><a href="{{ child_category.url }}">{{ child_category.title }}</a></li>                            
@@ -34,6 +46,7 @@
                                     id: '{{ child_category.id }}',
                                     title: '{{ child_category.title }}',
                                     url: '{{ child_category.url }}',
+                                    count: {{ child_category.count }},
                                     position: {{ forloop.counter }}
                                 }));
                             </script>
@@ -50,7 +63,7 @@
                         {% endif %}
                         {% if selected_category.parent.slug != 'opencurriculum' %}
                         <h4 class="category-panel-listing-categories-body-others">Others in {{ selected_category.parent.title }}</h4>
-                        <ul>
+                        <ul class="category-panel-listing-categories-body-siblings">
                         {% for parent_category in parent_categories %}
                             <li><a href="{{ parent_category.url }}">{{ parent_category.title }}</a></li>
                         {% endfor %}
@@ -64,6 +77,36 @@
         <div class="wide-center-stage-key-panel content-panel">
             <div class="content-panel-body-wrapper">
                 <div class="content-panel-body" id="category-{{ selected_category.id }}">
+                    {% if child_categories_map %}
+                    <div class="content-panel-body-feature">
+                        <div class="content-panel-body-feature-title"><h2>{{ selected_category.title }}</h2>
+                        <div class="breadcrumb">
+                            {% for breadcrumb_category in breadcrumb %}
+                                <a href="{{ breadcrumb_category.url }}">{{ breadcrumb_category.title }}</a> 
+                                {% if not forloop.last %}
+                                <span class="vertical-caret breadcrumbs-caret"></span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        </div>
+                    </div>
+                    <div class="content-panel-body-grades-topics">
+                        <div class="content-panel-body-grades-wrapper">
+                            <ul class="content-panel-body-grades">
+                                {% for child_category in child_categories %}
+                                <li><a href="{{ child_category.url }}" id="category-{{ child_category.id }}">{{ child_category.title }}</a></li> 
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="content-panel-body-grades-topics-list">
+                            <div class="content-panel-body-grades-topics-list-empty">
+                                <img src="{{ STATIC_URL }}images/select-category.png" />
+                                <h1><span class="content-panel-body-grades-topics-list-empty-arrow"></span>Select a grade level for a list of topic areas</h1>
+                            </div>
+                            <ul class="content-panel-body-grades-topics-list-filled"></ul>
+                        </div>
+                    </div>
+                    {% endif %}
                     {% if query or query == '' %}
                     <div class="content-panel-body-header">
                         <div class="content-panel-body-header-title">
@@ -73,9 +116,10 @@
                     <div class="content-panel-body-search content-panel-body-listing">
                     {% include 'partials/search.html' %}
                     </div>
-                    {% else %}
+                    {% elif not child_categories_map %}
                     <div class="content-panel-body-header">
-                        <div class="content-panel-body-header-title"><h2>{{ selected_category.title }}</h2>
+                        <div class="content-panel-body-header-title-wrapper">
+                            <div class="content-panel-body-header-title{% if not is_catalog %} show-share{% endif %}"><h2>{{ selected_category.title }}</h2>{% if not is_catalog %}<div class="content-panel-body-header-share action-button mini-action-button">+ Share new</div>{% endif %}</div>
                             <div class="breadcrumb">
                                 {% for breadcrumb_category in breadcrumb %}
                                     <a href="{{ breadcrumb_category.url }}">{{ breadcrumb_category.title }}</a> 
@@ -85,41 +129,45 @@
                                 {% endfor %}
                             </div>
                         </div>
-                        <div class="content-panel-body-header-share action-button mini-action-button">Post new</div>
-                    </div>
-                    <div class="content-panel-body-listing">
-                        <div class="content-panel-body-listing-filters">
-                            <div class="content-panel-body-listing-filters-search">
-                                <form>
-                                    <input type="text" placeholder="Filter by standard or objective..." />
-                                </form>
-                            </div>
-                            <div class="content-panel-body-listing-filters-sort">
-                                <span class="sort-by">Sort by: </span><span class="filter-sort-option filter-sort-option-newest selected">Newest</span> <span class="filter-sort-option">Popularity</span>
-                                <div class="sort-by-type">All types<span class="sort-by-type-button"></div>
-                                <div class="sort-by-type-menu">
-                                    <div class="sort-by-type-menu-content">
-                                        <h4>Content type</h4>
-                                        <label><input type="checkbox" name="type" value="lesson" checked />Lesson</label>
-                                        <label><input type="checkbox" name="type" value="project" checked />Project</label>
-                                        <label><input type="checkbox" name="type" value="worksheet" checked />Worksheet</label>
-                                        <label><input type="checkbox" name="type" value="handout" checked />Handout</label>
-                                        <label><input type="checkbox" name="type" value="activity" checked />Activity</label>
-                                        <label><input type="checkbox" name="type" value="test" checked />Test / assessment</label>
-                                        <label><input type="checkbox" name="type" value="lecture" checked />Lecture</label>
-                                    </div>
-                                     <div class="sort-by-type-menu-format">
-                                        <h4>Format type</h4>
-                                        <label><input type="checkbox" name="type" value="document" checked />Document</label>
-                                        <label><input type="checkbox" name="type" value="slideshow" checked />Slideshow</label>
-                                        <label><input type="checkbox" name="type" value="website" checked />Website</label>
-                                        <label><input type="checkbox" name="type" value="video" checked />Video</label>
-                                        <label><input type="checkbox" name="type" value="audio" checked />Audio</label>
-                                    </div>
+                        <div class="content-panel-body-listing-filters-sort">
+                            <span class="sort-by">Sort by: </span><span class="filter-sort-option filter-sort-option-newest selected">Newest</span> <span class="filter-sort-option">Popularity</span>
+                            <!--<div class="sort-by-type">All types<span class="sort-by-type-button"></div>
+                            <div class="sort-by-type-menu">
+                                <div class="sort-by-type-menu-content">
+                                    <h4>Content type</h4>
+                                    <label><input type="checkbox" name="type" value="lesson" checked />Lesson</label>
+                                    <label><input type="checkbox" name="type" value="project" checked />Project</label>
+                                    <label><input type="checkbox" name="type" value="worksheet" checked />Worksheet</label>
+                                    <label><input type="checkbox" name="type" value="handout" checked />Handout</label>
+                                    <label><input type="checkbox" name="type" value="activity" checked />Activity</label>
+                                    <label><input type="checkbox" name="type" value="test" checked />Test / assessment</label>
+                                    <label><input type="checkbox" name="type" value="lecture" checked />Lecture</label>
                                 </div>
-                            </div>
+                                 <div class="sort-by-type-menu-format">
+                                    <h4>Format type</h4>
+                                    <label><input type="checkbox" name="type" value="document" checked />Document</label>
+                                    <label><input type="checkbox" name="type" value="slideshow" checked />Slideshow</label>
+                                    <label><input type="checkbox" name="type" value="website" checked />Website</label>
+                                    <label><input type="checkbox" name="type" value="video" checked />Video</label>
+                                    <label><input type="checkbox" name="type" value="audio" checked />Audio</label>
+                                </div>
+                            </div>-->
                         </div>
-
+                    </div>
+                    {% if not child_categories_map and not is_catalog %}
+                    <div class="content-panel-body-listing-types">
+                        <ul>
+                            <li name="all"><a href="" class="current">All</a></li>
+                            <li name="lesson"><a href="">Lesson Plans</a></li>
+                            <li name="activity"><a href="">Activities</a></li>
+                            <li name="worksheet"><a href="">Worksheets</a><li>
+                            <li name="handout"><a href="">Handouts</a></li>
+                            <li name="assessment"><a href="">Assessments</a></li>
+                            <li name="lecture"><a href="">Lectures</a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="content-panel-body-listing">
                         <div class="content-panel-body-listing-items">
                         <script type="text/javascript">
                         {% for item in items %}
@@ -181,7 +229,7 @@
                             <div class="lazy-load-button enabled">Load more...</div>
                         {% endif %}
 
-                        {% if not query and query != '' %}
+                        {% if not query and query != '' and category_group %}
                         <div class="content-panel-body-listing-requests">
                         <script type="text/javascript">
                             requestURL = '{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}';

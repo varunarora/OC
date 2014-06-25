@@ -5,6 +5,9 @@ OC.categoryResources = {
     filterAsyncSearchOn: false,
     childCategories: [],
     visibleResourceCount: null,
+    isCatalog: false,
+    isSubjectHome: false,
+    gradeCategoryMap: {},
 
     initBrowseView: function(){
         // Set the height of the page.
@@ -43,8 +46,7 @@ OC.categoryResources = {
         });
 
         // Clear the filter search box.
-        $('.content-panel-body-listing-filters-search input').val('');
-
+       $(OC.config.search.input).val('');
 
         var sortByTypeMenu = $('.sort-by-type-menu');
         $('.content-panel').on('scroll click', function(event){
@@ -63,6 +65,63 @@ OC.categoryResources = {
         // Add a tooltip to category tag filters.
         $('.category-panel-listing-categories-body-filters-description').tipsy(
             {gravity: 's'});
+
+        // Slide in the empty state placeholder on the home browse page.
+        setTimeout(function(){
+            $('.content-panel-body-grades-topics-list-empty').animate({
+                'left': 0,
+                'opacity': 1
+            }, 1000);
+        }, 500);
+
+        function resizeHeader(){
+            // Set header height based on page height.
+            var newHeight = $(window).height() - $('body > header').height() - $(
+                    '.content-panel-body-grades').height();
+            $('.content-panel-body-feature').height(newHeight);
+
+            // Reposition the title.
+            $('.content-panel-body-feature-title').css({
+                'top': newHeight - $('.content-panel-body-feature-title').height() - 20
+            });
+        }
+
+        resizeHeader(); $(window).resize(resizeHeader);
+
+        // Bind grade click handler.
+        $('ul.content-panel-body-grades li a').click(function(event){
+            var currentGrade = $(this),
+                childCategoryID = parseInt($(this).attr('id').substring(9), 10);
+            
+            $('ul.content-panel-body-grades li a').removeClass('current');
+            currentGrade.addClass('current');
+
+            OC.categoryResources.setGradeTopicList(
+                OC.categoryResources.gradeCategoryMap[childCategoryID]);
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+    },
+
+    setGradeTopicList: function(topics){
+        $('.content-panel-body-grades-topics-list-empty').addClass('hidden');
+
+        var listWrapper = $('.content-panel-body-grades-topics-list-filled');
+        listWrapper.html('');
+
+        var i, newTopicWrapper, newTopicLink;
+        for (i = 0; i < topics.length; i++){
+            newTopicWrapper = $('<li/>');
+            newTopicLink = $('<a/>', {
+                'text': topics[i].title,
+                'href': topics[i].url
+            });
+
+            newTopicWrapper.append(newTopicLink);
+            listWrapper.append(newTopicWrapper);
+        }
     },
 
     initInfiniteScroll: function(){
@@ -111,13 +170,13 @@ OC.categoryResources = {
     },
 
     setVisibleResourceCount: function(){
-        var hiddenResourceItem = $('<div>', { 'class' : 'content-panel-body-listing-item' });
+        var hiddenResourceItem = $('<div>', { 'class' : 'content-panel-body-listing-thumbnail-item' });
         $('body').append(hiddenResourceItem);
 
         function setCount(){
             var squeezableResourceCount = $('.content-panel-body-listing').width(
-                ) / $('.content-panel-body-listing-item').outerWidth(true);
-            OC.categoryResources.visibleResourceCount = Math.floor(squeezableResourceCount);
+                ) / $('.content-panel-body-listing-thumbnail-item').outerWidth(true);
+            OC.categoryResources.visibleResourceCount = Math.floor(squeezableResourceCount) - 1;
         }
 
         setCount();
@@ -270,8 +329,7 @@ var CategoryView = Backbone.View.extend({
         else return { 'click .content-panel-body-listing-category-show': 'showMore' };
     },
     template: _.template('<div class="content-panel-body-listing-category-title">' +
-        '<h3><%= title %></h3></div><div class="content-panel-body-listing-category-resources"></div>' +
-        '<a href="<%= url %>" class="content-panel-body-listing-category-show">Show more &#187;</a>'),
+        '<h3><%= title %></h3></div><div class="content-panel-body-listing-category-resources"></div>'),
 
     showMore: function(){
         // Add loading to show more.
@@ -345,6 +403,12 @@ var CategoryView = Backbone.View.extend({
                     }).silentRender()
                 );
             }
+
+            this.$('.content-panel-body-listing-category-resources').append(
+                '<a href="' + this.model.get('url') + '" class="content-panel-body-listing-item-show">' +
+                '<div class="content-panel-body-listing-item-show-count">' + (this.model.get(
+                    'count') - categoryView.truncatedResourceLimit) + '</div> more</div>'
+            );
         }
     },
 
@@ -352,13 +416,13 @@ var CategoryView = Backbone.View.extend({
         modelJSON = this.model.toJSON();
         this.$el.html(this.template(modelJSON));
 
-        if (this.model.get('truncated') === false || this.model.get('loaded')){
-            this.$('.content-panel-body-listing-category-show').remove();
-        }
-
         $('.content-panel-body-listing-items').append(this.$el);
         this.renderResources();
         
+        if (this.model.get('truncated') === false || this.model.get('loaded')){
+            this.$('.content-panel-body-listing-item-show').remove();
+        }
+
         return this;
     },
     lateRender: function(model) {
@@ -458,8 +522,8 @@ var RequestCollectionView = Backbone.View.extend({
 
     showNullView: function () {
         $('.content-panel-body-listing-requests').html('Can\'t find what you are looking ' +
-            'for? <span class="no-request-found-teacher-count">' + this.randomUserCount() + '</span> teachers are currently ' +
-            'online waiting to help you for free! <a href="' + this.options.requestURL + '" class="no-request-found">Ask for help right now</a>');
+            'for? <span class="no-request-found-message"><span class="no-request-found-teacher-count">' + this.randomUserCount() + '</span> teachers are currently ' +
+            'online waiting to help you for free!</span> <a href="' + this.options.requestURL + '" class="no-request-found">Ask for help right now</a>');
     },
 
     randomUserCount: function () {
@@ -477,8 +541,11 @@ var RequestCollectionView = Backbone.View.extend({
 // Initialize resources view.
 var ResourceView = Backbone.View.extend({
     tagName: "div",
-    className: "content-panel-body-listing-item",
-    template: _.template(
+    className: function(){
+         return (!OC.categoryResources.isSubjectHome && (
+            !OC.categoryResources.isCatalog)) ? "content-panel-body-listing-banner-item" : "content-panel-body-listing-thumbnail-item";
+    },
+    thumbnailTemplate: _.template(
         '<a href="<%= user_url %>" class="content-panel-body-listing-item-user-picture" ' +
         'style="background-image: url(\'<%= user_thumbnail %>\')"></a>' +
         '<a href="<%= url %>" class="content-panel-body-listing-item-anchor"><div class="content-panel-body-listing-item-label-fold"></div>' +
@@ -497,13 +564,41 @@ var ResourceView = Backbone.View.extend({
         '</div><% } %></div></a>'
         ),
 
-    events: {
-        // Bind the favorite button.
-        'mouseenter .content-panel-body-listing-item-anchor': 'expand',
-        'mouseleave .content-panel-body-listing-item-anchor': 'collapse',
-        'click .content-panel-body-listing-item-favorites': 'favorite',
-        'mouseenter .content-panel-body-listing-item-user-picture': 'showUserTip',
-        'mouseleave .content-panel-body-listing-item-user-picture': 'hideUserTip'
+    bannerTemplate: _.template('<div class="content-panel-body-listing-banner-item">' +
+            '<a href="<%= user_url %>" class="content-panel-body-listing-item-user-picture" style="background-image: url(\'<%= user_thumbnail %>\')"></a>' +
+            '<div class="content-panel-body-listing-item-label-fold"></div>' +
+            '<div class="content-panel-body-listing-item-label"><%= type %></div>' +
+            '<a href="<%= url %>" class="content-panel-body-listing-item-anchor">' +
+                '<div class="content-panel-body-listing-item-thumbnail-wrapper">' +
+                    '<div class="content-panel-body-listing-item-favorites<% if (favorited){ %> favorited<% } %>"><%= favorites %></div>' +
+                    '<div class="content-panel-body-listing-item-thumbnail" style="background-image: url(\'<%= thumbnail %>\')"></div>' +
+                    '<div class="content-panel-body-listing-item-thumbnail-shadow"></div>' +
+                '</div>' +
+                '<div class="content-panel-body-listing-item-contents">' +
+                    '<div class="content-panel-body-listing-item-contents-caption"><%= title %></div><%= tags %>' +
+                    '<div class="content-panel-body-listing-item-contents-meta"><%= views %> views</div>' +
+                    '<div class="content-panel-body-listing-item-contents-description"><%= description %></div>' +
+                    '<% if (review_count !== 0) { %><div class="content-panel-body-listing-item-contents-reviews">' +
+                        '<div class="content-panel-body-listing-item-contents-review-count">' +
+                            '(<span class="content-panel-body-listing-item-contents-review-count-value"><%= review_count %></span>)' +
+                        '</div>' +
+                    '</div><% } %>' +
+                '</div>' +
+            '</a>' +
+        '</div>'),
+
+    events: function(){
+        var events = {
+            'click .content-panel-body-listing-item-favorites': 'favorite',
+            'mouseenter .content-panel-body-listing-item-user-picture': 'showUserTip',
+            'mouseleave .content-panel-body-listing-item-user-picture': 'hideUserTip'
+        };
+        if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog))
+            _.extend(events, {
+                'mouseenter .content-panel-body-listing-item-anchor': 'expand',
+                'mouseleave .content-panel-body-listing-item-anchor': 'collapse'
+            });
+        return events;
     },
 
     expand: function () {
@@ -583,6 +678,10 @@ var ResourceView = Backbone.View.extend({
         }
         this.$starsView = starsView;
 
+        // Set style of template (thumbnail or banner).
+        this.template = (!OC.categoryResources.isSubjectHome && (
+            !OC.categoryResources.isCatalog)) ? this.bannerTemplate : this.thumbnailTemplate;
+
         this.listenTo(this.model, "change", this.render);
     },
 
@@ -595,8 +694,13 @@ var ResourceView = Backbone.View.extend({
         modelJSON = this.model.toJSON();
         modelJSON['tags'] = String(this.$tagsView[0].outerHTML);
 
-        modelJSON['title'] = this.getTrucatedTitle();
-        modelJSON['description'] = this.getTrucatedDescription();
+        if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)) {
+            modelJSON['title'] = this.getTrucatedTitle();
+            modelJSON['description'] = this.getTrucatedDescription();
+        } else {
+            modelJSON['description'] = this.model.get(
+                'description') === '' ? 'No description found.' : this.model.get('description');
+        }
 
         this.$el.html(this.template(modelJSON));
         
@@ -754,8 +858,9 @@ function repopulateResources(target, resourceCollectionView) {
     var collectionToRender = filterResources(filteredCollection);
 
     // Recreate the view (clears previous view)
-    //resourceCollectionView.render(collectionToRender);
-    reset(collectionToRender);
+    if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)
+        resourceCollectionView.render(collectionToRender);
+    else reset(collectionToRender);
 }
 
 function filterInitialResources(collection){
@@ -915,45 +1020,75 @@ function init_mvc() {
         } else {
             filteredCollection.sortByPopularity();
         }
-
-        reset(filteredCollection);
+        
+        if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)
+            resourceCollectionView.render(filteredCollection);
+        else reset(filteredCollection);
     });
 
-    // Bind text input field as filter.
-    $('.content-panel-body-listing-filters-search input').keyup(function(event){
-        var currentInput = $(this).val(),
-            loadButton = $('.lazy-load-button');
+    var typeTabFilter = $('.content-panel-body-listing-types');
+    if (typeTabFilter.length > 0){
+        $('.content-panel-body-listing-types ul li a').click(function(event){
+            var currentTypeElement = $(event.target),
+                currentType = currentTypeElement.parents('li').attr('name');
 
-        // Re-render categories.
-        var collectionToRender = new ResourceSet(resourceSet.filter(function (resource) {
-            return (
-                resource.get('title').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1 ||
-                resource.get('description').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1 ||
-                _.filter(resource.get('tags'), function(tag){
-                    return tag.toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
-                }).length !== 0 ||
-                _.filter(resource.get('objectives'), function(objective){
-                    return objective.toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
-                }).length !== 0);
-        }));
+            $('.content-panel-body-listing-types ul li a').removeClass('current');
+            currentTypeElement.addClass('current');
 
-        // Recreate the view (clears previous view)
-        /*resourceCollectionView.render(collectionToRender);
-        resourceCollectionView.initialize();*/
+            if (currentType === 'all')
+                filters['type'] = [];
+            else {
+                var otherTypes = _.map($('.content-panel-body-listing-types ul li'), function(type){
+                    return $(type).attr('name');
+                });
 
-        if (currentInput.length > 0) {
-            if (loadButton.length > 0) {
-                loadButton.addClass('hide');
-                loadButton.removeClass('enabled');
+                otherTypes.splice(otherTypes.indexOf('all'), 1);
+                otherTypes.splice(otherTypes.indexOf(currentType), 1);
+                filters['type'] = otherTypes;
             }
 
-            // Hide the 'show more's from all categories. 
-            // categoryView.hideShowMores();
-            categoryView.truncateAll();
+            var collectionToRender = searchedResources ? searchedResources : filterResources(resourceSet);
 
-            // If there are categories that haven't been rendered yet.
-            //if (OC.categoryResources.currentCategoryID){
-                var loadingPlaceholder = $('.filter-search-placeholder');
+            resourceCollectionView.render(collectionToRender);
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+    }
+
+    // Bind text input field as filter.
+    if (!OC.categoryResources.isSubjectHome){
+        $(OC.config.search.input).keyup(function(event){
+            var currentInput = $(this).val(),
+                loadButton = $('.lazy-load-button');
+
+            // Re-render categories.
+            var collectionToRender = new ResourceSet(resourceSet.filter(function (resource) {
+                return (
+                    resource.get('title').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1 ||
+                    resource.get('description').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1 ||
+                    _.filter(resource.get('tags'), function(tag){
+                        return tag.toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+                    }).length !== 0 ||
+                    _.filter(resource.get('objectives'), function(objective){
+                        return objective.toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+                    }).length !== 0);
+            }));
+
+            var loadingPlaceholder = $('.filter-search-placeholder');
+
+            if (currentInput.length > 0) {
+                if (loadButton.length > 0) {
+                    loadButton.addClass('hide');
+                    loadButton.removeClass('enabled');
+                }
+
+                if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog))
+                    // Hide the 'show more's from all categories. 
+                    categoryView.truncateAll();
+
+                // If there are categories that haven't been rendered yet.
                 loadingPlaceholder.addClass('show');
 
                 // Calculate time since last key entered.
@@ -982,37 +1117,42 @@ function init_mvc() {
                                 if (response.status == 'true'){
                                     var keys = Object.keys(response.resources);
 
-                                    // Clear nothing found message, if nothing in original collection.
-                                    if (collectionToRender.length === 0 && keys.length === 0)
-                                        categoryView.showNullView();
+                                    if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog){
+                                        if (resourceCollectionView.collection.length === 0 && (
+                                            keys.length === 0))
+                                            resourceCollectionView.showNullView();
 
-                                    else if (collectionToRender.length === 0)
-                                        categoryView.clearView();
+                                        else if (resourceCollectionView.collection.length === 0)
+                                            resourceCollectionView.clearView();
 
-                                    /*if (resourceCollectionView.collection.length === 0 && (
-                                        keys.length === 0))
-                                        resourceCollectionView.showNullView();
+                                    } else {
+                                        // Clear nothing found message, if nothing in original collection.
+                                        if (collectionToRender.length === 0 && keys.length === 0)
+                                            categoryView.showNullView();
 
-                                    else if (resourceCollectionView.collection.length === 0)
-                                        resourceCollectionView.clearView();*/
-
+                                        else if (collectionToRender.length === 0)
+                                            categoryView.clearView();
+                                    }
+                                    
                                     for (i = 0; i < keys.length; i++){
                                         resource = response.resources[keys[i]];
                                         resourceModel = new Resource(resource);
-
-                                        /*resourceCollectionView.collection.add(
-                                            resourceModel);*/
+                                        
+                                        if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)
+                                            resourceCollectionView.collection.add(resourceModel);
 
                                         // If the resource isn't in the resource set.
-                                        collectionToRender.add(resourceModel);
+                                        else collectionToRender.add(resourceModel);
+                                        
                                         resourceSet.add(resourceModel);
                                     }
 
-                                    reset(filterResources(collectionToRender));
+                                    if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)){
+                                        reset(filterResources(collectionToRender));
+                                        categoryView.truncateAll();
+                                    }
+                                    
                                     searchedResources = collectionToRender;
-
-                                    categoryView.truncateAll();
-                                    //categoryView.hideShowMores();
                                 }
                                 else {
                                     OC.popup(response.message, response.title);
@@ -1025,32 +1165,41 @@ function init_mvc() {
                     OC.categoryResources.filterAsyncSearchOn = true;
                 }
                 OC.categoryResources.lastInputTimestamp = currentTime;
-            //}
-        } else {
-            clearTimeout(OC.categoryResources.searchFilterTimeout);
-            if (loadButton.length > 0) {
-                loadButton.removeClass('hide');
-                loadButton.addClass('enabled');
+            } else {
+                clearTimeout(OC.categoryResources.searchFilterTimeout);
+                if (loadButton.length > 0) {
+                    loadButton.removeClass('hide');
+                    loadButton.addClass('enabled');
+                }
+                OC.categoryResources.filterAsyncSearchOn = false;
+                loadingPlaceholder.removeClass('show');
+
+                try {
+                    categoryView.resetTruncate();
+                    // Show the 'show more's from all categories.
+                    categoryView.showShowMores();
+
+                } catch(e){}
+
+                searchedResources = null;
             }
-            OC.categoryResources.filterAsyncSearchOn = false;
-            categoryView.resetTruncate();
+            
+            // Recreate the view (clears previous view)
+            if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog){
+                resourceCollectionView.render(filterResources(collectionToRender));
+                resourceCollectionView.initialize();
+            } else reset(filterResources(collectionToRender));
+            
+            searchedResources = collectionToRender;
 
-            searchedResources = null;
+            // Filter the requests.
+            var requestsToRender = new RequestSet(requestSet.filter(function (request) {
+                return request.get('body').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+            }));
+            requestCollectionView.render(requestsToRender);
 
-            // Show the 'show more's from all categories.
-            categoryView.showShowMores();
-        }
-        
-        reset(filterResources(collectionToRender));
-        searchedResources = collectionToRender;
-
-        // Filter the requests.
-        var requestsToRender = new RequestSet(requestSet.filter(function (request) {
-            return request.get('body').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
-        }));
-        requestCollectionView.render(requestsToRender);
-
-    });
+        });
+    }
 }
 
 function filterClickHandler(event){
@@ -1094,29 +1243,33 @@ function groupResources(collection){
 }
 
 jQuery(document).ready(function($){
-     OC.categoryResources.setVisibleResourceCount();
+    if (!OC.categoryResources.isSubjectHome){
+        OC.categoryResources.setVisibleResourceCount();
 
-    // Construct collection views using the resources and requests objects built in
-    //if (OC.categoryResources.isCatalog){
-    reset(filterInitialResources(resourceSet));
-    //} else {
-    //    resourceCollectionView = new ResourceCollectionView({collection: resourceSet});
-    //    resourceCollectionView.render();
-    //}
+        // Construct collection views using the resources and requests objects built in
+        if (OC.categoryResources.isCatalog){
+            reset(filterInitialResources(resourceSet));
+        } else {
+            resourceCollectionView = new ResourceCollectionView({collection: resourceSet});
+            resourceCollectionView.render();
+        }
 
-    requestCollectionView = new RequestCollectionView({
-        collection: requestSet,
-        requestURL: requestURL
-    });
+        requestCollectionView = new RequestCollectionView({
+            collection: requestSet,
+            requestURL: requestURL
+        });
 
-    // Render the collection views
-    requestCollectionView.render();
+        // Render the collection views
+        requestCollectionView.render();
 
-    // Initiatialize the Backbone models/collection/view
-    init_mvc();
+        $(OC.config.search.input).autocomplete('disable');
 
-    // Initialize loading more resources on scroll down.
-    OC.categoryResources.initInfiniteScroll();
+        // Initiatialize the Backbone models/collection/view
+        init_mvc();
+
+        // Initialize loading more resources on scroll down.
+        OC.categoryResources.initInfiniteScroll();
+    }
 
     OC.categoryResources.initBrowseView();
 });

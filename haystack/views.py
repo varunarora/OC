@@ -260,6 +260,11 @@ class SanitizedSearchView(SearchView):
 
         (paginator, page) = self.build_page()
 
+        from interactions.models import Favorite
+        from oer.models import Resource
+        from django.contrib.contenttypes.models import ContentType
+        resource_ct = ContentType.objects.get_for_model(Resource)
+
         for result in page.object_list:
             try:
                 import re
@@ -267,6 +272,9 @@ class SanitizedSearchView(SearchView):
                 result.object.revision.body_markdown_html = re.sub("\s+", ' ', result.object.revision.body_markdown_html.strip())
             except:
                 pass
+
+                result.object.favorites_count = Favorite.objects.filter(
+                    parent_id=result.object.id, parent_type=resource_ct).count()
 
         # For all resource outputs, assign the type.
         import oer.CollectionUtilities as cu

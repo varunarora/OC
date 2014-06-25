@@ -24,8 +24,13 @@ def browse(request, category_slug):
 
     # Determine the depth to figure out what level of page needs to be displayed.
     import meta.CategoryUtilities as catU
+    is_common_core_hosted = True
+    is_subject_home = False
+
     try:
         host_category = Category.objects.get(slug=categories_slugs[0])
+        if categories_slugs != 'common-core':
+            is_common_core_hosted = False
 
         (host_browse_tree, host_flattened_tree) = catU.build_child_categories(
             {'root': [host_category]}, [])
@@ -62,6 +67,9 @@ def browse(request, category_slug):
             else:
                 return_url = reverse('browse_default')
 
+        if len(categories_slugs) == 2:
+            is_subject_home = True
+
     except Exception, e:
         from django.core.mail import mail_admins
         mail_admins('Browse failed to render category', str(e) + category_slug)
@@ -85,39 +93,90 @@ def browse(request, category_slug):
             }
         )
 
-    # Fetch the resources in the current category and everything nested within.
-    #(current_browse_tree, current_flattened_tree) = catU.build_child_categories(
-    #    {'root': [selected_category]}, [])
+    from meta.models import Tag, TagCategory
 
-    # Determine if this is a catalog page or not.
-    grand_children_categories = Category.objects.filter(parent__in=child_categories)
-    if grand_children_categories.count() > 0:
-        is_catalog = True
+    resource_type_tag_category = TagCategory.objects.get(title='Resource type')
+    for category in child_categories:
+        category.count = Resource.objects.filter(category=category, tags__in=Tag.objects.filter(
+            category=resource_type_tag_category)).order_by('-created').count(
+            ) + Resource.objects.filter(tags__in=category.tags.all(
+            )).filter(tags__in=Tag.objects.filter(category=resource_type_tag_category)).order_by('-created').count()
+
+    if not is_subject_home:
+        # Fetch the resources in the current category and everything nested within.
+        #(current_browse_tree, current_flattened_tree) = catU.build_child_categories(
+        #    {'root': [selected_category]}, [])
+
+        # Determine if this is a catalog page or not.
+        """grand_children_categories = Category.objects.filter(parent__in=child_categories)
+        if grand_children_categories.count() > 0:
+            is_catalog = True
+        else:
+            is_catalog = False"""
+        if Category.objects.filter(parent=selected_category).order_by('position').count() > 0:
+            is_catalog = True
+        else:
+            is_catalog = False
+        #(all_resources, all_collections, current_category_id) = get_category_tree_resources_collections(
+        #    current_flattened_tree, request.user)
+
+        if len(child_categories) == 0:
+            (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections_catalog(
+                [current_category], request.user, is_common_core_hosted)
+        else:
+            (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections_catalog(
+                child_categories, request.user, is_common_core_hosted)
+
+        from django.contrib.contenttypes.models import ContentType
+
+        requests = []
+        try:
+            # Fetch all requests in the selected category.
+            from projects.models import Project
+            project_ct = ContentType.objects.get_for_model(Project)
+            category_group = Project.objects.get(pk=settings.CATEGORY_GROUPS[selected_category.id])
+
+            from interactions.models import Comment
+            requests = Comment.objects.filter(
+                category__slug='requests', parent_id=category_group.id,
+                parent_type=project_ct.id
+            )
+        except KeyError:
+            category_group = None
+
+            # Get all the categories from the resources rendered, and then order.
+        category_tags_unsorted = set()
+        if not is_catalog:
+            for resource in all_resources:
+                category_tags_unsorted |= set(resource.filtered_tags)
+
+        category_tags = sorted(list(category_tags_unsorted), key=lambda c: c.title)
+
+        child_categories_map = None
+
     else:
-        is_catalog = False
+        all_resources = []
+        all_collections = []
+        category_tags = None
+        requests = None
+        category_group = None
+        is_catalog = True
+        current_category_id = current_category.id
 
-    #(all_resources, all_collections, current_category_id) = get_category_tree_resources_collections(
-    #    current_flattened_tree, request.user)
+        child_categories_map = {}
+        for child_category in child_categories:
+            child_category_children = Category.objects.filter(
+                parent=child_category).order_by('position')
+            
+            for category in child_category_children:
+                breadcrumb = catU.build_breadcrumb(category)
+                category.url = reverse(
+                    'browse', kwargs={
+                        'category_slug': breadcrumb[0].url
+                }
+            )
 
-    (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections_catalog(
-        child_categories, request.user)
-
-    from django.contrib.contenttypes.models import ContentType
-
-    requests = []
-    try:
-        # Fetch all requests in the selected category.
-        from projects.models import Project
-        project_ct = ContentType.objects.get_for_model(Project)
-        category_group = Project.objects.get(pk=settings.CATEGORY_GROUPS[selected_category.id])
-
-        from interactions.models import Comment
-        requests = Comment.objects.filter(
-            category__slug='requests', parent_id=category_group.id,
-            parent_type=project_ct.id
-        )
-    except KeyError:
-        pass
+            child_categories_map[child_category.id] = child_category_children
 
     # Build breadcrumb for selected category.
     breadcrumb = catU.build_breadcrumb(selected_category)[1:-1]
@@ -133,14 +192,6 @@ def browse(request, category_slug):
     # Set the URL for the current page for redirect situations.
     selected_category.url = request.path
 
-    # Get all the categories from the resources rendered, and then order.
-    category_tags_unsorted = set()
-    if not is_catalog:
-        for resource in all_resources:
-            category_tags_unsorted |= set(resource.filtered_tags.all())
-
-    category_tags = sorted(list(category_tags_unsorted), key=lambda c: c.title)
-
     context = {
         'title': 'Browse lessons, projects, activities, worksheets &amp; tests',
         'selected_category': selected_category,
@@ -152,6 +203,7 @@ def browse(request, category_slug):
         'requests': requests,
         'category_group': category_group,
         'is_catalog': is_catalog,
+        'child_categories_map': child_categories_map,
         'category_tags': category_tags,
         'current_category_id': current_category_id,
         'breadcrumb': breadcrumb
@@ -209,18 +261,19 @@ def get_category_tree_resources_collections(current_flattened_tree, user):
     return (all_resources, all_collections, current_category_id)
 
 
-def get_category_tree_resources_collections_catalog(child_categories, user):
+def get_category_tree_resources_collections_catalog(child_categories, user, is_common_core_hosted):
     all_resources = []
     all_raw_resources = []
     all_collections = []
     all_raw_collections = []
     current_category_id = None
 
-    from meta.models import Tag, TagCategory
+    from meta.models import Tag, TagCategory, TagMapping
 
     # Get the top 10 resources of each child category.
     for category in child_categories:
-        category_resources = Resource.objects.filter(category=category).order_by('-created')[:6]
+        category_resources = Resource.objects.filter(category=category, tags__in=Tag.objects.filter(category=TagCategory.objects.get(
+                    title='Resource type'))).order_by('-created')[:6]
         category_resources_count = category_resources.count()
 
         if category_resources_count < 6:
@@ -228,7 +281,31 @@ def get_category_tree_resources_collections_catalog(child_categories, user):
                 )).filter(tags__in=Tag.objects.filter(category=TagCategory.objects.get(
                     title='Resource type'))).order_by('-created')[:6 - category_resources_count]
 
-            unordered_category_tagged_resources = list(set(list(category_resources) + list(tagged_resources)))
+            # If this is a category that support mapped resources, fetch mapped content.
+            if is_common_core_hosted:
+                tag_mapped_resources = Resource.objects.none()
+            else:
+                mapped_tags = Tag.objects.none()
+                tag_mappings = TagMapping.objects.none()
+                for category_tag in category.tags.all():
+                    tag_mapping = TagMapping.objects.filter(from_node=category_tag)
+                    tag_mappings |= tag_mapping
+
+                    category_mapped_tags = tag_mapping.values('to_node')
+                    mapped_tags |= category_mapped_tags  #map((lambda x: x.to_node), category_mapped_tags)
+
+                tag_mapped_resources = Resource.objects.filter(tags__in=mapped_tags).filter(tags__in=Tag.objects.filter(category=TagCategory.objects.get(
+                        title='Resource type'))).order_by('-created')[:6 - category_resources_count]
+
+                for resource in tag_mapped_resources:
+                    # For each tag, if there is a tag mapping, use - else ignore the tag.
+                    filtered_tags = resource.tags.filter(
+                        category=TagCategory.objects.get(title='Standards'))
+
+                    resource.filtered_tags = [mapping.from_node for mapping in tag_mappings if (mapping.to_node in list(filtered_tags))]
+
+            unordered_category_tagged_resources = list(set(list(category_resources) + list(
+                tagged_resources) + list(tag_mapped_resources)))
  
             category_tagged_resources = sorted(
                 unordered_category_tagged_resources, key=lambda resource: resource.created, reverse=True)
@@ -277,8 +354,10 @@ def build_browse_resource(resource, user):
     resource.type = resource.tags.get(
         category=TagCategory.objects.get(title='Resource type'))
     resource.item_type = 'resource'
-    resource.filtered_tags = resource.tags.exclude(
-        category=TagCategory.objects.get(title='Resource type'))
+    if not hasattr(resource, 'filtered_tags'):
+        resource.filtered_tags = resource.tags.exclude(
+            category=TagCategory.objects.get(title='Resource type')).all()
+
     try:
         resource.favorited = Favorite.objects.get(
             parent_id=resource.id, parent_type=resource_ct, user=user) != None

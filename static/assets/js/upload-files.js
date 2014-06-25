@@ -334,7 +334,7 @@ $(document).ready(function() {
     OC.upload.isPost = $('form.files-upload-rename input[name="post"]').val() == "true";
 
     // Prevent form being submitted on hitting enter
-    $('form').bind('keypress', function (e) {
+    $('form.files-upload-rename ').bind('keypress', function (e) {
         if (e.keyCode === 13) {
             e.preventDefault();
         }
