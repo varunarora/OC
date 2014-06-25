@@ -20,7 +20,7 @@ class AttachmentUtilities:
             req = httplib.HTTPConnection(settings.SERVICES_HOST, 8888)
             req.connect()
             
-            params = urllib.urlencode({'url': 'http://' + settings.SITE_HOST + settings.MEDIA_URL + resource.revision.content.file.name})
+            params = urllib.urlencode({'url': settings.MEDIA_URL + resource.revision.content.file.name})
 
             req.request('POST', '/render', params)
             response = req.getresponse()
