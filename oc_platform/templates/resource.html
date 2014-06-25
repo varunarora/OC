@@ -21,7 +21,7 @@
 	</form>
 
 	{% if resource.revision.content_type.name == "attachment" %}
-		{% include 'partials/oer-attachment.html' %}
+	   	{% include 'partials/oer-attachment.html' %}
 	{% elif resource.revision.content_type.name == "link" %}
 		{% include 'partials/oer-url.html' %}
 	{% elif resource.revision.content_type.name == "document" %}

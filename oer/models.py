@@ -5,6 +5,7 @@ from meta.models import Language
 from articles.jsonfield.fields import JSONField
 from articles.MarkdownTextField import MarkdownTextField
 from ResourceThumbnail import ResourceThumbnail
+from AttachmentUtilities import AttachmentUtilities
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.dispatch import Signal
@@ -76,8 +77,21 @@ def generate_thumnbnail(sender, instance, created, raw, **kwargs):
         post_save.connect(generate_thumnbnail, sender=Resource)
 
 
+def generate_rendered_attachment(sender, instance, created, raw, **kwargs):
+    from django.contrib.contenttypes.models import ContentType
+    attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+    if created and instance.revision.content_type == attachment_content_type:
+        AttachmentUtilities.render_attachment(instance)
+        # Now disconnect the dispatcher
+        post_save.disconnect(generate_rendered_attachment, sender=Resource)
+        instance.save()
+        # Connect it again
+        post_save.connect(generate_rendered_attachment, sender=Resource)
+
 from django.db.models.signals import post_save
 post_save.connect(generate_thumnbnail, sender=Resource)
+post_save.connect(generate_rendered_attachment, sender=Resource)
 
 
 class ResourceMeta(models.Model):
@@ -151,6 +165,7 @@ class Link(models.Model):
 
 class Attachment(models.Model):
     file = models.FileField(upload_to='resources', max_length=256, null=True, blank=True)
+    rendered_file = models.FileField(upload_to='rendered_resources', max_length=256, null=True, blank=True)
 
 
 class Unit(models.Model):

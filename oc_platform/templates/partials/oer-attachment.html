@@ -1,5 +1,4 @@
-{% if resource.extension == '.pdf' %}
-
+{% if resource.extension == '.pdf' or resource.extension == '.doc' or resource.extension == '.docx' %}
 	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL}}css/viewer.css"/>
 
 	<link rel="resource" type="application/l10n" href="{{ STATIC_URL}}js/pdfjs/locale/locale.properties"/>
@@ -11,7 +10,7 @@
 	  PDFJS.workerSrc = '{{ STATIC_URL }}js/pdfjs/pdf.worker.js';
 	  PDFJS.cMapUrl = '../web/cmaps/';
 
-	var DEFAULT_URL = '{{ MEDIA_URL }}{{ resource.revision.content.file.name }}',
+	var DEFAULT_URL = {% if resource.extension == '.pdf' %}'{{ MEDIA_URL }}{{ resource.revision.content.file.name }}'{% else %}'{{ MEDIA_URL }}{{ resource.revision.content.rendered_file.name }}'{% endif %},
 		CSS_UNITS = 1;
 	</script>
 
