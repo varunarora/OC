@@ -17,10 +17,10 @@ class AttachmentUtilities:
 
         if ext == ".doc" or ext == ".docx":
             # Init a POST request to services to convert to PDF.
-            req = httplib.HTTPConnection('localhost', 8888)
+            req = httplib.HTTPConnection(settings.SERVICES_HOST, 8888)
             req.connect()
             
-            params = urllib.urlencode({'url': 'http://localhost:8000' + settings.MEDIA_URL + resource.revision.content.file.name})
+            params = urllib.urlencode({'url': 'http://' + settings.SITE_HOST + settings.MEDIA_URL + resource.revision.content.file.name})
 
             req.request('POST', '/render', params)
             response = req.getresponse()
