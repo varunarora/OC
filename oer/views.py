@@ -122,7 +122,7 @@ def browse(request, category_slug):
 
         if len(child_categories) == 0:
             (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections_catalog(
-                [current_category], request.user, is_common_core_hosted)
+                [current_category], request.user, is_common_core_hosted, is_catalog)
         else:
             (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections_catalog(
                 child_categories, request.user, is_common_core_hosted, is_catalog)
