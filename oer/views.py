@@ -125,7 +125,7 @@ def browse(request, category_slug):
                 [current_category], request.user, is_common_core_hosted)
         else:
             (all_resources, all_collections, current_category_id) = get_category_tree_resources_collections_catalog(
-                child_categories, request.user, is_common_core_hosted)
+                child_categories, request.user, is_common_core_hosted, is_catalog)
 
         from django.contrib.contenttypes.models import ContentType
 
@@ -261,7 +261,7 @@ def get_category_tree_resources_collections(current_flattened_tree, user):
     return (all_resources, all_collections, current_category_id)
 
 
-def get_category_tree_resources_collections_catalog(child_categories, user, is_common_core_hosted):
+def get_category_tree_resources_collections_catalog(child_categories, user, is_common_core_hosted, is_catalog):
     all_resources = []
     all_raw_resources = []
     all_collections = []
@@ -272,14 +272,17 @@ def get_category_tree_resources_collections_catalog(child_categories, user, is_c
 
     # Get the top 10 resources of each child category.
     for category in child_categories:
-        category_resources = Resource.objects.filter(category=category, tags__in=Tag.objects.filter(category=TagCategory.objects.get(
-                    title='Resource type'))).order_by('-created')[:6]
+        category_resources_uncapped = Resource.objects.filter(category=category, tags__in=Tag.objects.filter(category=TagCategory.objects.get(
+                    title='Resource type'))).order_by('-created')
+        category_resources = category_resources_uncapped[:6] if is_catalog else category_resources_uncapped
+
         category_resources_count = category_resources.count()
 
-        if category_resources_count < 6:
-            tagged_resources = Resource.objects.filter(tags__in=category.tags.all(
+        if (is_catalog and category_resources_count < 6) or not is_catalog:
+            tagged_resources_uncapped = Resource.objects.filter(tags__in=category.tags.all(
                 )).filter(tags__in=Tag.objects.filter(category=TagCategory.objects.get(
-                    title='Resource type'))).order_by('-created')[:6 - category_resources_count]
+                    title='Resource type'))).order_by('-created')
+            tagged_resources = tagged_resources_uncapped[:6 - category_resources_count] if is_catalog else tagged_resources_uncapped
 
             # If this is a category that support mapped resources, fetch mapped content.
             if is_common_core_hosted:
@@ -294,8 +297,10 @@ def get_category_tree_resources_collections_catalog(child_categories, user, is_c
                     category_mapped_tags = tag_mapping.values('to_node')
                     mapped_tags |= category_mapped_tags  #map((lambda x: x.to_node), category_mapped_tags)
 
-                tag_mapped_resources = Resource.objects.filter(tags__in=mapped_tags).filter(tags__in=Tag.objects.filter(category=TagCategory.objects.get(
+                tag_mapped_resources_uncapped = Resource.objects.filter(tags__in=mapped_tags).filter(tags__in=Tag.objects.filter(category=TagCategory.objects.get(
                         title='Resource type'))).order_by('-created')[:6 - category_resources_count]
+                tag_mapped_resources = tag_mapped_resources_uncapped[:6 - (
+                    category_resources_count + tagged_resources.count())] if is_catalog else tag_mapped_resources_uncapped
 
                 for resource in tag_mapped_resources:
                     # For each tag, if there is a tag mapping, use - else ignore the tag.
