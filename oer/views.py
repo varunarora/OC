@@ -1636,7 +1636,7 @@ def delete_individual_resource(resource):
 
     from interactions.models import CommentReference, Comment, Favorite
 
-    for revision in revisions:
+    for revision in revisions[:]:
         if revision.content_type == document_content_type:
             document_elements = DocumentElement.objects.filter(
                 document=revision.content
@@ -1650,8 +1650,6 @@ def delete_individual_resource(resource):
         elif (revision.content_type == link_content_type or 
             revision.content_type == attachment_content_type):
                 revision.content.delete()
-
-        revision.delete()
 
         # Delete the comments & comment references on this revision.
 
@@ -1676,6 +1674,9 @@ def delete_individual_resource(resource):
 
         for revision_comment in revision_comments:
             revision_comment.delete()
+
+        revision.delete()
+
 
     # Delete all the comments on this document.
     resource_comments = Comment.objects.filter(
@@ -3398,7 +3399,7 @@ def load_resources(request, collection_id, resource_count):
 
         # Run through general visibility filter
         if resource.visibility != 'public':
-            if request.user != collection_root and request.user not in resource.collaborators.all():
+            if request.user != collection_root.user and request.user not in resource.collaborators.all():
                 continue
 
         visibility_classes = ''
