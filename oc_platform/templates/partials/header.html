@@ -53,8 +53,8 @@
 							<form method="GET" action="/search" id="search-form">
 								<input type="search" name="q" title="Search">
 								<input type="submit" value="" />
-								<div class="search-options-button"></div>
-								<div class="search-options"></div>
+								<!--<div class="search-options-button"></div>
+								<div class="search-options"></div>-->
 							</form>
 						</hgroup>
 						<hgroup id="header-right">
@@ -64,6 +64,7 @@
 				</div>
 			</div>
 		</header>
+		{% elif body_class == 'index' %}
 		{% else %}
 		<header>
 			<div id="header-prebanner"></div>
@@ -75,8 +76,8 @@
 								<form method="GET" action="/search" id="search-form">
 									<input type="search" name="q" title="Search">
 									<input type="submit" value="" />
-									<div class="search-options-button"></div>
-									<div class="search-options"></div>
+									<!--<div class="search-options-button"></div>
+									<div class="search-options"></div>-->
 								</form>
 							</hgroup>
 						</div>

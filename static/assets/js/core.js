@@ -390,6 +390,37 @@ _.extend(OC, {
 
     },
 
+    setupIndex: function(){
+        var homePanel = $('#chief-panel-container.home');
+
+        if (homePanel.length > 0){
+            var homePanelHeight = $(window).height() - 100;
+            homePanel.height(homePanelHeight);
+
+            $('.blog-highlight').css({
+                top: homePanelHeight - $('.blog-highlight').outerHeight(true)
+            });
+
+            // Set the top blogpost.
+            $.ajax({ type: 'GET', dataType: 'xml',
+                url: "http://blog.opencurriculum.org/feed/rss/",
+                success: function(response) {
+                    var topEntry = $(response).find('item:first'),
+                        entryTitle = $(topEntry).find('title').text(),
+                        entryURL = $(topEntry).find('link').text();
+
+                    $('.blog-highlight-title').text(entryTitle);
+                    $('.blog-highlight-title').attr('href', entryURL);
+
+                    $('.blog-highlight').fadeIn('slow');
+                },
+            });
+
+            OC.renderIndexAnimation();
+        }
+
+    },
+
     /* Beginning of functionality that may be moved into modules */
 
     /**
@@ -413,7 +444,6 @@ _.extend(OC, {
             setTimeout(function(){
                 animationID = animate();
             }, 5000);
-            console.log(animationID);
         }
 
         function animate(){
@@ -4513,7 +4543,7 @@ jQuery(document).ready(function ($) {
 
     OC.initMessageBox();
 
-    OC.renderIndexAnimation();
+    OC.setupIndex();
 
     OC.initBrowse();
 

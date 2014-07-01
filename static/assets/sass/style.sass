@@ -140,7 +140,7 @@ header.wide-header
 @import "search_bar"
 @import "scaffolds"
 
-body.browse
+body.browse, body.index
 	> header
 		background-color: #333
 		height: $header-height - 7
@@ -159,6 +159,27 @@ body.browse
 		input[type="search"]
 			border: 1px solid #333
 			font-size: 1.2em
+			border: 1px solid #fff
+
+body.index
+	nav#authenticate-buttons, nav#user-buttons
+		> ul
+			> li
+				a
+					&:hover, &.hover
+						background-color: #5abd02
+
+	#search-bar
+		input[type="search"]
+			background-color: transparent
+			color: #fff
+
+			&:focus
+				border-color: #5abd02
+
+		input[type=submit]
+			background-color: transparent
+
 
 footer
 	font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif

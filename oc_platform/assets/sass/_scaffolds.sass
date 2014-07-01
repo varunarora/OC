@@ -89,7 +89,7 @@ $chief-panel-height: 550px
 		margin-top: 20px
 
 	&.home-teaser
-		margin-bottom: 60px
+		margin-bottom: 100px
 
 		h2
 			color: #5abd02
@@ -103,6 +103,10 @@ $chief-panel-height: 550px
 
 			&.no-border
 				border-width: 0px
+
+		p
+			line-height: 1.6em
+			color: $light-font
 
 	&.testimonial-wrapper
 		text-align: center
@@ -201,7 +205,7 @@ $chief-panel-height: 550px
 #chief-panel-container.home
 	height: $chief-panel-height
 	background-color: #000
-	background-image: url('../images/home_bg_2.jpg')
+	background-image: url('../images/home-cover-2.jpg')
 	background-repeat: no-repeat
 	background-position: top center
 	background-size: cover
@@ -225,7 +229,24 @@ $chief-panel-height: 550px
 			letter-spacing: -1px
 
 		p
-			color: #ddd
+			color: #fff
+			text-shadow: 0px 0px 12px rgba(0, 0, 0, 1)
+
+	.blog-highlight
+		height: 25px
+		background-color: #000
+		display: none
+		text-align: center
+		color: #fff
+		font-size: 1.2em
+		padding-top: 12px
+		background: url('../images/editor-search-background.png')
+		position: absolute
+		width: 100%
+
+		a
+			color: #fff
+
 
 #chief-panel-container.home #chief-panel, .home-teaser
 	p
