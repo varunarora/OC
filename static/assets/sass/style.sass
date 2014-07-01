@@ -61,7 +61,6 @@ body
 		display: block
 		height: $header-height
 		z-index: 3
-		position: relative
 		
 #header-prebanner
 	background-color: #5abd02
@@ -906,6 +905,10 @@ nav#share-menu, nav#download-menu
 nav#add-resource-menu
 	z-index: 5
 	width: 125px
+
+	&.popout
+		z-index: 12
+		position: absolute
 
 	.floating-menu-spacer
 		width: 140px
@@ -1897,6 +1900,10 @@ table
 
 .add-resource
 	width: 105px
+
+	&.popout
+		z-index: 12
+		position: absolute
 
 .page-action-button, .action-button, .collection-button
 	padding: 10px
@@ -3007,6 +3014,9 @@ aside.page-menu-wrapper
 
 .review-comment-dialog
 	width: 500px
+
+.user-welcome-dialog
+	width: 350px
 
 .add-collaborator-wrapper
 	overflow: hidden
@@ -4463,7 +4473,7 @@ table#edit-unit-form-table
 							margin-top: 20px
 
 				.content-panel-body-header
-					height: 30px
+					min-height: 30px
 					width: 92%
 
 					h3
@@ -4477,7 +4487,7 @@ table#edit-unit-form-table
 							overflow: hidden
 
 							&.show-share
-								height: 28px
+								min-height: 28px
 
 							h2
 								float: left
@@ -5249,6 +5259,103 @@ body.signup, body.login
 
 #viewerContainer
 	width: 1000px
+
+.signup-floaters
+	position: absolute
+	width: 100%
+	z-index: 11
+	top: 0px
+
+	&.hide
+		display: none
+
+.signup-steps-wrapper
+	height: 30px
+	top: 400px
+	position: relative
+	text-align: center
+
+	.signup-steps
+		.signup-step
+			color: #fff
+			height: 18px
+			width: 24px
+			@include border-radius(16px)
+			border: 1px solid #fff
+			display: inline-block
+			text-align: center
+			margin-right: 140px
+			padding-top: 6px
+
+			&.selected
+				background-color: #5ABD02
+				color: #fff
+				@include sans-bold
+				border-color: #5ABD02
+
+			&:last-child
+				margin-right: 0px
+
+			&.completed
+				background-color: #efefef
+				color: $light-font
+
+	.signup-steps-flow
+		background-image: url('../images/signup-flank.png')
+		background-repeat: repeat-x
+		width: 310px
+		position: relative
+		top: -22px
+		height: 24px
+		margin: auto
+		z-index: -1
+
+	&.hide
+		display: none
+
+.step-message
+	color: #fff
+	position: relative
+
+	.step-message-title
+		font-weight: bold
+		margin-bottom: 6px
+
+	//.step-message-body
+
+	&.hide
+		display: none
+
+.step-one-message, .step-three-message
+	width: 200px
+
+.step-two-message
+	width: 300px
+
+.signup-tour-buttons
+	margin-top: 20px
+
+	.signup-tour-primary-button, .signup-tour-secondary-button
+		@include border-radius(2px)
+
+		&:hover
+			@include box-shadow(0 0 2px rgba(0, 0, 0, 0.4))
+			color: $body-color
+
+	.signup-tour-primary-button
+		background-color: #fff
+		color: #666
+		border: 1px solid #fff
+		margin-left: 0px
+
+	.signup-tour-secondary-button
+		background-color: transparent
+		border: 1px solid #fff
+		opacity: 0.8
+
+		&:hover
+			background-color: #fff
+			opacity: 1
 
 /***** INTERNAL TOOLS *************/
 

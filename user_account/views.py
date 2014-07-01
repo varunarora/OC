@@ -60,9 +60,9 @@ def register(request):
 
         if user_creation_success:
             # Add message to confirm account.
-            from django.contrib import messages
-            messages.success(request, _(
-                settings.STRINGS['user']['register']['ACCOUNT_CREATE_SUCCESS']))
+            #from django.contrib import messages
+            #messages.success(request, _(
+            #    settings.STRINGS['user']['register']['ACCOUNT_CREATE_SUCCESS']))
         
             from django.contrib.auth import authenticate, login
             new_user = fields_context['new_user']
@@ -1713,3 +1713,22 @@ def social_availability(request, service, social_id):
 
     except:
         return APIUtilities._api_success()
+
+
+def onboard(request, tour, version_id):
+    from user_account.models import UserProfile
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        onboarding = user_profile.onboarding        
+        user_profile.onboarding = dict(onboarding.items() + {tour : 
+            {'status': True, 'version': version_id }}.items())
+
+        user_profile.save()
+
+        return APIUtilities._api_success()
+    except:
+        return APIUtilities._api_failure()

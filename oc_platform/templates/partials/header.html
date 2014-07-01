@@ -19,17 +19,21 @@
 		<script src="{{ STATIC_URL }}js/modernizr.js" type="text/javascript"></script>
 		<script src="{{ STATIC_URL }}js/jquery.tipsy.js" type="text/javascript"></script>
 		<script type="text/javascript" src="{{ STATIC_URL }}js/tag-it.min.js"></script>
+		<script type="text/javascript">
+			var OC = {
+				config: {
+					user: {
+						id: {% if user.is_authenticated %}'{{ user.id }}'{% else %}undefined{% endif %},
+						username: '{{ user.username }}',
+						name: '{{ user.first_name }}',
+						thumbnail: '{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}',
+						dob: '{{ user.get_profile.dob.year }}'
+					}
+				}
+			};
+		</script>
 		<script src="{{ STATIC_URL }}js/core.js" type="text/javascript"></script>
 		<script type="text/javascript">
-			OC.config.user = {
-				id: {% if user.is_authenticated %}'{{ user.id }}'{% else %}undefined{% endif %},
-				username: '{{ user.username }}',
-				thumbnail: '{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}'
-			}
-			{% if user.is_authenticated %}
-			ga('set', '&uid', {{ user.id }});
-			ga('set', 'dimension2', {{ user.get_profile.dob.year }});
-			{% endif %}
 		</script>
 
 		<link rel="icon" href="{{ STATIC_URL }}favicon.ico" type="image/x-icon"/>

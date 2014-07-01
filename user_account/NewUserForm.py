@@ -167,7 +167,8 @@ class NewUserProfileForm(ModelForm):
     """
     profile_pic_tmp = open(settings.MEDIA_ROOT + 'profile/' + 'default.jpg')
     social_id = forms.IntegerField(required=False)
-    social_service = forms.CharField(required=False)    
+    social_service = forms.CharField(required=False)
+    onboarding = forms.CharField(required=False)
     # gender = forms.BooleanField(required=True)
 
     def __init__(self, request, social_login, new_user, dob, social_id, social_service):
@@ -203,6 +204,8 @@ class NewUserProfileForm(ModelForm):
                 'social_id', social_id if social_login else None)
             newRequest.__setitem__(
                 'social_service', social_service if social_login else None)
+
+            newRequest.__setitem__('onboarding', '{"signup": {"status": true, "version": "0.1"}}')
 
             # Set profile picture default position.
             from media.models import ImagePosition

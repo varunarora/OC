@@ -11,6 +11,11 @@ from django.contrib.contenttypes import generic
 from django.core.urlresolvers import reverse
 from django.dispatch import Signal
 import user_account.NotificationUtilities as nu
+from articles.jsonfield.fields import JSONField
+
+def get_empty_onboarding():
+    import json
+    return json.loads('{"signup": {"status": false}}')
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -27,6 +32,7 @@ class UserProfile(models.Model):
     collection = models.ForeignKey('oer.Collection', null=True, blank=True)
     subscriptions = models.ManyToManyField('self', symmetrical=False,
         related_name="user_subscriptions", blank=True, null=True, through='Subscription')
+    onboarding = JSONField(default=get_empty_onboarding)
 
     def __unicode__(self):
         return self.user.username

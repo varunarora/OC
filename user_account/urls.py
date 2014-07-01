@@ -13,6 +13,7 @@ urlpatterns = patterns(
     url(r'^api/registeration-context/$', views.get_registration_context, name='get_registration_context'),
     url(r'^api/username-availability/(?P<username>\w+)/$', views.username_availability, name='username_availability'),
     url(r'^api/social-availability/(?P<service>\w+)/(?P<social_id>\d+)/$', views.social_availability, name='social_availability'),
+    url(r'^api/onboard/(?P<tour>\w+)/(?P<version_id>\d+\.\d+)/$', views.onboard, name='onboard'),
 
     url(r'^api/register-asynchronously/$', views.register_asynchronously, name='register_asynchronously'),
 

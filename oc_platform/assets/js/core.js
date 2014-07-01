@@ -3,66 +3,66 @@
 /*global jQuery, $, Modernizr, gapi, _*/
 /*jslint nomen: false */
 
-var OC = {
-    config: {
-        search: {
-            input: '#search-bar input[name=q]',
-            submit: '#search-bar input[type=submit]'
-        },
-        popup: {
-            id: 'default-popup',
-            width: 360
-        },
-        articlePanel: {
-            list: 'ul#article-panel',
-            item: 'ul#article-panel li'
-        },
-        article: {
-            redirectSelector: '#chapter-select, .revision-selector',
-            thermometer: '.thermometer-difficulty',
-            thermometerWrapper: '.thermometer-difficulty-wrapper',
-            image: '#article img'
-        },
-        catalog: {
-            filterInput: 'input[name=live-filter]',
-            filterList: '.category-article-panel',
-            categoryPanel: {
-                list: 'ul.category-article-panel',
-                item: 'ul.category-article-panel li'
-            }
-        },
-        about: {
-            jobsCarousel: '.jobs-image-rotator'
-        },
-        registration: {
-            fields: {
-                first_name: 'input[name=first_name]',
-                last_name: 'input[name=last_name]',
-                location: 'input[name=location]',
-                email: 'input[name=email]',
-                username: 'input[name=username]',
-                socialLogin: '.social-login-hide',
-                profilePicture: 'input[name=profile_pic]',
-                socialFlag: 'form#signup-form input[name=social_login]',
-                socialService: 'form#signup-form input[name=social_service]',
-                socialID: 'form#signup-form input[name=social_id]'
-            },
-            googleAuthURL: '/gauth/',
-            googleAuthResult: '.google-signin',
-            orWrapper: '.or-wrapper',
-            ToS: '#agree-terms-conditions',
-            signUpButtonID: 'signup-button'
-        },
-        invite: {
-            formSelector: 'form.signup',
-            formSpinner: '.form-spinner',
-            formError: '.form-error'
-        },
-        contentTypes: {
-            comment: ''
+_.extend(OC.config, {
+    search: {
+        input: '#search-bar input[name=q]',
+        submit: '#search-bar input[type=submit]'
+    },
+    popup: {
+        id: 'default-popup',
+        width: 360
+    },
+    articlePanel: {
+        list: 'ul#article-panel',
+        item: 'ul#article-panel li'
+    },
+    article: {
+        redirectSelector: '#chapter-select, .revision-selector',
+        thermometer: '.thermometer-difficulty',
+        thermometerWrapper: '.thermometer-difficulty-wrapper',
+        image: '#article img'
+    },
+    catalog: {
+        filterInput: 'input[name=live-filter]',
+        filterList: '.category-article-panel',
+        categoryPanel: {
+            list: 'ul.category-article-panel',
+            item: 'ul.category-article-panel li'
         }
     },
+    about: {
+        jobsCarousel: '.jobs-image-rotator'
+    },
+    registration: {
+        fields: {
+            first_name: 'input[name=first_name]',
+            last_name: 'input[name=last_name]',
+            location: 'input[name=location]',
+            email: 'input[name=email]',
+            username: 'input[name=username]',
+            socialLogin: '.social-login-hide',
+            profilePicture: 'input[name=profile_pic]',
+            socialFlag: 'form#signup-form input[name=social_login]',
+            socialService: 'form#signup-form input[name=social_service]',
+            socialID: 'form#signup-form input[name=social_id]'
+        },
+        googleAuthURL: '/gauth/',
+        googleAuthResult: '.google-signin',
+        orWrapper: '.or-wrapper',
+        ToS: '#agree-terms-conditions',
+        signUpButtonID: 'signup-button'
+    },
+    invite: {
+        formSelector: 'form.signup',
+        formSpinner: '.form-spinner',
+        formError: '.form-error'
+    },
+    contentTypes: {
+        comment: ''
+    }
+});
 
+_.extend(OC, {
     registerationSuccessCallback: '',
     signupDialog: null,
 
@@ -4048,6 +4048,330 @@ var OC = {
         s.parentNode.insertBefore(po, s);
     },
 
+    signupTour: function(){
+        var message, messageEl, signupFloaters, signupFloatersEl,
+            background = $('.popup-background'),
+            stepMessages = {
+                one: {
+                    title: 'Create lessons, units and folders of joy',
+                    body: 'Begin by creating a template-based lesson, or create a standards-aligned unit. ' +
+                        'Import existing content from Dropbox, Google Drive and other places to build folders for sharing.' +
+                        '<div class="signup-tour-buttons"><div class="action-button mini-action-button signup-tour-primary-button">' +
+                        'Next &#187;</div><div class="action-button mini-action-button signup-tour-secondary-button">Cancel</div></div>'
+                },
+
+                two: {
+                    title: 'Search from what others are creating',
+                    body: 'Hundreds of teachers and content publishers are creating and sharing lessons, worksheets, videos, ' +
+                        'student handouts, and activities for you to use. Here is where your quest begins.' +
+                        '<div class="signup-tour-buttons"><div class="action-button mini-action-button signup-tour-primary-button">' +
+                        'Next &#187;</div><div class="action-button mini-action-button signup-tour-secondary-button">Cancel</div></div>'
+                },
+
+                three: {
+                    title: 'Does that look like you?',
+                    body: 'Begin your journey in OpenCurriculum with a new dashing photo of yours and a headline update. ' +
+                        'Let all others in the community know you have arrived and are here to stay :)' +
+                        '<div class="signup-tour-buttons"><div class="action-button mini-action-button signup-tour-primary-button">' +
+                        'Done</div></div>'
+                },
+            };
+
+        function setupDialog(){
+            var welcomeMessage = '<p>Wohoo! You are almost set. We sent you an email to ' +
+                'confirm your account. When you get a chance, please check your email and confirm the same.</p>' +
+                '<p>For now, please enjoy this little tour we put together for you.</p>' +
+                '<div class="user-welcome-submit-wrapper oc-popup-submit-wrapper"><button class="action-button ' +
+                'user-welcome-submit-button oc-popup-submit-button">Take the mini-tour &#187;</button></div>';
+
+            var welcomeDialogEl = $('<div/>', {
+                'class': 'user-welcome-dialog oc-popup'
+            }),
+                welcomeDialogTitleBarEl = $('<div/>', {
+                'class': 'oc-popup-title-bar'
+            }),
+                welcomeDialogTitleEl = $('<div/>', {
+                'class': 'oc-popup-title'
+            }),
+                welcomeDialogTitleHeaderEl = $('<h3/>', {
+                'text': 'Welcome, ' + OC.config.user.name
+            }),
+                welcomeDialogExitButtonEl = $('<div/>', {
+                'class': 'delete-button oc-popup-exit',
+            }),
+               welcomeDialogBodyEl = $('<div/>', {
+                'class': 'oc-popup-body',
+                'html': welcomeMessage
+            });
+
+            welcomeDialogTitleEl.append(welcomeDialogTitleHeaderEl);
+            welcomeDialogTitleBarEl.append(welcomeDialogTitleEl);
+            welcomeDialogTitleBarEl.append(welcomeDialogExitButtonEl);
+
+            welcomeDialogEl.append(welcomeDialogTitleBarEl);
+            welcomeDialogEl.append(welcomeDialogBodyEl);
+
+            $('body').append(welcomeDialogEl);
+
+            var welcomeDialog = OC.customPopup('.user-welcome-dialog'),
+                startTour = $('.user-welcome-submit-button', welcomeDialog.dialog);
+
+            startTour.click(function(event){
+                welcomeDialog.close();
+
+                // Update server about having begun welcome tour.
+                $.get('/user/api/onboard/welcome/0.1/', function(
+                    r){}, 'json');
+
+                // Take the user through the tour.
+                signupFloaters = $('<div/>', {
+                    'class': 'signup-floaters'
+                });
+                $('body').append(signupFloaters);
+                signupFloatersEl = $('.signup-floaters');
+
+                signupFloatersEl.css({
+                    height: $(window).height(),
+                    width: $(window).width()
+                });
+
+                background.addClass('show-popup-background');
+
+                // Setup the steps.
+                var signupStepsWrapper = $('<div/>', { 'class': 'signup-steps-wrapper' }),
+                    signupSteps = $('<nav/>', { 'class': 'signup-steps' }),
+                    signupStepOne = $('<div/>', {
+                        'class': 'signup-step signup-step-one selected',
+                        'text': '1'
+                    }),
+                    signupStepTwo = $('<div/>', {
+                        'class': 'signup-step signup-step-two',
+                        'text': '2'
+                    }),
+                    signupStepThree = $('<div/>', {
+                        'class': 'signup-step signup-step-three',
+                        'text': '3'
+                    }),
+                    signupStepsFlow = $('<div/>', {
+                        'class': 'signup-steps-flow'
+                    });
+
+                signupSteps.append(signupStepOne);
+                signupSteps.append(signupStepTwo);
+                signupSteps.append(signupStepThree);
+                
+                signupStepsWrapper.append(signupSteps);
+                signupStepsWrapper.append(signupStepsFlow);
+
+                signupFloatersEl.append(signupStepsWrapper);
+
+                signupStepsWrapper.css({
+                    top: $(window).height() - signupStepsWrapper.height() - 20
+                });
+
+                setupStepOne();
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+        }
+
+        function advanceTo(step){
+            steps = ['one', 'two', 'three', 'four', 'five'];
+
+            // Hide all bodies and deselect all steps.
+            var stepsIndicators = $('.signup-steps-step');
+            stepsIndicators.removeClass('selected');
+
+            var currentStepIndicator = $('.signup-step-' + steps[step - 1]);
+
+            currentStepIndicator.addClass('selected');
+
+            // Mark previous indicator as complete.
+            var previousStepIndicator = $('.signup-step-' + steps[step - 2]);
+            if (previousStepIndicator.length !== 0) previousStepIndicator.addClass('completed');
+        }
+
+        function setupStepOne(){
+            // Popout and reposition.
+            var addResourceButton = $('.add-resource'),
+                addResourceMenu = $('#add-resource-menu');
+
+            addResourceButton.css({
+                top: addResourceButton.position().top,
+                left: addResourceButton.position().left
+            });
+            addResourceButton.addClass('popout');
+            addResourceMenu.addClass('popout');
+            addResourceMenu.mouseover();
+
+            // Add message around step one.
+            message = $('<div/>', { 'class': 'step-one-message step-message' });
+            messageTitle = $('<div/>', {
+                'class': 'step-message-title',
+                'text': stepMessages.one.title
+            });
+            messageBody = $('<div/>', {
+                'class': 'step-message-body',
+                'html': stepMessages.one.body
+            });
+
+            message.append(messageTitle);
+            message.append(messageBody);
+
+            signupFloatersEl.append(message);
+            var messageEl = $('.step-one-message');
+
+            messageEl.css({
+                'top': addResourceButton.position().top - 20,
+                'left': addResourceButton.position().left - messageEl.width() - 20
+            });
+
+            // Bind next handler on step one message.
+            $('.signup-tour-primary-button', messageEl).click(function(event){
+                // Destroy setup for step one.
+                message.addClass('hide');
+                addResourceButton.removeClass('popout');
+                addResourceMenu.removeClass('popout');
+
+                // Call setup for step two.
+                setupStepTwo();
+            });
+
+            $('.signup-tour-secondary-button', messageEl).click(
+                function(event){ cancelTour(); });
+        }
+
+        function setupStepTwo(){
+            advanceTo(2);
+
+            var searchBar = $('#search-bar');
+            searchBar.css({
+                top: searchBar.position().top,
+                left: searchBar.position().left
+            });
+
+            searchBar.addClass('popout');
+
+            // Add message around step one.
+            message = $('<div/>', { 'class': 'step-two-message step-message' });
+            messageTitle = $('<div/>', {
+                'class': 'step-message-title',
+                'text': stepMessages.two.title
+            });
+            messageBody = $('<div/>', {
+                'class': 'step-message-body',
+                'html': stepMessages.two.body
+            });
+
+            message.append(messageTitle);
+            message.append(messageBody);
+
+            signupFloatersEl.append(message);
+            var messageEl = $('.step-two-message');
+
+            messageEl.css({
+                'top': searchBar.position().top + 20,
+                'left': searchBar.position().left + 20
+            });
+
+            // Bind next handler on step one message.
+            $('.signup-tour-primary-button', messageEl).click(function(event){
+                // Destroy setup for step one.
+                message.addClass('hide');
+                searchBar.removeClass('popout');
+
+                // Call setup for step three.
+                setupStepThree();
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+
+            $('.signup-tour-secondary-button', messageEl).click(
+                function(event){ cancelTour(); });
+        }
+
+        function setupStepThree(){
+            advanceTo(3);
+            
+            var profilePic = $('.user-profile-picture'),
+                profileInfo = $('.user-profile-info-body'),
+                changePictureHandle = $('.edit-profile-picture .change-picture');
+
+            profilePic.css({
+                top: profilePic.position().top,
+                left: profilePic.position().left
+            });
+            profileInfo.css({
+                top: profileInfo.position().top,
+                left: profileInfo.position().left
+            });
+
+            profilePic.addClass('popout');
+            profileInfo.addClass('popout');
+            changePictureHandle.mouseover();
+
+            // Add message around step one.
+            message = $('<div/>', { 'class': 'step-three-message step-message' });
+            messageTitle = $('<div/>', {
+                'class': 'step-message-title',
+                'text': stepMessages.three.title
+            });
+            messageBody = $('<div/>', {
+                'class': 'step-message-body',
+                'html': stepMessages.three.body
+            });
+
+            message.append(messageTitle);
+            message.append(messageBody);
+
+            signupFloatersEl.append(message);
+            var messageEl = $('.step-three-message');
+
+            messageEl.css({
+                'top': profilePic.position().top - 20,
+                'left': profilePic.position().left + profilePic.width() + 20
+            });
+
+            // Bind next handler on step one message.
+            $('.signup-tour-primary-button', messageEl).click(function(event){
+                // Destroy setup for step one.
+                message.addClass('hide');
+                profilePic.removeClass('popout');
+                profileInfo.removeClass('popout');
+
+                endTour();
+            });
+        }
+
+        function endTour(){
+            cancelTour();
+        }
+
+        function cancelTour(){
+            background.removeClass('show-popup-background');
+            $('.signup-steps-wrapper').addClass('hide');
+            $('.signup-floaters').addClass('hide');
+        }
+
+
+        var params = window.location.search === '' ? [] : window.location.search.substring(
+            1).split('&');
+ 
+        if (params){
+            var newUserParameter = _.find(params, function(param){
+                return param.indexOf('new_user=') !== -1;
+            });
+            if (newUserParameter){
+                setupDialog();
+            }
+        }
+
+    },
+
     resource: {
         copy: function(fromCollectionID, resourceID, toCollectionID, callback){
             $.get('/resources/resource/' + resourceID + '/copy/from/' +
@@ -4165,7 +4489,7 @@ var OC = {
             });
         },
     }
-};
+});
 
 jQuery(document).ready(function ($) {
     OC.setupUserMenu();
@@ -4362,6 +4686,11 @@ jQuery(document).ready(function ($) {
        js.src = "//connect.facebook.net/en_US/all.js";
        ref.parentNode.insertBefore(js, ref);
     }(document));
+
+
+    // Initial tour on signup.
+    OC.signupTour();
+
 });
 var fbAppID;
 
@@ -4466,7 +4795,13 @@ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
 ga('create', 'UA-23974225-2', 'opencurriculum.org');
+
+if (OC.config.user.id){
+    ga('set', '&uid', parseInt(OC.config.user.id, 10));
+    ga('set', 'dimension2', OC.config.user.dob);
+}
 ga('send', 'pageview');
+
 /*jslint nomen: false */
 
 
