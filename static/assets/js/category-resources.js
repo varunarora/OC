@@ -115,7 +115,7 @@ OC.categoryResources = {
         for (i = 0; i < topics.length; i++){
             newTopicWrapper = $('<li/>');
             newTopicLink = $('<a/>', {
-                'text': topics[i].title,
+                'html': topics[i].title,
                 'href': topics[i].url
             });
 
@@ -404,11 +404,12 @@ var CategoryView = Backbone.View.extend({
                 );
             }
 
-            this.$('.content-panel-body-listing-category-resources').append(
-                '<a href="' + this.model.get('url') + '" class="content-panel-body-listing-item-show">' +
-                '<div class="content-panel-body-listing-item-show-count">' + (this.model.get(
-                    'count') - categoryView.truncatedResourceLimit) + '</div> more</div>'
-            );
+            if ((this.model.get('count') - categoryView.truncatedResourceLimit) > 0)
+                this.$('.content-panel-body-listing-category-resources').append(
+                    '<a href="' + this.model.get('url') + '" class="content-panel-body-listing-item-show">' +
+                    '<div class="content-panel-body-listing-item-show-count">' + (this.model.get(
+                        'count') - categoryView.truncatedResourceLimit) + '</div> more</div>'
+                );
         }
     },
 
