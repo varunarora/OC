@@ -1266,20 +1266,6 @@ _.extend(OC, {
         );
 
         // Validate the username.
-        OC.validate.text(
-            '#signup-form input[name="username"]',
-            /^[a-z]\w{3,}/,
-            'Username should be all lowercase, cannot begin with ' +
-                'a number and must only have letters and digits and/or underscores.'
-        );
-
-        // Validate the password.
-        OC.validate.text(
-            '#signup-form input[name="password"]',
-            /[\w\.\!\@\#\$\%\^\*\&]+/,
-            'Password should contain valid characters'
-        );
-
         $('#signup-form input[name="username"]').blur(function(event) {
             var usernameInput = $(this);
             if (usernameInput.val() !== ''){
@@ -1295,7 +1281,8 @@ _.extend(OC, {
                             usernameInput.tipsy({trigger: 'manual', gravity: 'n', fade: true });
                             usernameInput.tipsy('show');
                         } else {
-                            usernameInput.tipsy('hide');
+                            if (!usernameInput.hasClass('form-input-error'))
+                                usernameInput.tipsy('hide');
                             usernameInput.removeClass('unavailable');
                             usernameInput.addClass('available');
                         }
@@ -1303,6 +1290,21 @@ _.extend(OC, {
                 'json');
             }
         });
+
+        OC.validate.text(
+            '#signup-form input[name="username"]',
+            /^[a-z]\w{3,}/,
+            'Username should be all lowercase, cannot begin with ' +
+                'a number and must only have letters and digits and/or underscores.'
+        );
+
+        // Validate the password.
+        OC.validate.text(
+            '#signup-form input[name="password"]',
+            /[\w\.\!\@\#\$\%\^\*\&]+/,
+            'Password should contain valid characters'
+        );
+
 
         // Validate the birthdate.
         OC.validate.date(

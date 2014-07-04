@@ -40,7 +40,7 @@
             
             <tr class="registration-username-password">
                 <td{% if social_id %} colspan="2"{% endif %}>
-                    <input type="text" name="username" placeholder="Username" value="{{ form.username }}" />
+                    <input type="text" name="username" placeholder="Username" value="{{ form.username }}" {% if user_form.username.errors %}title="{{ user_form.username.errors|first }}" class="form-input-error"{% endif %}/>
                 </td>
                 {% if not social_id %}
                 <td>
@@ -68,19 +68,19 @@
             <tr><td colspan="2">
                 <div class="dob-inputs-wrapper">
                     <select name="dob_month" placeholder="Month">
-                        <option value="0">Month</option>
-                        <option value="1">January</option>
-                        <option value="2">February</option>
-                        <option value="3">March</option>
-                        <option value="4">April</option>
-                        <option value="5">May</option>
-                        <option value="6">June</option>
-                        <option value="7">July</option>
-                        <option value="8">August</option>
-                        <option value="9">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>                        
+                        <option value="0" {% ifequal form.dob_month '0' %}selected{% endifequal %}>Month</option>
+                        <option value="1" {% ifequal form.dob_month '1' %}selected{% endifequal %}>January</option>
+                        <option value="2" {% ifequal form.dob_month '2' %}selected{% endifequal %}>February</option>
+                        <option value="3" {% ifequal form.dob_month '3' %}selected{% endifequal %}>March</option>
+                        <option value="4" {% ifequal form.dob_month '4' %}selected{% endifequal %}>April</option>
+                        <option value="5" {% ifequal form.dob_month '5' %}selected{% endifequal %}>May</option>
+                        <option value="6" {% ifequal form.dob_month '6' %}selected{% endifequal %}>June</option>
+                        <option value="7" {% ifequal form.dob_month '7' %}selected{% endifequal %}>July</option>
+                        <option value="8" {% ifequal form.dob_month '8' %}selected{% endifequal %}>August</option>
+                        <option value="9" {% ifequal form.dob_month '9' %}selected{% endifequal %}>September</option>
+                        <option value="10" {% ifequal form.dob_month '10' %}selected{% endifequal %}>October</option>
+                        <option value="11" {% ifequal form.dob_month '11' %}selected{% endifequal %}>November</option>
+                        <option value="12" {% ifequal form.dob_month '12' %}selected{% endifequal %}>December</option>
                     </select>
                     <input type="text" placeholder="Date" name="dob_date" value="{{ form.dob_date }}" {% if profile_form.dob.errors %} title="{{ profile_form.dob.errors }}" class="form-input-error"{% endif %}/>
                     <input type="text" placeholder="Year" name="dob_year" value="{{ form.dob_year }}"/>
