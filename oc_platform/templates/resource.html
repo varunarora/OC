@@ -22,18 +22,12 @@
 
 	{% if resource.revision.content_type.name == "attachment" %}
 	   	{% include 'partials/oer-attachment.html' %}
-	{% elif resource.revision.content_type.name == "link" %}
+	{% elif resource.revision.content_type.name == "link" and not resource.revision.content.rendered_url %}
 		{% include 'partials/oer-url.html' %}
+    {% elif resource.revision.content_type.name == "link" and resource.revision.content.rendered_url %}
+        {% include 'partials/oer-full-document.html' %}
 	{% elif resource.revision.content_type.name == "document" %}
-	<div class="center-midstage resource-body{% if resource_type %} {{ resource_type }}{% endif %}">
-		{% include 'partials/resource-meta-snippet.html' %}
-		<section id="oer">
-			<div class="oer-document document-body">
-				{% include 'partials/oer-document.html' %}
-			</div>
-		</section>
-		<div class="request-resource-review">From a star rating of 1 star to 5 stars, how useful was this resource? <div class="request-resource-review-stars"><span class="empty-star"></span><span class="empty-star"></span><span class="empty-star"></span><span class="empty-star"></span><span class="empty-star"></span></div></div>
-	</div>
+        {% include 'partials/oer-full-document.html' %}
 	{% endif %}
 
 	<div class="center-stage resource-footer">

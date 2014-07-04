@@ -1,0 +1,20 @@
+{% include 'partials/header.html' %}
+
+<div class="center-stage">
+    <h2>Feed from: {{ blog_title }}</h2>
+    <form method="POST" action="{% url resource:feed_importer_list %}">
+        {% csrf_token %}
+        <input type="hidden" name="current_url" value="{{ current_url }}" />
+        <input type="hidden" name="next_url" value="{{ next_url }}" />
+        <input type="hidden" name="username" value="{{ username }}" />
+        <input type="hidden" name="license_id" value="{{ license_id }}" />
+        <input type="hidden" name="collection_id" value="{{ collection_id }}" />
+        <table>
+            {% for post in posts %}
+            <tr><td><input type="checkbox" value="{{ post.link }}" name="post" unchecked /></td><td><a href="{{ post.link }}" target="_blank">{{ post.title }}<img src="{{ STATIC_URL}}images/new_window.png"></a></td></tr>
+            {% endfor %}
+
+            <tr><td colspan="2"><button class="action-button secondary-button">Next &#187;</button></td></tr>
+        </table>
+    </form>
+</div>

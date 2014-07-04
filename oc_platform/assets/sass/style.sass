@@ -688,6 +688,10 @@ form input[type=text], form input[type=password], textarea, select
 		&:hover, &:focus
 			border-color: #E9322D
 
+form, form#signup-form
+	select.form-input-error
+		border: 1px solid #E9322D
+
 form#signup-form,
 form#new-project-form,
 form#sign-in-form,
@@ -3766,6 +3770,7 @@ blockquote
 		height: 80px
 		float: left
 		display: inline-block
+		background-size: cover
 
 		.resource-item-thumbnail-selector
 			background: url('../images/select.png') no-repeat center center

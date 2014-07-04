@@ -147,6 +147,9 @@ class ResourceRevision(models.Model):
 class Element(models.Model):
     body = JSONField()
 
+    def __unicode__(self):
+        return str(self.id)
+
 
 class Document(models.Model):
     elements = models.ManyToManyField(
@@ -161,6 +164,7 @@ class DocumentElement(models.Model):
 
 class Link(models.Model):
     url = models.URLField(null=True, blank=True)
+    rendered_url = models.ForeignKey('oer.Document', null=True, blank=True)
 
 
 class Attachment(models.Model):

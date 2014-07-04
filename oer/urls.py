@@ -84,5 +84,8 @@ urlpatterns = patterns(
     url(r'^api/delete-prior/(?P<concept_id>\d+)/from/(?P<resource_id>\d+)/$', views.delete_resource_prior, name='delete_resource_prior'),
     url(r'^api/delete-standard/(?P<tag_id>\d+)/from/(?P<resource_id>\d+)/$', views.delete_resource_tag, name='delete_resource_tag'),
 
+    url(r'^importer/$', views.feed_importer_home, name='feed_importer_home'),
+    url(r'^importer/feed/$', views.feed_importer_list, name='feed_importer_list'),
+
     url(r'^$', views.resource_center, name='resource_center'),
 )

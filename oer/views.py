@@ -588,6 +588,10 @@ def render_resource(resource_id, request=None):
         resource_type = "document"
 
     elif resource.revision.content_type == link_content_type:
+        if resource.revision.content.rendered_url:
+            resource.data = build_document_view(
+                resource.revision.content.rendered_url_id)
+
         import ResourceUtilities as ru
         resource_type = ru.get_resource_type_from_url(resource)
 
@@ -2080,6 +2084,229 @@ def play_collection(request, collection_id):
         'title': 'Play: the easy way to volunteer for K-12 education'
     }
     return render(request, 'play.html', context)
+
+
+def feed_importer_home(request):
+    from license.models import License
+    licenses = License.objects.all()
+    
+    context = {
+        'title': 'Feed importer',
+        'licenses': licenses
+    }
+    return render(request, 'internal/feed-importer.html', context)
+
+
+def create_document(body, user):
+    new_document = Document()
+    new_document.save()
+
+    new_document_element = DocumentElement()
+    new_document_element.document = new_document
+    
+    from media.models import Image
+    from django.conf import settings
+    import urllib2
+    from django.core.files.images import ImageFile
+    import os
+    
+    from oer.BeautifulSoup import BeautifulSoup
+    soup = BeautifulSoup(body)
+
+    images = soup.findAll('img')
+    
+    for image in images:
+        # Download the image.
+        img_web = urllib2.urlopen(image['src']).read()
+
+        # Write the image to disk.
+        # TODO(Varun): This variable gets a name.
+        image_path = settings.MEDIA_ROOT + 'resource_thumbnail/tmp/' + os.path.basename(image['src'])
+        localImage = open(image_path, 'w')
+        localImage.write(img_web)
+        localImage.close()
+
+        final_image = ImageFile(open(image_path))
+
+        # Upload new image as media item.
+        new_image = Image(
+            path=final_image,
+            title=final_image.name,
+            user=user
+        )
+        new_image.save()
+
+        url = settings.MEDIA_URL + new_image.path.name
+        image['src'] = url
+
+        # Delete the image from disk.
+        os.remove(image_path)
+
+    new_element = Element(body=json.loads('{"type": "textblock", "data": "' + str(soup).replace(
+        '\\', '\\\\').replace('\n', '\\n').replace('\r', '\\r').replace('\"', '\\"') + '"}'))
+    new_element.save()
+
+    new_document_element.element = new_element
+    new_document_element.position = 0
+    new_document_element.save()
+
+    return new_document
+
+
+def create_url_resource(title, username, description, link, tags, body, license_id, collection_id):
+    DEFAULT_COST = 0
+
+    try:
+        from django.contrib.auth.models import User
+        from license.models import License
+
+        title = title if title else 'Untitled website'
+        user = User.objects.get(username=username)
+        license = License.objects.get(pk=license_id)
+
+        from django.template.defaultfilters import slugify
+
+        # Create a new resource
+        new_resource = Resource(
+            title=title,
+            cost=DEFAULT_COST,
+            user=user,
+            slug=slugify(title),
+            visibility='public',
+            description=description,
+            license=license
+        )
+
+        new_url = Link(url=link, rendered_url=create_document(body, user))
+        new_url.save()
+
+        new_resource_revision = ResourceRevision()
+        new_resource_revision.content = new_url
+        new_resource_revision.user = user
+        new_resource_revision.save()
+
+        new_resource.revision = new_resource_revision
+        new_resource.save()
+
+        from meta.models import Tag
+
+        for raw_tag in tags:
+            try:
+                tag = Tag.objects.get(title=raw_tag)
+            except:
+                tag = Tag(title=raw_tag)
+                tag.save()
+
+            new_resource.tags.add(tag)
+
+        # Assign this resource to the revision created.
+        new_resource.revision.resource = new_resource
+        new_resource.revision.save()
+
+        # Now add this resource to the collection it belongs to
+        to_add_to = Collection.objects.get(pk=int(collection_id))
+        to_add_to.resources.add(new_resource)
+        to_add_to.save()
+    except Exception, e:
+        print e
+
+
+def feed_importer_list(request):
+    import feedparser
+    import urlparse
+
+    if request.method == 'POST':
+        current_url = request.POST.get('url', None)
+        username = request.POST.get('username', None)
+        license_id = request.POST.get('license_id', None)
+        collection_id = request.POST.get('collection_id', None)
+
+        if not current_url:
+            url = request.POST.get('current_url', None)
+
+            # Process submission.
+            current_feed = feedparser.parse(url)
+
+            approved_posts = request.POST.getlist('post', None)
+
+            for ap in approved_posts:
+                for entry in current_feed.entries:
+                    if entry.link == ap:
+                        tags = [tag.label for tag in entry.tags if tag.label]
+                        create_url_resource(
+                            entry.title,
+                            username,
+                            entry.summary,
+                            entry.link,
+                            tags,
+                            entry.content[0].value,
+                            license_id,
+                            collection_id
+                        )
+
+            current_url = request.POST.get('next_url', None)
+
+        feed = feedparser.parse(current_url)
+
+        if 'wordpress' in feed['feed']['generator'] or 'Blogger' in feed['feed']['generator']:
+            if 'wordpress' in feed['feed']['generator']:
+                parsed_url = urlparse.urlparse(current_url)
+                
+                new_query = []
+                queries = parsed_url.query.split('&')
+
+                if 'paged' in parsed_url.query:
+                    for query in queries:
+                        if 'paged' in query:
+                            current_page_id = int(query[query.index(
+                                'paged') + 6:])
+                            next_page_id = current_page_id + 1
+                            query = 'paged=' + str(next_page_id)
+                        
+                        new_query.append(query)
+                else:
+                    query = 'paged=2'
+                    new_query.append(query)
+
+            elif 'Blogger' in feed['feed']['generator']:
+                parsed_url = urlparse.urlparse(current_url)
+                
+                new_query = []
+                queries = parsed_url.query.split('&')
+
+                if 'start-index' in parsed_url.query:
+                    for query in queries:
+                        if 'start-index' in query:
+                            current_index = int(query[query.index(
+                                'start-index') + 12:])
+                            next_index = current_index + len(feed.entries) + 1
+                            query = 'start-index=' + str(next_index)
+                        
+                        new_query.append(query)
+                else:
+                    query = 'start-index=' + str(len(feed.entries) + 1)
+                    new_query.append(query)
+
+            try:
+                next_url = current_url[:current_url.index('?') + 1] + '&'.join(new_query)
+            except:
+                next_url = current_url + '?' + '&'.join(new_query)
+
+        feed_title = feed['feed']['title']
+        posts = feed.entries
+
+    context = {
+        'title': 'Feed list',
+        'blog_title': feed_title,
+        'current_url': current_url,
+        'next_url': next_url,
+        'posts': posts,
+        'username': username,
+        'next_url': next_url,
+        'license_id': license_id,
+        'collection_id': collection_id
+    }
+    return render(request, 'internal/feed-list.html', context)
 
 
 # API Stuff
