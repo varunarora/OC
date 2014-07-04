@@ -138,12 +138,9 @@ class ResourceThumbnail:
             ["phantomjs", settings.PROJECT_PATH + "oer/takeScreenshot.js", resource.url, thumbnail + "-tmp"
                 + ResourceThumbnail.THUMBNAIL_EXT])
         try:
-            check_output(
+            call(
                 ["convert", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT, "-resize",
-                    "600x300", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
-            """call(
-                ["convert", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT, "-resize",
-                    "600x300", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])"""
+                    "1280x786", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
             # Now delete the temporary retrived image thumbnail
             call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
