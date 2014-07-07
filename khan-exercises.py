@@ -206,7 +206,7 @@ def build_resource_from_exercise(exercise_raw, tag):
 
     resource.tags.add(Tag.objects.get(title=(
         'Assessment' if exercise['is_quiz'] else 'Exercise'), category=TagCategory.objects.get(title='Resource type')))
-    resource.tags.add(Tag.objects.get(title=tag, category=TagCategory.objects.get(title='Standards')))
+    resource.tags.add(Tag.objects.filter(title=tag, category=TagCategory.objects.get(title='Standards'))[0])
 
     # CREATE A MOFO NOTIFICATION.
     Resource.resource_created.send(
@@ -275,7 +275,7 @@ def build_resource_from_exercise(exercise_raw, tag):
         # Add tag to video.
         video.tags.add(Tag.objects.get(
             title='Lecture', category=TagCategory.objects.get(title='Resource type')))
-        video.tags.add(Tag.objects.get(title=tag, category=TagCategory.objects.get(title='Standards')))
+        video.tags.add(Tag.objects.filter(title=tag, category=TagCategory.objects.get(title='Standards'))[0])
 
         # CREATE A MOFO NOTIFICATION.
         Resource.resource_created.send(
@@ -296,20 +296,24 @@ for (grade, grade_domains) in grades_map.items():
     for (grade_domain_titles, grade_domain_exercises) in grade_domains.items():
         for (standard, exercises) in grade_domain_exercises.items():
             for exercise in exercises:
-                modified_standard = standard.replace('-', '.').upper()
-                try:
-                    t = Tag.objects.get(
-                        title=modified_standard,
-                        category=standards_tc
-                    )
-                except:
-                    t = Tag(
-                        title=modified_standard,
-                        category=standards_tc
-                    )
-                    t.save()
-                
-                build_resource_from_exercise(exercise['href'], modified_standard)
+                r = Resource.objects.filter(
+                    user__username='khanacademy', title=exercise['title']).count()
+
+                if r.count() == 0:
+                    modified_standard = standard.replace('-', '.').upper()
+                    try:
+                        t = Tag.objects.get(
+                            title=modified_standard,
+                            category=standards_tc
+                        )
+                    except:
+                        t = Tag(
+                            title=modified_standard,
+                            category=standards_tc
+                        )
+                        t.save()
+                    
+                    build_resource_from_exercise(exercise['href'], modified_standard)
 
                 """counter += 1
 
