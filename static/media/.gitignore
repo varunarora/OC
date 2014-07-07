@@ -1,0 +1,4 @@
+resource_thumbnail/*.jpg
+resource_thumbnail/*.png
+resource_thumbnail/*.jpeg
+rendered_resources/*.*
