@@ -287,7 +287,7 @@ def build_resource_from_exercise(exercise_raw, tag):
 """resource = build_resource_from_exercise(
     '/exercise/linear-models-of-bivariate-data', 'K.CC.A.1')"""
 
-import sys
+#import sys
 
 counter = 0
 standards_tc = TagCategory.objects.get(title='Standards')
@@ -311,7 +311,7 @@ for (grade, grade_domains) in grades_map.items():
                 
                 build_resource_from_exercise(exercise['href'], modified_standard)
 
-                counter += 1
+                """counter += 1
 
                 if counter > 100:
-                    sys.exit()
+                    sys.exit()"""
