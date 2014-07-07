@@ -299,7 +299,7 @@ for (grade, grade_domains) in grades_map.items():
                 r = Resource.objects.filter(
                     user__username='khanacademy', title=exercise['title']).count()
 
-                if r.count() == 0:
+                if r == 0:
                     modified_standard = standard.replace('-', '.').upper()
                     try:
                         t = Tag.objects.get(
