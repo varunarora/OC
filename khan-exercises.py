@@ -224,7 +224,12 @@ def build_resource_from_exercise(exercise_raw, tag):
         req.request('GET', video_url)
         response = req.getresponse()
 
-        video_response = json.loads(response.read())
+        result = response.read()
+
+        if result != '' and 'null' not in result:
+            video_response = json.loads(result)
+        else:
+            continue
 
         try:
             link = Link.objects.get(url__icontains=video_response['youtube_id'])
