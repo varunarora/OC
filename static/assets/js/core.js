@@ -1237,8 +1237,11 @@ _.extend(OC, {
                         OC.pushMessageBoxForward();
                     }, 'json');
             } else {
-                if (errorneousInputs.length === 0)
+                if (errorneousInputs.length === 0){
+                    $('.page-form-submission-loader').addClass('show');
+
                     submitButton.parents('form#signup-form').submit();
+                }
             }
 
             event.stopPropagation();
@@ -4397,7 +4400,7 @@ _.extend(OC, {
             var newUserParameter = _.find(params, function(param){
                 return param.indexOf('new_user=') !== -1;
             });
-            if (newUserParameter){
+            if (newUserParameter && OC.config.user.id){
                 setupDialog();
             }
         }
