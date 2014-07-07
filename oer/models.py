@@ -49,7 +49,7 @@ class Resource(models.Model):
     visibility = models.CharField(max_length=256)
     cost = models.FloatField()
     views = models.IntegerField(editable=False, default=0)
-    image = models.ImageField(upload_to='resource_thumbnail', null=True, blank=True)
+    image = models.ImageField(upload_to='resource_thumbnail', max_length=256, null=True, blank=True)
     source = models.CharField(max_length=256, null=True, blank=True)
     collaborators = models.ManyToManyField(User, blank=True, null=True,
         related_name='collabs')
@@ -69,7 +69,9 @@ class Resource(models.Model):
 
 def generate_thumnbnail(sender, instance, created, raw, **kwargs):
     if created:
-        ResourceThumbnail.generateThumbnail(instance)
+        if instance.image.name == None:
+            ResourceThumbnail.generateThumbnail(instance)
+
         # Now disconnect the dispatcher
         post_save.disconnect(generate_thumnbnail, sender=Resource)
         instance.save()
