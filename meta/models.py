@@ -17,7 +17,7 @@ class Category(models.Model):
 
 class Tag(models.Model):
     title = models.CharField(max_length=256)
-    description = models.TextField(blank=True)
+    description = models.TextField(null=True, blank=True)
     category = models.ForeignKey('meta.TagCategory', default=get_default_tagcategory)
     created = models.DateTimeField(auto_now_add=True, editable=False)
     position = models.IntegerField(default=0, null=True, blank=True)
