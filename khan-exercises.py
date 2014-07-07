@@ -231,7 +231,11 @@ def build_resource_from_exercise(exercise_raw, tag):
         result = response.read()
 
         if result != '' and 'null' not in result:
-            video_response = json.loads(result)
+            try:
+                video_response = json.loads(result)
+            except:
+                print video_id
+                return None
         else:
             continue
 
