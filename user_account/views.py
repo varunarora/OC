@@ -1504,7 +1504,7 @@ def change_profile_picture(request, username):
             user_profile.profile_pic.save(
                 str(user.id) + '-profile.jpg', profile_pic)
 
-            resize_user_image(user_profile, 200)
+            resize_user_image(user_profile, 300)
 
             from django.contrib import messages
             messages.success(request, 'New picture uploaded. Drag and save for your ideal fit.')
