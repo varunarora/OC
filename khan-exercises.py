@@ -152,7 +152,11 @@ def build_resource_from_exercise(exercise_raw, tag):
     result = response.read()
 
     if result != '' and 'There is no' not in result:
-        exercise = json.loads(result)
+        try:
+            exercise = json.loads(result)
+        except:
+            print exercise_name
+            return None
     else:
         return None
 
