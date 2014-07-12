@@ -87,5 +87,7 @@ urlpatterns = patterns(
     url(r'^importer/$', views.feed_importer_home, name='feed_importer_home'),
     url(r'^importer/feed/$', views.feed_importer_list, name='feed_importer_list'),
 
+    url(r'^rename/(?P<collection_id>\d+)/$', views.rename_collection, name='rename_collection'),
+
     url(r'^$', views.resource_center, name='resource_center'),
 )

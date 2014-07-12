@@ -2097,7 +2097,7 @@ def feed_importer_home(request):
     return render(request, 'internal/feed-importer.html', context)
 
 
-def create_document(body, user):
+def create_document(body, user, selector=None):
     new_document = Document()
     new_document.save()
 
@@ -2141,6 +2141,11 @@ def create_document(body, user):
 
         # Delete the image from disk.
         os.remove(image_path)
+
+    # Remove all 'onclick' attributes from <a>s
+    onClickAnchors = soup.findAll(onclick=True)
+    for anchor in onClickAnchors:
+        del(anchor['onclick'])
 
     new_element = Element(body=json.loads('{"type": "textblock", "data": "' + str(soup).replace(
         '\\', '\\\\').replace('\n', '\\n').replace('\r', '\\r').replace('\"', '\\"') + '"}'))
@@ -2220,93 +2225,168 @@ def feed_importer_list(request):
         username = request.POST.get('username', None)
         license_id = request.POST.get('license_id', None)
         collection_id = request.POST.get('collection_id', None)
+        selector = request.POST.get('selector', None)
+        tag_selector = request.POST.get('tag_selector', None)
 
-        if not current_url:
-            url = request.POST.get('current_url', None)
+        if selector:
+            import httplib
 
-            # Process submission.
-            current_feed = feedparser.parse(url)
+            parsed_url = urlparse.urlparse(current_url)
 
-            approved_posts = request.POST.getlist('post', None)
+            req = httplib.HTTPConnection(parsed_url.netloc, 80)
+            req.connect()
 
-            for ap in approved_posts:
-                for entry in current_feed.entries:
-                    if entry.link == ap:
-                        tags = [tag.label for tag in entry.tags if tag.label]
-                        create_url_resource(
-                            entry.title,
-                            username,
-                            entry.summary,
-                            entry.link,
-                            tags,
-                            entry.content[0].value,
-                            license_id,
-                            collection_id
-                        )
+            req.request('GET', parsed_url.path)
+            response = req.getresponse().read()
+    
+            from oer.BeautifulSoup import BeautifulSoup
+            soup = BeautifulSoup(response)
 
-            current_url = request.POST.get('next_url', None)
+            # Determine title of page.
+            title = soup.find('title').string
 
-        feed = feedparser.parse(current_url)
+            # Determine tags.
+            import re
+            tags_elements = soup.findAll(True, {'class': re.compile(r'\b%s\b' % tag_selector)})
+            tags = [tag.string for tag in tags_elements]
 
-        if 'wordpress' in feed['feed']['generator'] or 'Blogger' in feed['feed']['generator']:
-            if 'wordpress' in feed['feed']['generator']:
-                parsed_url = urlparse.urlparse(current_url)
-                
-                new_query = []
-                queries = parsed_url.query.split('&')
+            create_url_resource(
+                title,
+                username,
+                '',
+                current_url,
+                tags,
+                str(soup.find(id=selector)),
+                license_id,
+                collection_id
+            )
 
-                if 'paged' in parsed_url.query:
-                    for query in queries:
-                        if 'paged' in query:
-                            current_page_id = int(query[query.index(
-                                'paged') + 6:])
-                            next_page_id = current_page_id + 1
-                            query = 'paged=' + str(next_page_id)
-                        
+            from license.models import License
+            licenses = License.objects.all()
+
+            context = {
+                'username': username,
+                'selector': selector,
+                'tag_selector': tag_selector,
+                'license_id': license_id,
+                'collection_id': collection_id,
+                'title': 'Feed importer',
+                'licenses': licenses
+            }
+            return render(request, 'internal/feed-importer.html', context)
+
+        else:
+            if not current_url:
+                url = request.POST.get('current_url', None)
+
+                # Process submission.
+                current_feed = feedparser.parse(url)
+
+                approved_posts = request.POST.getlist('post', None)
+
+                for ap in approved_posts:
+                    for entry in current_feed.entries:
+                        if entry.link == ap:
+                            tags = [tag.label for tag in entry.tags if tag.label]
+                            create_url_resource(
+                                entry.title,
+                                username,
+                                entry.summary,
+                                entry.link,
+                                tags,
+                                entry.content[0].value,
+                                license_id,
+                                collection_id
+                            )
+
+                current_url = request.POST.get('next_url', None)
+
+            feed = feedparser.parse(current_url)
+
+            if 'wordpress' in feed['feed']['generator'] or 'Blogger' in feed['feed']['generator']:
+                if 'wordpress' in feed['feed']['generator']:
+                    parsed_url = urlparse.urlparse(current_url)
+                    
+                    new_query = []
+                    queries = parsed_url.query.split('&')
+
+                    if 'paged' in parsed_url.query:
+                        for query in queries:
+                            if 'paged' in query:
+                                current_page_id = int(query[query.index(
+                                    'paged') + 6:])
+                                next_page_id = current_page_id + 1
+                                query = 'paged=' + str(next_page_id)
+                            
+                            new_query.append(query)
+                    else:
+                        query = 'paged=2'
                         new_query.append(query)
-                else:
-                    query = 'paged=2'
-                    new_query.append(query)
 
-            elif 'Blogger' in feed['feed']['generator']:
-                parsed_url = urlparse.urlparse(current_url)
-                
-                new_query = []
-                queries = parsed_url.query.split('&')
+                elif 'Blogger' in feed['feed']['generator']:
+                    parsed_url = urlparse.urlparse(current_url)
+                    
+                    new_query = []
+                    queries = parsed_url.query.split('&')
 
-                if 'start-index' in parsed_url.query:
-                    for query in queries:
-                        if 'start-index' in query:
-                            current_index = int(query[query.index(
-                                'start-index') + 12:])
-                            next_index = current_index + len(feed.entries) + 1
-                            query = 'start-index=' + str(next_index)
-                        
+                    if 'start-index' in parsed_url.query:
+                        for query in queries:
+                            if 'start-index' in query:
+                                current_index = int(query[query.index(
+                                    'start-index') + 12:])
+                                next_index = current_index + len(feed.entries) + 1
+                                query = 'start-index=' + str(next_index)
+                            
+                            new_query.append(query)
+                    else:
+                        query = 'start-index=' + str(len(feed.entries) + 1)
                         new_query.append(query)
-                else:
-                    query = 'start-index=' + str(len(feed.entries) + 1)
-                    new_query.append(query)
 
-            try:
-                next_url = current_url[:current_url.index('?') + 1] + '&'.join(new_query)
-            except:
-                next_url = current_url + '?' + '&'.join(new_query)
+                try:
+                    next_url = current_url[:current_url.index('?') + 1] + '&'.join(new_query)
+                except:
+                    next_url = current_url + '?' + '&'.join(new_query)
 
-        feed_title = feed['feed']['title']
-        posts = feed.entries
+            feed_title = feed['feed']['title']
+            posts = feed.entries
+
+        context = {
+            'title': 'Feed list',
+            'blog_title': feed_title,
+            'current_url': current_url,
+            'next_url': next_url,
+            'posts': posts,
+            'username': username,
+            'next_url': next_url,
+            'license_id': license_id,
+            'collection_id': collection_id
+        }
+        return render(request, 'internal/feed-list.html', context)
+
+
+def rename_collection(request, collection_id):
+    collection = Collection.objects.get(pk=collection_id)
+    collection_resources = collection.resources.all()
+
+    if request.method == 'POST':
+        post_copy = request.POST.copy()
+        post_copy.pop('csrfmiddlewaretoken')
+
+        # Iterate, check for changes and save.
+        resource_names = post_copy.dict().items()
+
+        for resource_id, resource_name in resource_names:
+            original_resource = collection_resources.get(pk=resource_id)
+            if original_resource.title != resource_name:
+                original_resource.title = resource_name
+                original_resource.save()
 
     context = {
-        'title': 'Feed list',
-        'blog_title': feed_title,
-        'current_url': current_url,
-        'next_url': next_url,
-        'posts': posts,
-        'username': username,
-        'next_url': next_url,
-        'license_id': license_id,
-        'collection_id': collection_id
+        'resources': collection_resources,
+        'collection': collection,
+        'title': 'Play: the easy way to volunteer for K-12 education'
     }
-    return render(request, 'internal/feed-list.html', context)
+    return render(request, 'internal/rename.html', context)
 
 
 # API Stuff

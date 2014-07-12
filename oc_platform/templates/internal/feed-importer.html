@@ -1,17 +1,19 @@
 {% include 'partials/header.html' %}
 
 <div class="center-stage">
-    <h2>Import feed</h2>
+    <h2>Import</h2>
     <form method="POST" action="{% url resource:feed_importer_list %}">
         {% csrf_token %}
         <table>
             <tr><td>URL</td><td><input type="text" name="url" /></td></tr>
-            <tr><td>Username</td><td><input type="text" name="username" /></td></tr>
-            <tr><td>Collection ID</td><td><input type="text" name="collection_id" /></td></tr>
+            <tr><td>ID selector</td><td><input type="text" name="selector" value="{{ selector }}" /></td></tr>
+            <tr><td>Tag selector</td><td><input type="text" name="tag_selector" value="{{ tag_selector }}" /></td></tr>
+            <tr><td>Username</td><td><input type="text" name="username" value="{{ username }}" /></td></tr>
+            <tr><td>Collection ID</td><td><input type="text" name="collection_id" value="{{ collection_id }}" /></td></tr>
             <tr><td>License</td><td>
                 <select name="license_id">
                     {% for license in licenses %}
-                    <option value="{{ license.id }}">{{ license.title }}</option>
+                    <option value="{{ license.id }}"{% ifequal license_id license.id %}selected{% endifequal %}>{{ license.title }}</option>
                     {% endfor %}
                 </select>
             </td></tr>
