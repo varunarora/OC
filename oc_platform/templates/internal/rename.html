@@ -1,0 +1,14 @@
+{% include 'partials/header.html' %}
+
+<div class="center-stage">
+    <h2>Import</h2>
+    <form method="POST" action="{% url resource:rename_collection collection_id=collection.id %}">
+        {% csrf_token %}
+        <ul class="rename-resource-list">
+        {% for resource in resources %}
+            <li><input type="text" name="{{ resource.id }}" value="{{ resource.title }}" /></li>
+        {% endfor %}
+        </ul>
+        <button class="action-button secondary-button">Submit &#187;</button>
+    </form>
+</div>
