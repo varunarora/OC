@@ -6,6 +6,10 @@ from django.template import RequestContext
 from haystack.forms import ModelSearchForm, FacetedSearchForm
 from haystack.query import EmptySearchQuerySet
 
+from interactions.models import Favorite
+from oer.models import Resource
+from django.contrib.contenttypes.models import ContentType
+from meta.models import TagCategory
 
 RESULTS_PER_PAGE = getattr(settings, 'HAYSTACK_SEARCH_RESULTS_PER_PAGE', 150)
 
@@ -260,10 +264,9 @@ class SanitizedSearchView(SearchView):
 
         (paginator, page) = self.build_page()
 
-        from interactions.models import Favorite
-        from oer.models import Resource
-        from django.contrib.contenttypes.models import ContentType
+
         resource_ct = ContentType.objects.get_for_model(Resource)
+        resource_type = TagCategory.objects.get(title='Resource type')
 
         for result in page.object_list:
             try:
@@ -273,25 +276,17 @@ class SanitizedSearchView(SearchView):
             except:
                 pass
 
-                result.object.favorites_count = Favorite.objects.filter(
-                    parent_id=result.object.id, parent_type=resource_ct).count()
+            result.object.favorites_count = Favorite.objects.filter(
+                parent_id=result.object.id, parent_type=resource_ct).count()
+            result.object.type = result.object.tags.get(category=resource_type)
 
         # For all resource outputs, assign the type.
         import oer.CollectionUtilities as cu
-        filtered_resource_list = [item for item in page.object_list if item.content_type() == 'oer.resource']
-        cu.set_resources_type([item.object for item in filtered_resource_list])
-
-        # Get browse tree for Common Core.
-        # TODO(Varun): Clean up hard code.
-        import meta.CategoryUtilities as catU
-        from meta.models import Category
-        default_category = Category.objects.get(slug='common-core')
-        (browse_tree, flattened_tree) = catU.build_child_categories(
-            {'root': [default_category]}, [])
+        if not hasattr(result.object, 'type'):    
+            filtered_resource_list = [item for item in page.object_list if item.content_type() == 'oer.resource']
+            cu.set_resources_type([item.object for item in filtered_resource_list])
 
         extra['page'] = page
         extra['paginator'] = paginator
         extra['title'] = self.query + " &lsaquo; OpenCurriculum"
-        extra['selected_category'] = default_category
-        extra['browse_tree'] = browse_tree
         return extra

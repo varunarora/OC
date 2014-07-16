@@ -70,7 +70,7 @@
                 visibility: '{{ result.object.visibility }}',
                 cost: 'free',
                 license: '{{ result.object.license }}',
-                type: '{{ result.object.type }}',
+                type: '{{ result.object.type|upper }}',
                 views: '{{ result.object.views }}',
                 thumbnail: '{{ MEDIA_URL }}{{ result.object.image.name }}',
                 favorited: false,
