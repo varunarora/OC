@@ -10,7 +10,7 @@
             {% include 'partials/feed-item-document.html' %}
             
             {% elif item.target.type == 'video' %}
-            created a new video link. {% include 'partials/feed-item-resource-url.html' %} <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
+            created a new video link {% include 'partials/feed-item-resource-url.html' %} <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
             {% include 'partials/feed-item-video.html' %}
             {% elif item.target.type == 'attachment' %}
             uploaded a new file. <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
