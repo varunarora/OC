@@ -285,6 +285,230 @@ ul.tagit
 	header
 		display: none
 
+
+.editor-header
+	margin: 20px auto
+
+	#article-title input[type=text].browser-edit
+		width: 550px
+
+	.panel-right
+
+		.editor-button-wrapper
+			float: right
+
+.editor-toolbar-wrapper
+	background-color: #f6f6f6
+	height: 32px
+	padding-top: 6px
+
+	#editor-toolbar
+		width: $content-width
+		margin: auto
+
+body.editor
+	overflow: hidden
+
+.editor-frame
+	background-color: #efefef
+	padding-top: 40px
+	padding-bottom: 20px
+	overflow-y: scroll
+	overflow-x: initial
+
+	.editor-search
+		right: -600px
+		position: absolute
+		z-index: 2
+
+		.editor-search-pullout
+			float: left
+			background: url('../images/editor-search-background.png') center center
+			width: 50px
+			height: 50px
+			cursor: pointer
+
+		.editor-search-main-panel
+			background: url('../images/editor-search-background.png') center center
+			width: 600px
+			float: right
+
+		.editor-search-bar
+			height: 30px
+			width: 95%
+			margin: 10px auto
+
+			input
+				background: none
+				@include border-radius(2px)
+				border: 2px solid #666
+				width: 98%
+				font-size: 1.4em
+				color: #bababa
+				padding-left: 6px
+
+				&:focus
+					border-color: #bababa
+
+		.editor-search-body-content
+			overflow-y: auto
+			background-color: #fff
+			height: 600px
+
+			.editor-favorites-browser, .editor-profile-browser, .editor-projects-browser
+				border-width: 0px
+
+		.editor-search-body
+			width: 95%
+			margin: auto
+
+			> nav
+				height: 28px
+
+				ul
+					li
+						margin-left: 0px
+						margin-right: 3px
+						height: 28px
+
+						&.hide-tab
+							display: none
+						
+						a
+							padding-top: 4px
+							padding-bottom: 4px
+							border-top-width: 0px
+							border-left-width: 0px
+							border-right-width: 0px
+
+						.editor-favorites-tab, .editor-files-tab, .editor-projects-tab
+							background-size: 14px 14px
+							background-position: 10px 6px
+							background-repeat: no-repeat
+							padding-left: 30px
+
+						.editor-favorites-tab
+							background-image: url('../images/favorite.png')
+
+						.editor-projects-tab
+							background-image: url('../images/groups.png')
+
+						.editor-files-tab
+							background-image: url('../images/files.png')
+
+
+	.lesson-assist
+		position: absolute
+		z-index: 2
+		width: 300px
+		right: 40px
+		@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.1))
+
+		&.hide
+			display: none
+
+		.lesson-assist-pullout
+			background-color: #404040
+			color: #ffffff
+			padding: 10px
+			cursor: pointer
+
+		.lesson-assist-body
+			display: none
+			background-color: #fff
+			padding: 10px
+			overflow: auto
+
+			img
+				width: 95%
+
+	.editor-body-wrapper
+		position: relative
+		padding: 60px 65px
+		width: 830px
+		margin-top: 0px
+		@include box-shadow(0 0px 16px rgba(0, 0, 0, 0.1))
+		background-color: #fff
+		margin-bottom: 40px
+
+		.editor-body
+			min-height: 600px
+			outline: 0 none
+
+			.foreign-document-element
+				background-color: #efefef
+				padding: 10px
+				overflow: hidden
+
+				.foreign-document-element-thumbnail
+					background-position: center center
+					background-size: cover
+					float: left
+					height: 60px
+					margin-right: 16px
+					width: 60px
+
+				.foreign-document-element-description
+					float: left
+
+					.foreign-document-element-description-title
+						font-size: 1.4em
+						margin-bottom: 5px
+
+		&.assisted
+			margin-left: 32px
+	
+
+.editor-search-result
+	overflow: hidden
+	padding: 15px 10px
+	//position: absolute
+	background-color: #fff
+	//width: 550px
+
+	.editor-search-result-handle
+		float: left
+		width: 30px
+		height: 60px
+
+	.editor-search-result-thumbnail
+		float: left
+		margin-right: 16px
+		width: 60px
+		height: 60px
+		background-position: center center
+		background-size: cover
+
+	.editor-search-result-description
+		float: left
+		width: 70%
+
+		.editor-search-result-description-title
+			font-size: 1.4em
+			margin-bottom: 5px
+
+		.editor-search-result-description-meta
+			color: $light-font
+
+			a
+				color: $light-font
+
+	&:hover
+		background-color: #efefef
+		
+		.editor-search-result-handle
+			background-image: url('../images/move-handle.png')
+			cursor: move
+			background-repeat: repeat-y
+
+
+.editor-frame-result-clones
+	.editor-search-result
+		z-index: 5
+		width: 0.90 * 600px
+		position: absolute
+		opacity: 0.7
+
 /* All styling for widgets inside documents.*/
 #article-edit, article
 	.document-body
@@ -386,6 +610,28 @@ ul.tagit
 #new-resource-document-form
 	textarea[name=serialized-document-body]
 		display: none
+
+.editor-button-wrapper
+	.license-button,
+	.tags-button,
+	.share-document-button
+		background: linear-gradient(#FFFFFF, #EEEEEE) repeat scroll 0 0 rgba(0, 0, 0, 0)
+		text-shadow: 0 1px 0 #FFFFFF
+		color: #4b4b4b
+		box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), -1px -1px 0 0 #FFFFFF inset
+		border: 1px solid rgba(0, 0, 0, 0.2)
+		padding: 8px
+
+		&:hover
+			background: linear-gradient(#FAFAFA, #E9E9E9) repeat scroll 0 0 rgba(0, 0, 0, 0)
+
+	.license-button,
+	.tags-button
+		margin-left: -1px
+
+	.share-document-button
+		margin-left: 6px
+
 
 /** WMD specific styling starts here **/
 

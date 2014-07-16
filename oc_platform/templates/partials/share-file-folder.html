@@ -1,0 +1,47 @@
+<div class="resource-collection-visibility-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Add / remove collaborators</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <div class="resource-collection-visibility-form">
+            <nav class="resource-collection-visibility-form-tabs">
+                <ul>
+                    {% if host == 'project' %}
+                    <li><a href="#project-access">Everyone accessing the project</a></li>
+                    {% else %}
+                    <li><a href="#profile-access">Everyone accessing the profile</a></li>
+                    {% endif %}
+                    <li><a href="#private-access">Only people I choose (private)</a></li>
+                </ul>
+            </nav>
+            <div class="resource-collection-visibility-form-content oc-tabs-content">
+                <div class="project-access"></div>
+                <div class="profile-access">
+                    {% if host == 'profile' %}Your profile is public, so everyone can see this.{% endif %}
+                </div>
+                <div class="private-access">
+                    <p>Add a collaborator:</p>
+                    <form id="add-collection-collaborator-form">
+                        <input type="hidden" name="collection_id" value="" />
+                        <input type="hidden" name="resource_id" value="" />
+                        {% if host == 'project' %}
+                        <input type="hidden" name="project_id" value="{{ project.id }}" />
+                        {% endif %}
+                        <div class="add-collaborator-wrapper">
+                            <div class="add-collaborator-input">
+                                <input type="text" name="add-collaborator" placeholder="Type the name of the user you wish to add as a collaborator..." />
+                            </div>
+                            <div class="add-collaborator-button">
+                                <button class="action-button mini-action-button">Add</button>
+                            </div>
+                        </div>
+                    <p>Who can see and use this resource/folder:</p>
+                    <ul class="collaborators user-list">
+                    </ul>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

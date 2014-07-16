@@ -1,13 +1,4 @@
 OC.resourcesCollections = {
-    resourceCollectionCollaboratorTemplate: _.template('<li class="collaborator-item user" id="user-<%= id %>">' +
-        '<div class="collaborator-info user-info">' +
-        '<div class="collaborator-photo user-photo" style="background-image: url(\'<%= profile_pic %>\')"></div>' +
-        '<div class="collaborator-description user-description">' +
-        '<a href="/user/<%= username %>"><%= name %></a></div></div>' +
-        '<div class="collaborator-actions user-actions">' +
-        '<span class="delete-member delete-button" title="Remove collaborator"></span>' +
-        '</div></li>'),
-
     resourceItemTemplate: _.template('<div class="<%= host %>-browse-item resource-collection-item resource <%= type %>-resource" id="resource-<%= id %>">' +
         '<input type="checkbox" name="resource_id" value="<%= id %>"/>' +
         '<a href="<%= url %>"><%= title %> <span class="<%= host %>-browse-item-date"><%= created %></span>' +
@@ -268,199 +259,27 @@ OC.resourcesCollections = {
             // Get wrapping resource/collection element.
             var resourceCollectionItem = $(event.target).closest('.resource-collection-item');
 
-            OC.customPopup('.resource-collection-visibility-dialog', {
-                closeCallback: OC.resourcesCollections.closeCollaboratorPopupCallback
-            });
-
-            var isOwner = actionsWrapper.hasClass('is-owner');
-
-            var collaboratorForm = $('#add-collection-collaborator-form');
-            var collaboratorInput = $('input[name=add-collaborator]', collaboratorForm);
-            collaboratorInput.focus();
+            resourceCollectionItem.type =  resourceCollectionItem.hasClass(
+                'collection') ? 'collection' : 'resource';
+            resourceCollectionItem.id = resourceCollectionItem.type === 'collection' ? resourceCollectionItem.attr(
+                'id').substring(11) : resourceCollectionItem.attr('id').substring(9);
 
             // Nested if/else to figure out the visibility of the resource/collection.
-            OC.resourcesCollections.currentResourceCollectionVisibility = OC.resourcesCollections.getResourceCollectionVisibility(
+            OC.collaborators.currentResourceCollectionVisibility = OC.resourcesCollections.getResourceCollectionVisibility(
                 actionsWrapper, isProject);
 
-            // Empty contents of collaborator input.
-            collaboratorInput.val('');
-
-            // Get the list of current collaborators and place in popup list.
-            var userList = $('ul.collaborators', collaboratorForm);
-
-            // Clear current list.
-            userList.children().remove();
-
-            // Unbind all previously registered events from tabs.
-            $('.resource-collection-visibility-form-tabs li a').unbind('click');
-
-            if (resourceCollectionItem.hasClass('collection')){
-                // Setup the popup.
-                var collectionID = resourceCollectionItem.attr('id').substring(11);
-                $('input[name=collection_id]', collaboratorForm).val(collectionID);
-
-                // Re-initiate autocomplete add-a-collaborator-to-collection
-                //     functionality.
-                OC.resourcesCollections.addCollaborator(true);
-
-                userList.addClass('waiting');
-                $.get('/resources/collection/' + collectionID + '/list-collaborators/',
-                    function (response) {
-                        if (response.status === 'true'){
-                            OC.resourcesCollections.listCollaboratorsHandler(response);
-                        } else {
-                            OC.popup(response.message, response.title);
-                        }
-
-                        // Clear spinner from the user listing.
-                        userList.removeClass('waiting');
-                    },
-                'json');
-
-                // Make requests everytime the user clicks on a visibility button.
-                OC.resourcesCollections.collectionVisibility.setupToggler(
-                    collectionID, isProject);
-            } else {
-                // Setup the popup.
-                var resourceID = resourceCollectionItem.attr('id').substring(9);
-                $('input[name=resource_id]', collaboratorForm).val(resourceID);
-
-                // Re-initiate autocomplete add-a-collaborator-to-a-resource
-                //     functionality.
-                OC.resourcesCollections.addCollaborator(false);
-
-                userList.addClass('waiting');
-                $.get('/resources/resource/' + resourceID + '/list-collaborators/',
-                    function (response) {
-                        if (response.status === 'true'){
-                            OC.resourcesCollections.listCollaboratorsHandler(response);
-                        } else {
-                            OC.popup(response.message, response.title);
-                        }
-
-                        // Clear spinner from the user listing.
-                        userList.removeClass('waiting');
-                    },
-                'json');
-
-                // Make requests everytime the user clicks on a visibility button.
-                OC.resourcesCollections.resourceVisibility.setupToggler(
-                    resourceID, isProject);
-            }
-
-            if (isProject){
-                // Get current visibility of the project.
-                // TODO(Varun): Make projectID retrieval less hackish.
-                var projectID = $('#add-collection-collaborator-form input[name=project_id]').val();
-                $.get('/group/' + projectID + '/visibility/',
-                    function (response) {
-                        if (response.status === 'true'){
-                            // Set the body of the project visibility tab accordingly.
-                            var projectAccessWrapper = $(
-                                '.resource-collection-visibility-form-content .project-access');
-                            if (response.visibility === 'private'){
-                                projectAccessWrapper.text('This group is private, so only ' +
-                                    'the members of this project can see this.');
-                            } else if (response.visibility === 'public'){
-                                projectAccessWrapper.text('This group is public, so ' +
-                                    'everyone can see this.');
-                            }
-                        } else {
-                            OC.popup(response.message, response.title);
-                        }
-                    },
-                'json');
-            }
-
-            OC.tabs('.resource-collection-visibility-form', {
-                // Select the second tab (with index starting at 0)
-                tab: OC.resourcesCollections.currentResourceCollectionVisibility == 'private' ? 1:0,
-                showOnly: isOwner ? null : 1,
-            });
+            OC.collaborators.init(
+                resourceCollectionItem,
+                OC.resourcesCollections.resourceVisibility.setupToggler,
+                OC.resourcesCollections.collectionVisibility.setupToggler,
+                OC.resourcesCollections.closeCollaboratorPopupCallback,
+                actionsWrapper.hasClass('is-owner')
+            );
         }
 
         event.stopPropagation();
         event.preventDefault();
         return false;
-    },
-
-    addCollaborator: function(isCollection){
-        var collaboratorForm = $('#add-collection-collaborator-form');
-        var addCollaboratorInput = $('input[name=add-collaborator]', collaboratorForm);
-        var collectionID = $('input[name=collection_id]', collaboratorForm).val();
-        var resourceID = $('input[name=resource_id]', collaboratorForm).val();
-
-        addCollaboratorInput.autocomplete({
-            source: function(request, response){
-                $.get('/user/api/list/' + request.term,
-                    function (data){
-                        response($.map(data, function(item){
-                            // TODO (Varun): Remove existing users.
-                            return {
-                                label: item.name,
-                                value: item.username,
-                                id: item.id
-                            };
-                        }));
-                    }, 'json');
-            },
-            minLength: 2,
-            select: function(event, ui){
-                // Show the spinner as soon as the 'Add' button is clicked.
-                addCollaboratorInput.addClass('waiting');
-
-                if (isCollection){
-                    // Submit the add request through the project API        
-                    $.get('/resources/collection/' + collectionID + '/add/' + ui.item.id + '/',
-                        function (response) {
-                            var userList = $('#add-collection-collaborator-form ul.collaborators');
-                            OC.resourcesCollections.addCollaboratorHandler(response.user, userList);
-                        
-                            // Clear contents from the input box
-                            addCollaboratorInput.val('');
-                            addCollaboratorInput.removeClass('waiting');
-                        },
-                    'json');
-                } else {
-                    // Submit the add request through the project API        
-                    $.get('/resources/resource/' + resourceID + '/add/' + ui.item.id + '/',
-                        function (response) {
-                            var userList = $('#add-collection-collaborator-form ul.collaborators');
-                            OC.resourcesCollections.addCollaboratorHandler(response.user, userList, isCollection);
-                        
-                            // Clear contents from the input box
-                            addCollaboratorInput.val('');
-                            addCollaboratorInput.removeClass('waiting');
-                        },
-                    'json');
-                }
-
-            }
-        });
-    },
-
-    addCollaboratorHandler: function(user, userList, isCollection){
-        collaborator = OC.resourcesCollections.resourceCollectionCollaboratorTemplate(user);
-        userList.append(collaborator);
-
-        // Bind delete action with each user.
-        var newUserDeleteButton = userList.find(
-            'li.collaborator-item:last .delete-button');
-        newUserDeleteButton.click(function(event){
-            OC.resourcesCollections.removeCollaboratorHandler(event, isCollection);
-        });
-
-        // Tipsy the collaborator.
-        newUserDeleteButton.tipsy({gravity: 'n'});
-    },
-
-    listCollaboratorsHandler: function(response){
-        var userList = $('#add-collection-collaborator-form ul.collaborators');
-
-        var i, collaborator;
-        for (i = 0; i < response.users.length; i++){
-            OC.resourcesCollections.addCollaboratorHandler(response.users[i], userList);
-        }
     },
 
     getResourceCollectionVisibility: function(element, isProject){
@@ -475,14 +294,14 @@ OC.resourcesCollections = {
 
             if (isProject){
                 var projectVisibilityTab = $(
-                    '.resource-collection-visibility-form-tabs li a[href=".project-access"]');
+                    '.resource-collection-visibility-form-tabs li a[href="#project-access"]');
 
                 projectVisibilityTab.click(function(){
                     OC.resourcesCollections.collectionVisibility.setProjectVisibility(collectionVisibility, collectionID);
                 });
             } else {
                 var publicVisibilityTab = $(
-                    '.resource-collection-visibility-form-tabs li a[href=".profile-access"]');
+                    '.resource-collection-visibility-form-tabs li a[href="#profile-access"]');
 
                 publicVisibilityTab.click(function(){
                     OC.resourcesCollections.collectionVisibility.setPublicVisibility(collectionVisibility, collectionID);
@@ -490,7 +309,7 @@ OC.resourcesCollections = {
             }
 
             var privateVisibilityTab = $(
-                '.resource-collection-visibility-form-tabs li a[href=".private-access"]');
+                '.resource-collection-visibility-form-tabs li a[href="#private-access"]');
 
             privateVisibilityTab.click(function(){
                 OC.resourcesCollections.collectionVisibility.setPrivateVisibility(collectionVisibility, collectionID);
@@ -498,8 +317,6 @@ OC.resourcesCollections = {
         },
 
         setProjectVisibility: function(collectionVisibility, collectionID){
-            $.get('/resources/collection/' + collectionID + '/visibility/project/');
-
             // Remove the private visibility class on the collection.
             collectionVisibility.removeClass('visibility-private');
 
@@ -510,8 +327,6 @@ OC.resourcesCollections = {
         },
 
         setPrivateVisibility: function(collectionVisibility, collectionID){
-            $.get('/resources/collection/' + collectionID + '/visibility/private/');
-
             // Remove the private & public visibility class on the collection.
             collectionVisibility.removeClass('visibility-project');
             collectionVisibility.removeClass('visibility-public');
@@ -523,8 +338,6 @@ OC.resourcesCollections = {
         },
 
         setPublicVisibility: function(collectionVisibility, collectionID){
-            $.get('/resources/collection/' + collectionID + '/visibility/public/');
-
             // Remove the private visibility class on the collection.
             collectionVisibility.removeClass('visibility-private');
 
@@ -542,14 +355,14 @@ OC.resourcesCollections = {
 
             if (isProject){
                 var projectVisibilityTab = $(
-                    '.resource-collection-visibility-form-tabs li a[href=".project-access"]');
+                    '.resource-collection-visibility-form-tabs li a[href="#project-access"]');
 
                 projectVisibilityTab.click(function(){
                     OC.resourcesCollections.resourceVisibility.setProjectVisibility(resourceVisibility, resourceID);
                 });
             } else {
                 var publicVisibilityTab = $(
-                    '.resource-collection-visibility-form-tabs li a[href=".profile-access"]');
+                    '.resource-collection-visibility-form-tabs li a[href="#profile-access"]');
 
                 publicVisibilityTab.click(function(){
                     OC.resourcesCollections.resourceVisibility.setPublicVisibility(resourceVisibility, resourceID);
@@ -557,7 +370,7 @@ OC.resourcesCollections = {
             }
 
             var privateVisibilityTab = $(
-                '.resource-collection-visibility-form-tabs li a[href=".private-access"]');
+                '.resource-collection-visibility-form-tabs li a[href="#private-access"]');
 
             privateVisibilityTab.click(function(){
                 OC.resourcesCollections.resourceVisibility.setPrivateVisibility(resourceVisibility, resourceID);
@@ -565,8 +378,6 @@ OC.resourcesCollections = {
         },
 
         setProjectVisibility: function(resourceVisibility, resourceID){
-            $.get('/resources/resource/' + resourceID + '/visibility/project/');
-
             // Remove the private visibility class on the collection.
             resourceVisibility.removeClass('visibility-private');
 
@@ -577,8 +388,6 @@ OC.resourcesCollections = {
         },
 
         setPrivateVisibility: function(resourceVisibility, resourceID){
-            $.get('/resources/resource/' + resourceID + '/visibility/private/');
-
             // Remove the private visibility class on the collection.
             resourceVisibility.removeClass('visibility-project');
             resourceVisibility.removeClass('visibility-public');
@@ -590,8 +399,6 @@ OC.resourcesCollections = {
         },
 
         setPublicVisibility: function(resourceVisibility, resourceID){
-            $.get('/resources/resource/' + resourceID + '/visibility/public/');
-
             // Remove the private visibility class on the collection.
             resourceVisibility.removeClass('visibility-private');
 
@@ -601,48 +408,6 @@ OC.resourcesCollections = {
             resourceVisibility.html(
                 '<span class="publicly-shared-icon"></span>Public');
         }
-    },
-
-    removeCollaboratorHandler: function(event, isCollection){
-        // From event target, get the collectionID/resourceID and userID.
-        var collaboratorForm = $('#add-collection-collaborator-form'),
-            collectionID = $('input[name=collection_id]', collaboratorForm).val(),
-            resourceID = $('input[name=resource_id]', collaboratorForm).val(),
-            target = $(event.target),
-            userID = target.closest('li.collaborator-item').attr('id').substring(5);
-
-        if (isCollection){
-            // Submit the remove member request through the project API.
-            $.get('/resources/collection/' + collectionID + '/remove/' + userID + '/',
-                function (response) {
-                    if (response.status === 'true') {
-                        OC.resourcesCollections.removeCollaborator(target);
-                    } else {
-                        OC.popup(response.message, response.title);
-                    }
-                },
-            'json');
-        } else {
-            // Submit the remove member request through the project API.
-            $.get('/resources/resource/' + resourceID + '/remove/' + userID + '/',
-                function (response) {
-                    if (response.status === 'true') {
-                        OC.resourcesCollections.removeCollaborator(target);
-                    } else {
-                        OC.popup(response.message, response.title);
-                    }
-                },
-            'json');
-        }
-    },
-
-    removeCollaborator: function(target){
-        var collaboratorContainer = $(target).parents('li.collaborator-item');
-
-        // Hide the tipsy on the 'delete' target.
-        $(target).tipsy('hide');
-
-        collaboratorContainer.remove();
     },
 
     closeCollaboratorPopupCallback: function(){

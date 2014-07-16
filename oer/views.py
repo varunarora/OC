@@ -964,51 +964,12 @@ def render_editor(request, document_type):
 
     form_context = {}
     if request.method == 'POST':
-        user_id = request.POST.get('user', None)
-        project_id = request.POST.get('project', None)
-        collection_id = request.POST.get('collection', None)
+        (document, document_creation_success) = create_document_resource(request)
 
-        from oer import forms
-        # Create and save new Document.
-        content = Document()
-        content.save()
-
-        new_resource_revision = ResourceRevision()
-        new_resource_revision.content = content
-        new_resource_revision.user = request.user
-        new_resource_revision.save()
-
-        new_document = forms.NewDocumentForm(request.POST, request.user, new_resource_revision.id)
-
-        if new_document.is_valid():
-            create_document_elements(request.POST, content)
-
-            document_resource = new_document.save()
-
-            # Assign this document to the revision created.
-            document_resource.revision.resource = document_resource
-            document_resource.revision.save()
-
-            # Add to the necessary collection.
-            collection = get_collection(user_id, project_id, collection_id)
-
-            # Add to the necessary collection.
-            add_resource_to_collection(document_resource, collection)
-
-            # Push a signal for new resource created.
-            import oer.CollectionUtilities as cu
-            (collection_host_type, collection_host) = cu.get_collection_root(collection)
-            Resource.resource_created.send(
-                sender="Resources", resource=document_resource,
-                context_type=collection_host_type.name, context=collection_host
-            )
-
-            return view_resource(request, document_resource.id, document_resource.slug)
+        if document_creation_success:
+            return view_resource(request, document.id, document.slug)
         else:
-            new_document.delete()
-            new_resource_revision.delete()
-
-            build_return_resource_form_context(request, new_document, form_context)
+            build_return_resource_form_context(request, document, form_context)
 
     form_context['resource'] = {}
 
@@ -1037,6 +998,53 @@ def render_editor(request, document_type):
     }.items() + resource_context.items() + form_context.items())
 
     return render(request, document_type + '.html', context)
+
+
+def create_document_resource(request):
+    user_id = request.POST.get('user', None)
+    project_id = request.POST.get('project', None)
+    collection_id = request.POST.get('collection', None)
+
+    from oer import forms
+    # Create and save new Document.
+    content = Document()
+    content.save()
+
+    new_resource_revision = ResourceRevision()
+    new_resource_revision.content = content
+    new_resource_revision.user = request.user
+    new_resource_revision.save()
+
+    new_document = forms.NewDocumentForm(request.POST, request.user, new_resource_revision.id)
+
+    if new_document.is_valid():
+        create_document_elements(request.POST, content)
+
+        document_resource = new_document.save()
+
+        # Assign this document to the revision created.
+        document_resource.revision.resource = document_resource
+        document_resource.revision.save()
+
+        # Add to the necessary collection.
+        collection = get_collection(user_id, project_id, collection_id)
+
+        # Add to the necessary collection.
+        add_resource_to_collection(document_resource, collection)
+
+        # Push a signal for new resource created.
+        import oer.CollectionUtilities as cu
+        (collection_host_type, collection_host) = cu.get_collection_root(collection)
+        Resource.resource_created.send(
+            sender="Resources", resource=document_resource,
+            context_type=collection_host_type.name, context=collection_host
+        )
+
+        return (document_resource, True)
+    else:
+            new_document.delete()
+        new_resource_revision.delete()
+        return (new_document, False)
 
 
 def create_document_elements(post_request, content):
@@ -4046,3 +4054,23 @@ def request_for_information(request, resource_id):
             request.user.email, str(resource.id) + ':' + resource.title))
 
     return APIUtilities._api_success()
+
+
+def auto_save_document(request):
+    (document, document_creation_success) = create_document_resource(request)
+
+    if document_creation_success:
+        context = {
+            'resource': {
+                'id': document.id
+            }
+        }
+
+        return APIUtilities._api_success(context)
+    else:
+        context = {
+            'title': 'Could not auto-save the document.',
+            'message': 'We failed to save the document, and our apologies for that. '
+            + 'Please contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)

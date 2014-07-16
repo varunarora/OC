@@ -9,16 +9,17 @@
     {% csrf_token %}
     <div class="center-stage editor-header">
         {% include 'partials/resource-meta.html' %}
+        <input type="hidden" name="user" value="{{ user.id }}" />
+        <input type="hidden" name="visibility" value="{% if resource %}{{ resource.visibility }}{% else %}private{% endif %}" />
+        <input type="hidden" name="description" class="document-description" />
         <div id="key-panel" class="panel-left">
-             <input type="hidden" name="user" value="{{ user.id }}" />
-             <input type="hidden" name="description" class="document-description" />
              <h2 id="article-title" class="browser-edit"><input type="text" value="{{ resource.title }}" name="title" class="browser-edit" placeholder="(Document title)" /></h2>
         </div>
         <div id="fill-panel" class="panel-right">
             <div class="editor-button-wrapper">
-                <button class="action-button secondary-button license-button">License <span class="horizontal-caret-up breadcrumb-caret"></span></button>
-                <button class="action-button secondary-button tags-button">Tags <span class="horizontal-caret-up breadcrumb-caret"></span></button>
-                <button class="action-button secondary-button share-button">Share <span class="horizontal-caret-up breadcrumb-caret"></span></button>
+                <button type="button" class="action-button secondary-button license-button">License <span class="horizontal-caret-up breadcrumb-caret"></span></button>
+                <button type="button" class="action-button secondary-button tags-button">Tags <span class="horizontal-caret-up breadcrumb-caret"></span></button>
+                <button type="button" class="action-button secondary-button share-document-button">Share</button>
                 <button class="action-button save-button">Save</button>
 
                 <nav id="license-menu">
@@ -42,10 +43,6 @@
                             {% endif %}
                         </ul>
                     </div>
-                </nav>
-                <nav id="share-menu">
-                    <div class="floating-menu-spacer"></div>
-                    {% include 'partials/resource-form-visibility.html' %}
                 </nav>
             </div>
         </div>
@@ -252,6 +249,7 @@
         </div>
     </div>
 </div>
+{% include 'partials/share-file-folder.html' %}
 
 {% if document_type == 'lesson' %}
 <div class="lesson-path-dialog oc-popup">

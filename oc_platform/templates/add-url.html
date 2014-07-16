@@ -7,7 +7,7 @@
         {% else %}
         <h2>Edit link</h2>
         {% endif %}
-        <form method="POST" class="resource-create-edit-form">
+        <form method="POST" class="url-edit-form resource-create-edit-form">
             {% csrf_token %}
             {% include 'partials/resource-meta.html' %}
             <table class="add-url-inputs">

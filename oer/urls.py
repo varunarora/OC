@@ -43,6 +43,7 @@ urlpatterns = patterns(
     url(r'^resource/(?P<resource_id>\d+)/link/from/(?P<from_collection_id>\d+)/to/(?P<to_collection_id>\d+)/$', views.link_resource_to_collection, name='link_resource_to_collection'),
 
     url(r'^document-element/(?P<document_element_id>\d+)/comments/$', views.get_document_element_comments, name='get_document_element_comments'),
+    url(r'^api/auto-save-document/$', views.auto_save_document, name='auto_save_document'),
 
     url(r'^move/resource/(?P<resource_id>\d+)/from/(?P<from_collection_id>\d+)/to/(?P<to_collection_id>\d+)/$', views.move_resource_to_collection, name='move_resource_to_collection'),    
     url(r'^move/collection/(?P<collection_id>\d+)/from/(?P<from_collection_id>\d+)/to/(?P<to_collection_id>\d+)/$', views.move_collection_to_collection, name='move_collection_to_collection'),

@@ -247,7 +247,7 @@ _.extend(OC, {
             var i;
             for (i = 0; i < tabs.length; i++){
                 // Add a unique class to all blocks represented by the navigation
-                var contentBlock = $(tabs[i]).attr('href');
+                var contentBlock = $(tabs[i]).attr('href').replace('#', '.');
                 $(contentBlock).addClass('tab-content');
             }
 
@@ -259,7 +259,7 @@ _.extend(OC, {
                     tabs.removeClass('selected');
                     $(this).addClass('selected');
 
-                    var blockToDisplay = $(this).attr('href');
+                    var blockToDisplay = $(this).attr('href').replace('#', '.');
 
                     // Hide all the other open blocks
                     $(contentBlocks).hide();

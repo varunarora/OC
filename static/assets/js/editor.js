@@ -1149,44 +1149,84 @@ OC.editor = {
     initDropMenus: function(){
         OC.setUpMenuPositioning('nav#license-menu', '.editor-button-wrapper .license-button');
         OC.setUpMenuPositioning('nav#tags-menu', '.editor-button-wrapper .tags-button', true);
-        OC.setUpMenuPositioning('nav#share-menu', '.editor-button-wrapper .share-button');
 
         $(window).resize(function () {
             OC.setUpMenuPositioning('nav#license-menu', '.editor-button-wrapper .license-menu');
             OC.setUpMenuPositioning('nav#tags-menu', '.editor-button-wrapper .tags-menu', true);
-            OC.setUpMenuPositioning('nav#share-menu', '.editor-button-wrapper .share-button');
         });
 
-        // Now bind the click actions with the menus.
+        // Now bind the click button with the menus.
         $('.editor-button-wrapper button.license-button').click(
-            function(e){
+            function(event){
                 $('#license-menu').toggleClass('showMenu');
                 $('button.license-button').toggleClass('menu-open');
 
-                e.stopPropagation();
-                e.preventDefault();
+                event.stopPropagation();
+                event.preventDefault();
                 return false;
             }
         );
 
         $('.editor-button-wrapper button.tags-button').click(
-            function(e){
+            function(event){
                 $('#tags-menu').toggleClass('showMenu');
                 $('button.tags-button').toggleClass('menu-open');
 
-                e.stopPropagation();
-                e.preventDefault();
+                event.stopPropagation();
+                event.preventDefault();
                 return false;
             }
         );
 
-        $('.editor-button-wrapper button.share-button').click(
-            function(e){
-                $('#share-menu').toggleClass('showMenu');
-                $('button.share-button').toggleClass('menu-open');
+        $('.editor-button-wrapper button.share-document-button').click(
+            function(event){
+                function resourceVisibilityToggler(resourceID, isProject){}
+                function collectionVisibilityToggler(collectionID, isProject){}
 
-                e.stopPropagation();
-                e.preventDefault();
+                function closeCollaboratorPopupCallback(){
+                    $('input[name="visibility"]').val(
+                        OC.collaborators.currentResourceCollectionVisibility);
+                }
+
+                // Auto-save the document using a POST async request.
+                var resourceID = $('input[name="resource_id"]').val();
+
+                OC.collaborators.currentResourceCollectionVisibility =  $('input[name="visibility"]').val();
+
+                // Show auto-save loader before transitioning to popup.
+                if (resourceID === ''){
+                    OC.setMessageBoxMessage('Auto-saving your document to turn sharing on...');
+                    OC.showMessageBox();
+
+                    serializeDocument();
+                    var newDocumentForm = $('#new-resource-document-form');
+
+                    $.post('/resources/api/auto-save-document/', newDocumentForm.serialize(),
+                        function(response){
+                            // Hide the resource
+                            if (response.status == 'true'){
+                                OC.dismissMessageBox();
+
+                                // If not set already, set document ID.
+                                $('input[name="resource_id"]').val(response.resource.id);
+
+                                OC.collaborators.init({ type: 'resource', id: response.resource.id }, resourceVisibilityToggler,
+                                    collectionVisibilityToggler, closeCollaboratorPopupCallback, true);
+                            }
+                            else {
+                                OC.popup(response.message, response.title);
+                                OC.dismissMessageBox();
+                            }
+                        },
+                    'json');
+                } else {
+                    OC.collaborators.init({ type: 'resource', id: resourceID }, resourceVisibilityToggler,
+                        collectionVisibilityToggler, closeCollaboratorPopupCallback, true);
+                }
+
+
+                event.stopPropagation();
+                event.preventDefault();
                 return false;
             }
         );
@@ -2092,6 +2132,37 @@ function attachUserID(file, xhr, formData){
     formData.append('user', $('form.document-edit-form input[name=user]').val());
 }
 
+function serializeDocument(){
+    var newDocumentForm = $('#new-resource-document-form'),
+        existingSerializedDocumentBody = $(
+            'textarea[name="serialized-document-body"]'),
+        serializedDocumentBody;
+
+    if (existingSerializedDocumentBody.length === 0){
+        serializedDocumentBody = $('<textarea/>', {
+            'text': JSON.stringify([
+                {
+                    type: 'textblock',
+                    data: $('.editor-body').ckeditorGet().getData()
+                }
+            ]),
+            'name': 'serialized-document-body'
+        });
+        newDocumentForm.append(serializedDocumentBody);
+
+    } else {
+        serializedDocumentBody = existingSerializedDocumentBody;
+        serializedDocumentBody.text = JSON.stringify([
+            {
+                type: 'textblock',
+                data: $('.editor-body').ckeditorGet().getData()
+            }
+        ]);
+    }
+
+    return serializedDocumentBody;
+}
+
 $(document).ready(function(){
     $('.image-upload-dialog .upload-drag-drop').dropzone({
         url: '/api/image-upload/',
@@ -2101,8 +2172,10 @@ $(document).ready(function(){
             '<div class="dz-upload" data-dz-uploadprogress></div></div>' +
             '<div data-dz-errormessage></div>',*/
     });
-    Dropzone.forElement('.image-upload-dialog .upload-drag-drop').on('sending', attachUserID);
-    Dropzone.forElement('.image-upload-dialog .upload-drag-drop').on("sending", attachCSRFToken);
+    if ($('.image-upload-dialog .upload-drag-drop').length > 0){
+        Dropzone.forElement('.image-upload-dialog .upload-drag-drop').on('sending', attachUserID);
+        Dropzone.forElement('.image-upload-dialog .upload-drag-drop').on("sending", attachCSRFToken);
+    }
 
     $('.upload-widget-dialog .upload-drag-drop').dropzone({
         url: '/api/file-upload/',
@@ -2110,15 +2183,17 @@ $(document).ready(function(){
         maxFilesize: 5
     });
 
-    OC.editor.init();
+    if ($('.editor-frame').length > 0) OC.editor.init();
 
     OC.editor.initImageUploaderTabs();
 
-    // Setup up Dropzone.
-    Dropzone.forElement('.upload-widget-dialog .upload-drag-drop').on('sending', attachUserID);
+    if ($('.upload-widget-dialog .upload-drag-drop').length > 0){
+        // Setup up Dropzone.
+        Dropzone.forElement('.upload-widget-dialog .upload-drag-drop').on('sending', attachUserID);
 
-    // TODO(Varun): Move this to a common place to a context agnostic upload lib
-    Dropzone.forElement('.upload-widget-dialog .upload-drag-drop').on("sending", attachCSRFToken);
+        // TODO(Varun): Move this to a common place to a context agnostic upload lib
+        Dropzone.forElement('.upload-widget-dialog .upload-drag-drop').on("sending", attachCSRFToken);
+    }
 
     $('.tagit').tagit({
         allowSpaces: true
@@ -2210,20 +2285,8 @@ $(document).ready(function(){
         window.onbeforeunload = null;
 
         // Add all element JSONs into strings.
-        var newDocumentForm = $('#new-resource-document-form');
-
-        var serializedDocumentBody = $('<textarea/>', {
-            'text': JSON.stringify([
-                {
-                    type: 'textblock',
-                    data: $('.editor-body').ckeditorGet().getData()
-                }
-            ]),
-            'name': 'serialized-document-body'
-        });
-        
-        newDocumentForm.append(serializedDocumentBody);
-        newDocumentForm.submit();
+        serializeDocument();
+        $('#new-resource-document-form').submit();
 
         event.stopPropagation();
         event.preventDefault();
