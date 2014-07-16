@@ -25,7 +25,7 @@
         <div class="wide-center-stage-fill-panel category-panel">
             <div class="category-panel-listing">
                 <div class="category-choice-wrapper">
-                    <button class="category-choice action-button" title="Category this page is based on">Common Core<div class="category-choice-button"></div></button>
+                    <button class="category-choice action-button" title="Category this page is based on">Common Core<!--<div class="category-choice-button"></div>--></button>
                 </div>
                 {% if query or query == '' %}
                     <ul class="category-panel-listing-search-category">
@@ -129,6 +129,12 @@
                                 {% endfor %}
                             </div>
                         </div>
+                        <div class="content-panel-body-listing-questions-toggler">
+                            <a href="" class="content-panel-body-listing-questions-toggler-listing selected">Content</a>
+                            <a href="" class="content-panel-body-listing-questions-toggler-questions">Community Q&amp;A</a>
+                        </div>
+                    </div>
+                    <div class="content-panel-body-listing-filters-sort-wrapper">
                         <div class="content-panel-body-listing-filters-sort">
                             <span class="sort-by">Sort by: </span><span class="filter-sort-option filter-sort-option-newest selected">Newest</span> <span class="filter-sort-option">Popularity</span>
                             <!--<div class="sort-by-type">All types<span class="sort-by-type-button"></div>
@@ -161,20 +167,21 @@
                             <li name="lesson"><a href="">Lesson Plans</a></li>
                             <li name="activity"><a href="">Activities</a></li>
                             <li name="worksheet"><a href="">Worksheets</a><li>
-                            <li name="handout"><a href="">Handouts</a></li>
                             <li name="assessment"><a href="">Assessments</a></li>
+                            <li name="exercise"><a href="">Exercises</a></li>
                             <li name="lecture"><a href="">Lectures</a></li>
                         </ul>
                     </div>
                     {% endif %}
                     <div class="content-panel-body-listing">
-                        <div class="content-panel-body-listing-items">
+                        <div class="content-panel-body-listing-items show">
                         <script type="text/javascript">
                         {% for item in items %}
                             {% if item.item_type == 'resource' %}
                             var resource = new Resource({
                                 id: '{{ item.id }}',
-                                url: '{% url read resource_id=item.id resource_slug=item.slug %}',
+                                url: {% if item.revision.content_type.name == 'link'%}'{{ item.revision.content.url }}'{% else %}'{% url read resource_id=item.id resource_slug=item.slug %}'{% endif %},
+                                remote: {% if item.revision.content_type.name == 'link' %}true{% else %}false{% endif %},
                                 title: '{{ item.title }}',
                                 user: '{{ item.revision.user.get_full_name }}',
                                 user_id: '{{ item.revision.user.id }}',

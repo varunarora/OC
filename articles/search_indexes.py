@@ -11,6 +11,7 @@ class ResourceIndex(SearchIndex):
     tags = MultiValueField(null=True)
     objectives = MultiValueField(null=True)
     content_auto = EdgeNgramField(model_attr='title')
+    content_description = EdgeNgramField(model_attr='description')
 
     def index_queryset(self):
         """Used when the entire index for model is updated."""

@@ -361,7 +361,8 @@ def build_browse_resource(resource, user):
     resource.item_type = 'resource'
     if not hasattr(resource, 'filtered_tags'):
         resource.filtered_tags = resource.tags.exclude(
-            category=TagCategory.objects.get(title='Resource type')).all()
+            category=TagCategory.objects.get(title='Resource type')).exclude(
+            category=TagCategory.objects.get(title='Resources'))
 
     try:
         resource.favorited = Favorite.objects.get(
@@ -3952,6 +3953,8 @@ def search_category(request, category_id, query):
     for category in flattened_tree:
         categories_tags += category.tags.all()
 
+    resource_type_category = TagCategory.objects.get(title='Resource type')
+    resources_category = TagCategory.objects.get(title='Resources')
 
     def set_child_category(resource, immediate_category):
         while True:
@@ -3969,7 +3972,8 @@ def search_category(request, category_id, query):
     def categorize_resource(searched_resource):
         # Find the child category this is a descendant in.
         filtered_tags = searched_resource.object.tags.exclude(
-            category=TagCategory.objects.get(title='Resource type'))
+            category=resource_type_category).exclude(
+            category=resources_category)
 
         for tag in filtered_tags:
             if tag in categories_tags:
@@ -3984,18 +3988,21 @@ def search_category(request, category_id, query):
 
     # TODO(Varun): Rope in collection search.
     if len(categories) > 0 and len(categories_tags) > 0:
-        sqs = SearchQuerySet().filter(content_auto=query, visibility='public', category__in=categories)
-        sqs_tags = SearchQuerySet().filter(content_auto=query, visibility='public', tags__in=categories_tags)
+        sqs = SearchQuerySet().filter(content_auto=query, visibility='public', category__in=categories) | SearchQuerySet(
+            ).filter(content_description=query, visibility='public', category__in=categories)
+        sqs_tags = SearchQuerySet().filter(content_auto=query, visibility='public', tags__in=categories_tags) | SearchQuerySet(
+            ).filter(content_description=query, visibility='public', tags__in=categories_tags)
 
         all_raw_resources += sorted(
             set(map(set_category_on_categoried_resource, sqs) + map(
                 categorize_resource, sqs_tags)), key=lambda searched_resource: searched_resource.object.created, reverse=True)
     elif len(categories) > 0:
-        sqs = SearchQuerySet().filter(
-            content_auto=query, visibility='public', category__in=categories)
+        sqs = SearchQuerySet().filter(content_auto=query, visibility='public', tags__in=categories_tags) | SearchQuerySet(
+            ).filter(content_description=query, visibility='public', tags__in=categories_tags)
         all_raw_resources = map(set_category_on_categoried_resource, sqs)
     elif len(categories_tags) > 0:
-        sqs_tags = SearchQuerySet().filter(content_auto=query, visibility='public', tags__in=categories_tags)
+        sqs_tags = SearchQuerySet().filter(content_auto=query, visibility='public', category__in=categories) | SearchQuerySet(
+            ).filter(content_description=query, visibility='public', category__in=categories)
         all_raw_resources = list(map(categorize_resource, sqs_tags))
 
     # Setup each resource's favorites count and type.

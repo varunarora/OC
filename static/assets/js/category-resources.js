@@ -8,6 +8,7 @@ OC.categoryResources = {
     isCatalog: false,
     isSubjectHome: false,
     gradeCategoryMap: {},
+    currentView: 'items',
 
     initBrowseView: function(){
         // Set the height of the page.
@@ -231,7 +232,10 @@ var Resource = Backbone.Model.extend({
     stars: "",
 
     // Number of reviews this resource has gotten.
-    review_count: ""
+    review_count: "",
+
+    // Whether or not to open this URL in a new tab.
+    remote: "",
 });
 
 // Initialize resource results set Collection
@@ -395,6 +399,14 @@ var CategoryView = Backbone.View.extend({
             existingResources = this.model.get('resources').models.slice(0,categoryView.truncatedResourceLimit);
         }
 
+        // Sort the resources by exercise first.
+        existingResources = _.sortBy(existingResources, function(resource){
+            if (resource.get('type').toLowerCase() === 'activity' ||
+                resource.get('type').toLowerCase() === 'lesson')
+                return 0;
+            else return 1;
+        });
+
         if (existingResources){
             for (i = 0; i < existingResources.length; i++){
                 this.$('.content-panel-body-listing-category-resources').append(
@@ -549,7 +561,7 @@ var ResourceView = Backbone.View.extend({
     thumbnailTemplate: _.template(
         '<a href="<%= user_url %>" class="content-panel-body-listing-item-user-picture" ' +
         'style="background-image: url(\'<%= user_thumbnail %>\')"></a>' +
-        '<a href="<%= url %>" class="content-panel-body-listing-item-anchor"><div class="content-panel-body-listing-item-label-fold"></div>' +
+        '<a href="<%= url %>" class="content-panel-body-listing-item-anchor"<% if (remote) { %> target="_blank"<% } %>><div class="content-panel-body-listing-item-label-fold"></div>' +
         '<div class="content-panel-body-listing-item-label"><%= type %></div>' +
         '<div class="content-panel-body-listing-item-favorites<% if (favorited){ %> favorited<% } %>"><%= favorites %></div>' +
         '<div class="content-panel-body-listing-item-thumbnail"' +
@@ -569,7 +581,7 @@ var ResourceView = Backbone.View.extend({
             '<a href="<%= user_url %>" class="content-panel-body-listing-item-user-picture" style="background-image: url(\'<%= user_thumbnail %>\')"></a>' +
             '<div class="content-panel-body-listing-item-label-fold"></div>' +
             '<div class="content-panel-body-listing-item-label"><%= type %></div>' +
-            '<a href="<%= url %>" class="content-panel-body-listing-item-anchor">' +
+            '<a href="<%= url %>" class="content-panel-body-listing-item-anchor"<% if (remote) { %> target="_blank"<% } %>>' +
                 '<div class="content-panel-body-listing-item-thumbnail-wrapper">' +
                     '<div class="content-panel-body-listing-item-favorites<% if (favorited){ %> favorited<% } %>"><%= favorites %></div>' +
                     '<div class="content-panel-body-listing-item-thumbnail" style="background-image: url(\'<%= thumbnail %>\')"></div>' +
@@ -958,8 +970,15 @@ var ResourceCollectionView = Backbone.View.extend({
         if (collectionToRender.length === 0) {
             this.showNullView();
         } else {
-        // Create a new view object for each object in the collection and render it
-            _.each(collectionToRender.models, function(item) {
+            var collectionModels = _.sortBy(collectionToRender.models, function(resource){
+                if (resource.get('type').toLowerCase() === 'activity' ||
+                    resource.get('type').toLowerCase() === 'lesson')
+                    return 0;
+                else return 1;
+            });
+
+            // Create a new view object for each object in the collection and render it
+            _.each(collectionModels, function(item) {
                 new ResourceView({model: item}).render();
             });
         }
@@ -1058,6 +1077,8 @@ function init_mvc() {
         });
     }
 
+    var modes = $('.content-panel-body-listing-items, .content-panel-body-listing-requests');
+
     // Bind text input field as filter.
     if (!OC.categoryResources.isSubjectHome){
         $(OC.config.search.input).keyup(function(event){
@@ -1085,6 +1106,8 @@ function init_mvc() {
                     loadButton.removeClass('enabled');
                 }
 
+                modes.addClass('show');
+
                 if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog))
                     // Hide the 'show more's from all categories. 
                     categoryView.truncateAll();
@@ -1098,7 +1121,7 @@ function init_mvc() {
                     // Calculate delta between the current time and last timestamp.
                     delta = (currentTime - OC.categoryResources.lastInputTimestamp) / 1000;
 
-                    if (delta < 1.5){
+                    if (delta < 1){
                         clearTimeout(OC.categoryResources.searchFilterTimeout);
                         OC.categoryResources.filterAsyncSearchOn = false;
                     }
@@ -1175,6 +1198,9 @@ function init_mvc() {
                 OC.categoryResources.filterAsyncSearchOn = false;
                 loadingPlaceholder.removeClass('show');
 
+                var classToHide = OC.categoryResources.currentView == 'items' ? 'requests' : 'items';
+                $('.content-panel-body-listing-' + classToHide).removeClass('show');
+
                 try {
                     categoryView.resetTruncate();
                     // Show the 'show more's from all categories.
@@ -1243,6 +1269,29 @@ function groupResources(collection){
     return categorySet;
 }
 
+function initModeToggler(){
+    $('.content-panel-body-listing-questions-toggler a').click(function(event){
+        $('.content-panel-body-listing-questions-toggler a').removeClass('selected');
+        
+        var currentModeButton = $(event.target);
+        currentModeButton.addClass('selected');
+
+        if (currentModeButton.hasClass('content-panel-body-listing-questions-toggler-listing')){
+            $('.content-panel-body-listing-items').addClass('show');
+            $('.content-panel-body-listing-requests').removeClass('show');
+            OC.categoryResources.currentView = 'items';
+        } else if (currentModeButton.hasClass('content-panel-body-listing-questions-toggler-questions')){
+            $('.content-panel-body-listing-requests').addClass('show');
+            $('.content-panel-body-listing-items').removeClass('show');
+            OC.categoryResources.currentView = 'requests';
+        }
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+    });
+}
+
 jQuery(document).ready(function($){
     if (!OC.categoryResources.isSubjectHome){
         OC.categoryResources.setVisibleResourceCount();
@@ -1267,6 +1316,9 @@ jQuery(document).ready(function($){
 
         // Initiatialize the Backbone models/collection/view
         init_mvc();
+
+        // Initialize toggling between questions view and content.
+        initModeToggler();
 
         // Initialize loading more resources on scroll down.
         OC.categoryResources.initInfiniteScroll();
