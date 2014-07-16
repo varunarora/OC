@@ -20,7 +20,7 @@
         <div class="resource-big-actions">
             <button class="page-action-button mini-action-button favorite-button">Favorite</button>
             <button class="page-action-button mini-action-button share-button">Share</button>
-            <a href={% if resource_type == 'document' %}"{% if resource.document_type == 'lesson' %}{% url resource:new_lesson %}{% else %}{% url resource:new_document %}{% endif %}?remix={{ resource.id }}"{% elif resource_type == 'video' %}"https://edpuzzle.com/media/edit?url={{ resource.revision.content.url|urlencode }}" target="_blank"{% endif %} class="page-action-button mini-action-button remix-button">Remix</a>
+            <a href={% if resource_type == 'document' %}"{% if resource.document_type == 'lesson' %}{% url resource:new_lesson %}{% else %}{% url resource:new_document %}{% endif %}?remix={{ resource.id }}" {% elif resource_type == 'video' %}"https://edpuzzle.com/media/edit?url={{ resource.revision.content.url|urlencode }}" target="_blank"{% else %}"?remix={{ resource.id }}"{% endif %} class="page-action-button mini-action-button remix-button">Remix</a>
         </div>
     </div>
     <div class="resource-actions-wrapper">
