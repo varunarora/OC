@@ -4459,6 +4459,285 @@ _.extend(OC, {
 
     },
 
+    validateNewURL: function(){
+        // RegExp adopted and modified (to support no protocol)
+        //     from https://gist.github.com/dperini/729294
+        OC.validate.text(
+            '.resource-create-edit-form input[name="url"]',
+            /^(?:(?:https?|ftp):\/\/)?(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/i,
+            'You seem to have a little error in your URL'
+        );
+
+        $('form.url-edit-form .action-button').click(function(event){
+            var submitButton = $(this);
+
+            var fields = [
+                'input[name="url"]'
+            ];
+
+            var i, element, errorneousInputs = [];
+            for (i = 0; i < fields.length; i++){
+                element = $('form.resource-create-edit-form ' + fields[i]);
+                if (element.hasClass('form-input-error')){
+                    errorneousInputs.push(element);
+                }
+            }
+
+            if (errorneousInputs.length === 0) {
+                submitButton.parents('form.resource-create-edit-form').submit();
+            } else {
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            }
+        });
+    },
+
+    collaborators: {
+        currentResourceCollectionVisibility: null,
+        template: _.template('<li class="collaborator-item user" id="user-<%= id %>">' +
+            '<div class="collaborator-info user-info">' +
+            '<div class="collaborator-photo user-photo" style="background-image: url(\'<%= profile_pic %>\')"></div>' +
+            '<div class="collaborator-description user-description">' +
+            '<a href="/user/<%= username %>"><%= name %></a></div></div>' +
+            '<div class="collaborator-actions user-actions">' +
+            '<span class="delete-member delete-button" title="Remove collaborator"></span>' +
+            '</div></li>'),
+
+        init: function(resourceCollectionItem, setupResourceToggler, setupCollectionToggler, closeCallback, isOwner){
+            var collaboratorsPopup = OC.customPopup('.resource-collection-visibility-dialog', {
+                closeCallback: closeCallback
+            });
+
+            var collaboratorForm = $('#add-collection-collaborator-form', collaboratorsPopup.dialog);
+            var collaboratorInput = $('input[name=add-collaborator]', collaboratorForm);
+            collaboratorInput.focus();
+
+            // Empty contents of collaborator input.
+            collaboratorInput.val('');
+
+            // Get the list of current collaborators and place in popup list.
+            var userList = $('ul.collaborators', collaboratorForm);
+
+            // Clear current list.
+            userList.children().remove();
+
+            // Unbind all previously registered events from tabs.
+            $('.resource-collection-visibility-form-tabs li a').unbind('click');
+
+            var publicVisibilityTab = $(
+                '.resource-collection-visibility-form-tabs li a[href="#profile-access"]'),
+                projectVisibilityTab = $(
+                '.resource-collection-visibility-form-tabs li a[href="#project-access"]'),
+                privateVisibilityTab = $(
+                '.resource-collection-visibility-form-tabs li a[href="#private-access"]');
+            
+            if (resourceCollectionItem.type == 'collection'){
+                // Setup the popup.
+                $('input[name=collection_id]', collaboratorForm).val(resourceCollectionItem.id);
+
+                // Re-initiate autocomplete add-a-collaborator-to-collection
+                //     functionality.
+                OC.collaborators.add(true);
+
+                userList.addClass('waiting');
+                $.get('/resources/collection/' + resourceCollectionItem.id + '/list-collaborators/',
+                    function (response) {
+                        if (response.status === 'true'){
+                            OC.collaborators.listHandler(response);
+                        } else {
+                            OC.popup(response.message, response.title);
+                        }
+
+                        // Clear spinner from the user listing.
+                        userList.removeClass('waiting');
+                    },
+                'json');
+
+                // Make requests everytime the user clicks on a visibility button.
+                publicVisibilityTab.click(function(){
+                    OC.collaborators.currentResourceCollectionVisibility = 'public';
+                    $.get('/resources/collection/' + resourceCollectionItem.id + '/visibility/public/');
+                });
+                projectVisibilityTab.click(function(){
+                    OC.collaborators.currentResourceCollectionVisibility = 'project';
+                    $.get('/resources/collection/' + resourceCollectionItem.id + '/visibility/project/');
+                });
+                privateVisibilityTab.click(function(){
+                    OC.collaborators.currentResourceCollectionVisibility = 'private';
+                    $.get('/resources/collection/' + resourceCollectionItem.id + '/visibility/private/');
+                });
+
+                setupCollectionToggler(resourceCollectionItem.id, false);
+
+            } else {
+                // Setup the popup.
+                $('input[name=resource_id]', collaboratorForm).val(resourceCollectionItem.id);
+
+                // Re-initiate autocomplete add-a-collaborator-to-a-resource
+                //     functionality.
+                OC.collaborators.add(false);
+
+                userList.addClass('waiting');
+                $.get('/resources/resource/' + resourceCollectionItem.id + '/list-collaborators/',
+                    function (response) {
+                        if (response.status === 'true'){
+                            OC.collaborators.listHandler(response);
+                        } else {
+                            OC.popup(response.message, response.title);
+                        }
+
+                        // Clear spinner from the user listing.
+                        userList.removeClass('waiting');
+                    },
+                'json');
+
+                // Make requests everytime the user clicks on a visibility button.
+                publicVisibilityTab.click(function(){
+                    OC.collaborators.currentResourceCollectionVisibility = 'public';
+                    $.get('/resources/resource/' + resourceCollectionItem.id + '/visibility/public/');
+                });
+                projectVisibilityTab.click(function(){
+                    OC.collaborators.currentResourceCollectionVisibility = 'project';
+                    $.get('/resources/resource/' + resourceCollectionItem.id + '/visibility/project/');
+                });
+                privateVisibilityTab.click(function(){
+                    OC.collaborators.currentResourceCollectionVisibility = 'private';
+                    $.get('/resources/resource/' + resourceCollectionItem.id + '/visibility/private/');
+                });
+
+                setupResourceToggler(resourceCollectionItem.id, false);
+            }
+
+            OC.tabs('.resource-collection-visibility-form', {
+                // Select the second tab (with index starting at 0)
+                tab: OC.collaborators.currentResourceCollectionVisibility == 'private' ? 1:0,
+                showOnly: isOwner ? null : 1,
+            });
+        },
+
+        add: function(isCollection){
+            var collaboratorForm = $('#add-collection-collaborator-form');
+            var addCollaboratorInput = $('input[name=add-collaborator]', collaboratorForm);
+            var collectionID = $('input[name=collection_id]', collaboratorForm).val();
+            var resourceID = $('input[name=resource_id]', collaboratorForm).val();
+
+            addCollaboratorInput.autocomplete({
+                source: function(request, response){
+                    $.get('/user/api/list/' + request.term,
+                        function (data){
+                            response($.map(data, function(item){
+                                // TODO (Varun): Remove existing users.
+                                return {
+                                    label: item.name,
+                                    value: item.username,
+                                    id: item.id
+                                };
+                            }));
+                        }, 'json');
+                },
+                minLength: 2,
+                select: function(event, ui){
+                    // Show the spinner as soon as the 'Add' button is clicked.
+                    addCollaboratorInput.addClass('waiting');
+
+                    if (isCollection){
+                        // Submit the add request through the project API        
+                        $.get('/resources/collection/' + collectionID + '/add/' + ui.item.id + '/',
+                            function (response) {
+                                var userList = $('#add-collection-collaborator-form ul.collaborators');
+                                OC.collaborators.addHandler(response.user, userList);
+                            
+                                // Clear contents from the input box
+                                addCollaboratorInput.val('');
+                                addCollaboratorInput.removeClass('waiting');
+                            },
+                        'json');
+                    } else {
+                        // Submit the add request through the project API        
+                        $.get('/resources/resource/' + resourceID + '/add/' + ui.item.id + '/',
+                            function (response) {
+                                var userList = $('#add-collection-collaborator-form ul.collaborators');
+                                OC.collaborators.addHandler(response.user, userList, isCollection);
+                            
+                                // Clear contents from the input box
+                                addCollaboratorInput.val('');
+                                addCollaboratorInput.removeClass('waiting');
+                            },
+                        'json');
+                    }
+
+                }
+            });
+        },
+
+        listHandler: function(response){
+            var userList = $('#add-collection-collaborator-form ul.collaborators');
+
+            var i, collaborator;
+            for (i = 0; i < response.users.length; i++){
+                OC.collaborators.addHandler(response.users[i], userList);
+            }
+        },
+
+        addHandler: function(user, userList, isCollection){
+            collaborator = OC.collaborators.template(user);
+            userList.append(collaborator);
+
+            // Bind delete action with each user.
+            var newUserDeleteButton = userList.find(
+                'li.collaborator-item:last .delete-button');
+            newUserDeleteButton.click(function(event){
+                OC.collaborators.removeHandler(event, isCollection);
+            });
+
+            // Tipsy the collaborator.
+            newUserDeleteButton.tipsy({gravity: 'n'});
+        },
+
+        removeHandler: function(event, isCollection){
+            // From event target, get the collectionID/resourceID and userID.
+            var collaboratorForm = $('#add-collection-collaborator-form'),
+                collectionID = $('input[name=collection_id]', collaboratorForm).val(),
+                resourceID = $('input[name=resource_id]', collaboratorForm).val(),
+                target = $(event.target),
+                userID = target.closest('li.collaborator-item').attr('id').substring(5);
+
+            if (isCollection){
+                // Submit the remove member request through the project API.
+                $.get('/resources/collection/' + collectionID + '/remove/' + userID + '/',
+                    function (response) {
+                        if (response.status === 'true') {
+                            OC.collaborators.remove(target);
+                        } else {
+                            OC.popup(response.message, response.title);
+                        }
+                    },
+                'json');
+            } else {
+                // Submit the remove member request through the project API.
+                $.get('/resources/resource/' + resourceID + '/remove/' + userID + '/',
+                    function (response) {
+                        if (response.status === 'true') {
+                            OC.remove.remove(target);
+                        } else {
+                            OC.popup(response.message, response.title);
+                        }
+                    },
+                'json');
+            }
+        },
+
+        remove: function(target){
+            var collaboratorContainer = $(target).parents('li.collaborator-item');
+
+            // Hide the tipsy on the 'delete' target.
+            $(target).tipsy('hide');
+
+            collaboratorContainer.remove();
+        },
+    },
+
     resource: {
         copy: function(fromCollectionID, resourceID, toCollectionID, callback){
             $.get('/resources/resource/' + resourceID + '/copy/from/' +
@@ -4700,6 +4979,8 @@ jQuery(document).ready(function ($) {
     OC.initProfileSubscribers();
 
     //OC.initEditResource();
+
+    OC.validateNewURL();
 
     OC.initForgotAuth();
 
