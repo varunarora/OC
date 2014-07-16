@@ -278,7 +278,10 @@ class SanitizedSearchView(SearchView):
 
             result.object.favorites_count = Favorite.objects.filter(
                 parent_id=result.object.id, parent_type=resource_ct).count()
-            result.object.type = result.object.tags.get(category=resource_type)
+            try:
+                result.object.type = result.object.tags.get(category=resource_type)
+            except:
+                result.object.type = 'Resource'
 
         # For all resource outputs, assign the type.
         import oer.CollectionUtilities as cu
