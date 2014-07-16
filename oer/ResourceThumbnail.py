@@ -98,12 +98,15 @@ class ResourceThumbnail:
                         thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
 
         from django.core.files.images import ImageFile
-        thumbnail_to_assign = ImageFile(
-            open(thumbnail + ResourceThumbnail.THUMBNAIL_EXT))
+        image_file = open(thumbnail + ResourceThumbnail.THUMBNAIL_EXT)
+        thumbnail_to_assign = ImageFile(image_file)
+
         # NOTE(Varun): It's really important to keep the save as false, to avoid
         #     a recursion here
         resource.image.save(
             thumbnail_to_assign.name, thumbnail_to_assign, save=False)
+
+        image_file.close()
 
         # Now delete the temporary image thumbnail
         call(["rm", thumbnail + ResourceThumbnail.THUMBNAIL_EXT])
