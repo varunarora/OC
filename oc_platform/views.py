@@ -5,12 +5,12 @@ import json
 
 
 def home(request):
-    if request.user.is_authenticated():
-        return redirect('user:user_profile', username=request.user.username)
-
     context = {
-            'title': _(settings.STRINGS['global']['TITLE']),
+        'title': _(settings.STRINGS['global']['TITLE']),
     }
+    if request.user.is_authenticated():
+        return render(request, 'home.html', context)
+
     return render(request, 'index.html', context)
 
 
@@ -45,7 +45,6 @@ def login(request):
         }.items()
     )
     return render(request, 'login.html', context)
-
 
 
 def t404(request):
