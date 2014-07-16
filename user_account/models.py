@@ -796,4 +796,5 @@ class Notification(models.Model):
         notification.save()
 
         # Send an email about this notification.
-        nu.notify_by_email(notification, request.get_host())
+        nu.notify_subscription_by_email(
+            notification, request.get_host(), subscription.subscriber.user)
