@@ -308,11 +308,13 @@ _.extend(OC, {
     },
 
     tip: function($el, options){
-        var gravity = 'n', title = null, description = false;
+        var gravity = 'n', title = null, description = false, width = null, dismisser = null;
         if (options){
             gravity = options.gravity || gravity;
             title = options.title || title;
             description = options.description || description;
+            width = options.width || width;
+            dismisser = options.dismisser || dismisser;
         }
 
         // Set tip body+text.
@@ -325,20 +327,34 @@ _.extend(OC, {
                 'class': 'oc-tip-body',
                 'html': bodyTemplate({'title': title, 'description': description})
             }),
-            floatingSpacer = $('<div/>', {'class': 'floating-menu-spacer' });
+            floatingSpacer = $('<div/>', {'class': 'floating-menu-spacer ' + gravity });
 
-        var body = $('body'), appendedTip;
+        if (width){
+            // Adjust width of the body.
+            tipBody.width(width);
+        }
+
+        var body = $('body'), appendedTip, top, left;
         switch(gravity){
             case 'n':
                 tip.append(floatingSpacer);
                 tip.append(tipBody);
                 body.append(tip);
 
+                appendedTip = $('body .oc-tip:last');
+                left = $el.offset().left - (
+                    (appendedTip.width() - $el.outerWidth()) / 2);
+                top =  $el.offset().top + $el.outerHeight();
+
                 // Set position.
                 tip.css({
-                    'top': $el.offset().top + $el.outerHeight(),
-                    'left': $el.offset().left + ($el.outerWidth() / 2)
+                    'top': top + 10,
+                    'left': left
                 });
+                tip.animate({
+                    top: top,
+                    opacity: 1
+                }, 500);
                 break;
 
             case 'e':
@@ -360,9 +376,9 @@ _.extend(OC, {
                 body.append(tip);
 
                 appendedTip = $('body .oc-tip:last');
-                var left = $el.offset().left - (
-                    (appendedTip.width() - $el.outerWidth()) / 2),
-                    top =  $el.offset().top - appendedTip.height();
+                left = $el.offset().left - (
+                    (appendedTip.width() - $el.outerWidth()) / 2);
+                top =  $el.offset().top - appendedTip.height();
 
                 // Set position.
                 tip.css({
@@ -387,6 +403,24 @@ _.extend(OC, {
                 });
                 break;
         }
+
+        if (width){
+            appendedTipWidth = $('.oc-tip-body', appendedTip).innerWidth();
+
+            var appendedSpacer = $('.floating-menu-spacer', appendedTip);
+
+            appendedSpacer.width(appendedTipWidth);
+            appendedSpacer.css('background-position', ((appendedTipWidth / 2) - 8) + 'px bottom');
+        }
+
+        function dismissTip(tip){
+            tip.removeClass('show');
+            tip.remove();
+        }
+
+        $('.action-button', appendedTip).click(function(){
+            dismisser(tip, dismissTip);
+        });
 
     },
 
@@ -4390,8 +4424,23 @@ _.extend(OC, {
             background.removeClass('show-popup-background');
             $('.signup-steps-wrapper').addClass('hide');
             $('.signup-floaters').addClass('hide');
-        }
 
+            // Show tooltip for starting off with looking at the content.
+            var siteLogo = $('#logo');
+
+            setTimeout(function(){
+                OC.tip(siteLogo, {
+                    title: 'Confused about where to begin?',
+                    gravity: 'n',
+                    width: 220,
+                    description: 'Begin by exploring our vast library of content by clicking on the site logo, before ' +
+                    'you decide to come back to your profile to make something.',
+                    dismisser: function(tip, dismissCallback){
+                        dismissCallback(tip);
+                    }
+                });
+            }, 2500);
+        }
 
         var params = window.location.search === '' ? [] : window.location.search.substring(
             1).split('&');
