@@ -1240,10 +1240,11 @@ _.extend(OC, {
             var i, element, errorneousInputs = [];
             for (i = 0; i < fields.length; i++){
                 element = $('form#signup-form ' + fields[i]);
-                if (element.val() === '' || element.val() === '0'){
+                if (element.val() === '' || element.val() === '0')
                     element.addClass('form-input-error');
+
+                if (element.hasClass('form-input-error'))
                     errorneousInputs.push(element);
-                }
             }
 
             if (errorneousInputs.length === 0 && OC.signupDialog) {
@@ -1314,6 +1315,7 @@ _.extend(OC, {
 
                         if (response.status == 'false'){
                             usernameInput.addClass('unavailable');
+                            usernameInput.addClass('form-input-error');
                             usernameInput.attr('title', 'This username is not available');
                             usernameInput.tipsy({trigger: 'manual', gravity: 'n', fade: true });
                             usernameInput.tipsy('show');
@@ -1321,6 +1323,7 @@ _.extend(OC, {
                             if (!usernameInput.hasClass('form-input-error'))
                                 usernameInput.tipsy('hide');
                             usernameInput.removeClass('unavailable');
+                            usernameInput.removeClass('form-input-error');
                             usernameInput.addClass('available');
                         }
                     },
