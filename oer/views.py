@@ -1043,7 +1043,6 @@ def create_document_resource(request):
 
         return (document_resource, True)
     else:
-            new_document.delete()
         new_resource_revision.delete()
         return (new_document, False)
 
@@ -2269,6 +2268,7 @@ def feed_importer_list(request):
                 license_id,
                 collection_id
             )
+            req.close()
 
             from license.models import License
             licenses = License.objects.all()
@@ -3399,8 +3399,7 @@ def get_resource_comments(request, resource_id):
 
         return APIUtilities._api_success(context)
 
-    except Exception, e:
-        print e
+    except:
         context = {
             'title': 'Could not fetch the resource comments.',
             'message': 'We failed to fetch some of the comments of this resources. '
