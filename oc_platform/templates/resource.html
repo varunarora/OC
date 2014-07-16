@@ -25,7 +25,7 @@
 	{% elif resource.revision.content_type.name == "link" and not resource.revision.content.rendered_url %}
 		{% include 'partials/oer-url.html' %}
     {% elif resource.revision.content_type.name == "link" and resource.revision.content.rendered_url %}
-        {% include 'partials/oer-full-document.html' %}
+        {% include 'partials/oer-full-document.html' with resource_type='document' %}
 	{% elif resource.revision.content_type.name == "document" %}
         {% include 'partials/oer-full-document.html' %}
 	{% endif %}
