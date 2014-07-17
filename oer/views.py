@@ -3697,7 +3697,7 @@ def load_resources(request, collection_id, resource_count):
     except:
         return APIUtilities._api_not_found()
 
-    resource_list = collection.resources.all()[(int(resource_count) + 1):(
+    resource_list = collection.resources.all()[(int(resource_count)):(
         int(resource_count) + 20)]
 
     serialized_resources = {}
