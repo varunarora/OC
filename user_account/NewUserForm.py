@@ -142,7 +142,7 @@ class NewUserForm(UserCreationForm):
             raise forms.ValidationError(
                 _(settings.STRINGS['user']['register']['form']['NAME_VALIDATION_ERROR']))
 
-        return name
+        return name.strip()
 
     def clean_first_name(self):
         return self._clean_name(self.cleaned_data['first_name'])

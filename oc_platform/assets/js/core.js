@@ -1292,7 +1292,7 @@ _.extend(OC, {
         // Bind first name to validation.
         OC.validate.text(
             '#signup-form input[name="first_name"], #signup-form input[name="last_name"]',
-            '[A-Za-z-]{3,16}',
+            /[A-Za-z-]{3,16}[\s]?/,
             'The name must contain only letters and not be more than 16 letters.'
         );
 
@@ -1341,7 +1341,7 @@ _.extend(OC, {
         // Validate the password.
         OC.validate.text(
             '#signup-form input[name="password"]',
-            /[\w\.\!\@\#\$\%\^\*\&]+/,
+            /[\w\.\!\@\#\$\%\^\*\&\<\>]+/,
             'Password should contain valid characters'
         );
 
