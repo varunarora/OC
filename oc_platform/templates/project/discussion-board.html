@@ -1,7 +1,7 @@
 {% include 'partials/header.html' %}
 {% include 'project/header.html' with page="discussions" %}
 
-{% if user in project.members.all %}
+{% if user in project.confirmed_members %}
 <div class="center-stage discussion-board-actions">
     <div class="discussion-actions">
         <div class="page-action-button new-discussion-post-button">+ NEW POST</div>
