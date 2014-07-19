@@ -4291,13 +4291,6 @@ form.resource-create-edit-form
 							&.hidden
 								display: none
 
-							.content-panel-body-grades-topics-list-empty-arrow
-								width: 11px
-								height: 20px
-								margin-right: 10px
-								display: inline-block
-								background: url('../images/grade-topic-arrow.png') no-repeat center center
-								background-size: 80%
 
 						ul.content-panel-body-grades-topics-list-filled
 							li
@@ -4315,13 +4308,6 @@ form.resource-create-edit-form
 										text-decoration: none
 										background-color: #fff
 
-						h1
-							color: #aaa
-							font-size: 2.2em
-							letter-spacing: -2px
-							text-align: center
-							margin-top: 20px
-
 				.content-panel-body-header
 					min-height: 30px
 					width: 92%
@@ -4335,6 +4321,8 @@ form.resource-create-edit-form
 
 						.content-panel-body-header-title
 							overflow: hidden
+							display: inline
+							padding-bottom: 6px
 
 							&.show-share
 								min-height: 28px
@@ -4348,13 +4336,17 @@ form.resource-create-edit-form
 								@include border-radius(2px)
 								border: 1px solid #5abd02
 								color: #5abd02
-								float: left
+								float: none
+								display: inline
 								margin-left: 12px
 								padding: 4px 12px
 
 								&:hover
 									color: #fff
 									background-color: #5abd02
+
+						.breadcrumb
+							clear: left
 
 					.content-panel-body-listing-questions-toggler
 						float: right
@@ -4638,6 +4630,7 @@ form.resource-create-edit-form
 							padding-right: 32px
 							background-color: #F9F9F9
 							@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
+							margin-bottom: 6px
 
 							.content-panel-body-listing-request-thumbnail
 								width: 40px
@@ -5334,6 +5327,27 @@ body.signup, body.login
 			&:hover
 				.library-subject-title
 					background-color: #ddd
+
+h1.empty-state-title
+	color: #aaa
+	font-size: 2.2em
+	letter-spacing: -2px
+	text-align: center
+	margin-top: 20px
+
+.empty-state-arrow
+	width: 11px
+	height: 20px
+	margin-right: 10px
+	display: inline-block
+	background: url('../images/grade-topic-arrow.png') no-repeat center center
+	background-size: 80%
+
+.empty-feed
+	width: 400px
+	margin: auto
+	padding-top: 300px
+	background: url('../images/empty-feed.png') no-repeat center 150px
 
 
 /***** INTERNAL TOOLS *************/
