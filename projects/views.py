@@ -421,11 +421,12 @@ def discussion(request, project_slug, discussion_id):
     except:
         raise Http404
 
-    if request.user not in project.members.all():
-        raise PermissionDenied
+    if project.visibility == 'private':
+        if request.user not in project.confirmed_members:
+            raise PermissionDenied
 
     build_posts_social([post], request.user)
-    
+
     from oer.BeautifulSoup import BeautifulSoup
     soup = BeautifulSoup(post.body_markdown_html)
     post_title_short = soup.text[:200] + "..."
