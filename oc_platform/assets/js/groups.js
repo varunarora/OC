@@ -1032,7 +1032,25 @@ var PostView = Backbone.View.extend({
             loggedInUserThumbnail: OC.config.user.thumbnail,
             commentsContentType:  OC.config.contentTypes.comment
         })));
+
         $('.discussion-board').append(this.$el);
+
+        // Turn the links this post and its comments into clickable URLs.
+        pattern = /(?:(?:https?|ftp):\/\/)?(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?/g;
+        var commentBodies = $('.post-comment-body p', this.$el), i, j, commentBody, newCommentBody, matches;
+
+        for (i = 0; i < commentBodies.length; i++){
+            commentBody = $(commentBodies[i]).text();
+            matches = commentBody.match(pattern);
+
+            if (matches){
+                for (j = 0; j < matches.length; j++){
+                    commentBody = commentBody.replace(
+                        matches[j], '<a href=\"' + matches[j] + '\" target=\"_blank\">' + matches[j] + '</a>');
+                }
+                $(commentBodies[i]).html(commentBody);
+            }
+        }
 
         return this;
     },
