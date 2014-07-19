@@ -81,7 +81,7 @@
         <nav class="profile-tabs">
             <ul>
                 {% if user == user_profile %}
-                <li><a href="{% url user:user_profile username=user_profile.username %}" {% if page == "home" %} class="selected"{% endif %}>Home</a></li>
+                <li><a href="{% url user:user_profile username=user_profile.username %}" {% if page == "home" %} class="selected"{% endif %}>Activity</a></li>
                 {% endif %}
                 <li><a href="{% url user:user_favorites username=user_profile.username %}" class="profile-favorites-tab{% if page == 'favorites' %} selected{% endif %}">Favorites</a></li>
                 <li><a href="{% url user:user_files username=user_profile.username %}"  class="profile-files-tab{% if page == 'files' %} selected{% endif %}">Files</a></li>
@@ -106,17 +106,25 @@
                     <div class="profile-new-resource-caption">Create a standards aligned lesson or project</div>
                 </div>
             </div>-->
+            <script type="text/javascript">
+                OC.feed.feedCount = '{{ feed_count }}';
+                OC.feed.currentCount = {{ feed.count }};
+            </script>
 
             {# include 'partials/profile-content.html' #}
-            {% if user == user_profile %}
-            <h3>My feed</h3>
-            {% else %}
-            <h3>Recent activity</h3>
-            {% endif %}
-            <div class="user-list">
+            <div class="user-list feed-list">
             {% for item in feed %}
             {% include 'partials/feed-item.html' with host='profile' %}
+            {% empty %}
+            <div class="empty-feed">
+                <h1 class="empty-state-title"><span class="empty-state-arrow"></span>Subscribe to someone to get their latest and greatest updates</h1>
+            </div>
             {% endfor %}
+
+            {% if feed_count > 20 %}
+            <div class="lazy-load-button">Load more...</div>
+            {% endif %}
+
 
             </div>
 
