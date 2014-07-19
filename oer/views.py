@@ -134,7 +134,10 @@ def browse(request, category_slug):
             # Fetch all requests in the selected category.
             from projects.models import Project
             project_ct = ContentType.objects.get_for_model(Project)
-            category_group = Project.objects.get(pk=settings.CATEGORY_GROUPS[selected_category.id])
+
+            category_groups = settings.CATEGORY_GROUPS.iteritems()
+            group_id = next(group for group, category in category_groups if selected_category.id in category)
+            category_group = Project.objects.get(pk=group_id)
 
             from interactions.models import Comment
             requests = Comment.objects.filter(
