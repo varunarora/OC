@@ -47,10 +47,10 @@ TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-us'
 
 # Location of AWS S3 bucket for static content
-AWS_STATIC_BUCKET = str('http://ocfilepicker.s3.amazonaws.com/')
-S3_BUCKET_NAME = str('ocfilepicker')
-AWS_ACCESS_KEY = str('AKIAJNPJU26BJC5LW6MA')
-AWS_SECRET_KEY = str('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')
+AWS_STATIC_BUCKET = 'http://ocfilepicker.s3.amazonaws.com/'
+S3_BUCKET_NAME = 'ocfilepicker'
+AWS_ACCESS_KEY = 'AKIAJNPJU26BJC5LW6MA'
+AWS_SECRET_KEY = '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'
 
 HAYSTACK_SITECONF = 'search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
@@ -184,6 +184,7 @@ INSTALLED_APPS = (
     'user_account',
     'interactions',
     'projects',
+    'storages',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     'debug_toolbar',
@@ -224,6 +225,11 @@ AUTH_PROFILE_MODULE = 'user_account.UserProfile'
 
 RECAPTCHA_PRIVATE_KEY = '6LdyZOsSAAAAAI5o9s7tozx0lAab6mnkfcfLyoav'
 DEFAULT_PROJECT_KEY = 1
+
+AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY
+AWS_SECRET_ACCESS_KEY = AWS_SECRET_KEY
+AWS_STORAGE_BUCKET_NAME = 'media.opencurriculum.org'
+AWS_CALLING_FORMAT = 'media'
 
 STRINGS = {
     'global': {
@@ -360,7 +366,7 @@ STRINGS = {
     }
 }
 
-STAR_USERS = ['khanacademy', 'ck12', 'joshua', 'ddmeyer', 'illustrativemathematics']
+STAR_USERS = ['khanacademy', 'ck12', 'joshua', 'ddmeyer', 'illustrativemathematics', 'engageny']
 
 try:
     from settings_dev import *
