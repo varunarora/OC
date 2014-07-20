@@ -1498,13 +1498,18 @@ def change_profile_picture(request, username):
             user_profile.profile_pic_position.left = 50
             user_profile.profile_pic_position.save()
 
-            from django.core.files.base import ContentFile
-            profile_pic = ContentFile(request.FILES['new_profile_picture'].read())  # write_pic(request.FILES['new_profile_picture'])
-            
-            user_profile.profile_pic.save(
-                str(user.id) + '-profile.jpg', profile_pic)
+            from django.core.files.images import ImageFile
+            local_profile_pic_path = settings.MEDIA_ROOT + 'profile/tmp/' + str(user.id) + '-profile.jpg'
+            local_profile_pic = open(local_profile_pic_path, 'w')
+            local_profile_pic.write(request.FILES['new_profile_picture'].read())
 
-            resize_user_image(user_profile, 300)
+            resized_image_path = resize_user_image(user_profile, 300, local_profile_pic_path)
+
+            user_profile.profile_pic.save(
+                str(user_profile.user.id) + '-profile' + '300x300.jpg',
+                ImageFile(open(resized_image_path)))
+
+            local_profile_pic.close()
 
             from django.contrib import messages
             messages.success(request, 'New picture uploaded. Drag and save for your ideal fit.')
@@ -1512,10 +1517,10 @@ def change_profile_picture(request, username):
     return redirect('user:user_profile', username=username)
 
 
-def resize_user_image(user_profile, widthHeight):
+def resize_user_image(user_profile, widthHeight, local_profile_pic_path):
     # Now resize the image and resave
     from PIL import Image
-    image = Image.open(user_profile.profile_pic.path)
+    image = Image.open(local_profile_pic_path)
     (original_width, original_height) = image.size
 
     if original_width > original_height:
@@ -1539,10 +1544,7 @@ def resize_user_image(user_profile, widthHeight):
 
     imagefit.save(resized_image_path, 'JPEG', quality=90)
     
-    from django.core.files.images import ImageFile
-    user_profile.profile_pic.save(
-        str(user_profile.user.id) + '-profile' + str(widthHeight) + 'x' +
-        str(widthHeight) + '.jpg', ImageFile(open(resized_image_path)))
+    return resized_image_path
 
 
 def reposition_profile_picture(request, username):
