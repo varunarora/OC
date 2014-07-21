@@ -24,7 +24,6 @@ import re
 from boto.utils import find_class
 import uuid
 from boto.sdb.db.key import Key
-from boto.sdb.db.model import Model
 from boto.sdb.db.blob import Blob
 from boto.sdb.db.property import ListProperty, MapProperty
 from datetime import datetime, date, time
@@ -53,12 +52,17 @@ class SDBConverter(object):
     called"encode_<type name>" or "decode_<type name>".
     """
     def __init__(self, manager):
+        # Do a delayed import to prevent possible circular import errors.
+        from boto.sdb.db.model import Model
+        self.model_class = Model
         self.manager = manager
         self.type_map = {bool: (self.encode_bool, self.decode_bool),
                          int: (self.encode_int, self.decode_int),
                          long: (self.encode_long, self.decode_long),
                          float: (self.encode_float, self.decode_float),
-                         Model: (self.encode_reference, self.decode_reference),
+                         self.model_class: (
+                            self.encode_reference, self.decode_reference
+                         ),
                          Key: (self.encode_reference, self.decode_reference),
                          datetime: (self.encode_datetime, self.decode_datetime),
                          date: (self.encode_date, self.decode_date),
@@ -69,8 +73,8 @@ class SDBConverter(object):
 
     def encode(self, item_type, value):
         try:
-            if Model in item_type.mro():
-                item_type = Model
+            if self.model_class in item_type.mro():
+                item_type = self.model_class
         except:
             pass
         if item_type in self.type_map:
@@ -103,17 +107,17 @@ class SDBConverter(object):
 
     def encode_map(self, prop, value):
         import urllib
-        if value == None:
+        if value is None:
             return None
         if not isinstance(value, dict):
             raise ValueError('Expected a dict value, got %s' % type(value))
         new_value = []
         for key in value:
             item_type = getattr(prop, "item_type")
-            if Model in item_type.mro():
-                item_type = Model
+            if self.model_class in item_type.mro():
+                item_type = self.model_class
             encoded_value = self.encode(item_type, value[key])
-            if encoded_value != None:
+            if encoded_value is not None:
                 new_value.append('%s:%s' % (urllib.quote(key), encoded_value))
         return new_value
 
@@ -132,7 +136,7 @@ class SDBConverter(object):
             item_type = getattr(prop, "item_type")
             dec_val = {}
             for val in value:
-                if val != None:
+                if val is not None:
                     k, v = self.decode_map_element(item_type, val)
                     try:
                         k = int(k)
@@ -159,7 +163,7 @@ class SDBConverter(object):
         if ":" in value:
             key, value = value.split(':', 1)
             key = urllib.unquote(key)
-        if Model in item_type.mro():
+        if self.model_class in item_type.mro():
             value = item_type(id=value)
         else:
             value = self.decode(item_type, value)
@@ -260,7 +264,7 @@ class SDBConverter(object):
         return float(mantissa + 'e' + exponent)
 
     def encode_datetime(self, value):
-        if isinstance(value, str) or isinstance(value, unicode):
+        if isinstance(value, basestring):
             return value
         if isinstance(value, datetime):
             return value.strftime(ISO8601)
@@ -285,7 +289,7 @@ class SDBConverter(object):
             return None
 
     def encode_date(self, value):
-        if isinstance(value, str) or isinstance(value, unicode):
+        if isinstance(value, basestring):
             return value
         return value.isoformat()
 
@@ -318,7 +322,7 @@ class SDBConverter(object):
     def encode_reference(self, value):
         if value in (None, 'None', '', ' '):
             return None
-        if isinstance(value, str) or isinstance(value, unicode):
+        if isinstance(value, basestring):
             return value
         else:
             return value.id
@@ -331,7 +335,7 @@ class SDBConverter(object):
     def encode_blob(self, value):
         if not value:
             return None
-        if isinstance(value, str):
+        if isinstance(value, basestring):
             return value
 
         if not value.id:
@@ -347,7 +351,7 @@ class SDBConverter(object):
             else:
                 raise SDBPersistenceError("Invalid Blob ID: %s" % value.id)
 
-        if value.value != None:
+        if value.value is not None:
             key.set_contents_from_string(value.value)
         return value.id
 
@@ -411,7 +415,7 @@ class SDBManager(object):
         self.converter = SDBConverter(self)
         self._sdb = None
         self._domain = None
-        if consistent == None and hasattr(cls, "__consistent__"):
+        if consistent is None and hasattr(cls, "__consistent__"):
             consistent = cls.__consistent__
         self.consistent = consistent
 
@@ -452,7 +456,7 @@ class SDBManager(object):
                 yield obj
 
     def encode_value(self, prop, value):
-        if value == None:
+        if value is None:
             return None
         if not prop:
             return str(value)
@@ -540,7 +544,7 @@ class SDBManager(object):
             name = 'itemName()'
         if name != "itemName()":
             name = '`%s`' % name
-        if val == None:
+        if val is None:
             if op in ('is', '='):
                 return "%(name)s is null" % {"name": name}
             elif op in ('is not', '!='):
@@ -577,11 +581,11 @@ class SDBManager(object):
                 order_by_filtered = True
             query_parts.append("(%s)" % select)
 
-        if isinstance(filters, str) or isinstance(filters, unicode):
+        if isinstance(filters, basestring):
             query = "WHERE %s AND `__type__` = '%s'" % (filters, cls.__name__)
             if order_by in ["__id__", "itemName()"]:
                 query += " ORDER BY itemName() %s" % order_by_method
-            elif order_by != None:
+            elif order_by is not None:
                 query += " ORDER BY `%s` %s" % (order_by, order_by_method)
             return query
 
@@ -663,7 +667,7 @@ class SDBManager(object):
                 value = self.encode_value(property, value)
             if value == []:
                 value = None
-            if value == None:
+            if value is None:
                 del_attrs.append(property.name)
                 continue
             attrs[property.name] = value

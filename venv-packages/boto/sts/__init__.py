@@ -21,7 +21,7 @@
 # IN THE SOFTWARE.
 
 from connection import STSConnection
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -31,10 +31,7 @@ def regions():
     :rtype: list
     :return: A list of :class:`boto.regioninfo.RegionInfo` instances
     """
-    return [RegionInfo(name='us-east-1',
-                       endpoint='sts.amazonaws.com',
-                       connection_cls=STSConnection)
-            ]
+    return get_regions('sts', connection_cls=STSConnection)
 
 
 def connect_to_region(region_name, **kw_params):

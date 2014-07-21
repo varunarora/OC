@@ -36,38 +36,19 @@ import copy
 import datetime
 from email.utils import formatdate
 import hmac
+import os
 import sys
 import time
 import urllib
+import urlparse
 import posixpath
 
 from boto.auth_handler import AuthHandler
 from boto.exception import BotoClientError
-#
-# the following is necessary because of the incompatibilities
-# between Python 2.4, 2.5, and 2.6 as well as the fact that some
-# people running 2.4 have installed hashlib as a separate module
-# this fix was provided by boto user mccormix.
-# see: http://code.google.com/p/boto/issues/detail?id=172
-# for more details.
-#
+
 try:
     from hashlib import sha1 as sha
     from hashlib import sha256 as sha256
-
-    if sys.version[:3] == "2.4":
-        # we are using an hmac that expects a .new() method.
-        class Faker:
-            def __init__(self, which):
-                self.which = which
-                self.digest_size = self.which().digest_size
-
-            def new(self, *args, **kwargs):
-                return self.which(*args, **kwargs)
-
-        sha = Faker(sha)
-        sha256 = Faker(sha256)
-
 except ImportError:
     import sha
     sha256 = None
@@ -129,7 +110,7 @@ class AnonAuthHandler(AuthHandler, HmacKeys):
     capability = ['anon']
 
     def __init__(self, host, config, provider):
-        AuthHandler.__init__(self, host, config, provider)
+        super(AnonAuthHandler, self).__init__(host, config, provider)
 
     def add_auth(self, http_request, **kwargs):
         pass
@@ -240,7 +221,6 @@ class HmacAuthV3HTTPHandler(AuthHandler, HmacKeys):
         Select the headers from the request that need to be included
         in the StringToSign.
         """
-        headers_to_sign = {}
         headers_to_sign = {'Host': self.host}
         for name, value in http_request.headers.items():
             lname = name.lower()
@@ -349,7 +329,7 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
         parameter_names = sorted(http_request.params.keys())
         pairs = []
         for pname in parameter_names:
-            pval = str(http_request.params[pname]).encode('utf-8')
+            pval = boto.utils.get_utf8_value(http_request.params[pname])
             pairs.append(urllib.quote(pname, safe='') + '=' +
                          urllib.quote(pval, safe='-_~'))
         return '&'.join(pairs)
@@ -361,7 +341,7 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
             return ""
         l = []
         for param in sorted(http_request.params):
-            value = str(http_request.params[param])
+            value = boto.utils.get_utf8_value(http_request.params[param])
             l.append('%s=%s' % (urllib.quote(param, safe='-_.~'),
                                 urllib.quote(value, safe='-_.~')))
         return '&'.join(l)
@@ -373,10 +353,17 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
         case, sorting them in alphabetical order and then joining
         them into a string, separated by newlines.
         """
-        l = sorted(['%s:%s' % (n.lower().strip(),
-                    ' '.join(headers_to_sign[n].strip().split()))
-                    for n in headers_to_sign])
-        return '\n'.join(l)
+        canonical = []
+
+        for header in headers_to_sign:
+            c_name = header.lower().strip()
+            raw_value = headers_to_sign[header]
+            if '"' in raw_value:
+                c_value = raw_value.strip()
+            else:
+                c_value = ' '.join(raw_value.strip().split())
+            canonical.append('%s:%s' % (c_name, c_value))
+        return '\n'.join(sorted(canonical))
 
     def signed_headers(self, headers_to_sign):
         l = ['%s' % n.lower().strip() for n in headers_to_sign]
@@ -385,8 +372,9 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
 
     def canonical_uri(self, http_request):
         path = http_request.auth_path
-        # Normalize the path.
-        normalized = posixpath.normpath(path)
+        # Normalize the path
+        # in windows normpath('/') will be '\\' so we chane it back to '/'
+        normalized = posixpath.normpath(path).replace('\\','/')
         # Then urlencode whatever's left.
         encoded = urllib.quote(normalized)
         if len(path) > 1 and path.endswith('/'):
@@ -420,6 +408,34 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
         scope.append('aws4_request')
         return '/'.join(scope)
 
+    def split_host_parts(self, host):
+        return host.split('.')
+
+    def determine_region_name(self, host):
+        parts = self.split_host_parts(host)
+        if self.region_name is not None:
+            region_name = self.region_name
+        elif len(parts) > 1:
+            if parts[1] == 'us-gov':
+                region_name = 'us-gov-west-1'
+            else:
+                if len(parts) == 3:
+                    region_name = 'us-east-1'
+                else:
+                    region_name = parts[1]
+        else:
+            region_name = parts[0]
+
+        return region_name
+
+    def determine_service_name(self, host):
+        parts = self.split_host_parts(host)
+        if self.service_name is not None:
+            service_name = self.service_name
+        else:
+            service_name = parts[0]
+        return service_name
+
     def credential_scope(self, http_request):
         scope = []
         http_request.timestamp = http_request.headers['X-Amz-Date'][0:8]
@@ -427,19 +443,8 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
         # The service_name and region_name either come from:
         # * The service_name/region_name attrs or (if these values are None)
         # * parsed from the endpoint <service>.<region>.amazonaws.com.
-        parts = http_request.host.split('.')
-        if self.region_name is not None:
-            region_name = self.region_name
-        else:
-            if len(parts) == 3:
-                region_name = 'us-east-1'
-            else:
-                region_name = parts[1]
-        if self.service_name is not None:
-            service_name = self.service_name
-        else:
-            service_name = parts[0]
-
+        region_name = self.determine_region_name(http_request.host)
+        service_name = self.determine_service_name(http_request.host)
         http_request.service_name = service_name
         http_request.region_name = region_name
 
@@ -495,7 +500,10 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
             # Safe to modify req.path here since
             # the signature will use req.auth_path.
             req.path = req.path.split('?')[0]
-            req.path = req.path + '?' + qs
+
+            if qs:
+                # Don't insert the '?' unless there's actually a query string
+                req.path = req.path + '?' + qs
         canonical_request = self.canonical_request(req)
         boto.log.debug('CanonicalRequest:\n%s' % canonical_request)
         string_to_sign = self.string_to_sign(req, canonical_request)
@@ -507,6 +515,248 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
         l.append('SignedHeaders=%s' % self.signed_headers(headers_to_sign))
         l.append('Signature=%s' % signature)
         req.headers['Authorization'] = ','.join(l)
+
+
+class S3HmacAuthV4Handler(HmacAuthV4Handler, AuthHandler):
+    """
+    Implements a variant of Version 4 HMAC authorization specific to S3.
+    """
+    capability = ['hmac-v4-s3']
+
+    def __init__(self, *args, **kwargs):
+        super(S3HmacAuthV4Handler, self).__init__(*args, **kwargs)
+
+        if self.region_name:
+            self.region_name = self.clean_region_name(self.region_name)
+
+    def clean_region_name(self, region_name):
+        if region_name.startswith('s3-'):
+            return region_name[3:]
+
+        return region_name
+
+    def canonical_uri(self, http_request):
+        # S3 does **NOT** do path normalization that SigV4 typically does.
+        # Urlencode the path, **NOT** ``auth_path`` (because vhosting).
+        path = urlparse.urlparse(http_request.path)
+        # Because some quoting may have already been applied, let's back it out.
+        unquoted = urllib.unquote(path.path)
+        # Requote, this time addressing all characters.
+        encoded = urllib.quote(unquoted)
+        return encoded
+
+    def host_header(self, host, http_request):
+        port = http_request.port
+        secure = http_request.protocol == 'https'
+        if ((port == 80 and not secure) or (port == 443 and secure)):
+            return http_request.host
+        return '%s:%s' % (http_request.host, port)
+
+    def headers_to_sign(self, http_request):
+        """
+        Select the headers from the request that need to be included
+        in the StringToSign.
+        """
+        host_header_value = self.host_header(self.host, http_request)
+        headers_to_sign = {}
+        headers_to_sign = {'Host': host_header_value}
+        for name, value in http_request.headers.items():
+            lname = name.lower()
+            # Hooray for the only difference! The main SigV4 signer only does
+            # ``Host`` + ``x-amz-*``. But S3 wants pretty much everything
+            # signed, except for authorization itself.
+            if not lname in ['authorization']:
+                headers_to_sign[name] = value
+        return headers_to_sign
+
+    def determine_region_name(self, host):
+        # S3's different format(s) of representing region/service from the
+        # rest of AWS makes this hurt too.
+        #
+        # Possible domain formats:
+        # - s3.amazonaws.com (Classic)
+        # - s3-us-west-2.amazonaws.com (Specific region)
+        # - bukkit.s3.amazonaws.com (Vhosted Classic)
+        # - bukkit.s3-ap-northeast-1.amazonaws.com (Vhosted specific region)
+        # - s3.cn-north-1.amazonaws.com.cn - (Bejing region)
+        # - bukkit.s3.cn-north-1.amazonaws.com.cn - (Vhosted Bejing region)
+        parts = self.split_host_parts(host)
+
+        if self.region_name is not None:
+            region_name = self.region_name
+        else:
+            # Classic URLs - s3-us-west-2.amazonaws.com
+            if len(parts) == 3:
+                region_name = self.clean_region_name(parts[0])
+
+                # Special-case for Classic.
+                if region_name == 's3':
+                    region_name = 'us-east-1'
+            else:
+                # Iterate over the parts in reverse order.
+                for offset, part in enumerate(reversed(parts)):
+                    part = part.lower()
+
+                    # Look for the first thing starting with 's3'.
+                    # Until there's a ``.s3`` TLD, we should be OK. :P
+                    if part == 's3':
+                        # If it's by itself, the region is the previous part.
+                        region_name = parts[-offset]
+
+                        # Unless it's Vhosted classic
+                        if region_name == 'amazonaws':
+                            region_name = 'us-east-1'
+
+                        break
+                    elif part.startswith('s3-'):
+                        region_name = self.clean_region_name(part)
+                        break
+
+        return region_name
+
+    def determine_service_name(self, host):
+        # Should this signing mechanism ever be used for anything else, this
+        # will fail. Consider utilizing the logic from the parent class should
+        # you find yourself here.
+        return 's3'
+
+    def mangle_path_and_params(self, req):
+        """
+        Returns a copy of the request object with fixed ``auth_path/params``
+        attributes from the original.
+        """
+        modified_req = copy.copy(req)
+
+        # Unlike the most other services, in S3, ``req.params`` isn't the only
+        # source of query string parameters.
+        # Because of the ``query_args``, we may already have a query string
+        # **ON** the ``path/auth_path``.
+        # Rip them apart, so the ``auth_path/params`` can be signed
+        # appropriately.
+        parsed_path = urlparse.urlparse(modified_req.auth_path)
+        modified_req.auth_path = parsed_path.path
+
+        if modified_req.params is None:
+            modified_req.params = {}
+
+        raw_qs = parsed_path.query
+        existing_qs = urlparse.parse_qs(
+            raw_qs,
+            keep_blank_values=True
+        )
+
+        # ``parse_qs`` will return lists. Don't do that unless there's a real,
+        # live list provided.
+        for key, value in existing_qs.items():
+            if isinstance(value, (list, tuple)):
+                if len(value) == 1:
+                    existing_qs[key] = value[0]
+
+        modified_req.params.update(existing_qs)
+        return modified_req
+
+    def payload(self, http_request):
+        if http_request.headers.get('x-amz-content-sha256'):
+            return http_request.headers['x-amz-content-sha256']
+
+        return super(S3HmacAuthV4Handler, self).payload(http_request)
+
+    def add_auth(self, req, **kwargs):
+        if not 'x-amz-content-sha256' in req.headers:
+            if '_sha256' in req.headers:
+                req.headers['x-amz-content-sha256'] = req.headers.pop('_sha256')
+            else:
+                req.headers['x-amz-content-sha256'] = self.payload(req)
+
+        req = self.mangle_path_and_params(req)
+        return super(S3HmacAuthV4Handler, self).add_auth(req, **kwargs)
+
+    def presign(self, req, expires, iso_date=None):
+        """
+        Presign a request using SigV4 query params. Takes in an HTTP request
+        and an expiration time in seconds and returns a URL.
+
+        http://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
+        """
+        if iso_date is None:
+            iso_date = datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+
+        region = self.determine_region_name(req.host)
+        service = self.determine_service_name(req.host)
+
+        params = {
+            'X-Amz-Algorithm': 'AWS4-HMAC-SHA256',
+            'X-Amz-Credential': '%s/%s/%s/%s/aws4_request' % (
+                self._provider.access_key,
+                iso_date[:8],
+                region,
+                service
+            ),
+            'X-Amz-Date': iso_date,
+            'X-Amz-Expires': expires,
+            'X-Amz-SignedHeaders': 'host'
+        }
+
+        if self._provider.security_token:
+            params['X-Amz-Security-Token'] = self._provider.security_token
+
+        req.params.update(params)
+
+        cr = self.canonical_request(req)
+
+        # We need to replace the payload SHA with a constant
+        cr = '\n'.join(cr.split('\n')[:-1]) + '\nUNSIGNED-PAYLOAD'
+
+        # Date header is expected for string_to_sign, but unused otherwise
+        req.headers['X-Amz-Date'] = iso_date
+
+        sts = self.string_to_sign(req, cr)
+        signature = self.signature(req, sts)
+
+        # Add signature to params now that we have it
+        req.params['X-Amz-Signature'] = signature
+
+        return 'https://%s%s?%s' % (req.host, req.path,
+                                    urllib.urlencode(req.params))
+
+
+class QueryAuthHandler(AuthHandler):
+    """
+    Provides pure query construction (no actual signing).
+
+    Mostly useful for STS' ``assume_role_with_web_identity``.
+
+    Does **NOT** escape query string values!
+    """
+
+    capability = ['pure-query']
+
+    def _escape_value(self, value):
+        # Would normally be ``return urllib.quote(value)``.
+        return value
+
+    def _build_query_string(self, params):
+        keys = params.keys()
+        keys.sort(cmp=lambda x, y: cmp(x.lower(), y.lower()))
+        pairs = []
+        for key in keys:
+            val = boto.utils.get_utf8_value(params[key])
+            pairs.append(key + '=' + self._escape_value(val))
+        return '&'.join(pairs)
+
+    def add_auth(self, http_request, **kwargs):
+        headers = http_request.headers
+        params = http_request.params
+        qs = self._build_query_string(
+            http_request.params
+        )
+        boto.log.debug('query_string: %s' % qs)
+        headers['Content-Type'] = 'application/json; charset=UTF-8'
+        http_request.body = ''
+        # if this is a retried request, the qs from the previous try will
+        # already be there, we need to get rid of that and rebuild it
+        http_request.path = http_request.path.split('?')[0]
+        http_request.path = http_request.path + '?' + qs
 
 
 class QuerySignatureHelper(HmacKeys):
@@ -696,3 +946,42 @@ def get_auth_handler(host, config, provider, requested_capability=None):
     # user could override this with a .boto config that includes user-specific
     # credentials (for access to user data).
     return ready_handlers[-1]
+
+
+def detect_potential_sigv4(func):
+    def _wrapper(self):
+        if os.environ.get('EC2_USE_SIGV4', False):
+            return ['hmac-v4']
+
+        if boto.config.get('ec2', 'use-sigv4', False):
+            return ['hmac-v4']
+
+        if hasattr(self, 'region'):
+            # If you're making changes here, you should also check
+            # ``boto/iam/connection.py``, as several things there are also
+            # endpoint-related.
+            if getattr(self.region, 'endpoint', ''):
+                if '.cn-' in self.region.endpoint:
+                    return ['hmac-v4']
+
+        return func(self)
+    return _wrapper
+
+
+def detect_potential_s3sigv4(func):
+    def _wrapper(self):
+        if os.environ.get('S3_USE_SIGV4', False):
+            return ['hmac-v4-s3']
+
+        if boto.config.get('s3', 'use-sigv4', False):
+            return ['hmac-v4-s3']
+
+        if hasattr(self, 'host'):
+            # If you're making changes here, you should also check
+            # ``boto/iam/connection.py``, as several things there are also
+            # endpoint-related.
+            if '.cn-' in self.host:
+                return ['hmac-v4-s3']
+
+        return func(self)
+    return _wrapper

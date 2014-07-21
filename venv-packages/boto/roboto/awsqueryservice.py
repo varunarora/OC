@@ -10,7 +10,7 @@ class NoCredentialsError(boto.exception.BotoClientError):
 
     def __init__(self):
         s = 'Unable to find credentials'
-        boto.exception.BotoClientError.__init__(self, s)
+        super(NoCredentialsError, self).__init__(s)
 
 class AWSQueryService(boto.connection.AWSQueryConnection):
 
@@ -41,14 +41,14 @@ class AWSQueryService(boto.connection.AWSQueryConnection):
         if 'port' not in self.args:
             self.args['port'] = self.Port
         try:
-            boto.connection.AWSQueryConnection.__init__(self, **self.args)
+            super(AWSQueryService, self).__init__(**self.args)
             self.aws_response = None
         except boto.exception.NoAuthHandlerFound:
             raise NoCredentialsError()
 
     def check_for_credential_file(self):
         """
-        Checks for the existance of an AWS credential file.
+        Checks for the existence of an AWS credential file.
         If the environment variable AWS_CREDENTIAL_FILE is
         set and points to a file, that file will be read and
         will be searched credentials.
@@ -115,7 +115,7 @@ class AWSQueryService(boto.connection.AWSQueryConnection):
 
             if rslt.path and 'path' not in self.args:
                 self.args['path'] = rslt.path
-            
+
     def _required_auth_capability(self):
         return [self.Authentication]
-        
+
