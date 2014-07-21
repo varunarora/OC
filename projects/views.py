@@ -220,12 +220,27 @@ def change_cover_picture(request, project_id):
         project = Project.objects.get(pk=int(project_id))
 
         if form.is_valid():
-            from django.core.files.base import ContentFile
-            cover_pic = ContentFile(request.FILES['new_cover_picture'].read())  # write_pic(request.FILES['new_profile_picture'])
-            project.cover_pic.save(
-                str(project.id) + '-cover.jpg', cover_pic)
+            local_cover_pic_path = settings.MEDIA_ROOT + 'project/tmp/' + str(project.id) + '-cover.jpg'
 
-            resize_project_cover(project, 960)
+            local_cover_pic = open(local_cover_pic_path, 'w+')
+            f = request.FILES['new_cover_picture']
+            for chunk in f.chunks():
+                    local_cover_pic.write(chunk)
+            local_cover_pic.close()
+
+            from os.path import splitext
+            import os
+
+            resized_image_path = resize_project_cover(project, 960, local_cover_pic_path)
+            (filename, extension) = splitext(os.path.basename(f.name))
+
+            from django.core.files.images import ImageFile
+            project.cover_pic.save(
+                str(project.id) + '-cover960x' + filename [:50] + '.jpg',
+                ImageFile(open(resized_image_path)))
+
+            os.remove(local_cover_pic_path)
+            os.remove(resized_image_path)
 
             from django.contrib import messages
             messages.success(request,
@@ -234,10 +249,10 @@ def change_cover_picture(request, project_id):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-def resize_project_cover(project, width):
+def resize_project_cover(project, width, local_cover_pic_path):
     # Now resize the image and resave
     from PIL import Image
-    image = Image.open(project.cover_pic.path)
+    image = Image.open(local_cover_pic_path)
     (original_width, original_height) = image.size
 
     new_height = int((original_height / float(original_width)) * width)
@@ -255,10 +270,7 @@ def resize_project_cover(project, width):
 
     imagefit.save(resized_image_path, 'JPEG', quality=85)
     
-    from django.core.files.images import ImageFile
-    project.cover_pic.save(
-        str(project.id) + '-profile' + str(width) + 'x' +
-        str(new_height) + '.jpg', ImageFile(open(resized_image_path)))
+    return resized_image_path
 
 
 def members(request, project_slug):

@@ -9,6 +9,7 @@ from AttachmentUtilities import AttachmentUtilities
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.dispatch import Signal
+from oc_platform import ModelUtilities as mu
 
 
 def get_default_license():
@@ -49,7 +50,7 @@ class Resource(models.Model):
     visibility = models.CharField(max_length=256)
     cost = models.FloatField()
     views = models.IntegerField(editable=False, default=0)
-    image = models.ImageField(upload_to='resource_thumbnail', max_length=256, null=True, blank=True)
+    image = models.ImageField(upload_to='resource_thumbnail', max_length=256, null=True, blank=True, storage=mu.get_file_storage())
     source = models.CharField(max_length=256, null=True, blank=True)
     collaborators = models.ManyToManyField(User, blank=True, null=True,
         related_name='collabs')
@@ -170,7 +171,7 @@ class Link(models.Model):
 
 
 class Attachment(models.Model):
-    file = models.FileField(upload_to='resources', max_length=256, null=True, blank=True)
+    file = models.FileField(upload_to='resources', max_length=256, null=True, blank=True, storage=mu.get_file_storage())
     rendered_file = models.FileField(upload_to='rendered_resources', max_length=256, null=True, blank=True)
 
 
