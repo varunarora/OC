@@ -1499,7 +1499,7 @@ def change_profile_picture(request, username):
             user_profile.profile_pic_position.save()
 
             from django.core.files.images import ImageFile
-            local_profile_pic_path = settings.MEDIA_ROOT + 'profile/tmp/' + str(user.id) + '-profile.jpg'
+            local_profile_pic_path = settings.MEDIA_ROOT + 'images/users/tmp/' + str(user.id) + '-profile.jpg'
             local_profile_pic = open(local_profile_pic_path, 'w')
             local_profile_pic.write(request.FILES['new_profile_picture'].read())
 
@@ -1510,6 +1510,9 @@ def change_profile_picture(request, username):
                 ImageFile(open(resized_image_path)))
 
             local_profile_pic.close()
+
+            import os
+            os.remove(local_profile_pic_path)
 
             from django.contrib import messages
             messages.success(request, 'New picture uploaded. Drag and save for your ideal fit.')
