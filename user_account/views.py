@@ -1500,16 +1500,18 @@ def change_profile_picture(request, username):
 
             from django.core.files.images import ImageFile
             local_profile_pic_path = settings.MEDIA_ROOT + 'images/users/tmp/' + str(user.id) + '-profile.jpg'
-            local_profile_pic = open(local_profile_pic_path, 'w')
-            local_profile_pic.write(request.FILES['new_profile_picture'].read())
+
+            local_profile_pic = open(local_profile_pic_path, 'w+')
+            f = request.FILES['new_profile_picture']
+            for chunk in f.chunks():
+                    local_profile_pic.write(chunk)
+            local_profile_pic.close()
 
             resized_image_path = resize_user_image(user_profile, 300, local_profile_pic_path)
 
             user_profile.profile_pic.save(
                 str(user_profile.user.id) + '-profile' + '300x300.jpg',
                 ImageFile(open(resized_image_path)))
-
-            local_profile_pic.close()
 
             import os
             os.remove(local_profile_pic_path)
