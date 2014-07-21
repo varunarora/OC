@@ -1059,7 +1059,6 @@ def create_document_resource(request):
 
         return (document_resource, True)
     else:
-        print new_document.errors
         new_resource_revision.delete()
         return (new_document, False)
 
