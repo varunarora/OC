@@ -283,12 +283,6 @@ class SanitizedSearchView(SearchView):
             except:
                 result.object.type = 'Resource'
 
-        # For all resource outputs, assign the type.
-        import oer.CollectionUtilities as cu
-        if not hasattr(result.object, 'type'):    
-            filtered_resource_list = [item for item in page.object_list if item.content_type() == 'oer.resource']
-            cu.set_resources_type([item.object for item in filtered_resource_list])
-
         extra['page'] = page
         extra['paginator'] = paginator
         extra['title'] = self.query + " &lsaquo; OpenCurriculum"
