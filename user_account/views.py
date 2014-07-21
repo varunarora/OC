@@ -1507,13 +1507,16 @@ def change_profile_picture(request, username):
                     local_profile_pic.write(chunk)
             local_profile_pic.close()
 
+            from os.path import splitext
+            import os
+
             resized_image_path = resize_user_image(user_profile, 300, local_profile_pic_path)
+            (filename, extension) = splitext(os.path.basename(local_profile_pic_path))
 
             user_profile.profile_pic.save(
-                str(user_profile.user.id) + '-profile' + '300x300.jpg',
+                str(user_profile.user.id) + '-profile' + '300x300' + filename [:50] + '.jpg',
                 ImageFile(open(resized_image_path)))
 
-            import os
             os.remove(settings.MEDIA_ROOT + 'profile/300x300/' + str(user_profile.user.id) + '-profile' + '300x300.jpg')
             os.remove(local_profile_pic_path)
 
