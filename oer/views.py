@@ -678,9 +678,17 @@ def download(request, resource_id):
     except:
         raise Http404
 
-    import magic
-    mime = magic.Magic(mime=True)
-    content_type = mime.from_file(resource.revision.content.file.path)
+    try:
+        import magic
+        mime = magic.Magic(mime=True)
+        content_type = mime.from_file(resource.revision.content.file.path)
+    except:
+        from boto.s3.connection import S3Connection
+        from boto.s3.bucket import Bucket
+        connection = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+        bucket = Bucket(connection, settings.AWS_STORAGE_BUCKET_NAME)
+        key = bucket.get_key(resource.revision.content.file.name)
+        content_type = key.content_type
 
     # TODO(Varun): Security risk. Check file name for safeness
     response = HttpResponse(resource.revision.content.file, content_type)
