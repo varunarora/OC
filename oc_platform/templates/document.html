@@ -10,7 +10,7 @@
     <div class="center-stage editor-header">
         {% include 'partials/resource-meta.html' %}
         <input type="hidden" name="user" value="{{ user.id }}" />
-        <input type="hidden" name="visibility" value="{% if resource %}{% if not resource == '' %}{{ resource.visibility }}{% else %}private{% endif %}{% else %}private{% endif %}" />
+        <input type="hidden" name="visibility" value="{% if resource.visibility %}{{ resource.visibility }}{% else %}private{% endif %}" />
         <input type="hidden" name="description" class="document-description" />
         <div id="key-panel" class="panel-left">
              <h2 id="article-title" class="browser-edit"><input type="text" value="{{ resource.title }}" name="title" class="browser-edit" placeholder="(Document title)" /></h2>
