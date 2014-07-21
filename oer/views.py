@@ -981,6 +981,11 @@ def render_editor(request, document_type):
         if document_creation_success:
             return view_resource(request, document.id, document.slug)
         else:
+            from django.core.mail import mail_admins
+            mail_admins('Document failed to be created', 
+                '%s struggled with saving doc' % (request.user.username + ':' +
+                request.user.email))
+
             build_return_resource_form_context(request, document, form_context)
 
     form_context['resource'] = {}
@@ -1054,6 +1059,7 @@ def create_document_resource(request):
 
         return (document_resource, True)
     else:
+        print new_document.errors
         new_resource_revision.delete()
         return (new_document, False)
 
