@@ -24,6 +24,7 @@ def notify_subscription_by_email(notification, host, actor):
         'actor_first_name': actor.first_name,
         'actor_thumbnail': settings.MEDIA_URL + actor.get_profile().profile_pic.name,
         'actor_email': actor.email,
+        'actee_email': notification.user.email
     }
     template = render_to_string('notifications/notification.html', context)
 
