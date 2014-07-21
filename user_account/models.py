@@ -12,19 +12,11 @@ from django.core.urlresolvers import reverse
 from django.dispatch import Signal
 import user_account.NotificationUtilities as nu
 from articles.jsonfield.fields import JSONField
+from oc_platform import ModelUtilities as mu
 
 def get_empty_onboarding():
     import json
     return json.loads('{"signup": {"status": false}}')
-
-def get_file_storage():
-    from django.conf import settings
-    if settings.DEBUG:
-        from django.core.files.storage import FileSystemStorage
-        return FileSystemStorage()
-    else:
-        from storages.backends.s3boto import S3BotoStorage
-        return S3BotoStorage()
 
 
 class UserProfile(models.Model):
@@ -34,7 +26,7 @@ class UserProfile(models.Model):
     gender = models.NullBooleanField()
     location = models.CharField(max_length=256, null=True, blank=True)
     profession = models.CharField(max_length=256)
-    profile_pic = models.ImageField(upload_to='images/users', blank=True, storage=get_file_storage())
+    profile_pic = models.ImageField(upload_to='images/users', blank=True, storage=mu.get_file_storage())
     profile_pic_position = models.ForeignKey(ImagePosition)
     interests = models.ManyToManyField(Tag, null=True, blank=True)
     social_service = models.CharField(max_length=32, null=True, blank=True)

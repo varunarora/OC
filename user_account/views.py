@@ -1514,6 +1514,7 @@ def change_profile_picture(request, username):
                 ImageFile(open(resized_image_path)))
 
             import os
+            os.remove(str(user_profile.user.id) + '-profile' + '300x300.jpg')
             os.remove(local_profile_pic_path)
 
             from django.contrib import messages
