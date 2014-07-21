@@ -172,7 +172,7 @@ class Link(models.Model):
 
 class Attachment(models.Model):
     file = models.FileField(upload_to='resources', max_length=256, null=True, blank=True, storage=mu.get_file_storage())
-    rendered_file = models.FileField(upload_to='rendered_resources', max_length=256, null=True, blank=True)
+    rendered_file = models.FileField(upload_to='rendered_resources', max_length=256, null=True, blank=True, storage=mu.get_file_storage())
 
 
 class Unit(models.Model):
