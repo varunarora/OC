@@ -1167,7 +1167,7 @@ def fp_upload(request):
             response[new_resource.id] = new_resource.title
             static_file.close()
 
-        except Exception:          
+        except Exception, e:          
             # Delete this file from S3, and add it to the failure list
             from boto.s3.connection import S3Connection
             from boto.s3.bucket import Bucket
@@ -1180,7 +1180,8 @@ def fp_upload(request):
 
             from django.core.mail import mail_admins
             mail_admins('Filepicker S3 mounting failed', (
-                'Apologize to ' + str(user.id) + ": " + user.get_full_name()))
+                'Apologize to ' + str(user.id) + ": " + user.get_full_name(
+                ) + '\n\n' + str(e)))
 
             failure_list.append(title)
 
