@@ -24,6 +24,8 @@ class ResourceThumbnail:
 
         (resource, resource_type) = ResourceThumbnail.get_resource_type(original_resource)
 
+        import urllib
+
         if resource_type == "video":
 
             try:
@@ -31,8 +33,6 @@ class ResourceThumbnail:
                 video_tag = VideoHelper.getVideoID(resource.url, provider)
 
                 thumbnailUrl = ResourceThumbnail.getThumbnailFromProvider(video_tag, provider)
-
-                import urllib
 
                 # Returns a 120x90 image
                 urllib.urlretrieve(thumbnailUrl, thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT)
@@ -73,6 +73,10 @@ class ResourceThumbnail:
             if ext in ms:
                 thumbnailSrcName = "ms.jpg"
             elif ext in pdf:
+                if not settings.DEBUG:
+                    urllib.urlretrieve(settings.MEDIA_URL + resource.revision.content.file.name,
+                        settings.MEDIA_ROOT + resource.revision.content.file.name)
+
                 call(
                     ["convert", "-density", "300",
                     settings.MEDIA_ROOT + resource.revision.content.file.name + '[0]',
@@ -85,6 +89,10 @@ class ResourceThumbnail:
 
                 # Now delete the temporary retrived image thumbnail
                 call(["rm", thumbnail + "-tmp" + ResourceThumbnail.THUMBNAIL_EXT])
+
+                if not settings.DEBUG:
+                    import os
+                    os.remove(settings.MEDIA_ROOT + resource.revision.content.file.name)
 
                 thumbnailSrcName = "pdf.jpg"
             elif ext in image:
