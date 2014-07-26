@@ -1147,17 +1147,21 @@ def fp_upload(request):
     response = {}
     failure_list = []
 
+    from boto.s3.connection import S3Connection
+    from boto.s3.bucket import Bucket
+    from boto.s3.key import Key
+    conn = S3Connection(settings.AWS_ACCESS_KEY, settings.AWS_SECRET_KEY)
+    b = Bucket(conn, settings.S3_BUCKET_NAME)
+    k = Key(b)
+
     for (key, title) in file_list:
+        k.key = key
+
         try:
             # Create Resource objects for each file uploaded.
             # And generate the list for the response.
             file_path = settings.FILEPICKER_ROOT + key
-
-            # Set readable permissions for the file just uploaded through Fp.
-            import os
-            import stat
-            st = os.stat(file_path)
-            os.chmod(file_path, st.st_mode | stat.S_IREAD)
+            k.get_contents_to_filename(file_path)
 
             static_file = open(file_path)
 
@@ -1167,15 +1171,11 @@ def fp_upload(request):
             response[new_resource.id] = new_resource.title
             static_file.close()
 
+            import os
+            os.remove(file_path)
+
         except Exception, e:          
             # Delete this file from S3, and add it to the failure list
-            from boto.s3.connection import S3Connection
-            from boto.s3.bucket import Bucket
-            from boto.s3.key import Key
-            conn = S3Connection(settings.AWS_ACCESS_KEY, settings.AWS_SECRET_KEY)
-            b = Bucket(conn, settings.S3_BUCKET_NAME)
-            k = Key(b)
-            k.key = key
             b.delete_key(k)
 
             from django.core.mail import mail_admins
