@@ -1721,6 +1721,19 @@ def delete_individual_resource(resource):
     for resource_favorite in resource_favorites:
         resource_favorite.delete()
 
+    # Delete all the activity associated with this resource.
+    from user_account.models import Activity
+    resource_actions = Activity.objects.filter(
+        action_type=resource_content_type, action_id=resource.id)
+
+    resource_targets = Activity.objects.filter(
+        target_type=resource_content_type, target_id=resource.id)
+
+    resource_activities = resource_actions | resource_targets
+
+    for activity in resource_activities:
+        activity.delete()
+
     resource.delete()
 
 
@@ -4071,12 +4084,21 @@ def request_for_information(request, resource_id):
     except:
         return APIUtilities._api_not_found()
 
-    from django.core.mail import mail_admins
-    mail_admins('Request for information', 
-        '%s wants info on %s' % (request.user.username + ':' +
-            request.user.email, str(resource.id) + ':' + resource.title))
+    try:
+        from django.core.mail import mail_admins
+        mail_admins('Request for information', 
+            '%s wants info on %s' % (request.user.username + ':' +
+                request.user.email, str(resource.id) + ':' + resource.title))
 
-    return APIUtilities._api_success()
+        return APIUtilities._api_success()
+
+    except:
+        context = {
+            'title': 'Could not complete that request.',
+            'message': 'We failed to request for information on this resource, '
+            + 'and our apologies for that. Please contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
 
 
 def auto_save_document(request):
