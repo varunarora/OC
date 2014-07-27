@@ -24,13 +24,13 @@ urlpatterns = patterns(
     url(r'^(?P<username>\w+)/change-picture/$', views.change_profile_picture, name='change_profile_picture'),
     url(r'^(?P<username>\w+)/reposition-picture/$', views.reposition_profile_picture, name='reposition_profile_picture'),
 
-    url(r'^(?P<username>\w+)/groups/$', views.user_groups, name='user_groups'),
-    url(r'^(?P<username>\w+)/files/(?P<collection_slug>.+)/$', views.list_collection, name='list_collection'),
-    url(r'^(?P<username>\w+)/files/$', views.user_files, name='user_files'),
-    url(r'^(?P<username>\w+)/favorites/$', views.user_favorites, name='user_favorites'),
-    url(r'^(?P<username>\w+)/subscribers/$', views.user_subscribers, name='user_subscribers'),
-    url(r'^(?P<username>\w+)/subscriptions/$', views.user_subscriptions, name='user_subscriptions'),
+    url(r'^(?P<username>[a-z0-9_\.]+)/groups/$', views.user_groups, name='user_groups'),
+    url(r'^(?P<username>[a-z0-9_\.]+)/files/(?P<collection_slug>.+)/$', views.list_collection, name='list_collection'),
+    url(r'^(?P<username>[a-z0-9_\.]+)/files/$', views.user_files, name='user_files'),
+    url(r'^(?P<username>[a-z0-9_\.]+)/favorites/$', views.user_favorites, name='user_favorites'),
+    url(r'^(?P<username>[a-z0-9_\.]+)/subscribers/$', views.user_subscribers, name='user_subscribers'),
+    url(r'^(?P<username>[a-z0-9_\.]+)/subscriptions/$', views.user_subscriptions, name='user_subscriptions'),
     url(r'^preferences/$', views.user_preferences, name='user_preferences'),
 
-    url(r'^(?P<username>\w+)/$', views.user_profile, name='user_profile'),
+    url(r'^(?P<username>[a-z0-9_\.]+)/$', views.user_profile, name='user_profile'),
 )
