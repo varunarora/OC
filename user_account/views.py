@@ -293,7 +293,7 @@ def _create_user(request):
 
     if user_creation_failure:
         from django.core.mail import mail_admins
-        mail_admins('Failed to create user', user_creation_failure + '\n\n' + str(request.POST))
+        mail_admins('Failed to create user', str(user_creation_failure) + '\n\n' + str(request.POST))
 
     return ({
         'user_form': user_form, 'profile_form': profile_form,
