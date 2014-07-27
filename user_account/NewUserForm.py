@@ -22,7 +22,7 @@ class NewUserForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(required=True)
     last_name = forms.CharField()
-    username = forms.CharField(max_length=30, min_length=4, required=True)
+    username = forms.CharField(max_length=30, min_length=3, required=True)
     password = forms.CharField(required=True)
 
     def __init__(self, request, social_login):
@@ -113,7 +113,7 @@ class NewUserForm(UserCreationForm):
 
         # If the username does not match the simple regex pattern of only
         #     letters, digits, and underscores, raise validation error.
-        if re.match(r'^[a-z]\w+$', username) is None:
+        if re.match(r'^[a-z][a-z0-9_\.]{3,}$', username) is None:
             raise ValidationError(
                 _(settings.STRINGS['user']['register']['form']['USERNAME_VALIDATION_ERROR']))
 
