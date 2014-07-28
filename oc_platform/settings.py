@@ -54,7 +54,7 @@ AWS_SECRET_KEY = 'MA9eg98F0FOgZ6kInys+oo4uZ4WchY3bUDSR55y0'
 
 HAYSTACK_SITECONF = 'search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
-HAYSTACK_SOLR_URL = 'http://opencurriculum:8983/solr'
+HAYSTACK_SOLR_URL = 'http://opencurriculum.org:8983/solr'
 
 SITE_ID = 1
 
