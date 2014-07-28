@@ -277,7 +277,7 @@ class NewUserProfileForm(ModelForm):
             except UserProfile.DoesNotExist:
                 return social_id
             raise forms.ValidationError(
-                u'You % account is already linked to a user account. Please refresh and retry.'
+                'Your %s account is already linked to a user account. Please refresh and retry.'
                 % ('Google+' if social_service == 'plus' else 'Facebook')
             )
 
