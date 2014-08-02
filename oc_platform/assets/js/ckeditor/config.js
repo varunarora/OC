@@ -13,9 +13,6 @@ CKEDITOR.editorConfig = function( config ) {
     config.title = false;
 };
 
-CKEDITOR.config.contentsCss = '/static/assets/css/ckeditor/contents.css';
-CKEDITOR.config.skin = 'moono,/static/assets/css/ckeditor/skins/moono_docs/';
-
 CKEDITOR.config.toolbar_Basic = [
     [ 'Format','FontSize', '-', 'Bold', 'Italic' ],
     [ 'NumberedList','BulletedList'],
