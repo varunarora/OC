@@ -265,6 +265,9 @@ def favorite_resource(request, favorite_type, parent_id):
         except:
             return APIUtilities._api_failure()
 
+    except TypeError:
+        return APIUtilities._api_failure()
+
 
 def get_resource_vote_count(request, resource_id):
     try:
