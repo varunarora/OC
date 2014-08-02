@@ -796,15 +796,18 @@ _.extend(OC, {
 
         // Set the hidden field value for profile picture with the URL from gapi
         var smallPicture = profile.image.url,
-            mediumPicture = smallPicture.substring(0, smallPicture.indexOf('?sz=') + 4) + '150';
+            mediumPicture = smallPicture.substring(0, smallPicture.indexOf('?sz=') + 4) + '300';
         $(OC.config.registration.fields.profilePicture).attr(
             'value', mediumPicture);
 
 
         // Set the user email address & username
         $(OC.config.registration.fields.email).attr('value', profile.email);
-        $(OC.config.registration.fields.username).attr(
-            'value', profile.email.substring(0, profile.email.indexOf('@')));
+        try {
+            $(OC.config.registration.fields.username).attr(
+                'value', profile.email.substring(0, profile.email.indexOf('@')));
+        } catch (e){}
+
 
         // Set a new hidden form item to communicate to the server that no
         //    reCaptcha verification is required
@@ -820,6 +823,18 @@ _.extend(OC, {
             signInForm = $('#sign-in-form'),
             loginDialog = $('.login-dialog'),
             loginDialogBody = $('.oc-popup-body', loginDialog);
+
+        function condenseSignup(){
+            loginDialogBody.removeClass('faded');
+
+            OC.expediteGLogin(profile);
+
+            OC.highlightAndReturnErroneousInputs(false);
+            $('#signup-form input[type="text"]').trigger('change');
+
+            $('.login-dialog #fill-panel').remove();
+            $('.login-dialog #key-panel').addClass('center');
+        }
 
         function success(result, profile){
             if (loginDialog.length > 0){
@@ -838,8 +853,10 @@ _.extend(OC, {
                     if (response.status === "true"){
                         var redirect_to = $(
                             '.google-plus-login input[name=redirect_to]').val();
-                        if (redirect_to !== 'False'){
+                        if (redirect_to !== 'False' && redirect_to !== undefined){
                             window.location.href = redirect_to;
+                        } else if (OC.signupDialog){
+                            condenseSignup();
                         } else {
                             window.location.href = '/';
                         }
@@ -852,7 +869,11 @@ _.extend(OC, {
                             setTimeout(function(){
                                 window.location.href = '/signup/?expedite=plus';
                             }, 3000);
+                        } else if (loginDialog.length > 0){
+                            condenseSignup();
+                            return;
                         }
+
                     }
                 },
             'json');
@@ -865,6 +886,9 @@ _.extend(OC, {
                 //     of social login and populate hidden fields
                 //     with necessary values
                 OC.expediteGLogin(profile);
+
+                OC.highlightAndReturnErroneousInputs(false);
+                $('#signup-form input[type="text"]').trigger('change');
 
                 // Remove the loading spinner.
                 $('.or-wrapper .or-text').removeClass('hidden');
@@ -963,6 +987,9 @@ _.extend(OC, {
                 //     with necessary values
                 OC.expediteFbLogin(response);
 
+                OC.highlightAndReturnErroneousInputs(false);
+                $('#signup-form input[type="text"]').trigger('change');
+
                 // Remove the loading spinner.
                 $('.or-wrapper .or-text').removeClass('hidden');
                 $('.or-wrapper .or-loading').removeClass('visible');
@@ -1029,66 +1056,68 @@ _.extend(OC, {
         var signUpForm = $('#signup-form'),
             signInForm = $('#sign-in-form'),
             loginDialog = $('.login-dialog'),
-            loginDialogBody = $('.oc-popup-body', loginDialog);
+            loginDialogBody = $('.oc-popup-body', loginDialog),
+            facebookProfile;
+
+        function condenseSignup(){
+            loginDialogBody.removeClass('faded');
+
+            OC.expediteFbLogin(facebookProfile);
+
+            OC.highlightAndReturnErroneousInputs(false);
+            $('#signup-form input[type="text"]').trigger('change');
+
+            $('.login-dialog #fill-panel').remove();
+            $('.login-dialog #key-panel').addClass('center');
+        }
 
         if (loginDialog.length > 0){
             loginDialogBody.addClass('faded');
         }
 
-        FB.api('/me', function(profile) {
-            // Fill the hidden Google form object holding the user Fb ID.
-            $('form.facebook-login input[name=facebook_id]').val(
-                profile.id);
+        FB.login(function(response){
+            if (response.status === 'connected'){
+                FB.api('/me', function(profile) {
+                    facebookProfile = profile;
 
-            // Send a POST request for authenticating the user ID.
-            $.post('/fblogin/', $('form.facebook-login').serialize(),
-                function(response){
-                    // If authentication success, capture the source page and
-                    //     redirect the page.
-                    if (response.status === "true"){
-                        var redirect_to = $(
-                            '.facebook-login input[name=redirect_to]').val();
-                        if (redirect_to !== 'False' && redirect_to !== ''){
-                            window.location.href = redirect_to;
-                        } else if (OC.signupDialog){
-                            OC.config.user.id = response.id;
-                            $('input[name="user"]').val(response.id);
+                    // Fill the hidden Facebook form object holding the user Fb ID.
+                    $('form.facebook-login input[name=facebook_id]').val(
+                        profile.id);
 
-                            OC.config.user.username = response.username;
-
-                            // Dismiss login window and proceed to next step.
-                            OC.signupDialog.close();
-
-                            OC.registerationSuccessCallback();
-
-                            // Show signed up message.
-                            OC.setMessageBoxMessage('You have successfully logged in.');
-                            OC.showMessageBox();
-
-                            OC.pushMessageBoxForward();
-                        } else {
-                            window.location.href = '/';
-                        }
-                    } else {
-                        if (loginDialog.length === 0 && signInForm.length > 0){
-                            OC.customPopup('.new-account-redirect-dialog');
-                            
-                            // In the synchronous login scenario, redirect to new account
-                            //     create functionality where fields are prefilled.
-                            setTimeout(function(){
-                                window.location.href = '/signup/?expedite=facebook';
-                            }, 3000);
-                        } else if (loginDialog.length > 0){
-                            loginDialogBody.removeClass('faded');
-
-                            OC.expediteFbLogin(profile);
-
-                            $('.login-dialog #fill-panel').remove();
-                            $('.login-dialog #key-panel').addClass('center');
-                        }
-                    }
-                },
-            'json');
+                    // Send a POST request for authenticating the user ID.
+                    $.post('/fblogin/', $('form.facebook-login').serialize(),
+                        function(response){
+                            // If authentication success, capture the source page and
+                            //     redirect the page.
+                            if (response.status === "true"){
+                                var redirect_to = $(
+                                    '.facebook-login input[name=redirect_to]').val();
+                                if (redirect_to !== 'False' && redirect_to !== ''){
+                                    window.location.href = redirect_to;
+                                } else if (OC.signupDialog){
+                                    condenseSignup();
+                                } else {
+                                    window.location.href = '/';
+                                }
+                            } else {
+                                if (loginDialog.length === 0 && signInForm.length > 0){
+                                    OC.customPopup('.new-account-redirect-dialog');
+                                    
+                                    // In the synchronous login scenario, redirect to new account
+                                    //     create functionality where fields are prefilled.
+                                    setTimeout(function(){
+                                        window.location.href = '/signup/?expedite=facebook';
+                                    }, 2000);
+                                } else if (loginDialog.length > 0){
+                                    condenseSignup();
+                                }
+                            }
+                        },
+                    'json');
+                });
+            }
+        }, {
+            scope: 'public_profile, email'
         });
     },
 
@@ -1204,6 +1233,15 @@ _.extend(OC, {
             });
         });
 
+        // Check for if there is any fb expediting request.
+        if (window.location.search.indexOf('expedite=facebook') !== -1){
+            setTimeout(function(){
+                FB.login(function(response){}, {
+                    scope: 'public_profile, email'
+                });
+            }, 1000);
+        }
+
         $('#sign-in-form .facebook-button, .login-dialog .facebook-button').click(function(event){
             OC.facebookSignInCallback();
 
@@ -1229,25 +1267,9 @@ _.extend(OC, {
         $('form#signup-form button.large-action-button').click(function(event){
             var submitButton = $(this);
 
-            var fields = [
-                'input[name="first_name"]', 'input[name="last_name"]',
-                'input[name="email"]',
-                'input[name="username"]', 'input[name="password"]',
-                'input[name="dob_date"]', 'input[name="dob_year"]',
-                'select[name="dob_month"]'
-            ];
+            var erroneousInputs = OC.highlightAndReturnErroneousInputs(true);
 
-            var i, element, errorneousInputs = [];
-            for (i = 0; i < fields.length; i++){
-                element = $('form#signup-form ' + fields[i]);
-                if (element.val() === '' || element.val() === '0')
-                    element.addClass('form-input-error');
-
-                if (element.hasClass('form-input-error'))
-                    errorneousInputs.push(element);
-            }
-
-            if (errorneousInputs.length === 0 && OC.signupDialog) {
+            if (erroneousInputs.length === 0 && OC.signupDialog) {
                 var form = $('form#signup-form').serialize();
 
                 // Add spinner to submit button.
@@ -1272,7 +1294,7 @@ _.extend(OC, {
                         OC.pushMessageBoxForward();
                     }, 'json');
             } else {
-                if (errorneousInputs.length === 0){
+                if (erroneousInputs.length === 0){
                     $('.page-form-submission-loader').addClass('show');
 
                     submitButton.parents('form#signup-form').submit();
@@ -1286,6 +1308,30 @@ _.extend(OC, {
 
         // Bind change validation handlers with all fields.
         OC.liveValidateRegistrationForm();
+    },
+
+    highlightAndReturnErroneousInputs: function(checkPassword){
+        var fields = [
+            'input[name="first_name"]', 'input[name="last_name"]',
+            'input[name="email"]',
+            'input[name="username"]',
+            'input[name="dob_date"]', 'input[name="dob_year"]',
+            'select[name="dob_month"]'
+        ];
+
+        if (checkPassword) fields.push('input[name="password"]');
+
+        var i, element, errorneousInputs = [];
+        for (i = 0; i < fields.length; i++){
+            element = $('form#signup-form ' + fields[i]);
+            if (element.val() === '' || element.val() === '0')
+                element.addClass('form-input-error');
+
+            if (element.hasClass('form-input-error'))
+                errorneousInputs.push(element);
+        }
+
+        return errorneousInputs;
     },
 
     liveValidateRegistrationForm: function(){
@@ -1333,7 +1379,7 @@ _.extend(OC, {
 
         OC.validate.text(
             '#signup-form input[name="username"]',
-            /^[a-z][a-z0-9_\.]{3,}$/,
+            /^[a-z][a-z0-9_\.]{3,30}$/,
             'Username should be all lowercase, cannot begin with ' +
                 'a number and must only have letters and digits and/or underscores.'
         );
@@ -1376,23 +1422,28 @@ _.extend(OC, {
         text: function(selector, pattern, error){
             var input = $(selector),
                 currentInput;
-            input.keyup(function(event){
+
+            function inputKeyup(event){
                 currentInput = $(event.target);
                 if (currentInput.hasClass('form-input-error') && currentInput.val().match(pattern)) {
                     if (currentInput.val().match(pattern)[0] === currentInput.val()){
                         OC.validate.pass(currentInput);
                     }
                 }
-            });
+            }
 
-            input.blur(function(event){
+            function inputBlur(event){
                 currentInput = $(event.target);
                 if (!currentInput.val().match(pattern)){
                     OC.validate.invalidate(currentInput, error);
                 } else if (currentInput.val().match(pattern)[0] !== currentInput.val()){
                     OC.validate.invalidate(currentInput, error);
                 }
-            });
+            }
+
+            input.keyup(inputKeyup);
+            input.blur(inputBlur);
+            input.change(inputBlur);
         },
 
         confirm: function(selector, baseSelector, error){
@@ -4896,8 +4947,6 @@ jQuery(document).ready(function ($) {
     // Instantiate AJAX submit handler for invite sign-ups
     OC.initInviteSignup();
 
-    OC.initRegistrationForm();
-
 
     /** Article specific initializers and other functions */
 
@@ -5055,6 +5104,7 @@ jQuery(document).ready(function ($) {
        ref.parentNode.insertBefore(js, ref);
     }(document));
 
+    OC.initRegistrationForm();
 
     // Initial tour on signup.
     OC.signupTour();
