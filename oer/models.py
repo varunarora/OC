@@ -55,7 +55,7 @@ class Resource(models.Model):
     collaborators = models.ManyToManyField(User, blank=True, null=True,
         related_name='collabs')
     viewers = models.ManyToManyField(User, blank=True, null=True, related_name='viewers')
-    category = models.ForeignKey('meta.Category', null=True, blank=True)
+    categories = models.ManyToManyField('meta.Category', null=True, blank=True)
     language = models.ForeignKey('meta.Language', default=get_default_language)
     slug = models.SlugField(max_length=256)
     stage = models.CharField(max_length=64, null=True, blank=True)
@@ -105,6 +105,15 @@ class ResourceMeta(models.Model):
     context = JSONField(null=True, blank=True)
 
 
+"""class Suggestion(models.Model):
+    suggested_type = models.ForeignKey(ContentType)
+    suggested_id = models.PositiveIntegerField()
+    suggested = generic.GenericForeignKey('suggested_type', 'suggested_id')    
+    user = models.ForeignKey(User, null=True, blank=True)
+    category = models.ForeignKey('meta.Category', null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True, editable=False)"""
+
+
 class Collection(models.Model):
     title = models.CharField(max_length=256)
     created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -119,7 +128,8 @@ class Collection(models.Model):
     changed = models.DateTimeField(auto_now=True, editable=False)
     slug = models.SlugField(max_length=256)
     creator = models.ForeignKey(User)
-    category = models.ForeignKey('meta.Category', null=True, blank=True)
+    categories = models.ManyToManyField('meta.Category', null=True, blank=True)
+    tags = models.ManyToManyField('meta.Tag', null=True, blank=True)
 
     def __unicode__(self):
         return self.title
