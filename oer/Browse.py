@@ -45,8 +45,10 @@ class Browse():
         # Determine the depth to figure out what level of page needs to be displayed.
         try:
             host_category = Category.objects.get(slug=categories_slugs[0])
-            if categories_slugs != 'common-core':
+            if categories_slugs[0] != 'common-core':
                 self.is_common_core_hosted = False
+            else:
+                self.is_common_core_hosted = True
 
             (host_browse_tree, host_flattened_tree) = category_util.build_child_categories(
                 {'root': [host_category]}, [])
