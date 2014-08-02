@@ -1539,6 +1539,9 @@ def resize_user_image(user_profile, widthHeight, local_profile_pic_path):
         new_height = (original_height / float(original_width)) * widthHeight
         new_width = widthHeight
 
+    if image.mode == 'P':
+        image = image.convert('RGB')
+
     imagefit = image.resize((int(new_width), int(new_height)), Image.ANTIALIAS)
     resized_image_path = (settings.MEDIA_ROOT + 'profile/' + str(widthHeight) + 'x' +
         str(widthHeight) + '/' + str(user_profile.user.id) + '-profile' + str(widthHeight) + 'x' +
