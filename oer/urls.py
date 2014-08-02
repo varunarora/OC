@@ -57,9 +57,9 @@ urlpatterns = patterns(
     url(r'^api/search/(?P<query>[\w\ ]+)/$', views.autocomplete_search, name='autocomplete'),
     url(r'^api/editor-search/(?P<query>[\w\ ]+)/$', views.editor_autocomplete_search, name='editor-autocomplete'),
     url(r'^api/load-resources/(?P<collection_id>\d+)/from/(?P<resource_count>\d+)/$', views.load_resources, name='load_resources'),
-    url(r'^api/load-browse-resources/(?P<category_id>\d+)/from/(?P<last_category_id>\d+)/$', views.load_browse_resources, name='load_browse_resources'),
+    # url(r'^api/load-browse-resources/(?P<category_id>\d+)/from/(?P<last_category_id>\d+)/$', views.load_browse_resources, name='load_browse_resources'),
     url(r'^api/load-category-resources/(?P<category_id>\d+)/from/(?P<resource_count>\d+)/$', views.load_category_resources, name='load_category_resources'),
-    url(r'^api/search-category/(?P<category_id>\d+)/from/(?P<last_category_id>\d+)/query/(?P<query>[\w\ ]+)/$', views.search_category_old, name='search_category_old'),
+    # url(r'^api/search-category/(?P<category_id>\d+)/from/(?P<last_category_id>\d+)/query/(?P<query>[\w\ ]+)/$', views.search_category_old, name='search_category_old'),
     url(r'^api/search-category/(?P<category_id>\d+)/query/(?P<query>[\w\ ]+)/$', views.search_category, name='search_category'),
     url(r'^api/get-child-categories/(?P<category_id>\d+)/$', views.get_child_categories, name='get_child_categories'),
 
@@ -89,6 +89,4 @@ urlpatterns = patterns(
     url(r'^importer/feed/$', views.feed_importer_list, name='feed_importer_list'),
 
     url(r'^rename/(?P<collection_id>\d+)/$', views.rename_collection, name='rename_collection'),
-
-    url(r'^$', views.resource_center, name='resource_center'),
 )
