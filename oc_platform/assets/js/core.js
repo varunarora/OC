@@ -3440,21 +3440,59 @@ _.extend(OC, {
         },
 
         upvotePostClickHandler: function(event){
-            commentID = OC.projects.getDiscussionID(event.target);
-            OC.comments.newVote(commentID, true, event.target);
+            function vote(){
+                commentID = OC.projects.getDiscussionID(event.target);
+                OC.comments.newVote(commentID, true, event.target);
+            }
+
+            if (OC.config.user.id){
+                vote();
+            } else {
+                var message = 'To upvote this post, please login or create a free account instantly.';
+                OC.launchSignupDialog(message, vote);
+            }
         },
+
         downvotePostClickHandler: function(event){
-            commentID = OC.comments.getCommentID(event.target);
-            OC.comments.newVote(commentID, true, event.target);
+            function vote(){
+                commentID = OC.comments.getCommentID(event.target);
+                OC.comments.newVote(commentID, true, event.target);
+            }
+
+            if (OC.config.user.id){
+                vote();
+            } else {
+                var message = 'To downvote this post, please login or create a free account instantly.';
+                OC.launchSignupDialog(message, vote);
+            }
         },
 
         upvoteCommentClickHandler: function(event){
-            commentID = OC.comments.getCommentID(event.target);
-            OC.comments.newVote(commentID, true, event.target);
+            function vote(){
+                commentID = OC.comments.getCommentID(event.target);
+                OC.comments.newVote(commentID, true, event.target);
+            }
+
+            if (OC.config.user.id){
+                vote();
+            } else {
+                var message = 'To upvote this comment, please login or create a free account instantly.';
+                OC.launchSignupDialog(message, vote);
+            }
         },
+
         downvoteCommentClickHandler: function(event){
-            commentID = OC.comments.getCommentID(event.target);
-            OC.comments.newVote(commentID, false, event.target);
+            function vote(){
+                commentID = OC.comments.getCommentID(event.target);
+                OC.comments.newVote(commentID, false, event.target);
+            }
+
+            if (OC.config.user.id){
+                vote();
+            } else {
+                var message = 'To downvote this comment, please login or create a free account instantly.';
+                OC.launchSignupDialog(message, vote);
+            }
         },
 
         getCommentID: function(target){
