@@ -42,6 +42,29 @@ class Comment(models.Model):
     comment_created = Signal(providing_args=["comment_id", "parent_type", "request"])
 
 
+def remove_comment_activity(sender, instance, created, raw, **kwargs):
+    from django.contrib.contenttypes.models import ContentType
+    comment_ct = ContentType.objects.get_for_model(Comment)
+
+    from user_account.models import Activity
+    comment_actions = Activity.objects.filter(
+        action_type=comment_ct, action_id=instance.id)
+
+    comment_targets = Activity.objects.filter(
+        target_type=comment_ct, target_id=instance.id)
+
+    comment_context = Activity.objects.filter(
+        context_type=comment_ct, context_id=instance.id)
+
+    comment_activities = comment_actions | comment_targets | comment_context
+
+    for activity in comment_activities:
+        activity.delete()
+
+from django.db.models.signals import post_delete
+post_delete.connect(remove_comment_activity, sender=Comment)
+
+
 class CommentReference(models.Model):
     comment = models.ForeignKey('interactions.Comment', null=True, blank=True)
     reference = models.CharField(max_length=64)
