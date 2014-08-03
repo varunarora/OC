@@ -120,7 +120,7 @@ def build_child_tree(root_node):
             node_href.set(
                 'id', ('category-' if node_type == 'category' else 'tag-') + str(current_node.id))
             node_href.text = current_node.title if node_type == 'category' else (
-                current_node.title + ': ' + current_node.description)
+                current_node.title + ': ' + (current_node.description if current_node.description else ''))
 
         node_elements.append(node_element)
 
