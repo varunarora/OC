@@ -70,9 +70,12 @@ class Browse():
             except Category.DoesNotExist:
                 raise Http404
 
-            for category in host_flattened_tree:
-                if category == self.current_category:
-                    self.selected_category = category
+            try:
+                for category in host_flattened_tree:
+                    if category == self.current_category:
+                        self.selected_category = category
+            except:
+                raise Http404
 
             if len(categories_slugs) == 1:
                 self.return_url = None
