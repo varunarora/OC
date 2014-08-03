@@ -16,7 +16,7 @@ class ResourceIndex(SearchIndex):
     def index_queryset(self):
         """Used when the entire index for model is updated."""
         return Resource.objects.filter(created__lte=datetime.datetime.now())
-        
+
     def prepare_tags(self, obj):
         return [tag.title for tag in obj.tags.all()]
 
@@ -28,5 +28,8 @@ class ResourceIndex(SearchIndex):
             return [objective for objective in obj.meta.objectives]
         except:
             return []
+
+    def prepare_content_description(self, obj):
+        if obj.description is None: return ''
 
 site.register(Resource, ResourceIndex)
