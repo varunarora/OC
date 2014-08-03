@@ -75,8 +75,10 @@ class NewURLForm(forms.ModelForm):
             )[0]
 
             # If a description was found, set it on the resource.
-            if description:
+            if description.hasattr('title'):
                 newRequest.setdefault('description', description['content'])
+            else:
+                newRequest.setdefault('description', '')
         except:
             if not title:
                 title = 'Untitled website'
