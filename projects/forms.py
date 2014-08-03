@@ -117,5 +117,20 @@ class ProjectDelete():
         for comment in root_comments:
             delete_comment_tree(comment)
 
+        from user_account.models import Activity
+        project_actions = Activity.objects.filter(
+            action_type=project_ct, action_id=instance.id)
+
+        project_targets = Activity.objects.filter(
+            target_type=project_ct, target_id=instance.id)
+
+        project_context = Activity.objects.filter(
+            context_type=project_ct, context_id=instance.id)
+
+        project_activities = project_actions | project_targets | project_context
+
+        for activity in project_activities:
+            activity.delete()
+
         # Delete the project (deletes memberships and administration).
         instance.delete()
