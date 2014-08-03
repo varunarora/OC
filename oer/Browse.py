@@ -67,6 +67,9 @@ class Browse():
                 self.current_category = next(category for category in host_flattened_tree if(
                     category.slug == categories_slugs[-1] and category.parent.slug == categories_slugs[-2]))
 
+            except Category.DoesNotExist:
+                raise Http404
+
             for category in host_flattened_tree:
                 if category == self.current_category:
                     self.selected_category = category
