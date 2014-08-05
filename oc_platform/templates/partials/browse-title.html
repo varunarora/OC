@@ -1,0 +1,11 @@
+<div class="content-panel-body-header-title-wrapper">
+    <div class="content-panel-body-header-title{% if not is_catalog %} show-share{% endif %}"><h2>{{ selected_category.title }}</h2>{% if not is_catalog %}<div class="content-panel-body-header-share action-button mini-action-button">+ Share new</div>{% endif %}</div>
+    <div class="breadcrumb">
+        {% for breadcrumb_category in breadcrumb %}
+            <a href="{{ breadcrumb_category.url }}">{{ breadcrumb_category.title }}</a> 
+            {% if not forloop.last %}
+            <span class="vertical-caret breadcrumbs-caret"></span> 
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>

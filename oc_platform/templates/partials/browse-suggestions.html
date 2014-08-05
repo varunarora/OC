@@ -1,0 +1,45 @@
+{% for item in items %}
+    <div class="content-panel-body-listing-banner-item" id="suggestion-{{ item.id }}">
+        <a href="{% if item.suggested_type.name == 'collection' %}{% url user:user_profile username=item.suggested.creator.username %}{% else %}{% url user:user_profile username=item.suggested.revision.user.username %}{% endif %}" class="content-panel-body-listing-item-user-picture" style="background-image: url('{{ MEDIA_URL }}{% if item.suggested_type.name == 'collection' %}{{ item.suggested.creator.get_profile.profile_pic.name }}{% else %}{{ item.suggested.revision.user.get_profile.profile_pic.name }}{% endif %}')"></a>
+        <div class="content-panel-body-listing-item-label-fold"></div>
+        <div class="content-panel-body-listing-item-label">{{ item.suggested.type|upper }}</div>
+        <a href="{% if item.suggested_type.name == 'collection' %}{% url user:list_collection username=item.suggested.creator.username collection_slug=item.suggested.slug %}{% else %}{% if item.suggested.revision.content_type.name == 'link'%}{{ item.suggested.revision.content.url }}{% else %}{% url read resource_id=item.suggested.id resource_slug=item.suggested.slug %}{% endif %}{% endif %}" class="content-panel-body-listing-item-anchor"{% if remote %} target="_blank"{% endif %}>
+            <div class="content-panel-body-listing-item-thumbnail-wrapper">
+                <div class="content-panel-body-listing-item-favorites{% if favorited%} favorited{% endif %}"></div>
+                <div class="content-panel-body-listing-item-thumbnail" style="background-image: url('{% if item.suggested_type.name == 'collection' %}{{ STATIC_URL }}images/folder-large.png{% else %}{{ MEDIA_URL }}{{ item.suggested.image.name }}{% endif %}')"></div>
+                <div class="content-panel-body-listing-item-thumbnail-shadow"></div>
+            </div>
+            <div class="content-panel-body-listing-item-contents">
+                <div class="content-panel-body-listing-item-contents-caption">{{ item.suggested.title }}</div>{% if item.suggested.filtered_tags %}
+                <div class="content-panel-body-listing-item-contents-labels">
+                {% for tag in item.suggested.filtered_tags %}
+                    <span class="content-panel-body-listing-item-contents-label label">{{ tag }}</span>
+                {% endfor %}
+                </div>
+                {% endif %}
+                <div class="content-panel-body-listing-item-contents-description">{% if item.description %}{{ item.suggested.description|escapejs }}{% else %}{% endif %}</div>
+                <div class="content-panel-body-listing-item-contents-actions">
+                    <div class="action-button mini-action-button secondary-button approve-button">Approve</div>
+                    <div class="action-button mini-action-button secondary-button reject-button">Reject</div>
+                </div>
+            </div>
+        </a>
+    </div>
+{% endfor %}
+
+
+<div class="moderate-suggestion-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Leave a message for the suggestor</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <form method="POST" class="moderate-suggestion-form">
+            {% csrf_token %}
+            <textarea name="message"></textarea>
+            <div class="moderate-suggestion-submit-wrapper oc-popup-submit-wrapper">
+                <button class="action-button moderate-suggestion-submit oc-popup-submit-button">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
