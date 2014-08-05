@@ -383,6 +383,10 @@ class Browse():
 
             else:
                 resource_collection.favorited = False
+
+        except:   # In the case the user is logged out.
+            resource_collection.favorited = False
+
             
 
         if not hasattr(resource_collection, 'filtered_tags'):
