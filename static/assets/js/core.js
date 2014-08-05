@@ -5020,6 +5020,52 @@ _.extend(OC, {
                 }
             });
         },
+    },
+
+    feed: {
+        feedCount: null,
+        currentCount: null,
+
+        infiniteScroll: function(){
+            if (OC.feed.feedCount > 20){
+                var loadButton = $('.lazy-load-button'), i;
+                $(window).on('DOMContentLoaded load resize scroll', function(event){
+                    // If the load button is attached to the document.
+                    if ($.contains(document, loadButton[0])){
+                        if (isElementInViewport(loadButton) && !loadButton.hasClass('loading')){
+                            loadButton.addClass('loading');
+
+                            $.get('/user/api/load-feed/' + OC.config.user.id +
+                                    '/from/' + OC.feedCount.currentCount + '/',
+                                function(response){
+                                    if (response.status == 'true'){
+                                        var keys = Object.keys(response.resources);
+
+                                        if (keys.length !== 0){
+                                            for (i = 0; i < keys.length; i++){
+                                                $('.resources-collections-added').append(
+                                                    OC.resourcesCollections.resourceCollectionItemTemplate(
+                                                        response.resources[keys[i]]));
+                                            }
+                                            OC.resourcesCollections.currentCount += keys.length;
+
+                                        } else {
+                                            loadButton.remove();
+                                        }
+                                    }
+                                    else {
+                                        OC.popup(response.message, response.title);
+                                    }
+                                    loadButton.removeClass('loading');
+
+                                },
+                            'json');
+                        }
+                    }
+                });
+            }
+        },
+
     }
 });
 
