@@ -14,6 +14,7 @@ urlpatterns = patterns(
     url(r'^api/username-availability/(?P<username>[a-z0-9_\.]+)/$', views.username_availability, name='username_availability'),
     url(r'^api/social-availability/(?P<service>\w+)/(?P<social_id>\d+)/$', views.social_availability, name='social_availability'),
     url(r'^api/onboard/(?P<tour>\w+)/(?P<version_id>\d+\.\d+)/$', views.onboard, name='onboard'),
+    url(r'^api/get-profile/(?P<username>[a-z0-9_\.]+)/$', views.api_get_profile, name='api_get_profile'),
 
     url(r'^api/register-asynchronously/$', views.register_asynchronously, name='register_asynchronously'),
 

@@ -31,6 +31,7 @@ class Browse():
 
     resource_type_tag_category = TagCategory.objects.get(
         title='Resource type')
+    resources_category = TagCategory.objects.get(title='Resources')
 
     def __init__(self, request, category_slug=None):
         self.request = request
@@ -124,10 +125,10 @@ class Browse():
                 }
             )
 
-        resource_type_tag_category = TagCategory.objects.get(title='Resource type')
         for category in child_categories:
             category.count = Resource.objects.filter(categories=category, tags__in=Tag.objects.filter(
-                category=resource_type_tag_category)).order_by('-created').count()
+                category=self.resource_type_tag_category)).order_by('-created').count() + Collection.objects.filter(categories=category, tags__in=Tag.objects.filter(
+                category=self.resource_type_tag_category)).order_by('-created').count()
 
         if not self.is_subject_home:
             # Determine if this is a catalog page or not.
@@ -239,17 +240,33 @@ class Browse():
         (current_browse_tree, current_flattened_tree) = category_util.build_child_categories(
             {'root': [self.selected_category]}, [])
 
+        from oer.models import Suggestion
+        unfiltered_suggestions = Suggestion.objects.filter(category=self.current_category).order_by('-created')
 
+        suggestions = []
+        for unfiltered_suggestion in unfiltered_suggestions:
+            for tag in unfiltered_suggestion.suggested.tags.all():
+                if tag.category == self.resource_type_tag_category:
+                    suggestions.append(unfiltered_suggestion)
 
-        """(all_resources, all_collections, current_category_id) = self.get_category_tree_resources_collections_catalog(
-            current_flattened_tree, is_catalog=False)"""
+        for suggestion in suggestions:
+            # Set types on suggestions.
+            if suggestion.suggested_type.name == 'collection':
+                suggestion.suggested.type = 'Folder'
+            else:
+                suggestion.suggested.type = suggestion.suggested.tags.get(
+                    category=self.resource_type_tag_category)
+            
+            if not hasattr(suggestion.suggested, 'filtered_tags'):
+                suggestion.suggested.filtered_tags = suggestion.suggested.tags.exclude(
+                    category=self.resource_type_tag_category).exclude(
+                    category=self.resources_category)
 
         context = {
             'title': 'Review suggestions',
             'selected_category': self.selected_category,
             'child_categories': current_flattened_tree,
-            'items': list(all_resources) + list(all_collections),
-            'current_category_id': current_category_id,
+            'items': suggestions,
             'current_category': self.current_category,
             'is_catalog': False,
             'breadcrumb': self.breadcrumb,
@@ -266,16 +283,13 @@ class Browse():
         if is_catalog is None:
             is_catalog = self.is_catalog
 
-        all_resources = []
-        all_raw_resources = []
-        all_collections = []
-        all_raw_collections = []
-        current_category_id = None
+        all_resources_collections = []
+        all_raw_resources_collections = []
 
         # Get the top 10 resources of each child category.
         for category in child_categories:
-            category_resources_uncapped = Resource.objects.filter(categories=category, tags__in=Tag.objects.filter(category=TagCategory.objects.get(
-                title='Resource type'))).order_by('-created')
+            category_resources_uncapped = Resource.objects.filter(categories=category, tags__in=Tag.objects.filter(
+                category=self.resource_type_tag_category)).order_by('-created')
             category_resources = category_resources_uncapped[:6] if is_catalog else category_resources_uncapped
 
             category_resources_count = category_resources.count()
@@ -284,6 +298,9 @@ class Browse():
                 """tagged_resources_uncapped = Resource.objects.filter(tags__in=category.tags.all(
                     )).filter(tags__in=Tag.objects.filter(category=self.resource_type_tag_category)).order_by('-created')
                 tagged_resources = tagged_resources_uncapped[:6 - category_resources_count] if is_catalog else tagged_resources_uncapped"""
+                category_collections_uncapped = Collection.objects.filter(categories=category, tags__in=Tag.objects.filter(
+                    category=self.resource_type_tag_category)).order_by('-created')
+                category_collections = category_collections_uncapped[:6] if is_catalog else category_collections_uncapped
 
                 # If this is a category that support mapped resources, fetch mapped content.
                 if is_common_core_hosted:
@@ -310,7 +327,7 @@ class Browse():
 
                         resource.filtered_tags = [mapping.from_node for mapping in tag_mappings if (mapping.to_node in list(filtered_tags))]
 
-                unordered_category_tagged_resources = list(set(list(category_resources) + list(tag_mapped_resources)))
+                unordered_category_tagged_resources = list(set(list(category_resources) + list(category_collections) + list(tag_mapped_resources)))
      
                 category_tagged_resources = sorted(
                     unordered_category_tagged_resources, key=lambda resource: resource.created, reverse=True)
@@ -321,64 +338,69 @@ class Browse():
                 r.category = category
                 return r
 
-            all_raw_resources += map(categorize_resource, category_tagged_resources)
+            all_raw_resources_collections += map(categorize_resource, category_tagged_resources)
 
         # Setup each resource's favorites count and type.
-        from interactions.models import Favorite
-        collection_ct = ContentType.objects.get_for_model(Collection)
-
-        for resource in all_raw_resources:
+        for resource_collection in all_raw_resources_collections:
             try:
-                self.build_browse_resource(resource)
-                all_resources.append(resource)
+                self.build_browse_resource(resource_collection)
+                all_resources_collections.append(resource_collection)
             except Tag.DoesNotExist:
                 pass
 
-        for collection in all_raw_collections:
-            collection.favorites_count = Favorite.objects.filter(
-                parent_id=collection.id, parent_type=collection_ct).count()
-            collection.type = resource.tags.get(
-                category=TagCategory.objects.get(title='Resource type'))
-            collection.item_type = 'collection'
-            all_collections.append(collection)
-
-        return (all_resources, all_collections, current_category_id)
+        return (all_resources_collections, [], self.current_category_id)
 
 
-    def build_browse_resource(self, resource):
+    def build_browse_resource(self, resource_collection):
         from django.contrib.contenttypes.models import ContentType
         resource_ct = ContentType.objects.get_for_model(Resource)
+        collection_ct = ContentType.objects.get_for_model(Collection)
+
         from interactions.models import Favorite
-        from meta.models import TagCategory
 
-        resource.revision.user = resource.user
-        resource.favorites_count = Favorite.objects.filter(
-            parent_id=resource.id, parent_type=resource_ct).count()
-        resource.type = resource.tags.get(
-            category=TagCategory.objects.get(title='Resource type'))
-        resource.item_type = 'resource'
-        if not hasattr(resource, 'filtered_tags'):
-            resource.filtered_tags = resource.tags.exclude(
-                category=TagCategory.objects.get(title='Resource type')).exclude(
-                category=TagCategory.objects.get(title='Resources'))
+        resource_collection.type = resource_collection.tags.get(
+            category=self.resource_type_tag_category)
 
         try:
-            resource.favorited = Favorite.objects.get(
-                parent_id=resource.id, parent_type=resource_ct, user=self.request.user) != None
-        except:
-            resource.favorited = False
+            # resource.revision.user = resource.user
+            resource_collection.favorites_count = Favorite.objects.filter(
+                parent_id=resource_collection.id, parent_type=resource_ct).count()
+            resource_collection.item_type = 'resource'
+
+            resource_collection.favorited = Favorite.objects.get(
+                parent_id=resource_collection.id, parent_type=resource_ct, user=self.request.user) != None
+        except Favorite.DoesNotExist:
+            if not hasattr(resource_collection, 'revision'):
+                try:
+                    resource_collection.favorited = Favorite.objects.get(
+                        parent_id=resource_collection.id, parent_type=collection_ct, user=self.request.user) != None
+                except Favorite.DoesNotExist:
+                    resource_collection.favorited = False
+
+                resource_collection.favorites_count = Favorite.objects.filter(
+                    parent_id=resource_collection.id, parent_type=collection_ct).count()
+                resource_collection.item_type = 'collection'
+
+            else:
+                resource_collection.favorited = False
+            
+
+        if not hasattr(resource_collection, 'filtered_tags'):
+            resource_collection.filtered_tags = resource_collection.tags.exclude(
+                category=self.resource_type_tag_category).exclude(
+                category=self.resources_category)
 
         try:
-            resource.objectives = resource.meta.objectives
+            resource_collection.objectives = resource_collection.meta.objectives
         except:
-            resource.objectives = None
+            resource_collection.objectives = None
 
         from django.db.models import Avg
         review_average = Review.objects.filter(
-            comment__parent_id=resource.id, comment__classification='review').aggregate(Avg('rating'))['rating__avg']
-        resource.rating = review_average if review_average else 0
-        resource.review_count = Review.objects.filter(
-            comment__parent_id=resource.id, comment__classification='review').count()
+            comment__parent_id=resource_collection.id, comment__classification='review').aggregate(Avg('rating'))['rating__avg']
+        resource_collection.rating = review_average if review_average else 0
+        resource_collection.review_count = Review.objects.filter(
+            comment__parent_id=resource_collection.id, comment__classification='review').count()
 
 
     # API stuff.
@@ -391,7 +413,7 @@ class Browse():
 
         category_resources = Resource.objects.filter(categories=category).order_by('-created')
         tagged_resources = Resource.objects.filter(tags__in=category.tags.all()).filter(
-            tags__in=Tag.objects.filter(category=TagCategory.objects.get(title='Resource type'))).order_by('-created')
+            tags__in=Tag.objects.filter(category=self.resource_type_tag_category)).order_by('-created')
         category_resource_count = category_resources.count()
 
         def categorize_resource(r):
@@ -440,9 +462,6 @@ class Browse():
         for category in flattened_tree:
             categories_tags += category.tags.all()
 
-        resource_type_category = TagCategory.objects.get(title='Resource type')
-        resources_category = TagCategory.objects.get(title='Resources')
-
         def set_child_category(resource, immediate_category):
             while True:
                 if immediate_category in child_categories:
@@ -464,8 +483,8 @@ class Browse():
         def categorize_resource(searched_resource):
             # Find the child category this is a descendant in.
             filtered_tags = searched_resource.object.tags.exclude(
-                category=resource_type_category).exclude(
-                category=resources_category)
+                category=self.resource_type_category).exclude(
+                category=self.resources_category)
 
             for tag in filtered_tags:
                 if tag in categories_tags:

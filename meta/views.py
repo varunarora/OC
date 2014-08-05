@@ -292,10 +292,16 @@ def autocomplete_concept(request, query):
 def autocomplete_standard(request, query):
     standards = Tag.objects.filter(
         title__icontains=query, category=TagCategory.objects.get(title='Standards'))
+    limit = request.GET.get('limit', None)
 
     result_set = set()
-    for standard in standards:
-        result_set.add(standard.title)
+
+    if limit:
+        for standard in standards[:int(limit)]:
+            result_set.add(standard.title)
+    else:
+        for standard in standards:
+            result_set.add(standard.title)
 
     import json
     return HttpResponse(

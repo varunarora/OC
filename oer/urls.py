@@ -68,6 +68,9 @@ urlpatterns = patterns(
 
     url(r'^api/request-for-information/(?P<resource_id>\d+)/$', views.request_for_information, name='request_for_information'),
 
+    url(r'^api/approve-suggestion/(?P<suggestion_id>\d+)/$', views.approve_suggestion, name='approve_suggestion'),
+    url(r'^api/reject-suggestion/(?P<suggestion_id>\d+)/$', views.reject_suggestion, name='approve_suggestion'),
+
     url(r'^template/five-step-lesson-plan/$', views.template_five_step_lesson_plan, name='template_five_step_lesson_plan'),
     url(r'^template/three-act-lesson/$', views.template_three_act_lesson, name='template_three_act_lesson'),
     url(r'^template/understanding-by-design-lesson-plan/$', views.template_understanding_by_design_lesson_plan, name='template_understanding_by_design_lesson_plan'),

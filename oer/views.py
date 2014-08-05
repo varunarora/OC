@@ -893,7 +893,7 @@ def file_upload_submit(request):
 
                     # Add the necessary tags to the resource if this is a post upload.
                     if is_post:
-                        add_type_category_to_resource(new_resource, category_id, resource_type)
+                        suggest_resource_in_category(request, new_resource, category_id, resource_type, request.user)
 
             ###########################################################
             # Now, handle name changes for pre-uploaded files
@@ -918,6 +918,7 @@ def file_upload_submit(request):
                 del post_data['filename']
                 del post_data['submit']
                 del post_data['file']
+                del post_data['standard']
             except:
                 pass
 
@@ -931,8 +932,8 @@ def file_upload_submit(request):
 
                     # Add the necessary tags to the resource if this is a post upload.
                     if is_post:
-                        add_type_category_to_resource(resource, category_id, resource_type)
-        
+                        suggest_resource_in_category(request, resource, category_id, resource_type, request.user)
+
                 except:
                     pass
 
@@ -942,7 +943,7 @@ def file_upload_submit(request):
         
         # If this is a sent from a POST page, redirect to the same referrer, else to collection.
         if is_post:
-            return redirect(request.META.get('HTTP_REFERER'))
+            return redirect(request.META.get('HTTP_REFERER') + '?posted=success')
         else:
             return redirect_to_collection(user_id, project_id, collection_id)
 
@@ -950,14 +951,27 @@ def file_upload_submit(request):
         return Http404
 
 
-def add_type_category_to_resource(resource, category_id, resource_type):
+def suggest_resource_in_category(request, resource, category_id, resource_type, user):
+    # First add resource type on this.
     from meta.models import TagCategory, Category, Tag
     resource_type = Tag.objects.get(title__iexact=resource_type,
         category=TagCategory.objects.get(title='Resource type'))
 
     resource.tags.add(resource_type)
-    resource.category = Category.objects.get(pk=int(category_id))
-    resource.save()
+
+    standards = request.POST.getlist('standard', None)
+
+    standards_tag_category = TagCategory.objects.get(title='Standards')
+    for standard in standards:
+        try:
+            standard_tag = Tag.objects.get(
+                title__iexact=standard, category=standards_tag_category)
+            resource.tags.add(standard_tag)
+        except:
+            pass
+
+    category = Category.objects.get(pk=int(category_id))
+    create_new_suggestion(resource, category, user)
 
 
 def create_resource(uploaded_file, user, collection, new_filename=None):
@@ -2545,7 +2559,7 @@ def raw_user_collection_tree(request, ask, host):
         (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
             user_profile.collection) if ask == 'collections' else cu._get_browse_tree(
             user_profile.collection)
-        tree = cu.build_user_raw_tree(request, browse_tree)        
+        tree = cu.build_user_raw_tree(request, browse_tree)
 
     context = { 'tree': tree }
     return APIUtilities._api_success(context)
@@ -3284,6 +3298,7 @@ def post_existing_resource_collection(request):
     try:
         is_resource = request.POST.get('is_resource', None) == 'true'
         resource_collection_id = request.POST.get('resource_collection_ID', None)
+        standards = request.POST.getlist('standard', None)
 
         if is_resource and resource_collection_id:
             resource_collection = Resource.objects.get(pk=resource_collection_id)
@@ -3301,23 +3316,50 @@ def post_existing_resource_collection(request):
         from meta.models import Category
         category = Category.objects.get(pk=request.POST.get('category_id', None))
 
-        resource_collection.category = category
+        # If there is an original resource type tag, remove.
+        try:
+            # Remove the original resource type tag to avoid conflicts. 
+            resource_collection.tags.remove(resource_collection.tags.get(
+                category=TagCategory.objects.get(title='Resource type')))
+        except:
+            pass
 
-        # Remove the original resource type tag to avoid conflicts. 
-        resource_collection.tags.remove(resource_collection.tags.get(
-            category=TagCategory.objects.get(title='Resource type')))
-
-        resource_collection.tags.add(tag)
         resource_collection.save()
 
-        messages.success(request, 'Successfully posted your %s  \'%s\'.' % (
-            'file' if is_resource else 'folder', resource_collection.title))
+        resource_collection.tags.add(tag)
 
-        return redirect(request.META.get('HTTP_REFERER'))
+        standards_tag_category = TagCategory.objects.get(title='Standards')
+        for standard in standards:
+            try:
+                standard_tag = Tag.objects.get(
+                    title__iexact=standard, category=standards_tag_category)
+                resource_collection.tags.add(standard_tag)
+            except:
+                pass
+
+        create_new_suggestion(resource_collection, category, request.user)
+
+        return redirect(request.META.get('HTTP_REFERER') + '?posted=success')
 
     except:
         messages.success(request, 'Oops! Something went wrong')
         return redirect(request.META.get('HTTP_REFERER'))
+
+
+def create_new_suggestion(resource_collection, category, user):
+    from oer.models import Suggestion
+    new_suggestion = Suggestion(
+        suggested=resource_collection,
+        user=user,
+        category=category
+    )
+    new_suggestion.save()
+
+    from django.core.mail import mail_admins
+    mail_admins('Suggestion in %s' % category.title, 
+        '%s suggested %s in %s' % (user.username + ':' +
+            user.email, str(resource_collection.id) + ':' + resource_collection.title,
+            str(category.id) + ':' + category.title ))
 
 
 def post_url(request):
@@ -3333,6 +3375,7 @@ def post_url(request):
 
         posted_title = request.POST.get('title', None)        
         title = posted_title if posted_title else 'Untitled website'
+        standards = request.POST.getlist('standard', None)
 
         from django.template.defaultfilters import slugify
 
@@ -3344,10 +3387,10 @@ def post_url(request):
             slug=slugify(title),
             visibility='public',
             description='',
-            category=category
         )
 
-        new_url = Link(url=request.POST.get('url', None))
+        from oer.forms import sanitize_url
+        new_url = Link(url=sanitize_url(request.POST.get('url', None)))
         new_url.save()
 
         new_resource_revision = ResourceRevision()
@@ -3359,6 +3402,15 @@ def post_url(request):
         new_resource.save()
 
         new_resource.tags.add(tag)
+
+        standards_tag_category = TagCategory.objects.get(title='Standards')
+        for standard in standards:
+            try:
+                standard_tag = Tag.objects.get(
+                    title__iexact=standard, category=standards_tag_category)
+                new_resource.tags.add(standard_tag)
+            except:
+                pass
 
         # Push a signal for new resource created.     
         import oer.CollectionUtilities as cu
@@ -3373,12 +3425,14 @@ def post_url(request):
         new_resource.revision.resource = new_resource
         new_resource.revision.save()
 
-        # Now add this resource to the collection it belongs to
+        # Now add this resource to the collection it belongs to.
         request.user.get_profile().collection.resources.add(new_resource)
         request.user.get_profile().collection.save()
 
-        messages.success(request, 'Successfully posted that link')
-        return redirect(request.META.get('HTTP_REFERER'))
+        create_new_suggestion(new_resource, category, request.user)
+
+        # Posted appended to URL very hackishly - should be done using URLLib.
+        return redirect(request.META.get('HTTP_REFERER') + '?posted=success')
 
     except:
         messages.success(request, 'Oops! Something went wrong')
@@ -3556,3 +3610,63 @@ def auto_save_document(request):
             + 'Please contact us if the problem persists.'
         }
         return APIUtilities._api_failure(context)
+
+
+def approve_suggestion(request, suggestion_id):
+    from oer.models import Suggestion
+    try:
+        suggestion = Suggestion.objects.get(pk=suggestion_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        suggestion.suggested.categories.add(suggestion.category)
+        send_suggestion_message(request, suggestion, 'Your submission has been ACCEPTED! more below')
+        suggestion.delete()
+
+        return APIUtilities._api_success()
+
+    except:
+        context = {
+            'title': 'Could not approve the suggestion.',
+            'message': 'We failed approve this suggestion and add it to the listings. '
+            + 'Please contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
+
+
+def reject_suggestion(request, suggestion_id):
+    from oer.models import Suggestion
+    try:
+        suggestion = Suggestion.objects.get(pk=suggestion_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        send_suggestion_message(request, suggestion, 'Your submission has been rejected; here\'s why')
+        suggestion.delete()
+
+        return APIUtilities._api_success()
+
+    except:
+        context = {
+            'title': 'Could not approve the suggestion.',
+            'message': 'We failed approve this suggestion and add it to the listings. '
+            + 'Please contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
+
+
+def send_suggestion_message(request, suggestion, subject):
+    from django.core.mail import EmailMultiAlternatives
+
+    email_message_text = 'Message from the moderator about your suggestion \'%s\':\n\n%s' % (
+        suggestion.suggested.title, request.POST.get('message'))
+    email_message_html = '<strong>Message from the moderator about your suggestion \'%s\'</strong>:<br/><br/>%s' % (
+        suggestion.suggested.title, request.POST.get('message').replace('\\n', '<br/>'))
+
+    # Send the email with the fields prepared above.
+    subject, from_email, to = subject, '%s via OpenCurriculum <%s>' % (request.user.get_full_name(), request.user.email), [suggestion.user.email]
+    email = EmailMultiAlternatives(subject, email_message_text, from_email, to)
+    email.attach_alternative(email_message_html, "text/html")
+    email.send()

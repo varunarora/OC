@@ -105,13 +105,13 @@ class ResourceMeta(models.Model):
     context = JSONField(null=True, blank=True)
 
 
-"""class Suggestion(models.Model):
+class Suggestion(models.Model):
     suggested_type = models.ForeignKey(ContentType)
     suggested_id = models.PositiveIntegerField()
     suggested = generic.GenericForeignKey('suggested_type', 'suggested_id')    
     user = models.ForeignKey(User, null=True, blank=True)
     category = models.ForeignKey('meta.Category', null=True, blank=True)
-    created = models.DateTimeField(auto_now_add=True, editable=False)"""
+    created = models.DateTimeField(auto_now_add=True, editable=False)
 
 
 class Collection(models.Model):

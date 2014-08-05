@@ -123,9 +123,9 @@ OC.upload = {
         '<input type="text" name="filename" value="<%= filename %>" />' +
         '<input type="hidden" name="upload_service" value="<%= process %>" />' +
         '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
-        '<select name="type"><option value="lesson">Lesson</option><option value="project">Project</option>' +
+        '<!--<select name="type"><option value="lesson">Lesson</option><option value="project">Project</option>' +
         '<option value="worksheet">Worksheet</option><option value="handout">Handout</option><option value="activity">Activity</option>' +
-        '<option value="assessment">Test / assessment</option><option value="lecture">Lecture</option></select>' +
+        '<option value="assessment">Test / assessment</option><option value="lecture">Lecture</option></select>-->' +
         '<div class="alternative-upload"><a>Upload something else instead...</a></div></div>'),
 
     newFileUploadListener: function(){
@@ -360,6 +360,9 @@ $(document).ready(function() {
 
     $('form.files-upload-rename button[type=submit]').click(function(event) {
         OC.upload.preSubmissionHandler(event);
+        if (OC.upload.isPost){
+            return false;
+        }
         return true;
    });
 

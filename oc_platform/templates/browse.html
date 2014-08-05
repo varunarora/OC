@@ -23,6 +23,7 @@
 <div class="center-spread resource-browse">
     <div class="wide-center-stage">
         <div class="wide-center-stage-fill-panel category-panel">
+            {% if browse_mode != 'suggestions' %}
             <div class="category-panel-listing">
                 <div class="category-choice-wrapper">
                     <button class="category-choice action-button" title="Category this page is based on">Common Core<!--<div class="category-choice-button"></div>--></button>
@@ -73,186 +74,191 @@
                 </div>
                 {% endif %}
             </div>
+            {% endif %}
         </div>
         <div class="wide-center-stage-key-panel content-panel">
             <div class="content-panel-body-wrapper">
                 <div class="content-panel-body" id="category-{{ selected_category.id }}">
-                    {% if child_categories_map %}
-                    <div class="content-panel-body-feature">
-                        <div class="content-panel-body-feature-title"><h2>{{ selected_category.title }}</h2>
-                        <div class="breadcrumb">
-                            {% for breadcrumb_category in breadcrumb %}
-                                <a href="{{ breadcrumb_category.url }}">{{ breadcrumb_category.title }}</a> 
-                                {% if not forloop.last %}
-                                <span class="vertical-caret breadcrumbs-caret"></span>
-                                {% endif %}
-                            {% endfor %}
+                    {% if browse_mode == 'suggestions' %}
+                        <script type="text/javascript">
+                            OC.categoryResources.suggestionMode = true;
+                        </script>
+                        <div class="content-panel-body-header">
+                            {% include 'partials/browse-title.html' %}
                         </div>
+                        <div class="content-panel-body-listing">
+                            {% include 'partials/browse-suggestions.html' %}
                         </div>
-                    </div>
-                    <div class="content-panel-body-grades-topics">
-                        <div class="content-panel-body-grades-wrapper">
-                            <ul class="content-panel-body-grades">
-                                {% for child_category in child_categories %}
-                                <li><a href="{{ child_category.url }}" id="category-{{ child_category.id }}">{{ child_category.title }}</a></li> 
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        <div class="content-panel-body-grades-topics-list">
-                            <div class="content-panel-body-grades-topics-list-empty">
-                                <img src="{{ STATIC_URL }}images/select-category.png" />
-                                <h1 class="empty-state-title"><span class="content-panel-body-grades-topics-list-empty-arrow empty-state-arrow"></span>Select a grade level for a list of topic areas</h1>
-                            </div>
-                            <ul class="content-panel-body-grades-topics-list-filled"></ul>
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% if query or query == '' %}
-                    <div class="content-panel-body-header">
-                        <div class="content-panel-body-header-title">
-                            <h3>Search results for <span class="search-term">{{ query }}</span></h3>
-                        </div>
-                    </div>
-                    <div class="content-panel-body-search content-panel-body-listing">
-                    {% include 'partials/search.html' %}
-                    </div>
-                    {% elif not child_categories_map %}
-                    <div class="content-panel-body-header">
-                        <div class="content-panel-body-header-title-wrapper">
-                            <div class="content-panel-body-header-title{% if not is_catalog %} show-share{% endif %}"><h2>{{ selected_category.title }}</h2>{% if not is_catalog %}<div class="content-panel-body-header-share action-button mini-action-button">+ Share new</div>{% endif %}</div>
+
+                    {% else %}
+                        {% if child_categories_map %}
+                        <div class="content-panel-body-feature">
+                            <div class="content-panel-body-feature-title"><h2>{{ selected_category.title }}</h2>
                             <div class="breadcrumb">
                                 {% for breadcrumb_category in breadcrumb %}
                                     <a href="{{ breadcrumb_category.url }}">{{ breadcrumb_category.title }}</a> 
                                     {% if not forloop.last %}
-                                    <span class="vertical-caret breadcrumbs-caret"></span> 
+                                    <span class="vertical-caret breadcrumbs-caret"></span>
                                     {% endif %}
                                 {% endfor %}
                             </div>
+                            </div>
                         </div>
-                        <div class="content-panel-body-listing-questions-toggler">
-                            <a href="" class="content-panel-body-listing-questions-toggler-listing selected">Content</a>
-                            <a href="" class="content-panel-body-listing-questions-toggler-questions">Community Q&amp;A</a>
-                        </div>
-                    </div>
-                    <div class="content-panel-body-listing-filters-sort-wrapper">
-                        <div class="content-panel-body-listing-filters-sort">
-                            <span class="sort-by">Sort by: </span><span class="filter-sort-option filter-sort-option-newest selected">Newest</span> <span class="filter-sort-option">Popularity</span>
-                            <!--<div class="sort-by-type">All types<span class="sort-by-type-button"></div>
-                            <div class="sort-by-type-menu">
-                                <div class="sort-by-type-menu-content">
-                                    <h4>Content type</h4>
-                                    <label><input type="checkbox" name="type" value="lesson" checked />Lesson</label>
-                                    <label><input type="checkbox" name="type" value="project" checked />Project</label>
-                                    <label><input type="checkbox" name="type" value="worksheet" checked />Worksheet</label>
-                                    <label><input type="checkbox" name="type" value="handout" checked />Handout</label>
-                                    <label><input type="checkbox" name="type" value="activity" checked />Activity</label>
-                                    <label><input type="checkbox" name="type" value="test" checked />Test / assessment</label>
-                                    <label><input type="checkbox" name="type" value="lecture" checked />Lecture</label>
+                        <div class="content-panel-body-grades-topics">
+                            <div class="content-panel-body-grades-wrapper">
+                                <ul class="content-panel-body-grades">
+                                    {% for child_category in child_categories %}
+                                    <li><a href="{{ child_category.url }}" id="category-{{ child_category.id }}">{{ child_category.title }}</a></li> 
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="content-panel-body-grades-topics-list">
+                                <div class="content-panel-body-grades-topics-list-empty">
+                                    <img src="{{ STATIC_URL }}images/select-category.png" />
+                                    <h1 class="empty-state-title"><span class="content-panel-body-grades-topics-list-empty-arrow empty-state-arrow"></span>Select a grade level for a list of topic areas</h1>
                                 </div>
-                                 <div class="sort-by-type-menu-format">
-                                    <h4>Format type</h4>
-                                    <label><input type="checkbox" name="type" value="document" checked />Document</label>
-                                    <label><input type="checkbox" name="type" value="slideshow" checked />Slideshow</label>
-                                    <label><input type="checkbox" name="type" value="website" checked />Website</label>
-                                    <label><input type="checkbox" name="type" value="video" checked />Video</label>
-                                    <label><input type="checkbox" name="type" value="audio" checked />Audio</label>
-                                </div>
-                            </div>-->
+                                <ul class="content-panel-body-grades-topics-list-filled"></ul>
+                            </div>
                         </div>
-                    </div>
-                    {% if not child_categories_map and not is_catalog %}
-                    <div class="content-panel-body-listing-types">
-                        <ul>
-                            <li name="all"><a href="" class="current">All</a></li>
-                            <li name="lesson"><a href="">Lesson Plans</a></li>
-                            <li name="activity"><a href="">Activities</a></li>
-                            <li name="worksheet"><a href="">Worksheets</a><li>
-                            <li name="assessment"><a href="">Assessments</a></li>
-                            <li name="exercise"><a href="">Exercises</a></li>
-                            <li name="lecture"><a href="">Lectures</a></li>
-                        </ul>
-                    </div>
-                    {% endif %}
-                    <div class="content-panel-body-listing">
-                        <div class="content-panel-body-listing-items show">
-                        <script type="text/javascript">
-                        {% for item in items %}
-                            {% if item.item_type == 'resource' %}
-                            var resource = new Resource({
-                                id: '{{ item.id }}',
-                                url: {% if item.revision.content_type.name == 'link'%}'{{ item.revision.content.url }}'{% else %}'{% url read resource_id=item.id resource_slug=item.slug %}'{% endif %},
-                                remote: {% if item.revision.content_type.name == 'link' %}true{% else %}false{% endif %},
-                                title: '{{ item.title }}',
-                                user: '{{ item.revision.user.get_full_name }}',
-                                user_id: '{{ item.revision.user.id }}',
-                                user_thumbnail: '{{ MEDIA_URL }}{{ item.revision.user.get_profile.profile_pic.name }}',
-                                user_url: '{% url user:user_profile username=item.revision.user.username %}',
-                                favorites: '{{ item.favorites_count }}',
-                                views: '{{ item.views }}',
-                                type: '{{ item.type|upper }}',
-                                thumbnail: '{{ MEDIA_URL }}{{ item.image.name }}',
-                                favorited: '{{ item.favorited }}' === 'True',
-                                created: '{{ item.created|date:"U" }}',
-                                tags: {% if item.filtered_tags %}["{{ item.filtered_tags|join:'","' }}"]{% else %}[]{% endif %},
-                                description: {% if item.description %}'{{ item.description|escapejs }}'{% else %}''{% endif %},
-                                stars: '{{ item.rating }}',
-                                review_count: {{ item.review_count }},
-                                objectives: {% if item.objectives %}["{{ item.objectives|join:'","' }}"]{% else %}[]{% endif %},
-                                category: '{{ item.category.title }}'
-                            });
-                            resourceSet.add(resource);
-                            {% else %}
-                            var collection = new Resource({
-                                id: '{{ item.id }}',
-                                url: '{% url user:list_collection username=item.creator collection_slug=item.slug %}',
-                                title: '{{ item.title }}',
-                                user: '{{ item.creator }}',
-                                user_id: '{{ item.revision.user.id }}',
-                                user_thumbnail: '{{ MEDIA_URL }}{{ item.creator.get_profile.profile_pic.name }}',
-                                user_url: '{% url user:user_profile username=item.creator.username %}',
-                                favorites: '{{ item.favorites_count }}',
-                                views: '{{ item.views }}',
-                                type: '{{ item.type|upper }}',
-                                thumbnail: '{{ STATIC_URL }}images/folder-icon.png',
-                                favorited: false,
-                                created: '{{ item.created|date:"U" }}',
-                                tags: [],
-                                description: {% if item.description %}'{{ item.description|escapejs }}'{% else %}''{% endif %},
-                                stars: 3.5,
-                                review_count: 6,
-                                objectives: [],
-                                category: ''
-                            });
-                            resourceSet.add(collection);                        
-                            {% endif %}
-                        {% empty %}
-                            //<p>No results found.</p>
-                        {% endfor %}
-                        </script>
-                        </div>
-
-                        <div class="filter-search-placeholder">Searching for your happiness...</div>
-                        {% if current_category_id %}
-                            <div class="lazy-load-button enabled">Load more...</div>
                         {% endif %}
-
-                        {% if not query and query != '' and category_group %}
-                        <div class="content-panel-body-listing-requests">
-                        <script type="text/javascript">
-                            requestURL = '{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}';
-                            {% for request in requests %}
-                            var newRequest = new Request({
-                                url: '{% url projects:project_discussion project_slug=request.parent.slug discussion_id=request.id %}',
-                                body: '{{ request.body_markdown_html|safe|escapejs }}',
-                                user: '{{ request.user.get_full_name }}',
-                                user_thumbnail: '{{ MEDIA_URL }}{{ request.user.get_profile.profile_pic.name }}'
-                            });
-                            requestSet.add(newRequest);
-
+                        {% if query or query == '' %}
+                        <div class="content-panel-body-header">
+                            <div class="content-panel-body-header-title">
+                                <h3>Search results for <span class="search-term">{{ query }}</span></h3>
+                            </div>
+                        </div>
+                        <div class="content-panel-body-search content-panel-body-listing">
+                        {% include 'partials/search.html' %}
+                        </div>
+                        {% elif not child_categories_map %}
+                        <div class="content-panel-body-header">
+                            {% include 'partials/browse-title.html' %}
+                            <div class="content-panel-body-listing-questions-toggler">
+                                <a href="" class="content-panel-body-listing-questions-toggler-listing selected">Content</a>
+                                <a href="" class="content-panel-body-listing-questions-toggler-questions">Community Q&amp;A</a>
+                            </div>
+                        </div>
+                        <div class="content-panel-body-listing-filters-sort-wrapper">
+                            <div class="content-panel-body-listing-filters-sort">
+                                <span class="sort-by">Sort by: </span><span class="filter-sort-option filter-sort-option-newest selected">Newest</span> <span class="filter-sort-option">Popularity</span>
+                                <!--<div class="sort-by-type">All types<span class="sort-by-type-button"></div>
+                                <div class="sort-by-type-menu">
+                                    <div class="sort-by-type-menu-content">
+                                        <h4>Content type</h4>
+                                        <label><input type="checkbox" name="type" value="lesson" checked />Lesson</label>
+                                        <label><input type="checkbox" name="type" value="project" checked />Project</label>
+                                        <label><input type="checkbox" name="type" value="worksheet" checked />Worksheet</label>
+                                        <label><input type="checkbox" name="type" value="handout" checked />Handout</label>
+                                        <label><input type="checkbox" name="type" value="activity" checked />Activity</label>
+                                        <label><input type="checkbox" name="type" value="test" checked />Test / assessment</label>
+                                        <label><input type="checkbox" name="type" value="lecture" checked />Lecture</label>
+                                    </div>
+                                     <div class="sort-by-type-menu-format">
+                                        <h4>Format type</h4>
+                                        <label><input type="checkbox" name="type" value="document" checked />Document</label>
+                                        <label><input type="checkbox" name="type" value="slideshow" checked />Slideshow</label>
+                                        <label><input type="checkbox" name="type" value="website" checked />Website</label>
+                                        <label><input type="checkbox" name="type" value="video" checked />Video</label>
+                                        <label><input type="checkbox" name="type" value="audio" checked />Audio</label>
+                                    </div>
+                                </div>-->
+                            </div>
+                        </div>
+                        {% if not child_categories_map and not is_catalog %}
+                        <div class="content-panel-body-listing-types">
+                            <ul>
+                                <li name="all"><a href="" class="current">All</a></li>
+                                <li name="lesson"><a href="">Lesson Plans</a></li>
+                                <li name="activity"><a href="">Activities</a></li>
+                                <li name="worksheet"><a href="">Worksheets</a><li>
+                                <li name="assessment"><a href="">Assessments</a></li>
+                                <li name="exercise"><a href="">Exercises</a></li>
+                                <li name="lecture"><a href="">Lectures</a></li>
+                            </ul>
+                        </div>
+                        {% endif %}
+                        <div class="content-panel-body-listing">
+                            <div class="content-panel-body-listing-items show">
+                            <script type="text/javascript">
+                            {% for item in items %}
+                                {% if item.item_type == 'resource' %}
+                                var resource = new Resource({
+                                    id: '{{ item.id }}',
+                                    url: {% if item.revision.content_type.name == 'link'%}'{{ item.revision.content.url }}'{% else %}'{% url read resource_id=item.id resource_slug=item.slug %}'{% endif %},
+                                    remote: {% if item.revision.content_type.name == 'link' %}true{% else %}false{% endif %},
+                                    title: '{{ item.title }}',
+                                    user: '{{ item.revision.user.get_full_name }}',
+                                    user_id: '{{ item.revision.user.id }}',
+                                    user_thumbnail: '{{ MEDIA_URL }}{{ item.revision.user.get_profile.profile_pic.name }}',
+                                    user_url: '{% url user:user_profile username=item.revision.user.username %}',
+                                    favorites: '{{ item.favorites_count }}',
+                                    views: '{{ item.views }}',
+                                    type: '{{ item.type|upper }}',
+                                    thumbnail: '{{ MEDIA_URL }}{{ item.image.name }}',
+                                    favorited: '{{ item.favorited }}' === 'True',
+                                    created: '{{ item.created|date:"U" }}',
+                                    tags: {% if item.filtered_tags %}["{{ item.filtered_tags|join:'","' }}"]{% else %}[]{% endif %},
+                                    description: {% if item.description %}'{{ item.description|escapejs }}'{% else %}''{% endif %},
+                                    stars: '{{ item.rating }}',
+                                    review_count: {{ item.review_count }},
+                                    objectives: {% if item.objectives %}["{{ item.objectives|join:'","' }}"]{% else %}[]{% endif %},
+                                    category: '{{ item.category.title }}'
+                                });
+                                resourceSet.add(resource);
+                                {% else %}
+                                var collection = new Resource({
+                                    id: '{{ item.id }}',
+                                    url: '{% url user:list_collection username=item.creator.username collection_slug=item.slug %}',
+                                    remote: false,
+                                    title: '{{ item.title }}',
+                                    user: '{{ item.creator }}',
+                                    user_id: '{{ item.creator.id }}',
+                                    user_thumbnail: '{{ MEDIA_URL }}{{ item.creator.get_profile.profile_pic.name }}',
+                                    user_url: '{% url user:user_profile username=item.creator.username %}',
+                                    favorites: '{{ item.favorites_count }}',
+                                    views: null,
+                                    type: '{{ item.type|upper }}',
+                                    thumbnail: '{{ STATIC_URL }}images/folder-large.png',
+                                    favorited: '{{ item.favorited }}' === 'True',
+                                    created: '{{ item.created|date:"U" }}',
+                                    tags: [],
+                                    description: {% if item.description %}'{{ item.description|escapejs }}'{% else %}''{% endif %},
+                                    stars: '{{ item.rating }}',
+                                    review_count: {{ item.review_count }},
+                                    objectives: [],
+                                    category: '{{ item.category.title }}'
+                                });
+                                resourceSet.add(collection);
+                                {% endif %}
+                            {% empty %}
+                                //<p>No results found.</p>
                             {% endfor %}
-                        </script>
-                        {% endif %}
-                    </div>
+                            </script>
+                            </div>
+
+                            <div class="filter-search-placeholder">Searching for your happiness...</div>
+                            {% if current_category_id %}
+                                <div class="lazy-load-button enabled">Load more...</div>
+                            {% endif %}
+
+                            {% if not query and query != '' and category_group %}
+                            <div class="content-panel-body-listing-requests">
+                            <script type="text/javascript">
+                                requestURL = '{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}';
+                                {% for request in requests %}
+                                var newRequest = new Request({
+                                    url: '{% url projects:project_discussion project_slug=request.parent.slug discussion_id=request.id %}',
+                                    body: '{{ request.body_markdown_html|safe|escapejs }}',
+                                    user: '{{ request.user.get_full_name }}',
+                                    user_thumbnail: '{{ MEDIA_URL }}{{ request.user.get_profile.profile_pic.name }}'
+                                });
+                                requestSet.add(newRequest);
+
+                                {% endfor %}
+                            </script>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
@@ -301,18 +307,7 @@
             <input type="hidden" name="resource_collection_ID" value="" />
             <input type="hidden" name="category_id" value="{{ selected_category.id }}" />
             <div class="post-new-file-folder-submit-wrapper oc-popup-submit-wrapper">
-                <div class="resource-type-selector">This is a
-                    <select name="type">
-                        <option name="lesson" selected>Lesson</option>
-                        <option name="project">Project</option>
-                        <option name="worksheet">Worksheet</option>
-                        <option name="handout">Handout</option>
-                        <option name="activity">Activity</option>
-                        <option name="assessment">Test / assessment</option>
-                        <option name="lecture">Lecture</option>
-                    </select>
-                </div>
-                <button class="action-button post-new-file-folder-submit oc-popup-submit-button">Post</button>
+                <button class="action-button post-new-file-folder-submit oc-popup-submit-button">Next &#187;</button>
             </div>
         </form>
     </div>
@@ -330,22 +325,64 @@
             <table>
                 <tr><td>URL</td><td><input type="text" name="url" /></td></tr>
                 <tr><td>Title</td><td><input type="text" name="title" /></td></tr>
-                <tr><td>Type</td><td>
-                    <select name="type">
-                        <option name="lesson" selected>Lesson</option>
-                        <option name="project">Project</option>
-                        <option name="worksheet">Worksheet</option>
-                        <option name="handout">Handout</option>
-                        <option name="activity">Activity</option>
-                        <option name="assessment">Test / assessment</option>
-                        <option name="lecture">Lecture</option>
-                    </select>
-                </td></tr>
             </table>
             <div class="post-new-url-submit-wrapper oc-popup-submit-wrapper">
-                <button class="action-button post-new-url-submit oc-popup-submit-button">Post</button>
+                <button class="action-button post-new-url-submit oc-popup-submit-button">Next &#187;</button>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="post-tag-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Tell us a little more...</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <table>
+            <tr><td>This resource is a</td><td>
+                <select name="type">
+                    <option name="lesson" selected>Lesson</option>
+                    <option name="activity">Activity</option>
+                    <option name="worksheet">Worksheet</option>
+                    <option name="assessment">Assessment</option>
+                    <option name="assessment">Exercise</option>                    
+                    <option name="lecture">Lecture</option>
+                </select>
+            </td></tr>
+            <tr><td>Common Core standards met <span class="standards-suggestion-text">(begin typing to select from suggestions)</span></td><td><ul class="standards-input"></ul>
+            </td></tr>
+        </table>        
+        <div class="post-tag-submit-wrapper oc-popup-submit-wrapper">
+            <button class="action-button post-tag-submit oc-popup-submit-button">Post</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="posted-success-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        {% csrf_token %}
+        <div class="posted-success-header">
+            <h2>Congratulations! You successfully submitted your resource suggestion</h2>
+            <p>Now it's our turn to look at what you shared and add it to the list, if approved</p>
+        </div>
+        <div class="posted-success-body">
+            <div class="posted-success-body-user">
+                <img src="" class="posted-success-body-user-image" />
+            </div>
+            <div class="posted-success-body-description">
+                <h3>TL;DR: The person on the left is going to get back to you ASAP</h3>
+                <p>We have sent a pretty urgent yet polite email to the person on the left, <span class="moderator-name"></span>, to instantly review the amazing resource you have shared so that other teachers can instantly get to it. </p>
+                <p>Meanwhile, hang in there, share some other stuff for review, and someone will come running out of whatever they are working on to review it. If none of us are cut off from Internet, we make sure to review within <12 hours :)</p>
+            </div>
+        </div>
+        <div class="posted-success-submit-wrapper oc-popup-submit-wrapper">
+            <button class="action-button posted-success-submit oc-popup-submit-button">Sounds good!</button>
+        </div>
     </div>
 </div>
 

@@ -47,6 +47,8 @@ urlpatterns = patterns(
 
     url(r'^upload/', 'oer.views.upload_page', name='upload'),
 
+    url(r'^browse/(?P<category_slug>.+)/suggestions/$', 'oer.views.browse_suggestions', name='browse_suggestions'),
+
     url(r'^browse/(?P<category_slug>.+)/$', 'oer.views.browse', name='browse'),
 
     url(r'^browse/$', 'oer.views.browse_default', name='browse_default'),

@@ -62,6 +62,35 @@ _.extend(OC.config, {
     }
 });
 
+// OpenCurriculum internal API.
+OC.api = {};
+
+OC.api.UserProfile = function(username, callback){
+    this.username = username;
+    this.profile = {};
+
+    this.fetchProfile(callback);
+    return this;
+};
+
+OC.api.UserProfile.prototype.fetchProfile = function(callback){
+    profile = this.profile;
+    $.get('/user/api/get-profile/' +  this.username + '/',
+        function(response){
+            if (response.status == 'true'){
+                callback(response.user);
+            } else {
+                callback(null);
+            }
+        },
+    'json');
+};
+
+OC.api.User = function(username, callback){
+    this.username = username;
+    return new OC.api.UserProfile(this.username, callback);
+};
+
 _.extend(OC, {
     registerationSuccessCallback: '',
     signupDialog: null,
@@ -4100,13 +4129,59 @@ _.extend(OC, {
     },
 
     initNewPostDialog: function(){
+        function bindPostClickHandler(buttonSelector, $dialog, submit){
+            $(buttonSelector, $dialog.dialog).click(function(event){
+                $dialog.close();
+                var postTagDialog = OC.customPopup('.post-tag-dialog');
+
+                $('.post-tag-submit', postTagDialog.dialog).click(function(event){
+                    // Add the resource type and tags to the form URL post form.
+                    var resourceType = $('select[name=type]', postTagDialog.dialog).val(),
+                        newTypeInput = $('<input/>', {
+                            'name': 'type',
+                            'value': resourceType,
+                            'type': 'hidden'
+                        });
+
+                    var dialogForm = $('form:first', $dialog.dialog),
+                        standardTags = $('input[name="standard"]', postTagDialog.dialog), i;
+                    
+                    dialogForm.append(standardTags.clone());
+                    dialogForm.append(newTypeInput);
+
+                    debugger
+                    // Submit the form.
+                    if (submit)
+                        dialogForm.submit();
+                });
+            });
+        }
+
         var postDialog = OC.customPopup('.browse-post-new-dialog');
+
+        var postTagIt = $('.post-tag-dialog .standards-input').tagit({
+            fieldName: 'standard',
+            autocomplete: {
+                minLength: 2,
+                source: function(request, response){
+                    $.get('/meta/api/standard/search/' + request.term + '/?limit=15',
+                        function (data){
+                            response($.map(data, function(item){
+                                return { label: item, value: item };
+                            }));
+                        },
+                    'json');
+                },
+            }
+        });
 
         $('.browse-post-new-option.upload-option', postDialog.dialog).click(function(){
             postDialog.close();
 
             // Launch the upload popup.
             var uploadPopup = OC.customPopup('.post-new-upload-dialog');
+
+            bindPostClickHandler('form.files-upload-rename button[type="submit"]', uploadPopup, true);
         });
 
         $('.browse-post-new-option.file-folder-option', postDialog.dialog).click(function(){
@@ -4128,6 +4203,8 @@ _.extend(OC, {
 
                 },
             'json');
+
+            bindPostClickHandler('.post-new-file-folder-submit', fileFolderPopup, true);
 
             // Bind 'attach' button click handler.
             $('.post-new-file-folder-submit').click(function(event){
@@ -4151,8 +4228,6 @@ _.extend(OC, {
                         resource);
                     $('#post-new-file-folder-profile-form input[name=resource_collection_ID]').val(
                         resourceCollectionID);
-
-                    $('#post-new-file-folder-profile-form').submit();
                 }
 
                 event.stopPropagation();
@@ -4166,6 +4241,8 @@ _.extend(OC, {
 
             // Launch the upload popup.
             var newURLPopup = OC.customPopup('.post-new-url-dialog');
+
+            bindPostClickHandler('.post-new-url-submit', newURLPopup, true);
         });
     },
 
@@ -4943,6 +5020,52 @@ _.extend(OC, {
                 }
             });
         },
+    },
+
+    feed: {
+        feedCount: null,
+        currentCount: null,
+
+        infiniteScroll: function(){
+            if (OC.feed.feedCount > 20){
+                var loadButton = $('.lazy-load-button'), i;
+                $(window).on('DOMContentLoaded load resize scroll', function(event){
+                    // If the load button is attached to the document.
+                    if ($.contains(document, loadButton[0])){
+                        if (isElementInViewport(loadButton) && !loadButton.hasClass('loading')){
+                            loadButton.addClass('loading');
+
+                            $.get('/user/api/load-feed/' + OC.config.user.id +
+                                    '/from/' + OC.feedCount.currentCount + '/',
+                                function(response){
+                                    if (response.status == 'true'){
+                                        var keys = Object.keys(response.resources);
+
+                                        if (keys.length !== 0){
+                                            for (i = 0; i < keys.length; i++){
+                                                $('.resources-collections-added').append(
+                                                    OC.resourcesCollections.resourceCollectionItemTemplate(
+                                                        response.resources[keys[i]]));
+                                            }
+                                            OC.resourcesCollections.currentCount += keys.length;
+
+                                        } else {
+                                            loadButton.remove();
+                                        }
+                                    }
+                                    else {
+                                        OC.popup(response.message, response.title);
+                                    }
+                                    loadButton.removeClass('loading');
+
+                                },
+                            'json');
+                        }
+                    }
+                });
+            }
+        },
+
     }
 });
 
@@ -4984,8 +5107,6 @@ jQuery(document).ready(function ($) {
 
     // Instantiate AJAX submit handler for invite sign-ups
     OC.initInviteSignup();
-
-    OC.initRegistrationForm();
 
 
     /** Article specific initializers and other functions */
@@ -5144,6 +5265,7 @@ jQuery(document).ready(function ($) {
        ref.parentNode.insertBefore(js, ref);
     }(document));
 
+    OC.initRegistrationForm();
 
     // Initial tour on signup.
     OC.signupTour();

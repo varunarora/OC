@@ -7,74 +7,11 @@ OC.categoryResources = {
     visibleResourceCount: null,
     isCatalog: false,
     isSubjectHome: false,
+    suggestionMode: false,
     gradeCategoryMap: {},
     currentView: 'items',
 
     initBrowseView: function(){
-        // Set the height of the page.
-        function setBrowseHeight(){
-            $('.resource-browse').height(
-                $(window).height() - $('header').height()
-            );
-        }
-
-        setBrowseHeight();
-        $(window).resize(setBrowseHeight);
-
-        var scrollbarWidth = getScrollbarWidth();
-
-        /*
-        // Set the width of the left panel.
-        var leftPanelWidth = ($(window).width() - 960)/2 + 367;
-        $('.category-panel').width(leftPanelWidth);
-
-        $('.content-panel').width($(window).width() - leftPanelWidth - scrollbarWidth);*/
-
-        // Setup menu positioning (and adjust for scrollbar width) for content type filter.
-        OC.setUpMenuPositioning('.sort-by-type-menu', '.sort-by-type');
-
-        // Make the menu on the left nano'ed, conditional on the size of the content.
-        $('.category-panel-listing-categories-body').addClass('scroll-content');
-
-        $('.category-panel-listing-categories').height(
-            $('.resource-browse').height() - 100
-        );
-        $('.category-panel-listing-categories').nanoScroller({
-            paneClass: 'scroll-pane',
-            sliderClass: 'scroll-slider',
-            contentClass: 'scroll-content',
-            flash: true
-        });
-
-        // Clear the filter search box.
-       $(OC.config.search.input).val('');
-
-        var sortByTypeMenu = $('.sort-by-type-menu');
-        $('.content-panel').on('scroll click', function(event){
-            if (sortByTypeMenu.hasClass('show'))
-                $('.sort-by-type-menu').removeClass('show');
-        });
-
-        $('.sort-by-type').click(function(event){
-            $('.sort-by-type-menu').toggleClass('show');
-
-            event.stopPropagation();
-            event.preventDefault();
-            return false;
-        });
-
-        // Add a tooltip to category tag filters.
-        $('.category-panel-listing-categories-body-filters-description').tipsy(
-            {gravity: 's'});
-
-        // Slide in the empty state placeholder on the home browse page.
-        setTimeout(function(){
-            $('.content-panel-body-grades-topics-list-empty').animate({
-                'left': 0,
-                'opacity': 1
-            }, 1000);
-        }, 500);
-
         function resizeHeader(){
             // Set header height based on page height.
             var newHeight = $(window).height() - $('body > header').height() - $(
@@ -87,23 +24,149 @@ OC.categoryResources = {
             });
         }
 
-        resizeHeader(); $(window).resize(resizeHeader);
+        // Set the height of the page.
+        function setBrowseHeight(){
+            $('.resource-browse').height(
+                $(window).height() - $('header').height()
+            );
+        }
 
-        // Bind grade click handler.
-        $('ul.content-panel-body-grades li a').click(function(event){
-            var currentGrade = $(this),
-                childCategoryID = parseInt($(this).attr('id').substring(9), 10);
-            
-            $('ul.content-panel-body-grades li a').removeClass('current');
-            currentGrade.addClass('current');
+        setBrowseHeight();
+        $(window).resize(setBrowseHeight);
 
-            OC.categoryResources.setGradeTopicList(
-                OC.categoryResources.gradeCategoryMap[childCategoryID]);
+        var scrollbarWidth = getScrollbarWidth();
 
-            event.stopPropagation();
-            event.preventDefault();
-            return false;
-        });
+        // Clear the filter search box.
+        $(OC.config.search.input).val('');
+
+        if (! OC.categoryResources.suggestionMode){
+            /*
+            // Set the width of the left panel.
+            var leftPanelWidth = ($(window).width() - 960)/2 + 367;
+            $('.category-panel').width(leftPanelWidth);
+
+            $('.content-panel').width($(window).width() - leftPanelWidth - scrollbarWidth);*/
+
+            // Setup menu positioning (and adjust for scrollbar width) for content type filter.
+            OC.setUpMenuPositioning('.sort-by-type-menu', '.sort-by-type');
+
+            // Make the menu on the left nano'ed, conditional on the size of the content.
+            $('.category-panel-listing-categories-body').addClass('scroll-content');
+
+            $('.category-panel-listing-categories').height(
+                $('.resource-browse').height() - 100
+            );
+            $('.category-panel-listing-categories').nanoScroller({
+                paneClass: 'scroll-pane',
+                sliderClass: 'scroll-slider',
+                contentClass: 'scroll-content',
+                flash: true
+            });
+
+            var sortByTypeMenu = $('.sort-by-type-menu');
+            $('.content-panel').on('scroll click', function(event){
+                if (sortByTypeMenu.hasClass('show'))
+                    $('.sort-by-type-menu').removeClass('show');
+            });
+
+            $('.sort-by-type').click(function(event){
+                $('.sort-by-type-menu').toggleClass('show');
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+
+            // Add a tooltip to category tag filters.
+            $('.category-panel-listing-categories-body-filters-description').tipsy(
+                {gravity: 's'});
+
+            // Slide in the empty state placeholder on the home browse page.
+            setTimeout(function(){
+                $('.content-panel-body-grades-topics-list-empty').animate({
+                    'left': 0,
+                    'opacity': 1
+                }, 1000);
+            }, 500);
+
+            resizeHeader(); $(window).resize(resizeHeader);
+
+            // Bind grade click handler.
+            $('ul.content-panel-body-grades li a').click(function(event){
+                var currentGrade = $(this),
+                    childCategoryID = parseInt($(this).attr('id').substring(9), 10);
+                
+                $('ul.content-panel-body-grades li a').removeClass('current');
+                currentGrade.addClass('current');
+
+                OC.categoryResources.setGradeTopicList(
+                    OC.categoryResources.gradeCategoryMap[childCategoryID]);
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+
+            // If something has just been posted, show the 'just posted' dialog.
+            if (window.location.search.indexOf('posted=success') !== -1){
+                var postedSuccessDialog = OC.customPopup('.posted-success-dialog');
+
+                OC.api.User('ocrootu', function(profile){
+                    $('.posted-success-body-user-image', postedSuccessDialog.dialog).attr(
+                        'src', profile.picture);
+
+                    $('.moderator-name', postedSuccessDialog.dialog).text(profile.name);
+                });
+
+                $('.posted-success-submit', postedSuccessDialog.dialog).click(function(event){
+                    // Dismiss the dialog and empty the contents of the message.
+                    postedSuccessDialog.close();
+                });
+            }
+       }
+    },
+
+    initSuggestionsView: function(){
+        // Bind 'approve' and 'reject' on a suggestion.
+        function moderateSuggestion(selectorClass, endpoint, successMessage){
+            $(selectorClass).click(function(event){
+                var moderateSuggestionDialog = OC.customPopup('.moderate-suggestion-dialog'),
+                    moderateSuggestionForm = $('form.moderate-suggestion-form', moderateSuggestionDialog.dialog),
+                    suggestionItem = $(this).parents('.content-panel-body-listing-banner-item');
+                
+                $('textarea[name="message"]', moderateSuggestionDialog.dialog).val('');
+
+                $('.moderate-suggestion-submit', moderateSuggestionForm).click(function(event){
+                    // Dismiss the dialog and empty the contents of the message.
+                    moderateSuggestionDialog.close();
+
+                    // Get the suggestion ID.
+                    var suggestionID = suggestionItem.attr('id').substring(11);
+
+                    $.post('/resources/api/' + endpoint + '/' + suggestionID + '/', moderateSuggestionForm.serialize(),
+                        function (response) {
+                            if (response.status == 'true'){
+                                OC.setMessageBoxMessage(successMessage);
+                                OC.showMessageBox();
+
+                                suggestionItem.fadeOut('slow');
+
+                            } else OC.popup(response.message, response.title);
+                        }, 'json');
+
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return false;
+                });
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+        }
+
+        moderateSuggestion('.approve-button', 'approve-suggestion', 'Suggestion successfully approved!');
+        moderateSuggestion('.reject-button', 'reject-suggestion', 'Suggestion successfully rejected!');
     },
 
     setGradeTopicList: function(topics){
@@ -569,7 +632,7 @@ var ResourceView = Backbone.View.extend({
         '<div class="content-panel-body-listing-item-thumbnail-shadow"></div>' +
         '<div class="content-panel-body-listing-item-contents">' +
         '<div class="content-panel-body-listing-item-contents-caption"><%= title %></div>' +
-        '<div class="content-panel-body-listing-item-contents-meta"><%= views %> views</div>' +
+        '<% if (views){ %><div class="content-panel-body-listing-item-contents-meta"><%= views %> views</div><% } %>' +
         '<%= tags %><div class="content-panel-body-listing-item-contents-description"><%= description %></div>' +
         '<% if (review_count !== 0) { %><div class="content-panel-body-listing-item-contents-reviews">' +
         '<div class="content-panel-body-listing-item-contents-review-count">' +
@@ -577,8 +640,7 @@ var ResourceView = Backbone.View.extend({
         '</div><% } %></div></a>'
         ),
 
-    bannerTemplate: _.template('<div class="content-panel-body-listing-banner-item">' +
-            '<a href="<%= user_url %>" class="content-panel-body-listing-item-user-picture" style="background-image: url(\'<%= user_thumbnail %>\')"></a>' +
+    bannerTemplate: _.template('<a href="<%= user_url %>" class="content-panel-body-listing-item-user-picture" style="background-image: url(\'<%= user_thumbnail %>\')"></a>' +
             '<div class="content-panel-body-listing-item-label-fold"></div>' +
             '<div class="content-panel-body-listing-item-label"><%= type %></div>' +
             '<a href="<%= url %>" class="content-panel-body-listing-item-anchor"<% if (remote) { %> target="_blank"<% } %>>' +
@@ -589,7 +651,7 @@ var ResourceView = Backbone.View.extend({
                 '</div>' +
                 '<div class="content-panel-body-listing-item-contents">' +
                     '<div class="content-panel-body-listing-item-contents-caption"><%= title %></div><%= tags %>' +
-                    '<div class="content-panel-body-listing-item-contents-meta"><%= views %> views</div>' +
+                    '<% if (views){ %><div class="content-panel-body-listing-item-contents-meta"><%= views %> views</div><% } %>' +
                     '<div class="content-panel-body-listing-item-contents-description"><%= description %></div>' +
                     '<% if (review_count !== 0) { %><div class="content-panel-body-listing-item-contents-reviews">' +
                         '<div class="content-panel-body-listing-item-contents-review-count">' +
@@ -597,8 +659,8 @@ var ResourceView = Backbone.View.extend({
                         '</div>' +
                     '</div><% } %>' +
                 '</div>' +
-            '</a>' +
-        '</div>'),
+            '</a>'
+        ),
 
     events: function(){
         var events = {
@@ -1293,35 +1355,39 @@ function initModeToggler(){
 }
 
 jQuery(document).ready(function($){
-    if (!OC.categoryResources.isSubjectHome){
-        OC.categoryResources.setVisibleResourceCount();
+    if (!OC.categoryResources.suggestionMode){
+        if (!OC.categoryResources.isSubjectHome){
+            OC.categoryResources.setVisibleResourceCount();
 
-        // Construct collection views using the resources and requests objects built in
-        if (OC.categoryResources.isCatalog){
-            reset(filterInitialResources(resourceSet));
-        } else {
-            resourceCollectionView = new ResourceCollectionView({collection: resourceSet});
-            resourceCollectionView.render();
+            // Construct collection views using the resources and requests objects built in
+            if (OC.categoryResources.isCatalog){
+                reset(filterInitialResources(resourceSet));
+            } else {
+                resourceCollectionView = new ResourceCollectionView({collection: resourceSet});
+                resourceCollectionView.render();
+            }
+
+            requestCollectionView = new RequestCollectionView({
+                collection: requestSet,
+                requestURL: requestURL
+            });
+
+            // Render the collection views
+            requestCollectionView.render();
+
+            $(OC.config.search.input).autocomplete('disable');
+
+            // Initiatialize the Backbone models/collection/view
+            init_mvc();
+
+            // Initialize toggling between questions view and content.
+            initModeToggler();
+
+            // Initialize loading more resources on scroll down.
+            OC.categoryResources.initInfiniteScroll();
         }
-
-        requestCollectionView = new RequestCollectionView({
-            collection: requestSet,
-            requestURL: requestURL
-        });
-
-        // Render the collection views
-        requestCollectionView.render();
-
-        $(OC.config.search.input).autocomplete('disable');
-
-        // Initiatialize the Backbone models/collection/view
-        init_mvc();
-
-        // Initialize toggling between questions view and content.
-        initModeToggler();
-
-        // Initialize loading more resources on scroll down.
-        OC.categoryResources.initInfiniteScroll();
+    } else {
+        OC.categoryResources.initSuggestionsView();
     }
 
     OC.categoryResources.initBrowseView();

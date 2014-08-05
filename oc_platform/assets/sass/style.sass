@@ -4544,53 +4544,6 @@ form.resource-create-edit-form
 								color: $light-font
 
 
-
-						.content-panel-body-listing-banner-item
-							color: $body-color
-							display: block
-							width: 800px
-							padding-top: 10px
-							padding-left: 10px
-													
-							&.expanded
-								height: auto
-
-							> a
-								outline: none
-
-								&:hover
-									text-decoration: none
-
-							.content-panel-body-listing-item-label
-								left: -5px
-
-							.content-panel-body-listing-item-label-fold
-								background-image: url('../images/label-fold-flip.png')
-								left: -5px
-
-							a.content-panel-body-listing-item-anchor
-								height: 150px
-								width: 100%
-								overflow: hidden
-
-								.content-panel-body-listing-item-thumbnail-wrapper
-									float: left
-									width: 205px
-
-								.content-panel-body-listing-item-contents
-									float: right
-									width: 569px
-									padding-left: 15px
-									padding-top: 10px
-									font-size: 1.2em
-
-									.content-panel-body-listing-item-contents-caption
-										letter-spacing: -1px
-
-									.content-panel-body-listing-item-contents-description
-										margin-top: 16px
-
-
 					.content-panel-body-listing-requests
 						padding-top: 20px
 						margin-top: 20px
@@ -4733,6 +4686,54 @@ form.resource-create-edit-form
 
 		.content-panel-body-listing-item-contents
 			border: 1px solid #ddd
+
+
+	.content-panel-body-listing-banner-item
+		color: $body-color
+		display: block
+		width: 800px
+		padding-top: 10px
+		padding-left: 20px
+								
+		&.expanded
+			height: auto
+
+		> a
+			outline: none
+
+			&:hover
+				text-decoration: none
+
+		.content-panel-body-listing-item-label
+			left: -5px
+
+		.content-panel-body-listing-item-label-fold
+			background-image: url('../images/label-fold-flip.png')
+			left: -5px
+
+		a.content-panel-body-listing-item-anchor
+			height: 150px
+			width: 100%
+			overflow: hidden
+
+			.content-panel-body-listing-item-thumbnail-wrapper
+				float: left
+				width: 205px
+
+			.content-panel-body-listing-item-contents
+				float: right
+				width: 569px
+				padding-left: 15px
+				padding-top: 10px
+				font-size: 1.2em
+
+				.content-panel-body-listing-item-contents-caption
+					letter-spacing: -1px
+
+				.content-panel-body-listing-item-contents-description
+					margin-top: 16px
+
+
 
 a.content-panel-body-listing-item-anchor
 	background-color: #f9f9f9
@@ -5466,6 +5467,55 @@ h1.empty-state-title
 
 		input[type="text"]
 			width: 400px
+
+.moderate-suggestion-dialog
+	width: 400px
+	height: 400px
+
+	textarea[name="message"]
+		width: 97%
+		height: 300px
+
+.posted-success-dialog
+	width: 650px
+
+	.posted-success-header
+		margin-bottom: 40px
+		text-align: center
+
+	.posted-success-body
+		overflow: hidden
+
+		.posted-success-body-user
+			float: left
+			width: 250px
+
+			.posted-success-body-user-image
+				width: 250px
+
+		.posted-success-body-description
+			float: right
+			width: 370px
+
+.post-tag-dialog
+	width: 500px
+
+	.standards-input
+		width: 300px
+		min-height: 100px
+
+	.standards-suggestion-text
+		color: $light-font
+
+	table
+		td
+			vertical-align: top		
+
+		tr
+			margin-bottom: 10px
+
+			td:first-child
+				padding-top: 8px
 
 /***** EXPERIMENTS *************/
 

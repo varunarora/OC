@@ -892,12 +892,15 @@ def user_profile(request, username):
     from user_account.models import Activity
     feed = Activity.objects.filter(recipients=user).order_by('-pk')[:10]
 
+    feed_count = Activity.objects.filter(recipients=user).count()
+
     # Do all kinds of feed preprocessing.
     _preprocess_feed(feed)
 
     context = dict({
         'user_profile': user,
         'feed': feed,
+        'feed_count': feed_count,
         'collection': user_profile.collection,
         'stars': stars,
         'page': 'home',
@@ -1744,5 +1747,106 @@ def onboard(request, tour, version_id):
         user_profile.save()
 
         return APIUtilities._api_success()
+    except:
+        return APIUtilities._api_failure()
+
+
+def load_feed(request, user_id, feed_count):
+    try:
+        from django.contrib.auth.models import User
+        user = User.objects.get(pk=user_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    from user_account.models import Activity
+    feed = Activity.objects.filter(recipients=user).order_by('-pk')[(int(feed_count) + 1):(
+        int(feed_count) + 20)]
+
+    from django.core.urlresolvers import reverse
+
+    serialized_feed = {}
+    import datetime
+
+    for feed_item in feed:
+        serialized_feed[feed_item.id] = {
+            'id': feed_item.id,
+            'actor_name': feed_item.actor.get_full_name(),
+            'actor_thumbnail': feed_item.actor.get_profile().profile_pic.name,
+            'actor_url': reverse(
+                'user:user_profile', kwargs={ 'username': feed_item.actor.username }),
+            'action_id': feed_item.action.id,
+            'action_type': feed_item.action_type.name,
+            'target_id': feed_item.target.id,
+            'target_type': feed_item.target_type.name,
+            'target_created': datetime.datetime.strftime(feed_item.target.created, '%b. %d, %Y, %I:%M %P'),
+        }
+
+        if serialized_feed[feed_item.id]['action_type'] == serialized_feed[feed_item.id]['target_type'] and (
+            serialized_feed[feed_item.id]['target_type'] == 'comment'):
+            serialized_feed[feed_item.id]['target_url'] = reverse(
+                'projects:project_discussion', kwargs={
+                    'project_slug': feed_item.context.slug,
+                    'discussion_id': feed_item.target.id
+                }
+            )
+            serialized_feed[feed_item.id]['context_url'] = reverse(
+                'projects:project_home', kwargs={
+                    'project_slug': feed_item.context.slug }),
+            serialized_feed[feed_item.id]['context'] = feed_item.context.title
+
+        if serialized_feed[feed_item.id]['action_type'] == 'membership':
+            serialized_feed[feed_item.id]['target_url'] = reverse(
+                'projects:project_home', kwargs={
+                    'project_slug': feed_item.target.slug })
+            serialized_feed[feed_item.id]['target'] = feed_item.target.title
+
+        if serialized_feed[feed_item.id]['action_type'] == 'project':
+            serialized_feed[feed_item.id]['action_url'] = reverse(
+                'projects:project_home', kwargs={
+                    'project_slug': feed_item.action.slug })        
+
+        if serialized_feed[feed_item.id]['action_type'] == 'favorite':
+            serialized_feed[feed_item.id]['action_url'] = reverse(
+                'projects:project_home', kwargs={
+                    'project_slug': feed_item.action.slug })
+            serialized_feed[feed_item.id]['target'] = feed_item.target.user.get_full_name()
+            serialized_feed[feed_item.id]['target_url'] = reverse(
+                'projects:project_home', kwargs={
+                    'project_slug': feed_item.target.slug })
+
+        if serialized_feed[feed_item.id]['action_type'] == 'collection':
+            serialized_feed[feed_item.id]['target_url'] = reverse(
+                'user:list_collection', kwargs={
+                    'username': feed_item.context.user.username,
+                    'collection_slug': feed_item.target.slug
+                }
+            )            
+
+    context = {
+        'feeds': serialized_feed
+    }
+    return APIUtilities._api_success(context)
+
+
+def api_get_profile(request, username):
+    try:
+        from django.contrib.auth.models import User
+        user = User.objects.get(username=username)
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        context = {
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'first_name': user.first_name,
+                'name': user.get_full_name(),
+                'last_name': user.last_name,
+                'picture': settings.MEDIA_URL + user.get_profile().profile_pic.name
+            }
+        }
+        return APIUtilities._api_success(context)
+
     except:
         return APIUtilities._api_failure()
