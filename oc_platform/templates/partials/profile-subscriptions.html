@@ -10,7 +10,7 @@
                 <div class="subscriber-description user-description">
                     <a href="{% url user:user_profile username=subscriber.subscribee.user.username %}">{{ subscriber.subscribee.user.get_full_name }}</a>
                     {% if user != subscriber.subscribee.user %}
-                    <p><button class="btn dull-button subscribe-button">Subscribe</button></p>
+                    <p><button class="action-button mini-action-button subscribe-button">Subscribe</button></p>
                     {% endif %}
                 </div>
             </div>

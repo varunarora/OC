@@ -1,5 +1,5 @@
 <div class="resource-collection-item {{ item_category }}" id="{{ item_category }}-{{ item.id }}">
-    <input type="checkbox" name="resource_collection_id" value="{{ item.id }}"/>
+    {% if user == user_profile %}<div class="resource-item-selector"><input type="checkbox" name="resource_collection_id" value="{{ item.id }}"/></div>{% endif %}
     {% if item_category == 'resource' and item.type != 'gfolder' and item.type != 'dropbox' %}
     <a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %} class="resource-item-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ item.image.name }}');">
         <div class="resource-item-thumbnail-selector"></div>
@@ -24,9 +24,9 @@
         {% endif %}
     </a>
     {% elif item_type == 'unit' %}
-    <div class="resource-item-thumbnail" style="background-image: url('{{ STATIC_URL }}images/unit-icon.png');"></div>
+    <a a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %} class="resource-item-thumbnail" style="background-image: url('{{ STATIC_URL }}images/unit-icon-small.png');"></a>
     {% else %}
-    <a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %} class="resource-item-thumbnail" style="background-image: url('{{ STATIC_URL }}images/folder-icon.png');">
+    <a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %} class="resource-item-thumbnail" style="background-image: url('{{ STATIC_URL }}images/folder-small.png');">
         <div class="resource-item-thumbnail-selector"></div>
         {% if item.type == 'gfolder' or item.type == 'gdoc' %}
         <div class="resource-item-thumbnail-drive"></div>
@@ -37,11 +37,11 @@
     {% endif %}
     <div class="resource-item-description">
         <div class="resource-item-description-title"><a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %}>{{ item.title }}</a>
-        <div class="resource-item-description-meta">Last modified at: {% if item_category == 'resource' %}{{ item.revision.created }}{% else %}{{ item.changed|date:"M nS, 'y P"}}{% endif %}</div>
         </div>
+        <div class="resource-item-description-modified" title="{% if item_category == 'resource' %}{{ item.revision.created|date:'c' }}{% else %}{{ item.changed|date:'c' }}{% endif %}">{% if item_category == 'resource' %}{{ item.revision.created }}{% else %}{{ item.changed|date:"M nS, 'y P"}}{% endif %}</div>
         <div class="resource-item-description-actions">
             <div class="resource-item-description-actions-visibility">
-                <button class="action-button secondary-button mini-action-button {{ host }}-browse-item-visibility browse-item-visibility visibility-{{ item.visibility }}{% if host == 'profile' %}{% if user == user_profile %} profile-collection is-owner{% endif %}{% elif user in project.admins.all or user == item.creator or user == item.user %} is-owner{% elif item.visibility == 'private' and user in item.collaborators.all %} is-collaborator{% endif %}{% if host == 'profile' %}{% if user != item.creator and user != item.user %} unclickable{% endif %}{% elif host == 'project' and user != item.creator and user != item.user and user not in project.admins.all %} unclickable{% endif %}{% if item.visibility == 'private' and user not in item.collaborators.all and user != item.creator and user != item.user %} unclickable{% endif %}">
+                <span class="{{ host }}-browse-item-visibility browse-item-visibility visibility-{{ item.visibility }}{% if host == 'profile' %}{% if user == user_profile %} profile-collection is-owner{% endif %}{% elif user in project.admins.all or user == item.creator or user == item.user %} is-owner{% elif item.visibility == 'private' and user in item.collaborators.all %} is-collaborator{% endif %}{% if host == 'profile' %}{% if user != item.creator and user != item.user %} unclickable{% endif %}{% elif host == 'project' and user != item.creator and user != item.user and user not in project.admins.all %} unclickable{% endif %}{% if item.visibility == 'private' and user not in item.collaborators.all and user != item.creator and user != item.user %} unclickable{% endif %}">
                 {% if host == 'project' %}
                     {% if item.user != user and item.creator != user %}
                         {% if project.visibility == 'public' %}
@@ -91,12 +91,10 @@
                     {% endif %}
                 {% endif %}
                 {% endif %}
-                </button>
+                </span>
             </div>
-            <div class="resource-item-description-actions-common">
-                <span class="resource-favorite-wrapper"><a class="resource-favorite">Favorite</a></span>
-                <a class="resource-copy">Copy</a><a class="resource-remix">Remix</a>
-            </div>
+            <!--<span class="resource-favorite-wrapper"><a class="resource-favorite">Favorite</a></span>
+            <a class="resource-copy">Copy</a><a class="resource-remix">Remix</a>-->
         </div>
     </div>
 </div>

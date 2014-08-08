@@ -387,8 +387,6 @@ class Browse():
         except:   # In the case the user is logged out.
             resource_collection.favorited = False
 
-            
-
         if not hasattr(resource_collection, 'filtered_tags'):
             resource_collection.filtered_tags = resource_collection.tags.exclude(
                 category=self.resource_type_tag_category).exclude(

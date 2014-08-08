@@ -40,7 +40,7 @@
 	</head>
 	<body{% if body_class %} class="{{ body_class }}"{% endif %}>
 		{% if header_type != 'vanilla' %}
-		{% if body_class == 'browse' %}
+		{% if body_class == 'browse' or body_class == 'profile-view' %}
 		<header class="wide-header">
 			<div id="header-prebanner"></div>
 			<div class="wide-center-stage">

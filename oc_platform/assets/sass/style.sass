@@ -104,7 +104,7 @@ header.wide-header
 				a
 					color: #ddd
 					outline: none
-					height: 37px
+					height: 34px
 				
 					&:hover, &.hover
 						background-color: #555
@@ -141,7 +141,7 @@ header.wide-header
 @import "search_bar"
 @import "scaffolds"
 
-body.browse, body.index
+body.browse, body.index, body.profile-view
 	> header
 		background-color: #333
 		height: $header-height - 7
@@ -806,12 +806,25 @@ nav#authenticate-buttons, nav#user-buttons
 					display: inline-block
 					float: right
 					height: 9px
-					margin: 15px 0px 6px 0px
+					margin: 13px 0px 6px 0px
 
 			&.user-firstname-wrapper
 				a
 					padding: 6px 20px
-	
+
+			&.create-new-resource-button
+
+				a
+					background-image: url('../images/add-resource.png')
+					background-position: center
+					background-repeat: no-repeat
+					width: 25px
+					outline: none						
+
+					&.popout
+						z-index: 12
+						position: absolute
+
 .horizontal-caret-hover
 	border-color: $link-hover transparent transparent
 					
@@ -942,7 +955,7 @@ nav#add-resource-menu
 	.floating-menu-spacer
 		width: 140px
 		background: url('../images/user-nav-pointer.png') no-repeat
-		background-position: 15px bottom
+		background-position: 87px bottom
 		z-index: 10
 
 	ul
@@ -1846,7 +1859,6 @@ nav,settings-navigation
 	padding-top: 0px
 
 
-.profile-view .oc-tabs nav.profile-tabs li,
 nav.project-navigation li
 	margin-left: 0px
 	margin-right: 10px
@@ -1865,7 +1877,7 @@ nav.project-navigation li
 			color: #fff
 
 
-.profile-view, .tag-view
+.tag-view
 	background-color: #efefef
 
 	.center-stage
@@ -1943,11 +1955,7 @@ table
 	color: #B94A48
 
 .add-resource
-	width: 105px
-
-	&.popout
-		z-index: 12
-		position: absolute
+	width: 50px
 
 .page-action-button, .action-button, .collection-button
 	padding: 10px
@@ -2023,9 +2031,6 @@ table
 	&:hover
 		background-color: #E0E0E0
 
-	&.disabled-collection-button
-		color: #bababa
-
 		&:hover
 			background-color: #efefef
 
@@ -2033,62 +2038,163 @@ table
 	padding-left: 20px
 	padding-right: 20px
 
-nav#add-resource-menu
+.subscribe-button
+	margin-left: 0px
+
+nav#add-resource-menu, nav.profile-resources-collections-actions-menu-add
 	.add-collection, .add-document, .add-link, .add-video,
-	.add-upload, .add-lesson, .add-unit
+	.add-upload, .add-lesson, .add-unit, .add-group
 		a
-			padding-left: 34px
-			background-position: 12px 3px
-			@include sans-bold
+			font-weight: bold
 			background-repeat: no-repeat
 
 	.add-collection a
 		background-image: url('../images/folder.png')
 
-		&:hover
-			background-image: url('../images/folder-hover.png')
-
 	.add-document a
 		background-image: url('../images/document.png')
-
-		&:hover
-			background-image: url('../images/document-hover.png')
 
 	.add-link a
 		background-image: url('../images/link.png')
 
-		&:hover
-			background-image: url('../images/link-hover.png')
-
 	.add-video a
 		background-image: url('../images/video.png')
-
-		&:hover
-			background-image: url('../images/video-hover.png')
 
 	.add-upload a
 		background-image: url('../images/upload.png')
 
-		&:hover
-			background-image: url('../images/upload-hover.png')
-
 	.add-lesson a
 		background-image: url('../images/lesson.png')
-
-		&:hover
-			background-image: url('../images/lesson-hover.png')
 
 	.add-unit a
 		background-image: url('../images/unit.png')
 
+	.add-group a
+		background-image: url('../images/groups.png')
+
+nav#add-resource-menu
+	.add-collection, .add-document, .add-link, .add-video,
+	.add-upload, .add-lesson, .add-unit, .add-group
+		a
+			background-position: 12px 4px
+			padding-left: 34px
+			padding-top: 5px
+
+	.add-collection a
+		&:hover
+			background-image: url('../images/folder-hover.png')
+
+	.add-document a
+		&:hover
+			background-image: url('../images/document-hover.png')
+
+	.add-link a
+		&:hover
+			background-image: url('../images/link-hover.png')
+
+	.add-video a
+		&:hover
+			background-image: url('../images/video-hover.png')
+
+	.add-upload a
+		&:hover
+			background-image: url('../images/upload-hover.png')
+
+	.add-lesson a
+		&:hover
+			background-image: url('../images/lesson-hover.png')
+
+	.add-unit a
 		&:hover
 			background-image: url('../images/unit-hover.png')
+
+	.add-group a
+		&:hover
+			background-image: url('../images/groups-light.png')
+
+nav.profile-resources-collections-actions-menu-edit
+	margin-bottom: 10px
+	padding-bottom: 10px
+	border-bottom: 1px solid #ddd
+	display: none
+
+	&.show
+		display: block
+
+	li
+		a
+			font-weight: bold
+			background-repeat: no-repeat
+
+		&.disabled-collection-button
+			a
+				color: #bababa
+				cursor: auto
+
+				&:hover
+					background-color: transparent
+
+			&.share-button a
+				background-image: url('../images/share-dark-disabled-icon.png')
+
+			&.rename-button a
+				background-image: url('../images/edit-disabled-icon.png')
+
+		&.rename-button, &.move-button, &.del-button,
+		&.share-button, &.copy-button
+			a
+				background-position: 12px 4px
+
+		&.rename-button a
+			background-image: url('../images/edit-dark.png')
+
+		&.move-button a
+			background-image: url('../images/move-to-folder-icon.png')
+
+		&.del-button a
+			background-image: url('../images/trash-icon.png')
+
+		&.share-button a
+			background-image: url('../images/share-icon-dark.png')
+
+		&.copy-button a
+			background-image: url('../images/copy.png')
+
+nav.profile-resources-collections-actions-menu-add
+	&.fade-out
+		opacity: 0.6
+
+		&:hover
+			opacity: 1
+
+nav.profile-resources-collections-actions-menu-add,
+nav.profile-resources-collections-actions-menu-edit
+	ul
+		li
+			&.add-collection, &.add-document, &.add-link, &.add-video,
+			&.add-upload, &.add-lesson, &.add-unit
+				a
+					background-position: 12px 6px
+
+			a
+				outline: none
+				text-align: left
+				padding: 6px 12px
+				padding-left: 34px
+				display: block
+				color: #666666
+		
+				&:hover
+					background-color: #e0e0e0
+					text-decoration: none
 
 .browse-page
 	min-height: 100px
 
 nav.collections-navigation
 	margin-top: 20px
+	width: 240px
+	margin: auto
 
 	ul
 		display: block
@@ -2267,7 +2373,7 @@ aside#support.teacher-contributor-invite
 	height: 100px
 
 .new-resource-url
-	width: 100%
+	width: 96%
 
 .new-video-placeholder, .new-url-placeholder
 	background-repeat: no-repeat
@@ -2356,34 +2462,28 @@ aside#support.teacher-contributor-invite
 		.profile-collection-delete, .project-collection-delete
 			background-image: url('../images/delete-resource-hover.png')
 
+.profile-groups-listing
+	.projects-item:first-child
+		margin-top: 10px
 
-.profile-projects-listing, .home-projects-listing
-	color: #fff
-	padding-top: 10px
+	.projects-item
+		margin-bottom: 10px
 
-	&.compressed
-		height: 200px
-		overflow: hidden
-
-
-.projects-item
-	margin-bottom: 10px
-
-	.profile-projects-item-description-wrapper
-		background-size: cover
-		height: 100px
-
-	.profile-projects-item-title
-		font-size: 1.4em
-
-	a
-		color: #fff
-
-	a:hover
-		text-decoration: none
+		.profile-projects-item-description-wrapper
+			background-size: cover
+			height: 100px
 
 		.profile-projects-item-title
-			text-decoration: underline
+			font-size: 1.4em
+
+		a
+			color: #fff
+
+		a:hover
+			text-decoration: none
+
+			.profile-projects-item-title
+				text-decoration: underline
 
 .profile-projects-item-description
 	position: relative
@@ -3062,6 +3162,15 @@ aside.page-menu-wrapper
 .user-welcome-dialog
 	width: 350px
 
+.delete-resource-collection-dialog
+	width: 400px
+
+.new-group-dialog
+	width: 670px
+
+.post-new-upload-dialog
+	width: 960px
+
 .add-collaborator-wrapper
 	overflow: hidden
 	margin-top: 6px
@@ -3113,13 +3222,6 @@ ul.collaborators
 	.resource-collection-visibility-form-content
 		border-top-width: 0px
 		margin-top: 10px
-
-.collection-actions
-	margin-bottom: 20px
-	overflow: hidden
-
-	.collection-button
-		margin-right: 4px
 
 .move-resource-collection-dialog
 	width: 400px
@@ -3522,14 +3624,6 @@ ul.collaborators
 .activity-project-wrapper
 	padding-top: 8px
 
-.feed-list
-	.user-description
-		>a
-			font-weight: bold
-
-	.feed-item-date
-		color: #bababa
-
 blockquote
 	padding-left: 20px
 	padding-top: 10px
@@ -3540,18 +3634,44 @@ blockquote
 		display: inline
 
 .profile-content
+	height: 500px
+	overflow: auto
 	padding-top: 20px
+
+	.feed-list
+		width: 680px
+
+		.user-description
+			width: 538px
+			padding: 0px 10px
+
+			>a
+				font-weight: bold
+
+		.feed-item-date
+			color: #bababa
+
+		.feed-item
+			background-color: #fff
+			margin-left: 25px
+			margin-bottom: 16px
+			@include box-shadow(0 2px 2px rgba(0, 0, 0, 0.1))
+			padding: 10px
+			padding-top: 16px
+
+			.user-photo
+				display: block
 
 .resource-collection-item
 	overflow: hidden
-	margin: 10px 0px
-	padding: 5px
+	padding: 2px
+	border-bottom: 1px solid #ddd
 
 	&.selected, &.selected:hover
-		background-color: #E9EFFA
+		background-color: #fff
 
 	&:hover
-		background-color: #f2f2f2
+		background-color: #f9f9f9
 
 		.resource-item-thumbnail
 			.resource-item-thumbnail-selector
@@ -3563,27 +3683,21 @@ blockquote
 					visibility: visible
 					opacity: 1
 
-	input[name=resource_collection_id]
-		display: none
+	.resource-item-selector
+		float: left
+		width: 25px
+		text-align: left
 
+		input[name=resource_collection_id]
+			margin-top: 20px
+			padding-left: 4px
+		
 	.resource-item-thumbnail
-		width: 80px
-		height: 80px
+		width: 50px
+		height: 50px
 		float: left
 		display: inline-block
 		background-size: cover
-
-		.resource-item-thumbnail-selector
-			background: url('../images/select.png') no-repeat center center
-			width: 80px
-			height: 80px
-			visibility: hidden
-			opacity: 0
-			float: left
-
-			&.selected
-				visibility: visible
-				opacity: 1
 
 		.resource-item-thumbnail-drive, .resource-item-thumbnail-dropbox,
 		.resource-item-thumbnail-image, .resource-item-thumbnail-pdf,
@@ -3592,72 +3706,92 @@ blockquote
 		.resource-item-thumbnail-video
 			background-repeat: no-repeat
 			background-position: center center
-			width: 80px
-			height: 80px
+			width: 50px
+			height: 50px
+			background-size: 100%
 
 		.resource-item-thumbnail-drive
-			background: url('../images/drive-folder.png')
+			background-image: url('../images/drive-folder.png')
 
 		.resource-item-thumbnail-dropbox
-			background: url('../images/dropbox-folder.png')
+			background-image: url('../images/dropbox-folder.png')
 
 		.resource-item-thumbnail-image
-			background: url('../images/image-icon.png')
+			background-image: url('../images/image-icon.png')
 
 		.resource-item-thumbnail-pdf
-			background: url('../images/pdf-icon.png')
+			background-image: url('../images/pdf-icon.png')
 
 		.resource-item-thumbnail-document
-			background: url('../images/document-icon.png')
+			background-image: url('../images/document-icon.png')
 
 		.resource-item-thumbnail-spreadsheet
-			background: url('../images/spreadsheet-icon.png')
+			background-image: url('../images/spreadsheet-icon.png')
 
 		.resource-item-thumbnail-presentation
-			background: url('../images/powerpoint-icon.png')
+			background-image: url('../images/powerpoint-icon.png')
 
 		.resource-item-thumbnail-upload
-			background: url('../images/upload-icon.png')
+			background-image: url('../images/upload-icon.png')
 
 		.resource-item-thumbnail-url
-			background: url('../images/link-icon.png')
+			background-image: url('../images/link-icon.png')
 
 		.resource-item-thumbnail-video
-			background: url('../images/video-icon.png')
+			background-image: url('../images/video-icon.png')
 
 	.resource-item-description
 		float: left
 		margin-left: 15px
-		width: 80%
+		width: 86%
+		height: 50px
 
 		.resource-item-description-title
+			float: left
+			margin-top: 12px
+			width: 400px
+
 			a
 				font-size: 1.2em
+				color: $body-color
 
-		.resource-item-description-meta
+				&:hover
+					color: $link-hover
+
+		.resource-item-description-modified
+			margin-top: 12px
 			color: #bababa
+			float: left
+			width: 105px
 
 		.resource-item-description-actions
-			padding-top: 12px
+			margin-top: 12px
+			float: right
 
 			.resource-item-description-actions-visibility
 				float: left
 
-				button
-					margin-left: 0px
+				.browse-item-visibility
+					cursor: pointer
 
 					&.is-owner, &.is-collaborator
 						cursor: pointer
 
-			.resource-item-description-actions-common
-				padding-top: 5px
-				float: right
-
+					&:hover
+						color: $link-hover
 
 #fill-panel
 	.resource-collection-item
 		.resource-item-description
 			width: 270px
+
+.files-breadcrumb
+	font-size: 1.2em
+	margin-left: 25px
+	margin-bottom: 20px
+
+	a, span
+		font-weight: bold
 
 .action-button
 	.publicly-shared-icon, .private-shared-icon, .group-shared-icon,
@@ -4067,7 +4201,6 @@ form.resource-create-edit-form
 .empty-folder-suggestion
 	width: 85%
 	height: 300px
-	background-color: #efefef
 	text-align: center
 	padding: 40px
 
@@ -4417,36 +4550,6 @@ form.resource-create-edit-form
 					padding: 20px
 					padding-top: 0px
 					overflow: hidden
-
-				.content-panel-body-listing-types
-					margin-left: 25px
-					border-bottom: 1px solid #ddd
-					margin-top: 20px
-					margin-bottom: 10px
-					//padding-bottom: 8px
-
-					ul
-						overflow: hidden
-
-						li
-							float: left
-							margin-right: 28px
-
-							a
-								color: $light-font
-								font-size: 1.3em
-								padding-bottom: 6px
-								outline: none
-								display: inline-block
-
-								&:hover
-									text-decoration: none
-									color: $body-color
-
-								&.current
-									border-bottom: 2px solid $body-color
-									color: $body-color
-									font-weight: bold
 
 				.content-panel-body-listing
 					//overflow: auto
@@ -4831,6 +4934,37 @@ a.content-panel-body-listing-item-anchor
 		.content-panel-body-listing-item-contents-review-count
 			display: inline-block
 			margin-left: 6px
+
+
+.oc-page-tabs
+	margin-left: 25px
+	border-bottom: 1px solid #ddd
+	margin-top: 20px
+	margin-bottom: 10px
+	//padding-bottom: 8px
+
+	ul
+		overflow: hidden
+
+		li
+			float: left
+			margin-right: 28px
+
+			a
+				color: $light-font
+				font-size: 1.3em
+				padding-bottom: 6px
+				outline: none
+				display: inline-block
+
+				&:hover
+					text-decoration: none
+					color: $body-color
+
+				&.current
+					border-bottom: 2px solid $body-color
+					color: $body-color
+					font-weight: bold
 
 
 .content-panel-body-listing-filters-sort, .discussion-board-filters-sort
@@ -5328,27 +5462,39 @@ body.signup, body.login
 				.library-subject-title
 					background-color: #ddd
 
-h1.empty-state-title
-	color: #aaa
-	font-size: 2.2em
-	letter-spacing: -2px
-	text-align: center
-	margin-top: 20px
+.empty-state-title
+	float: left
+	width: 90%
+
+	h1
+		color: #aaa
+		font-size: 2.2em
+		letter-spacing: -2px
+		text-align: center
 
 .empty-state-arrow
+	float: right
 	width: 11px
 	height: 20px
 	margin-right: 10px
+	padding-top: 30px
 	display: inline-block
-	background: url('../images/grade-topic-arrow.png') no-repeat center center
+	background: url('../images/subscribe-suggestion-arrow.png') no-repeat center center
 	background-size: 80%
 
 .empty-feed
+	overflow: hidden
 	width: 400px
 	margin: auto
-	padding-top: 300px
-	background: url('../images/empty-feed.png') no-repeat center 150px
+	padding-top: 140px
+	background: url('../images/empty-feed.png') no-repeat center 0px
+	margin-bottom: 100px
 
+	&.empty-external-feed
+		background: url('../images/empty-external-feed.png') no-repeat center 0px
+		
+		.empty-state-title
+			width: 100%
 
 /***** INTERNAL TOOLS *************/
 

@@ -1,15 +1,16 @@
 .user-profile-info
     overflow: hidden
-    border-bottom: 1px solid #efefef
+    margin: 20px auto
     margin-bottom: 20px
+    width: 240px
 
     .user-profile-picture
-        width: 300px
-        height: 300px
+        width: 240px
+        height: 240px
 
         div.user-picture-cover
-            width: 300px
-            height: 300px
+            width: 240px
+            height: 240px
             background-repeat: no-repeat
             background-size: cover
             
@@ -24,8 +25,8 @@
                     z-index: 50            
 
         div.user-picture-repositioner
-            width: 300px
-            height: 300px
+            width: 240px
+            height: 240px
             position: relative
             z-index: 25
             display: none
@@ -48,7 +49,7 @@
 
         .edit-profile-picture
             top: 8px
-            left: 240px
+            left: 160px
             display: none
 
         &.popout
@@ -57,7 +58,6 @@
 
     .user-profile-info-body
         margin-top: 10px
-        padding: 0px 5px
 
         .profile-name, profile-headline, profile-subscribe
             padding-left: 4px
@@ -70,14 +70,11 @@
                 float: left
 
             .profile-headline
-                border: 1px solid #fff
-                padding: 2px
-                width: 260px
+                padding: 4px 2px
+                width: 214px
+                background-color: transparent
+                border: 1px solid transparent
 
-                &:focus
-                    // HACK(Varun): To undo the effect of the input shadow site-wide
-                    @include box-shadow(0px 0px)
-                
             .headline-edit
                 visibility: hidden
                 background-image: url("../images/glyphicons-halflings.png")
@@ -87,6 +84,8 @@
                 height: 14px
                 display: inline-block
                 margin-left: 6px
+                float: right
+                margin-top: 2px
 
                 &.changing
                     background-image: url("../images/spinner.gif")
@@ -96,12 +95,12 @@
         .profile-subscribe-wrapper
             margin: 10px 0px
             overflow: hidden
-            padding: 0px 20px
             color: $light-font
+            width: 220px
 
             .profile-subscriber-count, .profile-subscriptions-count
                 width: 100px
-                padding: 10px
+                padding: 5px
                 display: inline-block
                 color: $light-font
                 cursor: pointer
@@ -121,7 +120,7 @@
                     text-decoration: none
 
                 &.selected
-                    background-color: $link-hover
+                    background-color: #5abd02
                     color: #fff
 
             .profile-subscriber-count
@@ -184,6 +183,7 @@
             text-decoration: none
             color: #333
 
+
 .profile-resources-added-list, .profile-contributions-list
     &.compressed
         height: 200px
@@ -224,6 +224,9 @@
             &.selected
                 background-image: url('../images/files-light.png')
 
+.profile-tabs
+    &.oc-page-tabs
+        margin-bottom: 0px
 
 .profile-view
     background-color: #efefef
@@ -242,7 +245,7 @@
     background-color: #5abd02
     color: #fff
     background-image: none
-    width: 290px
+    width: 240px
     font-size: 1.3em
 
     &:hover
@@ -253,15 +256,64 @@
     .subscriber-info
         float: none
 
-
-.create-resource-collection-wrapper
+.profile-resources-collections-files
     overflow: hidden
 
-    .add-collection-resource-wrapper
-        float: right
+    .profile-resources-collections-wrapper
+        width: 700px
+        margin-left: 25px
+        float: left
+
+    .profile-resources-collections-actions
+        width: 150px
+        margin-left: 25px
+        float: left
+
+        &.floating
+            position: absolute
+
+        .profile-resources-collections-actions-shadow
+            background-image: linear-gradient(to right, #e2e2e2 0%, #efefef 10px)
+            height: 100px
+            width: 10px
+            float: left
+
+        .profile-resources-collections-actions-menu
+            padding-left: 10px
+
 
 .new-group-wrapper
     overflow: hidden
 
     .page-action-button
         float: right
+
+.profile-favorites
+    margin-left: 25px
+    overflow: hidden
+
+.profile-groups-listing-wrapper
+    width: 700px
+    margin-left: 25px
+
+.subscriptions-profile-content,
+.subscribers-profile-content
+    margin-left: 25px
+
+.no-favorites-found
+    margin-left: 25px
+
+.user-profile-feed-suggestions
+    overflow: hidden
+
+    .user-profile-feed
+        float: left
+        width: 700px
+
+    .user-profile-suggestions
+        float: left
+        width: 200px  
+
+        .user
+            .user-description
+                width: 114px

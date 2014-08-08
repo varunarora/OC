@@ -1303,6 +1303,49 @@ def delete_resource(request, resource_id, collection_id):
         return APIUtilities._api_failure()
 
 
+def delete_resources(request, collection_id):
+    try:
+        if not request.user.is_authenticated():
+            return APIUtilities._api_unauthorized_failure()
+
+        resources_ids = map(lambda x: int(x),
+            request.GET.get('ids', None).split(','))
+
+        resources = Resource.objects.filter(pk__in=resources_ids)
+
+        resources_deleted = []
+        for resource in resources:
+            if request.user == resource.user:
+                # If there are multiple collections where this resource is linked,
+                # do not delete the resource. Remove the resource only from the current collection.
+                from django.core.exceptions import MultipleObjectsReturned
+                try:
+                    collection = Collection.objects.get(resources__id=resource.id)
+                
+                except MultipleObjectsReturned:
+                    collection = Collection.objects.get(pk=collection_id)
+                    collection.resources.remove(resource)
+                    continue
+
+                resources_deleted.append(resource.id)
+                delete_individual_resource(resource)
+
+        context = {
+            'resourceIDs': resources_deleted
+        }
+
+        return APIUtilities._api_success(context)
+
+    except Exception, e:
+        print e
+        context = {
+            'title': 'Could not delete the files.',
+            'message': 'The files could not be deleted. Sorry! '
+            + 'Please contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
+
+
 def delete_individual_resource(resource):
     revisions = ResourceRevision.objects.filter(resource=resource)
 
@@ -1418,6 +1461,36 @@ def delete_collection(request, collection_id):
             + 'Please contact us if the problem persists.'
         }
         return APIUtilities._api_failure()
+
+
+def delete_collections(request):
+    try:
+        if not request.user.is_authenticated():
+            return APIUtilities._api_unauthorized_failure()
+
+        collection_ids = map(lambda x: int(x),
+            request.GET.get('ids', None).split(','))
+
+        collections = Collection.objects.filter(pk__in=collection_ids)
+
+        collections_deleted = []
+        for collection in collections:
+            if request.user == collection.creator:
+                collections_deleted(collection.id)
+                delete_individual_collection(collection)
+
+        context = {
+            'collectionIDs': collections_deleted
+        }
+
+        return APIUtilities._api_success(context)
+    except:
+        context = {
+            'title': 'Could not delete the folders.',
+            'message': 'The folders could not be deleted. Sorry! '
+            + 'Please contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
 
 
 def delete_individual_collection(collection):
@@ -2680,23 +2753,12 @@ def copy_resource_to_collection(request, resource_id, from_collection_id, to_col
 
         # Add new resource to fork.
 
-        import datetime
+        (visibility_classes, visibility_title) = get_resource_visibility(
+            request, resource, from_collection_root)
+
         context = {
-            'resource': {
-                'id': new_resource.id,
-                'title': new_resource.title,
-                'created': datetime.datetime.strftime(new_resource.created, '%b. %d, %Y, %I:%M %P'),
-                'visibility': new_resource.visibility,
-                'type': new_resource_type,
-                'is_collaborator': request.user in new_resource.collaborators.all(),
-                'url': reverse(
-                    'read', kwargs={
-                        'resource_id': new_resource.id,
-                        'resource_slug': new_resource.slug
-                    }
-                ),
-                'host': 'project' if from_collection_root_type.name == 'project' else 'profile',
-            }
+            'resource': serialize_collection_resource(
+                new_resource, visibility_classes, visibility_title)
         }
 
         return APIUtilities._api_success(context)
@@ -2708,6 +2770,34 @@ def copy_resource_to_collection(request, resource_id, from_collection_id, to_col
             + 'contact us if the problem persists.'
         }
         return APIUtilities._api_failure(context)
+
+
+def serialize_collection_resource(resource, visibility_classes, visibility_title):
+    import oer.CollectionUtilities as cu
+    cu.set_resources_type([resource])
+    cu.preprocess_collection_listings([resource])
+
+    serialized_resource = {
+        'id': resource.id,
+        'title': resource.title,
+        'category': 'resource',
+        'thumbnail': settings.MEDIA_URL + resource.image.name,
+        'type': resource.type,
+        'visibility': resource.visibility,
+        'modified':  resource.created.isoformat(),
+        'url': resource.open_url if hasattr(resource, 'open_url') else reverse(
+            'read', kwargs={
+                'resource_id': resource.id,
+                'resource_slug': resource.slug
+            }
+        ),
+        'host': 'profile',
+        'open_url': resource.open_url if hasattr(resource, 'open_url') else None,
+        'visibility_classes': visibility_classes,
+        'visibility_title': visibility_title
+    }
+
+    return serialized_resource
 
 
 def link_resource_to_collection(request, resource_id, from_collection_id, to_collection_id):
@@ -2818,8 +2908,7 @@ def get_resource_copy(resource, user, new_name=False):
         slug=resource.slug,
         user=user,
         image=resource.image,
-        source=resource.source,
-        category=resource.category
+        source=resource.source
     )
 
     # Make a copy of the revision content.
@@ -2871,8 +2960,11 @@ def get_resource_copy(resource, user, new_name=False):
     resource_copy.revision.resource = resource_copy
     resource_copy.save()
 
+    for category in resource.categories.all():
+        resource_copy.categories.add(category)
+
     # Copy all the tags of the resource.
-    for tag in resource_copy.tags.all():
+    for tag in resource.tags.all():
         resource_copy.tags.add(tag)
 
     # Add every collaborator to the new resource.
@@ -3449,7 +3541,6 @@ def load_resources(request, collection_id, resource_count):
         int(resource_count) + 20)]
 
     serialized_resources = {}
-    import datetime
 
     import oer.CollectionUtilities as cu
     cu.set_resources_type(resource_list)
@@ -3459,66 +3550,55 @@ def load_resources(request, collection_id, resource_count):
         collection)
 
     for resource in resource_list:
-
         # Run through general visibility filter
         if resource.visibility != 'public':
             if request.user != collection_root.user and request.user not in resource.collaborators.all():
                 continue
 
-        visibility_classes = ''
-        if request.user == collection_root:
-            visibility_classes += ' profile-collection is-owner'
-        elif request.user == resource.user:
-            visibility_classes += ' is-owner'
-        elif resource.visibility == 'private' and request.user in resource.collaborators.all():
-            visibility_classes += ' is-collaborator'
+        (visibility_classes, visibility_title) = get_resource_visibility(
+            request, resource, collection_root)
 
-        if request.user != resource.user:
-            visibility_classes += 'unclickable'
-        elif resource.visibility == 'private' and request.user not in resource.collaborators.all(
-            ) and request.user != resource.user:
-            visibility_classes += 'unclickable'
-
-        # TODO(Varun): Merge this into the upper logic block.
-        if resource.visibility == 'public':
-            visibility_title = 'Public'
-            visibility_classes += ' publicly-shared-icon'
-        elif resource.user != request.user and resource.visibility == 'private':
-                visibility_title = 'Shared with me'
-                visibility_classes += ' Shared-with-me-icon'
-        else:
-            if resource.visibility == 'private':
-                if len(resource.collaborators.all()) == 0:
-                    visibility_title = 'Only me'
-                    visibility_classes += ' personal-shared-icon'
-                else:
-                    visibility_title = 'Shared'
-                    visibility_classes += ' private-shared-icon'
-
-        serialized_resources[resource.id] = {
-            'id': resource.id,
-            'title': resource.title,
-            'category': 'resource',
-            'thumbnail': settings.MEDIA_URL + resource.image.name,
-            'type': resource.type,
-            'visibility': resource.visibility,
-            'modified':  datetime.datetime.strftime(resource.created, '%b. %d, %Y, %I:%M %P'),
-            'url': resource.open_url if hasattr(resource, 'open_url') else reverse(
-                'read', kwargs={
-                    'resource_id': resource.id,
-                    'resource_slug': resource.slug
-                }
-            ),
-            'host': 'profile',
-            'open_url': resource.open_url if hasattr(resource, 'open_url') else None,
-            'visibility_classes': visibility_classes,
-            'visibility_title': visibility_title
-        }
+        serialized_resources[resource.id] = serialize_collection_resource(
+            resource, visibility_classes, visibility_title)
 
     context = {
         'resources': serialized_resources
     }
     return APIUtilities._api_success(context)
+
+
+def get_resource_visibility(request, resource, collection_root):
+    visibility_classes = ''
+    if request.user == collection_root:
+        visibility_classes += ' profile-collection is-owner'
+    elif request.user == resource.user:
+        visibility_classes += ' is-owner'
+    elif resource.visibility == 'private' and request.user in resource.collaborators.all():
+        visibility_classes += ' is-collaborator'
+
+    if request.user != resource.user:
+        visibility_classes += 'unclickable'
+    elif resource.visibility == 'private' and request.user not in resource.collaborators.all(
+        ) and request.user != resource.user:
+        visibility_classes += 'unclickable'
+
+    # TODO(Varun): Merge this into the upper logic block.
+    if resource.visibility == 'public':
+        visibility_title = 'Public'
+        visibility_classes += ' publicly-shared-icon'
+    elif resource.user != request.user and resource.visibility == 'private':
+            visibility_title = 'Shared with me'
+            visibility_classes += ' Shared-with-me-icon'
+    else:
+        if resource.visibility == 'private':
+            if len(resource.collaborators.all()) == 0:
+                visibility_title = 'Only me'
+                visibility_classes += ' personal-shared-icon'
+            else:
+                visibility_title = 'Shared'
+                visibility_classes += ' private-shared-icon'
+
+    return (visibility_classes, visibility_title)
 
 
 def load_category_resources(request, category_id, resource_count):

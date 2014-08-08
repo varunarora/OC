@@ -8,10 +8,100 @@
                 </a>
 
             </li>
+            <li class="create-new-resource-button"><a href=""></a></li>
+
             <li class="user-notification-count {% if notification_count > 0 %}unread-notifications {% else %}no-notifications{% endif %}" title="Notifications">
                 {% if notification_count > 0 %}<span class="user-notification-count-box">{{ notification_count }}</span>{% endif %}
                 <a href=""></a>
             </li>
+
+            <nav id="add-resource-menu">
+                <div class="floating-menu-spacer"></div>
+                <ul>
+                    <li class="add-unit"><a href="">Unit...</a></li>
+                    <li class="add-lesson"><a href="/resources/new-lesson/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}" target="_blank">Lesson...</a></li>
+                    <li class="add-link"><a href="/resources/add-link/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}">Link...</a></li>
+                    <li class="add-document"><a href="/resources/new-document/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}" target="_blank">Document...</a></li>
+                    <li class="add-upload"><a href="/upload/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}">Upload...</a></li>
+
+                    <li class="add-group"><a href="">Group...</a></li>
+                </ul>
+            </nav>
+
+            <div class="dialog new-collection-dialog" title="Create a new folder">
+                <form action={% if host == 'project' %}"/resources/new-collection/project/{{ project.slug }}/"{% else %}"/resources/new-collection/user/{{ user.username }}/"{% endif %} method="POST" id="new-collection-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent_collection" value="{{ collection.slug }}" />
+                    <table>
+                        <tr><td>New folder name:</td><td><input type="text" name="new_collection_name"/></td></tr>
+                        <tr><td>Who can see its contents?</td><td>
+                            {% if host == 'project' %}
+                            <label>
+                                <input type="radio" name="collection_visibility" value="project" checked />
+                                Members / viewers of project
+                            </label>
+                            {% else %}
+                            <label>
+                                <input type="radio" name="collection_visibility" value="public" checked />
+                                Everyone (Public)
+                            </label>                    
+                            {% endif %}
+                            <label>
+                                <input type="radio" name="collection_visibility" value="private"/>
+                                Only me for now
+                            </label>
+                        </td></tr>
+                    </table>
+                </form>
+            </div>
+
+            {% include 'partials/add-unit.html' %}
+            {% include 'partials/upload-dialog.html' %}
+
+            <div class="new-group-dialog oc-popup">
+                <div class="oc-popup-title-bar">
+                    <div class="oc-popup-title"><h3>Create a new group</h3></div>
+                    <div class="delete-button oc-popup-exit"></div>
+                </div>
+                <div class="oc-popup-body">
+                    <form method="POST" action="/group/new/" id="new-project-form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <table id="project-form-table">
+                            <tr><td>Title*</td><td class="inputs"><input type="text" name="title" /></td></tr>
+                            <tr><td>Short description (in less than 200 characters)*</td><td class="inputs"><textarea name="short_description" maxlength="200"></textarea></td></tr>
+                            <tr><td>Who can see its contents?*</td><td class="inputs">
+                                {% include 'project/partials/project-form-visibility.html' %}
+                            </td></tr>
+                            <tr><td>Cover picture</td><td class="inputs"><input type="file" name="cover_pic"></td></tr>
+                        </table>
+                        <div class="new-group-submit-wrapper oc-popup-submit-wrapper">
+                            <button class="action-button new-group-submit oc-popup-submit-button" id="new-project-button">Create group <span class="vertical-caret"></span></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="new-link-dialog oc-popup">
+                <div class="oc-popup-title-bar">
+                    <div class="oc-popup-title"><h3>Add a new link</h3></div>
+                    <div class="delete-button oc-popup-exit"></div>
+                </div>
+                <div class="oc-popup-body">
+                    <form method="POST" action="{% url resource:add_url %}" class="url-edit-form resource-create-edit-form">
+                        {% csrf_token %}
+                        {% include 'partials/resource-meta.html' %}
+                        <table class="add-url-inputs">
+                            <tr><td><span class="bold">Title*</span></td><td><input type="text" name="title" class="new-resource-url" value="{{ resource.title }}"></td></tr>
+                            <tr><td></td><td><span class="resource-form-error">{{ form.errors.title }}</span></td></tr>
+                            <tr><td><span class="bold">URL (Web address)*</span></td><td><input type="text" name="url" class="new-resource-url" value="{{ resource.revision.content.url }}"></td></tr>
+                            <tr><td></td><td><span class="resource-form-error">{{ form.errors.url }}</span></td></tr>
+                            
+                            {% include 'partials/resource-form-meta.html' %}
+                        </table>
+                    </form>
+                </div>
+            </div>
+
             <nav id="user-menu">
                 <div class="floating-menu-spacer"></div>
                 <ul>
@@ -32,6 +122,7 @@
                 </ul>
             </nav>
         </ul>
+
     </nav>
     {% else %}
     <nav id="authenticate-buttons">

@@ -268,6 +268,7 @@ class SanitizedSearchView(SearchView):
         resource_ct = ContentType.objects.get_for_model(Resource)
         resource_type = TagCategory.objects.get(title='Resource type')
 
+        filtered_object_list = []
         for result in page.object_list:
             try:
                 import re
@@ -282,6 +283,11 @@ class SanitizedSearchView(SearchView):
                 result.object.type = result.object.tags.get(category=resource_type)
             except:
                 result.object.type = 'Resource'
+
+            if result.content_type() == "oer.resource" and result.object.visibility == 'public':
+                filtered_object_list.append(result)
+
+        page.object_list = filtered_object_list
 
         extra['page'] = page
         extra['paginator'] = paginator

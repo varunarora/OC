@@ -331,10 +331,10 @@ OC.upload = {
 };
 
 $(document).ready(function() {
-    OC.upload.isPost = $('form.files-upload-rename input[name="post"]').val() == "true";
+    OC.upload.isPost = $('form.files-upload-rename input[name="post"]').val() == 'true';
 
     // Prevent form being submitted on hitting enter
-    $('form.files-upload-rename ').bind('keypress', function (e) {
+    $('form.files-upload-rename').bind('keypress', function (e) {
         if (e.keyCode === 13) {
             e.preventDefault();
         }
@@ -445,11 +445,11 @@ $(document).ready(function() {
     // TODO(Varun): Add the project/user + collection ID to the Dropzone request
 
     // In the case of posting a single item, bind upload progress event with template.
-    if (OC.upload.isPost){
-        Dropzone.forElement('.upload-drag-drop').on('uploadprogress', function(file, progress, bytesSent){
+    Dropzone.forElement('.upload-drag-drop').on('uploadprogress', function(file, progress, bytesSent){
+        if (OC.upload.isPost){
             $('.single-upload .dz-progress .dz-upload').css('width', progress + '%');
-        });
-    }
+        }
+    });
 
     Dropzone.forElement('.upload-drag-drop').on("success", function(file, response){
         // Make the name of the file content editable.

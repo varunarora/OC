@@ -1,19 +1,19 @@
-<div class="user">
-    <div class="user-photo" style="background-image: url('{{ MEDIA_URL }}{{ item.actor.get_profile.profile_pic.name }}');"></div>
+<div class="user feed-item">
+    <a href="{% url user:user_profile username=item.actor.username %}" class="user-photo" style="background-image: url('{{ MEDIA_URL }}{{ item.actor.get_profile.profile_pic.name }}');" title="{{ item.actor.get_full_name }}"></a>
     <div class="user-description"><a href="{% url user:user_profile username=item.actor.username %}">{{ item.actor.get_full_name }}</a>
         {% if item.action_type.name == 'resource' %}
             {% if item.target.type == 'url' %}
-            created a new link {% include 'partials/feed-item-resource-url.html' %}. <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
+            created a new link {% include 'partials/feed-item-resource-url.html' %}. <span class="feed-item-date" title="{{ item.target.created.isoformat }}">On {{ item.target.created|date:"M nS, 'y P"}}</span>
             {% include 'partials/feed-item-link.html' %}
             {% elif item.target.type == 'document' %}
-            created a new document {% include 'partials/feed-item-resource-url.html' %}. <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
+            created a new document {% include 'partials/feed-item-resource-url.html' %}. <span class="feed-item-date" title="{{ item.target.created.isoformat }}">On {{ item.target.created|date:"M nS, 'y P"}}</span>
             {% include 'partials/feed-item-document.html' %}
             
             {% elif item.target.type == 'video' %}
-            created a new video link {% include 'partials/feed-item-resource-url.html' %} <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
+            created a new video link {% include 'partials/feed-item-resource-url.html' %} <span class="feed-item-date" title="{{ item.target.created.isoformat }}">On {{ item.target.created|date:"M nS, 'y P"}}</span>
             {% include 'partials/feed-item-video.html' %}
             {% elif item.target.type == 'attachment' %}
-            uploaded a new file. <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
+            uploaded a new file. <span class="feed-item-date" title="{{ item.target.created.isoformat }}">On {{ item.target.created|date:"M nS, 'y P"}}</span>
             {% include 'partials/feed-item-upload.html' %}
             {% endif %}
         {% elif item.action_type.name == 'comment' %}
@@ -25,18 +25,18 @@
                 wrote a <a href="{% url projects:project_discussion project_slug=item.context.slug discussion_id=item.target.id %}">new post</a> in <a href="{% url projects:project_home project_slug=item.context.slug %}">{{ item.context.title }}</a>. <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
                 {% include 'partials/feed-item-discussion-post.html' %}
                 {% else %}
-                commented on a <a href="{% url projects:project_discussion project_slug=item.context.slug discussion_id=item.target.id %}">discussion post</a> in <a href="{% url projects:project_home project_slug=item.context.slug %}">{{ item.context.title }}</a>. <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
+                commented on a <a href="{% url projects:project_discussion project_slug=item.context.slug discussion_id=item.target.id %}">discussion post</a> in <a href="{% url projects:project_home project_slug=item.context.slug %}">{{ item.context.title }}</a>. <span class="feed-item-date" title="{{ item.target.created.isoformat }}">On {{ item.target.created|date:"M nS, 'y P"}}</span>
                 {% include 'partials/feed-item-discussion-comment.html' %}
                 {% endif %}
             {% endif %}
         {% elif item.action_type.name == 'membership' %}
-        just joined the group {% if host == 'profile' %}<a href="{% url projects:project_home project_slug=item.target.slug %}">{{ item.target.title }}</a>{% endif %} <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
+        just joined the group {% if host == 'profile' %}<a href="{% url projects:project_home project_slug=item.target.slug %}">{{ item.target.title }}</a>{% endif %} <span class="feed-item-date" title="{{ item.target.created.isoformat }}">On {{ item.target.created|date:"M nS, 'y P"}}</span>
         {% if host == 'profile' %}{% include 'partials/feed-item-project.html' with project=item.target %}{% endif %}
         {% elif item.action_type.name == 'project' %}
         created the group <a href="{% url projects:project_home project_slug=item.action.slug %}">{{ item.action.title }}</a>. <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
         {% if host == 'profile' %}{% include 'partials/feed-item-project.html' with project=item.target %}{% endif %}
         {% elif item.action_type.name == 'favorite' %}
-        favorited <a href="{% url user:user_profile username=item.target.user.username %}">{{ item.target.user.get_full_name }}</a>'s resource <a href="{% if host == 'profile' %}{% url read resource_id=item.target.id resource_slug=item.target.slug %}{% else %}{% url projects:read_project_resource project_slug=project.slug resource_id=item.target.id resource_slug=item.target.slug %}{% endif %}">{{ item.target.title }}</a>. <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
+        favorited <a href="{% url user:user_profile username=item.target.user.username %}">{{ item.target.user.get_full_name }}</a>'s resource <a href="{% if host == 'profile' %}{% url read resource_id=item.target.id resource_slug=item.target.slug %}{% else %}{% url projects:read_project_resource project_slug=project.slug resource_id=item.target.id resource_slug=item.target.slug %}{% endif %}">{{ item.target.title }}</a>. <span class="feed-item-date" title="{{ item.target.created.isoformat }}">On {{ item.target.created|date:"M nS, 'y P"}}</span>
         {% if item.target.type == 'url' %}
         {% include 'partials/feed-item-link.html' %}
         {% elif item.target.type == 'document' %}
@@ -47,7 +47,7 @@
         {% include 'partials/feed-item-upload.html' %}
         {% endif %}
         {% elif item.action_type.name == 'collection' %}
-        created a new folder <a href="{% if host == 'profile' %}{% url user:list_collection username=item.context.user.username collection_slug=item.target.slug %}{% else %}{% url projects:list_collection project_slug=item.context.slug collection_slug=item.target.slug %}{% endif %}">{{ item.target.title }}</a>. <span class="feed-item-date">On {{ item.target.created|date:"M nS, 'y P"}}</span>
+        created a new folder <a href="{% if host == 'profile' %}{% url user:list_collection username=item.context.user.username collection_slug=item.target.slug %}{% else %}{% url projects:list_collection project_slug=item.context.slug collection_slug=item.target.slug %}{% endif %}">{{ item.target.title }}</a>. <span class="feed-item-date" title="{{ item.target.created.isoformat }}">On {{ item.target.created|date:"M nS, 'y P"}}</span>
         {% endif %}
     </div>
 </div>

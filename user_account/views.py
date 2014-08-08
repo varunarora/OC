@@ -860,39 +860,51 @@ def user_profile(request, username):
     except User.DoesNotExist:
         raise Http404
 
-    if request.user != user:
-        return redirect('user:user_favorites', username=username)
-
+    from user_account.models import Activity
     # Get user profile.
     user_profile = user.get_profile()
 
     user_context = _prepare_user_context(request, user, user_profile)
 
-    # Get users who have the most have the most subscribers.
-    # Subscription.objects.all().order_by('')[:10]
-    import copy
-    stars_raw = copy.deepcopy(settings.STAR_USERS)
-    try:
-        stars_raw.remove(user.username)
-    except:
-        pass
-
-    # Remove the suggested person name if the user has already subscribed to the star.
     from user_account.models import Subscription
-    for star in stars_raw:
+    if request.user == user:
+        # Get users who have the most have the most subscribers.
+        # Subscription.objects.all().order_by('')[:10]
+        filtered_stars_raw = []
+        import copy
+        stars_raw = copy.deepcopy(settings.STAR_USERS)
         try:
-            Subscription.objects.get(
-                subscriber=user_profile, subscribee__user__username=star)
-            stars_raw.remove(star)
+            stars_raw.remove(user.username)
         except:
             pass
 
-    stars = User.objects.filter(username__in=stars_raw)
+        # Remove the suggested person name if the user has already subscribed to the star.
+        for star in stars_raw:
+            try:
+                Subscription.objects.get(
+                    subscriber=user_profile, subscribee__user__username=star)
+            except:
+                filtered_stars_raw.append(star)
 
-    from user_account.models import Activity
-    feed = Activity.objects.filter(recipients=user).order_by('-pk')[:10]
+        stars = User.objects.filter(username__in=filtered_stars_raw)
 
-    feed_count = Activity.objects.filter(recipients=user).count()
+        feed = Activity.objects.filter(recipients=user).order_by('-pk')[:10]
+        feed_count = Activity.objects.filter(recipients=user).count()
+
+    else:
+        # Get the people who this person follows.
+        subscribees = Subscription.objects.filter(
+            subscriber=user_profile)
+        subscribee_usernames = map((lambda s: s.subscribee.user.username), subscribees)
+
+        try:
+            subscribee_usernames.remove(request.user.username)
+        except:
+            pass
+
+        stars = User.objects.filter(username__in=subscribee_usernames)
+        feed = Activity.objects.filter(actor=user).order_by('-pk')[:10]
+        feed_count = Activity.objects.filter(actor=user).count()
 
     # Do all kinds of feed preprocessing.
     _preprocess_feed(feed)
@@ -1023,9 +1035,11 @@ def list_collection(request, username, collection_slug):
     resource_count = root_assets.count()
     cu.set_resources_type(resources)
     cu.preprocess_collection_listings(resources)
+    
+    breadcrumb = cu.build_collection_breadcrumb(collection)
+    breadcrumb[0].title = 'Home'
 
     if collection_in_unit:
-        breadcrumb = cu.build_collection_breadcrumb(collection)
         context = dict({
             'user_profile': user,
             'collection': collection,
@@ -1049,6 +1063,7 @@ def list_collection(request, username, collection_slug):
             'resources': resources,
             'collections': child_collections,
             'units': child_units,
+            'breadcrumb': breadcrumb,
             'page': 'files',
             'resource_count': resource_count
         }.items() + user_context.items())
@@ -1751,12 +1766,29 @@ def onboard(request, tour, version_id):
         return APIUtilities._api_failure()
 
 
+def _filesizeFormat(size):
+    return '{0:.2f}'.format(float(size))
+
+
 def load_feed(request, user_id, feed_count):
     try:
         from django.contrib.auth.models import User
         user = User.objects.get(pk=user_id)
     except:
         return APIUtilities._api_not_found()
+
+    def format_filesize(original_filesize):
+        if original_filesize >= 1048576:
+            filesize = str(
+                _filesizeFormat(float(original_filesize) / 1048576)) + " MB"
+        elif original_filesize >= 1024:
+            filesize = str(
+                _filesizeFormat(float(original_filesize) / 1024)) + " KB"
+        else:
+            filesize = str(
+                _filesizeFormat(float(original_filesize))) + " B"
+
+        return filesize
 
     from user_account.models import Activity
     feed = Activity.objects.filter(recipients=user).order_by('-pk')[(int(feed_count) + 1):(
@@ -1765,55 +1797,145 @@ def load_feed(request, user_id, feed_count):
     from django.core.urlresolvers import reverse
 
     serialized_feed = {}
-    import datetime
+    import oer.CollectionUtilities as cu
 
     for feed_item in feed:
         serialized_feed[feed_item.id] = {
             'id': feed_item.id,
             'actor_name': feed_item.actor.get_full_name(),
-            'actor_thumbnail': feed_item.actor.get_profile().profile_pic.name,
+            'actor_thumbnail': settings.MEDIA_URL + feed_item.actor.get_profile().profile_pic.name,
             'actor_url': reverse(
                 'user:user_profile', kwargs={ 'username': feed_item.actor.username }),
             'action_id': feed_item.action.id,
             'action_type': feed_item.action_type.name,
             'target_id': feed_item.target.id,
             'target_type': feed_item.target_type.name,
-            'target_created': datetime.datetime.strftime(feed_item.target.created, '%b. %d, %Y, %I:%M %P'),
+            #'target_created': datetime.datetime.strftime(feed_item.target.created, '%b. %d, %Y, %I:%M %P'),
+            'target_created': feed_item.target.created.isoformat(),
         }
 
-        if serialized_feed[feed_item.id]['action_type'] == serialized_feed[feed_item.id]['target_type'] and (
-            serialized_feed[feed_item.id]['target_type'] == 'comment'):
-            serialized_feed[feed_item.id]['target_url'] = reverse(
-                'projects:project_discussion', kwargs={
-                    'project_slug': feed_item.context.slug,
-                    'discussion_id': feed_item.target.id
-                }
-            )
-            serialized_feed[feed_item.id]['context_url'] = reverse(
-                'projects:project_home', kwargs={
-                    'project_slug': feed_item.context.slug }),
-            serialized_feed[feed_item.id]['context'] = feed_item.context.title
+        # Determine the type of the resource.
+        if serialized_feed[feed_item.id]['action_type'] == 'resource' or (
+            serialized_feed[feed_item.id]['action_type'] == 'favorite'):
+            cu.set_resources_type([feed_item.target])
+            serialized_feed[feed_item.id]['target_type'] = feed_item.target.type
 
+        # If this is a new resource creation activity.
+        if serialized_feed[feed_item.id]['action_type'] == 'resource':
+            serialized_feed[feed_item.id]['target_user'] = feed_item.target.user.get_full_name()
+            serialized_feed[feed_item.id]['target_user_url'] = reverse(
+                'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),
+            serialized_feed[feed_item.id]['target'] = feed_item.target.title
+            serialized_feed[feed_item.id]['target_thumbnail'] = settings.MEDIA_URL + feed_item.target.image.name
+            serialized_feed[feed_item.id]['target_license'] = feed_item.target.license.title
+            serialized_feed[feed_item.id]['target_url'] = reverse(
+                'read', kwargs={
+                    'resource_id': feed_item.target.id,
+                    'resource_slug': feed_item.target.slug
+                })
+
+            if feed_item.target.type == 'url':
+                serialized_feed[feed_item.id]['target_direct_url'] = feed_item.target.revision.content.url
+
+            if feed_item.target.type == 'video':
+                serialized_feed[feed_item.id]['target_provider'] = feed_item.target.provider
+                serialized_feed[feed_item.id]['target_video_tag'] = feed_item.target.video_tag
+
+            if feed_item.target.type == 'attachment':
+                serialized_feed[feed_item.id]['target_download_url'] = reverse(
+                'resource:download', kwargs={ 'resource_id': feed_item.target.id }),
+                serialized_feed[feed_item.id]['target_size'] = format_filesize(
+                    feed_item.target.revision.content.file.size)
+
+        # If this is a new comment creation activity.
+        if serialized_feed[feed_item.id]['action_type'] == 'comment':
+            serialized_feed[feed_item.id]['action'] = feed_item.action.body_markdown_html
+
+            # If its on a resource.
+            if serialized_feed[feed_item.id]['target_type'] == 'resource':
+                serialized_feed[feed_item.id]['target_url'] = reverse(
+                    'read', kwargs={
+                        'resource_id': feed_item.target.id,
+                        'resource_slug': feed_item.target.slug
+                    })
+
+            # Assuming it is in response to another comment.
+            else:
+                serialized_feed[feed_item.id]['target'] = feed_item.target.title
+                serialized_feed[feed_item.id]['context'] = feed_item.context.title
+
+                # Its a new discussion post.
+                if serialized_feed[feed_item.id]['action_type'] == serialized_feed[feed_item.id]['target_type']:
+                    serialized_feed[feed_item.id]['target_url'] = reverse(
+                        'projects:project_discussion', kwargs={
+                            'project_slug': feed_item.context.slug,
+                            'discussion_id': feed_item.target.id
+                        }
+                    )
+                    serialized_feed[feed_item.id]['context_url'] = reverse(
+                        'projects:project_home', kwargs={
+                            'project_slug': feed_item.context.slug })
+
+                # Not this one.
+                else:
+                    serialized_feed[feed_item.id]['target'] = feed_item.target.body_markdown_html
+                    serialized_feed[feed_item.id]['target_user'] = feed_item.target.user.get_full_name()
+                    serialized_feed[feed_item.id]['target_user_url'] = reverse(
+                        'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),
+                    serialized_feed[feed_item.id]['target_user_thumbnail'] = settings.MEDIA_URL + feed_item.target.user.profile_pic.name
+
+        # If this is a group joining activity.
         if serialized_feed[feed_item.id]['action_type'] == 'membership':
             serialized_feed[feed_item.id]['target_url'] = reverse(
                 'projects:project_home', kwargs={
                     'project_slug': feed_item.target.slug })
             serialized_feed[feed_item.id]['target'] = feed_item.target.title
+            serialized_feed[feed_item.id]['target_description'] = feed_item.target.description
+            serialized_feed[feed_item.id]['target_thumbnail'] = settings.MEDIA_URL + feed_item.target.cover_pic.name
+            serialized_feed[feed_item.id]['target_thumbnail_position'] = [settings.MEDIA_URL + (
+                feed_item.target.cover_pic_position.left), settings.MEDIA_URL + (
+                feed_item.target.cover_pic_position.top)]
 
+        # If this is a new group creation activity.
         if serialized_feed[feed_item.id]['action_type'] == 'project':
             serialized_feed[feed_item.id]['action_url'] = reverse(
                 'projects:project_home', kwargs={
-                    'project_slug': feed_item.action.slug })        
-
-        if serialized_feed[feed_item.id]['action_type'] == 'favorite':
-            serialized_feed[feed_item.id]['action_url'] = reverse(
-                'projects:project_home', kwargs={
                     'project_slug': feed_item.action.slug })
-            serialized_feed[feed_item.id]['target'] = feed_item.target.user.get_full_name()
-            serialized_feed[feed_item.id]['target_url'] = reverse(
-                'projects:project_home', kwargs={
-                    'project_slug': feed_item.target.slug })
+            serialized_feed[feed_item.id]['action'] = feed_item.action.title
+            serialized_feed[feed_item.id]['action_description'] = feed_item.target.description
+            serialized_feed[feed_item.id]['action_thumbnail'] = settings.MEDIA_URL + (
+                feed_item.action.cover_pic)
+            serialized_feed[feed_item.id]['action_thumbnail_position'] = [settings.MEDIA_URL + (
+                feed_item.action.cover_pic_position.left), settings.MEDIA_URL + (
+                feed_item.action.cover_pic_position.top)]
 
+        # If this is a favoriting on a resource (or a collection) activity.
+        if serialized_feed[feed_item.id]['action_type'] == 'favorite':
+            serialized_feed[feed_item.id]['target_user'] = feed_item.target.user.get_full_name()
+            serialized_feed[feed_item.id]['target_user_url'] = reverse(
+                'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),
+            serialized_feed[feed_item.id]['target'] = feed_item.target.title
+            serialized_feed[feed_item.id]['target_thumbnail'] = settings.MEDIA_URL + feed_item.target.image.name
+            serialized_feed[feed_item.id]['target_url'] = reverse(
+                'read', kwargs={
+                    'resource_id': feed_item.target.id,
+                    'resource_slug': feed_item.target.slug
+                })
+        
+            if feed_item.target.type == 'url':
+                serialized_feed[feed_item.id]['target_direct_url'] = feed_item.target.revision.content.url
+
+            if feed_item.target.type == 'video':
+                serialized_feed[feed_item.id]['target_provider'] = feed_item.target.provider
+                serialized_feed[feed_item.id]['target_video_tag'] = feed_item.target.video_tag
+
+            if feed_item.target.type == 'attachment':
+                serialized_feed[feed_item.id]['target_download_url'] = reverse(
+                'resource:download', kwargs={ 'resource_id': feed_item.target.id }),
+                serialized_feed[feed_item.id]['target_size'] = format_filesize(
+                    feed_item.target.revision.content.file.size)
+
+        # If this is a folder creation activity.
         if serialized_feed[feed_item.id]['action_type'] == 'collection':
             serialized_feed[feed_item.id]['target_url'] = reverse(
                 'user:list_collection', kwargs={

@@ -22,6 +22,8 @@ urlpatterns = patterns(
 
     url(r'^meta/', include('meta.urls', namespace='meta')),
 
+    url(r'^license/', include('license.urls', namespace='license')),
+
 
     # Interactions
     url(r'^interactions/', include('interactions.urls', namespace='interactions')),

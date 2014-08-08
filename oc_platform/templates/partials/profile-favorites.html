@@ -1,23 +1,18 @@
+<script src="{{ STATIC_URL }}js/backbone-min.js" type="text/javascript"></script>
+<script src="{{ STATIC_URL }}js/resources.js" type="text/javascript"></script>
+<script type="text/javascript"></script>
+
 {% if favorites %}
-<div class="profile-favorites">
-    {% if user != user_profile %}
-    <h3>{{ user_profile.first_name }}'s favorites</h3>
-    {% else %}
-    <h3>My favorites</h3>
-    {% endif %}
-    {% for favorite in favorites %}
-        {% if favorite.parent_type.name == 'resource' %}
-        {% include 'partials/resource-item.html' with item=favorite.parent item_category='resource' %}
-        {% else %}
-        {% include 'partials/resource-item.html' with item=favorite.parent item_category='collection' %}
-        {% endif %}
-    {% endfor %}
+<div id="search-result-set" class="profile-favorites">
+    {% include 'partials/resource-thumbnail.html' with resources=favorites resources_source='favorites' %}
 </div>
+
 {% else %}
+<div class="no-favorites-found"> 
 {% if user != user_profile %}
 {{ user_profile.first_name }} does not have any favorites. Yet. {% if user_profile.get_profile.gender %}He{% else %}She{% endif %}'s on it!
 {% else %}
 You do not have any favorites yet. Favorite some content today to help people visiting your profile know you better!
 {% endif %}
-
+</div>
 {% endif %}

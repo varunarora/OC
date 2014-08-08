@@ -366,7 +366,10 @@ STRINGS = {
     }
 }
 
-STAR_USERS = ['khanacademy', 'ck12', 'joshua', 'ddmeyer', 'illustrativemathematics', 'engageny']
+STAR_USERS = [
+    'khanacademy', 'ck12', 'joshua', 'ddmeyer', 'illustrativemathematics',
+    'engageny', 'yummymath', 'fawnpnguyen', 'samjshah', 'ericpollock'
+]
 
 try:
     from settings_dev import *

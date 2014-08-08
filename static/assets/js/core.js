@@ -2009,7 +2009,7 @@ _.extend(OC, {
                 $('.profile-headline').blur();
 
                 // Get new headline.
-                var new_headline = $('.profile-headline').val();
+                var new_headline = $('.profile-headline').text();
 
                 // Compare with previous headline, only if different, call POST
                 //     request.
@@ -2122,25 +2122,27 @@ _.extend(OC, {
         });
     },
     initAddResource: function(){
-        OC.setUpMenuPositioning('nav#add-resource-menu', '.add-resource');
+        OC.setUpMenuPositioning('nav#add-resource-menu', '.create-new-resource-button a');
 
         $(window).resize(function () {
-            OC.setUpMenuPositioning('nav#add-resource-menu', '.add-resource');
+            OC.setUpMenuPositioning('nav#add-resource-menu', '.create-new-resource-button a');
         });
 
         OC.setupResourceMenu();
     },
 
     setupResourceMenu: function(){
-        $('.add-resource, nav#add-resource-menu').mouseenter(function () {
+        $('.create-new-resource-button a, nav#add-resource-menu').mouseenter(function () {
+            $('.create-new-resource-button a').addClass('hover');
             $('#add-resource-menu').addClass('showMenu');
         }).mouseleave(function () {
+            $('.create-new-resource-button a').removeClass('hover');
             $('#add-resource-menu').removeClass('showMenu');
         });
     },
 
     initCreateCollection: function(){
-        $('nav#add-resource-menu .add-collection a').click(function(event){
+        $('nav#add-resource-menu .add-collection a, nav.profile-resources-collections-actions-menu-add .add-collection a').click(function(event){
             $('.new-collection-dialog').dialog({
                 modal: true,
                 open: false,
@@ -2167,6 +2169,66 @@ _.extend(OC, {
             event.preventDefault();
             return false;
         });
+    },
+
+    initCreateGroup: function(){
+        $('nav#add-resource-menu .add-group a, .new-group-wrapper, a.new-groups-link').click(function(event){
+            var newGroupDialog = OC.customPopup('.new-group-dialog');
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+    },
+
+    initUpload: function(){
+        $('nav#add-resource-menu .add-upload a, .profile-resources-collections-actions-menu-add .add-upload a').click(function(event){
+            var newGroupDialog = OC.customPopup('.post-new-upload-dialog');
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+    },
+
+    getLicenses: function(callback){
+        // Get resource licenses if unknown.
+        if (!OC.config.licenses){
+            $.get('/license/api/list/',
+                function(response){
+                    if (response.status === 'true'){
+                        OC.config.licenses = response.licenses;
+                        callback(response.licenses);
+                    } else {
+                        OC.popup(response.message, response.title);
+                    }
+                },
+            'json');
+        } else callback(OC.config.licenses);
+    },
+
+    initLink: function(){
+        $('nav#add-resource-menu .add-link a, .profile-resources-collections-actions-menu-add .add-link a').click(function(event){
+            OC.getLicenses(function(licenses){
+                var licenseSelect = $('select[name="license"]'),
+                    i, license;
+
+                for (i = 0; i < licenses.length; i++){
+                    license = $('<option/>', {
+                        'value': licenses[i].id,
+                        'text': licenses[i].title
+                    });
+                    licenseSelect.append(license);
+                }
+            });
+
+            var newGroupDialog = OC.customPopup('.new-link-dialog');
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
+
     },
 
     bindDeleteResourceHandler: function(){
@@ -2222,7 +2284,8 @@ _.extend(OC, {
         
             OC.resourcesCollections.initCopyAction();
 
-            OC.resourcesCollections.bindItemSelect();
+            if (OC.resourcesCollections.ownerView)
+                OC.resourcesCollections.bindItemSelect();
 
             OC.resourcesCollections.infiniteScroll();
         }
@@ -3008,10 +3071,6 @@ _.extend(OC, {
         OC.initEditHandlers();
 
         OC.repositionPictures.initRepositionPictures();
-    },
-
-    initProfileTabs: function(){
-        OC.tabs('.profile-view > .center-stage .panel-right', {viewOnly: true});
     },
 
     initEditHandlers: function(){
@@ -4149,7 +4208,6 @@ _.extend(OC, {
                     dialogForm.append(standardTags.clone());
                     dialogForm.append(newTypeInput);
 
-                    debugger
                     // Submit the form.
                     if (submit)
                         dialogForm.submit();
@@ -4180,6 +4238,10 @@ _.extend(OC, {
 
             // Launch the upload popup.
             var uploadPopup = OC.customPopup('.post-new-upload-dialog');
+
+            // Set the popup settings to being 'is_post'.
+            $('input[name="post"]', uploadPopup.dialog).val('true');
+            OC.upload.isPost = true;
 
             bindPostClickHandler('form.files-upload-rename button[type="submit"]', uploadPopup, true);
         });
@@ -4433,7 +4495,7 @@ _.extend(OC, {
 
         function setupStepOne(){
             // Popout and reposition.
-            var addResourceButton = $('.add-resource'),
+            var addResourceButton = $('.create-new-resource-button a'),
                 addResourceMenu = $('#add-resource-menu');
 
             addResourceButton.css({
@@ -4462,8 +4524,8 @@ _.extend(OC, {
             var messageEl = $('.step-one-message');
 
             messageEl.css({
-                'top': addResourceButton.position().top - 20,
-                'left': addResourceButton.position().left - messageEl.width() - 20
+                'top': addResourceButton.position().top,
+                'left': addResourceButton.position().left - messageEl.width() - 80
             });
 
             // Bind next handler on step one message.
@@ -4944,33 +5006,54 @@ _.extend(OC, {
         },
 
         delete: function(resourceID, fromCollectionID, callback){
-            $('.delete-resource-dialog').dialog({
-                modal: true,
-                open: false,
-                width: 500,
-                buttons: {
-                    'Yes, delete': function () {
-                        $(this).dialog("close");
-                        $.post('/resources/delete-resource/' + resourceID  +
+            var deletePopup = OC.customPopup('.delete-resource-collection-dialog');
+
+            $('.delete-resource-collection-submit-button', deletePopup.dialog).click(function(event){
+                deletePopup.close();
+
+                $.post('/resources/delete-resource/' + resourceID  +
                             '/from/' + fromCollectionID + '/',
-                            function(response){
-                                // Hide the resource
-                                if (response.status == 'true'){
-                                    callback(response.resourceID);
-                                }
-                                else {
-                                    OC.popup(response.message, response.title);
-                                    OC.dismissMessageBox();
-                                }
-                            },
-                        'json');
+                    function(response){
+                        if (response.status == 'true'){
+                            callback([response.resourceID]);
+                        }
+                        else {
+                            OC.popup(response.message, response.title);
+                            OC.dismissMessageBox();
+                        }
                     },
-                    Cancel: function () {
-                        $(this).dialog("close");
-                    }
-                }
+                'json');
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
             });
         },
+
+        deleteMultiple: function(resourceIDList, fromCollectionID, callback){
+            var deletePopup = OC.customPopup('.delete-resource-collection-dialog');
+
+            $('.delete-resource-collection-submit-button', deletePopup.dialog).click(function(event){
+                deletePopup.close();
+                var resourceIDs = resourceIDList.join();
+
+                $.post('/resources/delete-resources/from/' + fromCollectionID + '/?ids=' + resourceIDs,
+                    function(response){
+                        if (response.status == 'true'){
+                            callback(response.resourceIDs);
+                        }
+                        else {
+                            OC.popup(response.message, response.title);
+                            OC.dismissMessageBox();
+                        }
+                    },
+                'json');
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+        }
     },
 
     collection: {
@@ -4994,79 +5077,54 @@ _.extend(OC, {
         },
 
         delete: function(collectionID, callback){
-            $('.delete-collection-dialog').dialog({
-                modal: true,
-                open: false,
-                width: 500,
-                buttons: {
-                    'Yes, delete': function () {
-                        $(this).dialog("close");
-                        $.post('/resources/delete-collection/' + collectionID  + '/',
-                            function(response){
-                                // Hide the resource
-                                if (response.status == 'true'){
-                                    callback(response.collectionID);
-                                }
-                                else {
-                                    OC.popup(response.message, response.title);
-                                    OC.dismissMessageBox();
-                                }
-                            },
-                        'json');
+            var deletePopup = OC.customPopup('.delete-resource-collection-dialog');
+
+            $('.delete-resource-collection-submit-button', deletePopup.dialog).click(function(event){
+                deletePopup.close();
+
+                $.post('/resources/delete-collection/' + collectionID  + '/',
+                    function(response){
+                        if (response.status == 'true'){
+                            callback([response.collectionID]);
+                        }
+                        else {
+                            OC.popup(response.message, response.title);
+                            OC.dismissMessageBox();
+                        }
                     },
-                    Cancel: function () {
-                        $(this).dialog("close");
-                    }
-                }
+                'json');
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
             });
         },
-    },
 
-    feed: {
-        feedCount: null,
-        currentCount: null,
+        deleteMultiple: function(collectionIDList, callback){
+            var deletePopup = OC.customPopup('.delete-resource-collection-dialog');
 
-        infiniteScroll: function(){
-            if (OC.feed.feedCount > 20){
-                var loadButton = $('.lazy-load-button'), i;
-                $(window).on('DOMContentLoaded load resize scroll', function(event){
-                    // If the load button is attached to the document.
-                    if ($.contains(document, loadButton[0])){
-                        if (isElementInViewport(loadButton) && !loadButton.hasClass('loading')){
-                            loadButton.addClass('loading');
+            $('.delete-resource-collection-submit-button', deletePopup.dialog).click(function(event){
+                deletePopup.close();
+                var collectionIDs = collectionIDList.join();
 
-                            $.get('/user/api/load-feed/' + OC.config.user.id +
-                                    '/from/' + OC.feedCount.currentCount + '/',
-                                function(response){
-                                    if (response.status == 'true'){
-                                        var keys = Object.keys(response.resources);
-
-                                        if (keys.length !== 0){
-                                            for (i = 0; i < keys.length; i++){
-                                                $('.resources-collections-added').append(
-                                                    OC.resourcesCollections.resourceCollectionItemTemplate(
-                                                        response.resources[keys[i]]));
-                                            }
-                                            OC.resourcesCollections.currentCount += keys.length;
-
-                                        } else {
-                                            loadButton.remove();
-                                        }
-                                    }
-                                    else {
-                                        OC.popup(response.message, response.title);
-                                    }
-                                    loadButton.removeClass('loading');
-
-                                },
-                            'json');
+                $.post('/resources/delete-collections/?ids=' + collectionIDs,
+                    function(response){
+                        if (response.status == 'true'){
+                            callback(response.collectionIDs);
                         }
-                    }
-                });
-            }
-        },
+                        else {
+                            OC.popup(response.message, response.title);
+                            OC.dismissMessageBox();
+                        }
+                    },
+                'json');
 
-    }
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+        }
+    },
 });
 
 jQuery(document).ready(function ($) {
@@ -5074,6 +5132,21 @@ jQuery(document).ready(function ($) {
 
     $('.chief-panel-container-cover').addClass('play');
 
+    // Set the height of the page.
+    function setBrowseHeight(){
+        $('.resource-browse, .profile-page').height(
+            $(window).height() - $('header').height()
+        );
+
+        $('.profile-content').height(
+            $(window).height() - $('header').height() - $(
+                '.profile-tabs').outerHeight(true) - parseInt($(
+                '.profile-content').css('padding-top'), 10)
+        );
+    }
+
+    setBrowseHeight();
+    $(window).resize(setBrowseHeight);
 
     OC.initSearchOptions();
 
@@ -5097,8 +5170,6 @@ jQuery(document).ready(function ($) {
 
 
     /* Profile specific initializers and other functions */
-
-    OC.initProfileTabs();
 
     OC.initPictureManipulation();
 
@@ -5163,6 +5234,12 @@ jQuery(document).ready(function ($) {
     OC.initAddResource();
 
     OC.initCreateCollection();
+
+    OC.initCreateGroup();
+
+    OC.initUpload();
+
+    OC.initLink();
 
     OC.bindDeleteResourceHandler();
 

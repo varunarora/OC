@@ -8,23 +8,20 @@ OC.resourcesCollections = {
         '</div></a></div>'),
 
     resourceCollectionItemTemplate: _.template('<div class="resource-collection-item <%= category %>" id="<%= category %>-<%= id %>">' +
-        '<input type="checkbox" name="resource_collection_id" value="<%= id %>"/>' +
+        '<% if (owner){ %> <div class="resource-item-selector"><input type="checkbox" name="resource_collection_id" value="<%= id %>"/></div><% } %>' +
         '<a href="<%= url %>"<% if (open_url){ %> target="_blank"<% } %> class="resource-item-thumbnail" style="background-image: url(\'<%= thumbnail %>\');">' +
         '<div class="resource-item-thumbnail-selector"></div>' +
         '<div class="resource-item-thumbnail-<%= type %>"></div>' +
         '</a><div class="resource-item-description">' +
         '<div class="resource-item-description-title"><a href="<%= url %>"<% if (open_url){ %> ' +
-        'target="_blank"<% } %>><%= title %></a>' +
-        '<div class="resource-item-description-meta">Last modified at: <%= modified %></div>' +
-        '</div><div class="resource-item-description-actions">' +
+        'target="_blank"<% } %>><%= title %></a></div>' +
+        '<div class="resource-item-description-modified" title="<%= modified %>"><%= modified %></div>' +
+        '<div class="resource-item-description-actions">' +
         '<div class="resource-item-description-actions-visibility">' +
-        '<button class="action-button secondary-button mini-action-button ' +
+        '<span class=" ' +
         '<%= host %>-browse-item-visibility browse-item-visibility visibility-<%= visibility %> <%= visibility_classes %>">' +
-        '<span class="visibility-icon"></span><%= visibility_title %></button></div>' +
-        '<div class="resource-item-description-actions-common">' +
-        '<span class="resource-favorite-wrapper"><a class="resource-favorite">Favorite</a></span>' +
-        '<a class="resource-copy">Copy</a><a class="resource-remix">Remix</a>' +
-        '</div></div></div></div>'),
+        '<span class="visibility-icon"></span><%= visibility_title %></span></div>' +
+        '</div></div></div>'),
 
     collectionItemTemplate: _.template('<div class="<%= host %>-browse-item resource-collection-item directory " id="collection-<%= id %>">' +
         '<input type="checkbox" name="collection_id" value="<%= id %>"/>' +
@@ -88,7 +85,7 @@ OC.resourcesCollections = {
         if (OC.resourcesCollections.resourceCount > 20){
             var loadButton = $('.lazy-load-button'),
                 currentCollectionID, i;
-            $(window).on('DOMContentLoaded load resize scroll', function(event){
+            $('.profile-content').on('DOMContentLoaded load resize scroll', function(event){
                 currentCollectionID = $('.resources-collections-added').attr('id').substring(11);
 
                 // If the load button is attached to the document.
@@ -103,10 +100,19 @@ OC.resourcesCollections = {
                                     var keys = Object.keys(response.resources);
 
                                     if (keys.length !== 0){
+                                        var newResourceCollection, rawResource;
                                         for (i = 0; i < keys.length; i++){
+                                            rawResource = response.resources[keys[i]];
+                                            rawResource['owner'] = OC.resourcesCollections.ownerView;
                                             $('.resources-collections-added').append(
                                                 OC.resourcesCollections.resourceCollectionItemTemplate(
-                                                    response.resources[keys[i]]));
+                                                    rawResource)
+                                            );
+
+                                            newResourceCollection =  $('.resources-collections-added .resource-collection-item:last');
+
+                                            // Make the datetime on the resource timeago'ed.
+                                            $('.resource-item-description-modified', newResourceCollection).timeago();
                                         }
                                         OC.resourcesCollections.currentCount += keys.length;
 
@@ -171,20 +177,20 @@ OC.resourcesCollections = {
     },
 
     synchronizeSelectors: function(){
-        var thumbnail, resourceCollectionCheckbox,
+        var thumbnail, resourceCollectionCheckbox, resourceCollectionItem,
             thumbnails = $('.resource-item-thumbnail-selector');
 
         // Synchonize the checkbox value with the thumbnail.
         var i = 0;
         for (i = 0; i < thumbnails.length; i++){
             thumbnail = $(thumbnails[i]);
-            resourceCollectionCheckbox = thumbnail.parents(
-                '.resource-collection-item').find('input[name=resource_collection_id]')[0];
+            resourceCollectionItem = thumbnail.parents('.resource-collection-item');
+            resourceCollectionCheckbox = resourceCollectionItem.find('input[name=resource_collection_id]')[0];
 
             if (resourceCollectionCheckbox.checked){
-                thumbnail.addClass('selected');
+                resourceCollectionItem.addClass('selected');
             } else {
-                thumbnail.removeClass('selected');
+                resourceCollectionItem.removeClass('selected');
             }
         }
 
@@ -195,11 +201,20 @@ OC.resourcesCollections = {
 
         $('.resource-collection-item').click(function(event){
             resourceCollection = $(this);
-            resourceCollectionCheckbox = $('input[name=resource_collection_id]', resourceCollection);
+            resourceCollectionCheckboxEl = $('input[name=resource_collection_id]', resourceCollection);
+            resourceCollectionCheckbox = resourceCollectionCheckboxEl[0];
 
-            resourceCollectionCheckbox.trigger('click');
+            if (resourceCollectionCheckbox.checked){
+                resourceCollectionCheckboxEl.prop('checked', false);
+            } else {
+                resourceCollectionCheckboxEl.prop('checked', true);
+            }
             resourceCollection.toggleClass('selected');
-            resourceCollection.find('.resource-item-thumbnail-selector').toggleClass('selected');
+        });
+
+        $('input[name=resource_collection_id]').click(function(event){
+            resourceCollectionItem = $(event.target).parents('.resource-collection-item');
+            resourceCollectionItem.toggleClass('selected');
         });
 
         // Do not let checkbox, thumbnail link click triggers propogate back to the resource item.
@@ -606,7 +621,7 @@ OC.resourcesCollectionsActions = {
         copiedResource.resource_type = resourceType;
         copiedResource.access = whoHasAccess;
 
-        var newResourceHTML = OC.resourcesCollections.resourceItemTemplate(copiedResource);
+        var newResourceHTML = OC.resourcesCollections.resourceCollectionItemTemplate(copiedResource);
 
         // Append the new resource to the resources collections listing
         $('.' + copiedResource.host + '-resources-added-list').append(newResourceHTML);
@@ -615,19 +630,19 @@ OC.resourcesCollectionsActions = {
         var newResourceItem = $(
             '.' + copiedResource.host + '-resources-added-list .resource-collection-item:last'),
             newResourceItemCheckbox = $('input[type=checkbox]', newResourceItem),
-            newResourceItemDeleteButton = $(
-                '.' + copiedResource.host + '-resource-delete', newResourceItem),
             newResourceItemVisibilityButton = $('.browse-item-visibility', newResourceItem);
 
         // Bind the click handler on the checkbox, the delete button and the visibility.
         newResourceItemCheckbox.click(
             OC.resourcesCollectionsActions.resourceCollectionCheckboxHandler);
-        newResourceItemDeleteButton.click(OC.deleteResourceHandler);
         newResourceItemVisibilityButton.click(
             OC.resourcesCollections.itemVisibilityButtonClickHandler);
 
         // Now make the collection draggable-droppable (+acceptable of new stuff).
         OC.resourcesCollectionsActions.initResourceCollectionsDraggability(newResourceItem);
+
+        // Make the datetime on the resource timeago'ed.
+        $(".resource-item-description-modified", newResourceItem).timeago();
 
         // Drop the action from the pending action list and announce completion.
         OC.resourcesCollectionsActions.pendingActions.copyResources.splice(resourceID);
@@ -653,20 +668,20 @@ OC.resourcesCollectionsActions = {
         var newCollectionItem = $(
             '.' + copiedCollection.host + '-collections-added-list .resource-collection-item:last'),
             newCollectionItemCheckbox = $('input[type=checkbox]', newCollectionItem),
-            newCollectionItemDeleteButton = $(
-                '.' + copiedCollection.host + '-collection-delete', newCollectionItem),
             newCollectionItemVisibilityButton = $('.browse-item-visibility', newCollectionItem);
 
         // Bind the click handler on the checkbox, the delete button and the visibility.
         newCollectionItemCheckbox.click(
             OC.resourcesCollectionsActions.resourceCollectionCheckboxHandler);
-        newCollectionItemDeleteButton.click(OC.deleteCollectionHandler);
         newCollectionItemVisibilityButton.click(
             OC.resourcesCollections.itemVisibilityButtonClickHandler);
 
         // Now make the collection draggable-droppable (+acceptable of new stuff).
         OC.resourcesCollectionsActions.initResourceCollectionsDraggability(newCollectionItem);
         OC.resourcesCollectionsActions.initResourceCollectionsDroppability(newCollectionItem);
+
+        // Make the datetime on the resource timeago'ed.
+        $(".resource-item-description-modified", newCollectionItem).timeago();
 
         // Drop the action from the pending action list and announce completion.
         OC.resourcesCollectionsActions.pendingActions.copyCollections.splice(collectionID);
@@ -699,23 +714,28 @@ OC.resourcesCollectionsActions = {
         OC.showMessageBox();
     },
 
-    collectionDeletedSuccessfully: function(deletedCollectionID){
-        $('.resource-collection-item#collection-' + deletedCollectionID).fadeOut();
+    collectionsDeletedSuccessfully: function(deletedCollectionIDs){
+        var i;
+        for (i = 0; i < deletedCollectionIDs.length; i++){
+            // Drop the action from the pending action list and announce completion.
+            OC.resourcesCollectionsActions.pendingActions.deleteCollections.splice(deletedCollectionIDs[i]);
+            OC.resourcesCollectionsActions.actionsCompleted.deleteCollections.push(deletedCollectionIDs[i]);
 
-        // Drop the action from the pending action list and announce completion.
-        OC.resourcesCollectionsActions.pendingActions.deleteCollections.splice(deletedCollectionID);
-        OC.resourcesCollectionsActions.actionsCompleted.deleteCollections.push(deletedCollectionID);
+            $('.resource-collection-item#collection-' + deletedCollectionIDs[i]).fadeOut();
+        }
 
         OC.resourcesCollectionsActions.actionCompleted();
     },
 
-    resourceDeletedSuccessfully: function(deletedResourceID){
-        console.log($('.resource-collection-item#resource-' + deletedResourceID));
-        $('.resource-collection-item#resource-' + deletedResourceID).fadeOut();
+    resourcesDeletedSuccessfully: function(deletedResourceIDs){
+        var i;
+        for (i = 0; i < deletedResourceIDs.length; i++){
+            // Drop the action from the pending action list and announce completion.
+            OC.resourcesCollectionsActions.pendingActions.deleteResources.splice(deletedResourceIDs[i]);
+            OC.resourcesCollectionsActions.actionsCompleted.deleteResources.push(deletedResourceIDs[i]);
 
-        // Drop the action from the pending action list and announce completion.
-        OC.resourcesCollectionsActions.pendingActions.deleteResources.splice(deletedResourceID);
-        OC.resourcesCollectionsActions.actionsCompleted.deleteResources.push(deletedResourceID);
+            $('.resource-collection-item#resource-' + deletedResourceIDs[i]).fadeOut();
+        }
 
         OC.resourcesCollectionsActions.actionCompleted();
     },
@@ -746,6 +766,66 @@ OC.resourcesCollectionsActions = {
 
 
     initResourceCollectionActions: function(){
+        // Make the action panel sticky.
+        var actionsPanel = $('.profile-resources-collections-actions'),
+            actionsShadow = $('.profile-resources-collections-actions-shadow'),
+            resourcesCollections = $('.profile-resources-collections-wrapper'),
+            profileTabs = $('.profile-tabs'),
+            offsetPoint = profileTabs.position().top + profileTabs.outerHeight(true),
+            actionsPanelLeft = actionsPanel.position().left;
+
+        // Pre-write the absolute position, only applied when absolute class is added.
+        actionsPanel.css({
+            top: offsetPoint,
+            left: actionsPanelLeft
+        });
+
+        function getShadowHeight(){
+            var resourcesCollections = $('.profile-resources-collections-wrapper'),
+                actionsMenu = $('.profile-resources-collections-actions-menu');
+            if (!isElementInViewport(resourcesCollections)){
+                return $(window).height() - resourcesCollections.offset().top;
+            } else {
+                if (actionsMenu.height() > resourcesCollections.height()){
+                    return actionsMenu.height();
+                } else {
+                    return resourcesCollections.height();
+                }
+            }
+        }
+
+        var shadowHeight = getShadowHeight();
+
+        $('.profile-content').on('scroll', function(event){
+            // If the load button is attached to the document.
+            if (isElementInViewport(actionsPanel) && !actionsPanel.hasClass('floating')){
+                if (actionsPanel.position().top < offsetPoint){
+                    actionsPanel.addClass('floating');
+                    actionsShadow.height(
+                       $(window).height() - offsetPoint
+                    );
+                }
+                
+            } else if (actionsPanel.hasClass('floating')){
+                if (resourcesCollections.position().top > offsetPoint){
+                    actionsPanel.removeClass('floating');
+                    actionsShadow.height(shadowHeight);
+                }
+            }
+        });
+
+        // Set the height of the page.
+        function setShadowHeight(){
+            actionsShadow.height(shadowHeight);
+        }
+
+        setShadowHeight();
+        $(window).resize(function(){
+            shadowHeight = getShadowHeight();
+            setShadowHeight();
+        });
+        
+
         OC.resourcesCollectionsActions.bindResourceCollectionSelectors();
 
         OC.resourcesCollectionsActions.actionButtonsClickHandler();
@@ -759,11 +839,7 @@ OC.resourcesCollectionsActions = {
                     checkedResourceCollections[i]);
             }
         } else {
-            var moveButton = $('.collection-actions .move-button');
-            OC.resourcesCollectionsActions.disableActionButton(moveButton);
-
-            var copyButton = $('.collection-actions .copy-button');
-            OC.resourcesCollectionsActions.disableActionButton(copyButton);
+            OC.resourcesCollectionsActions.selectedResourcesCollectionsChangeListener();
         }
     },
 
@@ -851,6 +927,10 @@ OC.resourcesCollectionsActions = {
                 },
             'json');
         }
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
     },
 
     copyButtonClickHandler: function(event){
@@ -883,6 +963,28 @@ OC.resourcesCollectionsActions = {
         OC.resourcesCollectionsActions.pendingActions.copyCollections.concat(collectionsCopied);
 
         OC.resourcesCollectionsActions.actionCompletionCallback = OC.resourcesCollectionsActions.copied;
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+    },
+
+    setDialogMessage: function(dialogSelector, message, title){
+        $(dialogSelector + '-message').text(message);
+        $(dialogSelector + '-title').text(title);
+    },
+
+    getSelectedResourcesCollections: function(){
+        var i, resources = [], collections = [];
+        for (i = 0; i < OC.resourcesCollectionsActions.selectedResourcesCollections.length; i++){
+            var resourceCollectionItem = $(OC.resourcesCollectionsActions.selectedResourcesCollections[i]).closest(
+                '.resource-collection-item');
+            if (resourceCollectionItem.hasClass('collection')){
+                collections.push(OC.resourcesCollectionsActions.selectedResourcesCollections[i]);
+            } else resources.push(OC.resourcesCollectionsActions.selectedResourcesCollections[i]);
+        }
+
+        return [resources, collections];
     },
 
     deleteButtonClickHandler: function(event){
@@ -892,29 +994,133 @@ OC.resourcesCollectionsActions = {
         OC.resourcesCollectionsActions.deleting();
 
         // Loop through all selected resources.
-        var i, resourcesDeleted = [], collectionsDeleted = [];
+        var i, j, resourceIDsToDelete = [], collectionIDsToDelete = [], resourcesDeleted = [], collectionsDeleted = [];
         for (i = 0; i < OC.resourcesCollectionsActions.selectedResourcesCollections.length; i++){
             var resourceCollectionItem = $(OC.resourcesCollectionsActions.selectedResourcesCollections[i]).closest(
                 '.resource-collection-item');
             if (resourceCollectionItem.hasClass('collection')){
-                OC.collection.delete(
-                    resourceCollectionItem.attr('id').substring(11),
-                    OC.resourcesCollectionsActions.collectionDeletedSuccessfully
-                );
+                collectionIDsToDelete.push(resourceCollectionItem.attr('id').substring(11));
                 collectionsDeleted.push(OC.resourcesCollectionsActions.selectedResourcesCollections[i]);
             } else {
-                OC.resource.delete(
-                    resourceCollectionItem.attr('id').substring(9), currentCollectionID,
-                    OC.resourcesCollectionsActions.resourceDeletedSuccessfully
-                );
+                resourceIDsToDelete.push(resourceCollectionItem.attr('id').substring(9));
                 resourcesDeleted.push(OC.resourcesCollectionsActions.selectedResourcesCollections[i]);
             }
+        }
+
+        resourceCollections = OC.resourcesCollectionsActions.getSelectedResourcesCollections();
+
+        if (resourceCollections[0].length > 1 && resourceCollections[1].length > 1){
+            OC.resourcesCollectionsActions.setDialogMessage(
+                '.delete-resource-collection-dialog',
+                'Are you sure you want to delete these files and folders? This will also ' +
+                    'delete all the files and folders within these folders.',
+                'Delete files and folders'
+            );
+            OC.resource.deleteMultiple(
+                resourceIDsToDelete, currentCollectionID,
+                OC.resourcesCollectionsActions.resourcesDeletedSuccessfully
+            );
+            OC.collection.deleteMultiple(
+                collectionIDsToDelete,
+                OC.resourcesCollectionsActions.collectionsDeletedSuccessfully
+            );
+        } else if (resourceCollections[0].length > 1 && resourceCollections[1].length === 1){
+            OC.resourcesCollectionsActions.setDialogMessage(
+                '.delete-resource-collection-dialog',
+                'Are you sure you want to delete these files and the selected folder? This will also ' +
+                    'delete all the files and folders within the folder.',
+                'Delete files and folder'
+            );
+            OC.resource.deleteMultiple(
+                resourceIDsToDelete, currentCollectionID,
+                OC.resourcesCollectionsActions.resourcesDeletedSuccessfully
+            );
+            OC.collection.delete(
+                collectionIDsToDelete[0],
+                OC.resourcesCollectionsActions.collectionsDeletedSuccessfully
+            );
+        }  else if (resourceCollections[0].length === 1 && resourceCollections[1].length > 1){
+            OC.resourcesCollectionsActions.setDialogMessage(
+                '.delete-resource-collection-dialog',
+                'Are you sure you want to delete these folders and the selected file? This will also ' +
+                    'delete all the files and folders within these folders.',
+                'Delete folders and file'
+            );
+            OC.resource.delete(
+                resourceIDsToDelete[0], currentCollectionID,
+                OC.resourcesCollectionsActions.resourcesDeletedSuccessfully
+            );
+            OC.collection.deleteMultiple(
+                collectionIDsToDelete,
+                OC.resourcesCollectionsActions.collectionsDeletedSuccessfully
+            );
+        }  else if (resourceCollections[0].length === 1 && resourceCollections[1].length === 1){
+            OC.resourcesCollectionsActions.setDialogMessage(
+                '.delete-resource-collection-dialog',
+                'Are you sure you want to delete this folder and this file? This will also ' +
+                    'delete all the files and folders within the folder.',
+                'Delete folder and file'
+            );
+            OC.resource.delete(
+                resourceIDsToDelete[0], currentCollectionID,
+                OC.resourcesCollectionsActions.resourcesDeletedSuccessfully
+            );
+            OC.collection.delete(
+                collectionIDsToDelete[0],
+                OC.resourcesCollectionsActions.collectionsDeletedSuccessfully
+            );
+        }  else if (resourceCollections[0].length > 1){
+            OC.resourcesCollectionsActions.setDialogMessage(
+                '.delete-resource-collection-dialog',
+                'Are you sure you want to delete these resources?',
+                'Delete resources'
+            );
+            OC.resource.deleteMultiple(
+                resourceIDsToDelete, currentCollectionID,
+                OC.resourcesCollectionsActions.resourcesDeletedSuccessfully
+            );
+        }  else if (resourceCollections[1].length > 1){
+            OC.resourcesCollectionsActions.setDialogMessage(
+                '.delete-resource-collection-dialog',
+                'Are you sure you want to delete these folders? This will also ' +
+                    'delete all the files and folders within these folders.',
+                'Delete folders'
+            );
+            OC.collection.deleteMultiple(
+                collectionIDsToDelete,
+                OC.resourcesCollectionsActions.resourcesDeletedSuccessfully
+            );
+        }  else if (resourceCollections[0].length === 1){
+            OC.resourcesCollectionsActions.setDialogMessage(
+                '.delete-resource-collection-dialog',
+                'Are you sure you want to delete this resource?',
+                'Delete resource'
+            );
+            OC.resource.delete(
+                resourceIDsToDelete[0], currentCollectionID,
+                OC.resourcesCollectionsActions.resourcesDeletedSuccessfully
+            );
+        }  else if (resourceCollections[1].length === 1){
+            OC.resourcesCollectionsActions.setDialogMessage(
+                '.delete-resource-collection-dialog',
+                'Are you sure you want to delete this folder? This will also ' +
+                    'delete all the files and folders within the folder.',
+                'Delete folder'
+            );
+            OC.collection.delete(
+                collectionIDsToDelete[0],
+                OC.resourcesCollectionsActions.collectionsDeletedSuccessfully
+            );
         }
 
         OC.resourcesCollectionsActions.pendingActions.deleteResources.concat(resourcesDeleted);
         OC.resourcesCollectionsActions.pendingActions.deleteCollections.concat(collectionsDeleted);
 
         OC.resourcesCollectionsActions.actionCompletionCallback = OC.resourcesCollectionsActions.deleted;
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
     },
 
 
@@ -941,8 +1147,28 @@ OC.resourcesCollectionsActions = {
     selectedResourcesCollectionsChangeListener: function(){
         var moveButton = $('.collection-actions .move-button'),
             copyButton = $('.collection-actions .copy-button'),
-            deleteButton = $('.collection-actions .del-button');
+            deleteButton = $('.collection-actions .del-button'),
+            renameButton = $('.collection-actions .rename-button'),
+            shareButton = $('.collection-actions .share-button'),
+            collectionActionsEdit = $('.profile-resources-collections-actions-menu-edit'),
+            collectionActionsAdd = $('.profile-resources-collections-actions-menu-add');
+
         if (OC.resourcesCollectionsActions.selectedResourcesCollections.length >= 1){
+            if (!collectionActionsEdit.hasClass('show')){
+                collectionActionsEdit.addClass('show');
+
+                // Make the add items menu a little transparent.
+                collectionActionsAdd.addClass('fade-out');
+            }
+
+            if (OC.resourcesCollectionsActions.selectedResourcesCollections.length == 1){
+                OC.resourcesCollectionsActions.enableActionButton(shareButton);
+                OC.resourcesCollectionsActions.enableActionButton(renameButton);
+            } else {
+                OC.resourcesCollectionsActions.disableActionButton(shareButton);
+                OC.resourcesCollectionsActions.disableActionButton(renameButton);
+            }
+
             // Enable the action buttons that depend on checked resources/collections.
             OC.resourcesCollectionsActions.enableActionButton(moveButton);
             OC.resourcesCollectionsActions.enableActionButton(copyButton);
@@ -953,18 +1179,30 @@ OC.resourcesCollectionsActions = {
             OC.resourcesCollectionsActions.disableActionButton(moveButton);
             OC.resourcesCollectionsActions.disableActionButton(copyButton);
             OC.resourcesCollectionsActions.disableActionButton(deleteButton);
+            OC.resourcesCollectionsActions.disableActionButton(renameButton);
+            OC.resourcesCollectionsActions.disableActionButton(shareButton);
+
+            collectionActionsEdit.removeClass('show');
+            collectionActionsAdd.removeClass('fade-out');
         }
     },
 
     enableActionButton: function(actionButton){
         actionButton.removeClass('disabled-collection-button');
         actionButton.disabled = false;
+        actionButton.unbind('click');
     },
 
     disableActionButton: function(actionButton){
         actionButton.addClass('disabled-collection-button');
         actionButton.disabled = true;
         actionButton.unbind('click');
+
+        actionButton.click(function(event){
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
     },
 
     initBrowseNavigation: function(){
@@ -982,5 +1220,8 @@ OC.resourcesCollectionsActions = {
 };
 
 jQuery(document).ready(function ($) {
-    OC.resourcesCollections.synchronizeSelectors();
+    if (OC.resourcesCollections.ownerView)
+        OC.resourcesCollections.synchronizeSelectors();
+
+    $(".resource-item-description-modified").timeago();
 });

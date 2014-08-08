@@ -1,154 +1,159 @@
 {% include 'partials/header.html' with body_class='profile-view' %}
-<div class="center-stage">
-    <div id="fill-panel" class="panel-left">
-        <div class="user-profile-info{% if user == user_profile %} my-profile{% endif %}">
-            <div class="user-profile-picture">
-                <form id="profile-picture-reposition-form">
-                    <input type="hidden" name="username" value="{{ user_profile.username }}"/>
-                </form>
-                <div style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}'); background-position: {{ user_profile.get_profile.profile_pic_position.left }}% {{ user_profile.get_profile.profile_pic_position.top }}%;" class="user-picture-cover" title="Hold and drag to reposition image">
-                {% if user == user_profile %}
-                <div class="edit-picture edit-profile-picture">
-                    <div class="change-picture" title="Change picture"></div>
-                    <div class="reposition-picture" title="Reposition picture"></div>
-                </div>
-                {% endif %}
-                </div>
-                <div class="user-picture-repositioner"></div>
-            </div>
-            <div class="user-profile-info-body">
-                <div class="profile-name">
-                    <h2>{{ user_profile.get_full_name }}</h2>
-                </div>
-                <div class="profile-headline-wrapper">
-                    <form>
-                        <input type="hidden" name="user_id" value="{{ user_profile.id }}"/>
-                        <input type="text" title='{{ user_profile.get_profile.headline }}' class="profile-headline" value="{% if user == user_profile %}{% if user_profile.get_profile.headline %}{{ user_profile.get_profile.headline }}{% else %}(edit headline){% endif %}{% else %}{{ user_profile.get_profile.headline }}{% endif %}" autocomplete="off"  {% if user != user_profile %} readonly{% endif %}/>
+
+<div class="center-spread profile-page">
+    <div class="wide-center-stage">
+        <div class="wide-center-stage-fill-panel category-panel">
+            <div class="user-profile-info{% if user == user_profile %} my-profile{% endif %}">
+                <div class="user-profile-picture">
+                    <form id="profile-picture-reposition-form">
+                        <input type="hidden" name="username" value="{{ user_profile.username }}"/>
                     </form>
-                    <span class="headline-edit"></span>
+                    <div style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}'); background-position: {{ user_profile.get_profile.profile_pic_position.left }}% {{ user_profile.get_profile.profile_pic_position.top }}%;" class="user-picture-cover" title="Hold and drag to reposition image">
+                    {% if user == user_profile %}
+                    <div class="edit-picture edit-profile-picture">
+                        <div class="change-picture" title="Change picture"></div>
+                        <div class="reposition-picture" title="Reposition picture"></div>
+                    </div>
+                    {% endif %}
+                    </div>
+                    <div class="user-picture-repositioner"></div>
                 </div>
-                <div class="profile-subscribe-wrapper">
-                    <a href="{% url user:user_subscribers username=user_profile.username %}" class="profile-subscriber-count{% if page == 'subscribers' %} selected{% endif %}">
-                        <div class="profile-subscribe-count">{{ subscriber_count }}</div>
-                        <div class="profile-subscribe-count-label">SUBSCRIBER(S)</div>
-                    </a>
-                    <a href="{% url user:user_subscriptions username=user_profile.username %}" class="profile-subscriptions-count {% if page == 'subscriptions' %} selected{% endif %}">
-                        <div class="profile-subscribe-count">{{ subscription_count }}</div>
-                        <div class="profile-subscribe-count-label">SUBSCRIPTION(S)</div>
-                    </a>
-                </div>
-                {% if user != user_profile %}
-                <div class="profile-subscribe">
-                    <form class="profile-subscribe-form">
-                        <input type="hidden" name="user_id" value="{{ user_profile.id }}"/>
-                    </form>
-                    {% if user_subscribed %}
-                    <button class="btn dull-button page-subscribe-button subscribed">✔ Subscribed</button>
-                    {% else %}
-                    <button class="btn dull-button page-subscribe-button">Subscribe</button>
+                <div class="user-profile-info-body">
+                    <div class="profile-name">
+                        <h2>{{ user_profile.get_full_name }}</h2>
+                    </div>
+                    <div class="profile-headline-wrapper">
+                        <form>
+                            <input type="hidden" name="user_id" value="{{ user_profile.id }}"/>
+                            <div contenteditable="true" type="text" title='{{ user_profile.get_profile.headline }}' class="profile-headline" autocomplete="off"  {% if user != user_profile %} readonly{% endif %}>{% if user == user_profile %}{% if user_profile.get_profile.headline %}{{ user_profile.get_profile.headline }}{% else %}(edit headline){% endif %}{% else %}{{ user_profile.get_profile.headline }}{% endif %}</div>
+                        </form>
+                        <span class="headline-edit"></span>
+                    </div>
+                    <div class="profile-subscribe-wrapper">
+                        <a href="{% url user:user_subscribers username=user_profile.username %}" class="profile-subscriber-count{% if page == 'subscribers' %} selected{% endif %}">
+                            <div class="profile-subscribe-count">{{ subscriber_count }}</div>
+                            <div class="profile-subscribe-count-label">SUBSCRIBER(S)</div>
+                        </a>
+                        <a href="{% url user:user_subscriptions username=user_profile.username %}" class="profile-subscriptions-count {% if page == 'subscriptions' %} selected{% endif %}">
+                            <div class="profile-subscribe-count">{{ subscription_count }}</div>
+                            <div class="profile-subscribe-count-label">SUBSCRIPTION(S)</div>
+                        </a>
+                    </div>
+                    {% if user != user_profile %}
+                    <div class="profile-subscribe">
+                        <form class="profile-subscribe-form">
+                            <input type="hidden" name="user_id" value="{{ user_profile.id }}"/>
+                        </form>
+                        {% if user_subscribed %}
+                        <button class="btn page-subscribe-button subscribed">✔ Subscribed</button>
+                        {% else %}
+                        <button class="btn page-subscribe-button">Subscribe</button>
+                        {% endif %}
+                    </div>
                     {% endif %}
                 </div>
-                {% endif %}
             </div>
-        </div>
 
-        {% if user == user_profile and stars %}
-        <h3>Who to subscribe to</h3>
-        <div class="subscribe-suggestions user-list">
-        {% for star in stars %}
-            <div class="user">
-                <form class="subscribe-suggestion-form">
-                    <input type="hidden" name="user_id" value="{{ star.id }}" />
-                    <div class="user-photo" style="background-image: url('{{ MEDIA_URL }}{{ star.get_profile.profile_pic.name }}');"></div>
-                    <div class="user-description"><a href="{% url user:user_profile username=star.username %}">{{ star.get_full_name }}</a>
-                    <p><button class="btn dull-button subscribe-button">Subscribe</button></p>
-                    </div>
-                </form>
-            </div>
-        {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if browse_tree %}
-        <nav class="collections-navigation">
-            {% load project_tags %}
-            {{ browse_tree|user_navigation_tree:user|safe }}
-        </nav>
-        {% endif %}
-
-    </div>
-    <div id="key-panel" class="panel-right">
-        <nav class="profile-tabs">
-            <ul>
-                {% if user == user_profile %}
-                <li><a href="{% url user:user_profile username=user_profile.username %}" {% if page == "home" %} class="selected"{% endif %}>Activity</a></li>
-                {% endif %}
-                <li><a href="{% url user:user_favorites username=user_profile.username %}" class="profile-favorites-tab{% if page == 'favorites' %} selected{% endif %}">Favorites</a></li>
-                <li><a href="{% url user:user_files username=user_profile.username %}"  class="profile-files-tab{% if page == 'files' %} selected{% endif %}">Files</a></li>
-                <li><a href="{% url user:user_groups username=user_profile.username %}"class="profile-groups-tab {% if page == 'groups' %} selected{% endif %}">Groups</a></li>
-            </ul>
-        </nav>
-        <div class="profile-content oc-tabs-content">
-
-        {% if page == 'home' %}
-            <!--
-            <div class="profile-new-resource-panel">
-                <div class="profile-browse-lessons">
-                    <h3><a href="">Browse Lesson library</a></h3><span class="label coming-soon-label">COMING SOON</span>-->
-                    <!--<div class="profile-new-resource-caption">Categorized and aligned lessons and projects</div>-->
-                <!--</div>
-                <div class="profile-add-unit">
-                    <h3><a class="add-unit">New Unit</a></h3>
-                    <div class="profile-new-resource-caption">Based off existing organization syllabus / curriculum</div>
-                </div>
-                <div class="profile-add-lesson">            
-                    <h3><a href="{% url resource:new_lesson %}" class="add-lesson">New Lesson</a></h3>
-                    <div class="profile-new-resource-caption">Create a standards aligned lesson or project</div>
-                </div>
-            </div>-->
-            <script type="text/javascript">
-                OC.feed.feedCount = '{{ feed_count }}';
-                OC.feed.currentCount = {{ feed.count }};
-            </script>
-
-            {# include 'partials/profile-content.html' #}
-            <div class="user-list feed-list">
-            {% for item in feed %}
-            {% include 'partials/feed-item.html' with host='profile' %}
-            {% empty %}
-            <div class="empty-feed">
-                <h1 class="empty-state-title"><span class="empty-state-arrow"></span>Subscribe to someone to get their latest and greatest updates</h1>
-            </div>
-            {% endfor %}
-
-            {% if feed_count > 20 %}
-            <div class="lazy-load-button">Load more...</div>
+            {% if browse_tree %}
+            <nav class="collections-navigation">
+                {% load project_tags %}
+                {{ browse_tree|user_navigation_tree:user|safe }}
+            </nav>
             {% endif %}
 
+        </div>
+        <div class="wide-center-stage-key-panel content-panel">
+            <nav class="profile-tabs oc-page-tabs">
+                <ul>
+                    <li><a href="{% url user:user_profile username=user_profile.username %}" {% if page == "home" %} class="current"{% endif %}>Activity</a></li>
+                    <li><a href="{% url user:user_files username=user_profile.username %}"  class="profile-files-tab{% if page == 'files' %} current{% endif %}">Files</a></li>
+                    <li><a href="{% url user:user_favorites username=user_profile.username %}" class="profile-favorites-tab{% if page == 'favorites' %} current{% endif %}">Favorites</a></li>
+                    <li><a href="{% url user:user_groups username=user_profile.username %}"class="profile-groups-tab {% if page == 'groups' %} current{% endif %}">Groups</a></li>
+                </ul>
+            </nav>
+            <div class="profile-content oc-tabs-content {{ page }}-profile-content">
 
-            </div>
+            {% if page == 'home' %}
+                <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.timeago.js"></script>
+                <script type="text/javascript" src="{{ STATIC_URL }}js/feed.js"></script>
+                <script type="text/javascript">
+                    OC.feed.feedCount = {{ feed_count }};
+                    OC.feed.currentCount = {{ feed.count }};
+                </script>
 
-        {% elif page == 'favorites' %}
-            {% include 'partials/profile-favorites.html' %}
+                <div class="user-profile-feed-suggestions">
+                    <div class="user-profile-feed">
+                        <div class="user-list feed-list">
+                        {% for item in feed %}
+                        {% include 'partials/feed-item.html' with host='profile' %}
+                        {% empty %}
+                        {% if user == user_profile %}
+                        <div class="empty-feed">
+                            <div class="empty-state-title">
+                                <h1>Subscribe to someone to get their latest and greatest updates</h1>
+                            </div>
+                            <div class="empty-state-arrow"></div>
+                        </div>
+                        {% else %}
+                        <div class="empty-feed empty-external-feed">
+                            <div class="empty-state-title">
+                                <h1>Looks like {{ user.first_name }} hasn't done much on the site lately</h1>
+                            </div>
+                        </div>
 
-        {% elif page == 'files' %}
-            {% include 'partials/profile-files.html' %}
+                        {% endif %}
+                        {% endfor %}
 
-        {% elif page == 'groups' %}
-            {% include 'partials/profile-groups.html' %}
+                        </div>
 
-        {% elif page == 'subscribers' %}
-            {% include 'partials/profile-subscribers.html' %}
+                        {% if feed_count > 20 %}
+                        <div class="lazy-load-button">Load more...</div>
+                        {% endif %}
+                    </div>
+                    <div class="user-profile-suggestions">
+                        {% if stars %}
+                            <h3>Who to subscribe to</h3>
+                            <div class="subscribe-suggestions user-list">
+                            {% for star in stars %}
+                                <div class="user">
+                                    <form class="subscribe-suggestion-form">
+                                        <input type="hidden" name="user_id" value="{{ star.id }}" />
+                                        <div class="user-photo" style="background-image: url('{{ MEDIA_URL }}{{ star.get_profile.profile_pic.name }}');"></div>
+                                        <div class="user-description"><a href="{% url user:user_profile username=star.username %}">{{ star.get_full_name }}</a>
+                                        <p><button class="action-button mini-action-button subscribe-button">Subscribe</button></p>
+                                        </div>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
 
-        {% elif page == 'subscriptions' %}
-            {% include 'partials/profile-subscriptions.html' %}
+            {% elif page == 'favorites' %}
+                {% include 'partials/profile-favorites.html' %}
 
-        {% elif page == 'preferences' %}
-            {% include 'partials/profile-preferences.html' %}
+            {% elif page == 'files' %}
+                {% include 'partials/profile-files.html' %}
 
-        {% endif %}
+            {% elif page == 'groups' %}
+                {% include 'partials/profile-groups.html' %}
 
-    {% include 'partials/add-unit.html' %}
-    {% include 'partials/profile-footer.html' %}
+            {% elif page == 'subscribers' %}
+                {% include 'partials/profile-subscribers.html' %}
+
+            {% elif page == 'subscriptions' %}
+                {% include 'partials/profile-subscriptions.html' %}
+
+            {% elif page == 'preferences' %}
+                {% include 'partials/profile-preferences.html' %}
+
+            {% endif %}
+
+        {% include 'partials/footer.html' %}
+        
+        {% include 'partials/add-unit.html' %}
+        {% include 'partials/profile-footer.html' %}
+
+    </div>
 </div>
-{% include 'partials/footer.html' %}

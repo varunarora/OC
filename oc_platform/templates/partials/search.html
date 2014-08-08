@@ -1,7 +1,5 @@
+<script src="{{ STATIC_URL }}js/resources.js" type="text/javascript"></script>
 <script src="{{ STATIC_URL }}js/search-results.js" type="text/javascript"></script>
-
-{% load highlight %}
-{% load stripper %}
 
 <div class="search-filters">
     <div class="search-filter">
@@ -26,67 +24,12 @@
     </div>
 </div>
 {% if query %}
+    <script type="text/javascript">
+    ga('set', 'dimension1', '{{ query }}');
+    </script>
+
     <div id="search-result-set">
-        <script type="text/javascript">
-        ga('set', 'dimension1', '{{ query }}');
-
-        {% for result in page.object_list %}
-            {% if result.content_type == "articles.article" %}              
-            var result = new Result({
-                id: '{{ result.object.id }}',
-                url: '{% url articles:reader category_slug=result.object.category.slug %}?q={{ result.object.slug }}',
-                title: '{{ result.object.title }}',
-                {% with result.object.revision.body_markdown_html|striptags|escapejs as stripped_result %}
-                description: '{% highlight stripped_result with query %}',
-                {% endwith %}
-                created: '{{ result.object.created }}',
-                user: '{{ result.object.revision.user }}',
-                difficulty: '{{ result.object.difficulty }}',
-                visibility: '{{ result.object.visibility }}',
-                cost: 'free',
-                license: '{{ result.object.license }}',
-                views: '{{ result.object.views }}',
-                type: 'article',
-                thumbnail: '{{ MEDIA_URL }}{{ result.object.image.name }}',
-                favorited: false,
-                user_url: '{% url user:user_profile username=result.object.revision.user.username %}',
-                user_thumbnail: '{{ MEDIA_URL }}{{ result.object.revision.user.get_profile.profile_pic.name }}',
-                favorites: '{{ result.object.favorites_count }}',
-                tags: [],
-                review_count: 0
-            });
-            {% endif %}
-            {% if result.content_type == "oer.resource" and result.object.visibility == 'public' %}
-            var result = new Result({
-                id: '{{ result.object.id }}',
-                url: '{% url read resource_id=result.object.id resource_slug=result.object.slug %}',
-                title: '{{ result.object.title }}',
-                {% with result.object.description|striptags|escapejs as stripped_result %}
-                description: '{% highlight stripped_result with query %}',
-                {% endwith %}
-                created: '{{ result.object.created }}',
-                user: '{{ result.object.user }}',
-                difficulty: '{{ result.object.difficulty }}',
-                visibility: '{{ result.object.visibility }}',
-                cost: 'free',
-                license: '{{ result.object.license }}',
-                type: '{{ result.object.type|upper }}',
-                views: '{{ result.object.views }}',
-                thumbnail: '{{ MEDIA_URL }}{{ result.object.image.name }}',
-                favorited: false,
-                user_url: '{% url user:user_profile username=result.object.revision.user.username %}',
-                user_thumbnail: '{{ MEDIA_URL }}{{ result.object.revision.user.get_profile.profile_pic.name }}',
-                favorites: '{{ result.object.favorites_count }}',
-                tags: [],
-                review_count: 0
-            });
-            {% endif %}
-            resultSet.add(result);
-        {% empty %}
-            //<p>No results found.</p>
-        {% endfor %}
-        </script>
-
+        {% include 'partials/resource-thumbnail.html' with resources=page.object_list resources_source='search' %}
     </div>
 {% endif %}
 

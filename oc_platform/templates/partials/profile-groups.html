@@ -1,19 +1,20 @@
-{% if user == user_profile %}
-<div class="new-group-wrapper">
-    <a href="{% url projects:new %}" class="page-action-button">+ NEW GROUP</a>
+<div class="profile-groups-listing-wrapper">
+    {% if user == user_profile %}
+    <div class="new-group-wrapper">
+        <a href="{% url projects:new %}" class="page-action-button">+ NEW GROUP</a>
+    </div>
+    {% endif %}
+    {% if projects %}
+    <div class="profile-groups-listing">
+    {% for project in projects %}
+        {% include 'partials/project-item.html' %}
+    {% endfor %}
+    </div>
+    {% else %}
+        {% if user == user_profile %}
+        You aren't part of any groups. Why wait? Create a <a href="" class="new-groups-link">new group now!</a>
+        {% else %}
+        No groups found.
+        {% endif %}
+    {% endif %}
 </div>
-{% endif %}
-{% if projects %}
-<div class="profile-projects-listing">
-{% for project in projects %}    
-    {% include 'partials/project-item.html' %}
-{% endfor %}
-</div>
-{% else %}
-{% if user == user_profile %}
-You aren't part of any groups. Why wait? Create a <a href="{% url projects:new %}">new group now!</a>
-{% else %}
-No groups found.
-{% endif %}
-{% endif %}
-

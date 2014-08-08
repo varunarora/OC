@@ -1,14 +1,12 @@
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.timeago.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.stalker.min.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/resources-collections.js"></script>
 <script type="text/javascript">
     OC.resourcesCollections.resourceCount = '{{ resource_count }}';
     OC.resourcesCollections.currentCount = {{ resources.count }};
+    OC.resourcesCollections.ownerView = {% if user == user_profile %}true{% else %}false{% endif %};
 </script>
 
-{% if user == user_profile %}
-<div class="create-resource-collection-wrapper">
-    {% include 'partials/create-resource-collection.html' %}
-</div>
-{% endif %}
 {% if resources or collections %}
 {% include 'partials/resources-collections-listing.html' with host='profile' %}
 {% else %}

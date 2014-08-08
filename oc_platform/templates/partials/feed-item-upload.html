@@ -1,5 +1,5 @@
 <div class="activity-object-wrapper" />
-    <div class="user-photo" style="background-image: url('{{ STATIC_URL }}images/by.png');"></div>
+    <div class="user-photo" style="background-image: url('{{ MEDIA_URL }}{{ item.target.image.name }}');"></div>
     <div class="user-description"><a href="{% if host == 'profile' %}{% url read resource_id=item.target.id resource_slug=item.target.slug %}{% else %}{% url projects:read_project_resource project_slug=project.slug resource_id=item.target.id resource_slug=item.target.slug %}{% endif %}">{{ item.target.title }}</a>
         <br/><a href="{% url resource:download resource_id=item.target.id %}" target="_blank">Download</a> &#183; {{ item.target.revision.content.file.size|filesizeformat }}
     </div>

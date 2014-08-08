@@ -1,42 +1,81 @@
-{% if host == 'project' %}
-{% if user in project.confirmed_members %}
-{% include 'partials/collection-actions.html' %}
+{% if not breadcrumb|length_is:"1" %}
+<section class="files-breadcrumb">
+{% for collection in breadcrumb %}
+    {% if not forloop.last %}
+    <a href="{{ collection.url }}">{{ collection.title }}</a> 
+    {% else %}
+    <span>{{ collection.title }}</span>
+    {% endif %}
+    {% if not forloop.last %}
+    <span class="vertical-caret breadcrumbs-caret"></span> 
+    {% endif %}
+{% endfor %}
+</section>
 {% endif %}
-{% elif user == user_profile %}
-{% include 'partials/collection-actions.html' %}
-{% endif %}
-<div class="{{ host }}-resources-collections resources-collections-added collection-visibility-{{ collection.visibility }}{% if host == 'project' %} project-listing project-visibility-{{ project.visibility }}{% endif %}" id="collection-{{ collection.id }}">
-    <div class="{{ host }}-collections-added-list">
-        {% with item_category='collection' %}
-        {% for item in collections %}
-        {% include 'partials/resource-collection-item-filter.html' %}
-        {% endfor %}
-        {% endwith %}
 
-        {% with item_category='collection' item_type='unit' %}
-        {% for item in units %}
-        {% include 'partials/resource-collection-item-filter.html' %}
-        {% endfor %}
-        {% endwith %}
+<div class="{{ host }}-resources-collections-files">
+    <div class="{{ host }}-resources-collections-wrapper">
+        <div class="{{ host }}-resources-collections resources-collections-added collection-visibility-{{ collection.visibility }}{% if host == 'project' %} project-listing project-visibility-{{ project.visibility }}{% endif %}" id="collection-{{ collection.id }}">
+            <div class="{{ host }}-collections-added-list">
+                {% with item_category='collection' %}
+                {% for item in collections %}
+                {% include 'partials/resource-collection-item-filter.html' %}
+                {% endfor %}
+                {% endwith %}
+
+                {% with item_category='collection' item_type='unit' %}
+                {% for item in units %}
+                {% include 'partials/resource-collection-item-filter.html' %}
+                {% endfor %}
+                {% endwith %}
+            </div>
+            <div class="{{ host }}-resources-added-list">
+                {% with item_category='resource' %}
+                {% for item in resources %}
+                {% include 'partials/resource-collection-item-filter.html' %}
+                {% endfor %}
+                {% endwith %}
+            </div>
+        </div>
+        {% if resource_count > 20 %}
+        <div class="lazy-load-button">Load more...</div>
+        {% endif %}
     </div>
-    <div class="{{ host }}-resources-added-list">
-        {% with item_category='resource' %}
-        {% for item in resources %}
-        {% include 'partials/resource-collection-item-filter.html' %}
-        {% endfor %}
-        {% endwith %}
+    <div class="{{ host }}-resources-collections-actions">
+        <div class="{{ host }}-resources-collections-actions-shadow"></div>
+        <div class="{{ host }}-resources-collections-actions-menu">
+            {% if host == 'project' %}
+            {% if user in project.confirmed_members %}
+            {% include 'partials/collection-actions.html' %}
+            {% endif %}
+            {% elif user == user_profile %}
+            {% include 'partials/collection-actions.html' %}
+            <nav class="profile-resources-collections-actions-menu-add">
+                <ul>
+                    <li class="add-collection"><a href="">New folder</a></li>
+                    <li class="add-unit"><a href="">New Unit</a></li>
+                    <li class="add-lesson"><a href="/resources/new-lesson/{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}" target="_blank">New Lesson</a></li>
+                    <li class="add-link"><a href="/resources/add-link/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}">Add Link</a></li>
+                    <li class="add-document"><a href="/resources/new-document/{% if host == 'project' %}?project={{ project.slug }}{% if collection != project.collection %}&collection={{ collection.slug }}{% endif %}{% else %}{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}{% endif %}" target="_blank">New Document</a></li>
+                    <li class="add-upload"><a href="/upload/{% if collection != user_profile.get_profile.collection %}?collection={{ collection.slug }}{% endif %}">Upload file(s)</a></li>
+                </ul>
+            </nav>
+        {% endif %}
+        </div>
     </div>
 </div>
-{% if resource_count > 20 %}
-<div class="lazy-load-button">Load more...</div>
-{% endif %}
 
-<div class="delete-resource-dialog dialog" title="Delete resource">
-    Are you sure you want to delete this resource?
-</div>
-
-<div class="delete-collection-dialog dialog" title="Delete resource">
-    Are you sure you want to delete this folder? This will delete all the folders and resources within this folder
+<div class="delete-resource-collection-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3 class="delete-resource-collection-dialog-title"></h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <span class="delete-resource-collection-dialog-message">Are you sure you want to delete this resource?</span>
+        <div class="delete-resource-collection-submit-wrapper oc-popup-submit-wrapper">
+            <button class="action-button delete-resource-collection-submit-button oc-popup-submit-button">Yes, delete</button>
+        </div>
+    </div>
 </div>
 
 <div class="move-resource-collection-dialog oc-popup">
@@ -45,7 +84,7 @@
         <div class="delete-button oc-popup-exit"></div>
     </div>
     <div class="oc-popup-body">
-        Select a folder from the following project folders:
+        Select a folder from the following folders:
         <div class="move-resource-collection-browser oc-popup-dialog-browser
  loading-browser">
         </div>

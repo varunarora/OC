@@ -17,6 +17,7 @@ urlpatterns = patterns(
     url(r'^api/get-profile/(?P<username>[a-z0-9_\.]+)/$', views.api_get_profile, name='api_get_profile'),
 
     url(r'^api/register-asynchronously/$', views.register_asynchronously, name='register_asynchronously'),
+    url(r'^api/load-feed/(?P<user_id>\d+)/from/(?P<feed_count>\d+)/$', views.load_feed, name='load_feed'),
 
     url(r'^(?P<username>[a-z0-9_\.]+)/reset-password/set-new-password/$', views.reset_password_set, name='reset_password_set'),
     url(r'^reset-password/$', views.reset_password, name='reset_password'),

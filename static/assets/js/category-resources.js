@@ -24,16 +24,6 @@ OC.categoryResources = {
             });
         }
 
-        // Set the height of the page.
-        function setBrowseHeight(){
-            $('.resource-browse').height(
-                $(window).height() - $('header').height()
-            );
-        }
-
-        setBrowseHeight();
-        $(window).resize(setBrowseHeight);
-
         var scrollbarWidth = getScrollbarWidth();
 
         // Clear the filter search box.
