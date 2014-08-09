@@ -124,7 +124,6 @@
 
       var latLng, image;
       {% for contributor, location in contributor_locations.items %}
-      console.log('{{ contributor }}');
       latLng = new google.maps.LatLng('{{ location.lat }}','{{ location.lng }}')
       image = {
         url: '{{ MEDIA_URL }}{{ contributor.get_profile.profile_pic.name }}',
