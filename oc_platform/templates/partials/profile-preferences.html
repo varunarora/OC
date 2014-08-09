@@ -1,28 +1,30 @@
-<h2>My preferences</h2>
+<div class="user-preferences">
+    <h2>My preferences</h2>
 
-<form action="{% url user:user_preferences %}" method="POST" id="user-preferences-form">
-    {% if success %}
-        <div class="success-message">{{ success }}</div>
-    {% elif error %}
-        <div class="error-message">{{ error }}</div>
-    {% endif %}
-    {% csrf_token %}
-    <table>
-        <colgroup>
-            <col class="label" />
-            <col class="value" />
-        </colgroup>
-        <tr><td>First name</td><td><input type="text" value="{{ user_profile.first_name }}" name="first_name" /></td></tr>
-        <tr><td>Last name</td><td><input type="text" value="{{ user_profile.last_name }}" name="last_name" /></td></tr>
-        <tr><td>Location</td><td><input type="text" value="{{ user_profile.get_profile.location }}" name="location" /></td></tr>
-        <tr><td>Email address</td><td><span class="bold">{{ user_profile.email }}</span><br><span class="value-caption">To change, send us an email. Apologies for the manual setup!</span></td></tr>
-        <tr><td>Password</td><td>******* <a id="change-password">Change password</a></td></tr>
-        <tr><td>Social account</td>
-            <td>{% if user_profile.get_profile.social_service == 'plus' %}Linked with <a href="http://plus.google.com/{{ user_profile.get_profile.social_id }}/" target="_blank">Google+</a>{% elif user_profile.get_profile.social_service == 'facebook' %}Linked with <a href="http://www.facebook.com/{{ user_profile.get_profile.social_id }}/" target="_blank">Google+</a>{% else %}No social account linked.{% endif %}</td>
-        </tr>
-        <tr><td colspan="2"><p><input type="submit" class="action-button page-submit-button" value="Save" /></p></td></tr>
-    </table>
-</form>
+    <form action="{% url user:user_preferences %}" method="POST" id="user-preferences-form">
+        {% if success %}
+            <div class="success-message">{{ success }}</div>
+        {% elif error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+        {% csrf_token %}
+        <table>
+            <colgroup>
+                <col class="label" />
+                <col class="value" />
+            </colgroup>
+            <tr><td>First name</td><td><input type="text" value="{{ user_profile.first_name }}" name="first_name" /></td></tr>
+            <tr><td>Last name</td><td><input type="text" value="{{ user_profile.last_name }}" name="last_name" /></td></tr>
+            <tr><td>Location</td><td><input type="text" value="{{ user_profile.get_profile.location }}" name="location" /></td></tr>
+            <tr><td>Email address</td><td><span class="bold">{{ user_profile.email }}</span><br><span class="value-caption">To change, send us an email. Apologies for the manual setup!</span></td></tr>
+            <tr><td>Password</td><td>******* <a id="change-password">Change password</a></td></tr>
+            <tr><td>Social account</td>
+                <td>{% if user_profile.get_profile.social_service == 'plus' %}Linked with <a href="http://plus.google.com/{{ user_profile.get_profile.social_id }}/" target="_blank">Google+</a>{% elif user_profile.get_profile.social_service == 'facebook' %}Linked with <a href="http://www.facebook.com/{{ user_profile.get_profile.social_id }}/" target="_blank">Google+</a>{% else %}No social account linked.{% endif %}</td>
+            </tr>
+            <tr><td colspan="2"><p><input type="submit" class="action-button page-submit-button" value="Save" /></p></td></tr>
+        </table>
+    </form>
+</div>
 
 <div class="change-password-dialog oc-popup">
     <div class="oc-popup-title-bar">

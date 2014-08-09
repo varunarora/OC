@@ -51,7 +51,7 @@ OC.feed = {
         '<%= target %></div></div></div></a></div></div>'),
 
     infiniteScroll: function(){
-        if (OC.feed.feedCount > 10){
+        if (OC.feed.feedCount > 10 && OC.config.user.id){
             var loadButton = $('.lazy-load-button'), i;
             $('.home-profile-content').on('DOMContentLoaded load resize scroll', function(event){
                 // If the load button is attached to the document.
@@ -59,7 +59,7 @@ OC.feed = {
                     if (isElementInViewport(loadButton) && !loadButton.hasClass('loading')){
                         loadButton.addClass('loading');
 
-                        $.get('/user/api/load-feed/' + OC.config.user.id +
+                        $.get('/user/api/load-feed/' + OC.config.profile.id +
                                 '/from/' + OC.feed.currentCount + '/',
                             function(response){
                                 if (response.status == 'true'){

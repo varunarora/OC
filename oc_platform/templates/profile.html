@@ -79,6 +79,12 @@
                 <script type="text/javascript">
                     OC.feed.feedCount = {{ feed_count }};
                     OC.feed.currentCount = {{ feed.count }};
+
+                    {% if user.is_authenticated %}
+                    OC.config.profile = {
+                        id: '{{ user.id }}'
+                    };
+                    {% endif %}
                 </script>
 
                 <div class="user-profile-feed-suggestions">

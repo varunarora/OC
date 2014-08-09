@@ -59,7 +59,7 @@ OC.feed = {
                     if (isElementInViewport(loadButton) && !loadButton.hasClass('loading')){
                         loadButton.addClass('loading');
 
-                        $.get('/user/api/load-feed/' + OC.config.user.id +
+                        $.get('/user/api/load-feed/' + OC.config.profile.id +
                                 '/from/' + OC.feed.currentCount + '/',
                             function(response){
                                 if (response.status == 'true'){
