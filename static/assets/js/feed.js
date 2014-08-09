@@ -141,14 +141,14 @@ OC.feed = {
                     feed_item_body += OC.feed.group(raw_item);
                     feed_item_body += OC.feed.date(raw_item);
 
-                    feed_item_body += OC.feed.groupItem(raw_item);
+                    feed_item_body += OC.feed.discussionItem(raw_item);
                 }
             } else if (raw_item.action_type === 'membership'){
                 feed_item_body += 'just joined the group ';
                 feed_item_body += OC.feed.membership(raw_item);
                 feed_item_body += OC.feed.date(raw_item);
 
-                feed_item_body += OC.feed.commentItem(raw_item);
+                feed_item_body += OC.feed.groupItem(raw_item);
             } else if (raw_item.action_type === 'project'){
                 feed_item_body += 'created the group ';
                 feed_item_body += OC.feed.membership(raw_item);
@@ -160,7 +160,7 @@ OC.feed = {
                 raw_item.target_thumbnail = raw_item.action_thumbnail;
                 raw_item.target_thumbnail_position = raw_item.action_thumbnail_position;
 
-                feed_item_body += OC.feed.commentItem(raw_item);
+                feed_item_body += OC.feed.groupItem(raw_item);
             } else if (raw_item.action_type === 'favorite'){
                 feed_item_body += 'favorited ';
                 feed_item_body += OC.feed.userURL(raw_item);
