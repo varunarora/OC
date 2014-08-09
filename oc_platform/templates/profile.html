@@ -112,7 +112,7 @@
 
                         </div>
 
-                        {% if feed_count > 20 %}
+                        {% if feed_count > 20 and user.is_authenticated %}
                         <div class="lazy-load-button">Load more...</div>
                         {% endif %}
                     </div>
