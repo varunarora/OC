@@ -1878,7 +1878,7 @@ def load_feed(request, user_id, feed_count):
                     serialized_feed[feed_item.id]['target_user'] = feed_item.target.user.get_full_name()
                     serialized_feed[feed_item.id]['target_user_url'] = reverse(
                         'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),
-                    serialized_feed[feed_item.id]['target_user_thumbnail'] = settings.MEDIA_URL + feed_item.target.user.profile_pic.name
+                    serialized_feed[feed_item.id]['target_user_thumbnail'] = settings.MEDIA_URL + feed_item.target.user.get_profile().profile_pic.name
 
         # If this is a group joining activity.
         if serialized_feed[feed_item.id]['action_type'] == 'membership':
