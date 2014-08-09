@@ -126,7 +126,7 @@ OC.feed = {
 
                 feed_item_body += OC.feed.commentItem(raw_item);
             } else if (raw_item.target_type === 'comment'){
-                if (raw_item.action_id === raw_item.target_id){
+                if (raw_item.action_type === raw_item.target_type){
                     feed_item_body += 'wrote a ';
                     feed_item_body += OC.feed.newPost(raw_item);
                     feed_item_body += ' in ';
