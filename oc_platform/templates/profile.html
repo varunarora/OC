@@ -82,7 +82,7 @@
 
                     {% if user.is_authenticated %}
                     OC.config.profile = {
-                        id: '{{ user.id }}'
+                        id: '{{ user_profile.id }}'
                     };
                     {% endif %}
                 </script>
