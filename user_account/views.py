@@ -1874,7 +1874,7 @@ def load_feed(request, user_id, feed_count):
                         'project_slug': feed_item.context.slug })
                 
                 # Its NOT a new discussion post, mostly a response to an existing one.
-                if serialized_feed[feed_item.id]['action_type'] != serialized_feed[feed_item.id]['target_type']:
+                if serialized_feed[feed_item.id]['action_id'] != serialized_feed[feed_item.id]['target_id']:
                     serialized_feed[feed_item.id]['target_user'] = feed_item.target.user.get_full_name()
                     serialized_feed[feed_item.id]['target_user_url'] = reverse(
                         'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),

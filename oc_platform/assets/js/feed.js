@@ -51,7 +51,7 @@ OC.feed = {
         '<%= target %></div></div></div></a></div></div>'),
 
     infiniteScroll: function(){
-        if (OC.feed.feedCount > 10){
+        if (OC.feed.feedCount > 10 && OC.config.user.id){
             var loadButton = $('.lazy-load-button'), i;
             $('.home-profile-content').on('DOMContentLoaded load resize scroll', function(event){
                 // If the load button is attached to the document.
