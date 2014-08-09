@@ -1859,26 +1859,22 @@ def load_feed(request, user_id, feed_count):
                         'resource_slug': feed_item.target.slug
                     })
 
-            # Assuming it is in response to another comment.
+            # Assuming it is in either on a project or in response to another comment.
             else:
-                serialized_feed[feed_item.id]['target'] = feed_item.target.title
                 serialized_feed[feed_item.id]['context'] = feed_item.context.title
-
-                # Its a new discussion post.
-                if serialized_feed[feed_item.id]['action_type'] == serialized_feed[feed_item.id]['target_type']:
-                    serialized_feed[feed_item.id]['target_url'] = reverse(
-                        'projects:project_discussion', kwargs={
-                            'project_slug': feed_item.context.slug,
-                            'discussion_id': feed_item.target.id
-                        }
-                    )
-                    serialized_feed[feed_item.id]['context_url'] = reverse(
-                        'projects:project_home', kwargs={
-                            'project_slug': feed_item.context.slug })
-
-                # Not this one.
-                else:
-                    serialized_feed[feed_item.id]['target'] = feed_item.target.body_markdown_html
+                serialized_feed[feed_item.id]['target'] = feed_item.target.body_markdown_html
+                serialized_feed[feed_item.id]['target_url'] = reverse(
+                    'projects:project_discussion', kwargs={
+                        'project_slug': feed_item.context.slug,
+                        'discussion_id': feed_item.target.id
+                    }
+                )
+                serialized_feed[feed_item.id]['context_url'] = reverse(
+                    'projects:project_home', kwargs={
+                        'project_slug': feed_item.context.slug })
+                
+                # Its NOT a new discussion post, mostly a response to an existing one.
+                if serialized_feed[feed_item.id]['action_type'] != serialized_feed[feed_item.id]['target_type']:
                     serialized_feed[feed_item.id]['target_user'] = feed_item.target.user.get_full_name()
                     serialized_feed[feed_item.id]['target_user_url'] = reverse(
                         'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),
