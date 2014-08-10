@@ -185,7 +185,7 @@ OC.upload = {
 
                 // Delete the original files from the dropzone listing.
                 OC.upload.dropzone_uploaded_files = {};
-                Dropzone.forElement('.upload-drag-drop').removeAllFiles();
+                Dropzone.forElement('.post-new-upload-dialog .upload-drag-drop').removeAllFiles();
 
                 // Delete the original files from Filepicker.
                 OC.upload.fp_uploaded_files = {};
@@ -200,7 +200,7 @@ OC.upload = {
 
         } else {
             var newElement = OC.upload.dzTemplate(newFile);
-            $('.upload-drag-drop').append(newElement);
+            $('.post-new-upload-dialog .upload-drag-drop').append(newElement);
         }
     },
 
@@ -272,7 +272,7 @@ OC.upload = {
             }
 
         } else {
-            var preparedFiles = $('.upload-drag-drop .dz-preview');
+            var preparedFiles = $('.post-new-upload-dialog .upload-drag-drop .dz-preview');
 
             var fp_key, dz_key, i, j, file_item, element_key, element_value;
             var formFiles = $('.files-upload-rename input[type=file]');
@@ -373,13 +373,13 @@ $(document).ready(function() {
         return false;
     });
 
-    $('.upload-drag-drop').dropzone({
+    $('.post-new-upload-dialog .upload-drag-drop').dropzone({
         url: '/api/file-upload/',
         maxFilesize: 5,
         createImageThumbnails: false
     });
 
-    Dropzone.forElement('.upload-drag-drop').on("sending", function(file, xhr, formData){
+    Dropzone.forElement('.post-new-upload-dialog .upload-drag-drop').on("sending", function(file, xhr, formData){
         function getCookie(name) {
             var cookieValue = null, cookies, i, cookie;
             if (document.cookie && document.cookie !== '') {
@@ -445,13 +445,13 @@ $(document).ready(function() {
     // TODO(Varun): Add the project/user + collection ID to the Dropzone request
 
     // In the case of posting a single item, bind upload progress event with template.
-    Dropzone.forElement('.upload-drag-drop').on('uploadprogress', function(file, progress, bytesSent){
+    Dropzone.forElement('.post-new-upload-dialog .upload-drag-drop').on('uploadprogress', function(file, progress, bytesSent){
         if (OC.upload.isPost){
             $('.single-upload .dz-progress .dz-upload').css('width', progress + '%');
         }
     });
 
-    Dropzone.forElement('.upload-drag-drop').on("success", function(file, response){
+    Dropzone.forElement('.post-new-upload-dialog .upload-drag-drop').on("success", function(file, response){
         // Make the name of the file content editable.
         $('.dz-filename span', file.previewElement).attr(
             'contenteditable', true);
