@@ -210,11 +210,15 @@ OC.resourcesCollections = {
                 resourceCollectionCheckboxEl.prop('checked', true);
             }
             resourceCollection.toggleClass('selected');
+
+            resourceCollectionCheckboxEl.trigger('itemSelected');
         });
 
         $('input[name=resource_collection_id]').click(function(event){
             resourceCollectionItem = $(event.target).parents('.resource-collection-item');
             resourceCollectionItem.toggleClass('selected');
+
+            $(event.target).trigger('itemSelected');
         });
 
         // Do not let checkbox, thumbnail link click triggers propogate back to the resource item.
@@ -1125,8 +1129,8 @@ OC.resourcesCollectionsActions = {
 
 
     bindResourceCollectionSelectors: function(){
-        $('.resource-collection-item input[type=checkbox]').change(
-            OC.resourcesCollectionsActions.resourceCollectionCheckboxHandler);
+        $('.resource-collection-item input[type=checkbox]').on(
+            'itemSelected', OC.resourcesCollectionsActions.resourceCollectionCheckboxHandler);
     },
 
     selectedResourcesCollections: [],
