@@ -51,6 +51,9 @@ urlpatterns = patterns(
     url(r'^move/resource/(?P<resource_id>\d+)/from/(?P<from_collection_id>\d+)/to/(?P<to_collection_id>\d+)/$', views.move_resource_to_collection, name='move_resource_to_collection'),    
     url(r'^move/collection/(?P<collection_id>\d+)/from/(?P<from_collection_id>\d+)/to/(?P<to_collection_id>\d+)/$', views.move_collection_to_collection, name='move_collection_to_collection'),
 
+    url(r'^rename/resource/(?P<resource_id>\d+)/(?P<new_title>.+)/$', views.rename_resource, name='move_resource_to_collection'),    
+    url(r'^rename/collection/(?P<collection_id>\d+)/(?P<new_title>.+)/$', views.rename_collection, name='move_collection_to_collection'),
+
     url(r'^(?P<resource_id>\d+)/build-export-document/$', views.build_export_document, name='build_export_document'),
 
     url(r'^(?P<resource_id>\d+)/$', views.view_resource_by_id, name='read_by_id_old'),
@@ -94,5 +97,5 @@ urlpatterns = patterns(
     url(r'^importer/$', views.feed_importer_home, name='feed_importer_home'),
     url(r'^importer/feed/$', views.feed_importer_list, name='feed_importer_list'),
 
-    url(r'^rename/(?P<collection_id>\d+)/$', views.rename_collection, name='rename_collection'),
+    url(r'^rename/(?P<collection_id>\d+)/$', views.play_rename_collection, name='play_rename_collection'),
 )

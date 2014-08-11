@@ -479,14 +479,18 @@ OC.resourcesCollectionsActions = {
         copyResources: [],
         copyCollections: [],
         deleteResources: [],
-        deleteCollections: []
+        deleteCollections: [],
+        renameResources: [],
+        renameCollections: []
     },
 
     actionsCompleted: {
         copyResources: [],
         copyCollections: [],
         deleteResources: [],
-        deleteCollections: []
+        deleteCollections: [],
+        renameResources: [],
+        renameCollections: []
     },
     actionCompletionCallback: '',
 
@@ -694,6 +698,38 @@ OC.resourcesCollectionsActions = {
         OC.resourcesCollectionsActions.actionCompleted();
     },
 
+    resourceRenamedSuccessfully: function(resourceID, newTitle){
+        var resourceItem = $('.resource-collection-item#resource-' + resourceID),
+            resourceTitle = $(".resource-item-description-title a", resourceItem);
+
+        resourceTitle.text(newTitle);
+
+        // Unselect the item.
+        resourceItem.trigger('click');
+
+        // Drop the action from the pending action list and announce completion.
+        OC.resourcesCollectionsActions.pendingActions.renameResources.splice(resourceID);
+        OC.resourcesCollectionsActions.actionsCompleted.renameResources.push(resourceID);
+
+        OC.resourcesCollectionsActions.actionCompleted();
+    },
+
+    collectionRenamedSuccessfully: function(collectionID, newTitle){
+        var collectionItem = $('.resource-collection-item#collection-' + collectionID),
+            collectionTitle = $(".resource-item-description-title a", collectionItem);
+
+        collectionTitle.text(newTitle);
+
+        // Unselect the item.
+        collectionItem.trigger('click');
+
+        // Drop the action from the pending action list and announce completion.
+        OC.resourcesCollectionsActions.pendingActions.renameCollections.splice(collectionID);
+        OC.resourcesCollectionsActions.actionsCompleted.renameCollections.push(collectionID);
+
+        OC.resourcesCollectionsActions.actionCompleted();
+    },
+
     copying: function(){
         OC.setMessageBoxMessage('Copying...');
         OC.showMessageBox();
@@ -713,6 +749,27 @@ OC.resourcesCollectionsActions = {
         } else if (copiedCollections.length >= 1) {
             OC.setMessageBoxMessage(
                 'Copied folder(s) successfully');
+        }
+
+        OC.showMessageBox();
+    },
+
+    renaming: function(){
+        // NOTE: This is currently overridden by the popup that dismisses it.
+        OC.setMessageBoxMessage('Renaming...');
+        OC.showMessageBox();
+    },
+
+    renamed: function(){
+        var renamedResource = OC.resourcesCollectionsActions.actionsCompleted.renameResources;
+        var renamedCollection = OC.resourcesCollectionsActions.actionsCompleted.renameCollections;
+
+        if (renamedResource.length === 1) {
+            OC.setMessageBoxMessage(
+                'Renamed resource successfully');
+        } else if (renamedCollection.length === 1) {
+            OC.setMessageBoxMessage(
+                'Renamed folder successfully');
         }
 
         OC.showMessageBox();
@@ -854,8 +911,8 @@ OC.resourcesCollectionsActions = {
         var copyButton = $('.collection-actions .copy-button');
         copyButton.click(OC.resourcesCollectionsActions.copyButtonClickHandler);
 
-        //var renameButton = $('.collection-actions .rename-button');
-        //renameButton.click(OC.resourcesCollectionsActions.renameButtonClickHandler);
+        var renameButton = $('.collection-actions .rename-button');
+        renameButton.click(OC.resourcesCollectionsActions.renameButtonClickHandler);
 
         var deleteButton = $('.collection-actions .del-button');
         deleteButton.click(OC.resourcesCollectionsActions.deleteButtonClickHandler);
@@ -967,6 +1024,59 @@ OC.resourcesCollectionsActions = {
         OC.resourcesCollectionsActions.pendingActions.copyCollections.concat(collectionsCopied);
 
         OC.resourcesCollectionsActions.actionCompletionCallback = OC.resourcesCollectionsActions.copied;
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+    },
+
+    renameButtonClickHandler: function(event){
+        // Set status to copying.
+        OC.resourcesCollectionsActions.renaming();
+
+        var resourceCollectionItem = $(OC.resourcesCollectionsActions.selectedResourcesCollections[0]).closest(
+            '.resource-collection-item');
+
+        // Launch rename dialog.
+        var renameFileFolderPopup = OC.customPopup('.rename-file-folder-dialog'),
+            nameInput = $('input[name="new_name"]', renameFileFolderPopup.dialog);
+
+        var oldTitle = $('.resource-item-description-title a', resourceCollectionItem).text();
+        nameInput.val(oldTitle);
+
+        $('.rename-file-folder-submit-button', renameFileFolderPopup.dialog).click(function(event){
+            renameFileFolderPopup.close();
+            var newTitle = nameInput.val();
+
+            if (newTitle !== oldTitle){
+                var renameResources = [], renameCollections = [];
+
+                if (resourceCollectionItem.hasClass('collection')){
+                    var collectionID = resourceCollectionItem.attr('id').substring(11);
+                    OC.collection.rename(
+                        collectionID, newTitle, OC.resourcesCollectionsActions.collectionRenamedSuccessfully);
+                    renameCollections.push(collectionID);
+                } else {
+                    var resourceID = resourceCollectionItem.attr('id').substring(9);
+                    OC.resource.rename(
+                        resourceID, newTitle, OC.resourcesCollectionsActions.resourceRenamedSuccessfully);
+                    renameResources.push(resourceID);
+                }
+
+                OC.resourcesCollectionsActions.pendingActions.renameResources.concat(renameResources);
+                OC.resourcesCollectionsActions.pendingActions.renameCollections.concat(renameCollections);
+
+                OC.resourcesCollectionsActions.actionCompletionCallback = OC.resourcesCollectionsActions.renamed;
+            }
+            
+            // Clear the new name from the dialog. 
+            nameInput.val('');
+            $(this).unbind('click');
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        });
 
         event.stopPropagation();
         event.preventDefault();

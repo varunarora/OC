@@ -5054,6 +5054,20 @@ _.extend(OC, {
                 event.preventDefault();
                 return false;
             });
+        },
+
+        rename: function(resourceID, title, callback){
+            $.post('/resources/rename/resource/' + resourceID + '/' + encodeURIComponent(title) + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        callback(response.resourceID, response.title);
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                        OC.dismissMessageBox();
+                    }
+                },
+            'json');
         }
     },
 
@@ -5124,6 +5138,20 @@ _.extend(OC, {
                 event.preventDefault();
                 return false;
             });
+        },
+
+        rename: function(collectionID, title, callback){
+            $.post('/resources/rename/collection/' + collectionID + '/' + encodeURIComponent(title) + '/',
+                function(response){
+                    if (response.status == 'true'){
+                        callback(response.collectionID, response.title);
+                    }
+                    else {
+                        OC.popup(response.message, response.title);
+                        OC.dismissMessageBox();
+                    }
+                },
+            'json');
         }
     },
 });

@@ -2154,7 +2154,7 @@ def feed_importer_list(request):
         return render(request, 'internal/feed-list.html', context)
 
 
-def rename_collection(request, collection_id):
+def play_rename_collection(request, collection_id):
     collection = Collection.objects.get(pk=collection_id)
     collection_resources = collection.resources.all()
 
@@ -2559,6 +2559,86 @@ def move_collection_to_collection(request, collection_id, from_collection_id, to
         context = {
             'title': 'Could not change the move the collection.',
             'message': 'We failed to the original collection into its new collection. '
+            + 'Please contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
+
+
+def rename_resource(request, resource_id, new_title):
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    if request.user != resource.user:
+        context = {
+            'title': 'Cannot change the name of this file.',
+            'message': 'You can only rename files you own and created. '
+            + 'Please contact the file owner to rename it.'
+        }
+        return APIUtilities._api_unauthorized_failure()
+
+    try:
+        from django.template.defaultfilters import slugify
+
+        resource.title = new_title
+        resource.slug = slugify(new_title)
+        resource.save()
+
+        context = {
+            'resourceID': str(resource.id),
+            'title': resource.title
+        }
+        return APIUtilities._api_success(context)
+
+    except:
+        context = {
+            'title': 'Could not change the rename the file.',
+            'message': 'We failed to rename this file. '
+            + 'Please contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
+
+
+def rename_collection(request, collection_id, new_title):
+    try:
+        collection = Collection.objects.get(pk=collection_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    if request.user != collection.creator:
+        context = {
+            'title': 'Cannot change the name of this folder.',
+            'message': 'You can only rename folders you own and created. '
+            + 'Please contact the folder owner to rename it.'
+        }
+        return APIUtilities._api_unauthorized_failure()
+
+    try:
+        import oer.CollectionUtilities as cu
+        import urllib
+        (collection_root_type, collection_root) = cu.get_collection_root(collection)
+        (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
+            collection_root.collection)
+
+        decoded_url = urllib.unquote_plus(new_title)
+
+        collection.title = decoded_url
+        collection.slug = cu._get_fresh_collection_slug(
+            decoded_url, flattened_tree)
+        collection.save()
+
+        context = {
+            'collectionID': str(collection.id),
+            'title': collection.title
+        }
+        return APIUtilities._api_success(context)
+
+    except Exception, e:
+        print e
+        context = {
+            'title': 'Could not change the rename the folder.',
+            'message': 'We failed to rename this folder. '
             + 'Please contact us if the problem persists.'
         }
         return APIUtilities._api_failure(context)
