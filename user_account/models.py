@@ -59,8 +59,8 @@ def add_to_mailing_list(sender, instance, created, raw, **kwargs):
             mailchimp.lists.subscribe(
                 settings.MAILCHIMP_MASTER_LIST_ID,
                 {'email': instance.user.email },
-                None, None,
-                False
+                {'fname': instance.user.first_name, 'lname': instance.user.last_name },
+                None, False
             )
         except Exception, e:
             from django.core.mail import mail_admins
