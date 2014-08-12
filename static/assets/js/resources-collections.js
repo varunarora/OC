@@ -109,8 +109,12 @@ OC.resourcesCollections = {
                                                     rawResource)
                                             );
 
-                                            newResourceCollection =  $('.resources-collections-added .resource-collection-item:last');
+                                            var newResourceCollectionSelector = '.resources-collections-added .resource-collection-item:last';
+                                            newResourceCollection =  $(newResourceCollectionSelector);
 
+                                            OC.resourcesCollections.bindItemSelect(newResourceCollectionSelector);
+                                            OC.resourcesCollectionsActions.bindResourceCollectionSelectors(newResourceCollectionSelector);
+                                            
                                             // Make the datetime on the resource timeago'ed.
                                             $('.resource-item-description-modified', newResourceCollection).timeago();
                                         }
@@ -196,13 +200,24 @@ OC.resourcesCollections = {
 
     },
 
-    bindItemSelect: function(){
-        var thumbnail, resourceCollectionCheckbox;
+    bindItemSelect: function(itemSelector){
+        var selector = itemSelector || '.resource-collection-item';
 
-        $('.resource-collection-item').click(function(event){
-            resourceCollection = $(this);
-            resourceCollectionCheckboxEl = $('input[name=resource_collection_id]', resourceCollection);
-            resourceCollectionCheckbox = resourceCollectionCheckboxEl[0];
+        $(selector).click(
+             OC.resourcesCollections.itemSelectClickHandlers.itemClick);
+
+        $(selector + ' input[name=resource_collection_id]').click(
+            OC.resourcesCollections.itemSelectClickHandlers.inputClick);
+
+        // Do not let checkbox, thumbnail link click triggers propogate back to the resource item.
+        OC.resourcesCollections.itemSelectClickHandlers.preventPropagationOnItemClick(selector);
+    },
+
+    itemSelectClickHandlers: {
+        itemClick: function(event){
+            var resourceCollection = $(this),
+                resourceCollectionCheckboxEl = $('input[name=resource_collection_id]', resourceCollection),
+                resourceCollectionCheckbox = resourceCollectionCheckboxEl[0];
 
             if (resourceCollectionCheckbox.checked){
                 resourceCollectionCheckboxEl.prop('checked', false);
@@ -212,20 +227,21 @@ OC.resourcesCollections = {
             resourceCollection.toggleClass('selected');
 
             resourceCollectionCheckboxEl.trigger('itemSelected');
-        });
+        },
 
-        $('input[name=resource_collection_id]').click(function(event){
-            resourceCollectionItem = $(event.target).parents('.resource-collection-item');
+        inputClick: function(event){
+            var resourceCollectionItem = $(event.target).parents('.resource-collection-item');
             resourceCollectionItem.toggleClass('selected');
 
             $(event.target).trigger('itemSelected');
-        });
+        },
 
-        // Do not let checkbox, thumbnail link click triggers propogate back to the resource item.
-        $('input[name=resource_collection_id], a.resource-item-thumbnail, ' +
-            '.resource-item-description-title a').click(function(event){
-            event.stopPropagation();
-        });
+        preventPropagationOnItemClick: function(itemSelector){
+            $(itemSelector + ' input[name=resource_collection_id], ' + itemSelector + ' a.resource-item-thumbnail, ' +
+                itemSelector + ' .resource-item-description-title a').click(function(event){
+                event.stopPropagation();
+            });
+        }
     },
 
     bindResourceCollectionCopyButton: function(itemType, resourceCollectionID, currentCollectionID){
@@ -1238,8 +1254,9 @@ OC.resourcesCollectionsActions = {
     },
 
 
-    bindResourceCollectionSelectors: function(){
-        $('.resource-collection-item input[type=checkbox]').on(
+    bindResourceCollectionSelectors: function(itemSelector){
+        var selector = itemSelector || '.resource-collection-item';
+        $(selector + ' input[type=checkbox]').on(
             'itemSelected', OC.resourcesCollectionsActions.resourceCollectionCheckboxHandler);
     },
 
