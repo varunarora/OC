@@ -428,11 +428,11 @@ $(document).ready(function() {
 
         // Append the values of user, project and collection ID
         formData.append('user', OC.config.user.id);
-        if ($('form input[name=project]').length > 0){
+        if ($('.post-new-upload-dialog form input[name=project]').length > 0){
             formData.append('project', $(
             'form.files-upload-rename input[name=project]').val());
         }
-        if ($('form input[name=collection]').length > 0) {
+        if ($('.post-new-upload-dialog form input[name=collection]').length > 0) {
             formData.append('collection', $(
                 'form.files-upload-rename input[name=collection]').val());
         }
