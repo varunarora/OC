@@ -103,6 +103,7 @@ class ResourceMeta(models.Model):
     time = models.PositiveIntegerField()
     materials = JSONField(null=True, blank=True)
     context = JSONField(null=True, blank=True)
+    show_description = models.BooleanField(default=False)
 
 
 class Suggestion(models.Model):

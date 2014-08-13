@@ -1,4 +1,25 @@
-{% if resource.meta %}
+{% if resource.meta.context %}
+<div class="oer-context">
+    <div class="oer-context-key">
+        <h3>A little background</h3>
+        <ul>
+            {% for context in resource.meta.context %}
+            <li>{{ context|safe }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="oer-context-fill"></div>
+</div>
+{% endif %}
+{% if resource.meta.show_description %}
+<div class="oer-description">
+    <div class="oer-description-key">
+        {{ resource.description }}
+    </div>
+    <div class="oer-description-fill"></div>
+</div>
+{% endif %}
+{% if resource.meta.objectives %}
 <section class="oer-meta">
     <div class="oer-meta-key">
         <h3>Objectives</h3>
@@ -22,6 +43,7 @@
 <section class="oer-meta-support">
     {% if resource.meta.time %}<span class="oer-meta-time-icon"></span>{{ resource.meta.time }} mins{% endif %}{% if resource.meta.materials %}<span class="oer-meta-materials-icon"></span>{{ resource.meta.materials|join:', ' }}{% endif %}{% if standards %}<span class="oer-meta-tag-icon"></span>{% for standard in standards %}<a href="{% url meta:standard tag_title=standard.title %}" class="oer-meta-support-tag" title="{{ standard.description }}">{{ standard.title }}</a>{% endfor %}{% endif %}
 </section>
-{% else %}
+{% endif %}
+{% if not resource.meta.show_description or resource.meta.objectives %}
 <div class="need-more-info">Confused about what the purpose of this resource is? Click <button class="action-button mini-action-button need-more-info-button">Need more information</button></div>
 {% endif %}

@@ -124,19 +124,6 @@
 
 	    <div id="viewerContainer" tabindex="0">
 	      <div class="viewer-wrapper">
-	      	{% if resource.meta.context %}
-	        <div class="oer-context">
-	        	<div class="oer-context-key">
-					<h3>A little background</h3>
-					<ul>
-						{% for context in resource.meta.context %}
-						<li>{{ context|safe }}</li>
-						{% endfor %}
-					</ul>
-				</div>
-				<div class="oer-context-fill"></div>
-	        </div>
-	        {% endif %}
 	        {% include 'partials/resource-meta-snippet.html' %}
 		    <div class="toolbar">
 		      <div id="toolbarContainer">
