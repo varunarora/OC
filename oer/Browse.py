@@ -571,6 +571,15 @@ class Browse():
             collection.categories.add(self.current_category)
 
 
+def calibrate_resource(resource):
+    # For each tag, find the set of categories who link to the tag.
+    for tag in resource.tags.all():
+        categories = Category.objects.filter(tags=tag)
+
+        # Iterate through related categories, and add them to the resource categories.
+        for category in categories:
+            resource.categories.add(category)
+
 
 def serialize(resources):
     serialized_resources = {}
