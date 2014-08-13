@@ -179,6 +179,7 @@ class DocumentElement(models.Model):
 class Link(models.Model):
     url = models.URLField(null=True, blank=True)
     rendered_url = models.ForeignKey('oer.Document', null=True, blank=True)
+    attachment = models.ForeignKey('oer.Attachment', null=True, blank=True)
 
 
 class Attachment(models.Model):
