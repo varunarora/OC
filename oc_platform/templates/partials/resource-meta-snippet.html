@@ -40,8 +40,10 @@
         {% endif %}
     </div>
 </section>
+{% endif %}
+{% if resource.meta.time != 0 or resource.meta.materials or standards %}
 <section class="oer-meta-support">
-    {% if resource.meta.time %}<span class="oer-meta-time-icon"></span>{{ resource.meta.time }} mins{% endif %}{% if resource.meta.materials %}<span class="oer-meta-materials-icon"></span>{{ resource.meta.materials|join:', ' }}{% endif %}{% if standards %}<span class="oer-meta-tag-icon"></span>{% for standard in standards %}<a href="{% url meta:standard tag_title=standard.title %}" class="oer-meta-support-tag" title="{{ standard.description }}">{{ standard.title }}</a>{% endfor %}{% endif %}
+    {% if resource.meta.time != 0 %}<span class="oer-meta-time-icon"></span>{{ resource.meta.time }} mins{% endif %}{% if resource.meta.materials %}<span class="oer-meta-materials-icon"></span>{{ resource.meta.materials|join:', ' }}{% endif %}{% if standards %}<span class="oer-meta-tag-icon"></span>{% for standard in standards %}<a href="{% url meta:standard tag_title=standard.title %}" class="oer-meta-support-tag" title="{{ standard.description }}">{{ standard.title }}</a>{% endfor %}{% endif %}
 </section>
 {% endif %}
 {% if not resource.meta.show_description or resource.meta.objectives %}
