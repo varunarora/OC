@@ -48,6 +48,6 @@
 </section>
 {% endif %}
 {% endif %}
-{% if not resource.meta.show_description or not resource.meta.objectives %}
+{% if not resource.meta.show_description and not resource.meta.objectives %}
 <div class="need-more-info">Confused about what the purpose of this resource is? Click <button class="action-button mini-action-button need-more-info-button">Need more information</button></div>
 {% endif %}
