@@ -452,10 +452,6 @@ $(document).ready(function() {
     });
 
     Dropzone.forElement('.post-new-upload-dialog .upload-drag-drop').on("success", function(file, response){
-        // Make the name of the file content editable.
-        $('.dz-filename span', file.previewElement).attr(
-            'contenteditable', true);
-
         var key;
         var response_object = JSON.parse(response);
         for (key in response_object) {
@@ -465,7 +461,12 @@ $(document).ready(function() {
         // Because there is no hook for the generated HTML, there is no way to
         //     programatically pass in the class for the <span> that holds the
         //     original filename. So have to inject the class manually.
-        $('.dz-preview:last .dz-filename > span').addClass(key);
+        $('.dz-preview .dz-filename > span:contains(' + OC.upload.dropzone_uploaded_files[key] + ')').addClass(
+            key);
+
+        // Make the name of the file content editable.
+        $('.dz-filename span', file.previewElement).attr(
+            'contenteditable', true);
 
         OC.upload.newFileUploadListener();
 

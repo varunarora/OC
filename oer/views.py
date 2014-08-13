@@ -847,6 +847,8 @@ def file_upload_submit(request):
         Redirect to project slug.
     """
     if request.method == "POST":
+        from django.template.defaultfilters import slugify
+
         user_id = request.POST.get('user', None)
         project_id = request.POST.get('project', None)
         collection_id = request.POST.get('collection', None)
@@ -908,27 +910,22 @@ def file_upload_submit(request):
             if collection_id:
                 del post_data['collection']
 
-            try:
-                del post_data['post']
-                del post_data['key']
-                del post_data['upload_service']
-                del post_data['type']
-                del post_data['category_id']
-                del post_data['MAX_FILE_SIZE']
-                del post_data['filename']
-                del post_data['submit']
-                del post_data['file']
-                del post_data['standard']
-            except:
-                pass
+            post_keys_to_delete = [
+                'post', 'key', 'upload_service', 'type'
+                'category_id', 'MAX_FILE_SIZE', 'filename',
+                'submit', 'file', 'standard'
+            ]
+            for key_to_delete in post_keys_to_delete:
+                try:
+                    del post_data[key_to_delete]
+                except:
+                    pass
 
             for id in post_data:
                 try:
                     resource = Resource.objects.get(pk=id)
                     # If the title has changed, persist it
                     if (resource.id != post_data[id]):
-                        from django.template.defaultfilters import slugify
-
                         resource.title = post_data[id]
                         resource.slug = slugify(post_data[id])
                         resource.save()
