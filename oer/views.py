@@ -927,7 +927,10 @@ def file_upload_submit(request):
                     resource = Resource.objects.get(pk=id)
                     # If the title has changed, persist it
                     if (resource.id != post_data[id]):
+                        from django.template.defaultfilters import slugify
+
                         resource.title = post_data[id]
+                        resource.slug = slugify(post_data[id])
                         resource.save()
 
                     # Add the necessary tags to the resource if this is a post upload.
