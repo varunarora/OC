@@ -14,7 +14,7 @@
 {% if resource.meta.show_description %}
 <div class="oer-description">
     <div class="oer-description-key">
-        {{ resource.description }}
+        {{ resource.description|safe }}
     </div>
     <div class="oer-description-fill"></div>
 </div>

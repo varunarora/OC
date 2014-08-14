@@ -611,6 +611,8 @@ var ResourceView = Backbone.View.extend({
          return (!OC.categoryResources.isSubjectHome && (
             !OC.categoryResources.isCatalog)) ? "content-panel-body-listing-banner-item" : "content-panel-body-listing-thumbnail-item";
     },
+    truncatedDescriptionLength: null,
+    itemHeight: null,
     thumbnailTemplate: _.template(
         '<a href="<%= user_url %>" class="content-panel-body-listing-item-user-picture" ' +
         'style="background-image: url(\'<%= user_thumbnail %>\')"></a>' +
@@ -658,30 +660,52 @@ var ResourceView = Backbone.View.extend({
             'mouseenter .content-panel-body-listing-item-user-picture': 'showUserTip',
             'mouseleave .content-panel-body-listing-item-user-picture': 'hideUserTip'
         };
-        if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog))
-            _.extend(events, {
-                'mouseenter .content-panel-body-listing-item-anchor': 'expand',
-                'mouseleave .content-panel-body-listing-item-anchor': 'collapse'
-            });
+        _.extend(events, {
+            'mouseenter .content-panel-body-listing-item-anchor': 'expand',
+            'mouseleave .content-panel-body-listing-item-anchor': 'collapse'
+        });
         return events;
     },
 
     expand: function () {
         this.$('.content-panel-body-listing-item-contents-caption').html(
             this.model.get('title'));
-        this.$('.content-panel-body-listing-item-contents-description').html(
-            this.model.get('description') === '' ? 'No description found.' : this.model.get('description'));
+        var descriptionToSet = this.model.get('description') === '' ? 'No description found.' : $(
+            this.model.get('description')).text();
+        this.$('.content-panel-body-listing-item-contents-description').html(descriptionToSet);
 
-        this.$el.addClass('expanded');
+        if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)) {
+            this.$el.addClass('expanded');
+        } else {
+            if (descriptionToSet.length > this.truncatedDescriptionLength){
+                this.itemHeight = this.$('a.content-panel-body-listing-item-anchor').height();
+                this.$('a.content-panel-body-listing-item-anchor').animateAuto('height', 200);
+            }
+        }
     },
 
     collapse: function () {
-        this.$el.removeClass('expanded');
+        var item = this;
+        function setTruncatedDescription(){
+            item.$('.content-panel-body-listing-item-contents-description').html(
+                item.getTrucatedDescription());
+        }
+
+        if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)) {
+            this.$el.removeClass('expanded');
+           setTruncatedDescription();
+        } else {
+            if (this.itemHeight){
+                this.$('a.content-panel-body-listing-item-anchor').animate({
+                    height: this.itemHeight
+                }, 300, function(){
+                    setTruncatedDescription();
+                });
+            }
+        }
 
         this.$('.content-panel-body-listing-item-contents-caption').html(
             this.getTrucatedTitle());
-        this.$('.content-panel-body-listing-item-contents-description').html(
-            this.getTrucatedDescription());
     },
 
     getTrucatedTitle: function (){
@@ -694,12 +718,12 @@ var ResourceView = Backbone.View.extend({
 
     getTrucatedDescription: function (){
         var originalDescriptionLength = this.model.get('description').length;
-        if (originalDescriptionLength > 100)
-            return this.model.get('description').substring(0, 100).trim() + '&hellip;';
+        if (originalDescriptionLength > this.truncatedDescriptionLength)
+            return $(this.model.get('description')).text().substring(0, this.truncatedDescriptionLength).trim() + '&hellip;';
         else if (originalDescriptionLength === 0)
             return 'No description found.';
 
-        return this.model.get('description');
+        return $(this.model.get('description')).text();
     },
 
     initialize: function() {
@@ -746,6 +770,8 @@ var ResourceView = Backbone.View.extend({
         // Set style of template (thumbnail or banner).
         this.template = (!OC.categoryResources.isSubjectHome && (
             !OC.categoryResources.isCatalog)) ? this.bannerTemplate : this.thumbnailTemplate;
+        this.truncatedDescriptionLength = (!OC.categoryResources.isSubjectHome && (
+            !OC.categoryResources.isCatalog)) ? 350 : 100;
 
         this.listenTo(this.model, "change", this.render);
     },
@@ -761,14 +787,12 @@ var ResourceView = Backbone.View.extend({
 
         if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)) {
             modelJSON['title'] = this.getTrucatedTitle();
-            modelJSON['description'] = this.getTrucatedDescription();
-        } else {
-            modelJSON['description'] = this.model.get(
-                'description') === '' ? 'No description found.' : this.model.get('description');
         }
 
+        modelJSON['description'] = this.getTrucatedDescription();
+
         this.$el.html(this.template(modelJSON));
-        
+
         //elementWrapper.append(this.$el);
         this.$('.content-panel-body-listing-item-contents-reviews').prepend(
             this.$starsView);
