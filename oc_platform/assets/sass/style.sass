@@ -36,6 +36,31 @@ $content-width: 960px
 	margin-bottom: 12px
 	color: #444
 
+// Mixins by Josh Broton (http://joshbroton.com/quick-fix-sass-mixins-for-css-keyframe-animations/)
+@mixin animation($animate)
+	$max: length($animate)
+	$animations: ''
+
+	@for $i from 1 through $max
+		$animations: #{$animations + nth($animate, $i)}
+
+		@if $i < $max
+			$animations: #{$animations + ", "}
+
+	-webkit-animation: $animations
+	-moz-animation:    $animations
+	-o-animation:      $animations
+	animation:         $animations
+
+
+@mixin transition($args)
+	-webkit-transition: $args
+	-moz-transition: $args
+	-ms-transition: $args
+	-o-transition: $args
+	transition: $args
+
+
 $header-height: 55px
 $header-prebanner-height: 4px
 
@@ -4798,9 +4823,10 @@ form.resource-create-edit-form
 		width: 800px
 		padding-top: 10px
 		padding-left: 20px
-								
+
 		&.expanded
-			height: auto
+			a.content-panel-body-listing-item-anchor
+				// height: auto
 
 		> a
 			outline: none
