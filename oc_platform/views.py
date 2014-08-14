@@ -288,3 +288,22 @@ def worksheet(request):
         'title': 'CBSE Math Clas 12 Sample paper maker'
     }
     return render(request, 'questions.html', context)    
+
+
+def merge_tags(from_id, to_id):
+    from meta.models import Tag, Category
+    from oer.models import Resource
+
+    from_tag = Tag.objects.get(pk=from_id)
+    to_tag = Tag.objects.get(pk=to_id)
+    try:
+        ar = Resource.objects.filter(tags=from_tag)
+        ac = Category.objects.filter(tags=from_tag)
+        for r in ar:
+            r.tags.add(to_tag)
+            r.tags.remove(from_tag)
+        for c in ac:
+            c.tags.add(to_tag)
+            c.tags.remove(from_tag)
+    except Exception, e:
+        print e
