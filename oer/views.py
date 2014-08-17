@@ -374,8 +374,11 @@ def _prepare_add_resource_context(request):
         if collection_slug:
             (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
                 user.get_profile().collection)
-            collection = next(
-                tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
+            try:
+                collection = next(
+                    tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
+            except:
+                collection = user.get_profile().collection
 
     # Get all licenses
     from license.models import License
