@@ -2182,7 +2182,8 @@ _.extend(OC, {
     },
 
     initUpload: function(){
-        $('nav#add-resource-menu .add-upload a, .profile-resources-collections-actions-menu-add .add-upload a').click(function(event){
+        $('nav#add-resource-menu .add-upload a, .profile-resources-collections-actions-menu-add .add-upload a,' +
+            'a.new-upload-suggestion').click(function(event){
             var newGroupDialog = OC.customPopup('.post-new-upload-dialog');
 
             event.stopPropagation();
