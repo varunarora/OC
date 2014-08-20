@@ -548,8 +548,12 @@ def new_unit(request):
                 (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
                     parent_collection)
                 title = request.POST.get('title', None)
+        
+                from django.template.defaultfilters import slugify
+                new_unit_suggested_slug = slugify(request.POST.get('title'))
+
                 slug = cu._get_fresh_collection_slug(
-                   title if title != '' else 'Untitled Unit', flattened_tree)
+                   title if new_unit_suggested_slug != '' else 'Untitled Unit', flattened_tree)
 
                 # Create and save the unit colleciton.
                 new_collection = Collection(
@@ -1597,8 +1601,17 @@ def new_user_collection(request, username):
 
         new_collection.host = collection
         new_collection.visibility = request.POST.get('collection_visibility')
-        new_collection.slug = cu._get_fresh_collection_slug(
-            request.POST.get('new_collection_name'), flattened_tree)
+        
+        from django.template.defaultfilters import slugify
+        new_collection_suggested_slug = slugify(request.POST.get('new_collection_name'))
+
+        if new_collection_suggested_slug != '':
+            new_collection.slug = cu._get_fresh_collection_slug(
+                request.POST.get('new_collection_name'), flattened_tree)
+        else:
+            new_collection.slug = cu._get_fresh_collection_slug(
+                'untitled', flattened_tree)
+
         new_collection.creator = user
         new_collection.save()
 
