@@ -520,10 +520,10 @@ class Browse():
         
         sqs = set()
         if len(sqs_title_categories) > 0:
-            sqs.add(sqs_title_categories)
+            sqs.add(list(sqs_title_categories))
 
         if len(sqs_description_categories) > 0:
-            sqs.add(sqs_description_categories)
+            sqs.add(list(sqs_description_categories))
 
         all_raw_resources += list(map(set_category_on_categorized_resource, sqs))
 
