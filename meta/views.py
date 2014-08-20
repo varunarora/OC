@@ -243,7 +243,14 @@ def standard(request, tag_title):
     for breadcrumb_category in breadcrumb:
         if breadcrumb_category.parent.slug == 'standards':
             break
-        breadcrumb_urlized.append(standard_urlize(breadcrumb_category.parent))
+
+        try:
+            breadcrumb_urlized.append(standard_urlize(breadcrumb_category.parent))
+        
+        # HACK(Varun): For practice standards whose parent has been ripped away.
+        except:
+            breadcrumb_category.url = ''    
+            breadcrumb_urlized.append(breadcrumb_category)
 
     breadcrumb_urlized.reverse()
 
