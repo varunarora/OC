@@ -37,5 +37,5 @@ urlpatterns = patterns(
     url(r'^(?P<username>[a-z0-9_\.]+)/$', views.user_profile, name='user_profile'),
 
     # Newsletters
-    url(r'^newsletter/tracker.gif', views.test_tracker, name='test_tracker'),
+    url(r'^newsletter/tracker.gif', views.newsletter_tracker, name='newsletter_tracker'),
 )
