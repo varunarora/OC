@@ -1968,3 +1968,15 @@ def api_get_profile(request, username):
 
     except:
         return APIUtilities._api_failure()
+
+
+# Non-view non API.
+
+def newsletter_tracker(request):
+    from django.core.mail import mail_admins
+    mail_admins('%s opened the email' % request.GET.get('id', None), '')
+
+    response = HttpResponse(
+        'R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='.decode('base64'),
+        mimetype='image/gif')
+    return response
