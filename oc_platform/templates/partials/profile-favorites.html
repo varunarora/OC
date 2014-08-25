@@ -1,11 +1,5 @@
-<script src="{{ STATIC_URL }}js/backbone-min.js" type="text/javascript"></script>
-<script src="{{ STATIC_URL }}js/resources.js" type="text/javascript"></script>
-<script type="text/javascript"></script>
-
 {% if favorites %}
-<div id="search-result-set" class="profile-favorites">
-    {% include 'partials/resource-thumbnail.html' with resources=favorites resources_source='favorites' %}
-</div>
+<div id="search-result-set" class="profile-favorites"></div>
 
 {% else %}
 <div class="no-favorites-found"> 

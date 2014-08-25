@@ -13,12 +13,6 @@
 		<!--[if lt IE 9]>
 			<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ie-override.css" />
 		<![endif]-->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
-		<script src="{{ STATIC_URL }}js/jquery-ui-1.10.4.custom.min.js" type="text/javascript"></script>
-		<script src="{{ STATIC_URL }}js/underscore-min.js" type="text/javascript"></script>
-		<script src="{{ STATIC_URL }}js/modernizr.js" type="text/javascript"></script>
-		<script src="{{ STATIC_URL }}js/jquery.tipsy.js" type="text/javascript"></script>
-		<script type="text/javascript" src="{{ STATIC_URL }}js/tag-it.min.js"></script>
 		<script type="text/javascript">
 			var OC = {
 				config: {
@@ -31,16 +25,77 @@
 					}
 				}
 			};
+			var staticURL = '{{ STATIC_URL }}';
 		</script>
-		<script src="{{ STATIC_URL }}js/core.js" type="text/javascript"></script>
+		<script data-main="{{ STATIC_URL }}js/common{% if not debug %}-build{% endif %}.js" src="{{ STATIC_URL }}js/lib/require.js" type="text/javascript"></script>
 		<script type="text/javascript">
-		</script>
+			require(['common'], function(){
+				{% if body_class == 'browse' %}
+					{% include 'js/browse.js' %}
+				{% elif body_class == 'profile-view' %}
+					{% if page == 'home' %}
+						OC.feed = {};
+						OC.feed.feedCount = {{ feed_count }};
+	                    OC.feed.currentCount = {{ feed.count }};
 
+	                    {% if user.is_authenticated %}
+	                    OC.config.profile = {
+	                        id: '{{ user_profile.id }}'
+	                    };
+	                    {% endif %}
+
+						require(['profile']);
+	                {% elif page == 'files' %}
+	                    OC.resourcesCollections = {}
+	                    OC.resourcesCollections.resourceCount = '{{ resource_count }}';
+    					OC.resourcesCollections.currentCount = {{ resources.count }};
+    					OC.resourcesCollections.ownerView = {% if user == user_profile %}true{% else %}false{% endif %};
+
+						require(['files']);
+
+	                {% elif page == 'favorites' %}
+	                	require(['jquery', 'resources'], function($, resources){
+							{% if favorites %}
+    							{% include 'partials/resource-thumbnail.js' with resources=favorites resources_source='favorites' %}
+							{% endif %}
+							require(['favorites']);
+	                	});
+
+	                {% else %}
+						require(['header']);
+					{% endif %}
+
+				{% elif body_class == 'project-view' %}
+                	require(['jquery', 'groups'], function($, groups){
+						OC.config.contentTypes.comment = '{{ host_content_type.id }}';
+						{% include 'js/discussion.js' %}
+						require(['group']);
+                	});
+				{% elif body_class == 'search' %}
+					require(['resources'], function(){
+						ga('set', 'dimension1', '{{ query }}');
+
+						{% include 'partials/resource-thumbnail.js' with resources=page.object_list resources_source='search' %}
+						require(['search']);
+					});
+
+				{% elif body_class == 'resource-view' %}
+					require(['article']);
+
+				{% elif body_class == 'editor' %}
+					require(['editor_page']);
+
+                {% else %}
+					require(['header']);
+
+				{% endif %}
+			});
+		</script>
 		<link rel="icon" href="{{ STATIC_URL }}favicon.ico" type="image/x-icon"/>
 	</head>
 	<body{% if body_class %} class="{{ body_class }}"{% endif %}>
 		{% if header_type != 'vanilla' %}
-		{% if body_class == 'browse' or body_class == 'profile-view' %}
+		{% if body_class == 'browse' or body_class == 'profile-view' or body_class == 'search' %}
 		<header class="wide-header">
 			<div id="header-prebanner"></div>
 			<div class="wide-center-stage">
@@ -65,6 +120,25 @@
 			</div>
 		</header>
 		{% elif body_class == 'index' %}
+		
+		{% elif body_class == 'mailpimp' %}
+		<header class="wide-header">
+			<div id="header-prebanner"></div>
+			<div class="wide-center-stage">
+				<div class="wide-center-stage-fill-panel header-brand-wrapper">
+					<a href={% if user.is_authenticated %}"{% url home %}"{% else %}"/"{% endif %} class="site-logo"><img src="{{ STATIC_URL }}images/mailpimp-logo.png" id="logo" alt="Mailpimp, by OpenCurriculum" title="Mailpimp, by OpenCurriculum" /></a>
+				</div>
+				<div class="wide-center-stage-key-panel">
+					<hgroup class="header-search-users-wrapper">
+						<hgroup id="search-bar">
+						</hgroup>
+						<hgroup id="header-right">
+							{% include 'partials/header-user.html' %}
+						</hgroup>
+					</hgroup>
+				</div>
+			</div>
+		</header>
 		{% else %}
 		<header>
 			<div id="header-prebanner"></div>

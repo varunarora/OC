@@ -166,7 +166,7 @@ header.wide-header
 @import "search_bar"
 @import "scaffolds"
 
-body.browse, body.index, body.profile-view
+body.browse, body.index, body.profile-view, body.mailpimp, body.search
 	> header
 		background-color: #333
 		height: $header-height - 7
@@ -5534,6 +5534,14 @@ body.signup, body.login
 		
 		.empty-state-title
 			width: 100%
+
+.video-placeholder
+	cursor: pointer
+
+	.video-placeholder-cover
+		width: 100%
+		height: 100%
+		background: url('../images/feed-video-icon.png') no-repeat center center
 
 /***** INTERNAL TOOLS *************/
 

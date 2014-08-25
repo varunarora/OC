@@ -2,19 +2,19 @@
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL}}css/viewer.css"/>
 
 <link rel="resource" type="application/l10n" href="{{ STATIC_URL}}js/pdfjs/locale/locale.properties"/>
-<script type="text/javascript" src="{{ STATIC_URL}}js/pdfjs/l10n.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL}}js/pdfjs/pdf.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL}}js/pdfjs/debugger.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL}}js/lib/pdfjs/l10n.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL}}js/lib/pdfjs/pdf.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL}}js/lib/pdfjs/debugger.js"></script>
 <script>
-PDFJS.imageResourcesPath = '{{ STATIC_URL }}images/pdfjs/';
-  PDFJS.workerSrc = '{{ STATIC_URL }}js/pdfjs/pdf.worker.js';
+PDFJS.imageResourcesPath = '{{ STATIC_URL }}images/lib/pdfjs/';
+  PDFJS.workerSrc = '{{ STATIC_URL }}js/lib/pdfjs/pdf.worker.js';
   PDFJS.cMapUrl = '../web/cmaps/';
 
 var DEFAULT_URL = {% if resource.extension == '.pdf' %}'{{ MEDIA_URL }}{{ resource.revision.content.file.name }}'{% else %}{% if resource.revision.content.rendered_file %}'{{ MEDIA_URL }}{{ resource.revision.content.rendered_file.name }}'{% else %}'{{ MEDIA_URL }}{{ resource.revision.content.attachment.file.name }}'{% endif %}{% endif %},
 	CSS_UNITS = 1;
 </script>
 
-<script type="text/javascript" src="{{ STATIC_URL}}js/pdfjs/viewer.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL}}js/lib/pdfjs/viewer.js"></script>
 
 <div id="outerContainer" class="loadingInProgress center-stage page-viewer">
 

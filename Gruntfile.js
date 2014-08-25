@@ -9,12 +9,13 @@ module.exports = function(grunt) {
             },
             dist: {
                 src: [
-                    'oc_platform/assets/js/jquery-ui-1.10.3.custom.min.js',
+                    'oc_platform/assets/js/jquery-ui-1.10.4.custom.min.js',
                     'oc_platform/assets/js/underscore-min.js',
                     'oc_platform/assets/js/backbone-min.js',
                     'oc_platform/assets/js/quicksilver.js',
                     'oc_platform/assets/js/modernizr.js',
                     'oc_platform/assets/js/jquery.tipsy.js',
+                    'oc_platform/assets/js/tag-it.min.js',
                     'oc_platform/assets/js/core.js'
                 ],
                 dest: 'oc_platform/assets/js/core.min.js'

@@ -74,19 +74,6 @@
             <div class="profile-content oc-tabs-content {{ page }}-profile-content">
 
             {% if page == 'home' %}
-                <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.timeago.js"></script>
-                <script type="text/javascript" src="{{ STATIC_URL }}js/feed.js"></script>
-                <script type="text/javascript">
-                    OC.feed.feedCount = {{ feed_count }};
-                    OC.feed.currentCount = {{ feed.count }};
-
-                    {% if user.is_authenticated %}
-                    OC.config.profile = {
-                        id: '{{ user_profile.id }}'
-                    };
-                    {% endif %}
-                </script>
-
                 <div class="user-profile-feed-suggestions">
                     <div class="user-profile-feed">
                         <div class="user-list feed-list">
