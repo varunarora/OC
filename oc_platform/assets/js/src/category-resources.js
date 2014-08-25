@@ -1,25 +1,5 @@
 define(['jquery', 'core', 'underscore', 'backbone', 'nanoscroller'], function($, undefined, _, Backbone){
 
-// Initialize resource results set Collection
-var ResourceSet = Backbone.Collection.extend({
-    model: Resource,
-    sortByPopularity: function(){
-        this.comparator = this.popularityComparator;
-        this.sort();
-    },
-    sortByNewest: function(){
-        this.comparator = this.newestComparator;
-        this.sort();
-    },
-    newestComparator: function(resource){
-        return -resource.get('created');
-    },
-    popularityComparator: function(resource){
-        return -resource.get('favorites');
-    },
-});
-
-
 // Initialize Category resources Model
 var Resource = Backbone.Model.extend({
     // ID of the resource.
@@ -71,12 +51,71 @@ var Resource = Backbone.Model.extend({
     remote: "",
 });
 
+// Initialize resource results set Collection
+var ResourceSet = Backbone.Collection.extend({
+    model: Resource,
+    sortByPopularity: function(){
+        this.comparator = this.popularityComparator;
+        this.sort();
+    },
+    sortByNewest: function(){
+        this.comparator = this.newestComparator;
+        this.sort();
+    },
+    newestComparator: function(resource){
+        return -resource.get('created');
+    },
+    popularityComparator: function(resource){
+        return -resource.get('favorites');
+    },
+});
+
+// Initialize request Model
+var Request = Backbone.Model.extend({
+    // URL of the request.
+    url: "",
+
+    // Body of the request.
+    body: "",
+
+    // User who created the request.
+    user: "",
+
+    // Thumbnail of user who created the request.
+    user_thumbnail: ""
+});
+
+// Initialize requests set Collection
+var RequestSet = Backbone.Collection.extend({
+    model: Request,
+    /*comparator: function(request){
+        return -request.get('created');
+    }*/
+});
+
 var Category = Backbone.Model.extend(
     { id: '', title: '', resources: '', url: '', position: '', truncated: true });
 var CategorySet = Backbone.Collection.extend({
     model: Category,
     comparator: 'position'
 });
+
+OC.categoryResources.childCategories = [];
+OC.categoryResources.resourceSet = new ResourceSet();
+OC.categoryResources.requestSet = new RequestSet();
+
+_.each(OC.categoryResources.rawChildCategories, function(category){
+    OC.categoryResources.childCategories.push(new Category(category));
+});
+
+_.each(OC.categoryResources.rawResources, function(resource){
+    OC.categoryResources.resourceSet.add(new Resource(resource));
+});
+
+_.each(OC.categoryResources.rawRequests, function(request){
+    OC.categoryResources.requestSet.add(new Request(request));
+});
+
 var CategoryCollectionView = Backbone.View.extend({
     truncatedResourceLimit: 0,
     initialize: function() {
@@ -274,30 +313,6 @@ var TagView = Backbone.View.extend({
         this.$el.html(this.template(this.model.toJSON()));
         return this.el;
     }
-});
-
-
-// Initialize request Model
-var Request = Backbone.Model.extend({
-    // URL of the request.
-    url: "",
-
-    // Body of the request.
-    body: "",
-
-    // User who created the request.
-    user: "",
-
-    // Thumbnail of user who created the request.
-    user_thumbnail: ""
-});
-
-// Initialize requests set Collection
-var RequestSet = Backbone.Collection.extend({
-    model: Request,
-    /*comparator: function(request){
-        return -request.get('created');
-    }*/
 });
 
 // Initialize request view.
@@ -748,25 +763,16 @@ var categorySet = new CategorySet();
 
 var searchedResources = null;
 
-OC.categoryResources = {
-    resourceSet: new ResourceSet(),
-    // Initialize the requests collection before page loads.
-    requestSet: new RequestSet(),
-    requestURL: '',
+_.extend(OC.categoryResources, {
     // Initialize the ResourceCollectionView, RequestCollectionView global
     resourceCollectionView: undefined,
     requestCollectionView: undefined,
 
-    currentCategoryID: null,
     lastInputTimestamp: null,
     searchFilterTimeout: null,
     filterAsyncSearchOn: false,
-    childCategories: [],
     visibleResourceCount: null,
-    isCatalog: false,
-    isSubjectHome: false,
     suggestionMode: false,
-    gradeCategoryMap: {},
     currentView: 'items',
 
     initBrowseView: function(){
@@ -1013,7 +1019,7 @@ OC.categoryResources = {
         // Create new collection.
         return filterResources(collection);
     }
-};
+});
 
 /**
     Core function that builds the univeral filters object as search filters are modified. As a

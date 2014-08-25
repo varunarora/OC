@@ -373,107 +373,110 @@ OC.upload = {
             return false;
         });
 
-        $('.post-new-upload-dialog .upload-drag-drop').dropzone({
-            url: '/api/file-upload/',
-            maxFilesize: 5,
-            createImageThumbnails: false
-        });
+        var uploadDragDrop = $('.post-new-upload-dialog .upload-drag-drop');
+        if (uploadDragDrop.length > 0){
+            $('.post-new-upload-dialog .upload-drag-drop').dropzone({
+                url: '/api/file-upload/',
+                maxFilesize: 5,
+                createImageThumbnails: false
+            });
 
-        Dropzone.forElement('.post-new-upload-dialog .upload-drag-drop').on("sending", function(file, xhr, formData){
-            function getCookie(name) {
-                var cookieValue = null, cookies, i, cookie;
-                if (document.cookie && document.cookie !== '') {
-                    cookies = document.cookie.split(';');
-                    for (i = 0; i < cookies.length; i++) {
-                        cookie = jQuery.trim(cookies[i]);
-                        // Does this cookie string begin with the name we want?
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(
-                                cookie.substring(name.length + 1));
-                            break;
+            Dropzone.forElement('.post-new-upload-dialog .upload-drag-drop').on("sending", function(file, xhr, formData){
+                function getCookie(name) {
+                    var cookieValue = null, cookies, i, cookie;
+                    if (document.cookie && document.cookie !== '') {
+                        cookies = document.cookie.split(';');
+                        for (i = 0; i < cookies.length; i++) {
+                            cookie = jQuery.trim(cookies[i]);
+                            // Does this cookie string begin with the name we want?
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(
+                                    cookie.substring(name.length + 1));
+                                break;
+                            }
                         }
                     }
+                    return cookieValue;
                 }
-                return cookieValue;
-            }
-            function sameOrigin(url) {
-                // url could be relative or scheme relative or absolute
-                var host = document.location.host, // host + port
-                    protocol = document.location.protocol,
-                    sr_origin = '//' + host,
-                    origin = protocol + sr_origin;
+                function sameOrigin(url) {
+                    // url could be relative or scheme relative or absolute
+                    var host = document.location.host, // host + port
+                        protocol = document.location.protocol,
+                        sr_origin = '//' + host,
+                        origin = protocol + sr_origin;
 
-                // Allow absolute or scheme relative URLs to same origin
-                return (url === origin || url.slice(
-                    0, origin.length + 1) === origin + '/') ||
-                    (url === sr_origin || url.slice(
-                        0, sr_origin.length + 1) === sr_origin + '/') ||
-                    // or any other URL that isn't scheme relative or absolute i.e
-                    //     relative.
-                    !(/^(\/\/|http:|https:).*/.test(url));
-            }
-            function safeMethod(method) {
-                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-            }
+                    // Allow absolute or scheme relative URLs to same origin
+                    return (url === origin || url.slice(
+                        0, origin.length + 1) === origin + '/') ||
+                        (url === sr_origin || url.slice(
+                            0, sr_origin.length + 1) === sr_origin + '/') ||
+                        // or any other URL that isn't scheme relative or absolute i.e
+                        //     relative.
+                        !(/^(\/\/|http:|https:).*/.test(url));
+                }
+                function safeMethod(method) {
+                    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+                }
 
-            var url = $(this)[0].options.url;
+                var url = $(this)[0].options.url;
 
-            // HACK(Varun): Modified from original if statement, because the method
-            //     is not available to us here. Original 'if' below:
-            //     if (!safeMethod(settings.type) && sameOrigin(url))
+                // HACK(Varun): Modified from original if statement, because the method
+                //     is not available to us here. Original 'if' below:
+                //     if (!safeMethod(settings.type) && sameOrigin(url))
 
-            if (sameOrigin(url)) {
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
+                if (sameOrigin(url)) {
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
 
-            // Append the values of user, project and collection ID
-            formData.append('user', OC.config.user.id);
-            if ($('.post-new-upload-dialog form input[name=project]').length > 0){
-                formData.append('project', $(
-                'form.files-upload-rename input[name=project]').val());
-            }
-            if ($('.post-new-upload-dialog form input[name=collection]').length > 0) {
-                formData.append('collection', $(
-                    'form.files-upload-rename input[name=collection]').val());
-            }
+                // Append the values of user, project and collection ID
+                formData.append('user', OC.config.user.id);
+                if ($('.post-new-upload-dialog form input[name=project]').length > 0){
+                    formData.append('project', $(
+                    'form.files-upload-rename input[name=project]').val());
+                }
+                if ($('.post-new-upload-dialog form input[name=collection]').length > 0) {
+                    formData.append('collection', $(
+                        'form.files-upload-rename input[name=collection]').val());
+                }
 
-            if (OC.upload.isPost) {
-                OC.upload.addToUploadList(null, file.name, 0, 'dropzone-item');
-            }
-        });
+                if (OC.upload.isPost) {
+                    OC.upload.addToUploadList(null, file.name, 0, 'dropzone-item');
+                }
+            });
 
-        // TODO(Varun): Add the project/user + collection ID to the Dropzone request
+            // TODO(Varun): Add the project/user + collection ID to the Dropzone request
 
-        // In the case of posting a single item, bind upload progress event with template.
-        Dropzone.forElement('.post-new-upload-dialog .upload-drag-drop').on('uploadprogress', function(file, progress, bytesSent){
-            if (OC.upload.isPost){
-                $('.single-upload .dz-progress .dz-upload').css('width', progress + '%');
-            }
-        });
+            // In the case of posting a single item, bind upload progress event with template.
+            Dropzone.forElement('.post-new-upload-dialog .upload-drag-drop').on('uploadprogress', function(file, progress, bytesSent){
+                if (OC.upload.isPost){
+                    $('.single-upload .dz-progress .dz-upload').css('width', progress + '%');
+                }
+            });
 
-        Dropzone.forElement('.post-new-upload-dialog .upload-drag-drop').on("success", function(file, response){
-            var key;
-            var response_object = JSON.parse(response);
-            for (key in response_object) {
-                OC.upload.dropzone_uploaded_files[key] = response_object[key]['title'];
-            }
+            Dropzone.forElement('.post-new-upload-dialog .upload-drag-drop').on("success", function(file, response){
+                var key;
+                var response_object = JSON.parse(response);
+                for (key in response_object) {
+                    OC.upload.dropzone_uploaded_files[key] = response_object[key]['title'];
+                }
 
-            // Because there is no hook for the generated HTML, there is no way to
-            //     programatically pass in the class for the <span> that holds the
-            //     original filename. So have to inject the class manually.
-            $('.dz-preview .dz-filename > span:contains(' + OC.upload.dropzone_uploaded_files[key] + ')').addClass(
-                key);
+                // Because there is no hook for the generated HTML, there is no way to
+                //     programatically pass in the class for the <span> that holds the
+                //     original filename. So have to inject the class manually.
+                $('.dz-preview .dz-filename > span:contains(' + OC.upload.dropzone_uploaded_files[key] + ')').addClass(
+                    key);
 
-            // Make the name of the file content editable.
-            $('.dz-filename span', file.previewElement).attr(
-                'contenteditable', true);
+                // Make the name of the file content editable.
+                $('.dz-filename span', file.previewElement).attr(
+                    'contenteditable', true);
 
-            OC.upload.newFileUploadListener();
+                OC.upload.newFileUploadListener();
 
-            if (OC.upload.isPost) {
-                OC.upload.updateSingleItemKey(key);
-            }
-        });
+                if (OC.upload.isPost) {
+                    OC.upload.updateSingleItemKey(key);
+                }
+            });
+        }
 
         $('input[type=file]').change(OC.upload.onFileInputChange);
     });

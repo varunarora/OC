@@ -2031,6 +2031,37 @@ define(['jquery', 'core', 'underscore', 'ckeditor', 'dropzone'], function($, OC,
             $('form#edit-unit-form textarea[name=description]').ckeditor({
                 skin: 'moono,/static/assets/css/ckeditor/skins/moono/'
             });
+        },
+
+        serializeDocument: function(){
+            var newDocumentForm = $('#new-resource-document-form'),
+                existingSerializedDocumentBody = $(
+                    'textarea[name="serialized-document-body"]'),
+                serializedDocumentBody;
+
+            if (existingSerializedDocumentBody.length === 0){
+                serializedDocumentBody = $('<textarea/>', {
+                    'text': JSON.stringify([
+                        {
+                            type: 'textblock',
+                            data: $('.editor-body').ckeditorGet().getData()
+                        }
+                    ]),
+                    'name': 'serialized-document-body'
+                });
+                newDocumentForm.append(serializedDocumentBody);
+
+            } else {
+                serializedDocumentBody = existingSerializedDocumentBody;
+                serializedDocumentBody.text = JSON.stringify([
+                    {
+                        type: 'textblock',
+                        data: $('.editor-body').ckeditorGet().getData()
+                    }
+                ]);
+            }
+
+            return serializedDocumentBody;
         }
     };
 
@@ -2132,36 +2163,5 @@ define(['jquery', 'core', 'underscore', 'ckeditor', 'dropzone'], function($, OC,
             newInput.focus();
         });
     });
-
-    function serializeDocument(){
-        var newDocumentForm = $('#new-resource-document-form'),
-            existingSerializedDocumentBody = $(
-                'textarea[name="serialized-document-body"]'),
-            serializedDocumentBody;
-
-        if (existingSerializedDocumentBody.length === 0){
-            serializedDocumentBody = $('<textarea/>', {
-                'text': JSON.stringify([
-                    {
-                        type: 'textblock',
-                        data: $('.editor-body').ckeditorGet().getData()
-                    }
-                ]),
-                'name': 'serialized-document-body'
-            });
-            newDocumentForm.append(serializedDocumentBody);
-
-        } else {
-            serializedDocumentBody = existingSerializedDocumentBody;
-            serializedDocumentBody.text = JSON.stringify([
-                {
-                    type: 'textblock',
-                    data: $('.editor-body').ckeditorGet().getData()
-                }
-            ]);
-        }
-
-        return serializedDocumentBody;
-    }
 
 });

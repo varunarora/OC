@@ -1,6 +1,6 @@
-require(['ckeditor', 'ckeditor_jquery', 'ckeditor_config', 'ckeditor_styles'], function(){
-    CKEDITOR.config.contentsCss =  '{{ STATIC_URL }}css/ckeditor/contents.css';
-    CKEDITOR.config.skin = 'moono,{{ STATIC_URL }}css/ckeditor/skins/moono_docs/';
+require(['ckeditor', 'ckeditor_jquery', 'ckeditor_config', 'ckeditor_styles', 'editor'], function(){
+    CKEDITOR.config.contentsCss =  staticURL + 'css/ckeditor/contents.css';
+    CKEDITOR.config.skin = 'moono,' + staticURL + 'css/ckeditor/skins/moono_docs/';
 
     require(['jquery', 'dropzone', 'editor'], function($, Dropzone){
 
@@ -126,7 +126,7 @@ require(['ckeditor', 'ckeditor_jquery', 'ckeditor_config', 'ckeditor_styles'], f
                 window.onbeforeunload = null;
 
                 // Add all element JSONs into strings.
-                serializeDocument();
+                OC.editor.serializeDocument();
                 $('#new-resource-document-form').submit();
 
                 event.stopPropagation();
