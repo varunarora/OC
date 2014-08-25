@@ -46,8 +46,10 @@
     paths: {
         jquery: 'empty:',
         filepicker: 'empty:',
-        mathjax: 'empty:'
+        mathjax: 'empty:',
+        requireLib: 'lib/require'
     },
+    include: 'requireLib',
     optimize: 'uglify2',
     removeCombined: true
 }
