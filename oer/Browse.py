@@ -12,6 +12,8 @@ from django.contrib.contenttypes.models import ContentType
 from interactions.models import Review
 from django.conf import settings
 from oc_platform import APIUtilities
+from interactions.models import Favorite
+from django.core.cache import cache
 import time
 
 
@@ -29,12 +31,22 @@ class Browse():
     breadcrumb = []
     request = {}
 
+    # Shared objects across functions.
+    users = {},
+    categories = {},
+
     resource_type_tag_category = TagCategory.objects.get(
         title='Resource type')
     resources_category = TagCategory.objects.get(title='Resources')
+    resource_ct = ContentType.objects.get_for_model(Resource)
+    collection_ct = ContentType.objects.get_for_model(Collection)
 
     def __init__(self, request, category_slug=None):
         self.request = request
+
+        self.users = {}
+        self.categories = {}
+
         if category_slug:
             self.category_slug = category_slug
             self.process_category_slug()
@@ -117,18 +129,16 @@ class Browse():
         parent_categories = list(Category.objects.filter(
             parent=self.selected_category.parent).order_by('position'))
 
-        for category in (child_categories + parent_categories):
-            breadcrumb = category_util.build_breadcrumb(category)
-            category.url = reverse(
-                'browse', kwargs={
-                    'category_slug': breadcrumb[0].url
-                }
-            )
+        serialized_child_categories = []
+        serialized_parent_categories = []
+
+        for category in parent_categories:
+            serialized_parent_categories.append(self.get_serialized_category(category))
 
         for category in child_categories:
-            category.count = Resource.objects.filter(categories=category, tags__in=Tag.objects.filter(
-                category=self.resource_type_tag_category)).order_by('-created').count() + Collection.objects.filter(categories=category, tags__in=Tag.objects.filter(
-                category=self.resource_type_tag_category)).order_by('-created').count()
+            self.set_category_count(category)
+            #category.count = self.get_serialized_category(category)['count']
+            serialized_child_categories.append(self.get_serialized_category(category))
 
         if not self.is_subject_home:
             # Determine if this is a catalog page or not.
@@ -153,10 +163,23 @@ class Browse():
                 category_group = Project.objects.get(pk=group_id)
 
                 from interactions.models import Comment
-                requests = Comment.objects.filter(
+                raw_requests = Comment.objects.filter(
                     category__slug='requests', parent_id=category_group.id,
                     parent_type=project_ct.id
                 )
+
+                requests = []
+                for raw_request in raw_requests:
+                    raw_request_user = self.get_serialized_user(raw_request.user_id)
+
+                    requests.append({
+                        'id': raw_request.id,
+                        'body': raw_request.body_markdown_html,
+                        'user_name': raw_request_user['name'],
+                        'user_thumbnail': raw_request_user['profile_pic'],
+                        'project_slug': category_group.slug
+                    })
+
             except KeyError:
                 category_group = None
             except StopIteration:
@@ -185,16 +208,12 @@ class Browse():
             for child_category in child_categories:
                 child_category_children = Category.objects.filter(
                     parent=child_category).order_by('position')
-                
-                for category in child_category_children:
-                    breadcrumb = category_util.build_breadcrumb(category)
-                    category.url = reverse(
-                        'browse', kwargs={
-                            'category_slug': breadcrumb[0].url
-                    }
-                )
 
-                child_categories_map[child_category.id] = child_category_children
+                serialized_child_category_children = []
+                for category in child_category_children:
+                    serialized_child_category_children.append(self.get_serialized_category(category))
+
+                child_categories_map[child_category.id] = serialized_child_category_children
 
 
         # Set the URL for the current page for redirect situations.
@@ -204,8 +223,8 @@ class Browse():
             'title': 'Browse lessons, projects, activities, worksheets &amp; tests',
             'selected_category': self.selected_category,
             # 'browse_tree': browse_tree,
-            'child_categories': child_categories,
-            'parent_categories': parent_categories,
+            'child_categories': serialized_child_categories,
+            'parent_categories': serialized_parent_categories,
             'return_url': self.return_url,
             'items': list(all_resources) + list(all_collections),
             'requests': requests,
@@ -352,33 +371,28 @@ class Browse():
 
 
     def build_browse_resource(self, resource_collection):
-        from django.contrib.contenttypes.models import ContentType
-        resource_ct = ContentType.objects.get_for_model(Resource)
-        collection_ct = ContentType.objects.get_for_model(Collection)
-
-        from interactions.models import Favorite
-
+        # TODO(Varun): Cache this call.
         resource_collection.type = resource_collection.tags.get(
             category=self.resource_type_tag_category)
 
         try:
             # resource.revision.user = resource.user
             resource_collection.favorites_count = Favorite.objects.filter(
-                parent_id=resource_collection.id, parent_type=resource_ct).count()
+                parent_id=resource_collection.id, parent_type=self.resource_ct).count()
             resource_collection.item_type = 'resource'
 
             resource_collection.favorited = Favorite.objects.get(
-                parent_id=resource_collection.id, parent_type=resource_ct, user=self.request.user) != None
+                parent_id=resource_collection.id, parent_type=self.resource_ct, user=self.request.user) != None
         except Favorite.DoesNotExist:
             if not hasattr(resource_collection, 'revision'):
                 try:
                     resource_collection.favorited = Favorite.objects.get(
-                        parent_id=resource_collection.id, parent_type=collection_ct, user=self.request.user) != None
+                        parent_id=resource_collection.id, parent_type=self.collection_ct, user=self.request.user) != None
                 except Favorite.DoesNotExist:
                     resource_collection.favorited = False
 
                 resource_collection.favorites_count = Favorite.objects.filter(
-                    parent_id=resource_collection.id, parent_type=collection_ct).count()
+                    parent_id=resource_collection.id, parent_type=self.collection_ct).count()
                 resource_collection.item_type = 'collection'
 
             else:
@@ -388,21 +402,91 @@ class Browse():
             resource_collection.favorited = False
 
         if not hasattr(resource_collection, 'filtered_tags'):
-            resource_collection.filtered_tags = resource_collection.tags.exclude(
+            # TODO(Varun): Cache this call.
+
+            raw_filtered_tags = resource_collection.tags.exclude(
                 category=self.resource_type_tag_category).exclude(
                 category=self.resources_category)
+
+            resource_collection.filtered_tags = [tag.title for tag in raw_filtered_tags]
 
         try:
             resource_collection.objectives = resource_collection.meta.objectives
         except:
             resource_collection.objectives = None
 
+        # TODO(Varun): Cache this call.
         from django.db.models import Avg
         review_average = Review.objects.filter(
             comment__parent_id=resource_collection.id, comment__classification='review').aggregate(Avg('rating'))['rating__avg']
         resource_collection.rating = review_average if review_average else 0
         resource_collection.review_count = Review.objects.filter(
             comment__parent_id=resource_collection.id, comment__classification='review').count()
+
+        # Get the user associated with this resource, if not known already.
+
+        try:
+            resource_collection_revision = resource_collection.revision
+            resource_collection.serialized_user = self.get_serialized_user(resource_collection_revision.user_id)
+        except:
+            resource_collection.serialized_user = self.get_serialized_user(resource_collection.creator_id)
+
+        # Set the content type of the resource.
+        try:
+            resource_collection.content_type = resource_collection.revision.content_type.name
+        except:
+            pass
+
+
+    def get_serialized_user(self, user_id):
+        if user_id not in self.users:
+            # Cache this call.
+            user_cache_key = "user_" + str(user_id)
+            self.users[user_id] = cache.get(user_cache_key)
+
+            # If no breadcrumb found in cache, build it and store it in the cache.
+            if not self.users[user_id]:
+                from django.contrib.auth.models import User
+                user = User.objects.get(pk=user_id)
+                user_profile = user.get_profile()
+
+                self.users[user.id] = {
+                    'id': user.id,
+                    'name': user.get_full_name(),
+                    'username': user.username,
+                    'profile_pic': user_profile.profile_pic.name
+                }                
+
+                # Set cache.
+                cache.set(user_cache_key, self.users[user.id])
+        
+        return self.users[user_id]
+
+
+    def get_serialized_category(self, category):
+        # TODO(Varun): Cache this call.
+        if category.id not in self.categories:
+            breadcrumb = category_util.build_breadcrumb(category)
+            self.categories[category.id] = {
+                'id': category.id,
+                'title': category.title,
+                'url': reverse(
+                    'browse', kwargs={
+                        'category_slug': breadcrumb[0].url
+                    }
+                )
+            }
+
+        return self.categories[category.id]
+
+
+    def set_category_count(self, category):
+        serialized_category = self.get_serialized_category(category)
+
+        # TODO(Varun): Cache this call.
+        serialized_category['count'] = Resource.objects.filter(categories=serialized_category['id'], tags__in=Tag.objects.filter(
+            category=self.resource_type_tag_category)).order_by('-created').count() + Collection.objects.filter(categories=category, tags__in=Tag.objects.filter(
+            category=self.resource_type_tag_category)).order_by('-created').count()
 
 
     # API stuff.

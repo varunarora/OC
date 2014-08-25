@@ -1,7 +1,22 @@
 from meta.models import Category, TagCategory
 import itertools
+from django.core.cache import cache
 
 def build_child_categories(category_model, flattened_descendants):
+    # Cache this call.
+    cc_cache_key = "cc_" + str(category_model['root'][0].id)
+    child_categories = cache.get(cc_cache_key)
+
+    # If no cc found in cache, build it and store it in the cache.
+    if not child_categories:
+        child_categories = calibrate_child_categories(category_model, flattened_descendants)
+        # Set cache.
+        cache.set(cc_cache_key, child_categories)
+
+    return child_categories
+
+
+def calibrate_child_categories(category_model, flattened_descendants):
     """Given a category tree model and a flattened list of categories, build
     a flushed out tree model recursively downwards.
 
@@ -41,7 +56,7 @@ def build_child_categories(category_model, flattened_descendants):
         # Call this function recursively to obtain the current models'
         #     descendant child categories
 
-        (descendantsTree, descendantsFlattened) = build_child_categories(
+        (descendantsTree, descendantsFlattened) = calibrate_child_categories(
             category_model, child_categories
         )
 
@@ -80,6 +95,21 @@ def _has_immediate_category_children(category):
 
 
 def build_breadcrumb(category):
+    # Cache this call.
+    breadcrumb_cache_key = "bc_" + str(category.id)
+    breadcrumb = cache.get(breadcrumb_cache_key)
+
+    # If no breadcrumb found in cache, build it and store it in the cache.
+    if not breadcrumb:
+        breadcrumb = calibrate_breadcrumb(category)
+
+        # Set cache.
+        cache.set(breadcrumb_cache_key, breadcrumb)
+
+    return breadcrumb 
+
+
+def calibrate_breadcrumb(category):
     # Create breadcrumb list and add the current category as current node
     breadcrumb = []
     breadcrumb.append(category)

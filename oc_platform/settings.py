@@ -396,3 +396,11 @@ try:
     from settings_prod import *
 except ImportError:
     pass
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': CACHE_HOST + ':11211',
+        'TIMEOUT': 86400
+    }
+}
