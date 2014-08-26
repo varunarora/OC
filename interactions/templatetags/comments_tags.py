@@ -101,8 +101,8 @@ def add_comment_data_to_element(node, node_element, user, root, host_type):
 
     markdown_html = ElementTree.fromstring(
         '<div class=\'post-comment-body\'>' + 
-        ElementTree.tostring(commentor) +
-        node.body_markdown_html + '</div>')
+        ElementTree.tostring(commentor).encode('utf-8') +
+        node.body_markdown_html.encode('utf-8') + '</div>')
 
     # Add comment actions (reply, upvote, downvote) to the comment
     node_actions = ElementTree.SubElement(markdown_html, 'div')
