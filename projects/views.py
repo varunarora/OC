@@ -57,7 +57,10 @@ def project_home(request, project_slug):
             'comments_content_type': comments_ct,            
         }
         return render(request, 'project/project.html', context)
-    except:
+    except Exception, e:
+        from django.core.mail import mail_admins
+        mail_admins('Group failed to load', str(e))
+
         raise Http404
 
 
