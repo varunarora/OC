@@ -396,7 +396,8 @@ define(['jquery', 'core', 'underscore', 'ckeditor', 'dropzone'], function($, OC,
                 sharedSpaces: {
                     top: 'editor-toolbar'
                 },
-                toolbar: 'Full'
+                toolbar: 'Full',
+                customConfig: staticURL + 'js/lib/ckeditor/config.js'
             }).ckeditorGet();
 
             // Turn off browser table resize.

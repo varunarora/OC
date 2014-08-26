@@ -76,9 +76,13 @@ OC.PostSet = Backbone.Collection.extend({
     }
 });
 
+OC.groups.postSet = new OC.PostSet();
 
-OC.groups = {
-    postSet: new OC.PostSet(),
+_.each(OC.groups.rawPosts, function(post){
+    OC.groups.postSet.add(new OC.Post(post));
+});
+
+_.extend(OC.groups, {
     postCollectionView: null,
 
     bindPostDeleteButtons: function(event){
@@ -131,7 +135,7 @@ OC.groups = {
         });
 
     }
-};
+});
 
 // Initialize post view.
 OC.PostView = Backbone.View.extend({

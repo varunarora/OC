@@ -1,6 +1,11 @@
 {% load comments_tags %}
+
+OC.groups = {
+    rawPosts: []
+};
+
 {% for post in posts %}
-    var post = new OC.Post({
+    var post = {
         id: {{ post.id }},
         user: '{{ post.user.get_full_name }}',
         userThumbnail: '{{ MEDIA_URL }}{{ post.user.get_profile.profile_pic.name }}',
@@ -21,6 +26,8 @@
         created_raw: {{ post.created|date:"U" }},
         created: '{{ post.created }}'
 
-    });
-    OC.groups.postSet.add(post);
+    };
+    OC.groups.rawPosts.push(post);
 {% endfor %}
+
+require(['group']);

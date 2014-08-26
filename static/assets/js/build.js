@@ -5,7 +5,7 @@
     modules: [
         {
             name: 'header',
-            include: ['jquery', 'underscore', 'modernizr', 'tipsy', 'tagit', 'core']
+            include: ['requireLib', 'jquery', 'underscore', 'modernizr', 'tipsy', 'tagit', 'core']
         },
         {
             name: 'browse',
@@ -41,15 +41,20 @@
             name: 'editor',
             include: ['editor_page'],
             exclude: ['header']
+        },
+        {
+            name: 'article',
+            include: ['article'],
+            exclude: ['header']
         }
     ],
     paths: {
         jquery: 'empty:',
         filepicker: 'empty:',
         mathjax: 'empty:',
-        requireLib: 'lib/require'
+        requireLib: 'lib/require',
     },
-    include: 'requireLib',
     optimize: 'uglify2',
-    removeCombined: true
+    removeCombined: true,
+    preserveLicenseComments: false
 }

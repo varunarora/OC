@@ -7,7 +7,6 @@ require.config({
         modernizr: 'lib/modernizr',
         tipsy: 'lib/jquery.tipsy',
         tagit: 'lib/tag-it.min',
-        article: 'src/article',
         backbone: 'lib/backbone-min',
         categoryResources: 'src/category-resources',
         core: 'src/core',
@@ -41,6 +40,7 @@ require.config({
         group: 'src/page/group',
         search: 'src/page/search',
         editor_page: 'src/page/editor',
+        article: 'src/page/article',
 
         // jQuery UI.
         autocomplete: 'lib/jquery-ui/autocomplete',

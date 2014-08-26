@@ -1,6 +1,6 @@
-require(['jquery', 'groups', 'dropzone'], function($, groups, Dropzone){
+define(['jquery', 'groups', 'dropzone'], function($, groups, Dropzone){
     $(document).ready(function ($) {
-        /* Projects specific initializers/renderers */
+        // Projects specific initializers/renderers
 
         // Initialize Projects' launch page.
         OC.projects.launch.init();

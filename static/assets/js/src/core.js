@@ -117,9 +117,6 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload'], func
             formSpinner: '.form-spinner',
             formError: '.form-error'
         },
-        contentTypes: {
-            comment: ''
-        }
     });
 
     // OpenCurriculum internal API.

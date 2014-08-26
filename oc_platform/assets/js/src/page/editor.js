@@ -1,4 +1,4 @@
-require(['ckeditor', 'ckeditor_jquery', 'ckeditor_config', 'ckeditor_styles', 'editor'], function(){
+define(['ckeditor', 'ckeditor_jquery', 'ckeditor_config', 'ckeditor_styles', 'editor'], function(){
     CKEDITOR.config.contentsCss =  staticURL + 'css/ckeditor/contents.css';
     CKEDITOR.config.skin = 'moono,' + staticURL + 'css/ckeditor/skins/moono_docs/';
 

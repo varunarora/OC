@@ -1,4 +1,4 @@
-define(['jquery', 'resources'], function($, OC){
+define(['jquery', 'core', 'resources'], function($, OC, resources){
     $(document).ready(function ($) {
         if (OC.config.user.id){
             // Initialize the favorite state of the search results.

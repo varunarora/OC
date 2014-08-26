@@ -1,13 +1,12 @@
 require.config({
-    baseUrl: staticURL + 'js',
-    //baseUrl: '',
+    //baseUrl: staticURL + 'js',
+    baseUrl: '',
     paths: {
         jquery: '//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min',
         underscore: 'lib/underscore-min',
         modernizr: 'lib/modernizr',
         tipsy: 'lib/jquery.tipsy',
         tagit: 'lib/tag-it.min',
-        article: 'src/article',
         backbone: 'lib/backbone-min',
         categoryResources: 'src/category-resources',
         core: 'src/core',
@@ -34,6 +33,7 @@ require.config({
 
         // Partials.
         browse: 'src/page/browse',
+        //browse: 'build/browse',
         profile: 'src/page/profile',
         files: 'src/page/files',
         favorites: 'src/page/favorites',
@@ -41,6 +41,7 @@ require.config({
         group: 'src/page/group',
         search: 'src/page/search',
         editor_page: 'src/page/editor',
+        article: 'src/page/article',
 
         // jQuery UI.
         autocomplete: 'lib/jquery-ui/autocomplete',
