@@ -1,6 +1,6 @@
 require.config({
-    baseUrl: staticURL + 'js',
-    //baseUrl: '',
+    //baseUrl: staticURL + 'js',
+    baseUrl: '',
     paths: {
         jquery: '//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min',
         underscore: 'lib/underscore-min',
