@@ -295,7 +295,10 @@ def about(request, project_slug):
                       ' &lsaquo; ' + project.title)
         }
         return render(request, 'project/about.html', context)
-    except:
+    except Exception, e:
+        from django.core.mail import mail_admins
+        mail_admins('Project about failed to load', str(e))
+
         raise Http404
 
 
