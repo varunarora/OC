@@ -20,6 +20,7 @@
 						id: {% if user.is_authenticated %}'{{ user.id }}'{% else %}undefined{% endif %},
 						username: '{{ user.username }}',
 						name: '{{ user.first_name }}',
+						full_name: '{{ user.get_full_name }}',
 						thumbnail: '{{ MEDIA_URL }}{{ user.get_profile.profile_pic.name }}',
 						dob: '{{ user.get_profile.dob.year }}'
 					},

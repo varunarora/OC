@@ -1,6 +1,6 @@
 require.config({
-    //baseUrl: staticURL + 'js',
-    baseUrl: '',
+    baseUrl: staticURL + 'js',
+    //baseUrl: '',
     paths: {
         jquery: '//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min',
         underscore: 'lib/underscore-min',
@@ -33,7 +33,6 @@ require.config({
 
         // Partials.
         browse: 'src/page/browse',
-        //browse: 'build/browse',
         profile: 'src/page/profile',
         files: 'src/page/files',
         favorites: 'src/page/favorites',
@@ -52,6 +51,9 @@ require.config({
         draggable: 'lib/jquery-ui/draggable',
         droppable: 'lib/jquery-ui/droppable',
         mouse: 'lib/jquery-ui/mouse',
-        slider: 'lib/jquery-ui/slider'
+        slider: 'lib/jquery-ui/slider',
+        dialog: 'lib/jquery-ui/dialog',
+        button: 'lib/jquery-ui/button',
+        resizable: 'lib/jquery-ui/resizable'
     },
 });

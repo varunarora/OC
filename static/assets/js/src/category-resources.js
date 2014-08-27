@@ -581,22 +581,29 @@ var ResourceView = Backbone.View.extend({
     },
 
     favorite: function(){
+        var currentFavoriteButton = this.$el.find(
+            '.content-panel-body-listing-item-favorites'),
+            currentFavoriteState = currentFavoriteButton.hasClass('favorited');
+        
+        favoriteCallback = this.favoriteCallback;
+
+        favoriteCallback(! currentFavoriteState, currentFavoriteButton);
         OC.favoriteClickHandler(
-            'resource', this.model.get('id'), this.favoriteCallback,
-            this.unfavoriteCallback, this.$el.find('.content-panel-body-listing-item-favorites')
-        );
+            'resource', this.model.get('id'), function(success){
+                if (!success) favoriteCallback(currentFavoriteState, currentFavoriteButton);
+        });
 
         return false;
     },
 
-    favoriteCallback: function(resourceFavoriteButton){
-        resourceFavoriteButton.text(parseInt(resourceFavoriteButton.text(), 10) + 1);
-        resourceFavoriteButton.addClass('favorited');
-    },
-
-    unfavoriteCallback: function(resourceFavoriteButton){
-        resourceFavoriteButton.text(parseInt(resourceFavoriteButton.text(), 10) - 1);
-        resourceFavoriteButton.removeClass('favorited');
+    favoriteCallback: function(resourceFavoriteState, resourceFavoriteButton){
+        if (resourceFavoriteState){
+            resourceFavoriteButton.text(parseInt(resourceFavoriteButton.text(), 10) + 1);
+            resourceFavoriteButton.addClass('favorited');
+        } else {
+            resourceFavoriteButton.text(parseInt(resourceFavoriteButton.text(), 10) - 1);
+            resourceFavoriteButton.removeClass('favorited');
+        }
     },
 
     showUserTip: function(){

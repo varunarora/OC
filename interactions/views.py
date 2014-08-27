@@ -94,11 +94,12 @@ def create_comment(request, postRequest):
     if comment_form.is_valid():
         comment = comment_form.save()
 
-        parent_type = postRequest.get('parent_type')
-        Comment.comment_created.send(
-            sender="Comments", comment_id=comment.id,
-            parent_type=parent_type, request=request
-        )
+        parent_type_id = postRequest.get('parent_type')
+
+        from interactions.tasks import comment as comment_task
+        commenting_task = comment_task.delay(
+            comment.id, parent_type_id, request.get_host())
+
         return comment
 
     else:
@@ -258,9 +259,9 @@ def favorite_resource(request, favorite_type, parent_id):
                 favorite_type == 'collection' and new_favorite.parent.creator != request.user):
                 # Send out a notification to the person who originally made
                 # the resource.
-                Favorite.item_favorited.send(
-                    sender="Favorite", favorite=new_favorite, request=request)
-
+                from interactions.tasks import favorite as favorite_task
+                favoriting_task = favorite_task.delay(request.get_host(), new_favorite.id)
+ 
             return APIUtilities._api_success()
         except:
             return APIUtilities._api_failure()

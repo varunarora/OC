@@ -39,10 +39,10 @@ class Comment(models.Model):
     def __unicode__(self):
         return str(self.parent_type) + ": " + str(self.parent_id)
 
-    comment_created = Signal(providing_args=["comment_id", "parent_type", "request"])
+    comment_created = Signal(providing_args=['comment_id', 'parent_type_id', 'host'])
 
 
-def remove_comment_activity(sender, instance, created, raw, **kwargs):
+def remove_comment_activity(sender, instance, created=None, raw=None, **kwargs):
     from django.contrib.contenttypes.models import ContentType
     comment_ct = ContentType.objects.get_for_model(Comment)
 
@@ -80,7 +80,7 @@ class Favorite(models.Model):
     parent_id = models.PositiveIntegerField()
     parent = generic.GenericForeignKey('parent_type', 'parent_id')
 
-    item_favorited = Signal(providing_args=["favorite", "request"])
+    item_favorited = Signal(providing_args=["host", "favorite_id"])
 
 
 class Review(models.Model):

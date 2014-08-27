@@ -102,10 +102,16 @@ define(['jquery', 'underscore', 'backbone', 'core'], function($, _, Backbone, OC
         },
 
         favorite: function(){
+            var currentFavoriteButton = this.$el.find('.resource-favorite'),
+                currentFavoriteState = currentFavoriteButton.hasClass('favorited');
+            
+            favoriteCallback = this.favoriteCallback;
+
+            favoriteCallback(! currentFavoriteState, currentFavoriteButton);
             OC.favoriteClickHandler('resource',
-                this.model.get('id'), this.favoriteCallback,
-                this.unfavoriteCallback, this.$el.find('.resource-favorite')
-            );
+                this.model.get('id'), function(success){
+                    if (!success) favoriteCallback(currentFavoriteState, currentFavoriteButton);
+            });
         },
 
         copy: function(){
@@ -126,15 +132,15 @@ define(['jquery', 'underscore', 'backbone', 'core'], function($, _, Backbone, OC
             'json');
         },
 
-        favoriteCallback: function(resourceFavorite){
-            resourceFavorite.text('Favorited');
-            resourceFavorite.addClass('favorited');
+        favoriteCallback: function(resourceFavoriteState, resourceFavoriteButton){
+            if (resourceFavoriteState){
+                resourceFavoriteButton.text('Favorited');
+                resourceFavoriteButton.addClass('favorited');
+            } else {
+                resourceFavoriteButton.text('Favorite');
+                resourceFavoriteButton.removeClass('favorited');
+            }
         },
-
-        unfavoriteCallback: function(resourceFavorite){
-            resourceFavorite.text('Favorite');
-            resourceFavorite.removeClass('favorited');
-        }
     });
 
     // Initialize the search results collection view

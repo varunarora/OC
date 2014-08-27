@@ -1662,13 +1662,8 @@ def subscribe(request, user_id):
         )
         new_subscription.save()
 
-        # Notify the user who has been subscribed to.
-        Subscription.new_subscription.send(
-            sender="UserProfile", subscription=new_subscription,
-            request=request
-        )
-
-        prepopulate_feed(new_subscription)
+        from user_account.tasks import subscribe as subscribe_task
+        subscription_task = subscribe_task.delay(request.get_host(), new_subscription.id)
 
         return APIUtilities._api_success()
     except:
@@ -1701,23 +1696,6 @@ def get_subscribe_state(request):
 
     except:
         return APIUtilities._api_failure()
-
-
-def prepopulate_feed(subscription):
-    # Fetch the past few activities of the subscribee where they created a resource.
-    from django.contrib.contenttypes.models import ContentType
-    from oer.models import Resource
-    from user_account.models import Activity
-
-    resource_type = ContentType.objects.get_for_model(Resource)
-
-    activities = Activity.objects.filter(
-        actor=subscription.subscribee.user, action_type=resource_type)[:10]
-
-    for activity in activities:
-        if activity.context_type.name == 'user profile' and activity.action.visibility == 'public':
-            # Push into the feed of the subscriber.
-            activity.recipients.add(subscription.subscriber.user)
 
 
 def username_availability(request, username):

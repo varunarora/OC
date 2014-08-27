@@ -3,7 +3,7 @@
 /*global jQuery, $, Modernizr, gapi, _*/
 /*jslint nomen: false */
 
-define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload'], function($){
+define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dialog'], function($){
 
     /**
      * fastLiveFilter jQuery plugin 1.0.3
@@ -2637,6 +2637,16 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload'], func
 
             var resourceFavoriteButton = $('button.favorite-button');
 
+            function setFavoriteUI(state, button){
+                if (state){
+                    button.addClass('favorited');
+                    button.text('Favorited');
+                } else {
+                    button.removeClass('favorited');
+                    button.text('Favorite');
+                }
+            }
+
             function setFavoriteState(resourceID, state){
                 if (state){
                     resourceFavoriteButton.addClass('favorited');
@@ -2648,14 +2658,14 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload'], func
                 OC.getFavoriteState('resource', resourceID, setFavoriteState);
 
                 resourceFavoriteButton.click(function(event){
-                    var currentResourceFavoriteButton = $(this);
+                    var currentResourceFavoriteButton = $(this),
+                        currentState = currentResourceFavoriteButton.hasClass('favorited');
+
+                    setFavoriteUI(! currentState, currentResourceFavoriteButton);
+
                     OC.favoriteClickHandler(
-                        'resource', resourceID, function(){
-                            currentResourceFavoriteButton.addClass('favorited');
-                            currentResourceFavoriteButton.text('Favorited');
-                        }, function(resourceFavoriteButton){
-                            currentResourceFavoriteButton.removeClass('favorited');
-                            currentResourceFavoriteButton.text('Favorite');
+                        'resource', resourceID, function(success){
+                            if (!success) setFavoriteUI(currentState, currentResourceFavoriteButton);
                         });
                 });
 
@@ -2671,15 +2681,15 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload'], func
             }
         },
 
-        favoriteClickHandler: function(type, resourceID, favoriteCallback, unfavoriteCallback, element){
+        favoriteClickHandler: function(type, resourceID, callback, element){
             function favorite(){
                 $.get('/interactions/favorite/' + type + '/' + resourceID + '/',
                     function(response){
-                        if (response.status == 'true'){
-                            favoriteCallback(element);
+                        if (response.status == 'true' || response.status == 'unfavorite success'){
+                            callback(true, element);
                         }
-                        else if (response.status == 'unfavorite success'){
-                            unfavoriteCallback(element);
+                        else {
+                            callback(false, element);
                         }
                     },
                 'json');
@@ -3435,7 +3445,7 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload'], func
                 '<div style="background-image: url(\'<%= profile_pic %>\')" class="discussion-response-thumbnail"></div>' +
                 '</div><div class="delete-button" title="Delete comment"></div>' +
                 '<div class="post-comment-body">' +
-                '<a href="/user/<%= username %>"><%= name %></a><%= body %>' +
+                '<a href="/user/<%= username %>"><%= name %></a> <%= body %>' +
                 '<form><input type="hidden" name="user" value="<%= user_id %>" />' +
                 '<input type="hidden" name="parent_type" value="<%= content_type %>" />' +
                 '<input type="hidden" name="parent_id" value="<%= id %>" /></form>' +
@@ -3515,16 +3525,17 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload'], func
             },
 
             postCommentClickHandler:function(event){
+                var commentTextarea = $(event.target).parents('.post-comments').find('textarea[name=body_markdown]'),
+                    comment = commentTextarea.val(),
+                    serializedCommentForm = $(event.target).parents('form').serialize();
+
                 function post(){
-                    var commentTextarea = $(event.target).parents('.post-comments').find('textarea[name=body_markdown]');
-                    if (commentTextarea.val() !== ''){
-                        $.post('/interactions/comment/',  $(event.target).parents('form').serialize(),
+                    if (comment !== ''){
+                        $.post('/interactions/comment/', serializedCommentForm,
                             function(response){
                                 // Hide the resource
-                                if (response.status == 'success'){
-                                    OC.comments.newCommentSuccessHandler(response, event.target);
-                                }
-                                else {
+                                if (response.status !== 'success'){
+                                    OC.comments.commentDeleteHandler(event.target);
                                     OC.popup(
                                         'Sorry, the comment could not be posted. Please try again later.');
                                 }
@@ -3534,6 +3545,21 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload'], func
                         commentTextarea.focus();
                     }
                 }
+
+                OC.comments.newCommentSuccessHandler(
+                    {
+                        message: {
+                            user_id: OC.config.user.id,
+                            name: OC.config.user.full_name,
+                            username: OC.config.user.username,
+                            profile_pic: OC.config.user.thumbnail,
+                            content_type: 0,
+                            id: 0,
+                            created: new Date().toISOString(),
+                            body: comment
+                        }
+                    },
+                event.target);
 
                 if (OC.config.user.id){
                     post();
@@ -4165,24 +4191,28 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload'], func
         },
 
         subscribeTo: function(userID, button){
+            function toggleSubscribeUI(){
+                if (button.hasClass('subscribed')){
+                    button.removeClass('subscribed');
+                    button.text('Subscribe');
+                } else {
+                    button.addClass('subscribed');
+                    button.text('✔ Subscribed');
+                }
+            }
+
             function subscribe(){
                 $.get('/user/api/subscribe/' + userID + '/',
                     function(response){
-                        if (response.status == 'true'){
-                            if (button.hasClass('subscribed')){
-                                button.removeClass('subscribed');
-                                button.text('Subscribe');
-                            } else {
-                                button.addClass('subscribed');
-                                button.text('✔ Subscribed');
-                            }
-                        } else {
+                        if (response.status !== 'true'){
+                            toggleSubscribeUI();
                             OC.popup(response.message, response.title);
                         }
                     },
                 'json');
             }
 
+            toggleSubscribeUI();
             if (OC.config.user.id){
                 subscribe();
             } else {

@@ -47,7 +47,7 @@ class Subscription(models.Model):
     def __unicode__(self):
         return self.subscriber.user.username + ":" +  self.subscribee.user.username  
 
-    new_subscription = Signal(providing_args=["subscription"])
+    new_subscription = Signal(providing_args=['host', 'subscription_id'])
 
 
 def add_to_mailing_list(sender, instance, created, raw, **kwargs):
@@ -108,8 +108,8 @@ class Notification(models.Model):
     @receiver(Comment.comment_created)
     def add_comment_notification(sender, **kwargs):
         comment_id = kwargs.get('comment_id', None)
-        parent_type = kwargs.get('parent_type', None)
-        request = kwargs.get('request', None)
+        parent_type_id = kwargs.get('parent_type_id', None)
+        host = kwargs.get('host', None)
 
         # Get the commment.
         from interactions.models import Comment, CommentReference
@@ -117,7 +117,7 @@ class Notification(models.Model):
 
         # Get the type of the parent of the comment
         from django.contrib.contenttypes.models import ContentType
-        parent_ct = ContentType.objects.get(pk=parent_type)
+        parent_ct = ContentType.objects.get(pk=parent_type_id)
 
         if parent_ct.name == 'comment reference':
             # Notify a consolidated list of (1) the collaborators on the resource,
@@ -168,7 +168,7 @@ class Notification(models.Model):
                 notification.save()
 
                 # Send an email about this notification.
-                nu.notify_by_email(notification, request.get_host())
+                nu.notify_by_email(notification, host)
 
         elif parent_ct.name == 'comment' or parent_ct.name == 'resource' or parent_ct.name == 'article revision':
             # Determine whether this is an ArticleRevision, resource, etc. and the
@@ -244,7 +244,7 @@ class Notification(models.Model):
                 notification.save()
 
                 # Send an email about this notification.
-                nu.notify_by_email(notification, request.get_host())
+                nu.notify_by_email(notification, host)
 
         elif parent_ct.name == 'project':
             project_members = comment.parent.members.all().exclude(pk=comment.user.id)
@@ -295,7 +295,7 @@ class Notification(models.Model):
     @receiver(Comment.comment_created)
     def new_comment_activity(sender, **kwargs):
         comment_id = kwargs.get('comment_id', None)
-        parent_type = kwargs.get('parent_type', None)
+        parent_type_id = kwargs.get('parent_type_id', None)
 
         # Get the commment.
         from interactions.models import Comment
@@ -303,7 +303,7 @@ class Notification(models.Model):
 
         # Get the type of the parent of the comment
         from django.contrib.contenttypes.models import ContentType
-        parent_ct = ContentType.objects.get(pk=parent_type)
+        parent_ct = ContentType.objects.get(pk=parent_type_id)
 
         if parent_ct.name == 'resource':
             import oer.ResourceUtilities as ru
@@ -578,7 +578,7 @@ class Notification(models.Model):
     @receiver(Favorite.item_favorited)
     def my_resource_favorited_notification(sender, **kwargs):
         favorite = kwargs.get('favorite', None)
-        request = kwargs.get('request', None)
+        host = kwargs.get('host', None)
 
         notification = Notification()
 
@@ -605,7 +605,7 @@ class Notification(models.Model):
         notification.save()
 
         # Send an email about this notification.
-        nu.notify_by_email(notification, request.get_host())
+        nu.notify_by_email(notification, host)
 
 
     @receiver(Vote.resource_vote_casted)
@@ -781,7 +781,7 @@ class Notification(models.Model):
     @receiver(Subscription.new_subscription)
     def new_subscription_notification(sender, **kwargs):
         subscription = kwargs.get('subscription', None)
-        request = kwargs.get('request', None)
+        host = kwargs.get('host', None)
 
         notification = Notification()
         notification.user = subscription.subscribee.user
@@ -799,4 +799,4 @@ class Notification(models.Model):
 
         # Send an email about this notification.
         nu.notify_subscription_by_email(
-            notification, request.get_host(), subscription.subscriber.user)
+            notification, host, subscription.subscriber.user)

@@ -51,6 +51,9 @@ require.config({
         draggable: 'lib/jquery-ui/draggable',
         droppable: 'lib/jquery-ui/droppable',
         mouse: 'lib/jquery-ui/mouse',
-        slider: 'lib/jquery-ui/slider'
+        slider: 'lib/jquery-ui/slider',
+        dialog: 'lib/jquery-ui/dialog',
+        button: 'lib/jquery-ui/button',
+        resizable: 'lib/jquery-ui/resizable'
     },
 });
