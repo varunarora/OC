@@ -329,11 +329,14 @@ def download(request, resource_id):
         key = bucket.get_key(resource.revision.content.file.name)
         content_type = key.content_type
 
-    # TODO(Varun): Security risk. Check file name for safeness
-    response = HttpResponse(resource.revision.content.file, content_type)
-    response['Content-Disposition'] = (
-        'attachment; filename="%s"' % resource.revision.content.file.name)
-    return response
+    try:
+        # TODO(Varun): Security risk. Check file name for safeness
+        response = HttpResponse(resource.revision.content.file, content_type)
+        response['Content-Disposition'] = (
+            'attachment; filename="%s"' % resource.revision.content.file.name)
+        return response
+    except:
+        raise Http404
 
 
 def _prepare_add_resource_context(request):
@@ -573,7 +576,10 @@ def new_unit(request):
                     'user:list_collection', username=new_collection.creator.username, collection_slug=new_collection.slug
                 )
         except:
-            return redirect('user:user_profile', username=request.user.username)
+            try:
+                return redirect('user:user_profile', username=request.user.username)
+            except:
+                raise Http404
 
     else:
         raise Http404
@@ -787,7 +793,7 @@ def fp_upload(request):
 
     for key_unicode in post_data:
         key = str(key_unicode)             # Unicode by default.
-        title = str(post_data[key])
+        title = str(post_data[key].encode('utf-8'))
         file_list.append((key, title))     # Two parens because tuple.
 
     response = {}
