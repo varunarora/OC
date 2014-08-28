@@ -470,6 +470,7 @@ class Browse():
             self.categories[category.id] = {
                 'id': category.id,
                 'title': category.title,
+                'slug': category.slug,
                 'url': reverse(
                     'browse', kwargs={
                         'category_slug': breadcrumb[0].url

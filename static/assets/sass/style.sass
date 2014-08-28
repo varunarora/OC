@@ -4272,8 +4272,136 @@ form.resource-create-edit-form
 					font-size: 1.3em
 					padding-top: 70px
 
+// WORLD'S BIGGEST HACK
+body.browse
+	#search-bar input[type="submit"]
+		background-color: #2980b9
+
+	#search-bar input[type="search"]
+		&:focus
+			border-color: #2980b9
 
 .resource-browse
+	&.resource-browse-subject
+
+		.subjects-header
+			height: 100px
+			background-color: #2980b9
+
+			.subjects-header-subjects
+				margin: auto
+				width: 80%
+
+				.subjects-header-subjects-subject
+					color: #679FC5
+					font-weight: bold
+					float: left
+					width: 33%
+					text-align: center
+					height: 65px
+					padding-top: 35px
+
+					&.selected
+						background-image: url('../images/subject-selector.png')
+						background-position: bottom center
+						background-repeat: no-repeat
+						color: #fff
+
+		.wide-center-stage
+			padding-top: 16px
+			height: auto
+
+			.wide-center-stage-key-panel
+				//width: 68%
+
+		ul.grades
+			margin-right: 40px
+			float: right
+
+			li
+				a
+					padding: 6px 20px
+					width: 85%
+					display: block
+					outline: none
+					color: $body-color
+
+					&.current
+						background-color: #fff	
+
+					&:hover
+						text-decoration: none
+
+					&.grade
+						&:hover
+							background-color: #f9f9f9
+
+						&:hover, &.current
+							background-image: url('../images/grade-selector-arrow-dark.png')
+							background-repeat: no-repeat
+							background-position: 95% center
+
+					&.grade-section
+						margin-top: 10px
+						color: #999
+						font-size: 0.85em
+						text-transform: uppercase
+						font-weight: bold
+
+		.grades-topics-list
+			margin: auto
+			overflow: hidden
+			margin-left: 25px
+
+			.grades-topics-list-empty
+				text-align: center
+				margin-top: 50px
+				left: 30px
+				position: relative
+				opacity: 0
+
+				&.hidden
+					display: none
+
+
+			ul.grades-topics-list-filled
+
+				li.grade-topic
+					float: left
+					width: 180px
+					margin-right: 40px
+
+					a
+						color: $light-font
+
+						&:hover
+							text-decoration: none
+
+							.grade-topic-content
+								border-color: #2980b9
+								color: #2980b9
+
+						.grade-topic-thumbnail, .grade-topic-content
+							width: 180px
+
+						.grade-topic-thumbnail
+							background-color: #2980b9
+							height: 140px
+							background-repeat: no-repeat
+							background-position: center center
+
+						.grade-topic-content
+							background-color: #fff
+							height: 79px
+							padding: 20px
+							width: 138px
+							border-width: 1px
+							border-style: solid
+							border-color: #fff
+							line-height: 1.6em
+							font-weight: bold
+
+
 	.category-panel
 		.category-panel-listing
 			.category-choice-wrapper
@@ -4388,84 +4516,6 @@ form.resource-create-edit-form
 				.content-panel-body-search
 					.search-filters
 						padding: 20px
-
-				.content-panel-body-feature
-					width: 100%
-					background: url('../images/mathematics-cover.jpg') no-repeat center center
-					background-size: cover
-					height: 200px
-
-					.content-panel-body-feature-title
-						color: #fff
-						margin-left: 20px
-						position: relative
-
-						.breadcrumb
-							a
-								color: #5abd02
-								//color: #2F7AFF
-
-				.content-panel-body-grades-topics
-					overflow: hidden
-
-					.content-panel-body-grades-wrapper
-						float: left
-						width: 35%
-
-						ul.content-panel-body-grades
-							li
-								a
-									padding: 10px 20px
-									background-color: #5adb02
-									color: #fff
-									width: 100%
-									display: block
-									border-bottom: 1px solid #60CA02
-									outline: none
-
-									&:hover
-										background-color: #4EA302
-
-									&.current
-										background-color: #428A01									
-
-									&:hover, &.current
-										text-decoration: none
-										background-image: url('../images/grade-selector-arrow.png')
-										background-repeat: no-repeat
-										background-position: 95% center
-
-					.content-panel-body-grades-topics-list
-						float: right
-						width: 61%
-						margin: auto
-
-						.content-panel-body-grades-topics-list-empty
-							text-align: center
-							margin-top: 50px
-							left: 30px
-							position: relative
-							opacity: 0
-
-							&.hidden
-								display: none
-
-
-						ul.content-panel-body-grades-topics-list-filled
-							li
-								a
-									padding: 10px 20px
-									background-color: #f9f9f9
-									color: $body-color
-									font-weight: bold
-									width: 100%
-									display: block
-									border-bottom: 1px solid #ddd
-									outline: none
-
-									&:hover
-										text-decoration: none
-										background-color: #fff
 
 				.content-panel-body-header
 					min-height: 30px

@@ -782,19 +782,30 @@ _.extend(OC.categoryResources, {
     suggestionMode: false,
     currentView: 'items',
 
+    commonCoreEasyMap: {
+        'Kindergarten': 'Kindergarten',
+        'Elementary / Primary School': {
+            'Grade 1': 'Grade 1',
+            'Grade 2': 'Grade 2',
+            'Grade 3': 'Grade 3',
+            'Grade 4': 'Grade 4',
+            'Grade 5': 'Grade 5'
+        },
+        'Middle School': {
+            'Grade 6': 'Grade 6',
+            'Grade 7': 'Grade 7',
+            'Grade 8': 'Grade 8'
+        },
+        'High School': {
+            'High School: Number &amp; Quantity': 'Number &amp; Quantity',
+            'High School: Algebra': 'Algebra',
+            'High School: Functions': 'Functions',
+            'High School: Geometry': 'Geometry',
+            'High School: Statistics &amp; Probability': 'Statistics &amp; Probability'
+        },
+    },
+
     initBrowseView: function(){
-        function resizeHeader(){
-            // Set header height based on page height.
-            var newHeight = $(window).height() - $('body > header').height() - $(
-                    '.content-panel-body-grades').height();
-            $('.content-panel-body-feature').height(newHeight);
-
-            // Reposition the title.
-            $('.content-panel-body-feature-title').css({
-                'top': newHeight - $('.content-panel-body-feature-title').height() - 20
-            });
-        }
-
         var scrollbarWidth = getScrollbarWidth();
 
         // Clear the filter search box.
@@ -842,31 +853,19 @@ _.extend(OC.categoryResources, {
             $('.category-panel-listing-categories-body-filters-description').tipsy(
                 {gravity: 's'});
 
+            // Setup the grades based on the easy map.
+            OC.categoryResources.setupGradeListing();
+
+            // Bind grade click handler.
+            $('ul.grades li a.grade').click(OC.categoryResources.gradeClickHandler);
+
             // Slide in the empty state placeholder on the home browse page.
             setTimeout(function(){
-                $('.content-panel-body-grades-topics-list-empty').animate({
+                $('.grades-topics-list-empty').animate({
                     'left': 0,
                     'opacity': 1
                 }, 1000);
             }, 500);
-
-            resizeHeader(); $(window).resize(resizeHeader);
-
-            // Bind grade click handler.
-            $('ul.content-panel-body-grades li a').click(function(event){
-                var currentGrade = $(this),
-                    childCategoryID = parseInt($(this).attr('id').substring(9), 10);
-                
-                $('ul.content-panel-body-grades li a').removeClass('current');
-                currentGrade.addClass('current');
-
-                OC.categoryResources.setGradeTopicList(
-                    OC.categoryResources.gradeCategoryMap[childCategoryID]);
-
-                event.stopPropagation();
-                event.preventDefault();
-                return false;
-            });
 
             // If something has just been posted, show the 'just posted' dialog.
             if (window.location.search.indexOf('posted=success') !== -1){
@@ -885,6 +884,21 @@ _.extend(OC.categoryResources, {
                 });
             }
        }
+    },
+
+    gradeClickHandler: function(event){
+        var currentGrade = $(this),
+            childCategoryID = parseInt($(this).attr('id').substring(9), 10);
+        
+        $('ul.grades li a').removeClass('current');
+        currentGrade.addClass('current');
+
+        OC.categoryResources.setGradeTopicList(
+            OC.categoryResources.gradeCategoryMap[childCategoryID]);
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
     },
 
     initSuggestionsView: function(){
@@ -931,22 +945,141 @@ _.extend(OC.categoryResources, {
     },
 
     setGradeTopicList: function(topics){
-        $('.content-panel-body-grades-topics-list-empty').addClass('hidden');
+        $('.grades-topics-list-empty').addClass('hidden');
 
-        var listWrapper = $('.content-panel-body-grades-topics-list-filled');
+        var listWrapper = $('.grades-topics-list-filled');
         listWrapper.html('');
 
-        var i, newTopicWrapper, newTopicLink;
+        var i, newTopicWrapper, newTopicLink, newTopicLinkThumbnail, newTopicLinkContent;
         for (i = 0; i < topics.length; i++){
-            newTopicWrapper = $('<li/>');
+            newTopicWrapper = $('<li/>', {'class': 'grade-topic'});
             newTopicLink = $('<a/>', {
-                'html': topics[i].title,
                 'href': topics[i].url
             });
+            newTopicLinkThumbnail = $('<div/>', {
+                'class': 'grade-topic-thumbnail',
+                'style': 'background-image: url(\'' + staticURL +
+                    'images/categories/' +  topics[i].slug + '.png' + '\');'
+            });
+            newTopicLinkContent = $('<div/>', {
+                'text': topics[i].title,
+                'class': 'grade-topic-content'
+            });
 
+            newTopicLink.append(newTopicLinkThumbnail);
+            newTopicLink.append(newTopicLinkContent);
             newTopicWrapper.append(newTopicLink);
             listWrapper.append(newTopicWrapper);
         }
+    },
+
+    setupGradeListing: function(){
+        // For each raw category, find where it is on the Common Core map.
+        var i, k, cameraTitle, key, sections = {}, ccMapKeys = _.keys(OC.categoryResources.commonCoreEasyMap),
+            isIndependent, gradeMap = [];
+
+        function getSectionThatContainsCategory(categoryTitle){
+            var j;
+            for (j in sections){
+                if (sections.hasOwnProperty(j)){
+                    if (_.has(sections[j], categoryTitle))
+                        return j;
+                }
+            }
+        }
+
+        function getSectionFromGradeMap(sectionTitle){
+            for (k = 0; k < gradeMap.length; k++){
+                if (_.isObject(gradeMap[k])){
+                    if (_.keys(gradeMap[k])[0] === sectionTitle) return _.values(
+                        gradeMap[k])[0];
+                }
+            }
+
+            // Create section if doesn't already exist.
+            sectionMap = {};
+            sectionMap[section] = [];
+            gradeMap.push(sectionMap);
+
+            return sectionMap[section];
+        }
+
+        for (key in OC.categoryResources.commonCoreEasyMap){
+            if (OC.categoryResources.commonCoreEasyMap.hasOwnProperty(key)){
+                if (_.isObject(OC.categoryResources.commonCoreEasyMap[key]))
+                    sections[key] = OC.categoryResources.commonCoreEasyMap[key];
+            }
+        }
+
+        for (i = 0; i < OC.categoryResources.rawChildCategories.length; i++){
+            // Check to see if this is one of the keys of the Common Core map.
+            isIndependent = ccMapKeys.indexOf(OC.categoryResources.rawChildCategories[i].title) !== -1;
+
+            // If this is a key, add its value to map as is.
+            if (isIndependent){
+                gradeMap.push({
+                    title: OC.categoryResources.commonCoreEasyMap[OC.categoryResources.rawChildCategories[i].title],
+                    id: OC.categoryResources.rawChildCategories[i].id,
+                    url: OC.categoryResources.rawChildCategories[i].url
+                });
+
+            } else {
+                // If not, find which section it is in, and add it to that section of the map.
+                section = getSectionThatContainsCategory(
+                    OC.categoryResources.rawChildCategories[i].title);
+
+                if (section){
+                    cameraTitle = sections[section][OC.categoryResources.rawChildCategories[i].title];
+                    getSectionFromGradeMap(section).push(
+                        {
+                            title: cameraTitle,
+                            id: OC.categoryResources.rawChildCategories[i].id,
+                            url: OC.categoryResources.rawChildCategories[i].url
+                        }
+                    );
+                }
+            }
+        }
+
+        var m, n, a, li, value, grades = $('.grades-topics ul.grades');
+
+        function appendGrade(id, title, url){
+            li = $('<li/>');
+            a = $('<a/>', {
+                href: url,
+                html: title,
+                id: 'category-' + id,
+                class: 'grade'
+            });
+
+            li.append(a);
+            grades.append(li);
+        }
+
+        // Now build the menu.
+        for (m = 0; m < gradeMap.length; m++){
+            value = _.values(gradeMap[m]);
+
+            if (value.length === 1){
+                // First, append the section title.
+                li = $('<li/>');
+                a = $('<a/>', {
+                    text: _.keys(gradeMap[m])[0],
+                    'class': 'grade-section'
+                });
+                li.append(a);
+                grades.append(li);
+
+                sectionCategories = _.values(gradeMap[m])[0];
+                for (n = 0; n < sectionCategories.length; n++){
+                    appendGrade(
+                        sectionCategories[n].id, sectionCategories[n].title, sectionCategories[n].url);
+                }
+            } else {
+                appendGrade(gradeMap[m].id, gradeMap[m].title, gradeMap[m].url);
+            }
+        }
+
     },
 
     initInfiniteScroll: function(){
@@ -1341,7 +1474,7 @@ function init_mvc() {
             var requestsToRender = new RequestSet(OC.categoryResources.requestSet.filter(function (request) {
                 return request.get('body').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
             }));
-            requestCollectionView.render(requestsToRender);
+            OC.categoryResources.requestCollectionView.render(requestsToRender);
 
         });
     }

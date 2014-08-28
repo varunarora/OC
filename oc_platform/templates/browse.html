@@ -4,6 +4,38 @@
 {% include 'partials/header.html' with body_class='browse' %}
 {% endif %}
 
+{% if child_categories_map %}
+<div class="center-spread resource-browse resource-browse-subject">
+    <div class="subjects-header">
+        <div class="subjects-header-subjects">
+            <h2 class="subjects-header-subjects-subject">English</h2>
+            <h2 class="subjects-header-subjects-subject selected">Mathematics</h2>
+            <h2 class="subjects-header-subjects-subject">Science</h2>
+        </div>
+    </div>
+    <div class="wide-center-stage">
+        <div class="wide-center-stage-fill-panel">
+            <div class="grades-topics">
+                <ul class="grades">
+                    {# for child_category in child_categories #}
+                    <!--<li><a href="{{ child_category.url }}" id="category-{{ child_category.id }}">{{ child_category.title }}</a></li>-->
+                    {# endfor #}
+                </ul>
+            </div>
+        </div>
+        <div class="wide-center-stage-key-panel content-panel">
+            <div class="grades-topics-list">
+                <div class="grades-topics-list-empty">
+                        <img src="{{ STATIC_URL }}images/select-category.png" />
+                        <h1 class="empty-state-title"><span class="grades-topics-list-empty-arrow empty-state-arrow"></span>Select a grade level for a list of topic areas</h1>
+                    </div>
+                    <ul class="grades-topics-list-filled"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+<div>
+{% else %}
 <div class="center-spread resource-browse">
     <div class="wide-center-stage">
         <div class="wide-center-stage-fill-panel category-panel">
@@ -150,6 +182,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <div class="browse-post-new-dialog oc-popup">
     <div class="oc-popup-title-bar">

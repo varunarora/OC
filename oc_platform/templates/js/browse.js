@@ -18,24 +18,23 @@ OC.categoryResources.isSubjectHome = {% if child_categories_map %}true{% else %}
     {% for child_categories_child in value %}
         OC.categoryResources.gradeCategoryMap['{{ key }}'].push({
             title: '{{ child_categories_child.title }}',
-            url: '{{ child_categories_child.url }}'
+            url: '{{ child_categories_child.url }}',
+            slug: '{{ child_categories_child.slug }}',
+            position: {{ forloop.counter }}
         });
     {% endfor %}
 {% endfor %}
-
-
-{% if not child_categories_map %}
 
 {% for child_category in child_categories %}
     OC.categoryResources.rawChildCategories.push({
         id: '{{ child_category.id }}',
         title: '{{ child_category.title }}',
         url: '{{ child_category.url }}',
+        slug: '{{ child_category.slug }}',
         count: {{ child_category.count }},
         position: {{ forloop.counter }}
     });
 {% endfor %}
-{% endif %}
 
 {% if browse_mode != 'suggestions' %}
 {% for item in items %}
