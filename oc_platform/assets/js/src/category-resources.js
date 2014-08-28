@@ -806,6 +806,13 @@ _.extend(OC.categoryResources, {
     },
 
     initBrowseView: function(){
+        function resizeGradeTopics(){
+            // Set header height based on page height.
+            var newHeight = $(window).height() - $('body > header').height() - $(
+                    '.subjects-header').height() - parseInt($('.resource-browse-subject .wide-center-stage').css('padding-top'), 10);
+            $('.grades-topics-list').height(newHeight);
+        }
+
         var scrollbarWidth = getScrollbarWidth();
 
         // Clear the filter search box.
@@ -866,6 +873,9 @@ _.extend(OC.categoryResources, {
                     'opacity': 1
                 }, 1000);
             }, 500);
+
+            if ($('.resource-browse-subject').length > 0)
+                resizeGradeTopics(); $(window).resize(resizeGradeTopics);
 
             // If something has just been posted, show the 'just posted' dialog.
             if (window.location.search.indexOf('posted=success') !== -1){
@@ -962,7 +972,7 @@ _.extend(OC.categoryResources, {
                     'images/categories/' +  topics[i].slug + '.png' + '\');'
             });
             newTopicLinkContent = $('<div/>', {
-                'text': topics[i].title,
+                'html': topics[i].title,
                 'class': 'grade-topic-content'
             });
 
