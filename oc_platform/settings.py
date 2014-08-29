@@ -9,7 +9,7 @@ SIGNUPS_ADMINS = ['hello@opencurriculum.org']
 CONTRIBUTOR_SIGNUPS_ADMINS = ['hello@opencurriculum.org', 'zeinab@opencurriculum.org', 'duncan@opencurriculum.org']
 HELP_EMAIL = 'hello@opencurriculum.org'
 
-EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_HOST = "smtp.mandrillapp.com"
 EMAIL_PORT = "587"
 EMAIL_HOST_USER = ""  # This needs to filled in
 EMAIL_HOST_PASSWORD = ""  # This needs to filled in
