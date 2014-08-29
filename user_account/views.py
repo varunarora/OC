@@ -1951,8 +1951,9 @@ def api_get_profile(request, username):
 # Non-view non API.
 
 def newsletter_tracker(request):
-    from django.core.mail import mail_admins
-    mail_admins('%s opened the email' % request.GET.get('id', None), '')
+    from user_account.tasks import open_newsletter
+    open_newsletter.delay(
+        request.GET.get('uid', None), request.GET.get('cid', None))
 
     response = HttpResponse(
         'R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='.decode('base64'),

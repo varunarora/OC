@@ -19,6 +19,11 @@ def get_empty_onboarding():
     return json.loads('{"signup": {"status": false}}')
 
 
+def get_default_digests():
+    import json
+    return json.loads('{"newsletter": "true"}')
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     headline = models.CharField(max_length=256, null=True, blank=True)
@@ -35,6 +40,7 @@ class UserProfile(models.Model):
     subscriptions = models.ManyToManyField('self', symmetrical=False,
         related_name="user_subscriptions", blank=True, null=True, through='Subscription')
     onboarding = JSONField(default=get_empty_onboarding)
+    digests = JSONField(default=get_default_digests)
 
     def __unicode__(self):
         return self.user.username
@@ -73,6 +79,24 @@ post_save.connect(add_to_mailing_list, sender=UserProfile)
 
 class Cohort(models.Model):
     members = models.ManyToManyField(User)
+
+
+class Campaign(models.Model):
+    title = models.CharField(max_length=64)
+    slug = models.SlugField(max_length=64)
+    opens = models.ManyToManyField(UserProfile, blank=True, null=True, through='CampaignOpen')
+
+    def __unicode__(self):
+        return self.title
+
+
+class CampaignOpen(models.Model):
+    campaign = models.ForeignKey('user_account.Campaign')
+    user = models.ForeignKey(UserProfile)
+    datetime = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def __unicode__(self):
+        return str(self.campaign.id) + ':' + self.user.user.username
 
 
 class Activity(models.Model):
