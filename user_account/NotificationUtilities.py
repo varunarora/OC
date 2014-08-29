@@ -41,5 +41,5 @@ def test_trackable(template_name, subject, user, campaign, context):
     from user_account.tasks import send_newsletter
     from django.template.loader import render_to_string
 
-    template = render_to_string('newsletter/%s.html' % template_name, context)
+    template = render_to_string('newsletters/%s.html' % template_name, context)
     send_newsletter.delay(template, subject, campaign.id, user.id)
