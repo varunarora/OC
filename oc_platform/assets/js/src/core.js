@@ -4,6 +4,9 @@
 /*jslint nomen: false */
 
 define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dialog'], function($){
+    //window.onerror = function(message, url, lineNumber){
+    //    $('')
+    //}
 
     /**
      * fastLiveFilter jQuery plugin 1.0.3
@@ -257,20 +260,20 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
 
             function attachEscapePopupHandler(popup){
                 $('.oc-popup-exit', popup.dialog).click(function(){
-                    popup.close(popup);
+                    popup.close();
                 });
 
                 $(document).keyup(function(event) {
                     if (popup.dialog.hasClass('show-popup')){
                         if (event.which == 27) { // 'Esc' on keyboard
-                            popup.close(popup);
+                            popup.close();
                         }
                     }
                 });
             }
 
-            function closePopup(popup){
-                popup.dialog.removeClass('show-popup');
+            function closePopup(){
+                this.dialog.removeClass('show-popup');
                 $('.popup-background').removeClass('show-popup-background');
 
                 // If any other popup is still open, show popup background again.
@@ -5488,7 +5491,6 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
 
         // Initial tour on signup.
         OC.signupTour();
-
     });
     var fbAppID;
 
