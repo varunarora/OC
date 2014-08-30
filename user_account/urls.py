@@ -15,6 +15,7 @@ urlpatterns = patterns(
     url(r'^api/social-availability/(?P<service>\w+)/(?P<social_id>\d+)/$', views.social_availability, name='social_availability'),
     url(r'^api/onboard/(?P<tour>\w+)/(?P<version_id>\d+\.\d+)/$', views.onboard, name='onboard'),
     url(r'^api/get-profile/(?P<username>[a-z0-9_\.]+)/$', views.api_get_profile, name='api_get_profile'),
+    url(r'^api/resubscribe/(?P<user_id>\d+)/(?P<service>[a-zA-Z\.]+)/$', views.api_resubscribe, name='api_resubscribe'),
 
     url(r'^api/register-asynchronously/$', views.register_asynchronously, name='register_asynchronously'),
     url(r'^api/load-feed/(?P<user_id>\d+)/from/(?P<feed_count>\d+)/$', views.load_feed, name='load_feed'),
@@ -22,6 +23,7 @@ urlpatterns = patterns(
     url(r'^(?P<username>[a-z0-9_\.]+)/reset-password/set-new-password/$', views.reset_password_set, name='reset_password_set'),
     url(r'^reset-password/$', views.reset_password, name='reset_password'),
     url(r'^change-password/$', views.change_password, name='change_password'),
+    url(r'^unsubscribe/(?P<user_id>\d+)/(?P<service>[a-zA-Z\.]+)/$', views.unsubscribe, name='unsubscribe'),
 
     url(r'^(?P<username>[a-z0-9_\.]+)/change-picture/$', views.change_profile_picture, name='change_profile_picture'),
     url(r'^(?P<username>[a-z0-9_\.]+)/reposition-picture/$', views.reposition_profile_picture, name='reposition_profile_picture'),

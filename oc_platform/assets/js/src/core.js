@@ -5284,6 +5284,32 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
             if (sameOrigin(url)) {
                 xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
             }
+        },
+
+        initUnsubscribe: function(){
+            $('.resubscribe-message').click(function(event){
+                $('.unsubscribe-title, .unsubscribe-message').fadeOut('slow');
+
+                var button = $(event.target),
+                    form = button.parents('form'),
+                    userID = $('input[name="user_id"]').val(),
+                    service = $('input[name="service"]').val();
+
+                $.get('/user/api/resubscribe/' + userID + '/' + service + '/',
+                    function(response){
+                        button.text('Re-subscribe success!');
+                    },
+                'json');
+
+                $('.resubscribe-content').fadeIn();
+
+                // Disable click on the button.
+                event.target.disabled = true;
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
         }
     });
 
@@ -5491,6 +5517,9 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
 
         // Initial tour on signup.
         OC.signupTour();
+
+        // Initialize unsubscription animation.
+        OC.initUnsubscribe();
     });
     var fbAppID;
 

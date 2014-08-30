@@ -62,13 +62,16 @@ def send_newsletter(email_message_html, subject, campaign_id, user_id):
     try:
         from django.contrib.auth.models import User
         user = User.objects.get(pk=user_id)
+
+        from user_account.models import Campaign
+        campaign = Campaign.objects.get(pk=campaign_id)
     except:
         return
 
     try:
         from django.utils.html import strip_tags
         email_message_text = strip_tags(email_message_html)
-        email_message_html += '<img src="http://opencurriculum.org/user/newsletter/tracker.gif?uid=1&cid=1"/>'
+        email_message_html += '<img src="http://opencurriculum.org/user/newsletter/tracker.gif?uid=1&cid=%s"/>' % campaign.id
 
         from django.conf import settings
         from django.core.mail import EmailMultiAlternatives

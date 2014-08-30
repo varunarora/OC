@@ -3371,17 +3371,33 @@ ul.collaborators
 		&:hover
 			background-color: #2e4679
 
+.unsubscribe-panel
+	width: 540px
+	text-align: center
+	margin-top: 100px
+
+	.unsubscribe-header-logo
+		margin-bottom: 20px
+
+	.unsubscribe-message, .resubscribe-content-message
+		padding-bottom: 20px
+		line-height: 1.3em
+		color: $light-font
+
+	.resubscribe-content
+		display: none
+
+.easy-sign-header-logo, .unsubscribe-header-logo
+	width: 80px
+	height: 80px
+	margin-bottom: 10px
+
 
 .authenticate-panel
 	width: 420px
 
 	.authenticate-header
 		text-align: center
-
-		.easy-sign-header-logo
-			width: 80px
-			height: 80px
-			margin-bottom: 10px
 
 		h3
 			margin-bottom: 6px
@@ -5335,7 +5351,7 @@ a.content-panel-body-listing-item-anchor
 		width: 98%
 		height: 200px
 
-body.signup, body.login
+body.signup, body.login, body.unsubscribe
 	background-color: #efefef
 
 #viewerContainer

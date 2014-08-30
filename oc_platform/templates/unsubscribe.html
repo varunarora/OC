@@ -1,0 +1,23 @@
+{% include 'partials/header.html' with header_type='vanilla' body_class='unsubscribe' %}
+<div class="center-stage unsubscribe-panel">
+    <div>
+        <img src="{{ STATIC_URL }}images/logo_shine.png" class="unsubscribe-header-logo" />
+    </diV>
+    <h3 class="unsubscribe-title">And... DONE! No more annoying newsletters from us anymore.</h3>
+    <div class="unsubscribe-message">We're sorry you didn't get very excited about our emails - we needed to learn this lesson. Meanwhile, you'd be happy to know that our marketing person is going to be yelled at on next Monday for annoying you.</div>
+
+    <form>
+        <input type="hidden" name="user_id" value="{{ user.id }}" />
+        <input type="hidden" name="service" value="{{ service }}" />
+        <button class="action-button site-action-button resubscribe-message">Re-subscribe</button>
+    </form>
+    <div class="resubscribe-content">
+        <h3>And... welcome back! We knew you never wanted to leave.</h3>
+        <div class="resubscribe-content-message">We want to make it up to you this time around. Please drop us (hello@opencurriculum.org) an email with the subject line "You promised..." and a message with everything you want us to set right for you. We are not going to lose you again. Promise.</div>
+
+    </div>
+</div>
+
+
+    </body>
+</html>

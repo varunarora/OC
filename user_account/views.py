@@ -1477,6 +1477,27 @@ def reset_password_set(request, username):
     return render(request, 'reset-password.html', context)
 
 
+def unsubscribe(request, user_id, service):
+    try:
+        user = User.objects.get(pk=user_id)
+    except:
+        raise Http404
+
+    user_profile = user.get_profile()
+    user_digests = user_profile.digests
+    user_digests['newsletter'] = False
+    
+    user_profile.digests = user_digests
+    user_profile.save()
+
+    context = {
+        'title': 'You have successully unsubscribed',
+        'user': user,
+        'service': 'newsletter'
+    }
+    return render(request, 'unsubscribe.html', context)    
+
+
 # API Stuff below #/
 
 def list_users(request, query):
@@ -1926,7 +1947,6 @@ def load_feed(request, user_id, feed_count):
 
 def api_get_profile(request, username):
     try:
-        from django.contrib.auth.models import User
         user = User.objects.get(username=username)
     except:
         return APIUtilities._api_not_found()
@@ -1943,6 +1963,26 @@ def api_get_profile(request, username):
             }
         }
         return APIUtilities._api_success(context)
+
+    except:
+        return APIUtilities._api_failure()
+
+
+def api_resubscribe(request, user_id, service):
+    try:
+        user = User.objects.get(pk=user_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    try:
+        user_profile = user.get_profile()
+        user_digests = user_profile.digests
+        user_digests['newsletter'] = True
+        
+        user_profile.digests = user_digests
+        user_profile.save()
+
+        return APIUtilities._api_success()
 
     except:
         return APIUtilities._api_failure()

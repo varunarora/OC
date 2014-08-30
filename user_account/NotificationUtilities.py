@@ -37,7 +37,7 @@ def notify_subscription_by_email(notification, host, actor):
     email.send()
 
 
-def test_trackable(template_name, subject, user, campaign, context):
+def send_trackable(template_name, subject, user, campaign, context):
     from user_account.tasks import send_newsletter
     from django.template.loader import render_to_string
 
