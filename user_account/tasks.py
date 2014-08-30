@@ -71,7 +71,7 @@ def send_newsletter(email_message_html, subject, campaign_id, user_id):
     try:
         from django.utils.html import strip_tags
         email_message_text = strip_tags(email_message_html)
-        email_message_html += '<img src="http://opencurriculum.org/user/newsletter/tracker.gif?uid=1&cid=%s"/>' % campaign.id
+        email_message_html += '<img src="http://opencurriculum.org/user/newsletter/tracker.gif?uid=%s&cid=%s"/>' % (user.id, campaign.id)
 
         from django.conf import settings
         from django.core.mail import EmailMultiAlternatives
