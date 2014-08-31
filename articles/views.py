@@ -203,7 +203,7 @@ def fetch_cached_article_revision(articleRevision):
         ar = build_article_revision_view(
             articleRevision.article, articleRevision)
         # Set caches.
-        cache.set(ar_cache_key, ar)
+        # cache.set(ar_cache_key, ar)
 
     return ar
 
