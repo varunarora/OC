@@ -502,7 +502,7 @@ def post_discussion(request, project_slug):
         project_ct = ContentType.objects.get_for_model(Project)
         Comment.comment_created.send(
             sender="Projects", comment_id=comment_created.id,
-            parent_type=project_ct.id, request=request
+            parent_type_id=project_ct.id, request=request
         )
 
         # If there is a redirect parameter, redirect to that page.
