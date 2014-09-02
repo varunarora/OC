@@ -73,7 +73,10 @@ class Browse():
                     slug=categories_slugs[-1], parent__slug=categories_slugs[-2])
             
             except IndexError:
-                self.current_category = Category.objects.get(slug=categories_slugs[-1])
+                try:
+                    self.current_category = Category.objects.get(slug=categories_slugs[-1])
+                except MultipleObjectsReturned:
+                    self.current_category = Category.objects.filter(slug=categories_slugs[-1])[0]
             
             except MultipleObjectsReturned:
                 # Find the unique combinator inside the host tree.
