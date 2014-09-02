@@ -73,9 +73,10 @@ def reader(request, category_slug):
     # Else, this is a category page request, and thus, return the category
     #     page, based on the URL slug(s)
     else:
+        raise Http404
         # Split the category slug delimited by '/' and resolve the list
-        categories_slugs = category_slug.split('/')
-        return categoryURLResolver(request, categories_slugs, -1)
+        #categories_slugs = category_slug.split('/')
+        #return categoryURLResolver(request, categories_slugs, -1)
 
 
 def process_article(request, article, view, revision):
