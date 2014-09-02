@@ -57,7 +57,12 @@ class Browse():
 
         # Determine the depth to figure out what level of page needs to be displayed.
         try:
-            host_category = Category.objects.filter(slug=categories_slugs[0])[0]
+            host_category = Category.objects.filter(slug=categories_slugs[0])
+            if host_category.count() == 0:
+                raise Http404
+            else:
+                host_category = host_category[0]
+
             if categories_slugs[0] != 'common-core':
                 self.is_common_core_hosted = False
             else:
