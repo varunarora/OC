@@ -369,7 +369,7 @@ STRINGS = {
 
 STAR_USERS = [
     'khanacademy', 'ck12', 'joshua', 'mars', 'ddmeyer', 'illustrativemathematics',
-    'engageny', 'yummymath', 'fawnpnguyen', 'samjshah', 'ericpollock'
+    'engageny', 'yummymath', 'fawnpnguyen', 'ericpollock'
 ]
 
 DEBUG_TOOLBAR_PANELS = (
