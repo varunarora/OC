@@ -696,7 +696,7 @@ def serialize(resources):
             'favorites': resource.favorites_count,
             'views': resource.views,
             'type': str(resource.type).upper(),
-            'tags': [tag.title for tag in filtered_tag_list] if resource.filtered_tags else [],
+            'tags': filtered_tag_list if resource.filtered_tags else [],
             'description': resource.description,
             'objectives': resource.objectives if resource.objectives else [],            
             'thumbnail': settings.MEDIA_URL + resource.image.name,
