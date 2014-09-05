@@ -4,7 +4,6 @@ from license.models import License
 from meta.models import Language
 from articles.jsonfield.fields import JSONField
 from articles.MarkdownTextField import MarkdownTextField
-from ResourceThumbnail import ResourceThumbnail
 from AttachmentUtilities import AttachmentUtilities
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
@@ -71,7 +70,8 @@ class Resource(models.Model):
 def generate_thumnbnail(sender, instance, created, raw, **kwargs):
     if created:
         if instance.image.name == None:
-            ResourceThumbnail.generateThumbnail(instance)
+            from oer.tasks import generate_thumbnail
+            generate_thumbnail.delay(instance.id)
 
         # Now disconnect the dispatcher
         post_save.disconnect(generate_thumnbnail, sender=Resource)
