@@ -1159,10 +1159,7 @@ def user_preferences(request):
         user = User.objects.get(username=request.user.username)
     except User.DoesNotExist:
         if not request.user.is_authenticated():
-            context = {
-                'title': _(settings.STRINGS['global']['TITLE']),
-            }            
-            return render(request, 'home.html', context)
+            return redirect('/?login=true&source=%s' % request.path)
         else:
             raise Http404
 
