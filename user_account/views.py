@@ -1158,7 +1158,13 @@ def user_preferences(request):
     try:
         user = User.objects.get(username=request.user.username)
     except User.DoesNotExist:
-        raise Http404
+        if not user.is_authenticated():
+            context = {
+                'title': _(settings.STRINGS['global']['TITLE']),
+            }            
+            return render(request, 'home.html', context)
+        else:
+            raise Http404
 
     from django.core.exceptions import PermissionDenied
     if request.user != user:
