@@ -16,6 +16,7 @@ EMAIL_HOST_PASSWORD = ""  # This needs to filled in
 SERVER_EMAIL = "hello@opencurriculum.org"  # This needs to filled in
 NOTIFICATIONS_EMAIL = "notifications@opencurriculum.org"  # This needs to filled in
 NEWSLETTERS_EMAIL = "newsletters@opencurriculum.org"
+DIGESTS_EMAIL = "digests+weekly@opencurriculum.org"
 EMAIL_USE_TLS = True
 
 MAILCHIMP_API_KEY = 'f8cfcc0cca3214a9894a8c8a58d733f5-us7'
