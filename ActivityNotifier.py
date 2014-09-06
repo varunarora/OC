@@ -198,7 +198,7 @@ class ActivityNotifier:
         return unique_actors
 
 
-    def prepare_resource(resource):
+    def prepare_resource(self, resource):
         from meta.models import TagCategory
         resource_type_tc = TagCategory.objects.get(title='Resource type')
 
