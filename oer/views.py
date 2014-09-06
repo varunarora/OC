@@ -429,7 +429,7 @@ def build_return_resource_form_context(request, form, form_context):
 
 def add_video(request, submission_context=None):
     if not request.user.is_authenticated():
-        return redirect('/?login=true&source=%s' % request.path)
+        return redirect('/login/?source=%s' % request.path)
 
     resource_context = _prepare_add_resource_context(request)
 
@@ -477,7 +477,7 @@ def add_video(request, submission_context=None):
 
 def add_url(request):
     if not request.user.is_authenticated():
-        return redirect('/?login=true&source=%s' % request.path)
+        return redirect('/login/?source=%s' % request.path)
 
     resource_context = _prepare_add_resource_context(request)
     
@@ -622,7 +622,7 @@ def edit_unit(request, unit_id, unit_slug):
 
 def render_editor(request, document_type):
     if not request.user.is_authenticated():
-        return redirect('/?login=true&source=%s' % request.path)
+        return redirect('/login/?source=%s' % request.path)
 
     resource_context = _prepare_add_resource_context(request)
 
@@ -742,7 +742,7 @@ def create_document_elements(post_request, content):
 def upload_page(request):
     """Renders the upload page, with user and project objects in context."""
     if not request.user.is_authenticated():
-        return redirect('/?login=true&source=%s' % request.path)
+        return redirect('/login/?source=%s' % request.path)
 
     resource_context = _prepare_add_resource_context(request)
 
@@ -1084,7 +1084,7 @@ def redirect_to_collection(user_id, project_id=None, collection_id=None):
 
 def edit_resource(request, resource_id):
     if not request.user.is_authenticated():
-        return redirect('/?login=true&source=%s' % request.path)
+        return redirect('/login/?source=%s' % request.path)
 
     from django.core.exceptions import ObjectDoesNotExist
 

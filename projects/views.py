@@ -126,7 +126,7 @@ def invite(request):
 
 def new_project(request):
     if not request.user.is_authenticated():
-        return redirect('/?login=true&source=%s' % request.path)
+        return redirect('/login/?source=%s' % request.path)
 
     # If a form submission was made
     if request.method == "POST":

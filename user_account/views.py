@@ -679,12 +679,12 @@ def authenticate(request):
                 return redirect('user:user_profile', username=user.username)
         else:
             # HACK(Varun): These GET parameters need to be moved to settings
-            redirect_url = '/login?error=inactive'
+            redirect_url = '/login/?error=inactive'
             if redirect_to:
                 return redirect(redirect_url + ('&source=%s' % redirect_to))
             return redirect(redirect_url)
     else:
-        redirect_url = '/login?error=auth'
+        redirect_url = '/login/?error=auth'
         if redirect_to:
             return redirect(redirect_url + ('&source=%s' % redirect_to))
         return redirect(redirect_url)
@@ -1310,7 +1310,7 @@ def _email_contributor_admins(original_form_inputs):
 
 def contributor_introduction(request):
     if not request.user.is_authenticated():
-        return redirect('/?login=true&source=%s' % request.path)
+        return redirect('/login/?source=%s' % request.path)
 
     cohortID = request.GET.get('cohort', None)
 
@@ -1402,7 +1402,7 @@ def reset_password(request):
         messages.error(request, 'Could not find user with that email address')
 
     # Redirect to login page
-    return redirect('/?login=true')
+    return redirect('/login/')
 
 
 def change_password(request):
