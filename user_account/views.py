@@ -1158,7 +1158,7 @@ def user_preferences(request):
     try:
         user = User.objects.get(username=request.user.username)
     except User.DoesNotExist:
-        if not user.is_authenticated():
+        if not request.user.is_authenticated():
             context = {
                 'title': _(settings.STRINGS['global']['TITLE']),
             }            
