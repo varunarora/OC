@@ -30,6 +30,10 @@
 				}
 			};
 			var staticURL = '{{ STATIC_URL }}';
+            if (!GPlusClientID || !fbAppID){
+                var GPlusClientID = '{{ PLUS_APP_ID }}',
+                    fbAppID = '{{ FB_APP_ID }}';
+            }
 		</script>
 
 
