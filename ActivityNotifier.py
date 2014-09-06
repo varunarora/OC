@@ -58,50 +58,51 @@ class ActivityNotifier:
 
         # Order by number of views.
         sorted_resources = sorted(resource_favorites, key=lambda rf: rf.views, reverse=True)
-        primary_resource = sorted_resources[0]
+        primary_resource = self.prepare_resource(sorted_resources[0])
 
         # Find three activities from different publishers (actors).
         unique_publishers = self.get_unique_actors(sorted_resources)
         if len(unique_publishers) == 1:
-            secondary_resources = [sorted_resources[1], sorted_resources[2], sorted_resources[3]]
+            secondary_resources = [
+            self.prepare_resource(sorted_resources[1]),
+            self.prepare_resource(sorted_resources[2]),
+            self.prepare_resource(sorted_resources[3])
+        ]
 
         elif len(unique_publishers) == 2:
             secondary_resources = []
 
             second_resource = next(
                 resource for resource in secondary_resources if resource.user != primary_resource.user)
-            secondary_resources.append(second_resource)
+            secondary_resources.append(self.prepare_resource(second_resource))
 
             third_resource = next(
                 resource for resource in secondary_resources[1:] if resource != second_resource)
             fourth_resource = next(
                 resource for resource in secondary_resources[1:] if resource != second_resource and resource != third_resource)
 
-            secondary_resources.append(third_resource)
-            secondary_resources.append(fourth_resource)
+            secondary_resources.append(self.prepare_resource(third_resource))
+            secondary_resources.append(self.prepare_resource(fourth_resource))
 
         elif len(unique_publishers) >= 3:
             secondary_resources = []
 
             second_resource = next(
                 resource for resource in secondary_resources if resource.user != primary_resource.user)
-            secondary_resources.append(second_resource)
+            secondary_resources.append(self.prepare_resource(second_resource))
 
             third_resource = next(
                 resource for resource in secondary_resources if resource.user != primary_resource.user and resource.user != second_resource.user)
-            secondary_resources.append(third_resource)
+            secondary_resources.append(self.prepare_resource(third_resource))
 
             fourth_resource = next(
                 resource for resource in secondary_resources[1:] if resource != second_resource and resource != third_resource)
-            secondary_resources.append(fourth_resource)
+            secondary_resources.append(self.prepare_resource(fourth_resource))
 
 
         from django.template.loader import render_to_string
         from django.core.urlresolvers import reverse
         from django.core.mail import EmailMultiAlternatives
-
-        from meta.models import TagCategory
-        resource_type_tc = TagCategory.objects.get(title='Resource type')
 
         host = 'http://opencurriculum.org'
 
@@ -118,7 +119,7 @@ class ActivityNotifier:
                 }
             ),
             'primary_resource_thumbnail': settings.MEDIA_URL + primary_resource.image.name,
-            'primary_resource_type': primary_resource.tags.get(category=resource_type_tc).title.lower(),
+            'primary_resource_type': primary_resource.type.lower(),
 
             'primary_resource_user': primary_resource.user.get_full_name(),
             'primary_resource_user_url': host + reverse(
@@ -129,7 +130,7 @@ class ActivityNotifier:
             'secondary_resources': [
                 {
                     'name': secondary_resources[0].title,
-                    'type': secondary_resources[0].tags.get(category=resource_type_tc).title,
+                    'type': secondary_resources[0].type.title,
                     'url': host + reverse(
                         'read', kwargs={
                             'resource_id': secondary_resources[0].id,
@@ -144,7 +145,7 @@ class ActivityNotifier:
                 },
                 {
                     'name': secondary_resources[1].title,
-                    'type': secondary_resources[1].tags.get(category=resource_type_tc).title,
+                    'type': secondary_resources[1].type.title,
                     'url': host + reverse(
                         'read', kwargs={
                             'resource_id': secondary_resources[1].id,
@@ -159,7 +160,7 @@ class ActivityNotifier:
                 },
                 {
                     'name': secondary_resources[2].title,
-                    'type': secondary_resources[2].tags.get(category=resource_type_tc).title,
+                    'type': secondary_resources[2].type.title,
                     'url': host + reverse(
                         'read', kwargs={
                             'resource_id': secondary_resources[2].id,
@@ -195,6 +196,18 @@ class ActivityNotifier:
             unique_actors.add(resource.user)
 
         return unique_actors
+
+
+    def prepare_resource(resource):
+        from meta.models import TagCategory
+        resource_type_tc = TagCategory.objects.get(title='Resource type')
+
+        try:
+            resource.type = resource.tags.get(category=resource_type_tc).title
+        except:
+            resource.type = 'Resource'
+
+        return resource
 
 
 timezone = pytz.utc
