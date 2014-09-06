@@ -33,7 +33,7 @@
                                                             <table align="center" border="0" cellpadding="0" cellspacing="0" width="568" style="border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; border: 0;">
                                                                 <tr>
                                                                      <td align="center" width="70%" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;"></td>
-                                                                     <td align="center" width="30%" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; padding-top: 5px;"><div style="background-image: url('{{ primary_resource_user_thumbnail }}'); width: 100px; height: 100px; background-size: cover; border-radius: 50px;"></div></td>
+                                                                     <td align="center" width="30%" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; padding-top: 5px;"><img src="{{ primary_resource_user_thumbnail }}" height="100px" style="width: 100px; border-radius: 50px;" /></td>
                                                                 </tr>
                                                             </table>
                                                         </td>
@@ -54,7 +54,7 @@
                                         <td>
                                         <table>
                                             <tr>
-                                                <td valign="top" width="20%" style="padding: 10px; padding-right: 20px;"><a href="{{ resource.url }}" style=" display: block;"><img src="{{ resource.thumbnail }}" width="160px" /></a></td>
+                                                <td valign="top" width="20%" style="padding: 10px; padding-right: 20px;"><a href="{{ resource.url }}" style=" display: block; height: 100px;"><img src="{{ resource.thumbnail }}" width="160px" /></a></td>
                                                 <td align="center" valign="top" class="heading-message" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; color: #606060; font-family: Arial, Helvetica; padding-bottom: 20px; text-align: left; padding-top: 10px; padding-right: 16px;">
                                                     <a href="{{ resource.url }}" style="color: #444; font-size: 16px; font-weight: bold;  letter-spacing: -1px; line-height: 125%; text-decoration: none;">{{ resource.name }} ({{ resource.type }})</a>
                                                     <div style="color: #606060; font-size: 14px; line-height: 125%;">By <a href="{{ resource.user_url }}" target="_blank" style="color: #55acee; text-decoration: none;">{{ resource.user }}</a></div>
