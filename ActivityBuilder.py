@@ -205,7 +205,7 @@ class ActivityBuilder:
 
 #activity_builder = ActivityBuilder(sys.argv[1], sys.argv[2])
 timezone = pytz.utc
-starting_date = timezone.localize(datetime.datetime.now() - datetime.timedelta(weeks=9))
+starting_date = timezone.localize(datetime.datetime.now() - datetime.timedelta(weeks=1))
 
 activity_builder = ActivityBuilder('khanacademy', starting_date)
 activity_builder.build()
