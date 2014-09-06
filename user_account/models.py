@@ -821,6 +821,7 @@ class Notification(models.Model):
 
         notification.save()
 
-        # Send an email about this notification.
-        nu.notify_subscription_by_email(
-            notification, host, subscription.subscriber.user)
+        if subscription.subscribee.user.get_profile().digests['subscription']:
+            # Send an email about this notification.
+            nu.notify_subscription_by_email(
+                notification, host, subscription.subscriber.user)

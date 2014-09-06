@@ -8,7 +8,7 @@
             <div class="error-message">{{ error }}</div>
         {% endif %}
         {% csrf_token %}
-        <table>
+        <table class="user-preferences-section">
             <colgroup>
                 <col class="label" />
                 <col class="value" />
@@ -21,6 +21,21 @@
             <tr><td>Social account</td>
                 <td>{% if user_profile.get_profile.social_service == 'plus' %}Linked with <a href="http://plus.google.com/{{ user_profile.get_profile.social_id }}/" target="_blank">Google+</a>{% elif user_profile.get_profile.social_service == 'facebook' %}Linked with <a href="http://www.facebook.com/{{ user_profile.get_profile.social_id }}/" target="_blank">Google+</a>{% else %}No social account linked.{% endif %}</td>
             </tr>
+        </table>
+
+        <h3>Email notifications</h3>
+        <table class="user-preferences-section">
+            <colgroup>
+                <col class="label" />
+                <col class="value" />
+            </colgroup>
+            <tr><td class="multioptional-label">Email me...</td><td>
+                <ul>
+                    <li><label><input type="checkbox" name="subscription" {% if user_profile.get_profile.digests.subscription %}checked{% endif %}>When someone subscribes to me</label></li>
+                    <li><label><input type="checkbox" name="newsletter" {% if user_profile.get_profile.digests.newsletter %}checked{% endif %}>Newsletters from OpenCurriculum (about once a month)</label></li>
+                    <li><label><input type="checkbox" name="activity_weekly" {% if user_profile.get_profile.digests.activity_weekly %}checked{% endif %}>Weekly activity from people I am subscribed to</label></li>
+                </ul>
+            </td></tr>
             <tr><td colspan="2"><p><input type="submit" class="action-button page-submit-button" value="Save" /></p></td></tr>
         </table>
     </form>
