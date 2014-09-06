@@ -1,0 +1,69 @@
+<center>
+    <table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" style="border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;margin: 0;padding: 0;background-color: #F2F2F2;height: 100% !important;width: 100% !important;">
+        <tr>
+            <td align="center" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;margin: 0;padding: 20px;border-top: 0;height: 100% !important;width: 100% !important;">
+                <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; border: 0;">
+                        <tr>
+                            <td align="center" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;">
+                                <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; border: 0;">
+                                    <tr>
+                                        <td valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; text-align: left; color: #606060; display: none !important; visibility: hidden; opacity: 0; height: 0px; width: 0px;">{{ preheader }}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="left" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;"><img src="https://s3.amazonaws.com/marketing.opencurriculum.org/newsletter-header-dark-background.png" width="600"></td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; border: 0; background-color: #ffffff; border: 1px solid #ddd; ">
+                                    <tr>
+                                        <td align="center" valign="top" class="heading-message" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; color: #444; font-family: Arial, Helvetica; font-size: 18px;line-height: 125%; padding: 16px; text-align: left; padding-bottom: 10px; font-weight: bold; letter-spacing: -1px;">
+                                            <p>{{ first_name }}, check out this latest {{ primary_resource_type }} from {{ primary_resource_user }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; padding: 16px; padding-top: 28px; padding-bottom: 24px;">
+                                            <a href="{{ primary_resource_url }}" style="display: block; background-image: url('{{ primary_resource_thumbnail }}'); height: 250px; background-size: cover; text-decoration: none;">
+                                                <div style="background-image: url('{{ primary_resource_user_thumbnail }}'); position: relative; top: 5px; left: 200px; width: 100px; height: 100px; background-size: cover; border-radius: 50px; margin-bottom: -100px;"></div>
+                                                <div style="background-image: url('http://assets.opencurriculum.org/images/editor-search-background.png'); color: #fff; font-family: Arial, Helvetica; font-size: 14px;line-height: 125%; padding: 8px 16px; text-align: left; font-weight: bold; position: relative; top: 218px;">{{ primary_resource_name }}</div>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center" valign="top" class="heading-message" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; color: #606060; font-family: Arial, Helvetica; font-size: 18px;line-height: 125%; padding: 16px; text-align: left; padding-bottom: 10px; font-weight: bold; letter-spacing: -1px; border-top: 1px solid #ddd;">
+                                            <p>Here are a few more resources that you might find useful</p>
+                                        </td>
+                                    </tr>
+                                    {% for resource in secondary_resources %}<tr>
+                                        <td>
+                                        <table>
+                                            <tr>
+                                                <td valign="top" width="20%" style="padding: 10px; padding-right: 20px;"><a href="{{ resource.url }}" style="background-image: url('{{ resource.thumbnail }}'); width: 160px; height: 100px; background-size: cover; display: block;"></a></td>
+                                                <td align="center" valign="top" class="heading-message" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; color: #606060; font-family: Arial, Helvetica; padding-bottom: 20px; text-align: left; padding-top: 10px; padding-right: 16px;">
+                                                    <a href="{{ resource.url }}" style="color: #444; font-size: 16px; font-weight: bold;  letter-spacing: -1px; line-height: 125%; text-decoration: none;">{{ resource.name }} ({{ resource.type }})</a>
+                                                    <div style="color: #606060; font-size: 14px; line-height: 125%;">By <a href="{{ resource.user_url }}" target="_blank" style="color: #55acee; text-decoration: none;">{{ resource.user }}</a></div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    </tr>{% endfor %}
+                                    <tr>
+                                        <td align="center" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; text-align: left; color: #606060; font-family: Arial, Helvetica;font-size: 16px;line-height: 125%; padding: 12px; text-align: center; padding-bottom: 40px; font-weight: bold;">
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td valign="top" align="center" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; text-align: left; color: #606060; font-family: Arial, Helvetica;font-size: 12px;line-height: 125%; padding-top: 20px; padding-left: 10px;">
+                                This email was sent to you so you can keep up with your subscriptions. If you no longer wish to receive these updates, you may <a href="{{ preferences_url }}" style="color: #444; text-decoration: none;">edit your preferences here</a>.<br/>
+                                <p>OpenCurriculum, Inc., 255 Easy St. - Unit 1, Mountain View, CA - 94043</p>
+                            </td>
+                        </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</center>
