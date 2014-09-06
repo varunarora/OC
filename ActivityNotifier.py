@@ -181,10 +181,10 @@ class ActivityNotifier:
         from django.utils.html import strip_tags
         email_message_text = strip_tags(template)
 
-        subject = '%s: %s' % (
+        subject = '%s: %s and more!' % (
             primary_resource.user.get_full_name(), primary_resource.title)
         
-        from_email, to = 'OpenCurriculum <%s>' % settings.DIGESTS_EMAIL, [user.email]
+        from_email, to = 'OpenCurriculum Digests <%s>' % settings.DIGESTS_EMAIL, [user.email]
         email = EmailMultiAlternatives(subject, email_message_text, from_email, to)
         email.attach_alternative(template, "text/html")
         email.send()

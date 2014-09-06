@@ -26,9 +26,22 @@
                                     </tr>
                                     <tr>
                                         <td align="center" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; padding: 16px; padding-top: 28px; padding-bottom: 24px;">
-                                            <a href="{{ primary_resource_url }}" style="display: block; background-image: url('{{ primary_resource_thumbnail }}'); height: 250px; background-size: cover; text-decoration: none;">
-                                                <div style="background-image: url('{{ primary_resource_user_thumbnail }}'); position: relative; top: 5px; left: 200px; width: 100px; height: 100px; background-size: cover; border-radius: 50px; margin-bottom: -100px;"></div>
-                                                <div style="background-image: url('http://assets.opencurriculum.org/images/editor-search-background.png'); color: #fff; font-family: Arial, Helvetica; font-size: 14px;line-height: 125%; padding: 8px 16px; text-align: left; font-weight: bold; position: relative; top: 218px;">{{ primary_resource_name }}</div>
+                                            <a href="{{ primary_resource_url }}" style="display: block; height: 250px; text-decoration: none;">
+                                                <table align="center" border="0" cellpadding="0" cellspacing="0" width="568" style="border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; border: 0; height: 250px; background-image: url('{{ primary_resource_thumbnail }}'); background-size: cover;">
+                                                    <tr>
+                                                        <td align="center" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;">
+                                                            <table align="center" border="0" cellpadding="0" cellspacing="0" width="568" style="border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; border: 0;">
+                                                                <tr>
+                                                                     <td align="center" width="70%" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;"></td>
+                                                                     <td align="center" width="30%" valign="top" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; padding-top: 5px;"><div style="background-image: url('{{ primary_resource_user_thumbnail }}'); width: 100px; height: 100px; background-size: cover; border-radius: 50px;"></div></td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td height="34px" style="background-image: url('http://assets.opencurriculum.org/images/editor-search-background.png'); color: #fff; font-family: Arial, Helvetica; font-size: 14px;line-height: 125%; padding: 8px 16px; text-align: left; font-weight: bold; position: relative; top: 218px;">{{ primary_resource_name }}</td>
+                                                    </tr>
+                                                </table>
                                             </a>
                                         </td>
                                     </tr>
@@ -41,7 +54,7 @@
                                         <td>
                                         <table>
                                             <tr>
-                                                <td valign="top" width="20%" style="padding: 10px; padding-right: 20px;"><a href="{{ resource.url }}" style="background-image: url('{{ resource.thumbnail }}'); width: 160px; height: 100px; background-size: cover; display: block;"></a></td>
+                                                <td valign="top" width="20%" style="padding: 10px; padding-right: 20px;"><a href="{{ resource.url }}" style=" display: block;"><img src="{{ resource.thumbnail }}" width="160px" /></a></td>
                                                 <td align="center" valign="top" class="heading-message" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%; color: #606060; font-family: Arial, Helvetica; padding-bottom: 20px; text-align: left; padding-top: 10px; padding-right: 16px;">
                                                     <a href="{{ resource.url }}" style="color: #444; font-size: 16px; font-weight: bold;  letter-spacing: -1px; line-height: 125%; text-decoration: none;">{{ resource.name }} ({{ resource.type }})</a>
                                                     <div style="color: #606060; font-size: 14px; line-height: 125%;">By <a href="{{ resource.user_url }}" target="_blank" style="color: #55acee; text-decoration: none;">{{ resource.user }}</a></div>
