@@ -74,8 +74,8 @@ class KhanAcademy:
             if root['kind'] == 'Exercise':
 
                 exercise_creation = dateutil.parser.parse(root['creation_date'])
-                if exercise_creation > since:
-                    exercises.append(self.build_activity_resource(root), exercise_creation)
+                if exercise_creation > since and not self.exercise_in_list(root['title'], exercises):
+                    exercises.append(self.build_activity_resource(root, exercise_creation))
 
             if 'children' in root:
                 for child in root['children']:
@@ -145,6 +145,14 @@ class KhanAcademy:
         return (new_activity_resource, new_activity_revision, activity)
 
 
+    def exercise_in_list(title, exercises):
+        for exercise in exercises:
+            if exercise.title == title:
+                return True
+
+        return False
+
+
 class ActivityBuilder:
     def __init__(self, username, since):
         self.username = username
@@ -196,6 +204,8 @@ class ActivityBuilder:
 
 
 #activity_builder = ActivityBuilder(sys.argv[1], sys.argv[2])
-activity_builder = ActivityBuilder('khanacademy', datetime.datetime.now(
-    ) - datetime.timedelta(weeks=1))
+timezone = pytz.utc
+starting_date = timezone.localize(datetime.datetime.now() - datetime.timedelta(weeks=9))
+
+activity_builder = ActivityBuilder('khanacademy', starting_date)
 activity_builder.build()
