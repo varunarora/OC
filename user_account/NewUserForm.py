@@ -206,7 +206,7 @@ class NewUserProfileForm(ModelForm):
                 'social_service', social_service if social_login else None)
 
             newRequest.__setitem__('onboarding', '{"signup": {"status": true, "version": "0.1"}}')
-            newRequest.__setitem__('digests', '{"newsletter": "true"}')
+            newRequest.__setitem__('digests', '{"newsletter": True}')
 
             # Set profile picture default position.
             from media.models import ImagePosition
