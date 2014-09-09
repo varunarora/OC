@@ -333,9 +333,12 @@ def edit_article(request, article, revision_id):
             article_form = forms.EditArticleRevisionForm(
                 request.POST, instance=original_revision)
         else:
-            article_form = forms.NewArticleRevision(
-                request.POST, request.user, article, flag
-            )
+            try:
+                article_form = forms.NewArticleRevision(
+                    request.POST, request.user, article, flag
+                )
+            except:
+                raise Http404
 
         if article_form.is_valid():
             new_revision = article_form.save(commit=False)
