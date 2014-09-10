@@ -21,7 +21,7 @@ def get_empty_onboarding():
 
 def get_default_digests():
     import json
-    return json.loads('{"newsletter": True}')
+    return json.loads('{"newsletter": true}')
 
 
 class UserProfile(models.Model):
