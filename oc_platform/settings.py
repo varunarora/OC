@@ -235,7 +235,7 @@ AWS_CALLING_FORMAT = 'media'
 
 STRINGS = {
     'global': {
-        'TITLE': 'OpenCurriculum: Create and discover better K-12 curriculum together',
+        'TITLE': 'OpenCurriculum: Discover the world\'s best K-12 curriculum all in one place',
         'invite': {
             'SUCCESS': 'Congratulations! We have successfully received your request submission.',
             'FAILURE': 'Unknown error occured. Try again or contact us at hello@ for a resolution.'

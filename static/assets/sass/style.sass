@@ -166,7 +166,7 @@ header.wide-header
 @import "search_bar"
 @import "scaffolds"
 
-body.browse, body.index, body.profile-view, body.mailpimp, body.search
+body.browse, body.profile-view, body.mailpimp, body.search
 	> header
 		background-color: #333
 		height: $header-height - 7
@@ -190,25 +190,70 @@ body.browse, body.index, body.profile-view, body.mailpimp, body.search
 				border-color: #5abd02
 
 body.index
+	#logo
+		height: auto
+
+	#header-prebanner
+		height: 0px
+
 	nav#authenticate-buttons, nav#user-buttons
 		> ul
 			> li
+				margin-top: 10px
+				height: 41px
+
 				a
+					color: #777
+
 					&:hover, &.hover
-						background-color: #5abd02
+						background-color: transparent
+						color: $body-color
+
+				&#sign-up-button
+					background-color: #5ABD02
+
+					&:hover
+						background-color: #3D7F01
+
+					a
+						color: #fff
+
 
 	#search-bar
 		input[type="search"]
 			background-color: transparent
-			color: #fff
-			border: 1px solid #fff
+			color: #444
+			border: 1px solid #ccc
 
 			&:focus
-				border-color: #5abd02
+				border-color: #aaa
+				box-shadow: none
 
 		input[type=submit]
 			background-color: transparent
+			background-image: url('../images/search-icon-old.png')
 
+			&:hover
+				box-shadow: none
+
+	.site-title-message, .site-title-message-em
+		letter-spacing: -1px
+		line-height: 1.5em
+		color: #444
+
+	.site-title-message
+		font-weight: normal
+
+	.site-caption-message
+		padding: 10px
+		color: #777
+		font-size: 1.3em
+
+		.site-caption-action
+			font-weight: bold
+
+	footer
+		padding: 20px
 
 footer
 	font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif
@@ -5487,10 +5532,7 @@ body.signup, body.login, body.unsubscribe
 		margin-bottom: 40px
 
 .home-library
-	margin-top: 20px
-	padding-bottom: 60px
-	margin-bottom: 20px
-	border-bottom: 1px solid #efefef
+	text-align: center
 
 	h3
 		margin-bottom: 40px
@@ -5498,10 +5540,11 @@ body.signup, body.login, body.unsubscribe
 
 	.library-subjects-wrapper
 		overflow: hidden
+		margin-bottom: 20px
 
 		.library-subject
 			width: 30%
-			height: 300px
+			height: 200px
 			display: block
 			float: left
 			margin: 0px 19px
@@ -5510,73 +5553,47 @@ body.signup, body.login, body.unsubscribe
 				margin-left: 0px
 
 			.library-subject-title
-				background-color: #5ABD02
-				padding: 12px 48px
-				font-size: 1.3em
-				color: #fff
+				padding: 12px 24px
+				font-size: 1.5em
 				font-weight: bold
-				display: block
-				position: relative
-				top: 160px
-				left: 50px
+				border: 1px solid #5ABD02
+				margin: auto
+				color: #5ABD02
 				text-align: center
-				width: 100px
-				margin-bottom: -40px
-				@include border-radius(20px)
-				@include box-shadow(0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.05))
-				border-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.25)
-
-			.library-subject-thumbnail
-				height: 180px
-				background-size: cover
-				background-image: url('../images/mathematics-thumbnail.jpg')
-				background-repeat: no-repeat
-				background-position: center center
-
-				&.english-subject-thumbnail
-					background-image: url('../images/english-thumbnail.jpg')
-
-				&.science-subject-thumbnail
-					background-image: url('../images/science-thumbnail.jpg')
+				font-family: 'PT Sans', sans-serif
+				margin: 0px 20px
 
 			.library-subject-content
-				background-color: #222
-				height: 120px
-				color: #fff
+				padding-top: 16px
 
 				.library-subject-content-meta
-					padding-top: 45px
-					font-family: 'PT Sans', sans-serif
-
-					.library-subject-content-meta-count
-						font-size: 1.8em
-						text-align: center
-
 					.library-subject-content-meta-caption
 						text-align: center
+						color: #777
 						font-size: 1.3em
 
+			
 			&:hover
 				text-decoration: none
 
 				.library-subject-title
-					background-color: #3D7F01
+					background-color: #5ABD02
+					color: #fff
 
 		.library-subject-inactive
 			.library-subject-title
-				background-color: #efefef
-				color: $light-font
+				border-color: #777
+				color: #777
 
 			.library-subject-content-caption
-				color: #D14836
-				font-size: 0.9em
-				padding-top: 45px
+				color: #999
 				text-align: center
 				font-weight: bold
 
 			&:hover
 				.library-subject-title
-					background-color: #ddd
+					background-color: transparent
+					color: #777
 
 .content-panel
 	h1.empty-state-title
