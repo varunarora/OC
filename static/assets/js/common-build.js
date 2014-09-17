@@ -12,6 +12,8 @@ require.config({
         group: 'group',
         search: 'search',
         editor_page: 'editor',
-        article: 'article'
+        article: 'article',
+        explorer: 'explorer',
+        standards: 'standards'
     }
 });
