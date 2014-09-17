@@ -46,6 +46,16 @@
             name: 'article',
             include: ['article'],
             exclude: ['header']
+        },
+        {
+            name: 'explorer',
+            include: ['explorer'],
+            exclude: ['header']
+        },
+        {
+            name: 'standards',
+            include: ['standards'],
+            exclude: ['header']
         }
     ],
     paths: {
