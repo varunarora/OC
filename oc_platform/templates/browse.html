@@ -63,7 +63,7 @@
                         {% if not is_catalog %}
                         <div class="category-panel-listing-categories-body-filters">
                             {% for tag in category_tags %}
-                                <label><input type="checkbox" name="tags" value="{{ tag.title }}" checked />{{ tag.title }}<span class="category-panel-listing-categories-body-filters-description" title="{{ tag.description }}">?</span></label>
+                                <label><input type="checkbox" name="tags" value="{{ tag.title|upper }}" checked />{{ tag.title|upper }}<span class="category-panel-listing-categories-body-filters-description" title="{{ tag.description }}">?</span></label>
                             {% endfor %}
                         </div>
                         {% endif %}
