@@ -160,6 +160,28 @@ def get_root_key(value):
         return None
 
 
+def play(request):
+    standards = Category.objects.filter(parent__title='Standards')
+    current_standard = Category.objects.get(title='Common Core')
+
+    # Get all categories in this standard.
+    current_standard_categories = Category.objects.filter(parent=current_standard)
+
+    # Get all the subcategories in the currently selected subject.
+    subcategories = Category.objects.filter(
+        parent=current_standard_categories[0]).order_by('position')
+
+    context = {
+        'standards': standards,
+        'current_standard': current_standard,
+        'current_standard_categories': current_standard_categories,
+        'subcategories': subcategories,
+        'title': 'Play &lsaquo; OpenCurriculum'
+    }
+    return render(request, 'standards-play.html', context)
+
+
+
 def get_standards(request):
     from meta.models import Category
     root_category = Category.objects.get(title='Standards')
@@ -222,6 +244,75 @@ def get_child_tags_from_category(request, category_id):
     context = {
         'tags': serialized_tags
     }
+    return APIUtilities._api_success(context)
+
+
+def get_nested_child_tags_from_category(request, category_id):
+    from meta.models import Category, TagCategory
+    category = Category.objects.get(pk=category_id)
+
+    import meta.CategoryUtilities as catU
+    (browse_tree, flattened_tree) = catU.build_child_categories(
+        {'root': [category]}, [])
+
+    tags = {}
+    for descendant_category in flattened_tree:
+        descendant_category_tags = descendant_category.tags.filter(category=TagCategory.objects.get(title='Standards')).order_by('position')
+        if descendant_category_tags.count() > 0:
+            #if descendant_category.parent not in tags:
+            #    tags[descendant_category.parent] = []
+            
+            #tags[descendant_category.parent].append(descendant_category_tags)
+            tags[descendant_category.parent] = descendant_category_tags
+
+    serialized_tags = []
+    for tag_category, tag_set in tags.items():
+        for tag in tag_set:
+            serialized_tags.append({
+                'id': tag.id,
+                'title': tag.title,
+                'domain': tag_category.title,
+                'description': tag.description,
+                'position': tag.position,
+                'url': reverse(
+                    'meta:standard', kwargs={
+                        'tag_title': tag.title
+                })
+            })
+
+    context = {
+        'tags': serialized_tags
+    }
+    return APIUtilities._api_success(context)
+
+
+def get_standard(request, category_id):
+    from meta.models import Category
+    category = Category.objects.get(pk=category_id)
+
+    # Get all categories in this standard.
+    subjects = Category.objects.filter(parent=category)
+
+    # Get all the subcategories in the currently selected subject.
+    grades = Category.objects.filter(parent=subjects[0]).order_by('position')
+
+    context = {
+        'subjects': [],
+        'grades': [],
+    }
+
+    for subject in subjects:
+        context['subjects'].append({
+            'title': subject.title,
+            'id': subject.id
+        })
+
+    for grade in grades:
+        context['grades'].append({
+            'title': grade.title,
+            'id': grade.id
+        })
+
     return APIUtilities._api_success(context)
 
 

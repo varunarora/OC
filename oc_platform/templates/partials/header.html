@@ -128,6 +128,12 @@
 				{% elif body_class == 'editor' %}
 					require(['editor_page']);
 
+				{% elif body_class == 'explorer' %}
+					require(['explorer']);
+
+				{% elif body_class == 'standards' %}
+					{% include 'js/standards.js' %}
+
                 {% else %}
 					require(['header']);
 

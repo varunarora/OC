@@ -1,0 +1,24 @@
+{% include 'partials/header.html' with header_type='vanilla' body_class='standards' %}
+
+<div class="standards-play">
+    <div class="category-selection-bar">
+        <select name="standard">
+            {% for standard in standards %}
+            <option name="category-{{ standard.id }}">{{ standard.title }}</option>
+            {% endfor %}
+        </select>
+        <select name="grade">
+            {% for category in current_standard_categories %}
+            <option>{{ category.title }}</option>
+            {% endfor %}
+        </select>
+
+    </div>
+    <div class="category-standards-body">
+        <div class="left-menu"></div>
+        <div class="middle-menu"></div>
+    </div>
+</div>
+
+</body>
+</html>

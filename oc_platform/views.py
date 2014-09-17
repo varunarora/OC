@@ -305,5 +305,7 @@ def merge_tags(from_id, to_id):
         for c in ac:
             c.tags.add(to_tag)
             c.tags.remove(from_tag)
+
+        to_tag.delete()
     except Exception, e:
         print e

@@ -5650,6 +5650,252 @@ body.signup, body.login, body.unsubscribe
 		height: 100%
 		background: url('../images/feed-video-icon.png') no-repeat center center
 
+
+/***** EXPLORER *************/
+
+.explorer-header
+	height: 50px
+	background-color: #2ECC71
+
+	.explorer-header-current, .explorer-header-child
+		float: left
+		color: #fff
+		width: 25%
+		text-align: center
+		height: 34px
+		text-decoration: none
+
+
+		font-size: 1.2em
+
+	.explorer-header-child
+		padding-top: 16px
+
+		&:hover
+			background-color: #27AE60
+
+	.explorer-header-current
+		background-color: #27AE60
+		cursor: pointer
+		text-align: left
+		height: 50px
+
+		.explorer-header-current-organization-thumbnail
+			margin-top: 7px
+			width: 36px
+			height: 36px
+			background-image: url('../images/hct.jpg')
+			border-radius: 18px
+			display: inline-block
+			float: left
+			background-size: cover
+			margin-left: 16px
+			margin-right: 16px
+
+		.explorer-header-current-organization-title
+			margin-top: 16px
+			
+			float: left
+
+			.explorer-header-current-organization-title-subject
+				font-weight: bold
+				margin-left: 8px
+
+	nav.explorer-home-menu
+		display: none
+		position: absolute
+
+		z-index: 5
+		width: 125px
+
+		&.popout
+			z-index: 12
+			position: absolute
+
+		.floating-menu-spacer
+			background: url('../images/user-nav-pointer.png') no-repeat
+			background-position: center bottom
+			z-index: 10
+			height: 8px
+			position: relative
+
+		> ul, .menu-body
+			//@include popout-box
+			background-color: #fff
+			border: 1px solid #ddd
+			border-top-width: 0px
+			z-index: 6
+			
+			> li
+
+				a
+					padding: 2px 12px
+					padding-top: 10px
+					text-align: left
+					height: 24px
+					display: block
+					color: #666666
+			
+					&:hover
+						background-color: #efefef
+						text-decoration: none
+
+		&.show
+			display: block
+
+.explorer-body
+	height: 500px
+
+	.explorer-body-side
+		background-color: #f2f2f2
+		width: 25%
+		height: 100%
+		float: left
+
+		.explorer-body-side-menu
+			padding: 20px
+			padding-top: 10px
+
+			li
+				margin: 10px 0px
+
+				&.selected
+					a
+						color: $light-font
+						font-weight: bold
+
+				a
+					color: #aaaaaa
+					font-weight: bold
+
+					&:hover
+						text-decoration: none
+						color: $light-font
+
+			&.explorer-body-side-menu-main
+				padding-top: 20px
+
+				> li
+					> a
+						font-size: 1.15em
+
+			&.explorer-body-side-menu-light
+				> li
+					> a
+						font-weight: normal
+
+					&.selected
+						> a
+							font-weight: bold
+
+	.explorer-body-stage
+		width: 75%
+		float: right
+		height: 100%
+		background-color: #f9f9f9
+
+		.explorer-body-stage-spread
+			padding: 20px
+
+			.explorer-resource-module
+				overflow: hidden
+
+				.explorer-resource-module-thumbnail
+					width: 80px
+					height: 80px
+					background-image: url('../images/q-skills.jpg')
+					background-size: cover
+					float: left
+					margin-right: 20px
+
+				.explorer-resource-module-content
+					float: left
+					padding-top: 10px
+					font-weight: bold
+
+					.explorer-resource-module-content-title
+						color: $light-font
+						font-size: 1.3em
+
+					.explorer-resource-module-content-caption
+						color: #aaa
+						padding-top: 6px
+
+			.explorer-resource-listing
+				margin-top: 20px
+
+				.explorer-resource-listing-labels
+					color: #aaa
+					overflow: hidden
+
+					.explorer-resource-listing-label
+						padding-left: 10px
+
+					.explorer-resource-listing-labels-fill
+						width: 33%
+						float: left
+
+					.explorer-resource-listing-labels-key
+						width: 67%
+						float: right
+
+				.explorer-resource-listing-body
+					margin-top: 10px
+					background-color: #fff
+					padding: 10px
+					color: $light-font
+					overflow: hidden
+
+					.explorer-resource-objective-section
+						overflow: hidden
+						border-bottom: 1px solid #ddd
+						padding: 10px 0px
+
+						&:first-child
+							padding-top: 0px
+
+						.explorer-resource-listing-body-fill
+							width: 33%
+							float: left
+
+							.explorer-resource-objective
+								margin-right: 10px
+
+						.explorer-resource-listing-body-key
+							width: 67%
+							float: right
+
+							.explorer-resource-item
+								overflow: hidden
+								padding-bottom: 10px
+								margin-bottom: 10px
+								border-bottom: 1px solid #efefef
+
+								&:last-child
+									border-bottom-width: 0px
+
+								.explorer-resource-item-thumbnail
+									float: left
+									width: 80px
+									height: 80px
+									background-color: #E67E22
+									margin-right: 16px
+
+								.explorer-resource-item-content
+									float: left
+									padding-right: 10px
+
+									.explorer-resource-item-content-title
+										font-size: 1.2em
+										display: block
+										margin-bottom: 8px
+										font-weight: bold
+										padding-top: 4px
+
+									.explorer-resource-item-content-description
+										color: #aaa
+
+
 /***** INTERNAL TOOLS *************/
 
 .resource-meta-edit
@@ -5715,50 +5961,88 @@ body.signup, body.login, body.unsubscribe
 
 
 .standards-play
-	height: 100%
-
 	.category-selection-bar
 		height: 18px
 		border-bottom: 1px solid #efefef
-		padding: 14p
+		padding: 14px
 
-	.left-menu
-		color: #fff
-		width: 24%
-		height: 100%
-		background: #011c33 /* Old browsers */
-		background: -moz-linear-gradient(top, #011c33 0%, #073d30 100%) /* FF3.6+ */
-		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#011c33), color-stop(100%,#073d30)) /* Chrome,Safari4+ */
-		background: -webkit-linear-gradient(top, #011c33 0%,#073d30 100%) /* Chrome10+,Safari5.1+ */
-		background: -o-linear-gradient(top, #011c33 0%,#073d30 100%) /* Opera 11.10+ */
-		background: -ms-linear-gradient(top, #011c33 0%,#073d30 100%) /* IE10+ */
-		background: linear-gradient(to bottom, #011c33 0%,#073d30 100%) /* W3C */
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#011c33', endColorstr='#073d30',GradientType=0 ) /* IE6-9 */
-		padding-left: 14px
-		padding-top: 30px
-		float: left
+	.category-standards-body
+		height: 500px
 
-		ul
-			margin-right: 10px
+		.left-menu, .middle-menu
+			height: 100%
 
-			li
-				padding: 4px
+		.left-menu
+			color: #fff
+			width: 24%
+			background: #011c33 /* Old browsers */
+			background: -moz-linear-gradient(top, #011c33 0%, #073d30 100%) /* FF3.6+ */
+			background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#011c33), color-stop(100%,#073d30)) /* Chrome,Safari4+ */
+			background: -webkit-linear-gradient(top, #011c33 0%,#073d30 100%) /* Chrome10+,Safari5.1+ */
+			background: -o-linear-gradient(top, #011c33 0%,#073d30 100%) /* Opera 11.10+ */
+			background: -ms-linear-gradient(top, #011c33 0%,#073d30 100%) /* IE10+ */
+			background: linear-gradient(to bottom, #011c33 0%,#073d30 100%) /* W3C */
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#011c33', endColorstr='#073d30',GradientType=0 ) /* IE6-9 */
+			padding-left: 14px			
+			float: left
 
-				&:hover
-					background-color: #011c33
+			ul
+				padding-top: 30px
+				margin-right: 10px
 
-	.middle-menu
-		width: 32%
-		background-color: #efefef
-		height: 100%
-		float: left
-		padding-top: 30px
-		padding-left: 14px
+				li
+					padding: 8px
+					border-radius: 2px
+					border: 1px solid transparent
+					cursor: pointer
 
-		&.loading
-			background-image: url('../images/spinner.gif')
-			background-repeat: no-repeat
-			background-position: center center
+					&:hover
+						border-color: #fff
+
+		.middle-menu
+			width: 32%
+			background-color: #efefef
+			float: left
+			//padding-top: 30px
+
+			> ul
+				&.loading
+					height: 100%
+					background-image: url('../images/spinner.gif')
+					background-repeat: no-repeat
+					background-position: center center
+
+			.domains-listing
+				margin-top: 30px
+
+				.domain-title
+					font-weight: bold
+					font-color: $light-font
+					margin-bottom: 10px
+					padding: 0px 20px
+
+			.standards-listing
+				.standards-listing-item
+					font-size: 0.87em
+					border-bottom: 1px solid #ddd
+					padding: 10px 20px
+					cursor: pointer
+
+					&:hover
+						background-color: #f9f9f9
+
+.page-loader
+	background-color: #fff
+	opacity: 0.7
+	background-image: url('../images/spinner.gif')
+	background-repeat: no-repeat
+	background-position: center center
+	display: none
+	position: absolute
+	width: 100%
+
+	&.load
+		display: block
 
 
 .rename-resource-list

@@ -1,35 +1,39 @@
 require.config({
-    //baseUrl: staticURL + 'js',
-    baseUrl: '',
+    baseUrl: staticURL + 'js',
+    //baseUrl: '',
     paths: {
+        // Libraries.
         jquery: '//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min',
         underscore: 'lib/underscore-min',
         modernizr: 'lib/modernizr',
         tipsy: 'lib/jquery.tipsy',
         tagit: 'lib/tag-it.min',
         backbone: 'lib/backbone-min',
-        categoryResources: 'src/category-resources',
-        core: 'src/core',
         dropzone: 'lib/dropzone.min',
-        editor: 'src/editor',
-        feed: 'src/feed',
-        groups: 'src/groups',
-        //internal: 'internal',
         nanoscroller: 'lib/jquery.nanoscroller.min',
         timeago: 'lib/jquery.timeago',
-        react: 'lib/react.min',
-        resources: 'src/resources',
-        resourcesCollections: 'src/resources-collections',
-        searchResults: 'src/search-results',
-        upload: 'src/upload-files',
+        react: 'lib/react',
         filepicker: '//api.filepicker.io/v1/filepicker',
         mathjax: '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML',
+        backboneReact: 'lib/backbone-react-component',
 
         // CKEditor stuff.
         ckeditor: 'lib/ckeditor/ckeditor',
         ckeditor_jquery: 'lib/ckeditor/adapters/jquery',
         ckeditor_config: 'lib/ckeditor/config',
         ckeditor_styles: 'lib/ckeditor/styles',
+
+        // Internal modules.
+        categoryResources: 'src/category-resources',
+        core: 'src/core',
+        editor: 'src/editor',
+        feed: 'src/feed',
+        groups: 'src/groups',
+        //internal: 'internal',        
+        resources: 'src/resources',
+        resourcesCollections: 'src/resources-collections',
+        searchResults: 'src/search-results',
+        upload: 'src/upload-files',
 
         // Partials.
         browse: 'src/page/browse',
@@ -41,6 +45,8 @@ require.config({
         search: 'src/page/search',
         editor_page: 'src/page/editor',
         article: 'src/page/article',
+        explorer: 'src/page/explorer',
+        standards: 'src/page/standards',
 
         // jQuery UI.
         autocomplete: 'lib/jquery-ui/autocomplete',

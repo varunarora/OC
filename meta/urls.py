@@ -9,10 +9,15 @@ urlpatterns = patterns(
     #url(r'^(?P<number>\d+)/$', views.match, name='match')
     url(r'^api/standards/$', views.get_standards, name='get_standards'),
     url(r'^api/get-child-tags-from-category/(?P<category_id>\d+)/$', views.get_child_tags_from_category, name='get_child_tags_from_category'),
+    url(r'^api/get-nested-child-tags-from-category/(?P<category_id>\d+)/$', views.get_nested_child_tags_from_category, name='get_nested_child_tags_from_category'),
+    url(r'^api/standard/(?P<category_id>\d+)/$', views.get_standard, name='get_standard'),
 
     url(r'^api/topic/search/(?P<query>[\w\ \-\.]+)/$', views.autocomplete_topic, name='autocomplete_topic'),
     url(r'^api/concept/search/(?P<query>[\w\ \-\.]+)/$', views.autocomplete_concept, name='autocomplete_concept'),
     url(r'^api/standard/search/(?P<query>[\w\ \-\.]+)/$', views.autocomplete_standard, name='autocomplete_standard'),
 
     url(r'^standard/(?P<tag_title>[\w\-\.]+)/$', views.standard, name='standard'),
+
+    # Internal tools.
+    url(r'^standards/play/', views.play, name='play'),
 )
