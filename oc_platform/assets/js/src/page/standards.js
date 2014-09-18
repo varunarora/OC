@@ -42,19 +42,25 @@ define(['jquery', 'core', 'underscore', 'backbone', 'react', 'backboneReact'], f
     _.extend(OC.standards, {
         loadFreeze: function(){
             var pageLoader = $('.page-loader');
+
+            function resizePageLoader(){
+                var categoryBarHeight = $('.category-selection-bar').outerHeight();
+                
+                pageLoader.css({
+                    top: categoryBarHeight,
+                    height: $(window).height() - categoryBarHeight
+                });
+            }
             if (pageLoader.length === 0){
                 var newPageLoader = $('<div/>', {
                     'class': 'page-loader'
                 });
                 $('body').append(newPageLoader);
 
-                var categoryBarHeight = $('.category-selection-bar').outerHeight();
-
                 pageLoader = $('.page-loader');
-                pageLoader.css({
-                    top: categoryBarHeight,
-                    height: $(window).height() - categoryBarHeight
-                });
+                
+                resizePageLoader();
+                $(window).resize(resizePageLoader);
             }
 
             pageLoader.addClass('load');
