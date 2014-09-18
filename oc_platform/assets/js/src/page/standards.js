@@ -104,9 +104,9 @@ define(['jquery', 'core', 'underscore', 'backbone', 'react', 'backboneReact'], f
                     OC.standards.domains.reset();
 
                     // Build categories from resource results 'domain' fields.
-                    var domain;
+                    var domain, j = 0;
                     _.each(groupedStandards, function(value, key, list){
-                        domain = new OC.standards.Domain({ title: key });
+                        domain = new OC.standards.Domain({ title: key, id: j++ });
                         domain.set('standards', new OC.standards.Standards(value));
                         OC.standards.domains.add(domain);
                     });
@@ -175,10 +175,16 @@ define(['jquery', 'core', 'underscore', 'backbone', 'react', 'backboneReact'], f
         StandardView: React.createClass({
             mixins: [BackboneMixin],
             renderStandardInfo: function(){
-
+                React.renderComponent(OC.standards.StandardInfoView(
+                    {model: this.getModel() }), $('.right-menu').get(0));
             },
             render: function(){
-                return React.DOM.li({onClick: this.renderStandardInfo(), className: 'standards-listing-item'}, this.props.title + ': ' + this.props.description);
+                var shortenedDescription = this.props.description;
+
+                if (shortenedDescription.length > 200)
+                    shortenedDescription = shortenedDescription.substring(0, 150) + '\u2026';
+
+                return React.DOM.li({onClick: this.renderStandardInfo, className: 'standards-listing-item'}, this.props.title + ': ' + shortenedDescription);
             }
         }),
 
@@ -211,7 +217,7 @@ define(['jquery', 'core', 'underscore', 'backbone', 'react', 'backboneReact'], f
                 return OC.standards.StandardView({ model: standard });
             },
             render: function(){
-                return React.DOM.div(null, [
+                return React.DOM.div({className: 'domain'}, [
                     React.DOM.div({className: 'domain-title'}, this.props.title),
                     React.DOM.ul({className: 'standards-listing'}, this.props.standards.map(this.renderStandard))
                 ]);
@@ -235,6 +241,10 @@ define(['jquery', 'core', 'underscore', 'backbone', 'react', 'backboneReact'], f
         StandardInfoView: React.createClass({
             mixins: [BackboneMixin],
             render: function(){
+                return React.DOM.div({className: 'standard-info'}, [
+                    React.DOM.div({className: 'standard-code'}, this.props.title),
+                    React.DOM.div({className: 'standard-description'}, this.props.description)
+                ]);
             }
         })
     });
@@ -280,13 +290,13 @@ define(['jquery', 'core', 'underscore', 'backbone', 'react', 'backboneReact'], f
 
                 // Subjects.
                 var j, li, gradeSelector = $('select[name="grade"]');
+                gradeSelector.empty();
                 for (j = 0; j < response.subjects.length; j++){
                     li = $('<option/>', {
                         name: 'category-' + response.subjects[j].id,
                         html: response.subjects[j].title
                     });
 
-                    gradeSelector.empty();
                     gradeSelector.append(li);
                 }
                 

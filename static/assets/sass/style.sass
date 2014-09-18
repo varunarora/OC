@@ -5983,10 +5983,10 @@ body.signup, body.login, body.unsubscribe
 			background: -ms-linear-gradient(top, #011c33 0%,#073d30 100%) /* IE10+ */
 			background: linear-gradient(to bottom, #011c33 0%,#073d30 100%) /* W3C */
 			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#011c33', endColorstr='#073d30',GradientType=0 ) /* IE6-9 */
-			padding-left: 14px			
 			float: left
 
 			ul
+				padding-left: 14px
 				padding-top: 30px
 				margin-right: 10px
 
@@ -6003,7 +6003,7 @@ body.signup, body.login, body.unsubscribe
 			width: 32%
 			background-color: #efefef
 			float: left
-			//padding-top: 30px
+			overflow-y: auto
 
 			> ul
 				&.loading
@@ -6013,13 +6013,15 @@ body.signup, body.login, body.unsubscribe
 					background-position: center center
 
 			.domains-listing
-				margin-top: 30px
+				
+				.domain
+					margin-top: 30px
 
-				.domain-title
-					font-weight: bold
-					font-color: $light-font
-					margin-bottom: 10px
-					padding: 0px 20px
+					.domain-title
+						font-weight: bold
+						font-color: $light-font
+						margin-bottom: 10px
+						padding: 0px 20px
 
 			.standards-listing
 				.standards-listing-item
@@ -6030,6 +6032,23 @@ body.signup, body.login, body.unsubscribe
 
 					&:hover
 						background-color: #f9f9f9
+
+		.right-menu
+			float: right
+			width: 44%
+
+			.standard-info
+				padding: 20px
+				padding-top: 30px
+
+			.standard-code
+				font-weight: bold
+				font-size: 2em
+				margin-bottom: 20px
+
+			.standard-description
+				font-size: 1.3em
+				line-height: 1.2em
 
 .page-loader
 	background-color: #fff
