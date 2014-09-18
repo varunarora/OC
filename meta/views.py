@@ -256,14 +256,14 @@ def get_nested_child_tags_from_category(request, category_id):
         {'root': [category]}, [])
 
     tags = {}
+    standards_category = TagCategory.objects.get(title='Standards')
     for descendant_category in flattened_tree:
-        descendant_category_tags = descendant_category.tags.filter(category=TagCategory.objects.get(title='Standards')).order_by('position')
+        descendant_category_tags = descendant_category.tags.filter(category=standards_category).order_by('position')
         if descendant_category_tags.count() > 0:
-            #if descendant_category.parent not in tags:
-            #    tags[descendant_category.parent] = []
-            
-            #tags[descendant_category.parent].append(descendant_category_tags)
-            tags[descendant_category.parent] = descendant_category_tags
+            if descendant_category.parent not in tags:
+                tags[descendant_category.parent] = descendant_category_tags
+            else:
+                tags[descendant_category.parent] |= descendant_category_tags
 
     serialized_tags = []
     for tag_category, tag_set in tags.items():
