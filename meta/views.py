@@ -162,7 +162,13 @@ def get_root_key(value):
 
 def play(request):
     standards = Category.objects.filter(parent__title='Standards')
-    current_standard = Category.objects.get(title='Common Core')
+    
+    standard_slug = request.GET.get('q', None)
+
+    if standard_slug:
+        current_standard = Category.objects.get(slug=standard_slug)
+    else:
+        current_standard = Category.objects.get(title='Common Core')
 
     # Get all categories in this standard.
     current_standard_categories = Category.objects.filter(parent=current_standard)

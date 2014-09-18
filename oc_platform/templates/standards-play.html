@@ -4,7 +4,7 @@
     <div class="category-selection-bar">
         <select name="standard">
             {% for standard in standards %}
-            <option name="category-{{ standard.id }}">{{ standard.title }}</option>
+            <option name="category-{{ standard.id }}" {% ifequal standard.id current_standard.id %}selected{% endifequal %}>{{ standard.title }}</option>
             {% endfor %}
         </select>
         <select name="grade">
