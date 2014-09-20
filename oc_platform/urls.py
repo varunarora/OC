@@ -55,6 +55,7 @@ urlpatterns = patterns(
 
     url(r'^browse/$', 'oer.views.browse_default', name='browse_default'),
 
+    url(r'^hct/level-4/resources/', 'oc_platform.views.curriculum_resources', name='curriculum_resources'),
 
     # User stuff
     url(r'^signup-invite/', 'oc_platform.views.signup_invite', name='signupinvite'),
@@ -83,6 +84,7 @@ urlpatterns = patterns(
 
     # Labs stuff
     url(r'^labs/article-center/$', 'articles.views.article_center', name='article_center'),
+    url(r'^mailpimp/$', 'oc_platform.views.mailpimp_home', name='mailpimp_home'),
 
     # Article Center Registration
     url(r'^contributor-registration/', 'user_account.views.contributor_registration', name='contributor_registration'),
