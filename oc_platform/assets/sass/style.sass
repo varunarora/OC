@@ -5019,13 +5019,13 @@ a.content-panel-body-listing-item-anchor
 	background-size: cover
 
 .content-panel-body-listing-item-thumbnail-shadow
-	height: 40px
+	height: 80px
 	width: 205px
-	top: -40px
-	margin-bottom: -40px
+	top: -80px
+	margin-bottom: -80px
 	position: relative
 	/* TODO: Custom IE styling in ie.sass */
-	@include background-image(linear-gradient(transparent, rgba(0,0,0, 0.2)))
+	@include background-image(linear-gradient(transparent, rgba(0,0,0, 0.4)))
 	//repeat scroll 0 0 rgba(0, 0, 0, 0)
 	z-index: 0
 
@@ -5786,10 +5786,6 @@ body.signup, body.login, body.unsubscribe
 					> a
 						font-weight: normal
 
-					&.selected
-						> a
-							font-weight: bold
-
 				&.explorer-body-side-menu-light-categorized
 					padding: 0px
 
@@ -5839,79 +5835,232 @@ body.signup, body.login, body.unsubscribe
 				margin-top: 20px
 
 				.explorer-resource-listing-labels
-					color: #aaa
 					overflow: hidden
 
-					.explorer-resource-listing-label
-						padding-left: 10px
-
-					.explorer-resource-listing-labels-fill
-						width: 33%
+					.explorer-resource-listing-labels-pre
+						width: 5%
 						float: left
 
-					.explorer-resource-listing-labels-key
-						width: 67%
-						float: right
+					.explorer-resource-listing-labels-header
+						color: #aaa
+						width: 95%
+						float: left
+						overflow: hidden
+
+						.explorer-resource-listing-label
+							padding-left: 10px
+
+						.explorer-resource-listing-labels-header-fill
+							width: 33%
+							float: left
+
+						.explorer-resource-listing-labels-header-key
+							width: 67%
+							float: right
 
 				.explorer-resource-listing-body
 					margin-top: 10px
 					background-color: #fff
-					padding: 10px
+					//padding: 10px
 					color: $light-font
 					overflow: hidden
 
 					.explorer-resource-objective-section
 						overflow: hidden
 						border-bottom: 1px solid #ddd
-						padding: 10px 0px
+						//padding: 10px
 
-						&:first-child
-							padding-top: 0px
+						/*&:first-child
+							padding-top: 0px*/
 
-						.explorer-resource-listing-body-fill
-							width: 33%
+						&.new
+							background-color: #f7ebc6
+
+						.explorer-resource-listing-body-pre
+							width: 5%
+							float: left
+							background-color: #E4F7D2
+							cursor: pointer
+
+						.explorer-resource-listing-body-content
+							overflow: hidden
+							width: 95%
 							float: left
 
-							.explorer-resource-objective
-								margin-right: 10px
+							.explorer-resource-listing-body-content-fill
+								width: 33%
+								float: left
 
-						.explorer-resource-listing-body-key
-							width: 67%
-							float: right
+								.explorer-resource-objective
+									margin-right: 10px
+									padding: 10px
+									outline: none
 
-							.explorer-resource-item
-								overflow: hidden
-								padding-bottom: 10px
-								margin-bottom: 10px
-								border-bottom: 1px solid #efefef
+							.explorer-resource-listing-body-content-key
+								width: 67%
+								float: right
 
-								&:last-child
-									border-bottom-width: 0px
+								.explorer-resource-item
+									overflow: hidden
+									padding-bottom: 10px
+									margin-bottom: 10px
+									border-bottom: 1px solid #efefef
 
-								.explorer-resource-item-thumbnail-wrapper
-									float: left
-									width: 18%
+									&:last-child
+										border-bottom-width: 0px
 
-									.explorer-resource-item-thumbnail
-										width: 80px
-										height: 80px
-										background-color: #E67E22
-										margin-right: 16px
+									&:first-child
+										padding-top: 10px
 
-								.explorer-resource-item-content
-									float: left
-									width: 82%
-									//padding-right: 10px
+									.explorer-resource-item-thumbnail-wrapper
+										float: left
+										width: 18%
 
-									.explorer-resource-item-content-title
-										font-size: 1.2em
-										display: block
-										margin-bottom: 8px
-										font-weight: bold
-										padding-top: 4px
+										.explorer-resource-item-thumbnail
+											width: 80px
+											height: 80px
+											background-color: #E67E22
+											margin-right: 16px
 
-									.explorer-resource-item-content-description
-										color: #aaa
+									.explorer-resource-item-content
+										float: left
+										width: 82%
+										//padding-right: 10px
+
+										.explorer-resource-item-content-title
+											font-size: 1.2em
+											display: block
+											margin-bottom: 8px
+											font-weight: bold
+											padding-top: 4px
+
+										.explorer-resource-item-content-description
+											color: #aaa
+
+	.explorer-resource-listing-actions
+		background-color: #efefef
+		padding: 10px
+		text-align: right
+
+		button
+			background-color: #aaa
+			padding: 4px 6px
+			color: #fff
+			border-width: 0px
+
+			&:hover
+				background-color: #999
+
+//.objective-status-popouts
+.objective-status-dialog
+	position: absolute
+	overflow: hidden
+	width: 250px
+	padding: 10px
+	padding-left: 0px
+	padding-top: 2px
+	display: none
+	top: 100px
+	left: 100px
+	//height: 200px
+	z-index: 10
+
+	&.show
+		display: block
+
+	.objective-status-pointer
+		width: 8px
+		background-image: url('../images/left-pointer.png')
+		background-repeat: no-repeat
+		background-position: right center
+		height: 10px
+		position: relative
+		margin-bottom: -30px
+		padding-top: 20px
+		left: 1px
+
+
+	.objective-status-body
+		width: 220px
+		//height: 180px
+		padding: 10px
+		background-color: #fff
+		@include box-shadow(0 2px 4px #d6d6d6)
+		margin-left: 8px
+		border: 1px solid #bbb
+
+
+		.objective-status-options
+			text-align: center
+
+			button.objective-ready-status
+				background-color: #E4F7D2
+				color: #41914F
+
+				&.selected
+					border-color: #41914F
+
+			button.objective-unready-status
+				background-color: #FBC9C9
+				color: #AE7A7A
+
+				&.selected
+					border-color: #AE7A7A
+			button
+				padding: 6px
+				border: 2px solid transparent
+				margin-bottom: 10px
+				width: 100%
+				font-weight: bold
+
+		.objective-status-unready-body
+			display: none
+			margin: auto
+
+			&.show
+				display: block
+
+			textarea
+				border: 1px solid #ddd
+				margin-bottom: 10px
+				width: 96%
+				padding: 4px
+				height: 140px
+				font-family: Arial, sans-serif
+
+			.action-button
+				float: none
+				text-align: center
+
+
+.state-message-wrapper
+	position: fixed
+	top: 60px
+	left: 90%
+	z-index: 1
+	color: #ccc
+	display: inline-block
+	width: 100px
+	overflow: hidden
+
+	.state-message
+		padding: 4px 
+		background-color: #fff
+		float: right
+
+.light-popup-background
+	z-index: 5
+	position: fixed
+	display: none
+	height: 100%
+	width: 100%
+	background: #ffffff
+	top: 0px
+	left: 0px
+	opacity: 0.7
+
+	&.show-popup-background
+		display: block
 
 
 /***** INTERNAL TOOLS *************/
