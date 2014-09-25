@@ -5219,7 +5219,7 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
                     '.profile-content').css('padding-top'), 10)
             );
 
-            if ($('.profile-content').length >0)
+            if ($('.profile-content').length > 0)
                 $('.wide-center-stage').height('100%');
         },
 
