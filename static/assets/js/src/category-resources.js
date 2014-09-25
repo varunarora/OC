@@ -387,7 +387,7 @@ var RequestCollectionView = Backbone.View.extend({
 var ResourceView = Backbone.View.extend({
     tagName: "div",
     className: function(){
-         return className = (!OC.categoryResources.isSubjectHome && (
+         return (!OC.categoryResources.isSubjectHome && (
             !OC.categoryResources.isCatalog)) ? "content-panel-body-listing-banner-item" : "content-panel-body-listing-thumbnail-item";
     },
     truncatedDescriptionLength: null,
