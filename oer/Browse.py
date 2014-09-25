@@ -150,10 +150,10 @@ class Browse():
 
         if not self.is_subject_home:
             # Determine if this is a catalog page or not.
-            if Category.objects.filter(parent=self.selected_category).order_by('position').count() > 0:
-                self.is_catalog = True
-            else:
-                self.is_catalog = False
+            #if Category.objects.filter(parent=self.selected_category).order_by('position').count() > 0:
+            #    self.is_catalog = True
+            #else:
+            self.is_catalog = False
 
             if len(child_categories) == 0:
                 (all_resources, all_collections, current_category_id) = self.get_category_tree_resources_collections_catalog([self.current_category])
@@ -228,7 +228,8 @@ class Browse():
         self.selected_category.url = self.request.path
 
         context = {
-            'title': 'Browse lessons, projects, activities, worksheets &amp; tests',
+            'title': 'Browse lessons, projects, activities, worksheets &amp; tests' if self.is_subject_home else (
+                self.selected_category.title + ' &lsaquo; Lessons, projects, activities, worksheets &amp; tests'),
             'selected_category': self.selected_category,
             # 'browse_tree': browse_tree,
             'child_categories': serialized_child_categories,

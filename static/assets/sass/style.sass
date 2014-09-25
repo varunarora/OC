@@ -115,13 +115,11 @@ header.wide-header
 		text-align: right
 	
 		a.site-logo
-			float: right
+			//float: right
 
 	#search-bar
 		padding-top: 10px
 
-	.header-search-users-wrapper
-		width: 92%
 
 	nav#authenticate-buttons, nav#user-buttons
 		> ul
@@ -4365,30 +4363,103 @@ body.browse
 			border-color: #2980b9
 
 .resource-browse
-	&.resource-browse-subject
+	.resource-browse-header
+		height: 80px
+		background-color: #2980b9
 
-		.subjects-header
-			height: 100px
-			background-color: #2980b9
+		.resource-browse-header-title-wrapper
+			//width: 92%
+			//float: right
+			padding-top: 20px
 
-			.subjects-header-subjects
-				margin: auto
-				width: 80%
+			.resource-browse-header-title
+				overflow: hidden
 
-				.subjects-header-subjects-subject
-					color: #679FC5
-					font-weight: bold
+				&.show-share
+					min-height: 24px
+
+				h2
+					display: inline-block
+					color: #fff
 					float: left
-					width: 33%
-					text-align: center
-					height: 65px
-					padding-top: 35px
 
-					&.selected
-						background-image: url('../images/subject-selector.png')
-						background-position: bottom center
-						background-repeat: no-repeat
-						color: #fff
+				.resource-browse-header-share
+					text-align: center
+					background-color: transparent
+					@include border-radius(2px)
+					border: 1px solid #fff
+					color: #fff
+					float: left
+					display: inline-block
+					margin-left: 24px
+					padding: 2px 8px
+					opacity: 0.7
+					margin-top: 2px
+
+					&:hover
+						color: #2980b9
+						background-color: #fff
+						opacity: 1
+			.breadcrumb
+				clear: left
+
+				a
+					color: #AAC0CE
+
+		.resource-browse-header-qna-wrapper
+			padding-top: 30px
+			text-align: right
+
+			.resource-browse-header-qna
+				color: #fff
+				font-size: 1.3em
+				padding-left: 24px
+				background-image: url('../images/qna-icon.png')
+				background-position: center left
+				background-repeat: no-repeat
+				outline: 0 none
+
+		//.content-panel-body-listing-questions-toggler
+			//float: right
+			//background-color: #ddd
+			//@include border-radius(4px)
+			//padding: 2px
+
+			//a
+				//padding: 8px 14px
+				//font-weight: bold
+				//display: inline-block
+				//color: #999
+				//@include border-radius(4px)
+				//outline: none
+
+				//&.selected
+					//background-color: #f9f9f9
+					//color: $body-color
+
+				//&:hover
+					//text-decoration: none
+					//color: $body-color
+
+	&.resource-browse-subject
+		.subjects-header-subjects
+			margin: auto
+			width: 80%
+
+			.subjects-header-subjects-subject
+				color: #679FC5
+				font-weight: bold
+				float: left
+				width: 33%
+				text-align: center
+				height: 55px
+				padding-top: 25px
+
+				&.selected
+					background-image: url('../images/subject-selector.png')
+					background-position: bottom center
+					background-repeat: no-repeat
+					color: #fff
 
 		.wide-center-stage
 			padding-top: 16px
@@ -4488,6 +4559,8 @@ body.browse
 
 	.category-panel
 		.category-panel-listing
+			width: 82%
+
 			.category-choice-wrapper
 				margin: 32px 0px
 				margin-bottom: 30px
@@ -4562,7 +4635,10 @@ body.browse
 						background-position: 8px center
 						padding-left: 30px
 
-		.category-panel-listing, .category-panel-listing-categories-body
+		.category-panel-listing .category-panel-listing-categories-body
+			padding-top: 20px
+			padding-left: 10px
+
 			> ul
 				> li
 					> a
@@ -4579,8 +4655,8 @@ body.browse
 				margin-top: 40px
 
 			.category-panel-listing-categories-body-filters
-				color: $light-font
-				padding-left: 10px
+				//color: $light-font
+				//padding-left: 10px
 
 				label:first-child
 					margin-top: 10px
@@ -4594,283 +4670,293 @@ body.browse
 					padding: 2px 5px
 					font-weight: bold
 
+		.category-panel-body-listing-types
+			margin-bottom: 10px
+
+			ul
+				li
+					padding-bottom: 10px
+
+					a
+						color: $light-font
+						font-size: 1.3em
+						outline: none
+
+						&:hover
+							text-decoration: none
+							color: $body-color
+
+						&.current
+							color: $body-color
+							font-weight: bold
+
+		.category-panel-body-listing-filters
+			.category-panel-body-listing-filters-filter
+				margin-top: 20px
+				color: $light-font
+
+				label
+					input
+						margin-right: 4px
+
+				.category-panel-body-listing-filters-filter-title
+					font-size: 1.1em
+					font-weight: bold
+					text-transform: uppercase
+					color: #999
+					margin-bottom: 6px
+
+			.category-panel-body-listing-filters-sort/*, .discussion-board-filters-sort*/
+				.filter-sort-option
+					cursor: pointer
+					line-height: 1.3em
+
+					.filter-radio
+						margin: right
+						width: 12px
+						height: 12px
+						display: inline-block
+						background-image: url('../images/unchecked-radio-button.png')
+						background-position: center center
+						background-repeat: no-repeat
+						background-size: 12px 12px
+						margin-right: 4px
+
+					&.selected
+						@include sans-bold
+
+						.filter-radio
+							background-image: url('../images/checked-radio-button.png')
+
+			.dropdown-filter
+				background-image: url('../images/arrow-light.png')
+				background-position: 60% center
+				background-repeat: no-repeat
+				cursor: pointer
+
+				&:hover
+					color: $light-font
+
+			.category-panel-body-listing-filters-filter-body
+				&.hidden
+					display: none
+
+				//.sort-by-type
+					//display: inline-block
+					//border: 1px solid #ddd
+					//padding: 4px 8px
+					//margin-left: 4px
+					//cursor: pointer
+
+					//.sort-by-type-button
+						//display: inline-block
+						//width: 16px
+						//height: 15px
+						//background: url('../images/downvote.png') no-repeat
+						//background-position: center
+						//background-size: 10px 10px
+						//position: relative
+						//float: right
+
+				//.sort-by-type-menu
+					//display: none
+					//position: absolute
+					//overflow: hidden
+					//padding: 10px
+					//@include box-shadow(0 2px 2px rgba(0, 0, 0, 0.4))
+					//background-color: #fff
+					//z-index: 10
+
+					//&.show
+						//display: block
+
+					.sort-by-type-menu-content
+						float: left
+						margin-right: 20px
+
+					.sort-by-type-menu-format
+						float: right
+
 	.content-panel
-		.content-panel-body-wrapper
-			.content-panel-body
-				.content-panel-body-search
-					.search-filters
-						padding: 20px
+		width: 76%
 
-				.content-panel-body-header
-					min-height: 30px
-					width: 92%
+		.content-panel-body-search
+			.search-filters
+				padding: 20px
 
-					h3
+		.content-panel-body-header
+			min-height: 30px
+			width: 92%
+
+			h3
+				color: $light-font
+
+		#search-result-set
+			padding: 20px
+			padding-top: 0px
+			overflow: hidden
+
+		.content-panel-body-listing
+			//overflow: auto
+
+			//.content-panel-body-listing-filters
+				//height: 25px
+				//margin-bottom: 20px
+				//padding-left: 20px
+
+				//.content-panel-body-listing-filters-search
+					//float: left
+
+					//input
+						//padding-left: 30px
+						//background: url('../images/search-icon-light.png') no-repeat
+						//background-position: 8px center
+						//width: 240px
+						//background-color: #f9f9f9
+
+
+			.content-panel-body-listing-items
+				overflow: hidden
+				display: none
+				padding-top: 20px
+
+				&.show
+					display: block
+
+				.content-panel-body-listing-category
+					overflow: hidden
+					margin-top: 20px
+
+					.content-panel-body-listing-category-title
+						margin-bottom: 20px
+						font-weight: bold
+						padding-left: 20px
+
+					.content-panel-body-listing-category-resources
+						overflow: hidden
+						padding-top: 10px
+						padding-left: 20px
+
+					.content-panel-body-listing-category-show
+						padding: 12px 0px
+						width: 96%
+						background-color: #F9F9F9
+						margin-bottom: 60px
+						border: 2px solid #ddd
+						font-weight: bold
+						@include border-radius(2px)
+						text-align: center
+						overflow: hidden
+						cursor: pointer
+						display: block
+						color: $light-font
+						margin-left: 20px
+						outline: none
+
+						&:hover
+							color: $body-color
+							background-color: #FFFFFF
+							border-color: #bababa
+							text-decoration: none
+
+						&.loading
+							background-image: url('../images/spinner.gif')
+							background-position: 40% center
+							background-repeat: no-repeat
+
+						&.hide
+							display: none
+
+				.content-panel-body-listing-item-show
+					height: 140px
+					width: 190px
+					background-color: #f6f6f6
+					display: block
+					float: left
+					color: #999
+					font-size: 1.6em
+					text-align: center
+					padding-top: 80px
+					background-image: url('../images/category-show-arrow.png')
+					background-repeat: no-repeat
+					background-position: 85% center
+					border: 5px solid #d2d2d2
+					outline: none
+
+					.content-panel-body-listing-item-show-count
+						font-size: 2em
+
+					&:hover
+						background-color: #FFF
+						@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.2))
+						text-decoration: none
 						color: $light-font
 
-					.content-panel-body-header-title-wrapper
-						width: 77%
+
+			.content-panel-body-listing-requests
+				padding-top: 20px
+				margin-top: 20px
+				border-top: 1px solid #ddd
+				clear: left
+				margin-left: 20px
+				display: none
+
+				&.show
+					display: block
+
+				.content-panel-body-listing-requests-title
+					overflow: hidden
+
+					h3
 						float: left
 
-						.content-panel-body-header-title
-							overflow: hidden
-							padding-bottom: 6px
-
-							&.show-share
-								min-height: 28px
-
-							h2
-								display: inline
-
-							.content-panel-body-header-share
-								text-align: center
-								background-color: transparent
-								@include border-radius(2px)
-								border: 1px solid #5abd02
-								color: #5abd02
-								float: none
-								display: inline
-								margin-left: 12px
-								padding: 4px 12px
-
-								&:hover
-									color: #fff
-									background-color: #5abd02
-
-						.breadcrumb
-							clear: left
-
-					.content-panel-body-listing-questions-toggler
+					.content-panel-body-listing-requests-new-request
 						float: right
-						background-color: #ddd
-						@include border-radius(4px)
-						padding: 2px
+						color: #800080
+						border: 1px solid #800080
+						text-align: center
+						border-radius: 2px
+						margin-right: 8px
+						background-color: #efefef
 
-						a
-							padding: 8px 14px
-							font-weight: bold
-							display: inline-block
-							color: #999
-							@include border-radius(4px)
-							outline: none
+						&:hover
+							color: #fff
+							background-color: #800080
 
-							&.selected
-								background-color: #f9f9f9
-								color: $body-color
-
-							&:hover
-								text-decoration: none
-								color: $body-color
-
-				.content-panel-body-listing-filters-sort-wrapper
-					width: 92%
+				.content-panel-body-listing-request
+					padding: 12px
+					display: block
 					overflow: hidden
+					color: $body-color
+					padding-right: 32px
+					background-color: #F9F9F9
+					@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
+					margin-bottom: 6px
 
-					.content-panel-body-listing-filters-sort
-						float: right
-						margin-top: 10px
+					.content-panel-body-listing-request-thumbnail
+						width: 40px
+						height: 40px
+						background-size: cover
+						float: left
+						margin-right: 12px
 
-						.sort-by-type
-							display: inline-block
-							border: 1px solid #ddd
-							padding: 4px 8px
-							margin-left: 4px
-							cursor: pointer
+					.content-panel-body-listing-request-body
+						float: left
+						width: 90%
 
-							.sort-by-type-button
-								display: inline-block
-								width: 16px
-								height: 15px
-								background: url('../images/downvote.png') no-repeat
-								background-position: center
-								background-size: 10px 10px
-								position: relative
-								float: right
+						.content-panel-body-listing-request-body-user
+							color: #bababa
+							margin-right: 8px
 
-						.sort-by-type-menu
-							display: none
-							position: absolute
-							overflow: hidden
-							padding: 10px
-							@include box-shadow(0 2px 2px rgba(0, 0, 0, 0.4))
-							background-color: #fff
-							z-index: 10
+						p
+							margin-top: 0px
+							display: inline
 
-							&.show
-								display: block
-
-							.sort-by-type-menu-content
-								float: left
-								margin-right: 20px
-
-							.sort-by-type-menu-format
-								float: right
-
-				#search-result-set
-					padding: 20px
-					padding-top: 0px
-					overflow: hidden
-
-				.content-panel-body-listing
-					//overflow: auto
-
-					//.content-panel-body-listing-filters
-						//height: 25px
-						//margin-bottom: 20px
-						//padding-left: 20px
-
-						//.content-panel-body-listing-filters-search
-							//float: left
-
-							//input
-								//padding-left: 30px
-								//background: url('../images/search-icon-light.png') no-repeat
-								//background-position: 8px center
-								//width: 240px
-								//background-color: #f9f9f9
-
-
-					.content-panel-body-listing-items
-						overflow: hidden
-						display: none
-
-						&.show
-							display: block
-
-						.content-panel-body-listing-category
-							overflow: hidden
-							margin-top: 20px
-
-							.content-panel-body-listing-category-title
-								margin-bottom: 20px
-								font-weight: bold
-								padding-left: 20px
-
-							.content-panel-body-listing-category-resources
-								overflow: hidden
-								padding-top: 10px
-								padding-left: 20px
-
-							.content-panel-body-listing-category-show
-								padding: 12px 0px
-								width: 96%
-								background-color: #F9F9F9
-								margin-bottom: 60px
-								border: 2px solid #ddd
-								font-weight: bold
-								@include border-radius(2px)
-								text-align: center
-								overflow: hidden
-								cursor: pointer
-								display: block
-								color: $light-font
-								margin-left: 20px
-								outline: none
-
-								&:hover
-									color: $body-color
-									background-color: #FFFFFF
-									border-color: #bababa
-									text-decoration: none
-
-								&.loading
-									background-image: url('../images/spinner.gif')
-									background-position: 40% center
-									background-repeat: no-repeat
-
-								&.hide
-									display: none
-
-						.content-panel-body-listing-item-show
-							height: 140px
-							width: 190px
-							background-color: #f6f6f6
-							display: block
-							float: left
-							color: #999
-							font-size: 1.6em
-							text-align: center
-							padding-top: 80px
-							background-image: url('../images/category-show-arrow.png')
-							background-repeat: no-repeat
-							background-position: 85% center
-							border: 5px solid #d2d2d2
-							outline: none
-
-							.content-panel-body-listing-item-show-count
-								font-size: 2em
-
-							&:hover
-								background-color: #FFF
-								@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.2))
-								text-decoration: none
-								color: $light-font
-
-
-					.content-panel-body-listing-requests
-						padding-top: 20px
-						margin-top: 20px
-						border-top: 1px solid #ddd
-						clear: left
-						margin-left: 20px
-						display: none
-
-						&.show
-							display: block
-
-						.content-panel-body-listing-requests-title
-							overflow: hidden
-
-							h3
-								float: left
-
-							.content-panel-body-listing-requests-new-request
-								float: right
-								color: #800080
-								border: 1px solid #800080
-								text-align: center
-								border-radius: 2px
-								margin-right: 8px
-								background-color: #efefef
-
-								&:hover
-									color: #fff
-									background-color: #800080
-
-						.content-panel-body-listing-request
-							padding: 12px
-							display: block
-							overflow: hidden
-							color: $body-color
-							padding-right: 32px
-							background-color: #F9F9F9
-							@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
-							margin-bottom: 6px
-
-							.content-panel-body-listing-request-thumbnail
-								width: 40px
-								height: 40px
-								background-size: cover
-								float: left
-								margin-right: 12px
-
-							.content-panel-body-listing-request-body
-								float: left
-								width: 90%
-
-								.content-panel-body-listing-request-body-user
-									color: #bababa
-									margin-right: 8px
-
-								p
-									margin-top: 0px
-									display: inline
-
-							&:hover
-								background-color: #ffffff
-								background-image: url('../images/request-open.png')
-								background-repeat: no-repeat
-								background-position: 97% center
+					&:hover
+						background-color: #ffffff
+						background-image: url('../images/request-open.png')
+						background-repeat: no-repeat
+						background-position: 97% center
 
 		footer
 			margin-top: 0px
@@ -4906,12 +4992,24 @@ body.browse
 	width: 60px
 	height: 12px
 	margin-bottom: -12px
-	background-color: #5ABD02
 	font-size: 0.87em
 	padding-left: 10px
 	padding-top: 2px
 	color: #fff
 	font-weight: bold
+
+	&.lesson-label
+		background-color: #34495e
+
+	&.exercise-label
+		background-color: #c0392b
+
+	&.activity-label
+		background-color: #16a085
+
+	&.worksheet-label
+		background-color: #7f8c8d
+
 
 .content-panel-body-listing-item-label-fold
 	position: relative
@@ -4922,6 +5020,8 @@ body.browse
 	background-image: url('../images/label-fold.png')
 
 #search-result-set, .content-panel-body-listing
+	overflow-y: scroll
+
 	.content-panel-body-listing-thumbnail-item
 		float: left
 		color: $body-color
@@ -4955,18 +5055,23 @@ body.browse
 		color: $body-color
 		display: block
 		width: 800px
-		padding-top: 10px
+		padding-bottom: 10px
 		padding-left: 20px
 
 		&.expanded
 			a.content-panel-body-listing-item-anchor
 				// height: auto
+				height: 260px
+
+			.content-panel-body-listing-item-contents-meta
+				top: 220px
 
 		> a
 			outline: none
 
 			&:hover
-				text-decoration: none
+				.content-panel-body-listing-item-contents-caption
+					//text-decoration: underline
 
 		.content-panel-body-listing-item-label
 			left: -5px
@@ -5000,17 +5105,17 @@ body.browse
 
 
 a.content-panel-body-listing-item-anchor
-	background-color: #f9f9f9
-	@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
+	background-color: #fff
+	//@include box-shadow(0 0px 5px rgba(0, 0, 0, 0.1))
 	display: inline-block
 	width: 205px
+	border: 1px solid #efefef
 
 	&:hover
-		@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.2))
+		//@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.2))
+		border-color: #2980b9
 		background-color: #fff
 
-		.content-panel-body-listing-item-contents-caption
-			text-decoration: underline
 
 .content-panel-body-listing-item-thumbnail
 	width: 205px
@@ -5050,14 +5155,20 @@ a.content-panel-body-listing-item-anchor
 	.content-panel-body-listing-item-contents-caption
 		display: block
 		color: $link-hover
-		font-weight: bold
 		font-size: 1.2em
 
-	.content-panel-body-listing-item-contents-meta,
 	.content-panel-body-listing-item-contents-description
 		margin-top: 4px
 		color: $light-font
 		font-size: 0.9em
+
+		.content-panel-body-listing-item-description-more,
+		.content-panel-body-listing-item-description-less
+			color: #1155cc
+			cursor: pointer
+
+			&:hover
+				text-decoration: underline
 
 	.content-panel-body-listing-item-contents-labels
 		margin: 6px 0px
@@ -5071,30 +5182,47 @@ a.content-panel-body-listing-item-anchor
 			margin-bottom: 2px
 			display: inline-block
 
-	.content-panel-body-listing-item-contents-reviews
-		margin-top: 6px
+	.content-panel-body-listing-item-contents-meta
+		margin-top: 4px
+		color: $light-font
+		font-size: 0.85em
+		position: relative
+		height: 20px
+		margin-bottom: -20px
+		top: 110px
 
-		.content-panel-body-listing-item-contents-reviews-stars
+		.content-panel-body-listing-item-contents-views,
+		.content-panel-body-listing-item-contents-creator
 			display: inline-block
-			vertical-align: middle
 
-			.content-panel-body-listing-item-contents-review-star,
-			.content-panel-body-listing-item-contents-review-halfstar
+		.content-panel-body-listing-item-contents-views
+			margin-right: 30px
+
+		.content-panel-body-listing-item-contents-reviews
+			display: inline-block
+			margin-right: 30px
+
+			.content-panel-body-listing-item-contents-reviews-stars
 				display: inline-block
-				background-repeat: no-repeat
-				background-position: center center
-				width: 14px
-				height: 14px
+				vertical-align: middle
 
-			.content-panel-body-listing-item-contents-review-star
-				background-image: url('../images/favorited.png')
+				.content-panel-body-listing-item-contents-review-star,
+				.content-panel-body-listing-item-contents-review-halfstar
+					display: inline-block
+					background-repeat: no-repeat
+					background-position: center center
+					width: 14px
+					height: 14px
 
-			.content-panel-body-listing-item-contents-review-halfstar
-				background-image: url('../images/half-star.png')
+				.content-panel-body-listing-item-contents-review-star
+					background-image: url('../images/favorited.png')
 
-		.content-panel-body-listing-item-contents-review-count
-			display: inline-block
-			margin-left: 6px
+				.content-panel-body-listing-item-contents-review-halfstar
+					background-image: url('../images/half-star.png')
+
+			.content-panel-body-listing-item-contents-review-count
+				display: inline-block
+				margin-left: 6px
 
 
 .oc-page-tabs
@@ -5126,19 +5254,6 @@ a.content-panel-body-listing-item-anchor
 					border-bottom: 2px solid $body-color
 					color: $body-color
 					font-weight: bold
-
-
-.content-panel-body-listing-filters-sort, .discussion-board-filters-sort
-	.filter-sort-option
-		color: $light-font
-		cursor: pointer
-
-		&.selected
-			color: $body-color
-			@include sans-bold
-
-	.sort-by
-		color: #bababa
 
 .no-request-found-message
 	font-weight: bold

@@ -6,7 +6,7 @@
 
 {% if child_categories_map %}
 <div class="center-spread resource-browse resource-browse-subject">
-    <div class="subjects-header">
+    <div class="resource-browse-header">
         <div class="subjects-header-subjects">
             <h2 class="subjects-header-subjects-subject">English</h2>
             <h2 class="subjects-header-subjects-subject selected">Mathematics</h2>
@@ -14,7 +14,7 @@
         </div>
     </div>
     <div class="wide-center-stage">
-        <div class="wide-center-stage-fill-panel">
+        <div class="wide-center-stage-fill-panel wide-center-stage-left-panel">
             <div class="grades-topics">
                 <ul class="grades">
                     {# for child_category in child_categories #}
@@ -23,7 +23,7 @@
                 </ul>
             </div>
         </div>
-        <div class="wide-center-stage-key-panel content-panel">
+        <div class="wide-center-stage-key-panel wide-center-stage-right-panel content-panel">
             <div class="grades-topics-list">
                 <div class="grades-topics-list-empty">
                         <img src="{{ STATIC_URL }}images/select-category.png" />
@@ -36,9 +36,11 @@
     </div>
 <div>
 {% else %}
+
+{% if query or query == '' %}
 <div class="center-spread resource-browse">
     <div class="wide-center-stage">
-        <div class="wide-center-stage-fill-panel category-panel">
+        <div class="wide-center-stage-fill-panel wide-center-stage-left-panel category-panel">
             {% if browse_mode != 'suggestions' %}
             <div class="category-panel-listing">
                 <div class="category-choice-wrapper">
@@ -83,7 +85,7 @@
             </div>
             {% endif %}
         </div>
-        <div class="wide-center-stage-key-panel content-panel">
+        <div class="wide-center-stage-key-panel wide-center-stage-right-panel content-panel">
             <div class="content-panel-body-wrapper">
                 <div class="content-panel-body" id="category-{{ selected_category.id }}">
                     {% if browse_mode == 'suggestions' %}
@@ -99,7 +101,7 @@
 
                     {% else %}
                         {% if child_categories_map %}
-                        <div class="content-panel-body-feature">
+                        <!--<div class="content-panel-body-feature">
                             <div class="content-panel-body-feature-title"><h2>{{ selected_category.title }}</h2>
                             <div class="breadcrumb">
                                 {% for breadcrumb_category in breadcrumb %}
@@ -126,7 +128,7 @@
                                 </div>
                                 <ul class="content-panel-body-grades-topics-list-filled"></ul>
                             </div>
-                        </div>
+                        </div>-->
                         {% endif %}
                         {% if query or query == '' %}
                         <div class="content-panel-body-header">
@@ -179,6 +181,96 @@
                 {% endif %}
             </div>
             {% include 'partials/footer.html' %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="center-spread resource-browse resource-browse-listing">
+    <div class="wide-center-stage resource-browse-header">
+        <div class="wide-center-stage-content">
+            <div class="wide-center-stage-key-panel wide-center-stage-left-panel">
+                <div class="resource-browse-header-title-wrapper">
+                    <div class="resource-browse-header-title{% if not is_catalog %} show-share{% endif %}"><h2>{{ selected_category.title }}</h2><div class="resource-browse-header-share action-button mini-action-button">+ Share new</div></div>
+                    <div class="breadcrumb">
+                        {% for breadcrumb_category in breadcrumb %}
+                            <a href="{{ breadcrumb_category.url }}">{{ breadcrumb_category.title }}</a> 
+                            {% if not forloop.last %}
+                            <span class="vertical-caret breadcrumbs-caret"></span> 
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="wide-center-stage-fill-panel wide-center-stage-right-panel">
+                <div class="resource-browse-header-qna-wrapper">
+                    <a href="{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}" target="_blank" class="resource-browse-header-qna">Q&amp;A FORUM</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="wide-center-stage resource-browse-body">
+        <div class="wide-center-stage-fill-panel wide-center-stage-left-panel category-panel">
+            <div class="category-panel-listing">
+                <div class="category-panel-listing-categories scrollable-block">
+                    <div class="category-panel-listing-categories-body">
+                        {% if not child_categories_map and not is_catalog %}
+                        <div class="category-panel-body-listing-types">
+                            <ul>
+                                <li name="all"><a href="" class="current">All</a></li>
+                                <li name="lesson"><a href="">Lesson Plans</a></li>
+                                <li name="activity"><a href="">Activities</a></li>
+                                <li name="worksheet"><a href="">Worksheets</a></li>
+                                <li name="assessment"><a href="">Assessments</a></li>
+                                <li name="exercise"><a href="">Exercises</a></li>
+                                <li name="lecture"><a href="">Lectures</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="category-panel-body-listing-filters">
+                            <div class="category-panel-body-listing-filters-filter category-panel-body-listing-filters-sort">
+                                <div class="category-panel-body-listing-filters-filter-title sort-by">Sort by</div>
+                                    <div class="filter-sort-option filter-sort-option-newest selected"><span class="filter-radio"></span>Newest</div>
+                                    <div class="filter-sort-option"><span class="filter-radio"></span>Popularity</div>
+                            </div>
+                            
+                            <div class="category-panel-body-listing-filters-filter category-panel-body-listing-filters-filter-subtopic">
+                                <div class="category-panel-body-listing-filters-filter-title">FILTER BY SUB-TOPIC</div>
+                                {% for child_category in child_categories %}
+                                    <label><input type="checkbox" name="category" value="{{ child_category.title }}" checked />{{ child_category.title }}</label>
+                                {% endfor %}
+                            </div>
+
+                            {% if not is_catalog %}
+                            <div class="category-panel-body-listing-filters-filter category-panel-body-listing-filters-filter-standards">
+                                <div class="category-panel-body-listing-filters-filter-title dropdown-filter">STANDARDS MET</div>
+                                <div class="category-panel-body-listing-filters-filter-body category-panel-listing-categories-body-filters hidden">
+                                {% for tag in category_tags %}
+                                    <label><input type="checkbox" name="tags" value="{{ tag.title|upper }}" checked />{{ tag.title|upper }}<span class="category-panel-listing-categories-body-filters-description" title="{{ tag.description }}">?</span></label>
+                                {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="wide-center-stage-key-panel wide-center-stage-right-panel content-panel">
+            <div class="content-panel-body-listing">
+                <div class="content-panel-body-listing-items show"></div>
+                <div class="filter-search-placeholder">Searching for your happiness...</div>
+                {% if current_category_id %}
+                    <div class="lazy-load-button enabled">Load more...</div>
+                {% endif %}
+
+                <!--{% if not query and query != '' and category_group %}
+                <div class="content-panel-body-listing-requests"></div>
+                {% endif %}-->
+            </div>
         </div>
     </div>
 </div>
@@ -302,3 +394,4 @@
 </div>
 
 <div class="user-tooltips"></div>
+{% include 'partials/footer.html' with footer_type='vanilla' %}

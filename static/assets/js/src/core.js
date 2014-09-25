@@ -2367,6 +2367,11 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
             messageElement.css('left', pageWidth / 2 - messageWidth / 2);
         },
 
+        appBox: {
+            saving: function(){ $('.state-message').text('Saving...'); },
+            saved: function(){ $('.state-message').text('Saved'); }
+        },
+
         parentCollectionClickHandler: function(event){
             var listItem = $(event.target).closest('li');
 
@@ -4210,7 +4215,7 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
             });
 
             // Attach click handler with share button.
-            $('.content-panel-body-header-share').click(function(){
+            $('.resource-browse-header-share').click(function(){
                 if (OC.config.user.id) OC.initNewPostDialog();
                 else {
                     var message = 'To post something into the community, you must ' +
@@ -5213,6 +5218,9 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
                     '.profile-tabs').outerHeight(true) - parseInt($(
                     '.profile-content').css('padding-top'), 10)
             );
+
+            if ($('.profile-content').length >0)
+                $('.wide-center-stage').height('100%');
         },
 
         favorites: {},

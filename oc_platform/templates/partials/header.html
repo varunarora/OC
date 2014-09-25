@@ -148,23 +148,25 @@
 		<header class="wide-header">
 			<div id="header-prebanner"></div>
 			<div class="wide-center-stage">
-				<div class="wide-center-stage-fill-panel header-brand-wrapper">
-					<a href={% if user.is_authenticated %}"{% url home %}"{% else %}"/"{% endif %} class="site-logo"><img src="{{ STATIC_URL }}images/public/opencurriculum-mono-s.png" id="logo" alt="OpenCurriculum" title="OpenCurriculum" /></a>
-				</div>
-				<div class="wide-center-stage-key-panel">
-					<hgroup class="header-search-users-wrapper">
-						<hgroup id="search-bar">
-							<form method="GET" action="/search" id="search-form">
-								<input type="search" name="q" title="Search">
-								<input type="submit" value="" />
-								<!--<div class="search-options-button"></div>
-								<div class="search-options"></div>-->
-							</form>
+				<div class="wide-center-stage-content">
+					<div class="wide-center-stage-fill-panel wide-center-stage-left-panel header-brand-wrapper">
+						<a href={% if user.is_authenticated %}"{% url home %}"{% else %}"/"{% endif %} class="site-logo"><img src="{{ STATIC_URL }}images/public/opencurriculum-mono-s.png" id="logo" alt="OpenCurriculum" title="OpenCurriculum" /></a>
+					</div>
+					<div class="wide-center-stage-key-panel wide-center-stage-right-panel">
+						<hgroup class="header-search-users-wrapper">
+							<hgroup id="search-bar">
+								<form method="GET" action="/search" id="search-form">
+									<input type="search" name="q" title="Search">
+									<input type="submit" value="" />
+									<!--<div class="search-options-button"></div>
+									<div class="search-options"></div>-->
+								</form>
+							</hgroup>
+							<hgroup id="header-right">
+								{% include 'partials/header-user.html' %}
+							</hgroup>
 						</hgroup>
-						<hgroup id="header-right">
-							{% include 'partials/header-user.html' %}
-						</hgroup>
-					</hgroup>
+					</div>
 				</div>
 			</div>
 		</header>
@@ -210,6 +212,7 @@
 					</hgroup>
 			</hgroup>
 		</header>
+	    {% endif %}
 	    {% endif %}
 	   	<div class="login-messages-wrapper">
 	        <span class="login-messages{% if message.tags %} {{ message.tags }}{% endif %}">{% for message in messages %}{{ message }}{% endfor %}</span><span class="close-message-box"></span>

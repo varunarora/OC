@@ -2,7 +2,7 @@
 
 <div class="center-spread profile-page">
     <div class="wide-center-stage">
-        <div class="wide-center-stage-fill-panel category-panel">
+        <div class="wide-center-stage-fill-panel wide-center-stage-left-panel category-panel">
             <div class="user-profile-info{% if user == user_profile %} my-profile{% endif %}">
                 <div class="user-profile-picture">
                     <form id="profile-picture-reposition-form">
@@ -62,7 +62,7 @@
             {% endif %}
 
         </div>
-        <div class="wide-center-stage-key-panel content-panel">
+        <div class="wide-center-stage-key-panel wide-center-stage-right-panel content-panel">
             <nav class="profile-tabs oc-page-tabs">
                 <ul>
                     <li><a href="{% url user:user_profile username=user_profile.username %}" {% if page == "home" %} class="current"{% endif %}>Activity</a></li>

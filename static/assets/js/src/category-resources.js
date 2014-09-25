@@ -1,4 +1,4 @@
-define(['jquery', 'core', 'underscore', 'backbone', 'nanoscroller'], function($, undefined, _, Backbone){
+define(['jquery', 'core', 'underscore', 'backbone', 'nanoscroller', 'timeago'], function($, undefined, _, Backbone){
 
 // Initialize Category resources Model
 var Resource = Backbone.Model.extend({
@@ -387,10 +387,11 @@ var RequestCollectionView = Backbone.View.extend({
 var ResourceView = Backbone.View.extend({
     tagName: "div",
     className: function(){
-         return (!OC.categoryResources.isSubjectHome && (
+         return className = (!OC.categoryResources.isSubjectHome && (
             !OC.categoryResources.isCatalog)) ? "content-panel-body-listing-banner-item" : "content-panel-body-listing-thumbnail-item";
     },
     truncatedDescriptionLength: null,
+    descriptionTruncated: true,
     itemHeight: null,
     thumbnailTemplate: _.template(
         '<a href="<%= user_url %>" class="content-panel-body-listing-item-user-picture" ' +
@@ -413,7 +414,7 @@ var ResourceView = Backbone.View.extend({
 
     bannerTemplate: _.template('<a href="<%= user_url %>" class="content-panel-body-listing-item-user-picture" style="background-image: url(\'<%= user_thumbnail %>\')"></a>' +
             '<div class="content-panel-body-listing-item-label-fold"></div>' +
-            '<div class="content-panel-body-listing-item-label"><%= type %></div>' +
+            '<div class="content-panel-body-listing-item-label <%= typeClass %>"><%= type %></div>' +
             '<a href="<%= url %>" class="content-panel-body-listing-item-anchor"<% if (remote) { %> target="_blank"<% } %>>' +
                 '<div class="content-panel-body-listing-item-thumbnail-wrapper">' +
                     '<div class="content-panel-body-listing-item-favorites<% if (favorited){ %> favorited<% } %>"><%= favorites %></div>' +
@@ -421,84 +422,71 @@ var ResourceView = Backbone.View.extend({
                     '<div class="content-panel-body-listing-item-thumbnail-shadow"></div>' +
                 '</div>' +
                 '<div class="content-panel-body-listing-item-contents">' +
-                    '<div class="content-panel-body-listing-item-contents-caption"><%= title %></div><%= tags %>' +
-                    '<% if (views){ %><div class="content-panel-body-listing-item-contents-meta"><%= views %> views</div><% } %>' +
+                    '<div class="content-panel-body-listing-item-contents-meta">' +
+                        '<% if (review_count !== 0) { %><div class="content-panel-body-listing-item-contents-reviews">' +
+                            '<div class="content-panel-body-listing-item-contents-review-count">' +
+                                '(<span class="content-panel-body-listing-item-contents-review-count-value"><%= review_count %></span>)' +
+                            '</div>' +
+                        '</div><% } %>' +
+                        '<% if (views){ %><div class="content-panel-body-listing-item-contents-views"><%= views %> views</div><% } %>' +
+                        '<div class="content-panel-body-listing-item-contents-creator">Shared by <span href="<%= user_url %>" target="_blank"><%= username %></span> <span title="<%= created_iso %>" class="resource-time-ago"></span></div>' +
+                    '</div>' +
+                    '<div class="content-panel-body-listing-item-contents-caption"><%= title %></div><!--<%= tags %>-->' +
                     '<div class="content-panel-body-listing-item-contents-description"><%= description %></div>' +
-                    '<% if (review_count !== 0) { %><div class="content-panel-body-listing-item-contents-reviews">' +
-                        '<div class="content-panel-body-listing-item-contents-review-count">' +
-                            '(<span class="content-panel-body-listing-item-contents-review-count-value"><%= review_count %></span>)' +
-                        '</div>' +
-                    '</div><% } %>' +
                 '</div>' +
             '</a>'
         ),
 
-    events: function(){
-        var events = {
-            'click .content-panel-body-listing-item-favorites': 'favorite',
-            'mouseenter .content-panel-body-listing-item-user-picture': 'showUserTip',
-            'mouseleave .content-panel-body-listing-item-user-picture': 'hideUserTip'
-        };
-        _.extend(events, {
-            'mouseenter .content-panel-body-listing-item-anchor': 'expand',
-            'mouseleave .content-panel-body-listing-item-anchor': 'collapse'
-        });
-        return events;
+    events: {
+        'click .content-panel-body-listing-item-favorites': 'favorite',
+        'mouseenter .content-panel-body-listing-item-user-picture': 'showUserTip',
+        'mouseleave .content-panel-body-listing-item-user-picture': 'hideUserTip',
+        'click .content-panel-body-listing-item-description-more': 'expand',
+        'click .content-panel-body-listing-item-description-less': 'collapse',
     },
 
-    expand: function () {
-        this.$('.content-panel-body-listing-item-contents-caption').html(
-            this.model.get('title'));
-        var descriptionToSet = this.model.get('description') === '' ? 'No description found.' : $(
-            this.model.get('description')).text();
-        this.$('.content-panel-body-listing-item-contents-description').html(descriptionToSet);
+    expand: function (event) {
+        this.descriptionTruncated = false;
+        this.silentRender();
 
-        if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)) {
-            this.$el.addClass('expanded');
-        } else {
-            if (descriptionToSet.length > this.truncatedDescriptionLength){
-                this.itemHeight = this.$('a.content-panel-body-listing-item-anchor').height();
-                this.$('a.content-panel-body-listing-item-anchor').animateAuto('height', 200);
-            }
-        }
+        this.$el.addClass('expanded');
+
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
     },
 
-    collapse: function () {
-        var item = this;
-        function setTruncatedDescription(){
-            item.$('.content-panel-body-listing-item-contents-description').html(
-                item.getTrucatedDescription());
-        }
+    collapse: function (event) {
+        this.descriptionTruncated = true;
+        this.silentRender();
 
-        if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)) {
-            this.$el.removeClass('expanded');
-           setTruncatedDescription();
-        } else {
-            if (this.itemHeight){
-                this.$('a.content-panel-body-listing-item-anchor').animate({
-                    height: this.itemHeight
-                }, 300, function(){
-                    setTruncatedDescription();
-                });
-            }
-        }
+        this.$el.removeClass('expanded');
 
-        this.$('.content-panel-body-listing-item-contents-caption').html(
-            this.getTrucatedTitle());
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
     },
 
     getTrucatedTitle: function (){
         var originalTitleLength = this.model.get('title').length;
-        if (originalTitleLength > 40)
-            return this.model.get('title').substring(0, 40).trim() + '&hellip;';
+        //if (originalTitleLength > 40)
+        //    return this.model.get('title').substring(0, 40).trim() + '&hellip;';
         
         return this.model.get('title');
     },
 
     getTrucatedDescription: function (){
         var originalDescriptionLength = this.model.get('description').length;
-        if (originalDescriptionLength > this.truncatedDescriptionLength)
-            return $(this.model.get('description')).text().substring(0, this.truncatedDescriptionLength).trim() + '&hellip;';
+        if (originalDescriptionLength > this.truncatedDescriptionLength){
+            if (this.descriptionTruncated)
+                return $(this.model.get('description')).text().substring(0, this.truncatedDescriptionLength).trim() + '&hellip;' +
+                    '<span href="" class="content-panel-body-listing-item-description-more">more &#x27a4;</span>';
+            else
+                return $(this.model.get('description')).text().substring(0, this.truncatedDescriptionLength * 3) +
+                    (originalDescriptionLength > this.truncatedDescriptionLength? '&hellip;': '') +
+                    '<span href="" class="content-panel-body-listing-item-description-less">&#x2770; less</span>';
+        }
+            
         else if (originalDescriptionLength === 0)
             return 'No description found.';
 
@@ -546,14 +534,13 @@ var ResourceView = Backbone.View.extend({
         }
         this.$starsView = starsView;
 
+        this.typeClass = this.model.get('type').toLowerCase() + '-label';
+
         // Set style of template (thumbnail or banner).
         this.template = (!OC.categoryResources.isSubjectHome && (
             !OC.categoryResources.isCatalog)) ? this.bannerTemplate : this.thumbnailTemplate;
         this.truncatedDescriptionLength = (!OC.categoryResources.isSubjectHome && (
-            !OC.categoryResources.isCatalog)) ? 350 : 100;
-
-        // THIS DOESN'T WORK ANYMORE.
-        this.listenTo(this.model, "change", this.render);
+            !OC.categoryResources.isCatalog)) ? 450 : 100;
     },
 
     render: function () {
@@ -563,13 +550,14 @@ var ResourceView = Backbone.View.extend({
 
     silentRender: function(elementWrapper){
         modelJSON = this.model.toJSON();
-        modelJSON['tags'] = String(this.$tagsView[0].outerHTML);
+        //modelJSON['tags'] = String(this.$tagsView[0].outerHTML);
 
         if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)) {
             modelJSON['title'] = this.getTrucatedTitle();
         }
 
         modelJSON['description'] = this.getTrucatedDescription();
+        modelJSON['typeClass'] = this.typeClass;
 
         this.$el.html(this.template(modelJSON));
 
@@ -719,6 +707,8 @@ var ResourceCollectionView = Backbone.View.extend({
             _.each(collectionModels, function(item) {
                 new ResourceView({model: item}).render();
             });
+
+            $('.resource-time-ago').timeago();
         }
         this.revealView();
     },
@@ -762,7 +752,8 @@ var ResourceCollectionView = Backbone.View.extend({
     // opposed to creating a white list, as in the case of _.js
 var filters = {
     type: [], // Type of the content
-    tags: []
+    tags: [],
+    category: [],
 };
 
 // Initialize the resource results collection before page loads.
@@ -780,6 +771,7 @@ _.extend(OC.categoryResources, {
     filterAsyncSearchOn: false,
     visibleResourceCount: null,
     suggestionMode: false,
+    qnaFlashed: false,
     currentView: 'items',
 
     commonCoreEasyMap: {
@@ -809,8 +801,15 @@ _.extend(OC.categoryResources, {
         function resizeGradeTopics(){
             // Set header height based on page height.
             var newHeight = $(window).height() - $('body > header').height() - $(
-                    '.subjects-header').height() - parseInt($('.resource-browse-subject .wide-center-stage').css('padding-top'), 10);
+                    '.resource-browse-header').height() - parseInt($('.resource-browse-subject .wide-center-stage').css('padding-top'), 10);
             $('.grades-topics-list').height(newHeight);
+        }
+
+        function resizeListing(){
+            // Set header height based on page height.
+            var newHeight = $(window).height() - $('body > header').height() - $(
+                    '.resource-browse-header').height();
+            $('.content-panel-body-listing').height(newHeight);
         }
 
         var scrollbarWidth = getScrollbarWidth();
@@ -874,8 +873,11 @@ _.extend(OC.categoryResources, {
                 }, 1000);
             }, 500);
 
-            if ($('.resource-browse-subject').length > 0)
-                resizeGradeTopics(); $(window).resize(resizeGradeTopics);
+            if ($('.resource-browse-subject').length > 0){
+                resizeGradeTopics(); $(window).resize(resizeGradeTopics); }
+
+            if ($('.resource-browse-listing').length > 0){
+                resizeListing(); $(window).resize(resizeListing); }
 
             // If something has just been posted, show the 'just posted' dialog.
             if (window.location.search.indexOf('posted=success') !== -1){
@@ -1156,7 +1158,8 @@ _.extend(OC.categoryResources, {
     filterInitialResources: function(collection){
         // Build filters.
         var filterInputs = $('.sort-by-type-menu input:checkbox, ' +
-            '.category-panel-listing-categories-body-filters input:checkbox');
+            '.category-panel-listing-categories-body-filters input:checkbox, ' +
+            '.category-panel-body-listing-filters-filter-subtopic input:checkbox');
         var i, filterType, filterValue;
         for (i = 0; i < filterInputs.length; i++){
             filterValue = $(filterInputs[i]).val();
@@ -1224,6 +1227,8 @@ function filterResources(collection){
                 else return _.every(resource.get(filterType), function(resourceTag){
                     return _.indexOf(filterValues, resourceTag) !== -1;
                 });
+            } else if (filterType == 'category') {
+                return _.indexOf(filterValues, resource.get(filterType)) !== -1;
             } else {
                 return _.indexOf(filterValues, resource.get(filterType).toLowerCase()) !== -1;
             }
@@ -1282,7 +1287,8 @@ function addTagFiltersFromResources(resources){
 function init_mvc() {
     // Listen to changes on all options in the filters panel
     var filterCheckboxes = $('.sort-by-type-menu label, ' +
-        '.category-panel-listing-categories-body-filters label');
+        '.category-panel-listing-categories-body-filters label, ' +
+        '.category-panel-body-listing-filters-filter-subtopic label');
 
     // Bind change listeners on function that repopulates the resources
     $(filterCheckboxes).click(filterClickHandler);
@@ -1306,19 +1312,19 @@ function init_mvc() {
         else reset(filteredCollection);
     });
 
-    var typeTabFilter = $('.content-panel-body-listing-types');
+    var typeTabFilter = $('.category-panel-body-listing-types');
     if (typeTabFilter.length > 0){
-        $('.content-panel-body-listing-types ul li a').click(function(event){
+        $('.category-panel-body-listing-types ul li a').click(function(event){
             var currentTypeElement = $(event.target),
                 currentType = currentTypeElement.parents('li').attr('name');
 
-            $('.content-panel-body-listing-types ul li a').removeClass('current');
+            $('.category-panel-body-listing-types ul li a').removeClass('current');
             currentTypeElement.addClass('current');
 
             if (currentType === 'all')
                 filters['type'] = [];
             else {
-                var otherTypes = _.map($('.content-panel-body-listing-types ul li'), function(type){
+                var otherTypes = _.map($('.category-panel-body-listing-types ul li'), function(type){
                     return $(type).attr('name');
                 });
 
@@ -1486,6 +1492,55 @@ function init_mvc() {
             }));
             OC.categoryResources.requestCollectionView.render(requestsToRender);
 
+        });
+
+        $('.category-panel-body-listing-filters-filter-standards .category-panel-body-listing-filters-filter-title').click(function(){
+            $(this).parent().find('.category-panel-body-listing-filters-filter-body').toggleClass('hidden');
+        });
+
+        // Set number of types on the filter UI.
+        var resourceTypeCounts = {}, resourceType;
+        OC.categoryResources.resourceSet.each(function(resource){
+            resourceType = resource.get('type');
+            if (_.has(resourceTypeCounts, resourceType)){
+                resourceTypeCounts[resourceType] += 1;
+            } else {
+                resourceTypeCounts[resourceType] = 1;
+            }
+        });
+
+        var $li;
+        _.each($('.category-panel-body-listing-types ul li'), function(li){
+            $li = $(li);
+            $a = $li.find('a');
+            if (_.has(resourceTypeCounts, $li.attr('name').toUpperCase())){
+                $a.text($a.text() + ' (' + resourceTypeCounts[$li.attr('name').toUpperCase()] + ')');
+            } else if ($li.attr('name') === 'all') {
+                $a.text($a.text() + ' (' + OC.categoryResources.resourceSet.length + ')');
+            } else {
+                $a.text($a.text() + ' (0)');
+            }
+        });
+        
+
+        var qnaButton = $('.resource-browse-header-qna');
+        qnaButton.tipsy({gravity: 'se', delayIn: 1000, trigger: 'manual', fade: true});
+
+        // On first scroll of content, offer suggestion of teachers waiting.
+        $('.content-panel-body-listing').scroll(function(event){
+            if (! OC.categoryResources.qnaFlashed){
+                qnaButton.attr('title', String(_.random(6, 14)) + ' teachers waiting online to help for free');
+                
+                setTimeout(function(){
+                    qnaButton.tipsy('show');
+
+                    setTimeout(function(){
+                        qnaButton.tipsy('hide');
+                    }, 5000);
+                }, 1500);
+
+                OC.categoryResources.qnaFlashed = true;
+            }
         });
     }
 }
