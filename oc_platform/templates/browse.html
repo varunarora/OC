@@ -205,7 +205,9 @@
 
             <div class="wide-center-stage-fill-panel wide-center-stage-right-panel">
                 <div class="resource-browse-header-qna-wrapper">
+                    {% if not query and query != '' and category_group %}
                     <a href="{% url projects:project_home project_slug=category_group.slug %}?post=new&category=requests&redirect_to={{ selected_category.url }}" target="_blank" class="resource-browse-header-qna">Q&amp;A FORUM</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
