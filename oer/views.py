@@ -316,24 +316,39 @@ def download(request, resource_id):
         resource = Resource.objects.get(pk=resource_id)
     except:
         raise Http404
+    
+    from django.contrib.contenttypes.models import ContentType
+    link_content_type = ContentType.objects.get_for_model(Link)
+    attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+    if resource.revision.content_type == attachment_content_type:
+        file = resource.revision.content.file
+    elif resource.revision.content_type == link_content_type:
+        try:
+            file = resource.revision.content.attachment.file
+        except:
+            raise Http404
+    else:
+        raise Http404
+
 
     try:
         import magic
         mime = magic.Magic(mime=True)
-        content_type = mime.from_file(resource.revision.content.file.path)
+        content_type = mime.from_file(file.path)
     except:
         from boto.s3.connection import S3Connection
         from boto.s3.bucket import Bucket
         connection = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
         bucket = Bucket(connection, settings.AWS_STORAGE_BUCKET_NAME)
-        key = bucket.get_key(resource.revision.content.file.name)
+        key = bucket.get_key(file.name)
         content_type = key.content_type
 
     try:
         # TODO(Varun): Security risk. Check file name for safeness
         response = HttpResponse(resource.revision.content.file, content_type)
         response['Content-Disposition'] = (
-            'attachment; filename="%s"' % resource.revision.content.file.name)
+            'attachment; filename="%s"' % file.name)
         return response
     except:
         raise Http404
