@@ -3519,7 +3519,10 @@ def post_existing_resource_collection(request):
             'type', None), category=TagCategory.objects.get(title='Resource type'))
     except:
         messages.success(request, 'Oops! Something went wrong')
-        return redirect(request.META.get('HTTP_REFERER'))
+        try:
+            return redirect(request.META.get('HTTP_REFERER'))
+        except:
+            raise Http404
 
     try:
         from meta.models import Category
