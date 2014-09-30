@@ -16,7 +16,7 @@
                         <div class="upload-drag-drop-replace hidden">
                         </div>
                         <button class="projects-success-button" type="file" name="select-file">UPLOAD FROM COMPUTER</button>
-                        <button class="projects-progress-button hidden" type="submit">{% if selected_category %}NEXT &#187;{% else %}DONE{% endif %}</button>
+                        <button class="projects-progress-button hidden" type="submit">{% if selected_category or curriculum %}NEXT &#187;{% else %}DONE{% endif %}</button>
                         <input type="hidden" name="post" value="false" />
                         {% if selected_category %}
                         <input type="hidden" name="category_id" value="{{ selected_category.id }}" />

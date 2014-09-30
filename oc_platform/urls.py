@@ -24,6 +24,8 @@ urlpatterns = patterns(
 
     url(r'^license/', include('license.urls', namespace='license')),
 
+    url(r'^curriculum/', include('curriculum.urls', namespace='curriculum')),
+
 
     # Interactions
     url(r'^interactions/', include('interactions.urls', namespace='interactions')),
@@ -54,8 +56,6 @@ urlpatterns = patterns(
     url(r'^browse/(?P<category_slug>.+)/$', 'oer.views.browse', name='browse'),
 
     url(r'^browse/$', 'oer.views.browse_default', name='browse_default'),
-
-    url(r'^hct/level-4/resources/', 'oc_platform.views.curriculum_resources', name='curriculum_resources'),
 
     # User stuff
     url(r'^signup-invite/', 'oc_platform.views.signup_invite', name='signupinvite'),

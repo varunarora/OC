@@ -8,6 +8,11 @@ def _api_success(context={}):
         content_type="application/json"
     )
 
+def success(context={}):
+    return HttpResponse(
+        json.dumps(context), 200,
+        content_type="application/json"
+    )
 
 def _api_failure(context={}):
     status = dict({'status': 'false'}.items() + context.items())

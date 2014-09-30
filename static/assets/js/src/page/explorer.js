@@ -1,6 +1,72 @@
-define(['jquery', 'core', 'underscore', 'react'], function($, OC, _, React){
+define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'], function($, OC, _, React, BackboneMixin){
 
-    OC.explorer = {
+    BackbonerMixin = {
+        _backboneForceUpdate: function() {
+            this.forceUpdate();
+        },
+
+        bindModelEvents: function() {
+            // Whenever there may be a change in the Backbone data, trigger a reconcile.
+            [this.props.model].map(function(model) {
+                model.on('add change remove', this._backboneForceUpdate, this);
+            }.bind(this));
+        },
+        
+        componentDidMount: function() {
+            this.bindModelEvents();
+        },
+
+        componentWillUnmount: function() {
+            // Ensure that we clean up any dangling references when the component is destroyed.
+            [this.props.model].map(function(model) {
+                model.off('add change remove', this._backboneForceUpdate, this);
+            }.bind(this));
+        }
+    };
+
+
+    OC.api.curriculum = {
+        objective: {
+            update: function(serializedObjective, callback){
+                $.post('/curriculum/api/objective/update/', serializedObjective,
+                    function(response){
+                        callback(response);
+                    }, 'json');
+            },
+            create: function(description, callback){
+                $.post('/curriculum/api/objective/create/', description,
+                    function(response){
+                        callback(response);
+                    }, 'json');
+            }
+        },
+        unit: {
+            addObjective: function(serializedUnitObjective, callback){
+                $.post('/curriculum/api/objective/add-objective-to-unit/', serializedUnitObjective,
+                    function(response){
+                        callback(response);
+                    }, 'json');
+            }
+        },
+        issues: {
+            update: function(serializedObjective, callback){
+                $.post('/curriculum/api/issue/create-update/', serializedObjective,
+                    function(response){
+                        callback(response);
+                    }, 'json');
+            },
+        },
+        resources: {
+            delete: function(serializedObjectiveResource, callback){
+                $.post('/curriculum/api/objective/remove-resource/', serializedObjectiveResource,
+                    function(response){
+                        callback(response);
+                    }, 'json');
+            }
+        }
+    };
+
+     _.extend(OC.explorer, {
         initGradeSubjectMenu: function(){
             var menuSelector = 'nav.explorer-home-menu',
                 menuButtonSelector = 'a.explorer-header-current';
@@ -22,10 +88,84 @@ define(['jquery', 'core', 'underscore', 'react'], function($, OC, _, React){
             });
         },
 
+        clearStatusFocus: function(){
+            $('.light-popup-background').removeClass('show-popup-background');
+        },
+
+        Objective: Backbone.Model.extend({
+            id: '',
+            description: '',
+            sync: function(method, model, options){
+                function success(response){ return options.success(response); }
+
+                switch(method) {
+                    case 'update':
+                        if (_.has(options, 'attrs')){
+                            if (_.has(options.attrs, 'ready')){
+                                return OC.api.curriculum.issues.update(
+                                    {'host_id': this.get('id'), 'ready': options.attrs.ready}, success);
+                            } else if (_.has(options.attrs, 'message')){
+                                return OC.api.curriculum.issues.update(
+                                    {'id': this.get('issue')['id'], 'message': options.attrs.message}, success);
+                            }
+                        }
+                        return OC.api.curriculum.objective.update(
+                            {'id': this.get('id'), 'description': this.get('description')}, success);
+                    case 'create':
+                        return OC.api.curriculum.objective.create(
+                            {'description': this.get('description'), 'unit_id': options.attrs.unit_id}, success);
+                }
+            }
+        }),
+        Objectives: Backbone.Collection.extend({
+            model: OC.explorer.Objective,
+            sync: function(method, model, options){
+                function success(response){ return options.success(response); }
+
+                switch(method) {
+                    case 'update':
+                        return OC.api.curriculum.unit.addObjective(
+                            {'id': model.get('unit_id'), 'objective_id': model.get('id')}, success);
+                }
+            }
+        }),
+
+        ObjectiveView: React.createClass({
+            mixins: [BackbonerMixin],
+            save: function(event){
+                newDescription = $(event.target).text();
+
+                if (this.props.model.get('description') !== newDescription){
+                    OC.appBox.saving();
+
+                    this.props.model.set('description', newDescription);
+                    this.props.model.save(null, {
+                        success: function(){
+                            OC.appBox.saved();
+                        }
+                    });
+                }
+            },
+            render: function(){
+                return React.DOM.div({
+                    className: 'explorer-resource-objective',
+                    contentEditable: true,
+                    title: this.props.model.get('description'),
+                    onBlur: this.save
+                }, this.props.model.get('description'));
+            }
+        }),
+
         ModuleView: React.createClass({
+            mixins: [BackboneMixin],
             render: function(){
                 return React.DOM.div({className: 'explorer-resource-module'}, [
-                    React.DOM.div({className: 'explorer-resource-module-thumbnail'}, ''),
+                    React.DOM.div({
+                        className: 'explorer-resource-module-thumbnail',
+                        style: {
+                            backgroundImage: 'url(' + this.props.thumbnail + ')'
+                        }
+                    }, ''),
                     React.DOM.div({className: 'explorer-resource-module-content'}, [
                         React.DOM.div({className: 'explorer-resource-module-content-title'}, this.props.title),
                         React.DOM.div({className: 'explorer-resource-module-content-caption'}, this.props.textbookTitle)
@@ -34,38 +174,446 @@ define(['jquery', 'core', 'underscore', 'react'], function($, OC, _, React){
             }
         }),
 
-        ResourceView: React.createClass({
+        StatusView: React.createClass({
+            _forceUpdate: function() {
+                this.forceUpdate();
+            },
+            componentDidMount: function() {
+                this.setReady();
+                //this.setMessage();
+
+                this.props.objective.on('add change remove', this._forceUpdate, this);
+            },
+            componentDidUpdate: function() {
+                this.setReady();
+                //this.setMessage();
+
+                this.props.objective.off('add change remove', this._forceUpdate, this);
+                this.props.objective.on('add change remove', this._forceUpdate, this);
+            },
+            componentWillUnmount: function() {
+                // Ensure that we clean up any dangling references when the component is destroyed.
+                this.props.objective.off('add change remove', this._forceUpdate, this);
+                        },
+            setReady: function(){
+                if (this.props.objective.get('ready') === undefined) {
+                    if (this.props.objective.get('issue').host_id !== null){
+                        this.props.objective.set('ready', false);
+                    } else this.props.objective.set('ready', true);
+                }
+            },
+            /*setMessage: function(){
+                if (this.props.objective.get('message') === undefined) {
+                    if (this.props.objective.get('issue'))
+                        this.props.objective.set('message', this.props.objective.get('issue')['message']);
+                    else
+                        this.props.objective.set('message', null);
+                }
+            },*/
+            changeMessage: function(event) {
+                var issue = this.props.objective.get('issue');
+                issue['message'] = event.target.value;
+
+                this.props.objective.set('issue', issue);
+            },
+            saveMessage: function(event){
+                OC.appBox.saving();
+                
+                this.turnOffFocus();
+                //this.props.objective.set('message', this.props.objective.get('message'));
+                this.props.objective.save(null, {
+                    attrs: {'message': this.props.objective.get('issue')['message']},
+                    success: function(){
+                        OC.appBox.saved();
+                    }
+                });
+            },
+            persist: function(){
+                this.props.objective.set('statusPersist', true);
+            },
+            letGo: function(){
+                if (! $('.light-popup-background').hasClass('show-popup-background')){
+                    this.props.objective.set('statusPersist', false);
+                    this.props.objective.set('statusShow', false);
+                }
+            },
+            makeReady: function(){
+                var props = this.props;
+
+                if (props.objective.get('ready') !== true){
+                    OC.appBox.saving();
+
+                    props.objective.set('ready', true);
+                    props.objective.save(null, {
+                        attrs: {'ready': true},
+                        success: function(){
+                            OC.appBox.saved();
+                        }
+                    });
+                }
+
+                
+            },
+            makeUnready: function(){
+                var props = this.props;
+
+                if (props.objective.get('ready') !== false){
+                    OC.appBox.saving();
+
+                    props.objective.set('ready', false);
+                    props.objective.save(null, {
+                        attrs: {'ready': false},
+                        success: function(){
+                            OC.appBox.saved();
+                        }
+                    });
+                }
+
+                $('.light-popup-background').addClass('show-popup-background');
+
+                this.turnOnFocus();
+                /*$('.light-popup-background').click(function(event){
+                    OC.explorer.clearStatusFocus(false);
+                    props.objective.set('statusShow', false);
+                    props.objective.set('statusPersist', false);
+                });*/
+            },
+            turnOnFocus: function(event) {
+                $('.light-popup-background').addClass('show-popup-background');
+
+                var props = this.props;
+                $('.light-popup-background').click(function(event){
+                    OC.explorer.clearStatusFocus(false);
+                    props.objective.set('statusShow', false);
+                    props.objective.set('statusPersist', false);
+                });
+            },
+            turnOffFocus: function(){
+                OC.explorer.clearStatusFocus();
+                this.props.objective.set('statusPersist', false);
+            },
+            render: function(){
+                return React.DOM.div({
+                    className: 'objective-status-dialog' + (
+                        this.props.objective.get('statusPersist') ? ' persist' : '' ) + (
+                        this.props.objective.get('statusShow') ? ' show' : '' ),
+                    
+                    onMouseOver: this.persist,
+                    onMouseLeave: this.letGo,
+                    style: this.props.objective.get('statusPosition')
+                }, [
+                    React.DOM.div({className: 'objective-status-pointer'}, ''),
+                    React.DOM.div({className: 'objective-status-body'}, [
+                        React.DOM.ul({className: 'objective-status-options'}, [
+                            React.DOM.li({className: 'objective-status-option'}, [
+                                React.DOM.button({
+                                    className: 'objective-ready-status' + (
+                                        this.props.objective.get('ready') ?  ' selected' : ''),
+                                    onClick: this.makeReady,
+                                }, 'Well framed objective and adequate resources'),
+                            ]),
+                            React.DOM.li({className: 'objective-status-option'}, [
+                                React.DOM.button({
+                                    className: 'objective-unready-status' + (
+                                        this.props.objective.get('ready') ? '' : ' selected'),
+                                    onClick: this.makeUnready,
+                                }, 'Objective or resources need work'),
+                            ]),
+                        ]),
+                        React.DOM.div({className: 'objective-status-unready-body' + (
+                            this.props.objective.get('ready') ? '' : ' show')}, [
+                            React.DOM.textarea({
+                                name: 'unready-message',
+                                placeholder: 'If you are looking for specific kinds of resources, explain here',
+                                defaultValue: this.props.objective.get('issue')['message'],
+                                onChange: this.changeMessage,
+                                onClick: this.turnOnFocus,
+                            }),
+                            React.DOM.div({className: 'action-button', onClick: this.saveMessage}, 'Done')
+                        ]),
+                    ])
+                ]);
+            }
+        }),
+
+        Resource: Backbone.Model.extend({
+            id: '',
+            title: '',
+            url: '',
+            sync: function(method, model, options){
+                function success(response){ return options.success(response); }
+
+                switch(method) {
+                    case 'update':
+                        if (_.has(options, 'attrs')){
+                            if (_.has(options.attrs, 'remove_resource_from')){
+                                return OC.api.curriculum.resources.delete(
+                                    {'resource_id': this.get('id'), 'id': options.attrs.remove_resource_from.get('id')}, success);
+                            }
+                        }
+                }
+            }
+        }),
+
+        Resources: Backbone.Collection.extend({
+            model: OC.explorer.Resource
+        }),
+
+        ResourcesView: React.createClass({
+            _forceUpdate: function() {
+                this.forceUpdate();
+            },
+            componentDidMount: function() {
+                this.props.collection.on('add change remove', this._forceUpdate, this);
+            },
+            componentWillMount: function() {
+                if (! _.has(this.props.collection, 'models')){
+                    this.props.collection = new OC.explorer.Resources();
+                }
+            },
             renderResource: function(resource){
+                return OC.explorer.ResourceView({
+                    model: resource,
+                    collection: this.props.collection,
+                    objective: this.props.objective
+                });
+            },
+            render: function() {
+                return React.DOM.div({className: 'explorer-resource-items'},
+                    this.props.collection.map(this.renderResource));
+            }
+        }),
+
+        ResourceView: React.createClass({
+            removeResource: function(){
+                OC.appBox.saving();
+                this.props.collection.remove(this.props.model);
+
+                this.props.model.save(null, {
+                    attrs: {'remove_resource_from': this.props.objective},
+                    success: function(){
+                        OC.appBox.saved();
+                        OC.explorer.resetPreHeights(true);
+                    }
+                });
+            },
+            render: function(){
                 return React.DOM.div({className: 'explorer-resource-item'}, [
                     React.DOM.div({className: 'explorer-resource-item-thumbnail-wrapper'}, [
                         React.DOM.div({className: 'explorer-resource-item-thumbnail'}, '')
                     ]),
                     React.DOM.div({className: 'explorer-resource-item-content'}, [
-                        React.DOM.div({className: 'explorer-resource-item-content-title'}, [
-                            React.DOM.a({href: resource.url, target: '_blank'}, resource.title)
+                        React.DOM.div({className: 'explorer-resource-item-content-body'}, [
+                            React.DOM.div({className: 'explorer-resource-item-content-title'}, [
+                                React.DOM.a({href: this.props.model.get('url'), target: '_blank'},  this.props.model.get('title'))
+                            ]),
+                            React.DOM.div({className: 'explorer-resource-item-content-caption'}, 'Teachers notes: , Related learning outcomes: ')
                         ]),
-                        React.DOM.div({className: 'explorer-resource-item-content-caption'}, 'Teachers notes: , Related learning outcomes: ')
+                        React.DOM.div({className: 'explorer-resource-item-content-actions'}, [
+                            React.DOM.div({
+                                className: 'explorer-resource-item-content-action-delete',
+                                onClick: this.removeResource,
+                                title: 'Remove resource'
+                            })
+                        ])
                     ])
                 ]);
+            }
+        }),
+
+        ObjectiveResourcesView: React.createClass({
+            setStatusProps: function(){
+                this.props.model.set('statusPersist', false);
+                this.props.model.set('statusShow', false);
+                //this.props.model.set('ready', true);
+                this.props.model.set('statusPosition', {
+                    top: 0,
+                    left: 0
+                });
+            },
+            componentWillMount: function(){
+                this.setStatusProps();
+            },
+            componentDidUpdate: function(){
+                if (!this.props.model.has('statusShow'))
+                    this.setStatusProps();
+            },
+            renderObjectiveStatus: function(event){
+                var pre = $(event.target);
+
+                this.props.model.set('statusPosition', {
+                    top: pre.offset().top,
+                    left: pre.offset().left + pre.width()
+                });
+
+                var props = this.props;
+                setTimeout(function(){
+                    props.model.set('statusShow', true);
+                }, 50);
+            },
+            hideObjectiveStatus: function(event){
+                var props = this.props;
+                setTimeout(function(){
+                    if (! props.model.get('statusPersist')) props.model.set('statusShow', false);
+                }, 50);
+            },
+            addResource: function(event){
+                var view = this;
+                OC.shareNewClickHandler(event, {
+                    title: 'Add a resource to the unit objective',
+                    message: 'What would you like to share today?',
+                    urlTitle: 'Add a website URL',
+                    addMeta: false,
+                    sent: view.resourceSent,
+                    callback: view.resourceAdded,
+                    urlPostURL: '/curriculum/api/objective/add-url/',
+                    existingPostURL:'/curriculum/api/objective/add-existing/',
+                    uploadPostURL:'/curriculum/api/objective/add-upload/',
+                    toAppendFormData: {objective_id: this.props.model.get('id')}
+                });
+            },
+            resourceAdded: function(response, resourceReference){
+                resourceReference.set(response.resource);
+
+                OC.appBox.saved();
+
+                OC.explorer.resetPreHeights();
+            },
+            resourceSent: function(resource){
+                OC.appBox.saving();
+
+                var newResource = new OC.explorer.Resource(resource);
+                this.props.model.get('resources').push(newResource);
+
+                return newResource;
+            },
+            render: function(){
+                return React.DOM.div({className: 'explorer-resource-objective-section'}, [
+                    React.DOM.div({
+                        className: 'explorer-resource-listing-body-pre' + (
+                            this.props.model.get('ready') === undefined ? (
+                                this.props.model.get('issue').host_id !== null ? ' has-issue': '') : (
+                                this.props.model.get('ready') ? '' : ' has-issue')
+                            ),
+                        onMouseOver: this.renderObjectiveStatus,
+                        onMouseLeave: this.hideObjectiveStatus
+                    }, ''),
+                    React.DOM.div({className: 'explorer-resource-listing-body-content'}, [
+                        React.DOM.div({className: 'explorer-resource-listing-body-content-fill'}, [
+                            OC.explorer.ObjectiveView({model: this.props.model})
+                        ]),
+                        React.DOM.div({className: 'explorer-resource-listing-body-content-key'}, [
+                            OC.explorer.ResourcesView({
+                                collection: this.props.model.get('resources'),
+                                objective: this.props.model
+                            }),
+                            React.DOM.div({className: 'explorer-resource-listing-body-resource-actions'}, [
+                                React.DOM.button({
+                                    className: 'explorer-resource-actions-add',
+                                    onClick: this.addResource
+                                }, '+ Add resource')
+                            ])
+                        ])
+                    ]),
+                    OC.explorer.StatusView({
+                        objective: this.props.model,
+                        persist: this.props.model.get('statusPersist'),
+                        show: this.props.model.get('statusShow'),
+                        position: this.props.model.get('statusPosition'),
+                    })
+                ]);
+            }
+        }),
+
+        ModuleObjectivesView: React.createClass({
+            mixins: [BackboneMixin],
+            componentWillReceiveProps: function(nextProps){
+                if (nextProps.collection instanceof Backbone.Collection)
+                    this.wrapper.collection = nextProps.collection;
             },
             renderObjective: function(objective){
-                return React.DOM.div({className: 'explorer-resource-objective-section'}, [
-                    React.DOM.div({className: 'explorer-resource-listing-body-fill'}, [
-                        React.DOM.div({className: 'explorer-resource-objective'}, objective.title)
-                    ]),
-                    React.DOM.div({className: 'explorer-resource-listing-body-key'},
-                        objective.resources.map(this.renderResource))
-                ]);
+                return OC.explorer.ObjectiveResourcesView({model: objective});
             },
             render: function(){
                 return React.DOM.div({className: 'explorer-resource-objective-sections'},
-                    this.props.objectives.map(this.renderObjective));
+                    this.getCollection().models.map(this.renderObjective));
+            }
+        }),
+
+        CurriculumIssuesSetView: React.createClass({
+            renderCurriculumIssues: function(unit){
+                return OC.explorer.CurriculumIssuesView({unit: unit});
+            },
+            render: function(){
+                return React.DOM.div({className: 'explorer-overview-issues'},
+                    this.props.units.map(this.renderCurriculumIssues));
+            }
+        }),
+
+        CurriculumIssuesView: React.createClass({
+            render: function(){
+                return React.DOM.div({className: 'explorer-overview-issues-set'}, [
+                    OC.explorer.ModuleView({
+                        title: this.props.unit.unitTitle.toUpperCase(),
+                        textbookTitle: this.props.unit.textbookTitle.toUpperCase(),
+                        thumbnail: this.props.unit.textbookThumbnail
+                    }),
+                    OC.explorer.IssuesView({objectives: this.props.unit.objectives})
+                ]);
+            }
+        }),
+
+        IssuesView: React.createClass({
+            renderIssue: function(objective){
+                return OC.explorer.IssueView({objective: objective});
+            },
+            render: function(){
+                return React.DOM.div({className: 'explorer-overview-issues-set-item'}, [
+                    React.DOM.div({className: 'explorer-resource-listing-labels'}, [
+                        React.DOM.div({className: 'explorer-resource-listing-labels-header-fill'}, [
+                            React.DOM.span({className: 'explorer-resource-listing-label'}, 'Objective / Skill'),
+                        ]),
+                        React.DOM.div({className: 'explorer-resource-listing-labels-header-key'}, [
+                            React.DOM.span({className: 'explorer-resource-listing-label'}, 'Issues'),
+                        ]),
+                    ]),
+
+                    React.DOM.div({className: 'explorer-issue-listing-body'}, [
+                        React.DOM.div({className: 'explorer-issue-listing-items'},
+                            this.props.objectives.map(this.renderIssue)),
+                    ])
+                ]);
+            }
+        }),
+
+        IssueView: React.createClass({
+            openIssue: function(event){
+                var props = this.props;
+                event.target = $('a#unit-' + this.props.objective.get('unit_id')).get(0);
+                OC.explorer.openUnit(event, function(){
+                    var toScrollToUnit = $('div[title="' + props.objective.get('description') + '"]');
+                    $('.explorer-body-stage').animate(
+                        { scrollTop: toScrollToUnit.offset().top - 100 }, 1000);
+                });
+            },
+            render: function(){
+                return React.DOM.div({className: 'explorer-issue-listing-items-item',
+                        onClick: this.openIssue
+                    }, [
+                    React.DOM.div({className: 'explorer-issue-listing-item-content-fill'}, [
+                        React.DOM.div({className: 'explorer-issue-listing-item-objective'},
+                            this.props.objective.get('description'))
+                    ]),
+                    React.DOM.div({className: 'explorer-issue-listing-item-content-key'}, [
+                        React.DOM.div({className: 'explorer-issue-listing-item-message'},
+                            this.props.objective.get('issue')['message'])
+                    ])
+                ]);
             }
         }),
 
         initSideNavigation: function(){
-            // Leanring outcomes / Standards.
-
+            // Learning outcomes / Standards.
             var i, j, LOCategories = _.keys(OC.explorer.hctLOs), menu,
                 categoryLi, categoryMenu, categoryURL, categoryLOs, LoLi, LoURL;
 
@@ -81,7 +629,7 @@ define(['jquery', 'core', 'underscore', 'react'], function($, OC, _, React){
                 categoryLi.append(categoryURL);
 
                 categoryMenu = $('<ul/>', {
-                    'class': 'explorer-body-side-menu explorer-body-side-menu-light explorer-body-side-menu-light-categorized'
+                    'class': 'explorer-body-side-menu explorer-body-side-menu-light'
                 });
 
                 categoryLOs = OC.explorer.hctLOs[LOCategories[i]];
@@ -103,17 +651,17 @@ define(['jquery', 'core', 'underscore', 'react'], function($, OC, _, React){
             $('li.learning-outcomes').append(menu);
 
             // Textbooks / resources.
-            var k, l, textbooks = _.keys(OC.explorer.hctTexts), resourcesMenu,
+            var k, l, /*textbooks = _.keys(OC.explorer.rawTexts), */resourcesMenu,
                 textbookLi, textbookMenu, textbookURL, textbookChapters, ChapterLi, ChapterURL;
 
             resourcesMenu = $('<ul/>', {
                 'class': 'explorer-body-side-menu'
             });
-            for (k = 0; k < textbooks.length; k++){
+            for (k = 0; k < OC.explorer.textbooks.length; k++){
                 textbookLi = $('<li/>');
                 textbookURL = $('<a/>', {
                     'href': '',
-                    'text': textbooks[k]
+                    'text': OC.explorer.textbooks[k].title
                 });
                 textbookLi.append(textbookURL);
 
@@ -121,11 +669,12 @@ define(['jquery', 'core', 'underscore', 'react'], function($, OC, _, React){
                     'class': 'explorer-body-side-menu explorer-body-side-menu-light'
                 });
 
-                textbookChapters = OC.explorer.hctTexts[textbooks[k]];
+                textbookChapters = OC.explorer.textbooks[k].units;
                 for (l = 0; l < textbookChapters.length; l++){
                     ChapterLi = $('<li/>');
                     ChapterURL = $('<a/>', {
                         'href': '',
+                        'id': 'unit-' + textbookChapters[l].id,
                         'text': textbookChapters[l].title
                     });
 
@@ -149,41 +698,157 @@ define(['jquery', 'core', 'underscore', 'react'], function($, OC, _, React){
                 return false;
             });
 
-            // Bind clicks on the lesson names.
-            $('li.textbooks .explorer-body-side-menu-light li a').click(function(event){
-                var title = $(this).text(),
-                    textbookTitle = $(this).parents('ul:first').parent().find('a:first').text();
+            function objectiveHasIssues(objective){
+                return objective.get('issue')['id'] !== null;
+            }
 
-                React.renderComponent(OC.explorer.ModuleView(
-                    {title: title.toUpperCase(), textbookTitle: textbookTitle.toUpperCase()}), $('.explorer-resource-module-wrapper').get(0));
+            $('li.overview > a').click(function(event){
+                $('.explorer-loader').addClass('show');
 
-                var rawObjectives = _.findWhere(OC.explorer.hctTexts[textbookTitle],
-                    {title: title}).objectives,
-                    objectives = [], resources, url;
-                
-                _.each(rawObjectives, function(objectiveResources, rawObjective, list){
-                    resources = [];
-                    objectiveResources.forEach(function(rawResource){
-                        url = OC.explorer.hctResources[rawResource.resource_id];
-                        resources.push({
-                            url: url,
-                            title: OC.explorer.hctResourceNames[url]
-                        });
-                    });
+                $('.explorer-resource-listing').removeClass('show');
+                $('.explorer-resource-module-wrapper').removeClass('show');
 
-                    objectives.push({
-                        title: rawObjective,
-                        resources: resources
-                    });
-                });
+                $('.explorer-resource-overview').addClass('show');
 
-                React.renderComponent(OC.explorer.ResourceView(
-                    {objectives: objectives}), $('.explorer-resource-listing-body').get(0));
+                // Build list of issues.
+
+                // Go through every text, and every unit and find objectives
+                //     with issue objects.
+                var m, n, textbookKeys = _.keys(OC.explorer.textbooks), unitKeys,
+                    textbook, unit, issueUnits = [];
+
+                for (m = 0; m < OC.explorer.textbooks.length; m++){
+                    textbook = OC.explorer.textbooks[m];
+
+                    for (n = 0; n < textbook.units.length; n++){
+                        unit = textbook.units[n];
+
+                        issueObjectives = unit.objectives.filter(objectiveHasIssues);
+                        if (issueObjectives.length > 0){
+                            issueUnits.push({
+                                'unitTitle': unit.title,
+                                'textbookTitle': textbook.title,
+                                'textbookThumbnail': _.findWhere(
+                                    OC.explorer.textbooks, {title: textbook.title}).thumbnail,
+                                'objectives': issueObjectives
+                            });
+                        }
+                    }
+                }
+
+                React.renderComponent(OC.explorer.CurriculumIssuesSetView(
+                    {units: issueUnits}), $('.explorer-overview-issues-wrapper').get(0),
+                    function(){
+                        $('.explorer-loader').removeClass('show');
+                    }
+                );
 
                 event.stopPropagation();
                 event.preventDefault();
                 return false;
             });
+
+            // Bind clicks on the lesson names.
+            $('li.textbooks .explorer-body-side-menu-light li a').click(
+                OC.explorer.openUnit);
+        },
+
+        initActions: function(){
+            $('button#new-objective').click(function(event){
+                // Get currently visible unit.
+                
+                var selectedModule = $('li.textbooks .explorer-body-side-menu-light li.selected a'),
+                    title = selectedModule.text(),
+                    textbookTitle = selectedModule.parents('ul:first').parent().find('a:first').text();
+
+                var newObjective = new OC.explorer.Objective({
+                    description: 'New objective',
+                    resources: [],
+                });
+
+                var unit = _.findWhere(_.findWhere(OC.explorer.textbooks, {
+                    title: textbookTitle}).units, {title: title}),
+                    unitObjectives = unit.objectives;
+
+                OC.appBox.saving();
+                newObjective.save(null, {
+                    attrs: {unit_id: unit.id},
+                    success: function(model){
+                        unit.objectives.add(newObjective);
+                        
+                        unitObjectives.sync('update', model, {
+                            success: OC.appBox.saved
+                        });
+                        
+                        // Highlight the last objective AFTER rendering completion.
+                        setTimeout(function(){
+                            OC.explorer.resetPreHeights();
+                            $('.explorer-resource-objective-section:last').addClass('new');
+                        }, 100);
+                    }
+                });
+            });
+        },
+
+        resetPreHeights: function(reverse) {
+            // Set height of pre-columns to 100% of parent - bad CSS problem.
+            var objectivePres = $('.explorer-resource-listing-body-pre, .explorer-resource-listing-labels-pre');
+
+            var i, objectivePre;
+            for (i = 0; i < objectivePres.length; i++){
+                objectivePre = $(objectivePres[i]);
+
+                if (reverse && reverse === true){
+                    objectivePre.height(objectivePre.parent().find(
+                        '.explorer-resource-listing-body-content').height());
+                } else {
+                    objectivePre.height(objectivePre.parent().height());
+                }
+            }
+        },
+
+        openUnit: function(event, callback){
+            $('.explorer-loader').addClass('show');
+
+            $('li.textbooks .explorer-body-side-menu-light li.selected').removeClass('selected');
+            
+            $('.explorer-resource-listing').addClass('show');
+            $('.explorer-resource-module-wrapper').addClass('show');
+
+            $('.explorer-resource-overview').removeClass('show');
+
+            var title = $(event.target).text(),
+                textbookTitle = $(event.target).parents('ul:first').parent().find('a:first').text(),
+                textbook = _.findWhere(OC.explorer.textbooks, {title: textbookTitle});
+
+            React.renderComponent(OC.explorer.ModuleView({
+                title: title.toUpperCase(),
+                textbookTitle: textbookTitle.toUpperCase(),
+                thumbnail: textbook.thumbnail
+            }), $('.explorer-resource-module-wrapper').get(0));
+
+            var objectivePres = $('.explorer-resource-listing-body-pre');
+            objectivePres.height('');
+
+            var unitObjectives = _.findWhere(textbook.units, {title: title}).objectives;
+
+            React.renderComponent(OC.explorer.ModuleObjectivesView(
+                {collection: unitObjectives}),
+                $('.explorer-resource-listing-body').get(0),
+                function(){
+                    OC.explorer.resetPreHeights();
+
+                    if (callback) callback();
+
+                    $('.explorer-loader').removeClass('show');
+                }
+            );
+
+            $(event.target).parent('li').addClass('selected');
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
         },
 
         hctLOs: {
@@ -256,7 +921,82 @@ define(['jquery', 'core', 'underscore', 'react'], function($, OC, _, React){
             ]
         },
 
-        hctTexts: {
+    });
+
+    $(document).ready(function($){
+        function resizeApp(){
+            $('.explorer-body').height(
+                $(window).height() - $('.explorer-header').height()
+            );
+
+            var explorerBody = $('.explorer-body-stage');
+            $('.explorer-loader').css({
+                top: explorerBody.offset().top,
+                left: explorerBody.offset().left,
+                width: explorerBody.outerWidth(),
+                height: explorerBody.height()
+            });
+        }
+
+        resizeApp();
+        $(window).resize(resizeApp);
+
+        // Build a new Backbone'd object from textbook and chapter names.
+        OC.explorer.textbooks = []; //{};
+
+        var i, j, k, objective, resources;
+        for (i = 0; i < OC.explorer.rawTexts.length; i++){
+            rawTextbook = OC.explorer.rawTexts[i];
+            rawUnits = [];
+
+            for (j = 0; j < rawTextbook.units.length; j++){
+                var rawUnit = rawTextbook.units[j],
+                    rawObjectives = rawUnit.objectives;
+            /*rawUnits = _.pluck(rawTextbook, 'title');
+
+            unitMaps = {};
+            _.each(rawUnits, function(unit){
+                var rawObjectives = _.findWhere(rawTextbook, {'title': unit}).objectives;
+                */
+                objectives = _.map(
+                    rawObjectives, function(ro){ return new OC.explorer.Objective(ro); });
+
+                rawUnit['objectives'] = new OC.explorer.Objectives(objectives);
+                
+                rawUnit['objectives'].each(function(objective){
+                    rawResources = objective.get('resources');
+                    resources = _.map(
+                        rawResources, function(rr){ return new OC.explorer.Resource(rr); });
+
+                    objective.set('resources', new OC.explorer.Resources(resources));
+                });
+
+                rawUnits.push(rawUnit);
+            //});
+            }
+
+            rawTextbook['units'] = rawUnits;
+            OC.explorer.textbooks.push(rawTextbook);
+        }
+
+        // Main grade-subject menu on home hover.
+        OC.explorer.initGradeSubjectMenu();
+
+        OC.explorer.initSideNavigation();
+
+        OC.explorer.initActions();
+
+        $('.explorer-body-side').nanoScroller({
+            paneClass: 'scroll-pane',
+            sliderClass: 'scroll-slider',
+            contentClass: 'scroll-content',
+            flash: true
+        });
+    });
+});
+
+
+        /*hctTexts: {
             'Ready to Read More': [
                 {
                     'title': 'Chapter 3: Use Vocabulary Strategies',
@@ -852,22 +1592,4 @@ define(['jquery', 'core', 'underscore', 'react'], function($, OC, _, React){
             'http://talk2meenglish.blogspot.com/2014/01/happiness-intermediate-lesson.html'
         ],
 
-        hctResourceNames: {"http://busyteacher.org/classroom_activities-grammar/modal_verbs-worksheets/": "520 FREE Modal Verbs Worksheets & Exercises", "http://alex.state.al.us/lesson_view.php?id=29359": "Untitled resource", "http://busyteacher.org/classroom_activities-grammar/tenses/past_perfect-worksheets/": "89 FREE Past Perfect Worksheets", "http://www.esl-lab.com/quizzes.htm": "Randall's ESL Vocabulary Quizzes", "http://www.readwritethink.org/classroom-resources/student-interactives/comparison-contrast-guide-30033.html": "Comparison and Contrast Guide - ReadWriteThink", "http://www.k12reader.com/subject/reading-skills/context-clues/": "Context Clues Worksheets | Reading Comprehension Activities", "http://www.readwritethink.org/classroom-resources/lesson-plans/persuasive-techniques-advertising-1166.html?tab=4": "Persuasive Techniques in Advertising - ReadWriteThink", "http://www.education.com/study-help/article/denotation-connotation_answer/": "Denotation and Connotation Practice Exercises | Education.com", "http://personal.cityu.edu.hk/~eljohnw/pda/iola/": "Interactive Online Listening Quizzes: PDA version", "http://www.readworks.org/lessons/concepts/compare-and-contrast": "Compare and Contrast Reading Lesson Plans, Lesson, Plan, Worksheets, Examples, Reading Strategies, Comprehension", "http://www.teacherspayteachers.com/Product/FREEBIE-Authors-Purpose-PIEED-Worksheet-869099": "FREEBIE!  AUTHOR'S PURPOSE PIE'ED WORKSHEET - TeachersPayTeachers.com", "http://www.ereadingworksheets.com/free-reading-worksheets/reading-comprehension-worksheets/context-clues-worksheets/": "Context Clues Worksheets | Reading Worksheets", "http://busyteacher.org/17125-verb-to-noun-er.html": "Verb to Noun with Suffix -Er", "http://www.bellaonline.com/articles/art10770.asp": "Dictionary Skills - Library Sciences", "http://www.superteacherworksheets.com/factopinion.html": "Fact and Opinion Worksheets", "http://www.ereadingworksheets.com/free-reading-worksheets/fact-and-opinion-worksheets/": "Fact and Opinion Worksheets | Reading Worksheets", "http://olc.spsd.sk.ca/de/resources/6_9ela/GradeLevelObjectives/Listening.htm": "Listening Objectives", "http://busyteacher.org/14461-how-to-teach-reading-skills-10-best-practices.html": "How to Teach Reading Skills: 10 Best Practices", "http://esl.about.com/od/Find-the-Mistake/a/Present-Perfect-Worksheets.htm": "Printable Present Perfect Worksheets", "http://www.readworks.org/lessons/concepts/authors-purpose": "Author's Purpose Reading Lesson Plans, Lesson, Plan, Worksheets, Examples, Reading Strategies, Comprehension", "http://www.helpteaching.com/questions/Cause_and_Effect": "Cause and Effect Tests and Worksheets - All Grades", "http://www.eslflow.com/Modalslessonplans.html": "Modal verbs & giving advice lessons for ESL teachers:esflow webguide", "http://busyteacher.org/18409-one-two-three-go-six-activities-for-sequencing.html": "One, Two, Three, Go! 6 Activities for Sequencing", "http://www.grammarbank.com/printable-worksheets.html": "Free Printable English Worksheets For Teachers", "http://www.manythings.org/b/e/category/interviews/": "ESL Videos \u00bb Interviews", "http://busyteacher.org/classroom_activities-vocabulary/wordbuilding/prefixessuffixes-worksheets/": "82 FREE Prefixes/Suffixes Worksheets", "http://busyteacher.org/8492-context-clue-notes.html": "Context Clue Notes", "http://esl.about.com/od/teaching_tenses/a/How-To-Teach-Present-Perfect.htm": "How to Teach the Present Perfect for ESL Students", "http://www.carnegiecouncil.org/education/002/lessons/be/be-01-01": "BE-01-01 Introduction to Business Ethics", "http://www.readwritethink.org/classroom-resources/printouts/chart-30225.html": "T-Chart - ReadWriteThink", "http://www.ego4u.com/en/cram-up/grammar/simpas-preper": "Simple Past vs. Present Perfect Simple", "http://www.indabook.org/d/Four-Kinds-of-Sentences.pdf": "Four Kinds of Sentences", "http://www.eslflow.com/collocationsandphrasalvebs.html": "Collocations\u00a0 exercises & worksheetsfor ESL teachers: eslflow webguide", "http://esl.about.com/library/quiz/bllisteningquiz.htm": "English Listening Quizzes", "http://learningenglish.voanews.com/": "\r\n\tVoice of America - Learn American English with VOA Learning English\r\n", "http://www.webenglishteacher.com/compare-contrast.html": "Compare-Contrast Writing, Lesson Plans @Web English Teacher", "http://www.internet4classrooms.com/assessment_assistance/assessment_preparation_language_arts_compare_contrast_lesson_plans.htm": "Language Arts Compare and Contrast Lesson Plans", "http://www.superteacherworksheets.com/dictionary-skills/printables/dictionary-skills-guide-words_WORDS.pdf": "Untitled resource", "http://busyteacher.org/classroom_activities-speaking/mingling-activities/": "259 FREE Mingling Activities and Find Someone Who", "http://www.breakingnewsenglish.com/0510/051006-happiness-e.html": "Breaking News English ESL Lesson Plan on Happiness", "http://www.teach-nology.com/worksheets/language_arts/authors/": "Author's Purpose Worksheets", "http://www.esltower.com/GRAMMARSHEETS/modals/modals.html": "Modal Verbs, Printable modals exercises and worksheets", "http://busyteacher.org/classroom_activities-grammar/tenses/present_perfect-worksheets/": "241 FREE Present Perfect Worksheets: Teach Present Perfect With Confidence!", "http://busyteacher.org/6061-10-tips-to-teach-collocations.html": "10 Tips to Teach Collocations", "http://www.superteacherworksheets.com/causeeffect.html": "Cause and Effect Worksheets", "http://www.kenbakerbooks.com/lessonplancompare.html": "Compare and Contrast Lesson Plan: Crazy Cow Compares\r\n& Contrasts", "https://www.havefunteaching.com/worksheets/reading-worksheets/cause-and-effect-worksheets": "302 Found", "http://www.teachingenglish.org.uk/article/collocation-pelmanism": "Collocation pelmanism | TeachingEnglish | British Council | BBC", "http://college.cengage.com/devenglish/wong/sentence_essentials/1e/students/downloads/ch7wkst1.pdf": "Untitled resource", "http://busyteacher.org/14856-most-common-stress-intonation-mistakes-esl.html": "Do Your ESL Students Make These Stress and Intonation Mistakes?", "http://www.mediacollege.com/journalism/interviews": "301 Moved Permanently", "http://www.worksheetplace.com/index.php?function=DisplayCategory&showCategory=Y&links=3&id=318&link1=43&link2=154&link3=318": "\n\n\r\n\nWorksheets", "http://www.readworks.org/lessons/concepts/fact-and-opinion": "Fact and Opinion Reading Lesson Plans, Lesson, Plan, Worksheets, Examples, Reading Strategies, Comprehension", "http://edhelper.com/Cause_and_Effect.htm": "Cause and Effect Activities, Worksheets, Printables, and Lesson Plans", "http://busyteacher.org/20734-irregular-verbs-poem.html": "Irregular Verbs Poem", "http://busyteacher.org/20609-present-perfect.html": "Present Perfect", "http://busyteacher.org/20680-have-you-ever-coversation-questions.html": "Have You Ever- Conversation Questions", "http://busyteacher.org/13613-new-vocabulary-7-best-sources.html": "7 Best Sources for New Vocabulary", "http://www.superteacherworksheets.com/prefix-suffix.html": "Prefixes - Suffixes", "http://www.grammar-quizzes.com/adj-forms.html": "Adjective Suffixes \u2014 English Exercises & Practice | Grammar Quizzes", "https://www.compassionateenglish.com/can-money-buy-happiness/": "Untitled resource", "http://www.ereadingworksheets.com/languageartsworksheets/sentence-structure/sentence-structure-worksheets/type-of-sentences-worksheets/": "Type of Sentences Worksheets | Reading Worksheets", "http://www.elllo.org/": "Learn English for Free with elllo!", "http://www.readingrockets.org/article/using-context-clues-understand-word-meanings": "Using Context Clues to Understand Word Meanings | Reading Rockets", "https://www.flocabulary.com/context-clues-lesson/": " Free Context Clues Worksheet & Lesson Plan - Flocabulary ", "http://www.usingenglish.com/teachers/lesson-plans/grammar-topics/33.html": "Collocation - Grammar Topic, Page 1 - ESL Lesson Plans & Worksheets - UsingEnglish.com", "http://www.teach-this.com/resources/question-tags": "Question Tags - ESL EFL Teaching Activities", "http://www.squ.edu.om/tabid/11969/language/en-US/Default.aspx": "\r\n\tLearning Outcomes in Listening and Speaking\r\n", "http://www.brighthubeducation.com/middle-school-english-lessons/99499-teaching-denotation-and-connotation-through-usage-of-words/": "Showing Connotation vs. Denotation Meanings to Students", "http://busyteacher.org/11819-speaking-intonation-and-feelings.html": "Speaking: Intonation and Feelings", "http://www.teacherspayteachers.com/Product/Denotation-and-Connotation-Activity-345325": "DENOTATION AND CONNOTATION ACTIVITY - TeachersPayTeachers.com", "http://www.eslcafe.com/grammar/understanding_and_using_modal_verbs01.htm": "404 Not Found", "http://busyteacher.org/14378-how-to-teach-intonation-6-tips.html": "Avoid Sounding Like a Robot: 6 Top Tips for Teaching Intonation", "http://www.teachingenglish.org.uk/knowledge-database/tag-questions": "Tag questions | TeachingEnglish | British Council | BBC", "http://busyteacher.org/classroom_activities-pronunciation/intonation_rhythm_and_stress-worksheets/": "41 FREE Intonation, Rhythm and Stress Worksheets", "http://elthq.com/how-to-teach-collocations/": "How To Teach Collocations", "https://www.youtube.com/watch?v=4eOynrI2eTM": "Untitled resource", "http://busyteacher.org/16149-teaching-english-intonation-tips.html": "Stress About It: 7 Tips for Teaching English Intonation", "http://www.ereadingworksheets.com/free-reading-worksheets/authors-purpose-worksheets/": "Author's Purpose | Reading Worksheets", "http://www.fortheteachers.org/Lesson_Plans/Lesson-Reading_Fact_vs_Opinion.pdf": "Untitled resource", "http://learning.blogs.nytimes.com/2011/04/25/on-the-market-thinking-critically-about-advertising/?_php=true&_type=blogs&_r=0": "Untitled resource", "http://curriculum.austinisd.org/la/hs/9th/documents/LA_Connotation_and_Denotation_Lesson_9thGr_4th6wks_1011.pdf": "Untitled resource", "http://www.englishwsheets.com/present_perfect.html": "Present Perfect Tense ESL Grammar Worksheets", "http://www.greatschools.org/worksheets-activities/6666-comparing-two-stories.gs": "Comparing two stories - Worksheets & Activities | GreatSchools", "http://busyteacher.org/15088-how-to-improve-esl-intonation-stress-7-exercises.html": "7 Excellent Exercises to Improve ESL Intonation and Stress", "http://www.englishcurrent.com/topic-corporate-social-responsibility-csr-upperintermediate-lesson-plan/": "Corporate Social Responsibility (CSR) (Upper-Intermediate Lesson Plan) English Current", "http://busyteacher.org/7763-10-teacher-tested-tricks-to-teach-modal-verbs.html": "10 Teacher Tested Tricks to Teach Modal Verbs", "http://www.eslflow.com/describingproductsandservices.html": "ESL lessons for advertising & describing products and services : eslflow webguide", "http://busyteacher.org/14853-correct-esl-students-intonation-7-ways.html": "7 Ways to Correct Your ESL Students\u2019 Intonation Once and for All", "http://www.eslflow.com/comparisoncontrast.html": " Comparison Contrast Essay & Paragraph Writing: eslflow webguide", "http://busyteacher.org/classroom_activities-vocabulary/collocations-worksheets/": "54 FREE Collocations Worksheets", "https://learnenglishteens.britishcouncil.org/skills/listening-skills-practice/interview-swimmer": "Interview with a swimmer | LearnEnglishTeens", "http://busyteacher.org/14387-how-to-improve-listening-skills-8-activities.html": "Do You Hear What I Hear? 8 Activities to Improve Listening Skills", "http://www.readwritethink.org/classroom-resources/lesson-plans/what-revising-connotation-80.html": "She Did What? Revising for Connotation - ReadWriteThink", "http://esl.about.com/od/beginningenglish/ig/Basic-English/Modal-Forms.htm": "Basic English - Modal Forms - 30 Essential Lessons for Beginning English Learners", "http://busyteacher.org/19003-compare-and-contrast-signal-words.html": "Compare and Contrast Signal Words", "http://www.readwritethink.org/classroom-resources/lesson-plans/solving-word-meanings-engaging-1089.html?tab=4": "Solving Word Meanings: Engaging Strategies for Vocabulary Development - ReadWriteThink", "https://www.youtube.com/watch?v=dheCcrv2WZs": "Untitled resource", "https://www.havefunteaching.com/worksheets/reading-worksheets/fact-and-opinion-worksheets": "302 Found", "http://esl.about.com/od/englishlistening/": "English Listening Skills and Activities-Effective Listening Practice for ESL EFL Learners and Teachers", "http://busyteacher.org/3681-present-perfect-vs-past-simple.html": "How To Teach Past Simple VS Present Perfect", "http://www.superteacherworksheets.com/dictionary-skills/printables/dictionary-parts_PARTS.pdf": "Untitled resource", "http://busyteacher.org/classroom_activities-grammar/tag_questions-worksheets/": "62 FREE Tag Questions Worksheets", "http://www.manythings.org/e/listening.html": "Listening (For ESL Students)", "https://www.englishlistening.com/index.php/listen-to-passages/": "302 Found", "http://www.developingteachers.com/plans/coll1_tanju.htm": "Tanju's Collocation lesson plan", "http://www.talkenglish.com/Listening/ListenBasic.aspx": "Basic Listening English Lessons with Quiz, Questions, and Answers", "http://www.washingtonpost.com/lifestyle/travel/oh-man-living-the-high-life-in-oman/2013/05/09/303af378-b346-11e2-bbf2-a6f9e9d79e19_story.html": "Oh, man! Living the high life in Oman. - The Washington Post", "http://alex.state.al.us/lesson_view.php?id=33176": "Untitled resource", "http://learning.blogs.nytimes.com/2010/10/07/can-money-buy-you-happiness/": "Untitled resource", "http://www.oxforddictionaries.com/us/words/11-activities": "11+ Activities - Oxford Dictionaries (US)", "http://www.englishwsheets.com/modals.html": "Modals ESL Grammar Worksheets", "http://www.worksheetworks.com/english/partsofspeech/sentences/identify-types.html": "Identifying Sentence Types - WorksheetWorks.com", "http://busyteacher.org/17140-how-to-practice-english-modals-5-fantastic.html": "You Really Should: 5 Fantastic Activities for Practicing English Modals", "http://www.classroomfreebies.com/2011/09/3-free-dictionary-worksheets.html": "Classroom Freebies: 3 Free Dictionary Worksheets!", "http://www.admongo.gov/lesson-plans.aspx": "\n", "http://busyteacher.org/16030-discrete-speech-sounds-vs-stress-and-intonation.html": "Which is More Important? Discrete Speech Sounds v. Stress and Intonation", "http://busyteacher.org/4126-how-to-teach-modal-verbs-4-steps.html": "How to Teach Modal Verbs: 4 Simple Steps", "http://busyteacher.org/20585-the-old-colonel.html": "The Old Colonel", "http://esl.about.com/od/speakingadvanced/a/timestress.htm": "Intonation and Stress in English", "http://www.storyboardthat.com/articles/education/grammar/denotation-vs-connotation": "Teaching Denotations versus Connotations with Storyboards", "http://www.englishpage.com/modals/modalintro.html": "ENGLISH PAGE - Modal Verb Tutorial", "http://busyteacher.org/8001-sequencing-activity.html": "Sequencing Activity", "http://busyteacher.org/14578-teaching-intonation-and-stress.html": "Hearing is Believing: Teaching the Ways of Intonation and Stress", "http://www.commoncoresheets.com/Sentence_Types.php": "Sentence Type Worksheets", "http://www.esl-galaxy.com/collocation.html": "ESL Matching and Collocation Worksheets", "http://www.englishpage.com/verbpage/presentperfect.html": "ENGLISH PAGE - Present Perfect", "http://mediasmarts.ca/lessonplan/advertising-all-around-us-lesson": "Advertising All Around Us - Lesson | MediaSmarts", "http://www.helpteaching.com/questions/Authors_Purpose": "Author's Purpose Tests and Worksheets - All Grades", "http://edhelper.com/language/sentences.htm": "Sentences:\u00a0\u00a0 Activities, Worksheets, Printables, and Lesson Plans", "http://busyteacher.org/10611-hes-funny-isnt-he-tips-to-teaching-tag-questions.html": "He\u2019s Funny, Isn\u2019t He? Tips to Teaching Tag Questions", "http://esl.about.com/library/listening/bllis_interview.htm": "English Listening Exercises - Lower-intermediate to intermediate Level Listening Quiz - Survey Information", "http://busyteacher.org/6514-write-comparing-contrasting-essay-tips.html": "C \u2013 Comparing and Contrasting (And Writing, Too) [Teacher Tips from A to Z]", "http://www.teachingenglish.org.uk/sites/teacheng/files/Advertising%20lesson%20plan.pdf": "Untitled resource", "http://www.learnenglishfeelgood.com/eslvideo/": "ESL Listening Comprehension Exercises: Movie clips to practice English | ELL/ELT", "http://www.teachingenglish.org.uk/sites/teacheng/files/Money%20conversations%20lesson%20plan.pdf": "Untitled resource", "http://busyteacher.org/17903-note-taking-during-lectures-7-ways-to-prepare.html": "Note-Taking During Lectures: 7 Ways to Help Students Prepare", "http://talk2meenglish.blogspot.com/2014/01/happiness-intermediate-lesson.html": "Talk2Me English : Happiness - Intermediate Lesson", "http://www.teachjunkie.com/filing-cabinet/free-download/ela-cause-effect-inferevidence/": "12 Easy Cause and Effect Activities and Worksheets - Teach Junkie", "http://esl.about.com/library/lessons/bltags.htm": "Grammar Lesson Plan - Question Tags", "http://www.rong-chang.com/speak/": "Speak English Fast", "http://www.brainpop.com/educators/community/bp-jr-topic/types-of-sentences/": "Types of Sentences Lesson Plans and Lesson Ideas - BrainPOP Educators", "http://www.scholastic.com/teachers/lesson-plan/connotation-effective-word-choice": "Connotation: Effective Word Choice | Scholastic.com", "http://a4esl.org/q/h/mc-bd-tagq.html": " ESL Quiz - Question Tags (Barbara Donnelly) I-TESL-J"}
-    };
-
-    $(document).ready(function($){
-        function resizeApp(){
-            $('.explorer-body').height(
-                $(window).height() - $('.explorer-header').height()
-            );
-        }
-
-        resizeApp();
-        $(window).resize(resizeApp);
-
-        // Main grade-subject menu on home hover.
-        OC.explorer.initGradeSubjectMenu();
-
-        OC.explorer.initSideNavigation();
-    });
-});
+        hctResourceNames: {"http://busyteacher.org/classroom_activities-grammar/modal_verbs-worksheets/": "520 FREE Modal Verbs Worksheets & Exercises", "http://alex.state.al.us/lesson_view.php?id=29359": "Untitled resource", "http://busyteacher.org/classroom_activities-grammar/tenses/past_perfect-worksheets/": "89 FREE Past Perfect Worksheets", "http://www.esl-lab.com/quizzes.htm": "Randall's ESL Vocabulary Quizzes", "http://www.readwritethink.org/classroom-resources/student-interactives/comparison-contrast-guide-30033.html": "Comparison and Contrast Guide - ReadWriteThink", "http://www.k12reader.com/subject/reading-skills/context-clues/": "Context Clues Worksheets | Reading Comprehension Activities", "http://www.readwritethink.org/classroom-resources/lesson-plans/persuasive-techniques-advertising-1166.html?tab=4": "Persuasive Techniques in Advertising - ReadWriteThink", "http://www.education.com/study-help/article/denotation-connotation_answer/": "Denotation and Connotation Practice Exercises | Education.com", "http://personal.cityu.edu.hk/~eljohnw/pda/iola/": "Interactive Online Listening Quizzes: PDA version", "http://www.readworks.org/lessons/concepts/compare-and-contrast": "Compare and Contrast Reading Lesson Plans, Lesson, Plan, Worksheets, Examples, Reading Strategies, Comprehension", "http://www.teacherspayteachers.com/Product/FREEBIE-Authors-Purpose-PIEED-Worksheet-869099": "FREEBIE!  AUTHOR'S PURPOSE PIE'ED WORKSHEET - TeachersPayTeachers.com", "http://www.ereadingworksheets.com/free-reading-worksheets/reading-comprehension-worksheets/context-clues-worksheets/": "Context Clues Worksheets | Reading Worksheets", "http://busyteacher.org/17125-verb-to-noun-er.html": "Verb to Noun with Suffix -Er", "http://www.bellaonline.com/articles/art10770.asp": "Dictionary Skills - Library Sciences", "http://www.superteacherworksheets.com/factopinion.html": "Fact and Opinion Worksheets", "http://www.ereadingworksheets.com/free-reading-worksheets/fact-and-opinion-worksheets/": "Fact and Opinion Worksheets | Reading Worksheets", "http://olc.spsd.sk.ca/de/resources/6_9ela/GradeLevelObjectives/Listening.htm": "Listening Objectives", "http://busyteacher.org/14461-how-to-teach-reading-skills-10-best-practices.html": "How to Teach Reading Skills: 10 Best Practices", "http://esl.about.com/od/Find-the-Mistake/a/Present-Perfect-Worksheets.htm": "Printable Present Perfect Worksheets", "http://www.readworks.org/lessons/concepts/authors-purpose": "Author's Purpose Reading Lesson Plans, Lesson, Plan, Worksheets, Examples, Reading Strategies, Comprehension", "http://www.helpteaching.com/questions/Cause_and_Effect": "Cause and Effect Tests and Worksheets - All Grades", "http://www.eslflow.com/Modalslessonplans.html": "Modal verbs & giving advice lessons for ESL teachers:esflow webguide", "http://busyteacher.org/18409-one-two-three-go-six-activities-for-sequencing.html": "One, Two, Three, Go! 6 Activities for Sequencing", "http://www.grammarbank.com/printable-worksheets.html": "Free Printable English Worksheets For Teachers", "http://www.manythings.org/b/e/category/interviews/": "ESL Videos \u00bb Interviews", "http://busyteacher.org/classroom_activities-vocabulary/wordbuilding/prefixessuffixes-worksheets/": "82 FREE Prefixes/Suffixes Worksheets", "http://busyteacher.org/8492-context-clue-notes.html": "Context Clue Notes", "http://esl.about.com/od/teaching_tenses/a/How-To-Teach-Present-Perfect.htm": "How to Teach the Present Perfect for ESL Students", "http://www.carnegiecouncil.org/education/002/lessons/be/be-01-01": "BE-01-01 Introduction to Business Ethics", "http://www.readwritethink.org/classroom-resources/printouts/chart-30225.html": "T-Chart - ReadWriteThink", "http://www.ego4u.com/en/cram-up/grammar/simpas-preper": "Simple Past vs. Present Perfect Simple", "http://www.indabook.org/d/Four-Kinds-of-Sentences.pdf": "Four Kinds of Sentences", "http://www.eslflow.com/collocationsandphrasalvebs.html": "Collocations\u00a0 exercises & worksheetsfor ESL teachers: eslflow webguide", "http://esl.about.com/library/quiz/bllisteningquiz.htm": "English Listening Quizzes", "http://learningenglish.voanews.com/": "\r\n\tVoice of America - Learn American English with VOA Learning English\r\n", "http://www.webenglishteacher.com/compare-contrast.html": "Compare-Contrast Writing, Lesson Plans @Web English Teacher", "http://www.internet4classrooms.com/assessment_assistance/assessment_preparation_language_arts_compare_contrast_lesson_plans.htm": "Language Arts Compare and Contrast Lesson Plans", "http://www.superteacherworksheets.com/dictionary-skills/printables/dictionary-skills-guide-words_WORDS.pdf": "Untitled resource", "http://busyteacher.org/classroom_activities-speaking/mingling-activities/": "259 FREE Mingling Activities and Find Someone Who", "http://www.breakingnewsenglish.com/0510/051006-happiness-e.html": "Breaking News English ESL Lesson Plan on Happiness", "http://www.teach-nology.com/worksheets/language_arts/authors/": "Author's Purpose Worksheets", "http://www.esltower.com/GRAMMARSHEETS/modals/modals.html": "Modal Verbs, Printable modals exercises and worksheets", "http://busyteacher.org/classroom_activities-grammar/tenses/present_perfect-worksheets/": "241 FREE Present Perfect Worksheets: Teach Present Perfect With Confidence!", "http://busyteacher.org/6061-10-tips-to-teach-collocations.html": "10 Tips to Teach Collocations", "http://www.superteacherworksheets.com/causeeffect.html": "Cause and Effect Worksheets", "http://www.kenbakerbooks.com/lessonplancompare.html": "Compare and Contrast Lesson Plan: Crazy Cow Compares\r\n& Contrasts", "https://www.havefunteaching.com/worksheets/reading-worksheets/cause-and-effect-worksheets": "302 Found", "http://www.teachingenglish.org.uk/article/collocation-pelmanism": "Collocation pelmanism | TeachingEnglish | British Council | BBC", "http://college.cengage.com/devenglish/wong/sentence_essentials/1e/students/downloads/ch7wkst1.pdf": "Untitled resource", "http://busyteacher.org/14856-most-common-stress-intonation-mistakes-esl.html": "Do Your ESL Students Make These Stress and Intonation Mistakes?", "http://www.mediacollege.com/journalism/interviews": "301 Moved Permanently", "http://www.worksheetplace.com/index.php?function=DisplayCategory&showCategory=Y&links=3&id=318&link1=43&link2=154&link3=318": "\n\n\r\n\nWorksheets", "http://www.readworks.org/lessons/concepts/fact-and-opinion": "Fact and Opinion Reading Lesson Plans, Lesson, Plan, Worksheets, Examples, Reading Strategies, Comprehension", "http://edhelper.com/Cause_and_Effect.htm": "Cause and Effect Activities, Worksheets, Printables, and Lesson Plans", "http://busyteacher.org/20734-irregular-verbs-poem.html": "Irregular Verbs Poem", "http://busyteacher.org/20609-present-perfect.html": "Present Perfect", "http://busyteacher.org/20680-have-you-ever-coversation-questions.html": "Have You Ever- Conversation Questions", "http://busyteacher.org/13613-new-vocabulary-7-best-sources.html": "7 Best Sources for New Vocabulary", "http://www.superteacherworksheets.com/prefix-suffix.html": "Prefixes - Suffixes", "http://www.grammar-quizzes.com/adj-forms.html": "Adjective Suffixes \u2014 English Exercises & Practice | Grammar Quizzes", "https://www.compassionateenglish.com/can-money-buy-happiness/": "Untitled resource", "http://www.ereadingworksheets.com/languageartsworksheets/sentence-structure/sentence-structure-worksheets/type-of-sentences-worksheets/": "Type of Sentences Worksheets | Reading Worksheets", "http://www.elllo.org/": "Learn English for Free with elllo!", "http://www.readingrockets.org/article/using-context-clues-understand-word-meanings": "Using Context Clues to Understand Word Meanings | Reading Rockets", "https://www.flocabulary.com/context-clues-lesson/": " Free Context Clues Worksheet & Lesson Plan - Flocabulary ", "http://www.usingenglish.com/teachers/lesson-plans/grammar-topics/33.html": "Collocation - Grammar Topic, Page 1 - ESL Lesson Plans & Worksheets - UsingEnglish.com", "http://www.teach-this.com/resources/question-tags": "Question Tags - ESL EFL Teaching Activities", "http://www.squ.edu.om/tabid/11969/language/en-US/Default.aspx": "\r\n\tLearning Outcomes in Listening and Speaking\r\n", "http://www.brighthubeducation.com/middle-school-english-lessons/99499-teaching-denotation-and-connotation-through-usage-of-words/": "Showing Connotation vs. Denotation Meanings to Students", "http://busyteacher.org/11819-speaking-intonation-and-feelings.html": "Speaking: Intonation and Feelings", "http://www.teacherspayteachers.com/Product/Denotation-and-Connotation-Activity-345325": "DENOTATION AND CONNOTATION ACTIVITY - TeachersPayTeachers.com", "http://www.eslcafe.com/grammar/understanding_and_using_modal_verbs01.htm": "404 Not Found", "http://busyteacher.org/14378-how-to-teach-intonation-6-tips.html": "Avoid Sounding Like a Robot: 6 Top Tips for Teaching Intonation", "http://www.teachingenglish.org.uk/knowledge-database/tag-questions": "Tag questions | TeachingEnglish | British Council | BBC", "http://busyteacher.org/classroom_activities-pronunciation/intonation_rhythm_and_stress-worksheets/": "41 FREE Intonation, Rhythm and Stress Worksheets", "http://elthq.com/how-to-teach-collocations/": "How To Teach Collocations", "https://www.youtube.com/watch?v=4eOynrI2eTM": "Untitled resource", "http://busyteacher.org/16149-teaching-english-intonation-tips.html": "Stress About It: 7 Tips for Teaching English Intonation", "http://www.ereadingworksheets.com/free-reading-worksheets/authors-purpose-worksheets/": "Author's Purpose | Reading Worksheets", "http://www.fortheteachers.org/Lesson_Plans/Lesson-Reading_Fact_vs_Opinion.pdf": "Untitled resource", "http://learning.blogs.nytimes.com/2011/04/25/on-the-market-thinking-critically-about-advertising/?_php=true&_type=blogs&_r=0": "Untitled resource", "http://curriculum.austinisd.org/la/hs/9th/documents/LA_Connotation_and_Denotation_Lesson_9thGr_4th6wks_1011.pdf": "Untitled resource", "http://www.englishwsheets.com/present_perfect.html": "Present Perfect Tense ESL Grammar Worksheets", "http://www.greatschools.org/worksheets-activities/6666-comparing-two-stories.gs": "Comparing two stories - Worksheets & Activities | GreatSchools", "http://busyteacher.org/15088-how-to-improve-esl-intonation-stress-7-exercises.html": "7 Excellent Exercises to Improve ESL Intonation and Stress", "http://www.englishcurrent.com/topic-corporate-social-responsibility-csr-upperintermediate-lesson-plan/": "Corporate Social Responsibility (CSR) (Upper-Intermediate Lesson Plan) English Current", "http://busyteacher.org/7763-10-teacher-tested-tricks-to-teach-modal-verbs.html": "10 Teacher Tested Tricks to Teach Modal Verbs", "http://www.eslflow.com/describingproductsandservices.html": "ESL lessons for advertising & describing products and services : eslflow webguide", "http://busyteacher.org/14853-correct-esl-students-intonation-7-ways.html": "7 Ways to Correct Your ESL Students\u2019 Intonation Once and for All", "http://www.eslflow.com/comparisoncontrast.html": " Comparison Contrast Essay & Paragraph Writing: eslflow webguide", "http://busyteacher.org/classroom_activities-vocabulary/collocations-worksheets/": "54 FREE Collocations Worksheets", "https://learnenglishteens.britishcouncil.org/skills/listening-skills-practice/interview-swimmer": "Interview with a swimmer | LearnEnglishTeens", "http://busyteacher.org/14387-how-to-improve-listening-skills-8-activities.html": "Do You Hear What I Hear? 8 Activities to Improve Listening Skills", "http://www.readwritethink.org/classroom-resources/lesson-plans/what-revising-connotation-80.html": "She Did What? Revising for Connotation - ReadWriteThink", "http://esl.about.com/od/beginningenglish/ig/Basic-English/Modal-Forms.htm": "Basic English - Modal Forms - 30 Essential Lessons for Beginning English Learners", "http://busyteacher.org/19003-compare-and-contrast-signal-words.html": "Compare and Contrast Signal Words", "http://www.readwritethink.org/classroom-resources/lesson-plans/solving-word-meanings-engaging-1089.html?tab=4": "Solving Word Meanings: Engaging Strategies for Vocabulary Development - ReadWriteThink", "https://www.youtube.com/watch?v=dheCcrv2WZs": "Untitled resource", "https://www.havefunteaching.com/worksheets/reading-worksheets/fact-and-opinion-worksheets": "302 Found", "http://esl.about.com/od/englishlistening/": "English Listening Skills and Activities-Effective Listening Practice for ESL EFL Learners and Teachers", "http://busyteacher.org/3681-present-perfect-vs-past-simple.html": "How To Teach Past Simple VS Present Perfect", "http://www.superteacherworksheets.com/dictionary-skills/printables/dictionary-parts_PARTS.pdf": "Untitled resource", "http://busyteacher.org/classroom_activities-grammar/tag_questions-worksheets/": "62 FREE Tag Questions Worksheets", "http://www.manythings.org/e/listening.html": "Listening (For ESL Students)", "https://www.englishlistening.com/index.php/listen-to-passages/": "302 Found", "http://www.developingteachers.com/plans/coll1_tanju.htm": "Tanju's Collocation lesson plan", "http://www.talkenglish.com/Listening/ListenBasic.aspx": "Basic Listening English Lessons with Quiz, Questions, and Answers", "http://www.washingtonpost.com/lifestyle/travel/oh-man-living-the-high-life-in-oman/2013/05/09/303af378-b346-11e2-bbf2-a6f9e9d79e19_story.html": "Oh, man! Living the high life in Oman. - The Washington Post", "http://alex.state.al.us/lesson_view.php?id=33176": "Untitled resource", "http://learning.blogs.nytimes.com/2010/10/07/can-money-buy-you-happiness/": "Untitled resource", "http://www.oxforddictionaries.com/us/words/11-activities": "11+ Activities - Oxford Dictionaries (US)", "http://www.englishwsheets.com/modals.html": "Modals ESL Grammar Worksheets", "http://www.worksheetworks.com/english/partsofspeech/sentences/identify-types.html": "Identifying Sentence Types - WorksheetWorks.com", "http://busyteacher.org/17140-how-to-practice-english-modals-5-fantastic.html": "You Really Should: 5 Fantastic Activities for Practicing English Modals", "http://www.classroomfreebies.com/2011/09/3-free-dictionary-worksheets.html": "Classroom Freebies: 3 Free Dictionary Worksheets!", "http://www.admongo.gov/lesson-plans.aspx": "\n", "http://busyteacher.org/16030-discrete-speech-sounds-vs-stress-and-intonation.html": "Which is More Important? Discrete Speech Sounds v. Stress and Intonation", "http://busyteacher.org/4126-how-to-teach-modal-verbs-4-steps.html": "How to Teach Modal Verbs: 4 Simple Steps", "http://busyteacher.org/20585-the-old-colonel.html": "The Old Colonel", "http://esl.about.com/od/speakingadvanced/a/timestress.htm": "Intonation and Stress in English", "http://www.storyboardthat.com/articles/education/grammar/denotation-vs-connotation": "Teaching Denotations versus Connotations with Storyboards", "http://www.englishpage.com/modals/modalintro.html": "ENGLISH PAGE - Modal Verb Tutorial", "http://busyteacher.org/8001-sequencing-activity.html": "Sequencing Activity", "http://busyteacher.org/14578-teaching-intonation-and-stress.html": "Hearing is Believing: Teaching the Ways of Intonation and Stress", "http://www.commoncoresheets.com/Sentence_Types.php": "Sentence Type Worksheets", "http://www.esl-galaxy.com/collocation.html": "ESL Matching and Collocation Worksheets", "http://www.englishpage.com/verbpage/presentperfect.html": "ENGLISH PAGE - Present Perfect", "http://mediasmarts.ca/lessonplan/advertising-all-around-us-lesson": "Advertising All Around Us - Lesson | MediaSmarts", "http://www.helpteaching.com/questions/Authors_Purpose": "Author's Purpose Tests and Worksheets - All Grades", "http://edhelper.com/language/sentences.htm": "Sentences:\u00a0\u00a0 Activities, Worksheets, Printables, and Lesson Plans", "http://busyteacher.org/10611-hes-funny-isnt-he-tips-to-teaching-tag-questions.html": "He\u2019s Funny, Isn\u2019t He? Tips to Teaching Tag Questions", "http://esl.about.com/library/listening/bllis_interview.htm": "English Listening Exercises - Lower-intermediate to intermediate Level Listening Quiz - Survey Information", "http://busyteacher.org/6514-write-comparing-contrasting-essay-tips.html": "C \u2013 Comparing and Contrasting (And Writing, Too) [Teacher Tips from A to Z]", "http://www.teachingenglish.org.uk/sites/teacheng/files/Advertising%20lesson%20plan.pdf": "Untitled resource", "http://www.learnenglishfeelgood.com/eslvideo/": "ESL Listening Comprehension Exercises: Movie clips to practice English | ELL/ELT", "http://www.teachingenglish.org.uk/sites/teacheng/files/Money%20conversations%20lesson%20plan.pdf": "Untitled resource", "http://busyteacher.org/17903-note-taking-during-lectures-7-ways-to-prepare.html": "Note-Taking During Lectures: 7 Ways to Help Students Prepare", "http://talk2meenglish.blogspot.com/2014/01/happiness-intermediate-lesson.html": "Talk2Me English : Happiness - Intermediate Lesson", "http://www.teachjunkie.com/filing-cabinet/free-download/ela-cause-effect-inferevidence/": "12 Easy Cause and Effect Activities and Worksheets - Teach Junkie", "http://esl.about.com/library/lessons/bltags.htm": "Grammar Lesson Plan - Question Tags", "http://www.rong-chang.com/speak/": "Speak English Fast", "http://www.brainpop.com/educators/community/bp-jr-topic/types-of-sentences/": "Types of Sentences Lesson Plans and Lesson Ideas - BrainPOP Educators", "http://www.scholastic.com/teachers/lesson-plan/connotation-effective-word-choice": "Connotation: Effective Word Choice | Scholastic.com", "http://a4esl.org/q/h/mc-bd-tagq.html": " ESL Quiz - Question Tags (Barbara Donnelly) I-TESL-J"}*/

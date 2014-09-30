@@ -186,6 +186,7 @@ INSTALLED_APPS = (
     'user_account',
     'interactions',
     'projects',
+    'curriculum',
     'storages',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',

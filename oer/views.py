@@ -2038,6 +2038,8 @@ def create_url_resource(title, username, description, link, tags, body, license_
         to_add_to = Collection.objects.get(pk=int(collection_id))
         to_add_to.resources.add(new_resource)
         to_add_to.save()
+
+        return new_resource.id
     except Exception, e:
         print e
 
@@ -3574,47 +3576,42 @@ def create_new_suggestion(resource_collection, category, user):
             str(category.id) + ':' + category.title ))
 
 
-def post_url(request):
+def new_url_from_form(user, title, url, resource_type=None, standards=None):
     DEFAULT_COST = 0
 
-    from django.contrib import messages
-    try:
-        from meta.models import TagCategory, Tag, Category
-        tag = Tag.objects.get(title__iexact=request.POST.get(
-            'type', None), category=TagCategory.objects.get(title='Resource type'))
+    from meta.models import TagCategory, Tag
+    
+    title = title if title else 'Untitled website'
 
-        category = Category.objects.get(pk=request.POST.get('category_id', None))
+    from django.template.defaultfilters import slugify
 
-        posted_title = request.POST.get('title', None)        
-        title = posted_title if posted_title else 'Untitled website'
-        standards = request.POST.getlist('standard', None)
+    # Create a new resource
+    new_resource = Resource(
+        title=title,
+        cost=DEFAULT_COST,
+        user=user,
+        slug=slugify(title),
+        visibility='public',
+        description='',
+    )
 
-        from django.template.defaultfilters import slugify
+    from oer.forms import sanitize_url
+    new_url = Link(url=sanitize_url(url))
+    new_url.save()
 
-        # Create a new resource
-        new_resource = Resource(
-            title=title,
-            cost=DEFAULT_COST,
-            user=request.user,
-            slug=slugify(title),
-            visibility='public',
-            description='',
-        )
+    new_resource_revision = ResourceRevision()
+    new_resource_revision.content = new_url
+    new_resource_revision.user = user
+    new_resource_revision.save()
 
-        from oer.forms import sanitize_url
-        new_url = Link(url=sanitize_url(request.POST.get('url', None)))
-        new_url.save()
+    new_resource.revision = new_resource_revision
+    new_resource.save()
 
-        new_resource_revision = ResourceRevision()
-        new_resource_revision.content = new_url
-        new_resource_revision.user = request.user
-        new_resource_revision.save()
-
-        new_resource.revision = new_resource_revision
-        new_resource.save()
-
+    if resource_type:
+        tag = Tag.objects.get(title__iexact=resource_type, category=TagCategory.objects.get(title='Resource type'))
         new_resource.tags.add(tag)
 
+    if standards:
         standards_tag_category = TagCategory.objects.get(title='Standards')
         for standard in standards:
             try:
@@ -3624,31 +3621,55 @@ def post_url(request):
             except:
                 pass
 
-        # Push a signal for new resource created.     
-        import oer.CollectionUtilities as cu
-        (collection_host_type, collection_host) = cu.get_collection_root(
-            request.user.get_profile().collection)
-        Resource.resource_created.send(
-            sender="Resources", resource=new_resource,
-            context_type='user profile', context=request.user.get_profile()
-        )
+    # Push a signal for new resource created.     
+    import oer.CollectionUtilities as cu
+    (collection_host_type, collection_host) = cu.get_collection_root(
+        user.get_profile().collection)
+    Resource.resource_created.send(
+        sender="Resources", resource=new_resource,
+        context_type='user profile', context=user.get_profile()
+    )
 
-        # Assign this resource to the revision created.
-        new_resource.revision.resource = new_resource
-        new_resource.revision.save()
+    # Assign this resource to the revision created.
+    new_resource.revision.resource = new_resource
+    new_resource.revision.save()
 
-        # Now add this resource to the collection it belongs to.
-        request.user.get_profile().collection.resources.add(new_resource)
-        request.user.get_profile().collection.save()
+    # Now add this resource to the collection it belongs to.
+    user.get_profile().collection.resources.add(new_resource)
+    user.get_profile().collection.save()
 
+    return new_resource
+
+
+def post_url(request):
+    try:
+        from meta.models import Category
+        category_id = request.POST.get('category_id', None)
+        resource_type = request.POST.get('type', None)
+        standards = request.POST.getlist('standard', None)
+
+        new_resource = new_url_from_form(
+            request.user, request.POST.get('title', None),
+            request.POST.get('url', None),
+            resource_type, standards)
+
+        category = Category.objects.get(pk=category_id)
         create_new_suggestion(new_resource, category, request.user)
 
-        # Posted appended to URL very hackishly - should be done using URLLib.
-        return redirect(request.META.get('HTTP_REFERER') + '?posted=success')
+        return APIUtilities.success({
+            'resource': {
+                'id': new_resource.id,
+                'title': new_resource.title
+            }
+        })
 
     except:
-        messages.success(request, 'Oops! Something went wrong')
-        return redirect(request.META.get('HTTP_REFERER'))
+        context = {
+            'title': 'Could not complete that request.',
+            'message': 'We failed to share this URL, and our apologies for that'
+            + 'We are working on fixing the issue. Please contact us if the problem persists.'
+        }
+        return APIUtilities._api_failure(context)
 
 
 def load_resources(request, collection_id, resource_count):

@@ -129,7 +129,7 @@
 					require(['editor_page']);
 
 				{% elif body_class == 'explorer' %}
-					require(['explorer']);
+					{% include 'js/explorer.js' %}
 
 				{% elif body_class == 'standards' %}
 					{% include 'js/standards.js' %}

@@ -878,23 +878,6 @@ _.extend(OC.categoryResources, {
 
             if ($('.resource-browse-listing').length > 0){
                 resizeListing(); $(window).resize(resizeListing); }
-
-            // If something has just been posted, show the 'just posted' dialog.
-            if (window.location.search.indexOf('posted=success') !== -1){
-                var postedSuccessDialog = OC.customPopup('.posted-success-dialog');
-
-                OC.api.User('ocrootu', function(profile){
-                    $('.posted-success-body-user-image', postedSuccessDialog.dialog).attr(
-                        'src', profile.picture);
-
-                    $('.moderator-name', postedSuccessDialog.dialog).text(profile.name);
-                });
-
-                $('.posted-success-submit', postedSuccessDialog.dialog).click(function(event){
-                    // Dismiss the dialog and empty the contents of the message.
-                    postedSuccessDialog.close();
-                });
-            }
        }
     },
 

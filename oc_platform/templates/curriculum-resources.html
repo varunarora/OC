@@ -1,9 +1,13 @@
 {% include 'partials/header.html' with header_type='vanilla' body_class='explorer' %}
 
+<div class="state-message-wrapper">
+    <span class="state-message">Saved</span>
+</div>
+
 <div class="wide-header explorer-header">
     <a class="explorer-header-current">
         <span class="explorer-header-current-organization-thumbnail"></span>
-        <span class="explorer-header-current-organization-title">Level 1 <span class="explorer-header-current-organization-title-subject">English</span></span>
+        <span class="explorer-header-current-organization-title">{{ curriculum.grade }} <span class="explorer-header-current-organization-title-subject">{{ curriculum.subject }}</span></span>
     </a>
     <a href="" class="explorer-header-child">Trimester 1</a>
     <a href="" class="explorer-header-child">Trimester 2</a>
@@ -20,102 +24,54 @@
     </nav>
 </div>
 <div class="wide-header explorer-body">
-    <div class="explorer-body-side">
-        <ul class="explorer-body-side-menu explorer-body-side-menu-main">
-            <li><a href="">OVERVIEW</a></li>
-            <li class="learning-outcomes"><a href="">LEARNING OUTCOMES</a>
-                <!--<ul class="explorer-body-side-menu">
-                    <li><a href="">GRAMMAR</a>
-                        <ul class="explorer-body-side-menu explorer-body-side-menu-light explorer-body-side-menu-light-categorized">
-                            <li><a href="">Unit 1: Are first impressions accurate?</a></li>
-                            <li><a href="">Unit 3: What can we learn from success and failure?</a></li>
-                            <li><a href="">Unit 4: Is change good or bad?</a></li>
-                            <li class="selected"><a href="">Unit 5: Are we responsible for the world we live in?</a></li>
-                            <li><a href="">Unit 6: How can advertisers change our behavior?</a></li>
-                            <li><a href="">Unit 9: Can money buy happiness?</a></li>
-                        </ul>
-                    </li>
-                </ul>-->
-            </li>
-            <li class="textbooks"><a href="">TEXTBOOKS / RESOURCES</a>
-                <!--<ul class="explorer-body-side-menu">
-                    <li><a href="">CUTTING EDGE - STARTER</a></li>
-                    <li><a href="">KEEP WRITING I</a></li>
-                    <li><a href="">Q - SKILLS - INTRO</a>
-                        <ul class="explorer-body-side-menu explorer-body-side-menu-light">
-                            <li><a href="">Unit 1: Are first impressions accurate?</a></li>
-                            <li><a href="">Unit 3: What can we learn from success and failure?</a></li>
-                            <li><a href="">Unit 4: Is change good or bad?</a></li>
-                            <li class="selected"><a href="">Unit 5: Are we responsible for the world we live in?</a></li>
-                            <li><a href="">Unit 6: How can advertisers change our behavior?</a></li>
-                            <li><a href="">Unit 9: Can money buy happiness?</a></li>
-                        </ul>
-                    </li>
-                </ul>-->
-            </li>
-            <!--<li><a href="">OVERVIEW</a></li>-->
+    <div class="explorer-body-side scrollable-block">
+        <ul class="explorer-body-side-menu explorer-body-side-menu-main scroll-content">
+            <li class="overview"><a href="">OVERVIEW</a></li>
+            <li class="learning-outcomes"><a href="">LEARNING OUTCOMES</a></li>
+            <li class="textbooks"><a href="">TEXTBOOKS / RESOURCES</a></li>
         </ul>
 
     </div>
     <div class="explorer-body-stage">
         <div class="explorer-body-stage-spread">
-            <div class="explorer-resource-module-wrapper"></div>
-            <!--<div class="explorer-resource-module">
-                <div class="explorer-resource-module-thumbnail"></div>
-                <div class="explorer-resource-module-content">
-                    <div class="explorer-resource-module-content-title">UNIT 5: ARE WE RESPONSIBLE FOR THE WORLD WE LIVE IN?</div>
-                    <div class="explorer-resource-module-content-caption">Q SKILLS - INTRO</div>
+            <div class="explorer-resource-overview show">
+                <div class="explorer-overview-section">
+                    <h2>Overview</h2>
+                    <p>No description found.</p>
                 </div>
-            </div>-->
 
+                <div class="explorer-overview-section">
+                    <h2>Issues</h2>
+                    <div class="explorer-overview-issues-wrapper">
+                    </div>
+                </div>
+
+            </div>
+            <div class="explorer-resource-module-wrapper"></div>
             <div class="explorer-resource-listing">
                 <div class="explorer-resource-listing-labels">
-                    <div class="explorer-resource-listing-labels-fill"><span class="explorer-resource-listing-label">Objective / Skill</span></div>
-                    <div class="explorer-resource-listing-labels-key"><span class="explorer-resource-listing-label">Resources</span></div>
+                    <div class="explorer-resource-listing-labels-pre"></div>
+                    <div class="explorer-resource-listing-labels-header">
+                        <div class="explorer-resource-listing-labels-header-fill"><span class="explorer-resource-listing-label">Objective / Skill</span></div>
+                        <div class="explorer-resource-listing-labels-header-key"><span class="explorer-resource-listing-label">Resources</span></div>
+                    </div>
                 </div>
 
-                <div class="explorer-resource-listing-body">
-                    <!--<div class="explorer-resource-objective-sections">
-                    <div class="explorer-resource-objective-section">
-                        <div class="explorer-resource-listing-body-fill">
+                <div class="explorer-resource-listing-body"></div>
 
-                            <div class="explorer-resource-objective">Listen to personal stories to understand their people's experiences</div>
-                        </div>
-
-                        <div class="explorer-resource-listing-body-key">
-                            
-                            <div class="explorer-resource-item">
-                                <div class="explorer-resource-item-thumbnail"></div>
-                                <div class="explorer-resource-item-content">
-                                    <a href="" class="explorer-resource-item-content-title">Personal story activity</a>
-                                    <div class="explorer-resource-item-content-description">
-                                        Simple short description of the activity or lesson related to this particular objective.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="explorer-resource-item">
-                                <div class="explorer-resource-item-thumbnail"></div>
-                                <div class="explorer-resource-item-content">
-                                    <a href="" class="explorer-resource-item-content-title">Personal story activity</a>
-                                    <div class="explorer-resource-item-content-description">
-                                        Simple short description of the activity or lesson related to this particular objective.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="explorer-resource-objective-section">
-                        <div class="explorer-resource-listing-body-fill">
-                            <div class="explorer-resource-objective">Listen to personal stories to understand their people's experiences</div>
-                        </div>
-                    </div>
-                    </div>-->
+                <div class="explorer-resource-listing-actions">
+                    <button id="new-objective">+ New objective / skill</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<div class="objective-status-popouts"></div>
+<div class="explorer-loader"></div>
+<div class="light-popup-background"></div>
+
+{% include 'partials/upload-dialog.html' %}
+{% include 'partials/share-new.html' %}
 
 {% include 'partials/footer.html' with footer_type='vanilla' %}

@@ -367,7 +367,11 @@ OC.upload = {
        });
 
         $('button[name=select-file]').click(function(event){
-            $('input[class=manual-upload]:last').click();
+            if (OC.upload.isPost){
+                $('.upload-drag-drop').click();
+            } else {
+                $('input[class=manual-upload]:last').click();
+            }
             event.preventDefault();
             event.stopPropagation();
             return false;
@@ -387,7 +391,7 @@ OC.upload = {
                     if (document.cookie && document.cookie !== '') {
                         cookies = document.cookie.split(';');
                         for (i = 0; i < cookies.length; i++) {
-                            cookie = jQuery.trim(cookies[i]);
+                            cookie = $.trim(cookies[i]);
                             // Does this cookie string begin with the name we want?
                             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                                 cookieValue = decodeURIComponent(

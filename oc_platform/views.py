@@ -279,13 +279,6 @@ def list_articles(request):
     return response
 
 
-def curriculum_resources(request):
-    context = {
-        'title': 'Unit 5 Resources  - Level 4: English'
-    }
-    return render(request, 'curriculum-resources.html', context)
-
-
 def mailpimp_home(request):
     context = {
         'title': 'Mailpimp, by OpenCurriculum'
