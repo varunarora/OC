@@ -267,10 +267,13 @@ def get_nested_child_tags_from_category(request, category_id):
     for descendant_category in flattened_tree:
         descendant_category_tags = descendant_category.tags.filter(category__in=standards_categories).order_by('position')
         if descendant_category_tags.count() > 0:
-            if descendant_category.parent not in tags:
-                tags[descendant_category.parent] = descendant_category_tags
+            if descendant_category.parent == category:
+                tags[descendant_category] = descendant_category_tags
             else:
-                tags[descendant_category.parent] |= descendant_category_tags
+                if descendant_category.parent not in tags:
+                    tags[descendant_category.parent] = descendant_category_tags
+                else:
+                    tags[descendant_category.parent] |= descendant_category_tags
 
     serialized_tags = []
     for tag_category, tag_set in tags.items():
