@@ -262,9 +262,10 @@ def get_nested_child_tags_from_category(request, category_id):
         {'root': [category]}, [])
 
     tags = {}
-    standards_category = TagCategory.objects.get(title='Standards')
+    standards_categories = TagCategory.objects.filter(title__in=['Standards', 'Objectives'])
+
     for descendant_category in flattened_tree:
-        descendant_category_tags = descendant_category.tags.filter(category=standards_category).order_by('position')
+        descendant_category_tags = descendant_category.tags.filter(category__in=standards_categories).order_by('position')
         if descendant_category_tags.count() > 0:
             if descendant_category.parent not in tags:
                 tags[descendant_category.parent] = descendant_category_tags
