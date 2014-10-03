@@ -6342,6 +6342,10 @@ body.signup, body.login, body.unsubscribe
 
 
 .standards-play
+	select
+		background-color: transparent
+		border-width: 0px
+
 	.category-selection-bar
 		height: 18px
 		border-bottom: 1px solid #efefef
@@ -6418,6 +6422,12 @@ body.signup, body.login, body.unsubscribe
 			float: right
 			width: 44%
 
+			&.loading
+				height: 100%
+				background-image: url('../images/spinner.gif')
+				background-repeat: no-repeat
+				background-position: center center
+
 			.standard-info
 				padding: 20px
 				padding-top: 30px
@@ -6430,6 +6440,123 @@ body.signup, body.login, body.unsubscribe
 			.standard-description
 				font-size: 1.3em
 				line-height: 1.2em
+
+			.standard-mapping, .standard-links
+				margin-top: 40px
+
+				table
+					width: 100%
+					border-bottom: 1px solid #ddd
+					border-top: 1px solid #CBD6E1
+
+					th, td
+						padding: 8px
+						height: 12px
+						outline: none
+
+					tr:first-child
+						background-color: #f4f7f8
+
+					tr
+						border: 1px solid #efefef
+						border-top-width: 0px
+
+						&:last-child
+							border-bottom-width: 0px
+
+			.standard-mapping
+				col.standard-mapping-to-column
+					width: 25%
+
+				col.standard-mapping-notes-column
+					width: 75%
+
+				.delete-mapping
+					background-image: url('../images/trash-icon.png')
+					background-repeat: no-repeat
+					background-position: center center
+					display: inline-block
+					width: 14px
+					height: 14px
+					cursor: pointer
+					visibility: hidden
+					float: right
+
+				
+				td.standard-mapping-to
+					.standard-mapping-to-title
+						float: left
+						width: 85%
+						outline: none
+
+					&:hover
+						.delete-mapping
+							visibility: visible
+
+				td:focus
+					border: 1px solid #1155cc
+
+
+			.standard-links
+				.standard-links-objectives
+					width: 100%
+
+				.standard-links-curriculum-select
+					width: 120px
+
+				/*.standard-link
+					.standard-links-curriculum
+						overflow: hidden
+
+						.standard-links-caption
+							float: left
+							margin-right: 10px
+							padding-top: 4px
+
+						.standard-links-curriculum-select
+							float: left
+
+					.standard-links-objectives
+						width: 100%
+
+						option
+							width: 100%*/
+
+			.standard-mapping-actions, .standard-links-actions
+				background-color: #efefef
+				padding: 10px
+				text-align: right
+
+				button
+					background-color: #aaa
+					padding: 4px 6px
+					color: #fff
+					border-width: 0px
+
+					&:hover
+						background-color: #999
+
+.standard-mapping-suggestions
+	background-color: #fff
+	@include box-shadow(0 2px 4px #d6d6d6)
+	display: none
+	position: absolute
+
+	li
+		padding: 4px
+		cursor: pointer
+
+		&:hover
+			background-color: #efefef
+
+	&.show
+		display: block
+
+	&.loading
+		background-image: url('../images/spinner.gif')
+		background-repeat: no-repeat
+		background-position: center center
+
 
 .page-loader
 	background-color: #fff

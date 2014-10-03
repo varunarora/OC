@@ -42,6 +42,7 @@ class Unit(models.Model):
 class Objective(models.Model):
     description = models.TextField()
     resources = models.ManyToManyField('curriculum.Resource', blank=True, null=True)
+    parent = models.ForeignKey('meta.Tag', null=True, blank=True)
 
     def __unicode__(self):
         return self.description[:200]

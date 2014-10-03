@@ -402,15 +402,197 @@ def autocomplete_standard(request, query):
         title__icontains=query, category=TagCategory.objects.get(title='Standards'))
     limit = request.GET.get('limit', None)
 
-    result_set = set()
+    result_set = []
+
+    def append_standard(standard_id, standard_title):
+        try:
+            next(
+                serialized_standard for serialized_standard in result_set if serialized_standard['id'] == standard_id)
+        except:
+            result_set.append({
+                'id': standard.id,
+                'title': standard.title,
+            })
 
     if limit:
         for standard in standards[:int(limit)]:
-            result_set.add(standard.title)
+            append_standard(standard.id, standard.title)
     else:
         for standard in standards:
-            result_set.add(standard.title)
+            append_standard(standard.id, standard.title)
 
-    import json
-    return HttpResponse(
-        json.dumps(list(result_set)), 200, content_type="application/json")
+    return APIUtilities.success(result_set)
+
+
+def get_mappings(request, standard_id):
+    from meta.models import TagMapping
+
+    standards_category = TagCategory.objects.get(title='Standards')
+    try:
+        standard = Tag.objects.get(pk=standard_id, category=standards_category)
+    except:
+        return APIUtilities._api_not_found()
+
+    tag_mappings = TagMapping.objects.filter(from_node=standard)
+
+    serialized_tag_mappings = []
+    for tag_mapping in tag_mappings:
+        serialized_tag_mappings.append({
+            'id': tag_mapping.id,
+            'standard': tag_mapping.to_node.id,
+            'standardTitle': tag_mapping.to_node.title,
+            'notes': tag_mapping.deviation,
+        })
+
+    context = {
+        'mappings': serialized_tag_mappings
+    }
+
+    return APIUtilities.success(context)
+
+
+def get_links(request, standard_id):
+    from curriculum.models import Objective, Curriculum
+
+    standards_categories = TagCategory.objects.filter(title__in=['Standards', 'Objectives'])
+    try:
+        standard = Tag.objects.get(pk=standard_id, category__in=standards_categories)
+        standard_objectives = Objective.objects.filter(parent=standard)
+        curricula = Curriculum.objects.filter(user=request.user)
+
+    except:
+        return APIUtilities._api_not_found()
+
+    curricula_objectives = []
+    for curriculum in curricula:
+        curriculum_objectives = []
+
+        for unit in curriculum.units.all():
+            for objective in unit.objectives.all():
+                curriculum_objectives.append({
+                    'id': objective.id,
+                    'description': objective.description                    
+                })
+
+        curricula_objectives.append({
+            'id': curriculum.id,
+            'curriculumGrade': curriculum.grade,
+            'curriculumSubject': curriculum.subject,
+            'objectives': curriculum_objectives
+        })
+
+    context = {
+        'standard_id': standard_id,
+        'objectives': curricula_objectives,
+        'links': []
+    }
+
+    for standard_objective in standard_objectives:
+        context['links'].append({
+            'id': standard_objective.id,
+            'description': standard_objective.description
+        })
+
+    return APIUtilities.success(context)
+
+
+
+def create_mapping(request):
+    from_id = request.POST.get('from', None)
+    to_id = request.POST.get('to', None)
+
+    standards_category = TagCategory.objects.get(title='Standards')
+
+    try:
+        from_node = Tag.objects.get(pk=from_id, category=standards_category)
+        to_node = Tag.objects.get(pk=to_id, category=standards_category)
+
+    except:
+        return APIUtilities._api_not_found()
+
+    from meta.models import TagMapping
+    mapping = TagMapping(from_node=from_node, to_node=to_node)
+    mapping.save()
+
+    serialize_mapping = {
+        'id': mapping.id,
+        'from_id': from_node.id,
+        'from_title': from_node.title,
+        'to_id': to_node.id,
+        'to_title': to_node.title,
+    }
+
+    return APIUtilities.success(serialize_mapping)
+
+
+def update_mapping(request):
+    mapping_id = request.POST.get('id', None)
+    to_node = request.POST.get('to', None)
+    notes = request.POST.get('notes', None)
+
+    try:
+        from meta.models import TagMapping
+        mapping = TagMapping.objects.get(pk=mapping_id)
+
+    except:
+        return APIUtilities._api_not_found()
+
+    mapping.deviation = notes
+    mapping.to = to_node
+    mapping.save()
+
+    serialize_mapping = {
+        'id': mapping.id,
+        'notes': mapping.deviation,
+    }
+
+    return APIUtilities.success(serialize_mapping)
+
+
+def delete_mapping(request):
+    mapping_id = request.POST.get('id', None)
+
+    try:
+        from meta.models import TagMapping
+        mapping = TagMapping.objects.get(pk=mapping_id)
+
+    except:
+        return APIUtilities._api_not_found()
+
+    mapping.delete()
+
+    return APIUtilities.success()
+
+
+def link_objective_to_standard(request):
+    objective_id = request.POST.get('objective_id', None)
+    standard_id = request.POST.get('standard_id', None)
+    remove_objective_id = request.POST.get('remove_objective_id', None)
+
+    standards_categories = TagCategory.objects.filter(title__in=['Standards', 'Objectives'])
+
+    try:
+        from curriculum.models import Objective
+        objective = Objective.objects.get(pk=objective_id)
+        previous_objective = Objective.objects.get(pk=remove_objective_id)
+        standard = Tag.objects.get(pk=standard_id, category__in=standards_categories)
+
+    except:
+        return APIUtilities._api_not_found()
+
+    if objective.parent:
+        return APIUtilities.failure({
+            'standard_id': objective.parent.id,
+            'standard_title': objective.parent.title
+        })
+    else:
+        previous_objective.parent = None
+        previous_objective.save()
+
+        objective.parent = standard
+        objective.save()
+
+    objective.parent = standard
+    objective.save()
+
+    return APIUtilities.success()

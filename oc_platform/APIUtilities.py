@@ -1,4 +1,5 @@
 from django.shortcuts import HttpResponse
+from django.http import HttpResponseBadRequest
 import json
 
 def _api_success(context={}):
@@ -11,6 +12,12 @@ def _api_success(context={}):
 def success(context={}):
     return HttpResponse(
         json.dumps(context), 200,
+        content_type="application/json"
+    )
+
+def failure(context={}):
+    return HttpResponseBadRequest(
+        json.dumps(context), 400,
         content_type="application/json"
     )
 
