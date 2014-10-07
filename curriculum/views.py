@@ -4,8 +4,18 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from oc_platform import APIUtilities
 
-def curriculum_resources(request):
-    curriculum = Curriculum.objects.get(pk=1)
+def curriculum_resources(request, username, grade_slug, subject_slug):
+    from django.template.defaultfilters import slugify
+
+    try:
+        from django.contrib.auth.models import User
+        user = User.objects.get(username=username)
+    except:
+        return APIUtilities._api_not_found()
+
+    curricula = Curriculum.objects.filter(user=user)
+    curriculum = next(curriculum for curriculum in curricula if (
+        slugify(curriculum.grade) == grade_slug and slugify(curriculum.subject) == subject_slug))
 
     from django.contrib.contenttypes.models import ContentType
     objective_content_type = ContentType.objects.get_for_model(Objective)
@@ -68,7 +78,7 @@ def curriculum_resources(request):
     context = {
         'curriculum': curriculum,
         'serialized_textbooks': serialized_textbooks,
-        'title': 'Unit 5 Resources  - Level 4: English'
+        'title': curriculum.level + ': ' + curriculum.subject
     }
     return render(request, 'curriculum-resources.html', context)
 

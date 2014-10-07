@@ -4,7 +4,7 @@ from curriculum import views
 
 urlpatterns = patterns(
     '',
-    url(r'^hct/level-4/english/', views.curriculum_resources, name='curriculum_resources'),
+    url(r'^(?P<username>[a-z0-9_\.]+)/(?P<grade_slug>[\w\-\.]+)/(?P<subject_slug>[\w\-\.]+)/', views.curriculum_resources, name='curriculum_resources'),
 
     # API stuff below.
     url(r'^api/objective/update/$', views.update_objective, name='update_objective'),
