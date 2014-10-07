@@ -78,7 +78,7 @@ def curriculum_resources(request, username, grade_slug, subject_slug):
     context = {
         'curriculum': curriculum,
         'serialized_textbooks': serialized_textbooks,
-        'title': curriculum.level + ': ' + curriculum.subject
+        'title': curriculum.grade + ': ' + curriculum.subject
     }
     return render(request, 'curriculum-resources.html', context)
 
