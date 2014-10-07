@@ -4,6 +4,9 @@ setup_environ(settings)
 
 import csv
 
+from django.db.models.loading import get_models
+get_models()
+
 from curriculum.models import Objective
 
 tags_raw = open('tfi-math-curriculum-objectives.csv', 'r')
@@ -11,7 +14,8 @@ tag_rows = csv.reader(tags_raw, delimiter=',')
 
 for row in tag_rows:
     tag_raw = row
-    description = tag_raw[0].strip()
+    raw_description = tag_raw[0].strip().replace('\'', '"')
+
     meta = {
         'methodology': None,
         'how': None,
@@ -19,8 +23,6 @@ for row in tag_rows:
         'prerequisites': None
     }
 
-    objective = Objective(
-        description=description,
-        meta=meta
-    )
+    objective = Objective(description=raw_description)
+    objective.meta = meta
     objective.save()
