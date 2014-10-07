@@ -16,6 +16,8 @@ urlpatterns = patterns(
     url(r'^api/objective/add-existing/$', views.add_existing_to_objective, name='add_existing_to_objective'),
     url(r'^api/objective/add-upload/$', views.add_upload_to_objective, name='add_upload_to_objective'),
 
+    url(r'^api/objective/(?P<objective_id>\d+)/suggest-resources/$', views.suggest_resources, name='suggest_resources'),
+
     # Issues.
     url(r'^api/issue/create-update/$', views.create_update_issue, name='create_update_issue'),
 )

@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from oc_platform import ModelUtilities as mu
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from articles.jsonfield.fields import JSONField
 
 
 class Curriculum(models.Model):
@@ -14,6 +15,7 @@ class Curriculum(models.Model):
     subject = models.CharField(max_length=32)
     textbooks = models.ManyToManyField('curriculum.Textbook', blank=True, null=True)
     units = models.ManyToManyField('curriculum.Unit', blank=True, null=True, related_name='units')
+    settings = JSONField(null=True, blank=True)
 
     def __unicode__(self):
         return self.grade + ': ' + self.subject
@@ -34,6 +36,7 @@ class Unit(models.Model):
     unit = models.ForeignKey('oer.Unit', related_name='unit', blank=True, null=True)
     title = models.CharField(max_length=256)
     objectives = models.ManyToManyField('curriculum.Objective', blank=True, null=True)
+    period = JSONField(null=True, blank=True)
 
     def __unicode__(self):
         return self.title
@@ -43,6 +46,7 @@ class Objective(models.Model):
     description = models.TextField()
     resources = models.ManyToManyField('curriculum.Resource', blank=True, null=True)
     parent = models.ForeignKey('meta.Tag', null=True, blank=True)
+    meta = JSONField(null=True, blank=True)
 
     def __unicode__(self):
         return self.description[:200]

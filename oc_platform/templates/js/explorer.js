@@ -1,5 +1,6 @@
 OC.explorer = {
-    rawTexts: []
+    rawTexts: [],
+    settings: {}
 };
 
 var rawText, rawUnit, rawUnitObjectives, rawObjective;
@@ -16,7 +17,8 @@ rawText = [];
                 rawUnitObjectiveResources.push({
                     'id': {{ resource.id }},
                     'url': '{{ resource.url }}',
-                    'title': '{{ resource.title|safe|escapejs }}'
+                    'title': '{{ resource.title|safe|escapejs }}',
+                    'thumbnail': '{{ resource.thumbnail }}'
                 });
             {% endfor %}
 
@@ -24,14 +26,23 @@ rawText = [];
                 id: {{ objective.id }},
                 description: '{{ objective.description }}',
                 unit_id: {{ unit.id }},
-                resources: rawUnitObjectiveResources
+                resources: rawUnitObjectiveResources,
+                selected: false
             };
 
             rawObjective['issue'] = {
                 id: {% if objective.issue %}{{ objective.issue.id }}{% else %}null{% endif %},
                 host_id: {% if objective.issue %}{{ objective.issue.host_id }}{% else %}null{% endif %},
                 message: {% if objective.issue %}'{{ objective.issue.message }}'{% else %}null{% endif %}
-            }
+            };
+
+            rawObjective['meta'] = {};
+            {% if objective.meta %}
+            {% for meta_key, meta_value in objective.meta.items %}
+            rawObjective['meta']['{{ meta_key }}'] = '{{ meta_value }}';
+            {% endfor %}
+            {% endif %}
+
 
             rawUnitObjectives.push(rawObjective);
         {% endfor %}
@@ -39,7 +50,17 @@ rawText = [];
         rawUnit = {
             id: {{ unit.id }},
             title: '{{ unit.title }}',
-            objectives: rawUnitObjectives
+            objectives: rawUnitObjectives,
+            {% if unit.period %}
+            period: {
+                type: '{{ unit.period.type }}',
+                unit: '{{ unit.period.unit }}',
+                begin: {{ unit.period.begin }},
+                end: {{ unit.period.end }}
+            }
+            {% else %}
+            period: null
+            {% endif %}
         };
 
         rawText.push(rawUnit);
@@ -52,5 +73,9 @@ OC.explorer.rawTexts.push({
     units: rawText,
 });
 {% endfor %}
+
+OC.explorer.curriculumSettings = {
+    periods: '{{ curriculum.settings.periods }}'
+};
 
 require(['explorer']);

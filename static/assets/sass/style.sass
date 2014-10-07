@@ -5926,15 +5926,7 @@ body.signup, body.login, body.unsubscribe
 		.explorer-body-stage-spread
 			padding: 20px
 
-			.explorer-resource-overview,
-			.explorer-resource-module-wrapper,
-			.explorer-resource-listing
-				display: none
-
-				&.show
-					display: block
-
-			.explorer-resource-module
+			.explorer-resource-module-header
 				overflow: hidden
 
 				.explorer-resource-module-thumbnail
@@ -5945,7 +5937,6 @@ body.signup, body.login, body.unsubscribe
 					margin-right: 20px
 
 				.explorer-resource-module-content
-					float: left
 					padding-top: 10px
 					font-weight: bold
 
@@ -5957,6 +5948,155 @@ body.signup, body.login, body.unsubscribe
 						color: #aaa
 						padding-top: 6px
 
+			.explorer-resource-overview,
+			.explorer-resource-module-wrapper,
+				display: none
+
+				&.show
+					display: block
+
+			.explorer-resource-module
+				.explorer-resource-module-main
+					&.compress
+						width: 45%
+						float: left
+
+				.explorer-resource-module-support
+					float: right
+					display: none
+					color: $light-font
+
+					&.show
+						width: 55%
+						display: block
+
+					.explorer-resource-module-support-body
+						background-color: #fff
+						border: 1px solid #27ae60
+						height: 400px
+						margin-left: 20px
+						padding: 20px
+						overflow: auto
+
+						.explorer-resource-module-support-title
+							font-size: 1.8em
+							font-weight: bold
+							letter-spacing: -1px
+							margin-bottom: 20px
+
+						.explorer-resource-module-support-section
+							margin-bottom: 20px
+
+							&.explorer-resource-module-support-section-methodology
+								.explorer-resource-module-support-section-title
+									background-image: url('../images/methodology.png')
+
+							&.explorer-resource-module-support-section-how
+								.explorer-resource-module-support-section-title
+									background-image: url('../images/how.png')
+
+							&.explorer-resource-module-support-section-resources
+								.explorer-resource-module-support-section-title
+									background-image: url('../images/objective-resources.png')
+
+							.explorer-resource-module-support-section-title
+								text-transform: uppercase
+								color: #aaa
+								margin-bottom: 5px
+								font-weight: bold
+								padding-left: 20px
+								background-repeat: no-repeat
+								background-position: left center
+								font-size: 1.2em
+
+							.explorer-resource-module-support-section-body
+								padding-left: 20px
+								outline: none
+
+						.explorer-resource-actions-suggest
+							width: 100%
+							background-color: #2980b9
+							color: #fff
+							font-weight: bold
+							border-width: 0px
+							padding: 10px 0px
+							margin-bottom: 20px
+							margin-top: 10px
+
+						.explorer-resource-item
+							overflow: hidden
+							padding-bottom: 10px
+							margin-bottom: 10px
+							border-bottom: 1px solid #efefef
+
+							&:last-child
+								border-bottom-width: 0px
+
+							&:first-child
+								padding-top: 10px
+
+							.explorer-resource-item-thumbnail-wrapper
+								float: left
+								width: 18%
+
+								.explorer-resource-item-thumbnail
+									width: 60px
+									height: 60px
+									background-color: #2ecc71
+									margin-right: 16px
+
+							.explorer-resource-item-content
+								float: left
+								width: 82%
+								//padding-right: 10px
+
+								.explorer-resource-item-content-body
+									float: left
+									width: 90%
+
+									.explorer-resource-item-content-title
+										font-size: 1.2em
+										display: block
+										margin-bottom: 8px
+										font-weight: bold
+										padding-top: 4px
+
+									.explorer-resource-item-content-description
+										color: #aaa
+
+								.explorer-resource-item-content-actions
+									float: right
+									width: 10%
+
+									.explorer-resource-item-content-action-delete
+										width: 14px
+										height: 14px
+										display: inline-block
+										background-image: url("../images/delete-resource.png")
+										background-repeat: no-repeat
+										background-position: center center
+										cursor: pointer
+										margin-right: 10px
+
+										&:hover
+											background-image: url("../images/delete-resource-hover.png")
+
+						.explorer-resource-listing-body-resource-actions
+							padding: 4px 0px
+							text-align: right
+
+							button
+								padding: 4px 6px
+								color: #fff
+								border: 1px solid #2ecc71
+								background-color: #2ecc71
+
+								&:hover
+									background-color: #27ae60
+									border-color: #27ae60
+									//color: #fff
+
+
 			.explorer-resource-listing
 				margin-top: 20px
 
@@ -5964,7 +6104,6 @@ body.signup, body.login, body.unsubscribe
 					margin-top: 10px
 					background-color: #fff
 					//padding: 10px
-					color: $light-font
 					overflow: hidden
 
 					.explorer-resource-objective-section
@@ -5978,132 +6117,77 @@ body.signup, body.login, body.unsubscribe
 						&.new
 							background-color: #f7ebc6
 
+						&.selected
+							border: 1px solid #27ae60
+
 						.explorer-resource-listing-body-pre
-							width: 5%
+							width: 6%
 							float: left
-							background-color: #E4F7D2
+							//background-color: #E4F7D2
 							cursor: pointer
+							background-image: url('../images/objective-ready.png')
+							background-repeat: no-repeat
+							background-position: center center
 
 							&.has-issue
-								background-color: #FBC9C9
+								//background-color: #FBC9C9
+								background-image: url('../images/objective-needs-work.png')
 
 						.explorer-resource-listing-body-content
 							overflow: hidden
-							width: 95%
+							width: 94%
 							float: left
 
-							.explorer-resource-listing-body-content-fill
-								width: 33%
+							.explorer-resource-listing-body-content-key
+								width: 67%
 								float: left
+
+								&.expand
+									width: auto
+									float: none
 
 								.explorer-resource-objective
 									margin-right: 10px
 									padding: 10px
 									outline: none
 
-							.explorer-resource-listing-body-content-key
-								width: 67%
+							.explorer-resource-listing-body-content-fill
+								width: 33%
 								float: right
 
-								.explorer-resource-item
-									overflow: hidden
-									padding-bottom: 10px
-									margin-bottom: 10px
-									border-bottom: 1px solid #efefef
-
-									&:last-child
-										border-bottom-width: 0px
-
-									&:first-child
-										padding-top: 10px
-
-									.explorer-resource-item-thumbnail-wrapper
-										float: left
-										width: 18%
-
-										.explorer-resource-item-thumbnail
-											width: 80px
-											height: 80px
-											background-color: #2ecc71
-											margin-right: 16px
-
-									.explorer-resource-item-content
-										float: left
-										width: 82%
-										//padding-right: 10px
-
-										.explorer-resource-item-content-body
-											float: left
-											width: 90%
-
-											.explorer-resource-item-content-title
-												font-size: 1.2em
-												display: block
-												margin-bottom: 8px
-												font-weight: bold
-												padding-top: 4px
-
-											.explorer-resource-item-content-description
-												color: #aaa
-
-										.explorer-resource-item-content-actions
-											float: right
-											width: 10%
-
-											.explorer-resource-item-content-action-delete
-												width: 14px
-												height: 14px
-												display: inline-block
-												background-image: url("../images/delete-resource.png")
-												background-repeat: no-repeat
-												background-position: center center
-												cursor: pointer
-												margin-right: 10px
-
-												&:hover
-													background-image: url("../images/delete-resource-hover.png")
-
-								.explorer-resource-listing-body-resource-actions
-									padding: 4px 0px
-									text-align: right
-									padding-right: 10px
-
-									button
-										padding: 4px 6px
-										color: #999
-										border: 1px solid #999
-										background-color: transparent
-
-										&:hover
-											background-color: #ddd
-											color: $light-font
-											border-color: $light-font
-											//color: #fff
-
+								&.hide
+									display: none
 
 			.explorer-resource-listing-labels
 				overflow: hidden
 				color: #aaa
 
 				.explorer-resource-listing-labels-pre
-					width: 5%
+					width: 6%
 					float: left
 
 				.explorer-resource-listing-labels-header
-					width: 95%
+					width: 94%
 					float: left
 					overflow: hidden
 
 				.explorer-resource-listing-label
 					padding-left: 10px
 
-				.explorer-resource-listing-labels-header-fill
-					width: 33%
-					float: left
-
 				.explorer-resource-listing-labels-header-key
 					width: 67%
+					float: left
+
+					&.expand
+						width: auto
+						float: none
+
+				.explorer-resource-listing-labels-header-fill
+					width: 33%
 					float: right
+
+					&.hide
+						display: none
 
 			.explorer-overview-section
 				margin-bottom: 40px
@@ -6128,17 +6212,51 @@ body.signup, body.login, body.unsubscribe
 								font-weight: bold
 								cursor: pointer
 
-								.explorer-issue-listing-item-content-fill
-									width: 33%
-									float: left
-
 								.explorer-issue-listing-item-content-key
 									width: 67%
+									float: left
+
+								.explorer-issue-listing-item-content-fill
+									width: 33%
 									float: right
 
 								.explorer-issue-listing-item-objective,
 								.explorer-issue-listing-item-message
 									padding: 10px
+
+
+			.explorer-overview-unit-table
+				overflow: hidden
+
+				.explorer-overview-timetable
+					overflow: hidden
+					width: 33%
+					float: left
+
+					.explorer-timetable-period
+						height: 55px
+						padding-top: 28px
+						border-bottom: 1px solid #ddd
+						background-color: #f4f7f8
+						padding-left: 60px
+						font-size: 1.15em
+						color: #0971B2
+
+				.explorer-overview-unitflow
+					float: right
+					width: 67%
+					background-color: #fff
+
+					.explorer-unitflow-unit
+						padding: 20px
+						border-bottom: 1px solid #ddd
+						text-decoration: none
+						display: block
+						cursor: pointer
+
+						&:hover
+							background-color: #efefef
+
 
 	.explorer-resource-listing-actions
 		background-color: #efefef
@@ -6275,6 +6393,46 @@ body.signup, body.login, body.unsubscribe
 
 	&.show-popup-background
 		display: block
+
+.explorer-suggest-resources-dialog
+	width: 800px
+	height: 500px
+
+	.explorer-suggest-resources-body
+		height: 435px
+		overflow-y: auto
+
+		&.loading
+			background-image: url('../images/spinner.gif')
+			background-repeat: no-repeat
+			background-position: center center
+
+		.explorer-suggest-resources-listing
+			overflow: hidden
+
+			.explorer-suggest-resources-listing-item
+				overflow: hidden
+				margin-bottom: 20px
+				margin-right: 10px
+
+				.explorer-suggest-resources-listing-item-thumbnail
+					width: 80px
+					height: 80px
+					float: left
+					margin-right: 20px
+
+				.explorer-suggest-resources-listing-item-content
+					width: 50%
+					float: left
+					color: $light-font
+
+					.explorer-suggest-resources-listing-item-content-title
+						display: inline-block
+						margin-bottom: 6px
+						font-weight: bold
+
+				.explorer-suggest-resources-listing-item-actions
+					float: right
 
 
 /***** INTERNAL TOOLS *************/

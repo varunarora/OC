@@ -1,4 +1,4 @@
-from curriculum.models import Curriculum, Textbook, Unit, Objective, Resource, Issue
+from curriculum.models import Curriculum, Unit, Objective, Resource, Issue
 from django.shortcuts import render
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -53,20 +53,23 @@ def curriculum_resources(request, username, grade_slug, subject_slug):
                                     'resource_slug': resource.resource.slug
                                 }
                             ),
-                            'title': resource.resource.title
+                            'title': resource.resource.title,
+                            'thumbnail': settings.MEDIA_URL + resource.resource.image.name
                         })
 
                     serialized_objectives.append({
                         'id': objective.id,
                         'description': objective.description,
                         'issue': serialized_issue,
+                        'meta': objective.meta,
                         'resources': serialized_resources
                     })
 
                 serialized_units.append({
                     'id': unit.id,
                     'title': unit.title,
-                    'objectives': serialized_objectives
+                    'objectives': serialized_objectives,
+                    'period': unit.period
                 })
 
         serialized_textbooks.append({
@@ -84,8 +87,8 @@ def curriculum_resources(request, username, grade_slug, subject_slug):
 
 
 def update_objective(request):
-    description = request.POST.get('description', None)
     objective_id = request.POST.get('id', None)
+    description = request.POST.get('description', None)
 
     try:
         objective = Objective.objects.get(pk=objective_id)
@@ -93,14 +96,26 @@ def update_objective(request):
         return APIUtilities._api_not_found()
 
     try:
-        objective.description = description
-        objective.save()
+        if description:
+            objective.description = description
+            objective.save()
 
-        context = { 'objective': {
-            'id': objective.id,
-            'description': objective.description
-        }}
-        return APIUtilities._api_success(context)
+            context = { 'objective': {
+                'id': objective.id,
+                'description': objective.description
+            }}
+        else:
+            for post_key, post_value in request.POST.items():
+                if 'meta' in post_key:
+                    objective.meta[post_key[5:-1]] = post_value
+
+            objective.save()
+            context = {
+                'id': objective.id,
+                'meta': objective.meta
+            }
+
+        return APIUtilities.success(context)
 
     except:
         return APIUtilities._api_failure()
@@ -326,3 +341,52 @@ def remove_resource_from_objective(request):
         resource.delete()
 
     return APIUtilities.success()
+
+
+def suggest_resources(request, objective_id):
+    try:
+        objective = Objective.objects.get(pk=objective_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    if not objective.parent:
+        context = {
+            'message': 'To suggest resources, the objective needs to be linked ' +
+                'a standard.'
+        }
+        return APIUtilities._api_failure(context)
+
+    from meta.models import TagMapping
+    mappings = TagMapping.objects.filter(from_node=objective.parent)
+
+    from oer.models import Resource as OEResource
+
+    #resources = OEResource.objects.none()
+    tags = []
+    for mapping in mappings:
+        tags.append(mapping.to_node)
+
+    resources = OEResource.objects.filter(tags__in=tags)
+
+    serialized_resources = {}
+    for resource in resources:
+        serialized_resources[resource.id] = {
+            'id': resource.id,
+            'url': reverse(
+                'read', kwargs={
+                    'resource_id': resource.id,
+                    'resource_slug': resource.slug
+                }
+            ),
+            'title': resource.title,
+            'user': resource.user.get_full_name(),
+            'user_url': reverse('user:user_profile', kwargs={
+                'username': resource.user.username }),
+            'description': resource.description,
+            'thumbnail': settings.MEDIA_URL + resource.image.name,
+       }
+
+    context = {
+        'resources': serialized_resources
+    }
+    return APIUtilities.success(context)

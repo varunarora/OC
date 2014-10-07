@@ -9,9 +9,9 @@
         <span class="explorer-header-current-organization-thumbnail"></span>
         <span class="explorer-header-current-organization-title">{{ curriculum.grade }} <span class="explorer-header-current-organization-title-subject">{{ curriculum.subject }}</span></span>
     </a>
-    <a href="" class="explorer-header-child">Trimester 1</a>
+    <!--<a href="" class="explorer-header-child">Trimester 1</a>
     <a href="" class="explorer-header-child">Trimester 2</a>
-    <a href="" class="explorer-header-child">Trimester 3</a>
+    <a href="" class="explorer-header-child">Trimester 3</a>-->
 
     <nav class="explorer-home-menu">
         <div class="floating-menu-spacer"></div>
@@ -27,8 +27,8 @@
     <div class="explorer-body-side scrollable-block">
         <ul class="explorer-body-side-menu explorer-body-side-menu-main scroll-content">
             <li class="overview"><a href="">OVERVIEW</a></li>
-            <li class="learning-outcomes"><a href="">LEARNING OUTCOMES</a></li>
-            <li class="textbooks"><a href="">TEXTBOOKS / RESOURCES</a></li>
+            <!--<li class="learning-outcomes"><a href="">LEARNING OUTCOMES</a></li>-->
+            <li class="textbooks"><a href="">UNITS / RESOURCES</a></li>
         </ul>
 
     </div>
@@ -41,14 +41,33 @@
                 </div>
 
                 <div class="explorer-overview-section">
+                    <div class="explorer-overview-unit-table">
+                        <!--<div class="explorer-overview-timetable">
+                            <div class="explorer-timetable-period">Week 1</div>
+                            <div class="explorer-timetable-period">Week 2</div>
+                            <div class="explorer-timetable-period">Week 3</div>
+                            <div class="explorer-timetable-period">Week 4</div>
+                            <div class="explorer-timetable-period">Week 5</div>
+                            <div class="explorer-timetable-period">Week 6</div>
+                        </div>-->
+                        <!--<div class="explorer-overview-unitflow">
+                            <div class="explorer-unitflow-unit">Chapter 1: Where to Look from / spatial understanding</div>
+                            <div class="explorer-unitflow-unit">Chapter 1: Where to Look from / spatial understanding</div>
+                            <div class="explorer-unitflow-unit">Chapter 1: Where to Look from / spatial understanding</div>
+                            <div class="explorer-unitflow-unit">Chapter 1: Where to Look from / spatial understanding</div>
+                        </div>-->
+                    </div>
+                </div>
+
+                <div class="explorer-overview-section">
                     <h2>Issues</h2>
-                    <div class="explorer-overview-issues-wrapper">
+                    <div class="explorer-overview-issues-wrapper explorer-resource-module">
                     </div>
                 </div>
 
             </div>
             <div class="explorer-resource-module-wrapper"></div>
-            <div class="explorer-resource-listing">
+            <!--<div class="explorer-resource-listing">
                 <div class="explorer-resource-listing-labels">
                     <div class="explorer-resource-listing-labels-pre"></div>
                     <div class="explorer-resource-listing-labels-header">
@@ -62,7 +81,19 @@
                 <div class="explorer-resource-listing-actions">
                     <button id="new-objective">+ New objective / skill</button>
                 </div>
-            </div>
+            </div>-->
+        </div>
+    </div>
+</div>
+
+<div class="explorer-suggest-resources-dialog oc-popup">
+    <div class="oc-popup-title-bar">
+        <div class="oc-popup-title"><h3>Resource suggestions</h3></div>
+        <div class="delete-button oc-popup-exit"></div>
+    </div>
+    <div class="oc-popup-body">
+        <div class="explorer-suggest-resources-body">
+            <div class="explorer-suggest-resources-listing"></div>
         </div>
     </div>
 </div>
