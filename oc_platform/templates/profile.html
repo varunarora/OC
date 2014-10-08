@@ -55,7 +55,7 @@
             </div>
 
             {% if browse_tree %}
-            <nav class="collections-navigation">
+            <nav class="collections-navigation scrollable-block">
                 {% load project_tags %}
                 {{ browse_tree|user_navigation_tree:user|safe }}
             </nav>

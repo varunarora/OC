@@ -2263,9 +2263,22 @@ nav.collections-navigation
 	margin-top: 20px
 	width: 240px
 	margin: auto
+	height: 200px
 
 	ul
 		display: block
+
+		li
+			overflow: hidden
+
+			a
+				float: left
+				width: 80%
+				height: auto
+				display: auto
+
+	> ul
+		overflow: auto
 
 nav.collections-navigation,
 .move-resource-collection-browser,
@@ -2303,8 +2316,11 @@ nav.collections-navigation,
 
 			> ul
 				padding-left: 6px
-				margin-top: 10px
 				display: block
+				outline: none
+
+			ul
+				margin-top: 16px
 
 	a
 		color: $body-color
