@@ -24,7 +24,7 @@ rawText = [];
 
             rawObjective = {
                 id: {{ objective.id }},
-                description: '{{ objective.description }}',
+                description: '{{ objective.description|safe|escapejs }}',
                 unit_id: {{ unit.id }},
                 resources: rawUnitObjectiveResources,
                 selected: false
@@ -49,7 +49,7 @@ rawText = [];
 
         rawUnit = {
             id: {{ unit.id }},
-            title: '{{ unit.title }}',
+            title: '{{ unit.title|safe|escapejs }}',
             objectives: rawUnitObjectives,
             {% if unit.period %}
             period: {

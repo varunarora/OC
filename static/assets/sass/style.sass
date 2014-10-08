@@ -5801,7 +5801,7 @@ body.signup, body.login, body.unsubscribe
 			margin-top: 7px
 			width: 36px
 			height: 36px
-			background-image: url('../images/hct.jpg')
+			//background-image: url('../images/hct.jpg')
 			border-radius: 18px
 			display: inline-block
 			float: left
@@ -5999,6 +5999,14 @@ body.signup, body.login, body.unsubscribe
 								.explorer-resource-module-support-section-title
 									background-image: url('../images/objective-resources.png')
 
+							&.explorer-resource-module-support-section-prerequisites
+								.explorer-resource-module-support-section-title
+									background-image: url('../images/prerequisites.png')
+
+							&.explorer-resource-module-support-section-wordwall
+								.explorer-resource-module-support-section-title
+									background-image: url('../images/wordwall.png')
+
 							.explorer-resource-module-support-section-title
 								text-transform: uppercase
 								color: #aaa
@@ -6150,6 +6158,10 @@ body.signup, body.login, body.unsubscribe
 									margin-right: 10px
 									padding: 10px
 									outline: none
+									color: $light-font
+
+									&:focus
+										color: $body-color
 
 							.explorer-resource-listing-body-content-fill
 								width: 33%
@@ -6253,6 +6265,7 @@ body.signup, body.login, body.unsubscribe
 						text-decoration: none
 						display: block
 						cursor: pointer
+						overflow: hidden
 
 						&:hover
 							background-color: #efefef
@@ -6409,6 +6422,13 @@ body.signup, body.login, body.unsubscribe
 
 		.explorer-suggest-resources-listing
 			overflow: hidden
+
+			&.failure
+				margin-top: 160px
+				text-align: center
+				color: #ccc
+				font-size: 1.8em
+				font-weight: bold
 
 			.explorer-suggest-resources-listing-item
 				overflow: hidden

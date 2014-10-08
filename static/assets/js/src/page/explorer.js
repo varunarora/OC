@@ -234,31 +234,37 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 var resourcesBody = $('.explorer-suggest-resources-body', suggestionsPopup.dialog),
                     resourcesBodyListing = $('.explorer-suggest-resources-listing', resourcesBody);
 
+                resourcesBodyListing.removeClass('failure');
                 resourcesBody.addClass('loading');
             
                 $.get('/curriculum/api/objective/' + this.props.objective.get('id') + '/suggest-resources/',
                     function(response){
-                        // Cache the newly downloaded resources.
-                        OC.explorer.cachedResources = _.union(
-                            OC.explorer.cachedResources, response.resources);
-
-                        var newResource, appendedResource;
-
                         resourcesBodyListing.html('');
 
-                        _.each(response.resources, function(resource){
-                            newResource = OC.explorer.suggestionTemplate(resource);
-                            resourcesBodyListing.append(newResource);
-                        });
-                        appendedResources = $('.explorer-suggest-resources-listing-item',
-                            resourcesBodyListing);
+                        if (response.status === 'false'){
+                            resourcesBodyListing.addClass('failure');
+                            resourcesBodyListing.html(response.message);
+                        } else {
+                            // Cache the newly downloaded resources.
+                            OC.explorer.cachedResources = _.union(
+                                OC.explorer.cachedResources, response.resources);
 
-                        $('.explorer-suggest-resources-listing-item-action-keep', appendedResources).click(
-                            view.keepResource);
-                        $('.explorer-suggest-resources-listing-item-action-hide', appendedResources).click(
-                            function(event){
-                                $(event.target).parents('.explorer-suggest-resources-listing-item').fadeOut('show');
-                        });
+                            var newResource, appendedResource;
+
+                            _.each(response.resources, function(resource){
+                                newResource = OC.explorer.suggestionTemplate(resource);
+                                resourcesBodyListing.append(newResource);
+                            });
+                            appendedResources = $('.explorer-suggest-resources-listing-item',
+                                resourcesBodyListing);
+
+                            $('.explorer-suggest-resources-listing-item-action-keep', appendedResources).click(
+                                view.keepResource);
+                            $('.explorer-suggest-resources-listing-item-action-hide', appendedResources).click(
+                                function(event){
+                                    $(event.target).parents('.explorer-suggest-resources-listing-item').fadeOut('show');
+                            });
+                        }
 
                         resourcesBody.removeClass('loading');
                 }, 'json');
@@ -368,7 +374,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 this.forceUpdate();
             },
             bindProps: function() {
-                /*_.union(this.props.objectives.models, */[this.props.settings, this.props.objectives]/*)*/.map(function(model){
+                [this.props.settings, this.props.objectives].map(function(model){
                     model.on('add change remove', this._backboneForceUpdate, this);
                 }.bind(this));
             },
@@ -382,7 +388,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             },
 
             componentWillUnmount: function() {
-                /*_.union(this.props.objectives.models, */[this.props.settings, this.props.objectives]/*)*/.map(function(model){
+                [this.props.settings, this.props.objectives].map(function(model){
                     model.off('add change remove', this._backboneForceUpdate, this);
                 }.bind(this));
             },
@@ -396,7 +402,45 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 } else {
                     return null;
                 }
-                
+            },
+            addObjective: function(){
+                // Get currently visible unit.
+                /*console.log('aaya tha');
+                var selectedModule = $('li.textbooks .explorer-body-side-menu-light li.selected a'),
+                    title = selectedModule.text(),
+                    textbookTitle = selectedModule.parents('ul:first').parent().find('a:first').text();
+
+                var unit = _.findWhere(_.findWhere(OC.explorer.textbooks, {
+                    title: textbookTitle}).units, {title: title}),
+                    unitObjectives = unit.objectives;*/
+
+                var newObjective = new OC.explorer.Objective({
+                    description: 'New objective',
+                    resources: [],
+                    issue: {
+                        id: null, host_id: null, message: null
+                    }
+                });
+
+                var view = this;
+                OC.appBox.saving();
+
+                view.props.objectives.add(newObjective);
+
+                newObjective.save(null, {
+                    attrs: {unit_id: this.props.id},
+                    success: function(model){
+                        view.props.objectives.sync('update', model, {
+                            success: OC.appBox.saved
+                        });
+                        
+                        // Highlight the last objective AFTER rendering completion.
+                        setTimeout(function(){
+                            OC.explorer.resetPreHeights();
+                            //$('.explorer-resource-objective-section:last').addClass('new');
+                        }, 100);
+                    }
+                });
             },
             render: function(){
                 return React.DOM.div({className: 'explorer-resource-module'}, [
@@ -426,7 +470,10 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                         ]),
 
                         React.DOM.div({className: 'explorer-resource-listing-actions'}, [
-                            React.DOM.button({id: 'new-objective'}, '+ New objective / skill'),
+                            React.DOM.button({
+                                id: 'new-objective',
+                                onClick: this.addObjective
+                            }, '+ New objective / skill'),
                         ]),
                     ]),
                     React.DOM.div({
@@ -724,14 +771,14 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             },
 
             setStatusProps: function(){
-                this.props.model.set('statusPersist', false);
+                /*this.props.model.set('statusPersist', false);
                 this.props.model.set('statusShow', false);
                 this.props.model.set('selected', false);
                 //this.props.model.set('ready', true);
                 this.props.model.set('statusPosition', {
                     top: 0,
                     left: 0
-                });
+                });*/
             },
             componentWillMount: function(){
                 this.setStatusProps();
@@ -1046,7 +1093,6 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
         initActions: function(){
             $('button#new-objective').click(function(event){
                 // Get currently visible unit.
-                
                 var selectedModule = $('li.textbooks .explorer-body-side-menu-light li.selected a'),
                     title = selectedModule.text(),
                     textbookTitle = selectedModule.parents('ul:first').parent().find('a:first').text();
@@ -1162,14 +1208,15 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             var objectivePres = $('.explorer-resource-listing-body-pre');
             objectivePres.height('');
 
-            var unitObjectives = _.findWhere(textbook.units, {title: title}).objectives;
+            var unit = _.findWhere(textbook.units, {title: title});
 
             React.renderComponent(OC.explorer.ModuleView({
                 title: title.toUpperCase(),
                 textbookTitle: textbookTitle.toUpperCase(),
                 thumbnail: textbook.thumbnail,
-                objectives: unitObjectives,
-                settings: OC.explorer.settings
+                objectives: unit.objectives,
+                settings: OC.explorer.settings,
+                id: unit.id
 
             }), $('.explorer-resource-module-wrapper').get(0), function(){
                 OC.explorer.resetPreHeights();
@@ -1305,7 +1352,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                         //'text': unitsWithPeriods[i].title,
                         'id': 'textbook-unit-' + unitsWithPeriods[i].id,
                         'style': 'height: ' + (((
-                            unitsWithPeriods[i].end - unitsWithPeriods[i].begin) * 12) - 40) + 'px'
+                            unitsWithPeriods[i].end - unitsWithPeriods[i].begin + 1) * 12) - 41) + 'px'
                     }));
 
                     appendedUnit = $('.explorer-unitflow-unit:last');
@@ -1329,7 +1376,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             'methodology': 'Methodology',
             'how': 'The \'How\'',
             'wordwall': 'Word Wall Must Haves',
-            'prerequisite': 'Pre-requisites'
+            'prerequisites': 'Pre-requisites'
         },
         metaOrder: ['methodology', 'how', 'wordwall', 'prerequisite'],
 

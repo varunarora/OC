@@ -4,9 +4,10 @@ from curriculum import views
 
 urlpatterns = patterns(
     '',
-    url(r'^(?P<username>[a-z0-9_\.]+)/(?P<grade_slug>[\w\-\.]+)/(?P<subject_slug>[\w\-\.]+)/', views.curriculum_resources, name='curriculum_resources'),
 
     # API stuff below.
+    url(r'^api/objective/(?P<objective_id>\d+)/suggest-resources/$', views.suggest_resources, name='suggest_resources'),
+
     url(r'^api/objective/update/$', views.update_objective, name='update_objective'),
     url(r'^api/objective/create/$', views.create_objective, name='create_objective'),
     url(r'^api/objective/add-objective-to-unit/$', views.add_objective_to_unit, name='add_objective_to_unit'),
@@ -16,7 +17,7 @@ urlpatterns = patterns(
     url(r'^api/objective/add-existing/$', views.add_existing_to_objective, name='add_existing_to_objective'),
     url(r'^api/objective/add-upload/$', views.add_upload_to_objective, name='add_upload_to_objective'),
 
-    url(r'^api/objective/(?P<objective_id>\d+)/suggest-resources/$', views.suggest_resources, name='suggest_resources'),
+    url(r'^(?P<username>[a-z0-9_\.]+)/(?P<grade_slug>[\w\-\.]+)/(?P<subject_slug>[\w\-\.]+)/', views.curriculum_resources, name='curriculum_resources'),
 
     # Issues.
     url(r'^api/issue/create-update/$', views.create_update_issue, name='create_update_issue'),

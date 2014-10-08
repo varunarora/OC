@@ -6,14 +6,14 @@
 
 <div class="wide-header explorer-header">
     <a class="explorer-header-current">
-        <span class="explorer-header-current-organization-thumbnail"></span>
+        <span class="explorer-header-current-organization-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ curriculum.user.get_profile.profile_pic.name }}');"></span>
         <span class="explorer-header-current-organization-title">{{ curriculum.grade }} <span class="explorer-header-current-organization-title-subject">{{ curriculum.subject }}</span></span>
     </a>
     <!--<a href="" class="explorer-header-child">Trimester 1</a>
     <a href="" class="explorer-header-child">Trimester 2</a>
     <a href="" class="explorer-header-child">Trimester 3</a>-->
 
-    <nav class="explorer-home-menu">
+    <!--<nav class="explorer-home-menu">
         <div class="floating-menu-spacer"></div>
         <ul>
             <li class=""><a href="">Level 1 English</a></li>
@@ -21,7 +21,7 @@
             <li class=""><a href="">Level 3 English</a></li>
             <li class=""><a href="">Level 4 English</a></li>
         </ul>
-    </nav>
+    </nav>-->
 </div>
 <div class="wide-header explorer-body">
     <div class="explorer-body-side scrollable-block">
@@ -37,7 +37,7 @@
             <div class="explorer-resource-overview show">
                 <div class="explorer-overview-section">
                     <h2>Overview</h2>
-                    <p>No description found.</p>
+                    <p>{{ curriculum.description|safe }}</p>
                 </div>
 
                 <div class="explorer-overview-section">
