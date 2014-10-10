@@ -100,21 +100,24 @@ var CategorySet = Backbone.Collection.extend({
     comparator: 'position'
 });
 
-OC.categoryResources.childCategories = [];
-OC.categoryResources.resourceSet = new ResourceSet();
-OC.categoryResources.requestSet = new RequestSet();
+if (OC.categoryResources){
+    OC.categoryResources.childCategories = [];
+    OC.categoryResources.resourceSet = new ResourceSet();
+    OC.categoryResources.requestSet = new RequestSet();
 
-_.each(OC.categoryResources.rawChildCategories, function(category){
-    OC.categoryResources.childCategories.push(new Category(category));
-});
+    _.each(OC.categoryResources.rawChildCategories, function(category){
+        OC.categoryResources.childCategories.push(new Category(category));
+    });
 
-_.each(OC.categoryResources.rawResources, function(resource){
-    OC.categoryResources.resourceSet.add(new Resource(resource));
-});
+    _.each(OC.categoryResources.rawResources, function(resource){
+        OC.categoryResources.resourceSet.add(new Resource(resource));
+    });
 
-_.each(OC.categoryResources.rawRequests, function(request){
-    OC.categoryResources.requestSet.add(new Request(request));
-});
+    _.each(OC.categoryResources.rawRequests, function(request){
+        OC.categoryResources.requestSet.add(new Request(request));
+    });
+
+}
 
 var CategoryCollectionView = Backbone.View.extend({
     truncatedResourceLimit: 0,
@@ -387,8 +390,9 @@ var RequestCollectionView = Backbone.View.extend({
 var ResourceView = Backbone.View.extend({
     tagName: "div",
     className: function(){
-         return (!OC.categoryResources.isSubjectHome && (
-            !OC.categoryResources.isCatalog)) ? "content-panel-body-listing-banner-item" : "content-panel-body-listing-thumbnail-item";
+         return OC.categoryResources ? ((!OC.categoryResources.isSubjectHome && (
+            !OC.categoryResources.isCatalog)) ? 'content-panel-body-listing-banner-item' : 'content-panel-body-listing-thumbnail-item') : (
+            'content-panel-body-listing-banner-item');
     },
     truncatedDescriptionLength: null,
     descriptionTruncated: true,
@@ -537,10 +541,11 @@ var ResourceView = Backbone.View.extend({
         this.typeClass = this.model.get('type').toLowerCase() + '-label';
 
         // Set style of template (thumbnail or banner).
-        this.template = (!OC.categoryResources.isSubjectHome && (
-            !OC.categoryResources.isCatalog)) ? this.bannerTemplate : this.thumbnailTemplate;
-        this.truncatedDescriptionLength = (!OC.categoryResources.isSubjectHome && (
-            !OC.categoryResources.isCatalog)) ? 450 : 100;
+        this.template = OC.categoryResources ? ((!OC.categoryResources.isSubjectHome && (
+            !OC.categoryResources.isCatalog)) ? this.bannerTemplate : this.thumbnailTemplate) : (
+            this.bannerTemplate);
+        this.truncatedDescriptionLength = OC.categoryResources ? ((!OC.categoryResources.isSubjectHome && (
+            !OC.categoryResources.isCatalog)) ? 450 : 100) : 450;
     },
 
     render: function () {
@@ -552,8 +557,10 @@ var ResourceView = Backbone.View.extend({
         modelJSON = this.model.toJSON();
         //modelJSON['tags'] = String(this.$tagsView[0].outerHTML);
 
-        if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)) {
-            modelJSON['title'] = this.getTrucatedTitle();
+        if (OC.categoryResources){
+            if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)) {
+                modelJSON['title'] = this.getTrucatedTitle();
+            }
         }
 
         modelJSON['description'] = this.getTrucatedDescription();
@@ -761,401 +768,687 @@ var categorySet = new CategorySet();
 
 var searchedResources = null;
 
-_.extend(OC.categoryResources, {
-    // Initialize the ResourceCollectionView, RequestCollectionView global
-    resourceCollectionView: undefined,
-    requestCollectionView: undefined,
 
-    lastInputTimestamp: null,
-    searchFilterTimeout: null,
-    filterAsyncSearchOn: false,
-    visibleResourceCount: null,
-    suggestionMode: false,
-    qnaFlashed: false,
-    currentView: 'items',
+if (OC.categoryResources){
+    _.extend(OC.categoryResources, {
+        // Initialize the ResourceCollectionView, RequestCollectionView global
+        resourceCollectionView: undefined,
+        requestCollectionView: undefined,
 
-    commonCoreEasyMap: {
-        'Kindergarten': 'Kindergarten',
-        'Elementary / Primary School': {
-            'Grade 1': 'Grade 1',
-            'Grade 2': 'Grade 2',
-            'Grade 3': 'Grade 3',
-            'Grade 4': 'Grade 4',
-            'Grade 5': 'Grade 5'
+        lastInputTimestamp: null,
+        searchFilterTimeout: null,
+        filterAsyncSearchOn: false,
+        visibleResourceCount: null,
+        suggestionMode: false,
+        qnaFlashed: false,
+        currentView: 'items',
+
+        commonCoreEasyMap: {
+            'Kindergarten': 'Kindergarten',
+            'Elementary / Primary School': {
+                'Grade 1': 'Grade 1',
+                'Grade 2': 'Grade 2',
+                'Grade 3': 'Grade 3',
+                'Grade 4': 'Grade 4',
+                'Grade 5': 'Grade 5'
+            },
+            'Middle School': {
+                'Grade 6': 'Grade 6',
+                'Grade 7': 'Grade 7',
+                'Grade 8': 'Grade 8'
+            },
+            'High School': {
+                'High School: Number &amp; Quantity': 'Number &amp; Quantity',
+                'High School: Algebra': 'Algebra',
+                'High School: Functions': 'Functions',
+                'High School: Geometry': 'Geometry',
+                'High School: Statistics &amp; Probability': 'Statistics &amp; Probability'
+            },
         },
-        'Middle School': {
-            'Grade 6': 'Grade 6',
-            'Grade 7': 'Grade 7',
-            'Grade 8': 'Grade 8'
-        },
-        'High School': {
-            'High School: Number &amp; Quantity': 'Number &amp; Quantity',
-            'High School: Algebra': 'Algebra',
-            'High School: Functions': 'Functions',
-            'High School: Geometry': 'Geometry',
-            'High School: Statistics &amp; Probability': 'Statistics &amp; Probability'
-        },
-    },
 
-    initBrowseView: function(){
-        function resizeGradeTopics(){
-            // Set header height based on page height.
-            var newHeight = $(window).height() - $('body > header').height() - $(
-                    '.resource-browse-header').height() - parseInt($('.resource-browse-subject .wide-center-stage').css('padding-top'), 10);
-            $('.grades-topics-list').height(newHeight);
-        }
+        initBrowseView: function(){
+            function resizeGradeTopics(){
+                // Set header height based on page height.
+                var newHeight = $(window).height() - $('body > header').height() - $(
+                        '.resource-browse-header').height() - parseInt($('.resource-browse-subject .wide-center-stage').css('padding-top'), 10);
+                $('.grades-topics-list').height(newHeight);
+            }
 
-        function resizeListing(){
-            // Set header height based on page height.
-            var newHeight = $(window).height() - $('body > header').height() - $(
-                    '.resource-browse-header').height();
-            $('.content-panel-body-listing').height(newHeight);
-        }
+            var scrollbarWidth = getScrollbarWidth();
 
-        var scrollbarWidth = getScrollbarWidth();
+            // Clear the filter search box.
+            $(OC.config.search.input).val('');
 
-        // Clear the filter search box.
-        $(OC.config.search.input).val('');
+            if (! OC.categoryResources.suggestionMode){
+                /*
+                // Set the width of the left panel.
+                var leftPanelWidth = ($(window).width() - 960)/2 + 367;
+                $('.category-panel').width(leftPanelWidth);
 
-        if (! OC.categoryResources.suggestionMode){
-            /*
-            // Set the width of the left panel.
-            var leftPanelWidth = ($(window).width() - 960)/2 + 367;
-            $('.category-panel').width(leftPanelWidth);
+                $('.content-panel').width($(window).width() - leftPanelWidth - scrollbarWidth);*/
 
-            $('.content-panel').width($(window).width() - leftPanelWidth - scrollbarWidth);*/
+                // Setup menu positioning (and adjust for scrollbar width) for content type filter.
+                OC.setUpMenuPositioning('.sort-by-type-menu', '.sort-by-type');
 
-            // Setup menu positioning (and adjust for scrollbar width) for content type filter.
-            OC.setUpMenuPositioning('.sort-by-type-menu', '.sort-by-type');
+                // Make the menu on the left nano'ed, conditional on the size of the content.
+                $('.category-panel-listing-categories-body').addClass('scroll-content');
 
-            // Make the menu on the left nano'ed, conditional on the size of the content.
-            $('.category-panel-listing-categories-body').addClass('scroll-content');
+                $('.category-panel-listing-categories').height(
+                    $('.resource-browse').height() - 100
+                );
+                $('.category-panel-listing-categories').nanoScroller({
+                    paneClass: 'scroll-pane',
+                    sliderClass: 'scroll-slider',
+                    contentClass: 'scroll-content',
+                    flash: true
+                });
 
-            $('.category-panel-listing-categories').height(
-                $('.resource-browse').height() - 100
-            );
-            $('.category-panel-listing-categories').nanoScroller({
-                paneClass: 'scroll-pane',
-                sliderClass: 'scroll-slider',
-                contentClass: 'scroll-content',
-                flash: true
-            });
+                var sortByTypeMenu = $('.sort-by-type-menu');
+                $('.content-panel').on('scroll click', function(event){
+                    if (sortByTypeMenu.hasClass('show'))
+                        $('.sort-by-type-menu').removeClass('show');
+                });
 
-            var sortByTypeMenu = $('.sort-by-type-menu');
-            $('.content-panel').on('scroll click', function(event){
-                if (sortByTypeMenu.hasClass('show'))
-                    $('.sort-by-type-menu').removeClass('show');
-            });
-
-            $('.sort-by-type').click(function(event){
-                $('.sort-by-type-menu').toggleClass('show');
-
-                event.stopPropagation();
-                event.preventDefault();
-                return false;
-            });
-
-            // Add a tooltip to category tag filters.
-            $('.category-panel-listing-categories-body-filters-description').tipsy(
-                {gravity: 's'});
-
-            // Setup the grades based on the easy map.
-            OC.categoryResources.setupGradeListing();
-
-            // Bind grade click handler.
-            $('ul.grades li a.grade').click(OC.categoryResources.gradeClickHandler);
-
-            // Slide in the empty state placeholder on the home browse page.
-            setTimeout(function(){
-                $('.grades-topics-list-empty').animate({
-                    'left': 0,
-                    'opacity': 1
-                }, 1000);
-            }, 500);
-
-            if ($('.resource-browse-subject').length > 0){
-                resizeGradeTopics(); $(window).resize(resizeGradeTopics); }
-
-            if ($('.resource-browse-listing').length > 0){
-                resizeListing(); $(window).resize(resizeListing); }
-       }
-    },
-
-    gradeClickHandler: function(event){
-        var currentGrade = $(this),
-            childCategoryID = parseInt($(this).attr('id').substring(9), 10);
-        
-        $('ul.grades li a').removeClass('current');
-        currentGrade.addClass('current');
-
-        OC.categoryResources.setGradeTopicList(
-            OC.categoryResources.gradeCategoryMap[childCategoryID]);
-
-        event.stopPropagation();
-        event.preventDefault();
-        return false;
-    },
-
-    initSuggestionsView: function(){
-        // Bind 'approve' and 'reject' on a suggestion.
-        function moderateSuggestion(selectorClass, endpoint, successMessage){
-            $(selectorClass).click(function(event){
-                var moderateSuggestionDialog = OC.customPopup('.moderate-suggestion-dialog'),
-                    moderateSuggestionForm = $('form.moderate-suggestion-form', moderateSuggestionDialog.dialog),
-                    suggestionItem = $(this).parents('.content-panel-body-listing-banner-item');
-                
-                $('textarea[name="message"]', moderateSuggestionDialog.dialog).val('');
-
-                $('.moderate-suggestion-submit', moderateSuggestionForm).click(function(event){
-                    // Dismiss the dialog and empty the contents of the message.
-                    moderateSuggestionDialog.close();
-
-                    // Get the suggestion ID.
-                    var suggestionID = suggestionItem.attr('id').substring(11);
-
-                    $.post('/resources/api/' + endpoint + '/' + suggestionID + '/', moderateSuggestionForm.serialize(),
-                        function (response) {
-                            if (response.status == 'true'){
-                                OC.setMessageBoxMessage(successMessage);
-                                OC.showMessageBox();
-
-                                suggestionItem.fadeOut('slow');
-
-                            } else OC.popup(response.message, response.title);
-                        }, 'json');
+                $('.sort-by-type').click(function(event){
+                    $('.sort-by-type-menu').toggleClass('show');
 
                     event.stopPropagation();
                     event.preventDefault();
                     return false;
                 });
 
+                // Add a tooltip to category tag filters.
+                $('.category-panel-listing-categories-body-filters-description').tipsy(
+                    {gravity: 's'});
+
+                // Setup the grades based on the easy map.
+                OC.categoryResources.setupGradeListing();
+
+                // Bind grade click handler.
+                $('ul.grades li a.grade').click(OC.categoryResources.gradeClickHandler);
+
+                // Slide in the empty state placeholder on the home browse page.
+                setTimeout(function(){
+                    $('.grades-topics-list-empty').animate({
+                        'left': 0,
+                        'opacity': 1
+                    }, 1000);
+                }, 500);
+
+                if ($('.resource-browse-subject').length > 0){
+                    resizeGradeTopics(); $(window).resize(resizeGradeTopics); }
+           }
+        },
+
+        gradeClickHandler: function(event){
+            var currentGrade = $(this),
+                childCategoryID = parseInt($(this).attr('id').substring(9), 10);
+            
+            $('ul.grades li a').removeClass('current');
+            currentGrade.addClass('current');
+
+            OC.categoryResources.setGradeTopicList(
+                OC.categoryResources.gradeCategoryMap[childCategoryID]);
+
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        },
+
+        initSuggestionsView: function(){
+            // Bind 'approve' and 'reject' on a suggestion.
+            function moderateSuggestion(selectorClass, endpoint, successMessage){
+                $(selectorClass).click(function(event){
+                    var moderateSuggestionDialog = OC.customPopup('.moderate-suggestion-dialog'),
+                        moderateSuggestionForm = $('form.moderate-suggestion-form', moderateSuggestionDialog.dialog),
+                        suggestionItem = $(this).parents('.content-panel-body-listing-banner-item');
+                    
+                    $('textarea[name="message"]', moderateSuggestionDialog.dialog).val('');
+
+                    $('.moderate-suggestion-submit', moderateSuggestionForm).click(function(event){
+                        // Dismiss the dialog and empty the contents of the message.
+                        moderateSuggestionDialog.close();
+
+                        // Get the suggestion ID.
+                        var suggestionID = suggestionItem.attr('id').substring(11);
+
+                        $.post('/resources/api/' + endpoint + '/' + suggestionID + '/', moderateSuggestionForm.serialize(),
+                            function (response) {
+                                if (response.status == 'true'){
+                                    OC.setMessageBoxMessage(successMessage);
+                                    OC.showMessageBox();
+
+                                    suggestionItem.fadeOut('slow');
+
+                                } else OC.popup(response.message, response.title);
+                            }, 'json');
+
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return false;
+                    });
+
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return false;
+                });
+            }
+
+            moderateSuggestion('.approve-button', 'approve-suggestion', 'Suggestion successfully approved!');
+            moderateSuggestion('.reject-button', 'reject-suggestion', 'Suggestion successfully rejected!');
+        },
+
+        setGradeTopicList: function(topics){
+            $('.grades-topics-list-empty').addClass('hidden');
+
+            var listWrapper = $('.grades-topics-list-filled');
+            listWrapper.html('');
+
+            var i, newTopicWrapper, newTopicLink, newTopicLinkThumbnail, newTopicLinkContent;
+            for (i = 0; i < topics.length; i++){
+                newTopicWrapper = $('<li/>', {'class': 'grade-topic'});
+                newTopicLink = $('<a/>', {
+                    'href': topics[i].url
+                });
+                newTopicLinkThumbnail = $('<div/>', {
+                    'class': 'grade-topic-thumbnail',
+                    'style': 'background-image: url(\'' + staticURL +
+                        'images/categories/' +  topics[i].slug + '.png' + '\');'
+                });
+                newTopicLinkContent = $('<div/>', {
+                    'html': topics[i].title,
+                    'class': 'grade-topic-content'
+                });
+
+                newTopicLink.append(newTopicLinkThumbnail);
+                newTopicLink.append(newTopicLinkContent);
+                newTopicWrapper.append(newTopicLink);
+                listWrapper.append(newTopicWrapper);
+            }
+        },
+
+        setupGradeListing: function(){
+            // For each raw category, find where it is on the Common Core map.
+            var i, k, cameraTitle, key, sections = {}, ccMapKeys = _.keys(OC.categoryResources.commonCoreEasyMap),
+                isIndependent, gradeMap = [];
+
+            function getSectionThatContainsCategory(categoryTitle){
+                var j;
+                for (j in sections){
+                    if (sections.hasOwnProperty(j)){
+                        if (_.has(sections[j], categoryTitle))
+                            return j;
+                    }
+                }
+            }
+
+            function getSectionFromGradeMap(sectionTitle){
+                for (k = 0; k < gradeMap.length; k++){
+                    if (_.isObject(gradeMap[k])){
+                        if (_.keys(gradeMap[k])[0] === sectionTitle) return _.values(
+                            gradeMap[k])[0];
+                    }
+                }
+
+                // Create section if doesn't already exist.
+                sectionMap = {};
+                sectionMap[section] = [];
+                gradeMap.push(sectionMap);
+
+                return sectionMap[section];
+            }
+
+            for (key in OC.categoryResources.commonCoreEasyMap){
+                if (OC.categoryResources.commonCoreEasyMap.hasOwnProperty(key)){
+                    if (_.isObject(OC.categoryResources.commonCoreEasyMap[key]))
+                        sections[key] = OC.categoryResources.commonCoreEasyMap[key];
+                }
+            }
+
+            for (i = 0; i < OC.categoryResources.rawChildCategories.length; i++){
+                // Check to see if this is one of the keys of the Common Core map.
+                isIndependent = ccMapKeys.indexOf(OC.categoryResources.rawChildCategories[i].title) !== -1;
+
+                // If this is a key, add its value to map as is.
+                if (isIndependent){
+                    gradeMap.push({
+                        title: OC.categoryResources.commonCoreEasyMap[OC.categoryResources.rawChildCategories[i].title],
+                        id: OC.categoryResources.rawChildCategories[i].id,
+                        url: OC.categoryResources.rawChildCategories[i].url
+                    });
+
+                } else {
+                    // If not, find which section it is in, and add it to that section of the map.
+                    section = getSectionThatContainsCategory(
+                        OC.categoryResources.rawChildCategories[i].title);
+
+                    if (section){
+                        cameraTitle = sections[section][OC.categoryResources.rawChildCategories[i].title];
+                        getSectionFromGradeMap(section).push(
+                            {
+                                title: cameraTitle,
+                                id: OC.categoryResources.rawChildCategories[i].id,
+                                url: OC.categoryResources.rawChildCategories[i].url
+                            }
+                        );
+                    }
+                }
+            }
+
+            var m, n, a, li, value, grades = $('.grades-topics ul.grades');
+
+            function appendGrade(id, title, url){
+                li = $('<li/>');
+                a = $('<a/>', {
+                    href: url,
+                    html: title,
+                    id: 'category-' + id,
+                    class: 'grade'
+                });
+
+                li.append(a);
+                grades.append(li);
+            }
+
+            // Now build the menu.
+            for (m = 0; m < gradeMap.length; m++){
+                value = _.values(gradeMap[m]);
+
+                if (value.length === 1){
+                    // First, append the section title.
+                    li = $('<li/>');
+                    a = $('<a/>', {
+                        text: _.keys(gradeMap[m])[0],
+                        'class': 'grade-section'
+                    });
+                    li.append(a);
+                    grades.append(li);
+
+                    sectionCategories = _.values(gradeMap[m])[0];
+                    for (n = 0; n < sectionCategories.length; n++){
+                        appendGrade(
+                            sectionCategories[n].id, sectionCategories[n].title, sectionCategories[n].url);
+                    }
+                } else {
+                    appendGrade(gradeMap[m].id, gradeMap[m].title, gradeMap[m].url);
+                }
+            }
+
+        },
+
+        initInfiniteScroll: function(){
+            if (OC.categoryResources.currentCategoryID){
+                var loadButton = $('.lazy-load-button'),
+                    categoryID, i, resource;
+                $('.content-panel').on('DOMContentLoaded load resize scroll', function(event){
+                    categoryID = $('.content-panel-body').attr('id').substring(9);
+
+                    // If the load button is attached to the document.
+                    if ($.contains(document, loadButton[0]) && loadButton.hasClass('enabled')){
+                        if (isElementInViewport(loadButton) && !loadButton.hasClass('loading')){
+                            loadButton.addClass('loading');
+
+                            $.get('/resources/api/load-browse-resources/' + categoryID +
+                                    '/from/' + OC.categoryResources.currentCategoryID + '/',
+                                function(response){
+                                    if (response.status === 'true'){
+                                        var keys = Object.keys(response.resources);
+
+                                        if (response.current_category_id){
+                                            for (i = 0; i < keys.length; i++){
+                                                resource = response.resources[keys[i]];
+                                                resourceModel = new Resource(resource);
+
+                                                resourceCollectionView.collection.add(
+                                                    resourceModel);
+                                            }
+                                            OC.categoryResources.currentCategoryID = response.current_category_id;
+
+                                        } else {
+                                            loadButton.remove();
+                                        }
+                                    }
+                                    else {
+                                        OC.popup(response.message, response.title);
+                                    }
+                                    loadButton.removeClass('loading');
+
+                                },
+                            'json');
+                        }
+                    }
+                });
+            }
+        },
+
+        setVisibleResourceCount: function(){
+            var hiddenResourceItem = $('<div>', { 'class' : 'content-panel-body-listing-thumbnail-item' });
+            $('body').append(hiddenResourceItem);
+
+            function setCount(){
+                var squeezableResourceCount = $('.content-panel-body-listing').width(
+                    ) / $('.content-panel-body-listing-thumbnail-item').outerWidth(true);
+                OC.categoryResources.visibleResourceCount = Math.floor(squeezableResourceCount) - 1;
+            }
+
+            setCount();
+            $(window).resize(function(){
+                setCount();
+            });
+        },
+
+        filterInitialResources: function(collection){
+            // Build filters.
+            var filterInputs = $('.sort-by-type-menu input:checkbox, ' +
+                '.category-panel-listing-categories-body-filters input:checkbox, ' +
+                '.category-panel-body-listing-filters-filter-subtopic input:checkbox');
+            var i, filterType, filterValue;
+            for (i = 0; i < filterInputs.length; i++){
+                filterValue = $(filterInputs[i]).val();
+                filterType = $(filterInputs[i]).attr('name');
+                if (!filterInputs[i].checked) {
+                    filters[filterType].push(filterValue);
+                }
+            }
+
+            // Create new collection.
+            return filterResources(collection);
+        },
+
+
+        initMVC: function() {
+            // Listen to changes on all options in the filters panel
+            var filterCheckboxes = $('.sort-by-type-menu label, ' +
+                '.category-panel-listing-categories-body-filters label, ' +
+                '.category-panel-body-listing-filters-filter-subtopic label');
+
+            // Bind change listeners on function that repopulates the resources
+            $(filterCheckboxes).click(filterClickHandler);
+
+            // Bind click listeners on main sorting.
+            $('.filter-sort-option').click(function(event){
+                // Get the set and filter is.
+                if (searchedResources) unfilteredCollection = searchedResources;
+                else unfilteredCollection = OC.categoryResources.resourceSet;
+
+                filteredCollection = filterResources(unfilteredCollection);
+
+                if ($(event.target).hasClass('filter-sort-option-newest')){
+                    filteredCollection.sortByNewest();
+                } else {
+                    filteredCollection.sortByPopularity();
+                }
+                
+                if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)
+                    OC.categoryResources.resourceCollectionView.render(filteredCollection);
+                else OC.categoryResources.reset(filteredCollection);
+            });
+
+            var typeTabFilter = $('.category-panel-body-listing-types');
+            if (typeTabFilter.length > 0){
+                $('.category-panel-body-listing-types ul li a').click(function(event){
+                    var currentTypeElement = $(event.target),
+                        currentType = currentTypeElement.parents('li').attr('name');
+
+                    $('.category-panel-body-listing-types ul li a').removeClass('current');
+                    currentTypeElement.addClass('current');
+
+                    if (currentType === 'all')
+                        filters['type'] = [];
+                    else {
+                        var otherTypes = _.map($('.category-panel-body-listing-types ul li'), function(type){
+                            return $(type).attr('name');
+                        });
+
+                        otherTypes.splice(otherTypes.indexOf('all'), 1);
+                        otherTypes.splice(otherTypes.indexOf(currentType), 1);
+                        filters['type'] = otherTypes;
+                    }
+
+                    var collectionToRender = searchedResources ? searchedResources : filterResources(
+                        OC.categoryResources.resourceSet);
+
+                    OC.categoryResources.resourceCollectionView.render(collectionToRender);
+
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return false;
+                });
+            }
+
+            var modes = $('.content-panel-body-listing-items, .content-panel-body-listing-requests');
+
+            // Bind text input field as filter.
+            if (!OC.categoryResources.isSubjectHome){
+                $(OC.config.search.input).keyup(function(event){
+                    var currentInput = $(this).val(),
+                        loadButton = $('.lazy-load-button');
+
+                    // Re-render categories.
+                    var collectionToRender = new ResourceSet(OC.categoryResources.resourceSet.filter(function (resource) {
+                        return (
+                            resource.get('title').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1 ||
+                            resource.get('description').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1 ||
+                            _.filter(resource.get('tags'), function(tag){
+                                return tag.toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+                            }).length !== 0 ||
+                            _.filter(resource.get('objectives'), function(objective){
+                                return objective.toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+                            }).length !== 0);
+                    }));
+
+                    var loadingPlaceholder = $('.filter-search-placeholder');
+
+                    if (currentInput.length > 0) {
+                        if (loadButton.length > 0) {
+                            loadButton.addClass('hide');
+                            loadButton.removeClass('enabled');
+                        }
+
+                        modes.addClass('show');
+
+                        if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog))
+                            // Hide the 'show more's from all categories. 
+                            categoryView.truncateAll();
+
+                        // If there are categories that haven't been rendered yet.
+                        loadingPlaceholder.addClass('show');
+
+                        // Calculate time since last key entered.
+                        currentTime = new Date().getTime();
+                        if (OC.categoryResources.lastInputTimestamp){
+                            // Calculate delta between the current time and last timestamp.
+                            delta = (currentTime - OC.categoryResources.lastInputTimestamp) / 1000;
+
+                            if (delta < 1){
+                                clearTimeout(OC.categoryResources.searchFilterTimeout);
+                                OC.categoryResources.filterAsyncSearchOn = false;
+                            }
+
+                            OC.categoryResources.searchFilterTimeout = setTimeout(function(){
+                                var i, resource, currentCategoryID,
+                                    categoryID = $('.content-panel-body').attr('id').substring(9),
+                                    resourceCount = 4;
+
+                                // Perform search.
+                                $.get('/resources/api/search-category/' + categoryID + '/query/' +
+                                        currentInput + '/',
+                                    function(response){
+                                        loadingPlaceholder.removeClass('show');
+                                        OC.categoryResources.filterAsyncSearchOn = false;
+
+                                        if (response.status == 'true'){
+                                            var keys = Object.keys(response.resources);
+
+                                            if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog){
+                                                if (OC.categoryResources.resourceCollectionView.collection.length === 0 && (
+                                                    keys.length === 0))
+                                                    OC.categoryResources.resourceCollectionView.showNullView();
+
+                                                else if (resourceCollectionView.collection.length === 0)
+                                                    OC.categoryResources.resourceCollectionView.clearView();
+
+                                            } else {
+                                                // Clear nothing found message, if nothing in original collection.
+                                                if (collectionToRender.length === 0 && keys.length === 0)
+                                                    categoryView.showNullView();
+
+                                                else if (collectionToRender.length === 0)
+                                                    categoryView.clearView();
+                                            }
+                                            
+                                            for (i = 0; i < keys.length; i++){
+                                                resource = response.resources[keys[i]];
+                                                resourceModel = new Resource(resource);
+                                                
+                                                if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)
+                                                    OC.categoryResources.resourceCollectionView.collection.add(resourceModel);
+
+                                                // If the resource isn't in the resource set.
+                                                else collectionToRender.add(resourceModel);
+                                                
+                                                OC.categoryResources.resourceSet.add(resourceModel);
+                                            }
+
+                                            if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)){
+                                                OC.categoryResources.reset(filterResources(collectionToRender));
+                                                categoryView.truncateAll();
+                                            }
+                                            
+                                            searchedResources = collectionToRender;
+                                        }
+                                        else {
+                                            OC.popup(response.message, response.title);
+                                        }
+
+                                        $('.no-results-message').removeClass('hide');
+                                    },
+                                'json');
+                            }, 1500);
+                            OC.categoryResources.filterAsyncSearchOn = true;
+                        }
+                        OC.categoryResources.lastInputTimestamp = currentTime;
+                    } else {
+                        clearTimeout(OC.categoryResources.searchFilterTimeout);
+                        if (loadButton.length > 0) {
+                            loadButton.removeClass('hide');
+                            loadButton.addClass('enabled');
+                        }
+                        OC.categoryResources.filterAsyncSearchOn = false;
+                        loadingPlaceholder.removeClass('show');
+
+                        var classToHide = OC.categoryResources.currentView == 'items' ? 'requests' : 'items';
+                        $('.content-panel-body-listing-' + classToHide).removeClass('show');
+
+                        try {
+                            categoryView.resetTruncate();
+                            // Show the 'show more's from all categories.
+                            categoryView.showShowMores();
+
+                        } catch(e){}
+
+                        searchedResources = null;
+                    }
+                    
+                    // Recreate the view (clears previous view)
+                    if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog){
+                        OC.categoryResources.resourceCollectionView.render(filterResources(collectionToRender));
+                        OC.categoryResources.resourceCollectionView.initialize();
+                    } else OC.categoryResources.reset(filterResources(collectionToRender));
+                    
+                    searchedResources = collectionToRender;
+
+                    // Filter the requests.
+                    var requestsToRender = new RequestSet(OC.categoryResources.requestSet.filter(function (request) {
+                        return request.get('body').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
+                    }));
+                    OC.categoryResources.requestCollectionView.render(requestsToRender);
+
+                });
+
+                $('.category-panel-body-listing-filters-filter-standards .category-panel-body-listing-filters-filter-title').click(function(){
+                    $(this).parent().find('.category-panel-body-listing-filters-filter-body').toggleClass('hidden');
+                });
+
+                // Set number of types on the filter UI.
+                var resourceTypeCounts = {}, resourceType;
+                OC.categoryResources.resourceSet.each(function(resource){
+                    resourceType = resource.get('type');
+                    if (_.has(resourceTypeCounts, resourceType)){
+                        resourceTypeCounts[resourceType] += 1;
+                    } else {
+                        resourceTypeCounts[resourceType] = 1;
+                    }
+                });
+
+                var $li;
+                _.each($('.category-panel-body-listing-types ul li'), function(li){
+                    $li = $(li);
+                    $a = $li.find('a');
+                    if (_.has(resourceTypeCounts, $li.attr('name').toUpperCase())){
+                        $a.text($a.text() + ' (' + resourceTypeCounts[$li.attr('name').toUpperCase()] + ')');
+                    } else if ($li.attr('name') === 'all') {
+                        $a.text($a.text() + ' (' + OC.categoryResources.resourceSet.length + ')');
+                    } else {
+                        $a.text($a.text() + ' (0)');
+                    }
+                });
+                
+
+                var qnaButton = $('.resource-browse-header-qna');
+                qnaButton.tipsy({gravity: 'se', delayIn: 1000, trigger: 'manual', fade: true});
+
+                // On first scroll of content, offer suggestion of teachers waiting.
+                $('.content-panel-body-listing').scroll(function(event){
+                    if (! OC.categoryResources.qnaFlashed){
+                        qnaButton.attr('title', String(_.random(6, 14)) + ' teachers waiting online to help for free');
+                        
+                        setTimeout(function(){
+                            qnaButton.tipsy('show');
+
+                            setTimeout(function(){
+                                qnaButton.tipsy('hide');
+                            }, 5000);
+                        }, 1500);
+
+                        OC.categoryResources.qnaFlashed = true;
+                    }
+                });
+            }
+        },
+
+        reset: function(collection){
+            // Add all categories into the category set.
+            categoryView = new CategoryCollectionView({collection: groupResources(collection)});
+
+            categoryView.render();
+        },
+
+        initModeToggler: function(){
+            $('.content-panel-body-listing-questions-toggler a').click(function(event){
+                $('.content-panel-body-listing-questions-toggler a').removeClass('selected');
+                
+                var currentModeButton = $(event.target);
+                currentModeButton.addClass('selected');
+
+                if (currentModeButton.hasClass('content-panel-body-listing-questions-toggler-listing')){
+                    $('.content-panel-body-listing-items').addClass('show');
+                    $('.content-panel-body-listing-requests').removeClass('show');
+                    OC.categoryResources.currentView = 'items';
+                } else if (currentModeButton.hasClass('content-panel-body-listing-questions-toggler-questions')){
+                    $('.content-panel-body-listing-requests').addClass('show');
+                    $('.content-panel-body-listing-items').removeClass('show');
+                    OC.categoryResources.currentView = 'requests';
+                }
+
                 event.stopPropagation();
                 event.preventDefault();
                 return false;
             });
         }
 
-        moderateSuggestion('.approve-button', 'approve-suggestion', 'Suggestion successfully approved!');
-        moderateSuggestion('.reject-button', 'reject-suggestion', 'Suggestion successfully rejected!');
-    },
-
-    setGradeTopicList: function(topics){
-        $('.grades-topics-list-empty').addClass('hidden');
-
-        var listWrapper = $('.grades-topics-list-filled');
-        listWrapper.html('');
-
-        var i, newTopicWrapper, newTopicLink, newTopicLinkThumbnail, newTopicLinkContent;
-        for (i = 0; i < topics.length; i++){
-            newTopicWrapper = $('<li/>', {'class': 'grade-topic'});
-            newTopicLink = $('<a/>', {
-                'href': topics[i].url
-            });
-            newTopicLinkThumbnail = $('<div/>', {
-                'class': 'grade-topic-thumbnail',
-                'style': 'background-image: url(\'' + staticURL +
-                    'images/categories/' +  topics[i].slug + '.png' + '\');'
-            });
-            newTopicLinkContent = $('<div/>', {
-                'html': topics[i].title,
-                'class': 'grade-topic-content'
-            });
-
-            newTopicLink.append(newTopicLinkThumbnail);
-            newTopicLink.append(newTopicLinkContent);
-            newTopicWrapper.append(newTopicLink);
-            listWrapper.append(newTopicWrapper);
-        }
-    },
-
-    setupGradeListing: function(){
-        // For each raw category, find where it is on the Common Core map.
-        var i, k, cameraTitle, key, sections = {}, ccMapKeys = _.keys(OC.categoryResources.commonCoreEasyMap),
-            isIndependent, gradeMap = [];
-
-        function getSectionThatContainsCategory(categoryTitle){
-            var j;
-            for (j in sections){
-                if (sections.hasOwnProperty(j)){
-                    if (_.has(sections[j], categoryTitle))
-                        return j;
-                }
-            }
-        }
-
-        function getSectionFromGradeMap(sectionTitle){
-            for (k = 0; k < gradeMap.length; k++){
-                if (_.isObject(gradeMap[k])){
-                    if (_.keys(gradeMap[k])[0] === sectionTitle) return _.values(
-                        gradeMap[k])[0];
-                }
-            }
-
-            // Create section if doesn't already exist.
-            sectionMap = {};
-            sectionMap[section] = [];
-            gradeMap.push(sectionMap);
-
-            return sectionMap[section];
-        }
-
-        for (key in OC.categoryResources.commonCoreEasyMap){
-            if (OC.categoryResources.commonCoreEasyMap.hasOwnProperty(key)){
-                if (_.isObject(OC.categoryResources.commonCoreEasyMap[key]))
-                    sections[key] = OC.categoryResources.commonCoreEasyMap[key];
-            }
-        }
-
-        for (i = 0; i < OC.categoryResources.rawChildCategories.length; i++){
-            // Check to see if this is one of the keys of the Common Core map.
-            isIndependent = ccMapKeys.indexOf(OC.categoryResources.rawChildCategories[i].title) !== -1;
-
-            // If this is a key, add its value to map as is.
-            if (isIndependent){
-                gradeMap.push({
-                    title: OC.categoryResources.commonCoreEasyMap[OC.categoryResources.rawChildCategories[i].title],
-                    id: OC.categoryResources.rawChildCategories[i].id,
-                    url: OC.categoryResources.rawChildCategories[i].url
-                });
-
-            } else {
-                // If not, find which section it is in, and add it to that section of the map.
-                section = getSectionThatContainsCategory(
-                    OC.categoryResources.rawChildCategories[i].title);
-
-                if (section){
-                    cameraTitle = sections[section][OC.categoryResources.rawChildCategories[i].title];
-                    getSectionFromGradeMap(section).push(
-                        {
-                            title: cameraTitle,
-                            id: OC.categoryResources.rawChildCategories[i].id,
-                            url: OC.categoryResources.rawChildCategories[i].url
-                        }
-                    );
-                }
-            }
-        }
-
-        var m, n, a, li, value, grades = $('.grades-topics ul.grades');
-
-        function appendGrade(id, title, url){
-            li = $('<li/>');
-            a = $('<a/>', {
-                href: url,
-                html: title,
-                id: 'category-' + id,
-                class: 'grade'
-            });
-
-            li.append(a);
-            grades.append(li);
-        }
-
-        // Now build the menu.
-        for (m = 0; m < gradeMap.length; m++){
-            value = _.values(gradeMap[m]);
-
-            if (value.length === 1){
-                // First, append the section title.
-                li = $('<li/>');
-                a = $('<a/>', {
-                    text: _.keys(gradeMap[m])[0],
-                    'class': 'grade-section'
-                });
-                li.append(a);
-                grades.append(li);
-
-                sectionCategories = _.values(gradeMap[m])[0];
-                for (n = 0; n < sectionCategories.length; n++){
-                    appendGrade(
-                        sectionCategories[n].id, sectionCategories[n].title, sectionCategories[n].url);
-                }
-            } else {
-                appendGrade(gradeMap[m].id, gradeMap[m].title, gradeMap[m].url);
-            }
-        }
-
-    },
-
-    initInfiniteScroll: function(){
-        if (OC.categoryResources.currentCategoryID){
-            var loadButton = $('.lazy-load-button'),
-                categoryID, i, resource;
-            $('.content-panel').on('DOMContentLoaded load resize scroll', function(event){
-                categoryID = $('.content-panel-body').attr('id').substring(9);
-
-                // If the load button is attached to the document.
-                if ($.contains(document, loadButton[0]) && loadButton.hasClass('enabled')){
-                    if (isElementInViewport(loadButton) && !loadButton.hasClass('loading')){
-                        loadButton.addClass('loading');
-
-                        $.get('/resources/api/load-browse-resources/' + categoryID +
-                                '/from/' + OC.categoryResources.currentCategoryID + '/',
-                            function(response){
-                                if (response.status === 'true'){
-                                    var keys = Object.keys(response.resources);
-
-                                    if (response.current_category_id){
-                                        for (i = 0; i < keys.length; i++){
-                                            resource = response.resources[keys[i]];
-                                            resourceModel = new Resource(resource);
-
-                                            resourceCollectionView.collection.add(
-                                                resourceModel);
-                                        }
-                                        OC.categoryResources.currentCategoryID = response.current_category_id;
-
-                                    } else {
-                                        loadButton.remove();
-                                    }
-                                }
-                                else {
-                                    OC.popup(response.message, response.title);
-                                }
-                                loadButton.removeClass('loading');
-
-                            },
-                        'json');
-                    }
-                }
-            });
-        }
-    },
-
-    setVisibleResourceCount: function(){
-        var hiddenResourceItem = $('<div>', { 'class' : 'content-panel-body-listing-thumbnail-item' });
-        $('body').append(hiddenResourceItem);
-
-        function setCount(){
-            var squeezableResourceCount = $('.content-panel-body-listing').width(
-                ) / $('.content-panel-body-listing-thumbnail-item').outerWidth(true);
-            OC.categoryResources.visibleResourceCount = Math.floor(squeezableResourceCount) - 1;
-        }
-
-        setCount();
-        $(window).resize(function(){
-            setCount();
-        });
-    },
-
-    filterInitialResources: function(collection){
-        // Build filters.
-        var filterInputs = $('.sort-by-type-menu input:checkbox, ' +
-            '.category-panel-listing-categories-body-filters input:checkbox, ' +
-            '.category-panel-body-listing-filters-filter-subtopic input:checkbox');
-        var i, filterType, filterValue;
-        for (i = 0; i < filterInputs.length; i++){
-            filterValue = $(filterInputs[i]).val();
-            filterType = $(filterInputs[i]).attr('name');
-            if (!filterInputs[i].checked) {
-                filters[filterType].push(filterValue);
-            }
-        }
-
-        // Create new collection.
-        return filterResources(collection);
-    }
-});
+    });
+}
 
 /**
     Core function that builds the univeral filters object as search filters are modified. As a
@@ -1198,7 +1491,7 @@ function repopulateResources(target, resourceCollectionView) {
     // Recreate the view (clears previous view)
     if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)
         resourceCollectionView.render(collectionToRender);
-    else reset(collectionToRender);
+    else OC.categoryResources.reset(collectionToRender);
 }
 
 function filterResources(collection){
@@ -1267,268 +1560,6 @@ function addTagFiltersFromResources(resources){
     }
 }
 
-function init_mvc() {
-    // Listen to changes on all options in the filters panel
-    var filterCheckboxes = $('.sort-by-type-menu label, ' +
-        '.category-panel-listing-categories-body-filters label, ' +
-        '.category-panel-body-listing-filters-filter-subtopic label');
-
-    // Bind change listeners on function that repopulates the resources
-    $(filterCheckboxes).click(filterClickHandler);
-
-    // Bind click listeners on main sorting.
-    $('.filter-sort-option').click(function(event){
-        // Get the set and filter is.
-        if (searchedResources) unfilteredCollection = searchedResources;
-        else unfilteredCollection = OC.categoryResources.resourceSet;
-
-        filteredCollection = filterResources(unfilteredCollection);
-
-        if ($(event.target).hasClass('filter-sort-option-newest')){
-            filteredCollection.sortByNewest();
-        } else {
-            filteredCollection.sortByPopularity();
-        }
-        
-        if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)
-            OC.categoryResources.resourceCollectionView.render(filteredCollection);
-        else reset(filteredCollection);
-    });
-
-    var typeTabFilter = $('.category-panel-body-listing-types');
-    if (typeTabFilter.length > 0){
-        $('.category-panel-body-listing-types ul li a').click(function(event){
-            var currentTypeElement = $(event.target),
-                currentType = currentTypeElement.parents('li').attr('name');
-
-            $('.category-panel-body-listing-types ul li a').removeClass('current');
-            currentTypeElement.addClass('current');
-
-            if (currentType === 'all')
-                filters['type'] = [];
-            else {
-                var otherTypes = _.map($('.category-panel-body-listing-types ul li'), function(type){
-                    return $(type).attr('name');
-                });
-
-                otherTypes.splice(otherTypes.indexOf('all'), 1);
-                otherTypes.splice(otherTypes.indexOf(currentType), 1);
-                filters['type'] = otherTypes;
-            }
-
-            var collectionToRender = searchedResources ? searchedResources : filterResources(
-                OC.categoryResources.resourceSet);
-
-            OC.categoryResources.resourceCollectionView.render(collectionToRender);
-
-            event.stopPropagation();
-            event.preventDefault();
-            return false;
-        });
-    }
-
-    var modes = $('.content-panel-body-listing-items, .content-panel-body-listing-requests');
-
-    // Bind text input field as filter.
-    if (!OC.categoryResources.isSubjectHome){
-        $(OC.config.search.input).keyup(function(event){
-            var currentInput = $(this).val(),
-                loadButton = $('.lazy-load-button');
-
-            // Re-render categories.
-            var collectionToRender = new ResourceSet(OC.categoryResources.resourceSet.filter(function (resource) {
-                return (
-                    resource.get('title').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1 ||
-                    resource.get('description').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1 ||
-                    _.filter(resource.get('tags'), function(tag){
-                        return tag.toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
-                    }).length !== 0 ||
-                    _.filter(resource.get('objectives'), function(objective){
-                        return objective.toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
-                    }).length !== 0);
-            }));
-
-            var loadingPlaceholder = $('.filter-search-placeholder');
-
-            if (currentInput.length > 0) {
-                if (loadButton.length > 0) {
-                    loadButton.addClass('hide');
-                    loadButton.removeClass('enabled');
-                }
-
-                modes.addClass('show');
-
-                if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog))
-                    // Hide the 'show more's from all categories. 
-                    categoryView.truncateAll();
-
-                // If there are categories that haven't been rendered yet.
-                loadingPlaceholder.addClass('show');
-
-                // Calculate time since last key entered.
-                currentTime = new Date().getTime();
-                if (OC.categoryResources.lastInputTimestamp){
-                    // Calculate delta between the current time and last timestamp.
-                    delta = (currentTime - OC.categoryResources.lastInputTimestamp) / 1000;
-
-                    if (delta < 1){
-                        clearTimeout(OC.categoryResources.searchFilterTimeout);
-                        OC.categoryResources.filterAsyncSearchOn = false;
-                    }
-
-                    OC.categoryResources.searchFilterTimeout = setTimeout(function(){
-                        var i, resource, currentCategoryID,
-                            categoryID = $('.content-panel-body').attr('id').substring(9),
-                            resourceCount = 4;
-
-                        // Perform search.
-                        $.get('/resources/api/search-category/' + categoryID + '/query/' +
-                                currentInput + '/',
-                            function(response){
-                                loadingPlaceholder.removeClass('show');
-                                OC.categoryResources.filterAsyncSearchOn = false;
-
-                                if (response.status == 'true'){
-                                    var keys = Object.keys(response.resources);
-
-                                    if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog){
-                                        if (OC.categoryResources.resourceCollectionView.collection.length === 0 && (
-                                            keys.length === 0))
-                                            OC.categoryResources.resourceCollectionView.showNullView();
-
-                                        else if (resourceCollectionView.collection.length === 0)
-                                            OC.categoryResources.resourceCollectionView.clearView();
-
-                                    } else {
-                                        // Clear nothing found message, if nothing in original collection.
-                                        if (collectionToRender.length === 0 && keys.length === 0)
-                                            categoryView.showNullView();
-
-                                        else if (collectionToRender.length === 0)
-                                            categoryView.clearView();
-                                    }
-                                    
-                                    for (i = 0; i < keys.length; i++){
-                                        resource = response.resources[keys[i]];
-                                        resourceModel = new Resource(resource);
-                                        
-                                        if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)
-                                            OC.categoryResources.resourceCollectionView.collection.add(resourceModel);
-
-                                        // If the resource isn't in the resource set.
-                                        else collectionToRender.add(resourceModel);
-                                        
-                                        OC.categoryResources.resourceSet.add(resourceModel);
-                                    }
-
-                                    if (!(!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog)){
-                                        reset(filterResources(collectionToRender));
-                                        categoryView.truncateAll();
-                                    }
-                                    
-                                    searchedResources = collectionToRender;
-                                }
-                                else {
-                                    OC.popup(response.message, response.title);
-                                }
-
-                                $('.no-results-message').removeClass('hide');
-                            },
-                        'json');
-                    }, 1500);
-                    OC.categoryResources.filterAsyncSearchOn = true;
-                }
-                OC.categoryResources.lastInputTimestamp = currentTime;
-            } else {
-                clearTimeout(OC.categoryResources.searchFilterTimeout);
-                if (loadButton.length > 0) {
-                    loadButton.removeClass('hide');
-                    loadButton.addClass('enabled');
-                }
-                OC.categoryResources.filterAsyncSearchOn = false;
-                loadingPlaceholder.removeClass('show');
-
-                var classToHide = OC.categoryResources.currentView == 'items' ? 'requests' : 'items';
-                $('.content-panel-body-listing-' + classToHide).removeClass('show');
-
-                try {
-                    categoryView.resetTruncate();
-                    // Show the 'show more's from all categories.
-                    categoryView.showShowMores();
-
-                } catch(e){}
-
-                searchedResources = null;
-            }
-            
-            // Recreate the view (clears previous view)
-            if (!OC.categoryResources.isSubjectHome && !OC.categoryResources.isCatalog){
-                OC.categoryResources.resourceCollectionView.render(filterResources(collectionToRender));
-                OC.categoryResources.resourceCollectionView.initialize();
-            } else reset(filterResources(collectionToRender));
-            
-            searchedResources = collectionToRender;
-
-            // Filter the requests.
-            var requestsToRender = new RequestSet(OC.categoryResources.requestSet.filter(function (request) {
-                return request.get('body').toLowerCase().indexOf(currentInput.toLowerCase()) !== -1;
-            }));
-            OC.categoryResources.requestCollectionView.render(requestsToRender);
-
-        });
-
-        $('.category-panel-body-listing-filters-filter-standards .category-panel-body-listing-filters-filter-title').click(function(){
-            $(this).parent().find('.category-panel-body-listing-filters-filter-body').toggleClass('hidden');
-        });
-
-        // Set number of types on the filter UI.
-        var resourceTypeCounts = {}, resourceType;
-        OC.categoryResources.resourceSet.each(function(resource){
-            resourceType = resource.get('type');
-            if (_.has(resourceTypeCounts, resourceType)){
-                resourceTypeCounts[resourceType] += 1;
-            } else {
-                resourceTypeCounts[resourceType] = 1;
-            }
-        });
-
-        var $li;
-        _.each($('.category-panel-body-listing-types ul li'), function(li){
-            $li = $(li);
-            $a = $li.find('a');
-            if (_.has(resourceTypeCounts, $li.attr('name').toUpperCase())){
-                $a.text($a.text() + ' (' + resourceTypeCounts[$li.attr('name').toUpperCase()] + ')');
-            } else if ($li.attr('name') === 'all') {
-                $a.text($a.text() + ' (' + OC.categoryResources.resourceSet.length + ')');
-            } else {
-                $a.text($a.text() + ' (0)');
-            }
-        });
-        
-
-        var qnaButton = $('.resource-browse-header-qna');
-        qnaButton.tipsy({gravity: 'se', delayIn: 1000, trigger: 'manual', fade: true});
-
-        // On first scroll of content, offer suggestion of teachers waiting.
-        $('.content-panel-body-listing').scroll(function(event){
-            if (! OC.categoryResources.qnaFlashed){
-                qnaButton.attr('title', String(_.random(6, 14)) + ' teachers waiting online to help for free');
-                
-                setTimeout(function(){
-                    qnaButton.tipsy('show');
-
-                    setTimeout(function(){
-                        qnaButton.tipsy('hide');
-                    }, 5000);
-                }, 1500);
-
-                OC.categoryResources.qnaFlashed = true;
-            }
-        });
-    }
-}
-    OC.categoryResources.init_mvc = init_mvc;
-
     function filterClickHandler(event){
         event.stopPropagation();
 
@@ -1543,15 +1574,6 @@ function init_mvc() {
         }
         repopulateResources(input, OC.categoryResources.resourceCollectionView);
     }
-
-    function reset(collection){
-        // Add all categories into the category set.
-        categoryView = new CategoryCollectionView({collection: groupResources(collection)});
-
-        categoryView.render();
-    }
-    // Reference this method.
-    OC.categoryResources.reset = reset;
 
     function groupResources(collection){
         // Split resources from resourceSet into multiple categories.
@@ -1571,33 +1593,10 @@ function init_mvc() {
         return categorySet;
     }
 
-    function initModeToggler(){
-        $('.content-panel-body-listing-questions-toggler a').click(function(event){
-            $('.content-panel-body-listing-questions-toggler a').removeClass('selected');
-            
-            var currentModeButton = $(event.target);
-            currentModeButton.addClass('selected');
-
-            if (currentModeButton.hasClass('content-panel-body-listing-questions-toggler-listing')){
-                $('.content-panel-body-listing-items').addClass('show');
-                $('.content-panel-body-listing-requests').removeClass('show');
-                OC.categoryResources.currentView = 'items';
-            } else if (currentModeButton.hasClass('content-panel-body-listing-questions-toggler-questions')){
-                $('.content-panel-body-listing-requests').addClass('show');
-                $('.content-panel-body-listing-items').removeClass('show');
-                OC.categoryResources.currentView = 'requests';
-            }
-
-            event.stopPropagation();
-            event.preventDefault();
-            return false;
-        });
-    }
-    OC.categoryResources.initModeToggler = initModeToggler;
-
     return {
         Category: Category,
         Resource: Resource,
+        ResourceView: ResourceView,
         Request: Request,
         RequestCollectionView: RequestCollectionView,
         ResourceCollectionView: ResourceCollectionView

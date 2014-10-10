@@ -37,7 +37,7 @@
 <div>
 {% else %}
 
-{% if query or query == '' %}
+{% if garba %}
 <div class="center-spread resource-browse">
     <div class="wide-center-stage">
         <div class="wide-center-stage-fill-panel wide-center-stage-left-panel category-panel">
@@ -184,12 +184,17 @@
         </div>
     </div>
 </div>
-{% endif %}
+{% else %}
 
 <div class="center-spread resource-browse resource-browse-listing">
     <div class="wide-center-stage resource-browse-header">
         <div class="wide-center-stage-content">
             <div class="wide-center-stage-key-panel wide-center-stage-left-panel">
+                {% if query or query == '' %}
+                <div class="resource-browse-header-title-wrapper">
+                    <div class="resource-browse-header-title"><h2>Search for '{{ query }}'</h2></div>
+                </div>
+                {% else %}
                 <div class="resource-browse-header-title-wrapper">
                     <div class="resource-browse-header-title{% if not is_catalog %} show-share{% endif %}"><h2>{{ selected_category.title }}</h2><div class="resource-browse-header-share action-button mini-action-button">+ Share new</div></div>
                     <div class="breadcrumb">
@@ -201,6 +206,7 @@
                         {% endfor %}
                     </div>
                 </div>
+                {% endif %}
             </div>
 
             <div class="wide-center-stage-fill-panel wide-center-stage-right-panel">
@@ -217,7 +223,7 @@
             <div class="category-panel-listing">
                 <div class="category-panel-listing-categories scrollable-block">
                     <div class="category-panel-listing-categories-body">
-                        {% if not child_categories_map and not is_catalog %}
+                        {% if not child_categories_map and not is_catalog and not query %}
                         <div class="category-panel-body-listing-types">
                             <ul>
                                 <li name="all"><a href="" class="current">All</a></li>
@@ -276,6 +282,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endif %}
 
 {% include 'partials/share-new.html' %}

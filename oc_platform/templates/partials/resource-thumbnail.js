@@ -29,13 +29,17 @@
 
         created: {% if resources_source == 'search' %}'{{ resource.object.created }}'{% elif resources_source == 'favorites' %}'{{ resource.parent.created }}'{% else %}'{{ resource.created }}'{% endif %},
 
-        user: {% if resources_source == 'search' %}'{{ resource.object.user }}'{% elif resources_source == 'favorites' %}'{{ resource.parent.user }}'{% else %}'{{ resource.user }}'{% endif %},
+        created_iso: {% if resources_source == 'search' %}'{{ resource.object.created|date:"c" }}'{% elif resources_source == 'favorites' %}'{{ resource.parent.created|date:"c" }}'{% else %}'{{ resource.created|date:"c" }}'{% endif %},
+
+        username: {% if resources_source == 'search' %}'{{ resource.object.user.username }}'{% elif resources_source == 'favorites' %}'{{ resource.parent.user.username }}'{% else %}'{{ resource.user.username }}'{% endif %},
 
         difficulty: {% if resources_source == 'search' %}'{{ resource.object.difficulty }}'{% elif resources_source == 'favorites' %}'{{ resource.parent.difficulty }}'{% else %}'{{ resource.difficulty }}'{% endif %},
 
         visibility: {% if resources_source == 'search' %}'{{ resource.object.visibility }}'{% elif resources_source == 'favorites' %}'{{ resource.parent.visibility }}'{% else %}'{{ resource.visibility }}'{% endif %},
 
         cost: 'free',
+
+        remote: false,
 
         license: {% if resources_source == 'search' %}'{{ resource.object.license }}'{% elif resources_source == 'favorites' %}'{{ resource.parent.license }}'{% else %}'{{ resource.license }}'{% endif %},
 

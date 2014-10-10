@@ -1,4 +1,4 @@
-define(['jquery', 'underscore', 'backbone', 'core'], function($, _, Backbone, OC){
+define(['jquery', 'underscore', 'backbone', 'core', 'categoryResources'], function($, _, Backbone, OC, categoryResources){
 
     // Initialize Search results Model
     OC.Result = Backbone.Model.extend({
@@ -96,7 +96,7 @@ define(['jquery', 'underscore', 'backbone', 'core'], function($, _, Backbone, OC
 
         render: function () {
             this.$el.html(this.template(this.model.toJSON()));
-            $('#search-result-set').append(this.$el);
+            $('.content-panel-body-listing-items').append(this.$el);
 
             return this;
         },
@@ -157,28 +157,28 @@ define(['jquery', 'underscore', 'backbone', 'core'], function($, _, Backbone, OC
             } else {
             // Create a new view object for each object in the collection and render it
                 _.each(collectionToRender.models, function(item) {
-                    new ResultsView({model: item}).render();
+                    new categoryResources.ResourceView({model: item}).render();
                 });
             }
             this.revealView();
         },
 
         clearView: function () {
-            $('#search-result-set').html('');
+            $('.content-panel-body-listing-items').html('');
         },
 
         prepareView: function () {
-            $('#search-result-set').addClass('spinner-background');
+            $('.content-panel-body-listing-items').addClass('spinner-background');
         },
 
         revealView: function () {
-            $('#search-result-set').removeClass('spinner-background');
-            $('#search-result-set').css('display', 'none');
-            $('#search-result-set').fadeIn("fast");
+            $('.content-panel-body-listing-items').removeClass('spinner-background');
+            $('.content-panel-body-listing-items').css('display', 'none');
+            $('.content-panel-body-listing-items').fadeIn("fast");
         },
 
         showNullView: function () {
-            $('#search-result-set').html('<p>No results matching your criteria found.</p>');
+            $('.content-panel-body-listing-items').html('<p>No results matching your criteria found.</p>');
         },
 
         setFavoriteStates: function () {}

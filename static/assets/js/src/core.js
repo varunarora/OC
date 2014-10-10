@@ -4250,6 +4250,16 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
 
             // Attach tooltip on the Common Core.
             $('.category-choice').tipsy({gravity: 's'});
+
+            function resizeListing(){
+                // Set header height based on page height.
+                var newHeight = $(window).height() - $('body > header').height() - $(
+                        '.resource-browse-header').height();
+                $('.content-panel-body-listing').height(newHeight);
+            }
+
+            if ($('.resource-browse-listing').length > 0){
+                resizeListing(); $(window).resize(resizeListing); }
         },
 
         newResourcePosted: function(){

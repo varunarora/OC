@@ -28,7 +28,7 @@ define(['jquery', 'core', 'categoryResources'], function($, OC, categoryResource
                 $(OC.config.search.input).autocomplete('disable');
 
                 // Initiatialize the Backbone models/collection/view
-                OC.categoryResources.init_mvc();
+                OC.categoryResources.initMVC();
 
                 // Initialize toggling between questions view and content.
                 OC.categoryResources.initModeToggler();
