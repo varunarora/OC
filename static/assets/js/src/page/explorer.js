@@ -722,7 +722,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                         React.DOM.div({
                             className: 'explorer-resource-item-thumbnail',
                             style: {
-                                backgroundImage: this.props.model.get('thumbnail')
+                                backgroundImage: 'url(\'' + this.props.model.get('thumbnail') + '\')'
                             }
                         })
                     ]),

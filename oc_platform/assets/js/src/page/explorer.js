@@ -374,7 +374,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 this.forceUpdate();
             },
             bindProps: function() {
-                [this.props.settings, this.props.objectives].map(function(model){
+                _.union(this.props.objectives, [this.props.settings]).map(function(model){
                     model.on('add change remove', this._backboneForceUpdate, this);
                 }.bind(this));
             },
@@ -383,12 +383,12 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 this.bindProps();
             },
 
-            componentDidUpdate: function() {
+            /*componentDidUpdate: function() {
                 this.bindProps();
-            },
+            },*/
 
             componentWillUnmount: function() {
-                [this.props.settings, this.props.objectives].map(function(model){
+                _.union(this.props.objectives, [this.props.settings]).map(function(model){
                     model.off('add change remove', this._backboneForceUpdate, this);
                 }.bind(this));
             },
@@ -496,13 +496,13 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
                 this.props.objective.on('add change remove', this._forceUpdate, this);
             },
-            componentDidUpdate: function() {
+            /*componentDidUpdate: function() {
                 this.setReady();
                 //this.setMessage();
 
                 this.props.objective.off('add change remove', this._forceUpdate, this);
                 this.props.objective.on('add change remove', this._forceUpdate, this);
-            },
+            },*/
             componentWillUnmount: function() {
                 // Ensure that we clean up any dangling references when the component is destroyed.
                 this.props.objective.off('add change remove', this._forceUpdate, this);
@@ -722,7 +722,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                         React.DOM.div({
                             className: 'explorer-resource-item-thumbnail',
                             style: {
-                                backgroundImage: this.props.model.get('thumbnail')
+                                backgroundImage: 'url(\'' + this.props.model.get('thumbnail') + '\')'
                             }
                         })
                     ]),
@@ -783,12 +783,12 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             componentWillMount: function(){
                 this.setStatusProps();
             },
-            componentDidUpdate: function(){
+            /*componentDidUpdate: function(){
                 if (!this.props.model.has('statusShow'))
                     this.setStatusProps();
 
                 this.bindProps();
-            },
+            },*/
             toggleObjectiveStatus: function(event){
                 var pre = $(event.target);
 
@@ -799,6 +799,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
                 var props = this.props;
                 
+                console.log(props.model.get('statusShow'));
                 props.model.set('statusShow', !props.model.get('statusShow'));
 
                 if (props.model.get('statusShow')){
@@ -806,6 +807,9 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     $('body').unbind('click');
                     $('body').click(function(event){
                         props.model.set('statusShow', false);
+
+                        //event.preventDefault();
+                        //return false;
                     });
                 }
 
@@ -987,6 +991,48 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                         React.DOM.div({className: 'explorer-issue-listing-item-message'},
                             this.props.objective.get('issue')['message'])
                     ])
+                ]);
+            }
+        }),
+
+        Genie: React.createClass({
+            render: function(){
+                return React.DOM.div({className: 'wide-header explorer-body'}, [
+                    React.DOM.div({className: 'explorer-body-side scrollable-block'}, [
+                        React.DOM.ul({className: 'explorer-body-side-menu explorer-body-side-menu-main scroll-content'}, [
+                            React.DOM.li({className: 'overview'}, [
+                                React.DOM.a({href: ''}, 'OVERVIEW')
+                            ]),
+                            React.DOM.li({className: 'textbooks'}, [
+                                React.DOM.a({href: ''}, 'UNITS / RESOURCES')
+                            ]),
+                        ])
+                    ]),
+
+                    React.DOM.div({className: 'explorer-body-stage'}, [
+                        React.DOM.div({className: 'explorer-body-stage-spread'}, [
+                            React.DOM.div({className: 'explorer-resource-overview show'}, [
+                                React.DOM.div({className: 'explorer-overview-section'}, [
+                                    React.DOM.h2({}, 'Overview'),
+                                    React.DOM.p({}, this.props.description),
+                                ]),
+
+                                React.DOM.div({className: 'explorer-overview-section'}, [
+                                    React.DOM.div({className: 'explorer-overview-unit-table'}, '')
+                                ]),
+
+                                React.DOM.div({className: 'explorer-overview-section'}, [
+                                    React.DOM.h2({}, 'Issues'),
+
+                                    React.DOM.div({className: 'explorer-overview-issues-wrapper explorer-resource-module'}, [
+
+                                    ])
+                                ]),
+
+                            ]),
+                        ]),
+                    ]),
+
                 ]);
             }
         }),
