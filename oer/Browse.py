@@ -132,6 +132,9 @@ class Browse():
 
 
     def browse(self):
+        if self.selected_category.parent.slug == 'opencurriculum':
+            raise Http404
+
         child_categories = list(Category.objects.filter(
             parent=self.selected_category).order_by('position'))
         parent_categories = list(Category.objects.filter(
