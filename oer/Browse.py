@@ -27,6 +27,7 @@ class Browse():
     current_category_id = None
     resource_count = 0
     selected_category = None
+    subject_category = None
     return_url = ''
     breadcrumb = []
     request = {}
@@ -91,6 +92,12 @@ class Browse():
             except Category.DoesNotExist:
                 raise Http404
 
+            # Determine subject if subject.
+            try:
+                self.subject_category = Category.objects.get(
+                    slug=categories_slugs[1], parent__slug=categories_slugs[0])
+            except:
+                pass
             
             for category in host_flattened_tree:
                 if category == self.current_category:
@@ -234,6 +241,7 @@ class Browse():
             'title': 'Browse lessons, projects, activities, worksheets &amp; tests' if self.is_subject_home else (
                 self.selected_category.title + ' &lsaquo; Lessons, projects, activities, worksheets &amp; tests'),
             'selected_category': self.selected_category,
+            'subject_category': self.subject_category,
             # 'browse_tree': browse_tree,
             'child_categories': serialized_child_categories,
             'parent_categories': serialized_parent_categories,

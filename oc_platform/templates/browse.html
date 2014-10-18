@@ -5,7 +5,7 @@
 {% endif %}
 
 {% if child_categories_map %}
-<div class="center-spread resource-browse resource-browse-subject">
+<div class="center-spread resource-browse resource-browse-subject resource-browse-{{ subject_category.slug }}">
     <div class="resource-browse-header">
         <div class="subjects-header-subjects">
             <h2 class="subjects-header-subjects-subject">English</h2>
@@ -37,156 +37,7 @@
 <div>
 {% else %}
 
-{% if garba %}
-<div class="center-spread resource-browse">
-    <div class="wide-center-stage">
-        <div class="wide-center-stage-fill-panel wide-center-stage-left-panel category-panel">
-            {% if browse_mode != 'suggestions' %}
-            <div class="category-panel-listing">
-                <div class="category-choice-wrapper">
-                    <button class="category-choice action-button" title="Category this page is based on">Common Core<!--<div class="category-choice-button"></div>--></button>
-                </div>
-                {% if query or query == '' %}
-                    <ul class="category-panel-listing-search-category">
-                        <li class="selected-category"><a href="">Search for '{{ query }}'</a></li>
-                    </ul>
-                {% else %}
-                <div class="category-panel-listing-categories scrollable-block">
-                    <div class="category-panel-listing-categories-body">
-                        {% if not child_categories_map %}
-                        <h4>{{ selected_category.title }}</h4>
-                        <ul class="category-panel-listing-categories-children">
-                        {% for child_category in child_categories %}
-                            {% if is_catalog %}
-                            <li><a href="{{ child_category.url }}">{{ child_category.title }}</a></li>
-                            {% endif %}
-                        {% endfor %}
-                        </ul>
-                        {% if not is_catalog %}
-                        <div class="category-panel-listing-categories-body-filters">
-                            {% for tag in category_tags %}
-                                <label><input type="checkbox" name="tags" value="{{ tag.title|upper }}" checked />{{ tag.title|upper }}<span class="category-panel-listing-categories-body-filters-description" title="{{ tag.description }}">?</span></label>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-
-                        {% endif %}
-                        {% if selected_category.parent.slug != 'opencurriculum' %}
-                        <h4 class="category-panel-listing-categories-body-others">Others in {{ selected_category.parent.title }}</h4>
-                        <ul class="category-panel-listing-categories-body-siblings">
-                        {% for parent_category in parent_categories %}
-                            <li><a href="{{ parent_category.url }}">{{ parent_category.title }}</a></li>
-                        {% endfor %}
-                        </ul>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-        </div>
-        <div class="wide-center-stage-key-panel wide-center-stage-right-panel content-panel">
-            <div class="content-panel-body-wrapper">
-                <div class="content-panel-body" id="category-{{ selected_category.id }}">
-                    {% if browse_mode == 'suggestions' %}
-                        <script type="text/javascript">
-                            OC.categoryResources.suggestionMode = true;
-                        </script>
-                        <div class="content-panel-body-header">
-                            {% include 'partials/browse-title.html' %}
-                        </div>
-                        <div class="content-panel-body-listing">
-                            {% include 'partials/browse-suggestions.html' %}
-                        </div>
-
-                    {% else %}
-                        {% if child_categories_map %}
-                        <!--<div class="content-panel-body-feature">
-                            <div class="content-panel-body-feature-title"><h2>{{ selected_category.title }}</h2>
-                            <div class="breadcrumb">
-                                {% for breadcrumb_category in breadcrumb %}
-                                    <a href="{{ breadcrumb_category.url }}">{{ breadcrumb_category.title }}</a> 
-                                    {% if not forloop.last %}
-                                    <span class="vertical-caret breadcrumbs-caret"></span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                            </div>
-                        </div>
-                        <div class="content-panel-body-grades-topics">
-                            <div class="content-panel-body-grades-wrapper">
-                                <ul class="content-panel-body-grades">
-                                    {% for child_category in child_categories %}
-                                    <li><a href="{{ child_category.url }}" id="category-{{ child_category.id }}">{{ child_category.title }}</a></li> 
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                            <div class="content-panel-body-grades-topics-list">
-                                <div class="content-panel-body-grades-topics-list-empty">
-                                    <img src="{{ STATIC_URL }}images/select-category.png" />
-                                    <h1 class="empty-state-title"><span class="content-panel-body-grades-topics-list-empty-arrow empty-state-arrow"></span>Select a grade level for a list of topic areas</h1>
-                                </div>
-                                <ul class="content-panel-body-grades-topics-list-filled"></ul>
-                            </div>
-                        </div>-->
-                        {% endif %}
-                        {% if query or query == '' %}
-                        <div class="content-panel-body-header">
-                            <div class="content-panel-body-header-title">
-                                <h3>Search results for <span class="search-term">{{ query }}</span></h3>
-                            </div>
-                        </div>
-                        <div class="content-panel-body-search content-panel-body-listing">
-                        {% include 'partials/search.html' %}
-                        </div>
-                        {% elif not child_categories_map %}
-                        <div class="content-panel-body-header">
-                            {% include 'partials/browse-title.html' %}
-                            <div class="content-panel-body-listing-questions-toggler">
-                                <a href="" class="content-panel-body-listing-questions-toggler-listing selected">Content</a>
-                                <a href="" class="content-panel-body-listing-questions-toggler-questions">Community Q&amp;A</a>
-                            </div>
-                        </div>
-                        <div class="content-panel-body-listing-filters-sort-wrapper">
-                            <div class="content-panel-body-listing-filters-sort">
-                                <span class="sort-by">Sort by: </span><span class="filter-sort-option filter-sort-option-newest selected">Newest</span> <span class="filter-sort-option">Popularity</span>
-                            </div>
-                        </div>
-                        {% if not child_categories_map and not is_catalog %}
-                        <div class="content-panel-body-listing-types oc-page-tabs">
-                            <ul>
-                                <li name="all"><a href="" class="current">All</a></li>
-                                <li name="lesson"><a href="">Lesson Plans</a></li>
-                                <li name="activity"><a href="">Activities</a></li>
-                                <li name="worksheet"><a href="">Worksheets</a><li>
-                                <li name="assessment"><a href="">Assessments</a></li>
-                                <li name="exercise"><a href="">Exercises</a></li>
-                                <li name="lecture"><a href="">Lectures</a></li>
-                            </ul>
-                        </div>
-                        {% endif %}
-                        <div class="content-panel-body-listing">
-                            <div class="content-panel-body-listing-items show"></div>
-                            <div class="filter-search-placeholder">Searching for your happiness...</div>
-                            {% if current_category_id %}
-                                <div class="lazy-load-button enabled">Load more...</div>
-                            {% endif %}
-
-                            {% if not query and query != '' and category_group %}
-                            <div class="content-panel-body-listing-requests"></div>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                </div>
-                {% endif %}
-            </div>
-            {% include 'partials/footer.html' %}
-        </div>
-    </div>
-</div>
-{% else %}
-
-<div class="center-spread resource-browse resource-browse-listing">
+<div class="center-spread resource-browse resource-browse-listing resource-browse-{{ subject_category.slug }}">
     <div class="wide-center-stage resource-browse-header">
         <div class="wide-center-stage-content">
             <div class="wide-center-stage-key-panel wide-center-stage-left-panel">
@@ -282,7 +133,6 @@
         </div>
     </div>
 </div>
-{% endif %}
 {% endif %}
 
 {% include 'partials/share-new.html' %}
