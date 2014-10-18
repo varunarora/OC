@@ -36,7 +36,7 @@ class Textbook(models.Model):
 class Unit(models.Model):
     unit = models.ForeignKey('oer.Unit', related_name='unit', blank=True, null=True)
     title = models.CharField(max_length=256)
-    #objectives = models.ManyToManyField('curriculum.Objective', blank=True, null=True)
+    objectives = models.ManyToManyField('curriculum.Objective', blank=True, null=True)
     sections = models.ManyToManyField('curriculum.Section', blank=True, null=True)
     period = JSONField(null=True, blank=True)
 
@@ -79,10 +79,10 @@ class StandardCategory(models.Model):
 
 
 class Objective(models.Model):
-    #description = models.TextField()
-    #resources = models.ManyToManyField('curriculum.Resource', blank=True, null=True)
+    description = models.TextField()
+    resources = models.ManyToManyField('curriculum.Resource', blank=True, null=True)
     parent = models.ForeignKey('meta.Tag', null=True, blank=True)
-    #meta = JSONField(null=True, blank=True)
+    meta = JSONField(null=True, blank=True)
 
     def __unicode__(self):
         return self.description[:200]
