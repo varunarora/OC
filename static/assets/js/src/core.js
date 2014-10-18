@@ -3,7 +3,7 @@
 /*global jQuery, $, Modernizr, gapi, _*/
 /*jslint nomen: false */
 
-define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dialog'], function($){
+define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'dialog'], function($){
     //window.onerror = function(message, url, lineNumber){
     //    $('')
     //}
@@ -2225,7 +2225,10 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
         initUpload: function(){
             $('nav#add-resource-menu .add-upload a, .profile-resources-collections-actions-menu-add .add-upload a,' +
                 'a.new-upload-suggestion').click(function(event){
-                var newGroupDialog = OC.customPopup('.post-new-upload-dialog');
+                
+                require(['upload'], function(){
+                    var newGroupDialog = OC.customPopup('.post-new-upload-dialog');
+                });
 
                 event.stopPropagation();
                 event.preventDefault();
@@ -5670,6 +5673,7 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
         );
     };
 
+    /*
     // Include the UserVoice JavaScript SDK (only needed once on a page)
     UserVoice=window.UserVoice||[];(function(){var uv=document.createElement('script');uv.type='text/javascript';uv.async=true;uv.src='//widget.uservoice.com/ZAGIW6Tl7C98iiNDKsLe5g.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(uv,s)})();
 
@@ -5682,6 +5686,7 @@ define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'upload', 'dial
 
     // Add default trigger to the bottom-right corner of the window:
     UserVoice.push(['addTrigger', { mode: 'contact', trigger_position: 'bottom-right' }]);
+    */
 
     $.fn.animateAuto = function(prop, speed, callback){
         var elem, height, width;

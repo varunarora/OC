@@ -2320,6 +2320,7 @@ nav.collections-navigation,
 				outline: none
 
 			ul
+				clear: left
 				margin-top: 16px
 
 	a
@@ -4369,19 +4370,9 @@ form.resource-create-edit-form
 					font-size: 1.3em
 					padding-top: 70px
 
-// WORLD'S BIGGEST HACK
-body.browse
-	#search-bar input[type="submit"]
-		background-color: #2980b9
-
-	#search-bar input[type="search"]
-		&:focus
-			border-color: #2980b9
-
 .resource-browse
 	.resource-browse-header
 		height: 80px
-		background-color: #2980b9
 
 		.resource-browse-header-title-wrapper
 			//width: 92%
@@ -4413,14 +4404,10 @@ body.browse
 					margin-top: 2px
 
 					&:hover
-						color: #2980b9
 						background-color: #fff
 						opacity: 1
 			.breadcrumb
 				clear: left
-
-				a
-					color: #AAC0CE
 
 		.resource-browse-header-qna-wrapper
 			padding-top: 30px
@@ -4463,7 +4450,6 @@ body.browse
 			width: 80%
 
 			.subjects-header-subjects-subject
-				color: #679FC5
 				font-weight: bold
 				float: left
 				width: 33%
@@ -4548,15 +4534,10 @@ body.browse
 						&:hover
 							text-decoration: none
 
-							.grade-topic-content
-								border-color: #2980b9
-								color: #2980b9
-
 						.grade-topic-thumbnail, .grade-topic-content
 							width: 180px
 
 						.grade-topic-thumbnail
-							background-color: #2980b9
 							height: 140px
 							background-repeat: no-repeat
 							background-position: center center
@@ -4571,7 +4552,6 @@ body.browse
 							border-color: #fff
 							line-height: 1.6em
 							font-weight: bold
-
 
 	.category-panel
 		.category-panel-listing
@@ -4977,6 +4957,86 @@ body.browse
 		footer
 			margin-top: 0px
 
+	&.resource-browse-mathematics
+		.resource-browse-header
+			background-color: #2980b9
+
+			.subjects-header-subjects-subject
+				color: #679FC5
+
+			.resource-browse-header-title
+				.resource-browse-header-share
+					&:hover
+						color: #2980b9
+						background-color: #fff
+						opacity: 1
+			.breadcrumb
+				a
+					color: #AAC0CE
+
+		ul.grades-topics-list-filled
+
+			li.grade-topic
+				a:hover
+					.grade-topic-content
+						border-color: #2980b9
+						color: #2980b9
+
+				.grade-topic-thumbnail
+					background-color: #2980b9
+
+		a.content-panel-body-listing-item-anchor
+			&:hover
+				border-color: #2980b9
+		
+		.content-panel-body-listing-item-contents-caption
+			color: $link-hover
+
+		.content-panel-body-listing-item-description-more,
+		.content-panel-body-listing-item-description-less
+			color: $link-hover
+
+
+	&.resource-browse-english
+		.resource-browse-header
+			background-color: #d35400
+
+			.subjects-header-subjects-subject
+				color: #FFA366
+
+			.resource-browse-header-title
+				.resource-browse-header-share
+					&:hover
+						color: #d35400
+						background-color: #fff
+						opacity: 1
+			.breadcrumb
+				a
+					color: #FFA366
+
+		ul.grades-topics-list-filled
+
+			li.grade-topic
+				a:hover
+					.grade-topic-content
+						border-color: #d35400
+						color: #d35400
+
+				.grade-topic-thumbnail
+					background-color: #d35400
+
+		a.content-panel-body-listing-item-anchor
+			&:hover
+				border-color: #d35400
+
+		.content-panel-body-listing-item-contents-caption
+			color: #d35400
+
+		.content-panel-body-listing-item-description-more,
+		.content-panel-body-listing-item-description-less
+			color: #d35400
+
+
 .content-panel-body-listing-thumbnail-item
 	width: 210px
 	height: 320px
@@ -5131,7 +5191,6 @@ a.content-panel-body-listing-item-anchor
 
 	&:hover
 		//@include box-shadow(0 0px 8px rgba(0, 0, 0, 0.2))
-		border-color: #2980b9
 		background-color: #fff
 
 
@@ -5172,7 +5231,6 @@ a.content-panel-body-listing-item-anchor
 	
 	.content-panel-body-listing-item-contents-caption
 		display: block
-		color: $link-hover
 		font-size: 1.2em
 
 	.content-panel-body-listing-item-contents-description
@@ -5182,7 +5240,6 @@ a.content-panel-body-listing-item-anchor
 
 		.content-panel-body-listing-item-description-more,
 		.content-panel-body-listing-item-description-less
-			color: #1155cc
 			cursor: pointer
 
 			&:hover
@@ -5788,7 +5845,7 @@ body.signup, body.login, body.unsubscribe
 
 .explorer-header
 	height: 50px
-	background-color: #2ECC71
+	background-color: #3498db
 
 	.explorer-header-current, .explorer-header-child
 		float: left
@@ -5805,10 +5862,10 @@ body.signup, body.login, body.unsubscribe
 		padding-top: 16px
 
 		&:hover
-			background-color: #27AE60
+			background-color: #2980b9
 
 	.explorer-header-current
-		background-color: #27AE60
+		background-color: #2980b9
 		cursor: pointer
 		text-align: left
 		height: 50px
@@ -5876,8 +5933,12 @@ body.signup, body.login, body.unsubscribe
 		&.show
 			display: block
 
-.explorer-body
+.explorer-body-wrapper
 	height: 500px
+
+
+	.explorer-body
+		height: 100%
 
 	.explorer-body-side
 		background-color: #f2f2f2
@@ -5914,6 +5975,11 @@ body.signup, body.login, body.unsubscribe
 					> a
 						font-size: 1.15em
 
+			&.explorer-body-side-menu-parentless-child
+				> li
+					> a
+						font-weight: normal
+
 			&.explorer-body-side-menu-light
 				padding: 0px
 				padding-bottom: 20px
@@ -5946,11 +6012,12 @@ body.signup, body.login, body.unsubscribe
 				overflow: hidden
 
 				.explorer-resource-module-thumbnail
-					width: 80px
-					height: 80px
+					width: 77px
+					height: 77px
 					background-size: cover
 					float: left
 					margin-right: 20px
+					background-color: #efefef
 
 				.explorer-resource-module-content
 					padding-top: 10px
@@ -5964,12 +6031,6 @@ body.signup, body.login, body.unsubscribe
 						color: #aaa
 						padding-top: 6px
 
-			.explorer-resource-overview,
-			.explorer-resource-module-wrapper,
-				display: none
-
-				&.show
-					display: block
 
 			.explorer-resource-module
 				.explorer-resource-module-main
@@ -6066,7 +6127,7 @@ body.signup, body.login, body.unsubscribe
 								.explorer-resource-item-thumbnail
 									width: 60px
 									height: 60px
-									background-color: #2ecc71
+									background-color: #efefef
 									margin-right: 16px
 
 							.explorer-resource-item-content
@@ -6121,16 +6182,18 @@ body.signup, body.login, body.unsubscribe
 									//color: #fff
 
 
-			.explorer-resource-listing
+			.explorer-resource-sections
 				margin-top: 20px
 
-				.explorer-resource-listing-body
-					margin-top: 10px
-					background-color: #fff
-					//padding: 10px
-					overflow: hidden
+				.explorer-resource-section-body
 
-					.explorer-resource-objective-section
+					.explorer-resource-section-listing-items
+						margin-top: 10px
+						background-color: #fff
+						//padding: 10px
+						overflow: hidden
+
+					.explorer-resource-section-listing-item
 						overflow: hidden
 						border-bottom: 1px solid #ddd
 						//padding: 10px
@@ -6141,10 +6204,14 @@ body.signup, body.login, body.unsubscribe
 						&.new
 							background-color: #f7ebc6
 
+						&:hover
+							border: 1px solid #aaa
+
 						&.selected
 							border: 1px solid #27ae60
 
-						.explorer-resource-listing-body-pre
+
+						.explorer-resource-section-listing-item-pre
 							width: 6%
 							float: left
 							//background-color: #E4F7D2
@@ -6157,12 +6224,12 @@ body.signup, body.login, body.unsubscribe
 								//background-color: #FBC9C9
 								background-image: url('../images/objective-needs-work.png')
 
-						.explorer-resource-listing-body-content
+						.explorer-resource-section-listing-item-content
 							overflow: hidden
 							width: 94%
 							float: left
 
-							.explorer-resource-listing-body-content-key
+							.explorer-resource-section-listing-item-content-key
 								width: 67%
 								float: left
 
@@ -6179,7 +6246,7 @@ body.signup, body.login, body.unsubscribe
 									&:focus
 										color: $body-color
 
-							.explorer-resource-listing-body-content-fill
+							.explorer-resource-section-listing-item-content-fill
 								width: 33%
 								float: right
 
@@ -6262,13 +6329,15 @@ body.signup, body.login, body.unsubscribe
 					float: left
 
 					.explorer-timetable-period
-						height: 55px
 						padding-top: 28px
 						border-bottom: 1px solid #ddd
 						background-color: #f4f7f8
 						padding-left: 60px
 						font-size: 1.15em
 						color: #0971B2
+
+						&.explorer-timetable-week
+							height: 55px
 
 				.explorer-overview-unitflow
 					float: right
@@ -6282,6 +6351,7 @@ body.signup, body.login, body.unsubscribe
 						display: block
 						cursor: pointer
 						overflow: hidden
+						height: 77px
 
 						&:hover
 							background-color: #efefef

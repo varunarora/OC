@@ -16,6 +16,7 @@ class Curriculum(models.Model):
     textbooks = models.ManyToManyField('curriculum.Textbook', blank=True, null=True)
     units = models.ManyToManyField('curriculum.Unit', blank=True, null=True, related_name='units')
     settings = JSONField(null=True, blank=True)
+    standard_categories = models.ManyToManyField('curriculum.StandardCategory', blank=True, null=True)
 
     def __unicode__(self):
         return self.grade + ': ' + self.subject
@@ -35,22 +36,56 @@ class Textbook(models.Model):
 class Unit(models.Model):
     unit = models.ForeignKey('oer.Unit', related_name='unit', blank=True, null=True)
     title = models.CharField(max_length=256)
-    objectives = models.ManyToManyField('curriculum.Objective', blank=True, null=True)
+    #objectives = models.ManyToManyField('curriculum.Objective', blank=True, null=True)
+    sections = models.ManyToManyField('curriculum.Section', blank=True, null=True)
     period = JSONField(null=True, blank=True)
 
     def __unicode__(self):
         return self.title
 
 
-class Objective(models.Model):
+class Section(models.Model):
+    position = models.IntegerField(default=0, null=True, blank=True)
+    title = models.CharField(max_length=256)
+    items = models.ManyToManyField('curriculum.SectionItem', blank=True, null=True)
+    settings = JSONField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.title
+
+
+class SectionItem(models.Model):
+    content_type = models.ForeignKey(ContentType, null=True, blank=True)
+    content_id = models.PositiveIntegerField(null=True, blank=True)
+    content = generic.GenericForeignKey('content_type', 'content_id')
     description = models.TextField()
-    resources = models.ManyToManyField('curriculum.Resource', blank=True, null=True)
-    parent = models.ForeignKey('meta.Tag', null=True, blank=True)
     meta = JSONField(null=True, blank=True)
+    resource_sets = models.ManyToManyField('curriculum.SectionItemResources', null=True, blank=True)
 
     def __unicode__(self):
         return self.description[:200]
 
+
+class SectionItemResources(models.Model):
+    title = models.CharField(max_length=256)
+    resources = models.ManyToManyField('curriculum.Resource', blank=True, null=True)
+
+
+class StandardCategory(models.Model):
+    title = models.CharField(max_length=256)
+    standard_categories = models.ManyToManyField('self', blank=True, null=True, symmetrical=False)
+    category = models.ForeignKey('meta.Category', blank=True, null=True)
+    sections = models.ManyToManyField('curriculum.Section', blank=True, null=True)
+
+
+class Objective(models.Model):
+    #description = models.TextField()
+    #resources = models.ManyToManyField('curriculum.Resource', blank=True, null=True)
+    parent = models.ForeignKey('meta.Tag', null=True, blank=True)
+    #meta = JSONField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.description[:200]
 
 class Resource(models.Model):
     resource = models.ForeignKey('oer.Resource', related_name='resourcey')
