@@ -138,8 +138,8 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                                         textbookTitle: textbook.title,
                                         title: unit.title,
                                         textbookThumbnail: textbook.thumbnail,
-                                        begin: _.has(unit.period, 'begin') ? unit.period.begin : null,
-                                        end: _.has(unit.period, 'end') ? unit.period.end : null,
+                                        begin: unit.period && _.has(unit.period, 'begin') ? unit.period.begin : null,
+                                        end: unit.period && _.has(unit.period, 'end') ? unit.period.end : null,
                                     };
                                 });
                             }));
@@ -161,10 +161,10 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                                 return {
                                     id: unit.id,
                                     title: unit.title,
-                                    type: _.has(unit.period, 'type') ? unit.period.type : null,
-                                    position: _.has(unit.period, 'position') ? unit.period.position : null,
-                                    parent: _.has(unit.period, 'parent') ? unit.period.parent : null,
-                                    unit: _.has(unit.period, 'unit') ? unit.period.unit : null
+                                    type: unit.period && _.has(unit.period, 'type') ? unit.period.type : null,
+                                    position: unit.period && _.has(unit.period, 'position') ? unit.period.position : null,
+                                    parent: unit.period && _.has(unit.period, 'parent') ? unit.period.parent : null,
+                                    unit: unit.period && _.has(unit.period, 'unit') ? unit.period.unit : null
                                 };
                             });
                             view.setProps({units: unitPeriods});
