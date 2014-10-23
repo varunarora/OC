@@ -212,7 +212,7 @@ def get_serialized_sections(parent):
                 'issue': serialized_issue,
                 'meta': item.meta if item.meta else {},
                 'resource_sets': serialized_resource_sets,
-                'parent': item.content.parent if item.content else None
+                'parent': item.content.parent.title if item.content else None
             })
 
         serialized_sections.append({
