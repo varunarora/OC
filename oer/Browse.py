@@ -354,17 +354,20 @@ class Browse():
                         category_mapped_tags = tag_mapping.values('to_node')
                         mapped_tags |= category_mapped_tags  #map((lambda x: x.to_node), category_mapped_tags)
 
-                    tag_mapped_resources_uncapped = Resource.objects.filter(tags__in=mapped_tags).filter(tags__in=Tag.objects.filter(category=TagCategory.objects.get(
-                            title='Resource type'))).order_by('-created')[:6 - category_resources_count]
-                    tag_mapped_resources = tag_mapped_resources_uncapped[:6 - (
-                        category_resources_count)] if is_catalog else tag_mapped_resources_uncapped
+                    try:
+                        tag_mapped_resources_uncapped = Resource.objects.filter(tags__in=mapped_tags).filter(tags__in=Tag.objects.filter(category=TagCategory.objects.get(
+                                title='Resource type'))).order_by('-created')[:6 - category_resources_count]
+                        tag_mapped_resources = tag_mapped_resources_uncapped[:6 - (
+                            category_resources_count)] if is_catalog else tag_mapped_resources_uncapped
 
-                    for resource in tag_mapped_resources:
-                        # For each tag, if there is a tag mapping, use - else ignore the tag.
-                        filtered_tags = resource.tags.filter(
-                            category=TagCategory.objects.get(title='Standards'))
+                        for resource in tag_mapped_resources:
+                            # For each tag, if there is a tag mapping, use - else ignore the tag.
+                            filtered_tags = resource.tags.filter(
+                                category=TagCategory.objects.get(title='Standards'))
 
-                        resource.filtered_tags = [mapping.from_node for mapping in tag_mappings if (mapping.to_node in list(filtered_tags))]
+                            resource.filtered_tags = [mapping.from_node for mapping in tag_mappings if (mapping.to_node in list(filtered_tags))]
+                    except:
+                        tag_mapped_resources = Resource.objects.none()
 
                 unordered_category_tagged_resources = list(set(list(category_resources) + list(category_collections) + list(tag_mapped_resources)))
      
