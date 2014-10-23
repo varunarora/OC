@@ -5955,9 +5955,10 @@ body.signup, body.login, body.unsubscribe
 				margin: 10px 0px
 
 				&.selected
-					a
+					> a
 						color: $light-font
 						font-weight: bold
+						color: #2980b9
 
 				a
 					color: #aaaaaa
@@ -5982,7 +5983,10 @@ body.signup, body.login, body.unsubscribe
 
 			&.explorer-body-side-menu-light
 				padding: 0px
-				padding-bottom: 20px
+				padding-bottom: 10px
+
+				&:last-child
+					padding-bottom: 0px
 
 				> li
 					> a
@@ -5997,6 +6001,16 @@ body.signup, body.login, body.unsubscribe
 
 			&.hidden
 				display: none
+
+		.explorer-menu-caret
+			width: 14px
+			height: 14px
+			margin-left: 8px
+			background-image: url('../images/arrow-light.png')
+			background-repeat: no-repeat
+			background-position: center 2px
+			display: inline-block
+			background-size: 100%
 
 	.explorer-body-stage
 		width: 75%
@@ -6019,6 +6033,9 @@ body.signup, body.login, body.unsubscribe
 					margin-right: 20px
 					background-color: #efefef
 
+					&.hide
+						display: none
+
 				.explorer-resource-module-content
 					padding-top: 10px
 					font-weight: bold
@@ -6026,6 +6043,7 @@ body.signup, body.login, body.unsubscribe
 					.explorer-resource-module-content-title
 						color: $light-font
 						font-size: 1.3em
+						line-height: 1.2em
 
 					.explorer-resource-module-content-caption
 						color: #aaa
@@ -6060,9 +6078,11 @@ body.signup, body.login, body.unsubscribe
 							font-weight: bold
 							letter-spacing: -1px
 							margin-bottom: 20px
+							line-height: 1.15em
 
 						.explorer-resource-module-support-section
 							margin-bottom: 20px
+							overflow: auto
 
 							&.explorer-resource-module-support-section-methodology
 								.explorer-resource-module-support-section-title
@@ -6084,6 +6104,27 @@ body.signup, body.login, body.unsubscribe
 								.explorer-resource-module-support-section-title
 									background-image: url('../images/wordwall.png')
 
+							&.explorer-resource-module-support-section-ccss
+								.explorer-resource-module-support-section-title
+									background-image: url('../images/common-core.png')
+
+							&.explorer-resource-module-support-section-content
+								.explorer-resource-module-support-section-title
+									background-image: url('../images/common-core.png')
+
+							&.explorer-resource-module-support-section-practices
+								.explorer-resource-module-support-section-title
+									background-image: url('../images/common-core.png')
+
+							&.explorer-resource-module-support-section-big-idea
+								.explorer-resource-module-support-section-title
+									background-image: url('../images/big-idea.png')
+
+							&.explorer-resource-module-support-section-understandings
+								.explorer-resource-module-support-section-title
+									background-image: url('../images/understandings.png')
+
+
 							.explorer-resource-module-support-section-title
 								text-transform: uppercase
 								color: #aaa
@@ -6097,6 +6138,14 @@ body.signup, body.login, body.unsubscribe
 							.explorer-resource-module-support-section-body
 								padding-left: 20px
 								outline: none
+								line-height: 1.2em
+								min-height: 14px
+
+							*[data-placeholder]:not(:focus):not([data-div-placeholder-content]):before
+								content: attr(data-placeholder)
+								float: left
+								margin-left: 2px
+								color: #b3b3b3
 
 						.explorer-resource-actions-suggest
 							width: 100%
@@ -6129,6 +6178,7 @@ body.signup, body.login, body.unsubscribe
 									height: 60px
 									background-color: #efefef
 									margin-right: 16px
+									background-size: cover
 
 							.explorer-resource-item-content
 								float: left
@@ -6173,19 +6223,23 @@ body.signup, body.login, body.unsubscribe
 							button
 								padding: 4px 6px
 								color: #fff
-								border: 1px solid #2ecc71
-								background-color: #2ecc71
+								border: 1px solid #3498db
+								background-color: #3498db
 
 								&:hover
-									background-color: #27ae60
-									border-color: #27ae60
+									background-color: #2980b9
+									border-color: #2980b9
 									//color: #fff
 
 
 			.explorer-resource-sections
-				margin-top: 20px
-
 				.explorer-resource-section-body
+					margin-top: 20px
+
+					.explorer-resource-section-listing-title
+						color: #aaa
+						font-weight: bold
+						text-transform: uppercase
 
 					.explorer-resource-section-listing-items
 						margin-top: 10px
@@ -6205,10 +6259,10 @@ body.signup, body.login, body.unsubscribe
 							background-color: #f7ebc6
 
 						&:hover
-							border: 1px solid #aaa
+							border-color: #aaa
 
 						&.selected
-							border: 1px solid #27ae60
+							border-color: #2980b9
 
 
 						.explorer-resource-section-listing-item-pre
@@ -6242,6 +6296,8 @@ body.signup, body.login, body.unsubscribe
 									padding: 10px
 									outline: none
 									color: $light-font
+									line-height: 1.2em
+									min-height: 14px
 
 									&:focus
 										color: $body-color
@@ -6332,9 +6388,17 @@ body.signup, body.login, body.unsubscribe
 						padding-top: 28px
 						border-bottom: 1px solid #ddd
 						background-color: #f4f7f8
-						padding-left: 60px
-						font-size: 1.15em
-						color: #0971B2
+						padding-left: 50px
+
+						.explorer-timetable-period-title
+							font-size: 1.15em
+							color: #0971B2
+							font-weight: bold
+							margin-bottom: 6px
+
+						.explorer-timetable-period-caption
+							font-size: 0.9em
+							color: $light-font
 
 						&.explorer-timetable-week
 							height: 55px
@@ -6355,6 +6419,10 @@ body.signup, body.login, body.unsubscribe
 
 						&:hover
 							background-color: #efefef
+
+		h2
+			font-family: 'Arial', 'Helvetica', sans-serif
+			color: $light-font
 
 
 	.explorer-resource-listing-actions

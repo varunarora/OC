@@ -200,12 +200,19 @@ def get_serialized_sections(parent):
                     'resources': serialized_resources
                 })
 
+            if item.resource_sets.count() == 0:
+                serialized_resource_sets.append({
+                    'id': None,
+                    'resources': []
+                })
+
             serialized_items.append({
                 'id': item.id,
                 'description': item.description,
                 'issue': serialized_issue,
                 'meta': item.meta if item.meta else {},
-                'resource_sets': serialized_resource_sets
+                'resource_sets': serialized_resource_sets,
+                'parent': item.content.parent if item.content else None
             })
 
         serialized_sections.append({
@@ -368,17 +375,17 @@ def add_item_to_section(request):
 
 
 def create_update_issue(request):
-    objective_id = request.POST.get('host_id', None)
+    section_item_id = request.POST.get('host_id', None)
     issue_state = request.POST.get('ready', None)
     message = request.POST.get('message', None)
     issue_id = request.POST.get('id', None)
 
     from django.contrib.contenttypes.models import ContentType
-    objective_content_type = ContentType.objects.get_for_model(Objective)
+    section_item_content_type = ContentType.objects.get_for_model(SectionItem)
 
     if issue_state == 'false':
         try:
-            objective = Objective.objects.get(pk=objective_id)
+            section_item = SectionItem.objects.get(pk=section_item_id)
         except:
             return APIUtilities._api_not_found()
 
@@ -388,7 +395,7 @@ def create_update_issue(request):
             reporter = User.objects.get(username='ocrootu')
 
             issue = Issue(
-                host=objective,
+                host=section_item,
                 reporter=reporter
             )
             issue.save()
@@ -396,7 +403,7 @@ def create_update_issue(request):
             context = {
                 'issue': {
                     'id': issue.id,
-                    'host_id': objective.id,
+                    'host_id': section_item.id,
                     'message': issue.message,
                 }
             }
@@ -420,7 +427,7 @@ def create_update_issue(request):
         return APIUtilities.success(context)
 
     else:
-        issue = Issue.objects.get(host_id=objective_id, host_type=objective_content_type)
+        issue = Issue.objects.get(host_id=section_item_id, host_type=section_item_content_type)
         issue.delete()
 
         context = {
@@ -434,13 +441,40 @@ def create_update_issue(request):
         return APIUtilities.success(context)
 
 
+def create_resource_set(request, section_item_resources_id):
+    if request.user:
+        if section_item_resources_id == 'null':
+            section_item_id = request.POST.get('section_item_id', None)
+
+            if section_item_id:
+                section_item = SectionItem.objects.get(pk=section_item_id)
+
+                section_item_resources = SectionItemResources(title='Resources')
+                section_item_resources.save()
+
+                section_item.resource_sets.add(section_item_resources)
+            
+            else:
+                return None
+
+        else:
+            return None
+
+    else:
+        return None
+
+
 def add_url_to_section_item_resources(request):
     section_item_resources_id = request.POST.get('section_item_resources_id', None)
 
     try:
         section_item_resources = SectionItemResources.objects.get(pk=section_item_resources_id)
     except:
-        return APIUtilities._api_not_found()
+        section_item_resources = create_resource_set(request, section_item_resources)
+
+        if not section_item_resources:
+            return APIUtilities._api_not_found()
+
 
     from oer.views import new_url_from_form
     new_resource = new_url_from_form(
@@ -456,7 +490,8 @@ def add_url_to_section_item_resources(request):
         'resource': {
             'id': new_objective_resource.id,
             'url': new_resource.revision.content.url,
-            'title': new_resource.title
+            'title': new_resource.title,
+            'thumbnail': settings.MEDIA_URL + new_resource.image.name if new_resource.image else '',
         }
     }
 
@@ -471,7 +506,11 @@ def add_existing_to_section_item_resources(request):
     try:
         section_item_resources = SectionItemResources.objects.get(pk=section_item_resources_id)
     except:
-        return APIUtilities._api_not_found()
+        section_item_resources = create_resource_set(request, section_item_resources)
+
+        if not section_item_resources:
+            return APIUtilities._api_not_found()
+
 
     from oer.models import Resource as OEResource    
     resource = OEResource.objects.get(pk=resource_collection_id)
@@ -490,6 +529,7 @@ def add_existing_to_section_item_resources(request):
                     'resource_slug': resource.slug
                 }
             ),
+            'thumbnail': settings.MEDIA_URL + resource.image.name if resource.image else '',
             'title': resource.title
         }
     }
@@ -507,7 +547,11 @@ def add_upload_to_section_item_resources(request):
         section_item_resources = SectionItemResources.objects.get(pk=section_item_resources_id)
         resource = OEResource.objects.get(pk=resource_id)
     except:
-        return APIUtilities._api_not_found()
+        section_item_resources = create_resource_set(request, section_item_resources)
+
+        if not section_item_resources:
+            return APIUtilities._api_not_found()
+
 
     new_objective_resource = Resource(resource=resource)
     new_objective_resource.save()
@@ -523,6 +567,7 @@ def add_upload_to_section_item_resources(request):
                     'resource_slug': resource.slug
                 }
             ),
+            'thumbnail': settings.MEDIA_URL + resource.image.name if resource.image else '',
             'title': resource.title
         }
     }

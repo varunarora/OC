@@ -26,8 +26,8 @@ urlpatterns = patterns(
     url(r'^api/section-item-resources/add-existing/$', views.add_existing_to_section_item_resources, name='add_existing_to_section_item_resources'),
     url(r'^api/section-item-resources/add-upload/$', views.add_upload_to_section_item_resources, name='add_upload_to_section_item_resources'),
 
-    url(r'^(?P<username>[a-z0-9_\.]+)/(?P<grade_slug>[\w\-\.]+)/(?P<subject_slug>[\w\-\.]+)/', views.curriculum_resources, name='curriculum_resources'),
-
     # Issues.
     url(r'^api/issue/create-update/$', views.create_update_issue, name='create_update_issue'),
+
+    url(r'^(?P<username>[a-z0-9_\.]+)/(?P<grade_slug>[\w\-\.]+)/(?P<subject_slug>[\w\-\.]+)/', views.curriculum_resources, name='curriculum_resources'),
 )

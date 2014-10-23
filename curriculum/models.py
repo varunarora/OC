@@ -77,6 +77,8 @@ class StandardCategory(models.Model):
     category = models.ForeignKey('meta.Category', blank=True, null=True)
     sections = models.ManyToManyField('curriculum.Section', blank=True, null=True)
 
+    def __unicode__(self):
+        return self.title[:200]
 
 class Objective(models.Model):
     #description = models.TextField()

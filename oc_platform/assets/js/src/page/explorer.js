@@ -95,13 +95,19 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
         App: React.createClass({
             getInitialState: function() {
-                return {numWeeks: 0, view: 'overview'};
+                return {numWeeks: 0, view: 'overview', drawerView: false};
             },
             getDefaultProps: function() {
                 return {units: []};
             },
+
+            getTextbookFromUnitID: function(unitID){
+                return _.find(OC.explorer.textbooks, function(textbook){
+                    return _.findWhere(textbook.units, {id: unitID});
+                });
+            },
             componentWillMount: function() {
-                var view = this;
+                var view = this, textbook;
 
                 $('.explorer-loader').addClass('show');
                 $.get('/curriculum/api/curriculum/' + this.props.id + '/',
@@ -158,15 +164,31 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                         } else if (view.props.settings.periods.title == 'terms'){
 
                             unitPeriods = _.map(OC.explorer.units, function(unit){
+                                textbook = view.getTextbookFromUnitID(unit.id);
                                 return {
                                     id: unit.id,
                                     title: unit.title,
+                                    textbookTitle: textbook ? textbook.title : null,
+                                    textbookThumbnail: textbook ? textbook.thumbnail : null,
                                     type: unit.period && _.has(unit.period, 'type') ? unit.period.type : null,
                                     position: unit.period && _.has(unit.period, 'position') ? unit.period.position : null,
                                     parent: unit.period && _.has(unit.period, 'parent') ? unit.period.parent : null,
                                     unit: unit.period && _.has(unit.period, 'unit') ? unit.period.unit : null
                                 };
                             });
+
+                            // Determine the number of units associated with each term.
+                            var unitData;
+                            _.each(unitPeriods, function(unit){
+                                unitData = view.props.settings.periods.data[unit.parent];
+
+                                if (! _.has(unitData, 'count')){
+                                    unitData['count'] = 1;
+                                } else {
+                                    unitData['count'] += 1;
+                                }
+                            });
+                            
                             view.setProps({units: unitPeriods});
                         }
                 }, 'json');
@@ -237,27 +259,19 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                             {className: 'explorer-timetable-period explorer-timetable-week'}, 'Week ' + (i + 1));
                     });
                 } else if (this.props.settings.periods.title == 'terms'){
-                    // Determine the number of units associated with each term.
-                    var unitData;
-                    _.each(this.props.units, function(unit){
-                        unitData = view.props.settings.periods.data[unit.parent];
-
-                        if (! _.has(unitData, 'count')){
-                            unitData['count'] = 1;
-                        } else {
-                            unitData['count'] += 1;
-                        }
-                    });
-
                     // Render each term (particularly length) based on unit length.
                     return _.map(view.props.settings.periods.data, function(period){
                         if (period.count && period.count > 0){
                             return React.DOM.div({
+                                key: period.title,
                                 className: 'explorer-timetable-period',
                                 style: {
                                     height: ((period.count * 7 * 11) + 40 * period.count + 1 * period.count) - 29 + 'px'
                                 }
-                            }, period.title);
+                            }, [
+                                React.DOM.div({className: 'explorer-timetable-period-title', key: 0}, period.title),
+                                React.DOM.div({className: 'explorer-timetable-period-caption', key: 1}, period.caption)
+                            ]);
                         } else return null;
                     });
                 }
@@ -270,7 +284,8 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 return this.props.units.map(function(unit){
                     return OC.explorer.PeriodUnitItem({
                         unit: unit,
-                        click: view.renderUnit
+                        click: view.renderUnit,
+                        key: unit.id
                     });
                 });
             },
@@ -279,14 +294,18 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 var view = this;
 
                 return OC.explorer.textbooks.map(function(textbook){
-                    return React.DOM.li({className: 'textbooks'}, [
+                    return React.DOM.li({
+                        className: 'textbooks',
+                        key: textbook.id
+                    }, [
                         React.DOM.a({href: ''}, textbook.title),
                         React.DOM.ul({className: 'explorer-body-side-menu explorer-body-side-menu-light'},
                             textbook.units.map(function(unit){
                                 return OC.explorer.CurriculumUnitItem({
                                     unit: unit,
                                     textbook: textbook,
-                                    click: view.renderUnit
+                                    click: view.renderUnit,
+                                    key: unit.id
                                 });
                             }))
                     ]);
@@ -298,9 +317,11 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
                 return OC.explorer.units.map(function(unit){
                     return OC.explorer.CurriculumUnitItem({
+                        key: unit.id,
                         unit: unit,
-                        textbook: _.findWhere(OC.explorer.textbook, {id: unit.textbook_id}),
-                        click: view.renderUnit
+                        textbook: view.getTextbookFromUnitID(unit.id),
+                        click: view.renderUnit,
+                        selected: view.props.unit && view.state.view === 'unit' ? view.props.unit === unit : false
                     });
                 });
             },
@@ -339,8 +360,17 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 var view = this;
 
                 return OC.explorer.standards.map(function(standard){
-                    return React.DOM.li({className: 'standards'}, [
-                        React.DOM.a({href: ''}, standard.title),
+                    return OC.explorer.StandardItem({
+                        key: standard.id,
+                        click: view.openStandard,
+                        standard: standard,
+                        selected: view.state.view === 'standard' ? view.props.standard : undefined
+                    });
+                    /*return React.DOM.li({className: 'standards'}, [
+                        React.DOM.a({
+                            href: '',
+                            onClick: view.open
+                        }, standard.title),
                         React.DOM.ul({className: 'explorer-body-side-menu explorer-body-side-menu-light'},
                             standard.standards.map(function(subStandard){
                                 return OC.explorer.StandardItem({
@@ -349,7 +379,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                                     standard: subStandard
                                 });
                             }))
-                    ]);
+                    ]);*/
                 });
             },
 
@@ -358,19 +388,31 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 var menuItems = this.props.settings.menu.map(function(menuItem){
                     
                     if (menuItem.organization === 'textbook-units'){
-                        return React.DOM.li({className: 'textbooks'}, [
-                            React.DOM.a({href: ''}, menuItem.title),
-                            React.DOM.ul({className: 'explorer-body-side-menu'}, view.renderTextbooks())
+                        return React.DOM.li({
+                            className: 'textbooks',
+                            key: menuItem.title
+                        }, [
+                            React.DOM.a({href: '', key: 0}, menuItem.title),
+                            React.DOM.ul({className: 'explorer-body-side-menu', key: 1}, view.renderTextbooks())
                         ]);
                     } else if (menuItem.organization === 'units') {
-                        return React.DOM.li({className: 'units'}, [
-                            React.DOM.a({href: ''}, menuItem.title),
-                            React.DOM.ul({className: 'explorer-body-side-menu explorer-body-side-menu-parentless-child'}, view.renderUnits())
+                        return React.DOM.li({
+                            className: 'units',
+                            key: menuItem.title
+                        }, [
+                            React.DOM.a({href: '', key: 0}, menuItem.title),
+                            React.DOM.ul({className: 'explorer-body-side-menu explorer-body-side-menu-parentless-child', key: 1}, view.renderUnits())
                         ]);
                     } else {
-                        return React.DOM.li({className: 'domain-clusters'}, [
-                            React.DOM.a({href: ''}, menuItem.title),
-                            React.DOM.ul({className: 'explorer-body-side-menu'}, view.renderStandards())
+                        return React.DOM.li({
+                            className: 'domain-clusters',
+                            key: menuItem.title
+                        }, [
+                            React.DOM.a({href: '', key: 0}, [
+                                React.DOM.span({key: 0}, menuItem.title),
+                                React.DOM.span({className: 'explorer-menu-caret', key: 1}, null)
+                            ]),
+                            React.DOM.ul({className: 'explorer-body-side-menu', key: 1}, view.renderStandards())
                         ]);
                     }
                 });
@@ -452,22 +494,26 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 });
             },
 
+            openDrawer: function() {
+                this.setState({drawerView: true});
+            },
+
             render: function(){
                 var overviewView = React.DOM.div({className: 'explorer-resource-overview show'}, [
-                    React.DOM.div({className: 'explorer-overview-section'}, [
-                        React.DOM.h2({}, 'Overview'),
-                        React.DOM.p({}, this.props.description),
+                    React.DOM.div({className: 'explorer-overview-section', key: 0}, [
+                        React.DOM.h2({key: 0}, 'Overview'),
+                        React.DOM.p({key: 1}, this.props.description),
                     ]),
 
-                    React.DOM.div({className: 'explorer-overview-section'}, [
-                        React.DOM.div({className: 'explorer-overview-unit-table'}, [
-                            React.DOM.div({className: 'explorer-overview-timetable'}, this.renderPeriods()),
-                            React.DOM.div({className: 'explorer-overview-unitflow'}, this.renderPeriodUnits()),
+                    React.DOM.div({className: 'explorer-overview-section', key: 1},
+                        React.DOM.div({className: 'explorer-overview-unit-table', key: 0}, [
+                            React.DOM.div({className: 'explorer-overview-timetable', key: 0}, this.renderPeriods()),
+                            React.DOM.div({className: 'explorer-overview-unitflow', key: 1}, this.renderPeriodUnits()),
                         ])
-                    ]),
+                    ),
 
                     /*React.DOM.div({className: 'explorer-overview-section'}, [
-                        React.DOM.h2({}, 'Objectives that need work'),
+                        React.DOM.h2({}, 'Notes and issues'),
 
                         React.DOM.div({className: 'explorer-overview-issues-wrapper explorer-resource-module'}, [
 
@@ -477,37 +523,38 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
                 var unitView = null;
                 if (this.state.view === 'unit' || this.state.view === 'standard'){
-                    unitView = React.DOM.div({className: 'explorer-resource-module-wrapper'}, [
+                    unitView = React.DOM.div({className: 'explorer-resource-module-wrapper'},
                         OC.explorer.Page({
                             title: this.state.view === 'unit' ? this.props.unit.title.toUpperCase(
                                 ) : this.props.standard.title.toUpperCase(),
                             textbookTitle: this.props.textbook ? this.props.textbook.title.toUpperCase() : null,
                             thumbnail: this.props.textbook ? this.props.textbook.thumbnail : null,
                             sections: this.state.view === 'unit' ? this.props.unit.sections : this.props.standard.sections,
-                            id: this.state.view === 'unit' ? this.props.unit.id : this.props.standard.id
+                            id: this.state.view === 'unit' ? this.props.unit.id : this.props.standard.id,
+                            drawerView: this.state.drawerView,
+                            setDrawerOpen: this.openDrawer
                         })
-                    ]);
+                    );
                 }
 
-                return React.DOM.div({className: 'explorer-body'}, [
-                    React.DOM.div({className: 'explorer-body-side scrollable-block'}, [
-                        React.DOM.ul({className: 'explorer-body-side-menu explorer-body-side-menu-main scroll-content'}, [
-                            React.DOM.li({className: 'overview'}, [
+                return React.DOM.div({className: 'explorer-body'},[
+                    React.DOM.div({className: 'explorer-body-side scrollable-block', key: 0},
+                        React.DOM.ul({className: 'explorer-body-side-menu explorer-body-side-menu-main scroll-content', key: 0},
+                            React.DOM.li({className: 'overview', key: 0},
                                 React.DOM.a({
                                     href: '',
                                     onClick: this.openOverview
                                 }, 'OVERVIEW')
-                            ]),
+                            ),
                             this.renderMenu()
-                        ])
-                    ]),
+                        )
+                    ),
 
-                    React.DOM.div({className: 'explorer-body-stage'}, [
-                        React.DOM.div({className: 'explorer-body-stage-spread'}, [
-                            this.state.view === 'overview' ? overviewView : unitView,
-
-                        ])
-                    ])
+                    React.DOM.div({className: 'explorer-body-stage', key: 1},
+                        React.DOM.div({className: 'explorer-body-stage-spread'},
+                            this.state.view === 'overview' ? overviewView : unitView
+                        )
+                    )
                 ]);
             }
         }),
@@ -515,9 +562,44 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
         /************************END OF APP**********************************/
 
         StandardItem: React.createClass({
-            getInitialState: function(){
+            /*getInitialState: function(){
                 return {selected: false};
+            },*/
+            openStandard: function(event) {
+                this.props.click(this.props.standard);
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
             },
+            render: function(){
+                var view = this;
+
+                return React.DOM.li({
+                    className: this.props.selected === this.props.standard ? 'selected' : '',
+                    onClick: this.openStandard
+                }, [
+                    React.DOM.a({href: '', key: 0}, this.props.standard.title),
+                    this.props.standard.standards.length > 0 ? (
+                    React.DOM.ul({className: 'explorer-body-side-menu explorer-body-side-menu-light', key: 1}, [
+                        this.props.standard.standards.map(function(subStandard){
+                            return OC.explorer.SubStandardItem({
+                                key: subStandard.id,
+                                title: subStandard.title,
+                                click: view.props.click,
+                                standard: subStandard,
+                                selected: view.props.selected === subStandard ? true : false
+                            });
+                        })
+                    ])) : null,
+                ]);
+            }
+        }),
+
+        SubStandardItem: React.createClass({
+            /*getInitialState: function(){
+                return {selected: false};
+            },*/
             openStandard: function(event) {
                 this.props.click(this.props.standard);
 
@@ -527,11 +609,11 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             },
             render: function(){
                 return React.DOM.li({
-                    className: this.state.selected ? 'selected' : '',
+                    className: this.props.selected ? 'selected' : '',
                     onClick: this.openStandard
-                }, [
+                },
                     React.DOM.a({href: ''}, this.props.title)
-                ]);
+                );
             }
         }),
 
@@ -550,25 +632,26 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 }, OC.explorer.ModuleHeader({
                     title: this.props.unit.title,
                     textbookTitle: this.props.unit.textbookTitle,
-                    thumbnail: this.props.unit.textbookThumbnail
+                    thumbnail: this.props.unit.textbookThumbnail,
+                    pageView: false
                 }));
             }
         }),
 
         CurriculumUnitItem: React.createClass({
-            getInitialState: function(){
+            /*getInitialState: function(){
                 return {selected: false};
-            },
+            },*/
             render: function() {
                 return React.DOM.li({
-                    className: this.state.selected ? 'selected' : '',
+                    className: this.props.selected ? 'selected' : '',
                     onClick: this.openUnit
-                }, [
+                },
                     React.DOM.a({href: ''}, this.props.unit.title)
-                ]);
+                );
             },
             openUnit: function(event, callback){
-                this.setState({selected: true});
+                //this.setState({selected: true});
 
                 this.props.click(this.props.unit, this.props.textbook);
 
@@ -605,7 +688,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             },*/
 
             getInitialState: function(){
-                return {drawerView: false};
+                return {drawerItem: null};
             },
 
             getDefaultProps: function() {
@@ -623,7 +706,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             renderDrawer: function(){
                 // Find objective from currently selected.
                 var props = this.props;
-                var selectedSection = props.sections.find(function(section){
+                var selectedSection = _.find(props.sections, function(section){
                     return section.items.findWhere({selected: true});
                 });
 
@@ -631,14 +714,15 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     return OC.explorer.Context({ item: selectedSection.items.findWhere(
                         {selected: true}) });
                 } else {
-                    return null;
+                    if (this.props.drawerView)
+                        return OC.explorer.Context();
                 }
             },
 
             openDrawer: function(item){
                 //this.replaceState({selected: true});
                 // Remove all objective selecteds.
-                var selectedItem = this.props.sections.find(function(section){
+                var selectedItem = _.find(this.props.sections, function(section){
                     return section.items.findWhere({selected: true});
                 });
                 if (selectedItem) selectedItem.items.findWhere({selected: true}).set({selected: false});
@@ -649,7 +733,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
                 item.set('selected', true);
 
-                this.setState({drawerView: true});
+                this.props.setDrawerOpen();
 
                 //$('.explorer-resource-module-main').addClass('compress');
                 
@@ -661,34 +745,38 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             render: function(){
                 return React.DOM.div({className: 'explorer-resource-module'}, [
                     React.DOM.div({
-                        className: 'explorer-resource-module-main' + (this.state.drawerView ?
-                            ' compress' : '')
+                        className: 'explorer-resource-module-main' + (this.props.drawerView ?
+                            ' compress' : ''),
+                        key: 0
                     }, [
                         OC.explorer.ModuleHeader({
+                            key: 0,
                             thumbnail: this.props.thumbnail,
                             title: this.props.title,
-                            textbookTitle: this.props.textbookTitle
+                            textbookTitle: this.props.textbookTitle,
+                            pageView: true
                         }),
 
-                        React.DOM.div({className: 'explorer-resource-sections'}, [
+                        React.DOM.div({className: 'explorer-resource-sections', key: 1},
                                 OC.explorer.Sections({
                                     //collection: this.props.objectives,
                                     sections: this.props.sections,
                                     openDrawer: this.openDrawer,
-                                    drawerOpen: this.state.drawerView
+                                    drawerOpen: this.props.drawerView
                                 })
-                                /*OC.explorer.ModuleObjectives({
-                                    collection: this.props.objectives,
-                                    openDrawer: this.openDrawer
-                                }),*/
-                        ]),
+                                //OC.explorer.ModuleObjectives({
+                                //    collection: this.props.objectives,
+                                //    openDrawer: this.openDrawer
+                                //}),
+                        ),
                     ]),
                     React.DOM.div({
-                        className: 'explorer-resource-module-support' + (this.state.drawerView ?
-                            ' show' : '')
-                    }, [
+                        className: 'explorer-resource-module-support' + (this.props.drawerView ?
+                            ' show' : ''),
+                        key: 1
+                    },
                         this.renderDrawer()
-                    ]),
+                    ),
                 ]);
             }
         }),
@@ -697,14 +785,15 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             render: function(){
                 return React.DOM.div({className: 'explorer-resource-module-header'}, [
                     React.DOM.div({
-                        className: 'explorer-resource-module-thumbnail',
+                        key: 0,
+                        className: 'explorer-resource-module-thumbnail' + (!this.props.thumbnail && this.props.pageView ? ' hide' : ''),
                         style: {
                             backgroundImage: this.props.thumbnail ? 'url(' + this.props.thumbnail + ')' : null
                         }
                     }, ''),
-                    React.DOM.div({className: 'explorer-resource-module-content'}, [
-                        React.DOM.div({className: 'explorer-resource-module-content-title'}, this.props.title),
-                        React.DOM.div({className: 'explorer-resource-module-content-caption'}, this.props.textbookTitle)
+                    React.DOM.div({className: 'explorer-resource-module-content', key: 1}, [
+                        React.DOM.div({className: 'explorer-resource-module-content-title', key: 0}, this.props.title),
+                        React.DOM.div({className: 'explorer-resource-module-content-caption', key: 1}, this.props.textbookTitle)
                     ])
                 ]);
             }
@@ -739,6 +828,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
         Sections: React.createClass({
             renderSection: function(section){
                 return OC.explorer.ModuleSection({
+                    key: section.id,
                     id: section.id,
                     collection: section.items,
                     title: section.title,
@@ -748,9 +838,9 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 });
             },
             render: function(){
-                return React.DOM.div({className: 'explorer-resource-section'}, [
+                return React.DOM.div({className: 'explorer-resource-section'},
                     this.props.sections.map(this.renderSection)
-                ]);
+                );
             }
         }),
 
@@ -758,61 +848,47 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             _backboneForceUpdate: function() {
                 this.forceUpdate();
             },
-
             bindProps: function() {
-                this.props.collection.map(function(model){
-                    model.on('add change remove', this._backboneForceUpdate, this);
-                }.bind(this));
+                this.props.collection.on('add change remove', this._backboneForceUpdate, this);
             },
-            
             componentDidMount: function() {
                 this.bindProps();
             },
-
             componentWillUnmount: function() {
-                this.props.collection.map(function(model){
-                    model.off('add change remove', this._backboneForceUpdate, this);
-                }.bind(this));
+                this.props.collection.off('add change remove', this._backboneForceUpdate, this);
             },
             addItem: function(){
-                // Get currently visible unit.
-                /*console.log('aaya tha');
-                var selectedModule = $('li.textbooks .explorer-body-side-menu-light li.selected a'),
-                    title = selectedModule.text(),
-                    textbookTitle = selectedModule.parents('ul:first').parent().find('a:first').text();
-
-                var unit = _.findWhere(_.findWhere(OC.explorer.textbooks, {
-                    title: textbookTitle}).units, {title: title}),
-                    unitObjectives = unit.objectives;*/
-
                 var newItem = new OC.explorer.SectionItem({
-                    description: 'New item',
+                    description: '',
                     resource_sets: [{ id: null, resources: new OC.explorer.Resources() }],
                     meta: {},
                     issue: {
                         id: null, host_id: null, message: null
-                    }
+                    },
+                    section_id: this.props.id
                 });
 
                 var view = this;
                 OC.appBox.saving();
 
-                view.props.collection.add(newItem);
-
-                newItem.save(null, {
-                    attrs: {section_id: this.props.id},
+                newCollectionItem = view.props.collection.create(newItem, {
                     success: function(model){
-                        view.props.collection.sync('update', model, {
-                            success: OC.appBox.saved
-                        });
-                        
-                        // Highlight the last objective AFTER rendering completion.
-                        setTimeout(function(){
-                            OC.explorer.resetPreHeights();
-                            //$('.explorer-resource-objective-section:last').addClass('new');
-                        }, 100);
+                        view.props.collection.add(model);
+                        return OC.api.curriculum.section.addItem(
+                            {'id': model.get('section_id'), 'item_id': model.get('id')}, function(){});
                     }
                 });
+
+                // Highlight the last objective AFTER rendering completion.
+                setTimeout(function(){
+                    OC.explorer.resetPreHeights();
+
+                    // Focus on the new item.
+                    $('.explorer-resource-section-listing-item:last .explorer-resource-objective').focus();
+                }, 20);
+
+                //newCollectionItem.set('selected', true);
+                this.props.openDrawer(newCollectionItem);
 
                 /*var newObjective = new OC.explorer.Objective({
                     description: 'New objective',
@@ -845,48 +921,50 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
             renderItem: function(item) {
                 return OC.explorer.ModuleSectionItemWrapper({
+                    key: item.id,
                     title: item.get('title'),
                     model: item,
                     collection: this.props.collection,
-                    openDrawer: this.props.openDrawer
+                    openDrawer: this.props.openDrawer,
+                    drawerOpen: this.props.drawerOpen
                 });
             },
             render: function(){
                 if (this.props.type === 'collection'){
                     var sectionTitle;
                     if (this.props.title == 'Objectives'){
-                        sectionTitle = React.DOM.div({className: 'explorer-resource-listing-labels'}, [
-                            React.DOM.div({className: 'explorer-resource-listing-labels-pre'}, ''),
-                            React.DOM.div({className: 'explorer-resource-listing-labels-header'}, [
+                        sectionTitle = React.DOM.div({className: 'explorer-resource-listing-labels', key: 0}, [
+                            React.DOM.div({className: 'explorer-resource-listing-labels-pre', key: 0}, ''),
+                            React.DOM.div({className: 'explorer-resource-listing-labels-header', key: 1}, [
                                 React.DOM.div({className: 'explorer-resource-listing-labels-header-key' + (this.props.drawerOpen ?
-                                    ' expand' : '')}, [
+                                    ' expand' : ''), key: 0},
                                     React.DOM.span({className: 'explorer-resource-listing-label'}, 'Objective / Skill')
-                                ]),
+                                ),
                                 React.DOM.div({className: 'explorer-resource-listing-labels-header-fill' + (this.props.drawerOpen ?
-                                    ' hide' : '')}, [
+                                    ' hide' : ''), key: 1},
                                     React.DOM.span({className: 'explorer-resource-listing-label'}, 'Information')
-                                ])
+                                )
                             ])
                         ]);
                     } else {
                         sectionTitle = React.DOM.div(
-                            {className: 'explorer-resource-section-listing-title'}, this.props.title);
+                            {className: 'explorer-resource-section-listing-title', key: 0}, this.props.title);
                     }
                     return React.DOM.div({className: 'explorer-resource-section-body'}, [
                         sectionTitle,
-                        React.DOM.div({className: 'explorer-resource-section-listing-items'},
+                        React.DOM.div({className: 'explorer-resource-section-listing-items', key: 1},
                            this.props.collection.map(this.renderItem)),
-                        React.DOM.div({className: 'explorer-resource-listing-actions'}, [
+                        React.DOM.div({className: 'explorer-resource-listing-actions', key: 2},
                             React.DOM.button({
                                 id: 'new-item',
                                 onClick: this.addItem
-                            }, '+ Add new'),
-                        ]),
+                            }, '+ Add new')
+                        )
                     ]);
                 } else {
-                    return React.DOM.div({className: 'explorer-resource-section-body'}, [
+                    return React.DOM.div({className: 'explorer-resource-section-body'},
                         React.DOM.div({className: 'explorer-resource-section-title'}, this.props.title)
-                    ]);
+                    );
                 }
             }
         }),
@@ -927,7 +1005,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
 
         /************************END OF MODULE SCAFFOLD VIEWS**********************/
-
+        /*
         ObjectiveWrapper: React.createClass({
             _backboneForceUpdate: function() {
                 this.forceUpdate();
@@ -960,14 +1038,14 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     } else this.props.objective.set('ready', true);
                 }
             },
-            /*setMessage: function(){
-                if (this.props.objective.get('message') === undefined) {
-                    if (this.props.objective.get('issue'))
-                        this.props.objective.set('message', this.props.objective.get('issue')['message']);
-                    else
-                        this.props.objective.set('message', null);
-                }
-            },*/
+            //setMessage: function(){
+            //    if (this.props.objective.get('message') === undefined) {
+            //        if (this.props.objective.get('issue'))
+            //            this.props.objective.set('message', this.props.objective.get('issue')['message']);
+            //        else
+            //            this.props.objective.set('message', null);
+            //    }
+            //},
             changeMessage: function(event) {
                 var issue = this.props.objective.get('issue');
                 issue['message'] = event.target.value;
@@ -991,15 +1069,15 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 });
             },
 
-            /*persist: function(){
-                this.props.objective.set('statusPersist', true);
-            },
-            letGo: function(){
-                if (! $('.light-popup-background').hasClass('show-popup-background')){
-                    //this.props.objective.set('statusPersist', false);
-                    //this.props.objective.set('statusShow', false);
-                }
-            },*/
+            //persist: function(){
+            //    this.props.objective.set('statusPersist', true);
+            //},
+            //letGo: function(){
+            //    if (! $('.light-popup-background').hasClass('show-popup-background')){
+            //        //this.props.objective.set('statusPersist', false);
+            //        //this.props.objective.set('statusShow', false);
+            //    }
+            //},
             makeReady: function(){
                 var props = this.props;
 
@@ -1035,11 +1113,11 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 $('.light-popup-background').addClass('show-popup-background');
 
                 this.turnOnFocus();
-                /*$('.light-popup-background').click(function(event){
-                    OC.explorer.clearStatusFocus(false);
-                    props.objective.set('statusShow', false);
-                    props.objective.set('statusPersist', false);
-                });*/
+                //$('.light-popup-background').click(function(event){
+                //    OC.explorer.clearStatusFocus(false);
+                //    props.objective.set('statusShow', false);
+                //    props.objective.set('statusPersist', false);
+                //});
 
                 event.stopPropagation();
                 return false;
@@ -1060,25 +1138,26 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             },
 
             setStatusProps: function(){
-                /*this.props.model.set('statusPersist', false);
-                this.props.model.set('statusShow', false);
-                this.props.model.set('selected', false);
+                //this.props.model.set('statusPersist', false);
+                //this.props.model.set('statusShow', false);
+                //this.props.model.set('selected', false);
                 //this.props.model.set('ready', true);
-                this.props.model.set('statusPosition', {
-                    top: 0,
-                    left: 0
-                });*/
+                //this.props.model.set('statusPosition', {
+                //    top: 0,
+                //    left: 0
+                //});
             },
             componentWillMount: function(){
                 this.setStatusProps();
             },
-            /*componentDidUpdate: function(){
-                if (!this.props.model.has('statusShow'))
-                    this.setStatusProps();
+            //componentDidUpdate: function(){
+            //    if (!this.props.model.has('statusShow'))
+            //        this.setStatusProps();
 
-                this.bindProps();
-            },*/
+            //    this.bindProps();
+            //},
             toggleObjectiveStatus: function(event){
+                console.log('aaayyyaaa!!');
                 var pre = $(event.target);
 
                 this.props.model.set('statusPosition', {
@@ -1122,16 +1201,16 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                                 this.props.model.get('issue').host_id !== null ? ' has-issue': '') : (
                                 this.props.model.get('ready') ? '' : ' has-issue')
                             ),
-                        onClick: this.toggleObjectiveStatus,
+                        onClick: this.toggleObjectiveStatus
                         //onMouseLeave: this.hideObjectiveStatus
                     }, ''),
                     React.DOM.div({className: 'explorer-resource-listing-body-content'}, [
                         React.DOM.div({className: 'explorer-resource-listing-body-content-key' + (
-                            this.state.drawerView ? ' expand' : '')}, [
+                            this.props.drawerView ? ' expand' : '')}, [
                             OC.explorer.ObjectiveView({model: this.props.model})
                         ]),
                         React.DOM.div({className: 'explorer-resource-listing-body-content-fill' + (
-                            this.state.drawerView ? ' hide' : '')}, [
+                            this.props.drawerView ? ' hide' : '')}, [
                         ])
                     ]),
                     OC.explorer.Status({
@@ -1144,13 +1223,15 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     })
                 ]);
             }
-        }),
+        }),*/
 
         ModuleSectionItemWrapper: React.createClass({
             getInitialState: function(){
                 return {selected: false};
             },
-
+            componentDidMount: function() {
+                this.setReady();
+            },
             setReady: function(){
                 if (this.props.model.get('ready') === undefined) {
                     if (this.props.model.get('issue').host_id !== null){
@@ -1188,8 +1269,8 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 if (props.objective.get('ready') !== true){
                     OC.appBox.saving();
 
-                    props.objective.set('ready', true);
-                    props.objective.save(null, {
+                    props.model.set('ready', true);
+                    props.model.save(null, {
                         attrs: {'ready': true},
                         success: function(){
                             OC.appBox.saved();
@@ -1205,6 +1286,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     OC.appBox.saving();
 
                     props.model.set('ready', false);
+                    props.model.set('statusShow', true);
                     props.model.save(null, {
                         attrs: {'ready': false},
                         success: function(){
@@ -1241,7 +1323,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 //this.setStatusProps();
             },
 
-            toggleObjectiveStatus: function(event){
+            toggleStatus: function(event){
                 var pre = $(event.target);
 
                 this.props.model.set('statusPosition', {
@@ -1257,7 +1339,8 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     // Clicking anywhere on the body except the box should close this.
                     $('body').unbind('click');
                     $('body').click(function(event){
-                        props.model.set('statusShow', false);
+                        if (event.target.type !== 'textarea')
+                            props.model.set('statusShow', false);
                     });
                 }
 
@@ -1282,28 +1365,30 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                                 this.props.model.get('ready') ? '' : ' has-issue')
                             ),
                         onClick: this.toggleStatus,
+                        key: 0
                     }, ''),
                     
-                    React.DOM.div({className: 'explorer-resource-section-listing-item-content'}, [
+                    React.DOM.div({className: 'explorer-resource-section-listing-item-content', key: 1}, [
                         React.DOM.div({className: 'explorer-resource-section-listing-item-content-key' + (
-                            this.state.drawerView ? ' expand' : '')}, [
+                            this.props.drawerOpen ? ' expand' : ''), key: 0},
                             OC.explorer.ModuleSectionItem({
                                 model: this.props.model,
-                                openDrawer: this.openDrawer
+                                openDrawer: this.openDrawer,
                             })
-                        ]),
+                        ),
                         React.DOM.div({className: 'explorer-resource-section-listing-item-content-fill' + (
-                            this.state.drawerView ? ' hide' : '')}, [
-                        ])
+                            this.props.drawerOpen ? ' hide' : ''), key: 1}, null)
                     ]),
 
                     OC.explorer.Status({
+                        key: 2,
                         model: this.props.model,
                         persist: this.props.model.get('statusPersist'),
                         show: this.props.model.get('statusShow'),
                         position: this.props.model.get('statusPosition'),
                         makeReady: this.makeReady,
-                        makeUnready: this.makeUnready
+                        makeUnready: this.makeUnready,
+                        turnOnFocus: this.turnOnFocus
                     })
 
                 ]);
@@ -1372,7 +1457,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
                     case 'create':
                         return OC.api.curriculum.sectionItem.create(
-                            {'description': this.get('description'), 'section_id': options.attrs.section_id}, success);
+                            {'description': this.get('description'), 'section_id': this.get('section_id')}, success);
                 }
             }
         }),
@@ -1443,7 +1528,6 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
             renderSections: function(){
                 var props = this.props;
-
                 var metaLength = _.keys(this.props.item.get('meta')).length;
                 if (metaLength > 0){
                     var rawSections = [], sections = [], metaItem;
@@ -1479,9 +1563,12 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
             renderResourceSet: function(resourceSet){
                 return OC.explorer.ResourcesView({
+                    key: resourceSet.id ? resourceSet.id : 0,
                     id:  resourceSet.id,
                     collection: resourceSet.resources,
-                    item: this.props.item
+                    title: resourceSet.title,
+                    item: this.props.item,
+                    parent: this.props.item.get('parent')
                 });
             },
 
@@ -1492,18 +1579,37 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                         height: $('.explorer-body-stage').height() - (parseInt($(
                         '.explorer-body-stage-spread').css('padding-top'), 10) * 2) - 40
                     }
-                }, [
-                    React.DOM.div({className: 'explorer-resource-module-support-title'}, this.props.item.get('description')),
-                    this.renderSections(),
-                    this.props.item.get('resource_sets').map(this.renderResourceSet)
-                ]);
+                }, this.props.item ? [
+                    React.DOM.div({className: 'explorer-resource-module-support-title', key: 0}, this.props.item.get('description')),
+                    React.DOM.div({className: 'explorer-resource-module-support-sections', key: 1}, this.renderSections()),
+                    React.DOM.div({className: 'explorer-resource-module-support-resourcesets', key: 2}, this.props.item.get(
+                        'resource_sets').map(this.renderResourceSet))
+                ]: null);
             }
         }),
 
         Meta: React.createClass({
+            getInitialState: function(){
+                return {body: this.props.body};
+            },
+            componentDidMount: function(){
+                $(this.getDOMNode()).on('change keydown keypress input', '*[data-placeholder]', function() {
+                    if (this.textContent) {
+                        this.setAttribute('data-div-placeholder-content', 'true');
+                    }
+                    else {
+                        this.removeAttribute('data-div-placeholder-content');
+                    }
+                });
+            },
+            componentWillReceiveProps: function(nextProps){
+                this.setState({body: nextProps.body });
+            },
             save: function(event){
                 newValue = $(event.target).text();
                 currentMetas = this.props.objective.get('meta');
+
+                this.setState({body: newValue});
 
                 if (currentMetas[this.props.key] !== newValue){
                     OC.appBox.saving();
@@ -1521,12 +1627,14 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             },
             render: function(){
                 return React.DOM.div({className: 'explorer-resource-module-support-section explorer-resource-module-support-section-' + this.props.key}, [
-                    React.DOM.div({className: 'explorer-resource-module-support-section-title'}, this.props.title),
+                    React.DOM.div({className: 'explorer-resource-module-support-section-title', key: 0}, this.props.title),
                     React.DOM.div({
                         className: 'explorer-resource-module-support-section-body',
                         contentEditable: true,
-                        onBlur: this.save
-                    }, this.props.body ? this.props.body: '(add something)'),
+                        onBlur: this.save,
+                        'data-placeholder': this.state.body && this.state.body.length > 0 ? '' : '(add something)',
+                        key: 1
+                    }, this.state.body && this.state.body.length > 0 ? this.state.body : undefined),
                 ]);
             }
         }),
@@ -1543,14 +1651,14 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 this.props.collection.on('add change remove', this._forceUpdate, this);
             },
             componentWillMount: function() {
-                /*if (! _.has(this.props.collection, 'models')){
+                if (! _.has(this.props.collection, 'models')){
                     this.props.collection = new OC.explorer.Resources();
-                }*/
+                }
             },
             addResource: function(event){
                 var view = this;
                 OC.shareNewClickHandler(event, {
-                    title: 'Add a resource to the unit objective',
+                    title: 'Add a resource',
                     message: 'What would you like to share today?',
                     urlTitle: 'Add a website URL',
                     addMeta: false,
@@ -1559,7 +1667,10 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     urlPostURL: '/curriculum/api/section-item-resources/add-url/',
                     existingPostURL:'/curriculum/api/section-item-resources/add-existing/',
                     uploadPostURL:'/curriculum/api/section-item-resources/add-upload/',
-                    toAppendFormData: {section_item_id: this.props.item.get('id')}
+                    toAppendFormData: {
+                        section_item_id: this.props.item.get('id'),
+                        section_item_resources_id: this.props.id
+                    }
                 });
             },
             resourceAdded: function(response, resourceReference){
@@ -1573,7 +1684,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 OC.appBox.saving();
 
                 var newResource = new OC.explorer.Resource(resource);
-                this.props.item.get('resources').resources.push(newResource);
+                this.props.collection.add(newResource);
 
                 return newResource;
             },
@@ -1645,26 +1756,28 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 return OC.explorer.ResourceView({
                     model: resource,
                     collection: this.props.collection,
-                    objective: this.props.objective
+                    objective: this.props.objective,
+                    key: resource.id
                 });
             },
             render: function() {
                 return React.DOM.div({className: 'explorer-resource-module-support-section explorer-resource-module-support-section-resources'}, [
-                    React.DOM.div({className: 'explorer-resource-module-support-section-title'}, 'Resources'),
-                    React.DOM.div({className: 'explorer-resource-items'},
+                    React.DOM.div({className: 'explorer-resource-module-support-section-title', key: 0}, this.props.title ? this.props.title : 'Resources'),
+                    React.DOM.div({className: 'explorer-resource-items', key: 1},
                         this.props.collection.map(this.renderResource)),
 
-                    React.DOM.button({
+                    this.props.parent ? React.DOM.button({
                         className: 'explorer-resource-actions-suggest',
-                        onClick: this.suggest
-                    }, 'SUGGEST MORE RESOURCES'),
+                        onClick: this.suggest,
+                        key: 2
+                    }, 'SUGGEST MORE RESOURCES') : null,
 
-                    React.DOM.div({className: 'explorer-resource-listing-body-resource-actions'}, [
+                    React.DOM.div({className: 'explorer-resource-listing-body-resource-actions', key: 3},
                         React.DOM.button({
                             className: 'explorer-resource-actions-add',
                             onClick: this.addResource
                         }, '+ Add resource')
-                    ])
+                    )
                 ]);
             }
         }),
@@ -1703,28 +1816,28 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             },
             render: function(){
                 return React.DOM.div({className: 'explorer-resource-item'}, [
-                    React.DOM.div({className: 'explorer-resource-item-thumbnail-wrapper'}, [
+                    React.DOM.div({className: 'explorer-resource-item-thumbnail-wrapper', key: 0},
                         React.DOM.div({
                             className: 'explorer-resource-item-thumbnail',
                             style: {
                                 backgroundImage: 'url(\'' + this.props.model.get('thumbnail') + '\')'
                             }
                         })
-                    ]),
-                    React.DOM.div({className: 'explorer-resource-item-content'}, [
-                        React.DOM.div({className: 'explorer-resource-item-content-body'}, [
-                            React.DOM.div({className: 'explorer-resource-item-content-title'}, [
+                    ),
+                    React.DOM.div({className: 'explorer-resource-item-content', key: 1}, [
+                        React.DOM.div({className: 'explorer-resource-item-content-body', key: 0}, [
+                            React.DOM.div({className: 'explorer-resource-item-content-title', key: 0},
                                 React.DOM.a({href: this.props.model.get('url'), target: '_blank'},  this.props.model.get('title'))
-                            ]),
-                            React.DOM.div({className: 'explorer-resource-item-content-caption'}, 'Teachers notes: , Related learning outcomes: ')
+                            ),
+                            React.DOM.div({className: 'explorer-resource-item-content-caption', key: 1}, '')
                         ]),
-                        React.DOM.div({className: 'explorer-resource-item-content-actions'}, [
+                        React.DOM.div({className: 'explorer-resource-item-content-actions', key: 1},
                             React.DOM.div({
                                 className: 'explorer-resource-item-content-action-delete',
                                 onClick: this.removeResource,
                                 title: 'Remove resource'
                             })
-                        ])
+                        )
                     ])
                 ]);
             }
@@ -1750,6 +1863,9 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 this.props.objective.off('add change remove', this._forceUpdate, this);
                 this.props.objective.on('add change remove', this._forceUpdate, this);
             },*/
+            focus: function(event){
+                return this.props.turnOnFocus(event);
+            },
             componentWillUnmount: function() {
                 // Ensure that we clean up any dangling references when the component is destroyed.
                 this.props.model.off('add change remove', this._forceUpdate, this);
@@ -1764,34 +1880,35 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     onMouseLeave: this.letGo,*/
                     style: this.props.model.get('statusPosition')
                 }, [
-                    React.DOM.div({className: 'objective-status-pointer'}, ''),
-                    React.DOM.div({className: 'objective-status-body'}, [
-                        React.DOM.ul({className: 'objective-status-options'}, [
-                            React.DOM.li({className: 'objective-status-option'}, [
+                    React.DOM.div({className: 'objective-status-pointer', key: 0}, ''),
+                    React.DOM.div({className: 'objective-status-body', key: 1}, [
+                        React.DOM.ul({className: 'objective-status-options', key: 0}, [
+                            React.DOM.li({className: 'objective-status-option', key: 0},
                                 React.DOM.button({
                                     className: 'objective-ready-status' + (
                                         this.props.model.get('ready') ?  ' selected' : ''),
                                     onClick: this.props.makeReady,
-                                }, 'Well framed objective and adequate resources'),
-                            ]),
-                            React.DOM.li({className: 'objective-status-option'}, [
+                                }, 'It\'s perfect!')
+                            ),
+                            React.DOM.li({className: 'objective-status-option', key: 1},
                                 React.DOM.button({
                                     className: 'objective-unready-status' + (
                                         this.props.model.get('ready') ? '' : ' selected'),
                                     onClick: this.props.makeUnready,
-                                }, 'Objective or resources need work'),
-                            ]),
+                                }, 'Needs work')
+                            )
                         ]),
                         React.DOM.div({className: 'objective-status-unready-body' + (
-                            this.props.model.get('ready') ? '' : ' show')}, [
+                            this.props.model.get('ready') ? '' : ' show'), key: 1}, [
                             React.DOM.textarea({
                                 name: 'unready-message',
-                                placeholder: 'If you are looking for specific kinds of resources, explain here',
+                                placeholder: 'Add a note...',
                                 defaultValue: this.props.model.get('issue')['message'],
                                 onChange: this.changeMessage,
-                                onClick: this.turnOnFocus,
+                                onFocus: this.focus,
+                                key: 0
                             }),
-                            React.DOM.div({className: 'action-button', onClick: this.saveMessage}, 'Done')
+                            React.DOM.div({className: 'action-button', onClick: this.saveMessage, key: 1}, 'Done')
                         ]),
                     ])
                 ]);
@@ -1804,7 +1921,8 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     OC.explorer.ModuleHeader({
                         title: unit.unitTitle.toUpperCase(),
                         textbookTitle: unit.textbookTitle.toUpperCase(),
-                        thumbnail: unit.textbookThumbnail
+                        thumbnail: unit.textbookThumbnail,
+                        pageView: false
                     }),
                     OC.explorer.Issues({objectives: unit.objectives})
                 ]);
@@ -1817,7 +1935,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
         Issues: React.createClass({
             renderIssue: function(objective){
-                return OC.explorer.Issue({objective: objective});
+                return OC.explorer.Issue({key: objective.id, objective: objective});
             },
             render: function(){
                 return React.DOM.div({className: 'explorer-overview-issues-set-item'}, [
@@ -1907,22 +2025,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
 
 
-            // Show on click.
-            $('li.learning-outcomes > a, li.textbooks > a').click(function(event){
-                $(this).parent().find('.explorer-body-side-menu:first').toggleClass('hidden');
 
-                event.stopPropagation();
-                event.preventDefault();
-                return false;
-            });
-
-            $('li.overview > a').click(function(event){
-                OC.explorer.initOverview();
-
-                event.stopPropagation();
-                event.preventDefault();
-                return false;
-            });
 
 
         },
@@ -2009,7 +2112,12 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             'methodology': 'Methodology',
             'how': 'The \'How\'',
             'wordwall': 'Word Wall Must Haves',
-            'prerequisites': 'Pre-requisites'
+            'prerequisites': 'Pre-requisites',
+            'ccss': 'Common Core State Standards',
+            'content': 'Standards for Mathematical Content',
+            'practices': 'Standards for Mathematical Practice',
+            'big-idea': 'Big Idea',
+            'understandings': 'Enduring Understandings'
         },
         metaOrder: ['methodology', 'how', 'wordwall', 'prerequisite'],
 
@@ -2054,7 +2162,27 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             id: OC.explorer.curriculumSettings.id,
             description: OC.explorer.curriculumSettings.description,
             settings: OC.explorer.curriculumSettings,
-        }), $('.explorer-body-wrapper').get(0));
+        }), $('.explorer-body-wrapper').get(0), function(){
+            $('.explorer-body-side').nanoScroller({
+                paneClass: 'scroll-pane',
+                sliderClass: 'scroll-slider',
+                contentClass: 'scroll-content',
+                flash: true
+            });
+            
+
+            // Show on click.
+            $('li.domain-clusters > ul').addClass('hidden');
+
+            $('li.domain-clusters > a, li.textbooks > a').click(function(event){
+                $(this).parent().find('.explorer-body-side-menu:first').toggleClass('hidden');
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+
+        });
 
         resizeApp();
         $(window).resize(resizeApp);
@@ -2102,13 +2230,6 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
         OC.explorer.initActions();
 
         OC.explorer.initOverview();*/
-
-        $('.explorer-body-side').nanoScroller({
-            paneClass: 'scroll-pane',
-            sliderClass: 'scroll-slider',
-            contentClass: 'scroll-content',
-            flash: true
-        });
     });
 });
 
