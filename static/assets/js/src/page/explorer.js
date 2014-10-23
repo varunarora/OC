@@ -168,6 +168,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                                 return {
                                     id: unit.id,
                                     title: unit.title,
+                                    textbook: textbook,
                                     textbookTitle: textbook ? textbook.title : null,
                                     textbookThumbnail: textbook ? textbook.thumbnail : null,
                                     type: unit.period && _.has(unit.period, 'type') ? unit.period.type : null,
@@ -330,7 +331,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 var view = this;
 
                 function redoUI(){
-                    view.setProps({standard: standard});
+                    view.setProps({standard: standard, textbook: null});
 
                     view.setState({view: 'standard'}, function(){
                         setTimeout(OC.explorer.resetPreHeights, 50);
@@ -412,7 +413,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                                 React.DOM.span({key: 0}, menuItem.title),
                                 React.DOM.span({className: 'explorer-menu-caret', key: 1}, null)
                             ]),
-                            React.DOM.ul({className: 'explorer-body-side-menu', key: 1}, view.renderStandards())
+                            React.DOM.ul({className: 'explorer-body-side-menu explorer-body-side-menu-domain-clusters', key: 1}, view.renderStandards())
                         ]);
                     }
                 });
@@ -476,6 +477,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                         item.set('resource_sets', _.map(item.get('resource_sets'), function(resourceSet){
                             return {
                                 id: resourceSet.id,
+                                title: resourceSet.title,
                                 resources: new OC.explorer.Resources(_.map(
                                 resourceSet.resources, function(rr){ return new OC.explorer.Resource(rr); }))
                             };
@@ -619,7 +621,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
         PeriodUnitItem: React.createClass({
             openUnit: function(){
-                this.props.click(this.props.unit);
+                this.props.click(this.props.unit, this.props.unit.textbook);
             },
             render: function(){
                 return React.DOM.a({
@@ -782,13 +784,19 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
         }),
 
         ModuleHeader: React.createClass({
+            getInitialState: function(){
+                return {thumbnail: this.props.thumbnail};
+            },
+            componentWillReceiveProps: function(nextProps){
+                this.setState({thumbnail: nextProps.thumbnail });
+            },
             render: function(){
                 return React.DOM.div({className: 'explorer-resource-module-header'}, [
                     React.DOM.div({
                         key: 0,
-                        className: 'explorer-resource-module-thumbnail' + (!this.props.thumbnail && this.props.pageView ? ' hide' : ''),
+                        className: 'explorer-resource-module-thumbnail' + (!this.state.thumbnail && this.props.pageView ? ' hide' : ''),
                         style: {
-                            backgroundImage: this.props.thumbnail ? 'url(' + this.props.thumbnail + ')' : null
+                            backgroundImage: this.state.thumbnail ? 'url(' + this.state.thumbnail + ')' : null
                         }
                     }, ''),
                     React.DOM.div({className: 'explorer-resource-module-content', key: 1}, [
@@ -918,6 +926,9 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     }
                 });*/
             },
+            open: function() {
+                this.props.openDrawer(this.props.collection.at(0));
+            },
 
             renderItem: function(item) {
                 return OC.explorer.ModuleSectionItemWrapper({
@@ -961,9 +972,13 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                             }, '+ Add new')
                         )
                     ]);
-                } else {
+                } else if (this.props.type === 'contextual') {
                     return React.DOM.div({className: 'explorer-resource-section-body'},
-                        React.DOM.div({className: 'explorer-resource-section-title'}, this.props.title)
+                        React.DOM.div({
+                            className: 'explorer-resource-section-contextual-listing-title' + (this.props.collection.at(
+                                0).get('selected') ? ' selected' : ''),
+                            onClick: this.open
+                        }, this.props.title)
                     );
                 }
             }
@@ -1462,7 +1477,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             }
         }),
 
-        ObjectiveView: React.createClass({
+        /*ObjectiveView: React.createClass({
             mixins: [BackbonerMixin],
             save: function(event){
                 newDescription = $(event.target).text();
@@ -1486,7 +1501,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     onBlur: this.save
                 }, this.props.model.get('description'));
             }
-        }),
+        }),*/
 
         ModuleSectionItem: React.createClass({
             save: function(event){
@@ -1551,7 +1566,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
 
                         return OC.explorer.Meta({
                             key: key,
-                            title: OC.explorer.metaTitles[key],
+                            title: _.has(OC.explorer.metaTitles, key) ? OC.explorer.metaTitles[key] : '(Unnamed)',
                             body: value,
                             objective: props.item
                         });
@@ -1605,6 +1620,9 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             componentWillReceiveProps: function(nextProps){
                 this.setState({body: nextProps.body });
             },
+            componentDidUpdate: function(){
+                $(this.getDOMNode).find('.explorer-resource-module-support-section-body').trigger('change');
+            },
             save: function(event){
                 newValue = $(event.target).text();
                 currentMetas = this.props.objective.get('meta');
@@ -1634,7 +1652,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                         onBlur: this.save,
                         'data-placeholder': this.state.body && this.state.body.length > 0 ? '' : '(add something)',
                         key: 1
-                    }, this.state.body && this.state.body.length > 0 ? this.state.body : undefined),
+                    }, this.state.body && this.state.body.length > 0 ? this.state.body : ''),
                 ]);
             }
         }),
@@ -2117,7 +2135,8 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             'content': 'Standards for Mathematical Content',
             'practices': 'Standards for Mathematical Practice',
             'big-idea': 'Big Idea',
-            'understandings': 'Enduring Understandings'
+            'understandings': 'Enduring Understandings',
+            'language-objectives-supports': 'Language Objectives and Supports'
         },
         metaOrder: ['methodology', 'how', 'wordwall', 'prerequisite'],
 
@@ -2170,9 +2189,10 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                 flash: true
             });
             
-
+            setTimeout(function(){
+                $('li.domain-clusters > ul').addClass('hidden');
+            }, 500);
             // Show on click.
-            $('li.domain-clusters > ul').addClass('hidden');
 
             $('li.domain-clusters > a, li.textbooks > a').click(function(event){
                 $(this).parent().find('.explorer-body-side-menu:first').toggleClass('hidden');

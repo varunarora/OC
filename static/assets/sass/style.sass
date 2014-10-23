@@ -5976,6 +5976,11 @@ body.signup, body.login, body.unsubscribe
 					> a
 						font-size: 1.15em
 
+			&.explorer-body-side-menu-domain-clusters
+				> li
+					margin-bottom: 20px
+
+
 			&.explorer-body-side-menu-parentless-child
 				> li
 					> a
@@ -6084,6 +6089,10 @@ body.signup, body.login, body.unsubscribe
 							margin-bottom: 20px
 							overflow: auto
 
+							&.explorer-resource-module-support-section
+								.explorer-resource-module-support-section-title
+									background-image: url('../images/module-section-meta.png')
+
 							&.explorer-resource-module-support-section-methodology
 								.explorer-resource-module-support-section-title
 									background-image: url('../images/methodology.png')
@@ -6120,7 +6129,7 @@ body.signup, body.login, body.unsubscribe
 								.explorer-resource-module-support-section-title
 									background-image: url('../images/big-idea.png')
 
-							&.explorer-resource-module-support-section-understandings
+							&.explorer-resource-module-support-section-essential-understandings
 								.explorer-resource-module-support-section-title
 									background-image: url('../images/understandings.png')
 
@@ -6308,6 +6317,22 @@ body.signup, body.login, body.unsubscribe
 
 								&.hide
 									display: none
+
+					.explorer-resource-section-contextual-listing-title
+						padding: 10px
+						background-color: #fff
+						font-weight: bold
+						text-transform: uppercase
+						color: #aaa
+						cursor: pointer
+						border: 1px solid #fff
+
+						&:hover
+							color: $light-font
+
+						&.selected
+							color: $light-font
+							border-color: #2980b9
 
 			.explorer-resource-listing-labels
 				overflow: hidden

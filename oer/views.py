@@ -807,7 +807,7 @@ def fp_upload(request):
     file_list = []
 
     for key_unicode in post_data:
-        key = str(key_unicode)             # Unicode by default.
+        key = str(key_unicode.encode('utf-8'))             # Unicode by default.
         title = str(post_data[key].encode('utf-8'))
         file_list.append((key, title))     # Two parens because tuple.
 

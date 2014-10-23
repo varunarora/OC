@@ -197,6 +197,7 @@ def get_serialized_sections(parent):
 
                 serialized_resource_sets.append({
                     'id': resource_set.id,
+                    'title': resource_set.title,
                     'resources': serialized_resources
                 })
 

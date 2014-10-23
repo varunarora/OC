@@ -70,6 +70,9 @@ class SectionItemResources(models.Model):
     title = models.CharField(max_length=256)
     resources = models.ManyToManyField('curriculum.Resource', blank=True, null=True)
 
+    def __unicode__(self):
+        return self.title
+
 
 class StandardCategory(models.Model):
     title = models.CharField(max_length=256)
