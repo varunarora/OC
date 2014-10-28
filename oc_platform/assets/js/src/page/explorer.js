@@ -2135,7 +2135,7 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             'content': 'Standards for Mathematical Content',
             'practices': 'Standards for Mathematical Practice',
             'big-idea': 'Big Idea',
-            'understandings': 'Enduring Understandings',
+            'essential-understandings': 'Enduring Understandings',
             'language-objectives-supports': 'Language Objectives and Supports'
         },
         metaOrder: ['methodology', 'how', 'wordwall', 'prerequisite'],
