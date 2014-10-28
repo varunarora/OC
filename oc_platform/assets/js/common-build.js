@@ -14,6 +14,7 @@ require.config({
         editor_page: 'editor',
         article: 'article',
         explorer: 'explorer',
-        standards: 'standards'
+        standards: 'standards',
+        upload: 'upload'
     }
 });

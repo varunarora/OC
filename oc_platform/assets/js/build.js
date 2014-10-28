@@ -56,6 +56,11 @@
             name: 'standards',
             include: ['standards'],
             exclude: ['header']
+        },
+        {
+            name: 'upload',
+            include: ['upload'],
+            exclude: ['header']
         }
     ],
     paths: {
