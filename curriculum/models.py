@@ -109,3 +109,9 @@ class Issue(models.Model):
 
     def __unicode__(self):
         return self.message[:100] if self.message else '\'' + self.host.description[:100] + '\''
+
+
+class Reference(models.Model):
+    source_type = models.CharField(max_length=64, null=True, blank=True)
+    textbook = models.ForeignKey('Textbook')
+    scope = JSONField(null=True, blank=True)

@@ -219,6 +219,9 @@ def render_resource(resource_id, request=None):
     link_content_type = ContentType.objects.get_for_model(Link)
     attachment_content_type = ContentType.objects.get_for_model(Attachment)
 
+    from curriculum.models import Reference
+    reference_content_type = ContentType.objects.get_for_model(Reference)
+
     if resource.revision.content_type == document_content_type:
         resource.data = build_document_view(resource.revision.content_id)
 
@@ -257,6 +260,9 @@ def render_resource(resource_id, request=None):
         name, resource.extension = splitext(resource.revision.content.file.name)
 
         resource_type = "attachment"
+
+    elif resource.revision.content_type == reference_content_type:
+        resource_type = "reference"
 
     return (resource, resource_type, revision)
 

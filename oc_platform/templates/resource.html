@@ -32,6 +32,8 @@
         {% endif %}
     {% elif resource.revision.content_type.name == "document" %}
         {% include 'partials/oer-full-document.html' %}
+    {% elif resource.revision.content_type.name == "reference" %}
+        {% include 'partials/oer-reference.html' %}
 	{% endif %}
 
 	<div class="center-stage resource-footer">

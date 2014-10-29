@@ -1,4 +1,5 @@
-from curriculum.models import Curriculum, Unit, Objective, Resource, Issue, Section, SectionItem, SectionItemResources, StandardCategory
+from curriculum.models import Curriculum, Unit, Objective, Resource, Issue, Section
+from curriculum.models import SectionItem, SectionItemResources, StandardCategory, Reference
 from django.shortcuts import render
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -649,3 +650,56 @@ def suggest_resources(request, section_item_id):
         'resources': serialized_resources
     }
     return APIUtilities.success(context)
+
+
+def create_textbook_reference(textbook, scope, title, username,
+    description, license, collection):
+    DEFAULT_COST = 0
+
+    try:
+        from django.contrib.auth.models import User
+
+        title = title if title else 'Untitled reference'
+        user = User.objects.get(username=username)
+
+        from django.template.defaultfilters import slugify
+
+        # Create a new resource
+        from oer.models import Resource as OEResource
+        new_resource = OEResource(
+            title=title,
+            cost=DEFAULT_COST,
+            user=user,
+            slug=slugify(title),
+            visibility='public',
+            description=description,
+            license=license
+        )
+
+        new_reference = Reference(source_type='textbook', textbook=textbook, scope=scope)
+        new_reference.save()
+
+        from oer.models import ResourceRevision
+        new_resource_revision = ResourceRevision()
+        new_resource_revision.content = new_reference
+        new_resource_revision.user = user
+        new_resource_revision.save()
+
+        new_resource.revision = new_resource_revision
+        new_resource.save()
+
+        # Assign this resource to the revision created.
+        new_resource.revision.resource = new_resource
+        new_resource.revision.save()
+
+        # Now add this resource to the collection it belongs to
+        collection.resources.add(new_resource)
+        collection.save()
+
+        new_curriculum_resource = Resource(resource=new_resource)
+        new_curriculum_resource.save()
+
+        return (new_resource.id, new_curriculum_resource.id)
+
+    except Exception, exception:
+        print exception
