@@ -2014,7 +2014,7 @@ def create_url_resource(title, username, description, link, tags, body, license_
             license=license
         )
 
-        new_url = Link(url=link, rendered_url=create_document(body, user))
+        new_url = Link(url=link, rendered_url=create_document(body, user) if body else None)
         new_url.save()
 
         new_resource_revision = ResourceRevision()
