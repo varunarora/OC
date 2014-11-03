@@ -162,6 +162,8 @@ def get_serialized_sections(parent):
     reference_content_type = ContentType.objects.get_for_model(Reference)
     attachment_content_type = ContentType.objects.get_for_model(Attachment)
 
+    from meta.models import Tag
+
     serialized_sections = []
 
     for section in parent.sections.all():
@@ -228,6 +230,21 @@ def get_serialized_sections(parent):
                     'id': None,
                     'resources': []
                 })
+
+            if item.meta:
+                for key, value in item.meta.items():
+                    if type(value) == dict:
+
+                        if 'standards' in value:
+                            standards = []
+                            for std_id in value['standards']:
+                                standard = Tag.objects.get(pk=std_id)
+                                standards.append({
+                                    'title': standard.title,
+                                    'description': standard.description
+                                })
+
+                            value['standards'] = standards
 
             serialized_items.append({
                 'id': item.id,

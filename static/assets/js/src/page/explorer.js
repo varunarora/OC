@@ -1643,16 +1643,36 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
                     });
                 }
             },
+            renderStandard: function(standard){
+                return React.DOM.div({
+                    className: 'explorer-resource-module-support-section-body-field-snippet'}, [
+                    React.DOM.span({
+                        className: 'explorer-resource-module-support-section-body-standard'
+                    }, standard.title),
+                    React.DOM.span({}, ': ' + standard.description)
+                ]);
+            },
             render: function(){
-                return React.DOM.div({className: 'explorer-resource-module-support-section explorer-resource-module-support-section-' + this.props.key}, [
-                    React.DOM.div({className: 'explorer-resource-module-support-section-title', key: 0}, this.props.title),
-                    React.DOM.div({
+                var isStandardsFieldView = _.isObject(this.state.body) && this.state.body.type == 'standards';
+
+                var metaBody;
+                if (isStandardsFieldView){
+                    metaBody = React.DOM.div({
+                        className: 'explorer-resource-module-support-section-body'
+                    }, this.state.body.standards.map(this.renderStandard));
+                } else {
+                    metaBody = React.DOM.div({
                         className: 'explorer-resource-module-support-section-body',
                         contentEditable: true,
                         onBlur: this.save,
                         'data-placeholder': this.state.body && this.state.body.length > 0 ? '' : '(add something)',
                         key: 1
-                    }, this.state.body && this.state.body.length > 0 ? this.state.body : ''),
+                    }, this.state.body && this.state.body.length > 0 ? this.state.body : '');
+                }
+
+                return React.DOM.div({className: 'explorer-resource-module-support-section explorer-resource-module-support-section-' + this.props.key}, [
+                    React.DOM.div({className: 'explorer-resource-module-support-section-title', key: 0}, this.props.title),
+                    metaBody,
                 ]);
             }
         }),
