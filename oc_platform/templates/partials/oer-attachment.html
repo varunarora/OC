@@ -4,6 +4,8 @@
 <link rel="resource" type="application/l10n" href="{{ STATIC_URL}}js/lib/pdfjs/locale/locale.properties"/>
 
 <script>
+      OC.DEFAULT_URL = {% if resource.extension == '.pdf' %}'{{ MEDIA_URL }}{{ resource.revision.content.file.name }}'{% else %}{% if resource.revision.content.rendered_file %}'{{ MEDIA_URL }}{{ resource.revision.content.rendered_file.name }}'{% else %}'{{ MEDIA_URL }}{{ resource.revision.content.attachment.file.name }}'{% endif %}{% endif %};
+      
       require([{% if debug %}'common'{% else %}'{{ STATIC_URL }}js/common-build.js'{% endif %}], function(){
             if (OC.config.pdfjs){
                 require(['pdfjs_l10n', 'pdfjs', 'pdfjs_debugger'], function(){
@@ -11,7 +13,6 @@
                   PDFJS.workerSrc = '{{ STATIC_URL }}js/lib/pdfjs/pdf.worker.js';
                   PDFJS.cMapUrl = '{{ STATIC_URL }}js/lib/pdfjs/cmaps/';
 
-                  OC.DEFAULT_URL = {% if resource.extension == '.pdf' %}'{{ MEDIA_URL }}{{ resource.revision.content.file.name }}'{% else %}{% if resource.revision.content.rendered_file %}'{{ MEDIA_URL }}{{ resource.revision.content.rendered_file.name }}'{% else %}'{{ MEDIA_URL }}{{ resource.revision.content.attachment.file.name }}'{% endif %}{% endif %},
                   CSS_UNITS = 1;
                 
                 require(['pdfjs_viewer'], function(webViewerLoad){
