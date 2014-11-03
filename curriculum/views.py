@@ -157,9 +157,10 @@ def get_serialized_sections(parent):
     from django.contrib.contenttypes.models import ContentType
     section_item_content_type = ContentType.objects.get_for_model(SectionItem)
 
-    from oer.models import Link
+    from oer.models import Link, Attachment
     link_content_type = ContentType.objects.get_for_model(Link)
     reference_content_type = ContentType.objects.get_for_model(Reference)
+    attachment_content_type = ContentType.objects.get_for_model(Attachment)
 
     serialized_sections = []
 
@@ -180,6 +181,9 @@ def get_serialized_sections(parent):
             except:
                 serialized_issue = None
 
+            from os.path import splitext
+            document = [".doc", ".docx", ".rtf", "odt"]
+
             for resource_set in item.resource_sets.all():
                 serialized_resources = []
 
@@ -187,6 +191,13 @@ def get_serialized_sections(parent):
                     import oer.CollectionUtilities as cu
                     cu.set_resources_type([resource.resource])
                     cu.preprocess_collection_listings([resource.resource])
+
+                    if resource.resource.revision.content_type == attachment_content_type:
+                        name, extension = splitext(
+                            resource.resource.revision.content.file.name)
+
+                        if extension in document:
+                            resource.resource.type = 'pdf'
 
                     thumbnail = settings.MEDIA_URL + resource.resource.revision.content.textbook.thumbnail.name if (
                         resource.resource.revision.content_type == reference_content_type) else settings.MEDIA_URL + resource.resource.image.name

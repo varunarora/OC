@@ -405,7 +405,7 @@ def set_resources_type(resources):
 
 
 def preprocess_collection_listings(resources):
-    from oer.models import Link, Attachment, Document
+    from oer.models import Link, Attachment
     from curriculum.models import Reference
     from django.contrib.contenttypes.models import ContentType
     link_content_type = ContentType.objects.get_for_model(Link)
