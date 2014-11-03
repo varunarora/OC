@@ -3037,7 +3037,7 @@ ul.tagit
 	background: #000000
 	top: 0px
 	left: 0px
-	opacity: 0.5
+	opacity: 0.65
 
 	&.show-popup-background
 		display: block
@@ -3823,47 +3823,6 @@ blockquote
 		display: inline-block
 		background-size: cover
 
-		.resource-item-thumbnail-drive, .resource-item-thumbnail-dropbox,
-		.resource-item-thumbnail-image, .resource-item-thumbnail-pdf,
-		.resource-item-thumbnail-document, .resource-item-thumbnail-spreadsheet,
-		.resource-item-thumbnail-upload, .resource-item-thumbnail-url,
-		.resource-item-thumbnail-video
-			background-repeat: no-repeat
-			background-position: center center
-			width: 50px
-			height: 50px
-			background-size: 100%
-
-		.resource-item-thumbnail-drive
-			background-image: url('../images/drive-folder.png')
-
-		.resource-item-thumbnail-dropbox
-			background-image: url('../images/dropbox-folder.png')
-
-		.resource-item-thumbnail-image
-			background-image: url('../images/image-icon.png')
-
-		.resource-item-thumbnail-pdf
-			background-image: url('../images/pdf-icon.png')
-
-		.resource-item-thumbnail-document
-			background-image: url('../images/document-icon.png')
-
-		.resource-item-thumbnail-spreadsheet
-			background-image: url('../images/spreadsheet-icon.png')
-
-		.resource-item-thumbnail-presentation
-			background-image: url('../images/powerpoint-icon.png')
-
-		.resource-item-thumbnail-upload
-			background-image: url('../images/upload-icon.png')
-
-		.resource-item-thumbnail-url
-			background-image: url('../images/link-icon.png')
-
-		.resource-item-thumbnail-video
-			background-image: url('../images/video-icon.png')
-
 	.resource-item-description
 		float: left
 		margin-left: 15px
@@ -3903,6 +3862,50 @@ blockquote
 
 					&:hover
 						color: $link-hover
+
+.thumbnail-drive, .thumbnail-dropbox,
+.thumbnail-image, .thumbnail-pdf,
+.thumbnail-document, .thumbnail-spreadsheet,
+.thumbnail-upload, .thumbnail-url,
+.thumbnail-video, .thumbnail-reference
+	background-repeat: no-repeat
+	background-position: center center
+	width: 50px
+	height: 50px
+	background-size: 100%
+
+.thumbnail-drive
+	background-image: url('../images/drive-folder.png')
+
+.thumbnail-dropbox
+	background-image: url('../images/dropbox-folder.png')
+
+.thumbnail-image
+	background-image: url('../images/image-icon.png')
+
+.thumbnail-pdf
+	background-image: url('../images/pdf-icon.png')
+
+.thumbnail-document
+	background-image: url('../images/document-icon.png')
+
+.thumbnail-spreadsheet
+	background-image: url('../images/spreadsheet-icon.png')
+
+.thumbnail-presentation
+	background-image: url('../images/powerpoint-icon.png')
+
+.thumbnail-upload
+	background-image: url('../images/upload-icon.png')
+
+.thumbnail-url
+	background-image: url('../images/link-icon.png')
+
+.thumbnail-video
+	background-image: url('../images/video-icon.png')
+
+.thumbnail-reference
+	background-image: url('../images/reference-icon.png')
 
 #fill-panel
 	.resource-collection-item
@@ -6189,6 +6192,10 @@ body.signup, body.login, body.unsubscribe
 									margin-right: 16px
 									background-size: cover
 
+									.thumbnail-silhouette
+										height: 60px
+										width: 60px
+
 							.explorer-resource-item-content
 								float: left
 								width: 82%
@@ -6202,7 +6209,6 @@ body.signup, body.login, body.unsubscribe
 										font-size: 1.2em
 										display: block
 										margin-bottom: 8px
-										font-weight: bold
 										padding-top: 4px
 
 									.explorer-resource-item-content-description
@@ -6633,6 +6639,136 @@ body.signup, body.login, body.unsubscribe
 				.explorer-suggest-resources-listing-item-actions
 					float: right
 
+.explorer-resource-preview-wrapper
+	z-index: 11
+	position: fixed
+	height: 100%
+	width: 100%
+	top: 0px
+	left: 0px
+	overflow-y: scroll
+	display: none
+
+	&.show
+		display: block
+
+	.spinner
+		display: block
+
+	.explorer-resource-preview
+		display: none
+
+		&.show
+			display: block
+
+	.explorer-resource-header
+		width: 1080px
+		margin: auto
+		overflow: hidden
+
+		.explorer-resource-header-thumbnail-wrapper
+			width: 60px
+			height: 60px
+			float: left
+
+			.explorer-resource-header-thumbnail
+				margin-top: 10px
+				width: 40px
+				height: 40px
+				border-radius: 20px
+				background-size: cover
+
+		.explorer-resource-header-title
+			padding: 20px 0px
+			color: #fff
+			font-size: 1.3em
+
+	.explorer-resource-contents
+		width: 1080px
+		margin: auto
+		overflow: hidden
+
+		&.reference-resource
+			margin-top: 40px
+
+			.explorer-resource-body
+				h2, h3
+					color: #fff
+
+				p
+					color: #ddd
+
+		&.foreign-resource
+			.explorer-resource-body
+				@include box-shadow(0 0 5px rgba(0, 0, 0, 0.5))
+				background-color: #fff
+
+		.explorer-resource-body
+			margin-left: 60px
+			float: left
+			display: none
+			width: 960px
+			height: 100%
+			margin-bottom: 40px
+
+			&.show
+				display: block
+
+			&.pdf
+				background-color: transparent
+
+			/* PDF JS specific styling */
+			.page-viewer.center-stage
+				margin-top: 0px
+
+				#viewerContainer
+					width: 1000px
+
+					.viewer-wrapper
+						margin-left: 0px
+						margin-top: 0px
+
+						.toolbar
+							display: none
+
+			/* Reference styling */
+			.reference-preview-wrapper
+				overflow: hidden
+
+				.reference-preview-thumbnail
+					float: left
+					margin-right: 40px
+					height: 100px
+					width: 100px
+					background-size: cover
+
+		.explorer-resource-actions
+			float: right
+			width: 60px
+
+			.explorer-resource-actions-close,
+			.explorer-resource-actions-open,
+			.explorer-resource-actions-favorite
+				display: block
+				background-repeat: no-repeat
+				background-position: center center
+				height: 24px
+				width: 24px
+				margin: auto
+				cursor: pointer
+				margin-bottom: 10px
+
+			.explorer-resource-actions-close
+				background-image: url('../images/close-resource.png')
+
+			.explorer-resource-actions-open
+				background-image: url('../images/open-resource.png')
+
+			.explorer-resource-actions-favorite
+				background-image: url('../images/heart-light.png')
+
+				&.favorited
+					background-image: url('../images/hearted-light.png')
 
 /***** INTERNAL TOOLS *************/
 

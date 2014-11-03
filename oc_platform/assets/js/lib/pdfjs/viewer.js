@@ -21,9 +21,12 @@
            noContextMenuHandler, SecondaryToolbar, PasswordPrompt,
            PresentationMode, HandTool, Promise, DocumentProperties */
 
+define([], function(){
+
 'use strict';
 
 //var DEFAULT_URL = 'compressed.tracemonkey-pldi-09.pdf';
+var DEFAULT_URL = OC.DEFAULT_URL;
 var DEFAULT_SCALE = 'page-width';
 var DEFAULT_SCALE_DELTA = 1.1;
 var UNKNOWN_SCALE = 0;
@@ -2907,7 +2910,7 @@ var PDFView = {
 
     var parameters = {password: password};
     if (typeof url === 'string') { // URL
-      this.setTitleUsingUrl(url);
+      // this.setTitleUsingUrl(url);
       parameters.url = url;
     } else if (url && 'byteLength' in url) { // ArrayBuffer
       parameters.data = url;
@@ -3384,7 +3387,7 @@ var PDFView = {
       }
 
       if (pdfTitle) {
-        self.setTitle(pdfTitle + ' - ' + document.title);
+        //self.setTitle(pdfTitle + ' - ' + document.title);
       }
 
       if (info.IsAcroFormPresent) {
@@ -5245,13 +5248,12 @@ function webViewerInitialized() {
   document.getElementById('download').addEventListener('click',
     SecondaryToolbar.downloadClick.bind(SecondaryToolbar));
 
-
   if (file) {
     PDFView.open(file, 0);
   }
 }
 
-document.addEventListener('DOMContentLoaded', webViewerLoad, true);
+//document.addEventListener('DOMContentLoaded', webViewerLoad, true);
 
 function updateViewarea() {
 
@@ -5752,3 +5754,5 @@ window.addEventListener('afterprint', function afterPrint(evt) {
 })();
 
 
+return webViewerLoad;
+});

@@ -187,7 +187,10 @@ define(['jquery', 'core', 'tipsy', 'mathjax'], function($){
 
     };
 
-    $(document).ready(function(){
-        OC.article.initImages();
-    });
+
+
+
+    //$(document).ready(function(){
+    OC.article.initImages();
+    //});
 });

@@ -2,25 +2,25 @@
     {% if user == user_profile %}<div class="resource-item-selector"><input type="checkbox" name="resource_collection_id" value="{{ item.id }}"/></div>{% endif %}
     {% if item_category == 'resource' and item.type != 'gfolder' and item.type != 'dropbox' %}
     <a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %} class="resource-item-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ item.image.name }}');">
-        <div class="resource-item-thumbnail-selector"></div>
+        <div class="thumbnail-selector"></div>
         {% if item.type == 'image' %}
-        <div class="resource-item-thumbnail-image"></div>
+        <div class="thumbnail-image"></div>
         {% elif item.type == 'pdf' %}
-        <div class="resource-item-thumbnail-pdf"></div>
+        <div class="thumbnail-pdf"></div>
         {% elif item.type == 'document' %}
-        <div class="resource-item-thumbnail-document"></div>
+        <div class="thumbnail-document"></div>
         {% elif item.type == 'presentation' %}
-        <div class="resource-item-thumbnail-presentation"></div>
+        <div class="thumbnail-presentation"></div>
         {% elif item.type == 'spreadsheet' %}
-        <div class="resource-item-thumbnail-spreadsheet"></div>
+        <div class="thumbnail-spreadsheet"></div>
         {% elif item.type == 'upload' %}
-        <div class="resource-item-thumbnail-upload"></div>
+        <div class="thumbnail-upload"></div>
         {% elif item.type == 'url' %}
-        <div class="resource-item-thumbnail-url"></div>
+        <div class="thumbnail-url"></div>
         {% elif item.type == 'video' %}
-        <div class="resource-item-thumbnail-video"></div>
+        <div class="thumbnail-video"></div>
         {% elif item.type == 'gdoc' %}
-        <div class="resource-item-thumbnail-drive"></div>  
+        <div class="thumbnail-drive"></div>  
         {% endif %}
     </a>
     {% elif item_type == 'unit' %}
@@ -29,9 +29,9 @@
     <a href="{% if item.open_url %}{{ item.open_url }}{% elif item_category == 'resource' %}{% if host == 'profile' %}{% url read resource_id=item.id resource_slug=item.slug %}{% else %}{% url read resource_id=item.id resource_slug=item.slug %}{% endif %}{% else %}{% if host == 'profile' %}{% url user:list_collection username=user_profile.username collection_slug=item.slug %}{% elif host == 'project' %}{% url projects:list_collection project_slug=project.slug collection_slug=item.slug %}{% endif %}{% endif %}"{% if item.open_url %} target="_blank"{% endif %} class="resource-item-thumbnail" style="background-image: url('{{ STATIC_URL }}images/folder-small.png');">
         <div class="resource-item-thumbnail-selector"></div>
         {% if item.type == 'gfolder' or item.type == 'gdoc' %}
-        <div class="resource-item-thumbnail-drive"></div>
+        <div class="thumbnail-drive"></div>
         {% elif item.type == 'dropbox' %}
-        <div class="resource-item-thumbnail-dropbox"></div>
+        <div class="thumbnail-dropbox"></div>
         {% endif %}
     </a>
     {% endif %}

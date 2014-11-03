@@ -159,6 +159,7 @@ def get_serialized_sections(parent):
 
     from oer.models import Link
     link_content_type = ContentType.objects.get_for_model(Link)
+    reference_content_type = ContentType.objects.get_for_model(Reference)
 
     serialized_sections = []
 
@@ -183,6 +184,13 @@ def get_serialized_sections(parent):
                 serialized_resources = []
 
                 for resource in resource_set.resources.all():
+                    import oer.CollectionUtilities as cu
+                    cu.set_resources_type([resource.resource])
+                    cu.preprocess_collection_listings([resource.resource])
+
+                    thumbnail = settings.MEDIA_URL + resource.resource.revision.content.textbook.thumbnail.name if (
+                        resource.resource.revision.content_type == reference_content_type) else settings.MEDIA_URL + resource.resource.image.name
+
                     serialized_resources.append({
                         'id': resource.id,
                         'url': resource.resource.revision.content.url if (
@@ -193,7 +201,9 @@ def get_serialized_sections(parent):
                             }
                         ),
                         'title': resource.resource.title,
-                        'thumbnail': settings.MEDIA_URL + resource.resource.image.name
+                        'thumbnail': thumbnail,
+                        'user_thumbnail': settings.MEDIA_URL + resource.resource.user.get_profile().profile_pic.name,
+                        'type': resource.resource.type
                     })
 
                 serialized_resource_sets.append({
@@ -522,6 +532,10 @@ def add_existing_to_section_item_resources(request):
 
     section_item_resources.resources.add(new_objective_resource)
 
+    import oer.CollectionUtilities as cu
+    cu.set_resources_type([resource.resource])
+    cu.preprocess_collection_listings([resource.resource])
+
     context = {
         'resource': {
             'id': new_objective_resource.id,
@@ -532,7 +546,8 @@ def add_existing_to_section_item_resources(request):
                 }
             ),
             'thumbnail': settings.MEDIA_URL + resource.image.name if resource.image else '',
-            'title': resource.title
+            'title': resource.title,
+            'type': resource.type
         }
     }
 
@@ -703,3 +718,55 @@ def create_textbook_reference(textbook, scope, title, username,
 
     except Exception, exception:
         print exception
+
+
+def asynchronous_view(request, resource_id):
+    from oer.views import render_resource
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    (resource, resource_type, revision) = render_resource(resource.resource.id)
+
+    from django.template import Template, Context
+    template = Template(open(
+        settings.TEMPLATE_DIR + '/templates/partials/resource-body.html', 'r').read())
+    context = Context({
+        'MEDIA_URL': settings.MEDIA_URL,
+        'STATIC_URL': settings.STATIC_URL,
+        'debug': settings.DEBUG,
+        'resource': resource
+    })
+    template_html = template.render(context)
+
+    from django.http import HttpResponse
+    return HttpResponse(
+        template_html, 200,
+        content_type="text/html"
+    )
+
+
+def favorite(request, resource_id):
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    from interactions.views import favorite_resource
+    return favorite_resource(request, 'resource', resource.resource.id)
+
+
+def get_reference(request, resource_id):
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    reference = resource.resource.revision.content
+    context = dict({
+        'textbook_title': reference.textbook.title,
+        'thumbnail': settings.MEDIA_URL + reference.textbook.thumbnail.name,
+    }.items() + reference.scope.items())
+
+    return APIUtilities.success(context)

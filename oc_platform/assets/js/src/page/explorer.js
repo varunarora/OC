@@ -1,4 +1,4 @@
-define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'], function($, OC, _, React, BackboneMixin){
+define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroller'], function($, OC, Backbone, _, React, Spinner){
 
     BackbonerMixin = {
         _backboneForceUpdate: function() {
@@ -1832,6 +1832,19 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                     }
                 });
             },
+            openSesame: function(event){
+                OC.explorer.openResourcePreview(
+                    this.props.model.get('id'),
+                    this.props.model.get('title'),
+                    this.props.model.get('user_thumbnail'),
+                    this.props.model.get('url'),
+                    this.props.model.get('type')
+                );
+
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            },
             render: function(){
                 return React.DOM.div({className: 'explorer-resource-item'}, [
                     React.DOM.div({className: 'explorer-resource-item-thumbnail-wrapper', key: 0},
@@ -1840,12 +1853,19 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
                             style: {
                                 backgroundImage: 'url(\'' + this.props.model.get('thumbnail') + '\')'
                             }
-                        })
+                        }, React.DOM.div({
+                            className: 'thumbnail-silhouette thumbnail-' + this.props.model.get('type')
+                            })
+                        )
                     ),
                     React.DOM.div({className: 'explorer-resource-item-content', key: 1}, [
                         React.DOM.div({className: 'explorer-resource-item-content-body', key: 0}, [
                             React.DOM.div({className: 'explorer-resource-item-content-title', key: 0},
-                                React.DOM.a({href: this.props.model.get('url'), target: '_blank'},  this.props.model.get('title'))
+                                React.DOM.a({
+                                    href: this.props.model.get('url'), target: '_blank',
+                                    onClick: _.contains(
+                                        ['pdf', 'document', 'reference'], this.props.model.get('type')) ? this.openSesame : null
+                                },  this.props.model.get('title'))
                             ),
                             React.DOM.div({className: 'explorer-resource-item-content-caption', key: 1}, '')
                         ]),
@@ -2152,7 +2172,174 @@ define(['jquery', 'core', 'underscore', 'react', 'backboneReact', 'nanoscroller'
             '</div>' +
         '</div>'),
 
-        cachedResources: []
+        cachedResources: [],
+
+        openResourcePreview: function(curriculum_resource_id, title, thumbnail, url, type){
+            var previewWrapper = $('.explorer-resource-preview-wrapper');
+
+            function close(){
+                $('.popup-background').removeClass('show-popup-background');
+                previewWrapper.removeClass('show');
+            }
+
+            function bindFavorite(element){
+                element.unbind('click');
+                element.click(function(event){
+                    $.get('/curriculum/api/favorite/' + curriculum_resource_id + '/',
+                        function(response){
+                            element.toggleClass('favorited');
+                        },
+                    'json');
+                });
+            }
+
+            function renderResponse(response){
+                $('.explorer-resource-header-title').html(title);
+                $('.explorer-resource-header-thumbnail').css(
+                    {'background-image': 'url(\'' + thumbnail + '\')'});
+                $('.explorer-resource-actions-open').attr('href', url);
+
+                $('.explorer-resource-body').append(response);
+                $('.explorer-resource-body').addClass('show');
+
+                $('.explorer-resource-preview').addClass('show');
+
+                // Bind favorite.
+                bindFavorite($('.explorer-resource-actions-favorite'));
+            }
+
+            $('.popup-background').addClass('show-popup-background');
+            previewWrapper.addClass('show');
+
+            if (! _.has(OC.explorer, 'spinner')){
+                var options = {
+                    lines: 15, // The number of lines to draw
+                    length: 6, // The length of each line
+                    width: 3, // The line thickness
+                    radius: 8, // The radius of the inner circle
+                    corners: 0.9, // Corner roundness (0..1)
+                    rotate: 75, // The rotation offset
+                    direction: 1, // 1: clockwise, -1: counterclockwise
+                    color: '#fff', // #rgb or #rrggbb or array of colors
+                    speed: 1, // Rounds per second
+                    trail: 79, // Afterglow percentage
+                    shadow: false, // Whether to render a shadow
+                    hwaccel: false, // Whether to use hardware acceleration
+                    className: 'spinner', // The CSS class to assign to the spinner
+                    zIndex: 12, // The z-index (defaults to 2000000000)
+                    top: '50%', // Top position relative to parent
+                    left: '50%' // Left position relative to parent
+                };
+                OC.explorer.spinner = new Spinner(options).spin($('.explorer-resource-preview-wrapper').get(0));
+            
+                // Also setup the tooltips.
+                $('.explorer-resource-actions div, a').tipsy({gravity: 'w'});
+            } else OC.explorer.spinner.spin($('.explorer-resource-preview-wrapper').get(0));
+
+            // Fetch the resource from the server.
+            $('.explorer-resource-body').html('');
+
+            var sectionTemplate = _.template(
+                '<div class="reference-preview-wrapper">' +
+                    '<div class="reference-preview-thumbnail" style="background-image: url(\'<%= thumbnail %>\');"></div>' +
+                    '<div class="reference-preview-contents">' +
+                        '<h2><%= textbook_title %></h2>' +
+                        '<h3>Chapter <%= chapter %>: <%= title %></h3>' +
+                        '<h3>Section <%= section %></h3>' +
+                        '<p>No digital preview available.</p>' +
+                    '</div>' +
+                '</div>');
+
+            var pagesTemplate = _.template(
+                '<div class="reference-preview-wrapper">' +
+                    '<div class="reference-preview-thumbnail" style="background-image: url(\'<%= thumbnail %>\');"></div>' +
+                    '<div class="reference-preview-contents">' +
+                        '<h2><%= textbook_title %></h2>' +
+                        '<h3>Pages: <%= begin %> - <%= end %></h3>' +
+                        '<p>No digital preview available.</p>' +
+                    '</div>' +
+                '</div>');
+
+            var excerptsTemplate = function(props){
+                excerpts = _.reduce(props.excerpts, function(memo, value){
+                    return memo ? memo + ', ' + value: value; });
+
+                props._excerpts = excerpts;
+
+                return _.template(
+                '<div class="reference-preview-wrapper">' +
+                    '<div class="reference-preview-thumbnail" style="background-image: url(\'<%= thumbnail %>\');"></div>' +
+                    '<div class="reference-preview-contents">' +
+                        '<h2><%= textbook_title %></h2>' +
+                        '<h3><%= _excerpts %></h3>' +
+                        '<p>No digital preview available.</p>' +
+                    '</div>' +
+                '</div>')(props);
+            };
+
+            var excerptTemplate = _.template(
+                '<div class="reference-preview-wrapper">' +
+                    '<div class="reference-preview-thumbnail" style="background-image: url(\'<%= thumbnail %>\');"></div>' +
+                    '<div class="reference-preview-contents">' +
+                        '<h2><%= textbook_title %></h2>' +
+                        '<h3><%= excerpt %></h3>' +
+                        '<p>No digital preview available.</p>' +
+                    '</div>' +
+                '</div>');
+
+            if (type == 'reference'){
+                $.get('/curriculum/api/reference/' + curriculum_resource_id + '/',
+                    function(response){
+                        OC.explorer.spinner.stop();
+
+                        if (response.type == 'chapter-section'){
+                            renderResponse(sectionTemplate(response));
+                        }
+                        
+                        if (response.type == 'pages'){
+                            renderResponse(pagesTemplate(response));
+                        }
+                        
+                        if (response.type == 'excerpts'){
+                            renderResponse(excerptsTemplate(response));
+                        }
+
+                        if (response.type == 'excerpt'){
+                            renderResponse(excerptsTemplate(response));
+                        }
+
+                        $('.explorer-resource-contents').removeClass('foreign-resource');
+                        $('.explorer-resource-contents').addClass('reference-resource');
+                    },
+                'json');
+            } else {
+                $.get('/curriculum/api/resource-view/' + curriculum_resource_id + '/',
+                    function(response){
+                        OC.explorer.spinner.stop();
+
+                        if (type == 'pdf'){
+                            OC.config.pdfjs = true;
+                            $('.explorer-resource-body').addClass('pdf');
+                        }
+                        
+                        $('.explorer-resource-contents').removeClass('reference-resource');
+                        $('.explorer-resource-contents').addClass('foreign-resource');
+                        renderResponse(response);
+                    },
+                'html');
+            }
+
+            $('.explorer-resource-actions-close').unbind('click');
+            $('.explorer-resource-actions-close').click(close);
+
+            $(document).keyup(function(event) {
+                if (previewWrapper.hasClass('show')){
+                    if (event.which == 27) { // 'Esc' on keyboard
+                        close();
+                    }
+                }
+            });
+        }
 
     });
 

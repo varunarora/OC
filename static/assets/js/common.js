@@ -16,6 +16,13 @@ require.config({
         filepicker: '//api.filepicker.io/v1/filepicker',
         mathjax: '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML',
         backboneReact: 'lib/backbone-react-component',
+        spin: 'lib/spin.min',
+
+        // PDFJS
+        pdfjs_l10n: 'lib/pdfjs/l10n',
+        pdfjs: 'lib/pdfjs/pdf',
+        pdfjs_debugger: 'lib/pdfjs/debugger',
+        pdfjs_viewer: 'lib/pdfjs/viewer',
 
         // CKEditor stuff.
         ckeditor: 'lib/ckeditor/ckeditor',

@@ -3,7 +3,7 @@
 /*global jQuery, $, Modernizr, gapi, _*/
 /*jslint nomen: false */
 
-define(['jquery', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'dialog'], function($){
+define(['jquery', 'underscore', 'autocomplete', 'tagit', 'tipsy', 'modernizr', 'dialog'], function($, _){
     //window.onerror = function(message, url, lineNumber){
     //    $('')
     //}

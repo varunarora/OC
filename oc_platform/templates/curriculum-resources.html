@@ -9,52 +9,8 @@
         <span class="explorer-header-current-organization-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ curriculum.user.get_profile.profile_pic.name }}');"></span>
         <span class="explorer-header-current-organization-title">{{ curriculum.grade }} <span class="explorer-header-current-organization-title-subject">{{ curriculum.subject }}</span></span>
     </a>
-    <!--<a href="" class="explorer-header-child">Trimester 1</a>
-    <a href="" class="explorer-header-child">Trimester 2</a>
-    <a href="" class="explorer-header-child">Trimester 3</a>-->
-
-    <!--<nav class="explorer-home-menu">
-        <div class="floating-menu-spacer"></div>
-        <ul>
-            <li class=""><a href="">Level 1 English</a></li>
-            <li class=""><a href="">Level 2 English</a></li>
-            <li class=""><a href="">Level 3 English</a></li>
-            <li class=""><a href="">Level 4 English</a></li>
-        </ul>
-    </nav>-->
 </div>
-<div class="wide-header explorer-body-wrapper">
-    <!--<div class="explorer-body-side scrollable-block">
-        <ul class="explorer-body-side-menu explorer-body-side-menu-main scroll-content">
-            <li class="overview"><a href="">OVERVIEW</a></li>
-            <li class="textbooks"><a href="">UNITS / RESOURCES</a></li>
-        </ul>
-
-    </div>
-    <div class="explorer-body-stage">
-        <div class="explorer-body-stage-spread">
-            <div class="explorer-resource-overview show">
-                <div class="explorer-overview-section">
-                    <h2>Overview</h2>
-                    <p>{{ curriculum.description|safe }}</p>
-                </div>
-
-                <div class="explorer-overview-section">
-                    <div class="explorer-overview-unit-table">
-                    </div>
-                </div>
-
-                <div class="explorer-overview-section">
-                    <h2>Issues</h2>
-                    <div class="explorer-overview-issues-wrapper explorer-resource-module">
-                    </div>
-                </div>
-
-            </div>
-            <div class="explorer-resource-module-wrapper"></div>
-        </div>
-    </div>-->
-</div>
+<div class="wide-header explorer-body-wrapper"></div>
 
 <div class="explorer-suggest-resources-dialog oc-popup">
     <div class="oc-popup-title-bar">
@@ -64,6 +20,25 @@
     <div class="oc-popup-body">
         <div class="explorer-suggest-resources-body">
             <div class="explorer-suggest-resources-listing"></div>
+        </div>
+    </div>
+</div>
+
+<div class="explorer-resource-preview-wrapper">
+    <div class="explorer-resource-preview">
+        <div class="explorer-resource-header">
+            <div class="explorer-resource-header-thumbnail-wrapper">
+                <div class="explorer-resource-header-thumbnail"></div>
+            </div>
+            <div class="explorer-resource-header-title"></div>
+        </div>
+        <div class="explorer-resource-contents">
+            <div class="explorer-resource-body"></div>
+            <div class="explorer-resource-actions">
+                <div class="explorer-resource-actions-close" title="Close"></div>
+                <a class="explorer-resource-actions-open" title="Open in new tab / window" target="_blank"></a>
+                <div class="explorer-resource-actions-favorite" title="Favorite"></div>
+            </div>
         </div>
     </div>
 </div>

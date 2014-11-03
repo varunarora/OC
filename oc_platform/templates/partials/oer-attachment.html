@@ -1,20 +1,27 @@
 {% if resource.extension == '.pdf' or resource.extension == '.doc' or resource.extension == '.docx' or resource.revision.content.attachment %}
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL}}css/viewer.css"/>
 
-<link rel="resource" type="application/l10n" href="{{ STATIC_URL}}js/pdfjs/locale/locale.properties"/>
-<script type="text/javascript" src="{{ STATIC_URL}}js/lib/pdfjs/l10n.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL}}js/lib/pdfjs/pdf.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL}}js/lib/pdfjs/debugger.js"></script>
+<link rel="resource" type="application/l10n" href="{{ STATIC_URL}}js/lib/pdfjs/locale/locale.properties"/>
+
 <script>
-PDFJS.imageResourcesPath = '{{ STATIC_URL }}images/lib/pdfjs/';
-  PDFJS.workerSrc = '{{ STATIC_URL }}js/lib/pdfjs/pdf.worker.js';
-  PDFJS.cMapUrl = '../web/cmaps/';
+      require([{% if debug %}'common'{% else %}'{{ STATIC_URL }}js/common-build.js'{% endif %}], function(){
+            if (OC.config.pdfjs){
+                require(['pdfjs_l10n', 'pdfjs', 'pdfjs_debugger'], function(){
+                  PDFJS.imageResourcesPath = '{{ STATIC_URL }}images/lib/pdfjs/';
+                  PDFJS.workerSrc = '{{ STATIC_URL }}js/lib/pdfjs/pdf.worker.js';
+                  PDFJS.cMapUrl = '{{ STATIC_URL }}js/lib/pdfjs/cmaps/';
 
-var DEFAULT_URL = {% if resource.extension == '.pdf' %}'{{ MEDIA_URL }}{{ resource.revision.content.file.name }}'{% else %}{% if resource.revision.content.rendered_file %}'{{ MEDIA_URL }}{{ resource.revision.content.rendered_file.name }}'{% else %}'{{ MEDIA_URL }}{{ resource.revision.content.attachment.file.name }}'{% endif %}{% endif %},
-	CSS_UNITS = 1;
+                  OC.DEFAULT_URL = {% if resource.extension == '.pdf' %}'{{ MEDIA_URL }}{{ resource.revision.content.file.name }}'{% else %}{% if resource.revision.content.rendered_file %}'{{ MEDIA_URL }}{{ resource.revision.content.rendered_file.name }}'{% else %}'{{ MEDIA_URL }}{{ resource.revision.content.attachment.file.name }}'{% endif %}{% endif %},
+                  CSS_UNITS = 1;
+                
+                require(['pdfjs_viewer'], function(webViewerLoad){
+                    // HACK(Varun): Because we are loading script in async
+                    webViewerLoad();
+                });
+              });
+            }
+      });
 </script>
-
-<script type="text/javascript" src="{{ STATIC_URL}}js/lib/pdfjs/viewer.js"></script>
 
 <div id="outerContainer" class="loadingInProgress center-stage page-viewer">
 

@@ -405,10 +405,13 @@ def set_resources_type(resources):
 
 
 def preprocess_collection_listings(resources):
-    from oer.models import Link, Attachment
+    from oer.models import Link, Attachment, Document
+    from curriculum.models import Reference
     from django.contrib.contenttypes.models import ContentType
     link_content_type = ContentType.objects.get_for_model(Link)
     attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+    reference_content_type = ContentType.objects.get_for_model(Reference)
     import oer.ResourceUtilities as ru
     from os.path import splitext
 
@@ -456,6 +459,9 @@ def preprocess_collection_listings(resources):
                 resource.type = 'image'
             else:
                 resource.type = 'upload'
+
+        elif resource.revision.content_type == reference_content_type:
+            resource.type = 'reference'
 
 
 def build_projects_raw_tree(request, browse_trees):

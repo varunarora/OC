@@ -29,7 +29,8 @@
 					},
 					contentTypes: {
 
-					}
+					},
+					pdfjs:  false
 				}
 			};
 			var staticURL = '{{ STATIC_URL }}';
@@ -66,7 +67,8 @@
 		<script src="{{ STATIC_URL }}js/build/search.js" type="text/javascript"></script>
 
 		{% elif body_class == 'resource-view' %}
-		<script src="{{ STATIC_URL }}js/build/article.js" type="text/javascript"></script>
+	    <script src="{{ STATIC_URL }}js/build/article.js" type="text/javascript"></script>
+
 
 		{% elif body_class == 'editor' %}
 		<script src="{{ STATIC_URL }}js/build/editor.js" type="text/javascript"></script>
@@ -125,6 +127,16 @@
 					});
 
 				{% elif body_class == 'resource-view' %}
+				    {% if resource.revision.content_type.name == "attachment" %}
+				    	{% if resource.extension == '.pdf' or resource.extension == '.doc' or resource.extension == '.docx' or resource.revision.content.attachment %}
+				    	OC.config.pdfjs = true;
+				    	{% endif %}
+				    {% elif resource.revision.content_type.name == "link" and resource.revision.content.attachment %}
+				    	{% if resource.extension == '.pdf' or resource.extension == '.doc' or resource.extension == '.docx' or resource.revision.content.attachment %}
+				    	OC.config.pdfjs = true;
+				    	{% endif %}
+				    {% endif %}
+
 					require(['article']);
 
 				{% elif body_class == 'editor' %}

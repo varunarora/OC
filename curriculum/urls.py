@@ -26,6 +26,10 @@ urlpatterns = patterns(
     url(r'^api/section-item-resources/add-existing/$', views.add_existing_to_section_item_resources, name='add_existing_to_section_item_resources'),
     url(r'^api/section-item-resources/add-upload/$', views.add_upload_to_section_item_resources, name='add_upload_to_section_item_resources'),
 
+    url(r'^api/resource-view/(?P<resource_id>\d+)/$', views.asynchronous_view, name='asynchronous_view'),
+    url(r'^api/favorite/(?P<resource_id>\d+)/$', views.favorite, name='favorite'),
+    url(r'^api/reference/(?P<resource_id>\d+)/$', views.get_reference, name='get_reference'),
+
     # Issues.
     url(r'^api/issue/create-update/$', views.create_update_issue, name='create_update_issue'),
 
