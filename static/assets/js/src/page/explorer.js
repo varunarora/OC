@@ -467,7 +467,12 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'showdown',
                 var overviewView = React.DOM.div({className: 'explorer-resource-overview show'}, [
                     React.DOM.div({className: 'explorer-overview-section', key: 0}, [
                         React.DOM.h2({key: 0}, 'Overview'),
-                        React.DOM.p({key: 1}, this.props.description),
+                        React.DOM.p({
+                            key: 1,
+                            dangerouslySetInnerHTML: {
+                                __html: this.props.description
+                            }
+                        }),
                     ]),
 
                     React.DOM.div({className: 'explorer-overview-section', key: 1},
