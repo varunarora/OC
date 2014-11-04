@@ -18,8 +18,13 @@ def curriculum_resources(request, username, grade_slug, subject_slug):
     curriculum = next(curriculum for curriculum in curricula if (
         slugify(curriculum.grade) == grade_slug and slugify(curriculum.subject) == subject_slug))
 
+    is_owner = False
+    if request.user == curriculum.user:
+        is_owner = True
+
     context = {
         'curriculum': curriculum,
+        'is_owner': is_owner,
         'title': curriculum.grade + ': ' + curriculum.subject
     }
     return render(request, 'curriculum-resources.html', context)

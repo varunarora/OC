@@ -1,4 +1,4 @@
-define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroller'], function($, OC, Backbone, _, React, Spinner){
+define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'showdown', 'nanoscroller'], function($, OC, Backbone, _, React, Spinner, Showdown, undefined){
 
     BackbonerMixin = {
         _backboneForceUpdate: function() {
@@ -26,20 +26,6 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
 
 
     OC.api.curriculum = {
-        /*objective: {
-            update: function(serializedObjective, callback){
-                $.post('/curriculum/api/objective/update/', serializedObjective,
-                    function(response){
-                        callback(response);
-                    }, 'json');
-            },
-            create: function(description, callback){
-                $.post('/curriculum/api/objective/create/', description,
-                    function(response){
-                        callback(response);
-                    }, 'json');
-            }
-        },*/
         sectionItem: {
             update: function(serializedObjective, callback){
                 $.post('/curriculum/api/section-item/update/', serializedObjective,
@@ -54,14 +40,6 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
                     }, 'json');
             }
         },
-        /*unit: {
-            addObjective: function(serializedUnitObjective, callback){
-                $.post('/curriculum/api/objective/add-objective-to-unit/', serializedUnitObjective,
-                    function(response){
-                        callback(response);
-                    }, 'json');
-            }
-        },*/
         section: {
             addItem: function(serializedUnitItem, callback){
                 $.post('/curriculum/api/section-item/add-item-to-section/', serializedUnitItem,
@@ -89,13 +67,12 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
     };
 
      _.extend(OC.explorer, {
-        /*Settings: Backbone.Model.extend({
-            drawerOpen: '',
-        }),*/
-
         App: React.createClass({
             getInitialState: function() {
-                return {numWeeks: 0, view: 'overview', drawerView: false};
+                return {
+                    numWeeks: 0, view: 'overview',
+                    drawerView: false, edit: OC.explorer.curriculumSettings.isOwner
+                };
             },
             getDefaultProps: function() {
                 return {units: []};
@@ -367,20 +344,6 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
                         standard: standard,
                         selected: view.state.view === 'standard' ? view.props.standard : undefined
                     });
-                    /*return React.DOM.li({className: 'standards'}, [
-                        React.DOM.a({
-                            href: '',
-                            onClick: view.open
-                        }, standard.title),
-                        React.DOM.ul({className: 'explorer-body-side-menu explorer-body-side-menu-light'},
-                            standard.standards.map(function(subStandard){
-                                return OC.explorer.StandardItem({
-                                    title: subStandard.title,
-                                    click: view.openStandard,
-                                    standard: subStandard
-                                });
-                            }))
-                    ]);*/
                 });
             },
 
@@ -534,12 +497,13 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
                             sections: this.state.view === 'unit' ? this.props.unit.sections : this.props.standard.sections,
                             id: this.state.view === 'unit' ? this.props.unit.id : this.props.standard.id,
                             drawerView: this.state.drawerView,
-                            setDrawerOpen: this.openDrawer
+                            setDrawerOpen: this.openDrawer,
+                            edit: this.state.edit
                         })
                     );
                 }
 
-                return React.DOM.div({className: 'explorer-body'},[
+                return React.DOM.div({className: 'explorer-body ' + (this.state.edit ? ' edit-' : ' view-') + 'mode'},[
                     React.DOM.div({className: 'explorer-body-side scrollable-block', key: 0},
                         React.DOM.ul({className: 'explorer-body-side-menu explorer-body-side-menu-main scroll-content', key: 0},
                             React.DOM.li({className: 'overview', key: 0},
@@ -714,7 +678,7 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
 
                 if (selectedSection){
                     return OC.explorer.Context({ item: selectedSection.items.findWhere(
-                        {selected: true}) });
+                        {selected: true}), edit: this.props.edit });
                 } else {
                     if (this.props.drawerView)
                         return OC.explorer.Context();
@@ -722,26 +686,14 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
             },
 
             openDrawer: function(item){
-                //this.replaceState({selected: true});
                 // Remove all objective selecteds.
                 var selectedItem = _.find(this.props.sections, function(section){
                     return section.items.findWhere({selected: true});
                 });
                 if (selectedItem) selectedItem.items.findWhere({selected: true}).set({selected: false});
 
-                /*this.props.objectives.where({selected: true}).forEach(function(objective){
-                    objective.set({selected: false});
-                });*/
-
                 item.set('selected', true);
-
                 this.props.setDrawerOpen();
-
-                //$('.explorer-resource-module-main').addClass('compress');
-                
-                //$('.explorer-resource-module-support').addClass('show');
-                
-                //OC.explorer.settings.set('drawerOpen', true);
             },
 
             render: function(){
@@ -760,16 +712,13 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
                         }),
 
                         React.DOM.div({className: 'explorer-resource-sections', key: 1},
-                                OC.explorer.Sections({
-                                    //collection: this.props.objectives,
-                                    sections: this.props.sections,
-                                    openDrawer: this.openDrawer,
-                                    drawerOpen: this.props.drawerView
-                                })
-                                //OC.explorer.ModuleObjectives({
-                                //    collection: this.props.objectives,
-                                //    openDrawer: this.openDrawer
-                                //}),
+                            OC.explorer.Sections({
+                                //collection: this.props.objectives,
+                                sections: this.props.sections,
+                                openDrawer: this.openDrawer,
+                                drawerOpen: this.props.drawerView,
+                                edit: this.props.edit
+                            })
                         ),
                     ]),
                     React.DOM.div({
@@ -842,7 +791,8 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
                     title: section.title,
                     type: section.type,
                     openDrawer: this.props.openDrawer,
-                    drawerOpen: this.props.drawerOpen
+                    drawerOpen: this.props.drawerOpen,
+                    edit: this.props.edit
                 });
             },
             render: function(){
@@ -897,34 +847,6 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
 
                 //newCollectionItem.set('selected', true);
                 this.props.openDrawer(newCollectionItem);
-
-                /*var newObjective = new OC.explorer.Objective({
-                    description: 'New objective',
-                    resources: [],
-                    issue: {
-                        id: null, host_id: null, message: null
-                    }
-                });
-
-                var view = this;
-                OC.appBox.saving();
-
-                view.props.objectives.add(newObjective);
-
-                newObjective.save(null, {
-                    attrs: {unit_id: this.props.id},
-                    success: function(model){
-                        view.props.objectives.sync('update', model, {
-                            success: OC.appBox.saved
-                        });
-                        
-                        // Highlight the last objective AFTER rendering completion.
-                        setTimeout(function(){
-                            OC.explorer.resetPreHeights();
-                            //$('.explorer-resource-objective-section:last').addClass('new');
-                        }, 100);
-                    }
-                });*/
             },
             open: function() {
                 this.props.openDrawer(this.props.collection.at(0));
@@ -937,7 +859,8 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
                     model: item,
                     collection: this.props.collection,
                     openDrawer: this.props.openDrawer,
-                    drawerOpen: this.props.drawerOpen
+                    drawerOpen: this.props.drawerOpen,
+                    edit: this.props.edit
                 });
             },
             render: function(){
@@ -965,12 +888,12 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
                         sectionTitle,
                         React.DOM.div({className: 'explorer-resource-section-listing-items', key: 1},
                            this.props.collection.map(this.renderItem)),
-                        React.DOM.div({className: 'explorer-resource-listing-actions', key: 2},
+                        this.props.edit ? React.DOM.div({className: 'explorer-resource-listing-actions', key: 2},
                             React.DOM.button({
                                 id: 'new-item',
                                 onClick: this.addItem
                             }, '+ Add new')
-                        )
+                        ) : null
                     ]);
                 } else if (this.props.type === 'contextual') {
                     return React.DOM.div({className: 'explorer-resource-section-body'},
@@ -984,261 +907,8 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
             }
         }),
 
-        /*ModuleObjectives: React.createClass({
-            mixins: [BackboneMixin],
-            componentWillReceiveProps: function(nextProps){
-                if (nextProps.collection instanceof Backbone.Collection)
-                    this.wrapper.collection = nextProps.collection;
-            },
-            renderObjective: function(objective){
-                return OC.explorer.ObjectiveWrapper({
-                    model: objective,
-                    objectives: this.getCollection(),
-                    openDrawer: this.props.openDrawer
-                });
-            },
-            render: function(){
-                return React.DOM.div({className: 'explorer-resource-section-body'}, [
-                    React.DOM.div({className: 'explorer-resource-listing-labels'}, [
-                        React.DOM.div({className: 'explorer-resource-listing-labels-pre'}, ''),
-                        React.DOM.div({className: 'explorer-resource-listing-labels-header'}, [
-                            React.DOM.div({className: 'explorer-resource-listing-labels-header-key' + (this.props.openDrawer ?
-                                ' expand' : '')}, [
-                                React.DOM.span({className: 'explorer-resource-listing-label'}, 'Objective / Skill')
-                            ]),
-                            React.DOM.div({className: 'explorer-resource-listing-labels-header-fill' + (this.props.openDrawer ?
-                                ' hide' : '')}, [
-                                React.DOM.span({className: 'explorer-resource-listing-label'}, 'Information')
-                            ])
-                        ])
-                    ]),
-                    React.DOM.div({className: 'explorer-resource-objective-sections'},
-                        this.getCollection().models.map(this.renderObjective))
-                ]);
-            }
-        }),*/
-
 
         /************************END OF MODULE SCAFFOLD VIEWS**********************/
-        /*
-        ObjectiveWrapper: React.createClass({
-            _backboneForceUpdate: function() {
-                this.forceUpdate();
-            },
-
-            bindProps: function() {
-                [this.props.model].map(function(model){
-                    model.on('add change remove', this._backboneForceUpdate, this);
-                }.bind(this));
-            },
-            
-            componentDidMount: function() {
-                this.bindProps();
-            },
-
-            componentWillUnmount: function() {
-                [this.props.model].map(function(model){
-                    model.off('add change remove', this._backboneForceUpdate, this);
-                }.bind(this));
-            },
-
-            getInitialState: function(){
-                return {selected: false};
-            },
-
-            setReady: function(){
-                if (this.props.objective.get('ready') === undefined) {
-                    if (this.props.objective.get('issue').host_id !== null){
-                        this.props.objective.set('ready', false);
-                    } else this.props.objective.set('ready', true);
-                }
-            },
-            //setMessage: function(){
-            //    if (this.props.objective.get('message') === undefined) {
-            //        if (this.props.objective.get('issue'))
-            //            this.props.objective.set('message', this.props.objective.get('issue')['message']);
-            //        else
-            //            this.props.objective.set('message', null);
-            //    }
-            //},
-            changeMessage: function(event) {
-                var issue = this.props.objective.get('issue');
-                issue['message'] = event.target.value;
-
-                this.props.objective.set('issue', issue);
-            },
-            saveMessage: function(event){
-                OC.appBox.saving();
-                
-                this.turnOffFocus();
-
-                this.props.objective.set('statusPersist', false);
-                this.props.objective.set('statusShow', false);
-
-                //this.props.objective.set('message', this.props.objective.get('message'));
-                this.props.objective.save(null, {
-                    attrs: {'message': this.props.objective.get('issue')['message']},
-                    success: function(){
-                        OC.appBox.saved();
-                    }
-                });
-            },
-
-            //persist: function(){
-            //    this.props.objective.set('statusPersist', true);
-            //},
-            //letGo: function(){
-            //    if (! $('.light-popup-background').hasClass('show-popup-background')){
-            //        //this.props.objective.set('statusPersist', false);
-            //        //this.props.objective.set('statusShow', false);
-            //    }
-            //},
-            makeReady: function(){
-                var props = this.props;
-
-                if (props.objective.get('ready') !== true){
-                    OC.appBox.saving();
-
-                    props.objective.set('ready', true);
-                    props.objective.save(null, {
-                        attrs: {'ready': true},
-                        success: function(){
-                            OC.appBox.saved();
-                        }
-                    });
-                }
-
-                
-            },
-            makeUnready: function(event){
-                var props = this.props;
-
-                if (props.objective.get('ready') !== false){
-                    OC.appBox.saving();
-
-                    props.objective.set('ready', false);
-                    props.objective.save(null, {
-                        attrs: {'ready': false},
-                        success: function(){
-                            OC.appBox.saved();
-                        }
-                    });
-                }
-
-                $('.light-popup-background').addClass('show-popup-background');
-
-                this.turnOnFocus();
-                //$('.light-popup-background').click(function(event){
-                //    OC.explorer.clearStatusFocus(false);
-                //    props.objective.set('statusShow', false);
-                //    props.objective.set('statusPersist', false);
-                //});
-
-                event.stopPropagation();
-                return false;
-            },
-            turnOnFocus: function(event) {
-                $('.light-popup-background').addClass('show-popup-background');
-
-                var props = this.props;
-                $('.light-popup-background').click(function(event){
-                    OC.explorer.clearStatusFocus(false);
-                    props.objective.set('statusShow', false);
-                    props.objective.set('statusPersist', false);
-                });
-            },
-            turnOffFocus: function(){
-                OC.explorer.clearStatusFocus();
-                this.props.objective.set('statusPersist', false);
-            },
-
-            setStatusProps: function(){
-                //this.props.model.set('statusPersist', false);
-                //this.props.model.set('statusShow', false);
-                //this.props.model.set('selected', false);
-                //this.props.model.set('ready', true);
-                //this.props.model.set('statusPosition', {
-                //    top: 0,
-                //    left: 0
-                //});
-            },
-            componentWillMount: function(){
-                this.setStatusProps();
-            },
-            //componentDidUpdate: function(){
-            //    if (!this.props.model.has('statusShow'))
-            //        this.setStatusProps();
-
-            //    this.bindProps();
-            //},
-            toggleObjectiveStatus: function(event){
-                console.log('aaayyyaaa!!');
-                var pre = $(event.target);
-
-                this.props.model.set('statusPosition', {
-                    top: pre.offset().top,
-                    left: pre.offset().left + (pre.width() / 2) + 7
-                });
-
-                var props = this.props;
-                
-                props.model.set('statusShow', !props.model.get('statusShow'));
-
-                if (props.model.get('statusShow')){
-                    // Clicking anywhere on the body except the box should close this.
-                    $('body').unbind('click');
-                    $('body').click(function(event){
-                        props.model.set('statusShow', false);
-
-                        //event.preventDefault();
-                        //return false;
-                    });
-                }
-
-                event.stopPropagation();
-                return false;
-            },
-
-            openDrawer: function() {
-                this.props.openDrawer(this.props.model);
-            },
-
-            render: function(){
-                return React.DOM.div(
-                    {
-                        className: 'explorer-resource-objective-section' + (
-                            this.props.model.get('selected') ? ' selected' : ''),
-                        onClick: this.openDrawer
-                    }, [
-                    React.DOM.div({
-                        className: 'explorer-resource-listing-body-pre' + (
-                            this.props.model.get('ready') === undefined ? (
-                                this.props.model.get('issue').host_id !== null ? ' has-issue': '') : (
-                                this.props.model.get('ready') ? '' : ' has-issue')
-                            ),
-                        onClick: this.toggleObjectiveStatus
-                        //onMouseLeave: this.hideObjectiveStatus
-                    }, ''),
-                    React.DOM.div({className: 'explorer-resource-listing-body-content'}, [
-                        React.DOM.div({className: 'explorer-resource-listing-body-content-key' + (
-                            this.props.drawerView ? ' expand' : '')}, [
-                            OC.explorer.ObjectiveView({model: this.props.model})
-                        ]),
-                        React.DOM.div({className: 'explorer-resource-listing-body-content-fill' + (
-                            this.props.drawerView ? ' hide' : '')}, [
-                        ])
-                    ]),
-                    OC.explorer.Status({
-                        objective: this.props.model,
-                        persist: this.props.model.get('statusPersist'),
-                        show: this.props.model.get('statusShow'),
-                        position: this.props.model.get('statusPosition'),
-                        makeReady: this.makeReady,
-                        makeUnready: this.makeUnready
-                    })
-                ]);
-            }
-        }),*/
 
         ModuleSectionItemWrapper: React.createClass({
             getInitialState: function(){
@@ -1410,38 +1080,6 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
             }
         }),
 
-        /*Objective: Backbone.Model.extend({
-            id: '',
-            description: '',
-            sync: function(method, model, options){
-                function success(response){ return options.success(response); }
-
-                switch(method) {
-                    case 'update':
-                        if (_.has(options, 'attrs')){
-                            if (_.has(options.attrs, 'ready')){
-                                return OC.api.curriculum.issues.update(
-                                    {'host_id': this.get('id'), 'ready': options.attrs.ready}, success);
-                            } else if (_.has(options.attrs, 'message')){
-                                return OC.api.curriculum.issues.update(
-                                    {'id': this.get('issue')['id'], 'message': options.attrs.message}, success);
-                            } else if (_.has(options.attrs, 'meta')){
-                                meta = {};
-                                meta[options.attrs.meta] = this.get('meta')[options.attrs.meta];
-
-                                return OC.api.curriculum.objective.update(
-                                    {'id': this.get('id'), 'meta': meta}, success);
-                            }
-                        }
-                        return OC.api.curriculum.objective.update(
-                            {'id': this.get('id'), 'description': this.get('description')}, success);
-                    case 'create':
-                        return OC.api.curriculum.objective.create(
-                            {'description': this.get('description'), 'unit_id': options.attrs.unit_id}, success);
-                }
-            }
-        }),*/
-
         SectionItem: Backbone.Model.extend({
             id: '',
             description: '',
@@ -1477,32 +1115,6 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
             }
         }),
 
-        /*ObjectiveView: React.createClass({
-            mixins: [BackbonerMixin],
-            save: function(event){
-                newDescription = $(event.target).text();
-
-                if (this.props.model.get('description') !== newDescription){
-                    OC.appBox.saving();
-
-                    this.props.model.set('description', newDescription);
-                    this.props.model.save(null, {
-                        success: function(){
-                            OC.appBox.saved();
-                        }
-                    });
-                }
-            },
-            render: function(){
-                return React.DOM.div({
-                    className: 'explorer-resource-objective',
-                    contentEditable: true,
-                    title: this.props.model.get('description'),
-                    onBlur: this.save
-                }, this.props.model.get('description'));
-            }
-        }),*/
-
         ModuleSectionItem: React.createClass({
             save: function(event){
                 newDescription = $(event.target).text();
@@ -1521,7 +1133,7 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
             render: function(){
                 return React.DOM.div({
                     className: 'explorer-resource-objective',
-                    contentEditable: true,
+                    contentEditable: this.props.edit ? true : false,
                     title: this.props.model.get('description'),
                     onBlur: this.save
                 }, this.props.model.get('description'));
@@ -1568,7 +1180,8 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
                             key: key,
                             title: _.has(OC.explorer.metaTitles, key) ? OC.explorer.metaTitles[key] : '(Unnamed)',
                             body: value,
-                            objective: props.item
+                            objective: props.item,
+                            edit: props.edit
                         });
                     });
                 } else {
@@ -1577,13 +1190,18 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
             },
 
             renderResourceSet: function(resourceSet){
+                if (!this.props.edit && !resourceSet.id) {
+                    return null;
+                }
+
                 return OC.explorer.ResourcesView({
                     key: resourceSet.id ? resourceSet.id : 0,
                     id:  resourceSet.id,
                     collection: resourceSet.resources,
                     title: resourceSet.title,
                     item: this.props.item,
-                    parent: this.props.item.get('parent')
+                    parent: this.props.item.get('parent'),
+                    edit: this.props.edit
                 });
             },
 
@@ -1655,23 +1273,31 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
             render: function(){
                 var isStandardsFieldView = _.isObject(this.state.body) && this.state.body.type == 'standards';
 
-                var metaBody;
+                var metaBody, hideTitle = _.isObject(this.state.body) && this.state.body.hideTitle;
+
                 if (isStandardsFieldView){
                     metaBody = React.DOM.div({
                         className: 'explorer-resource-module-support-section-body'
                     }, this.state.body.standards.map(this.renderStandard));
                 } else {
+                    var converter = new Showdown.converter(),
+                        body = hideTitle ? this.state.body.body : this.state.body;
+
                     metaBody = React.DOM.div({
                         className: 'explorer-resource-module-support-section-body',
-                        contentEditable: true,
+                        contentEditable: this.props.edit? true : false,
                         onBlur: this.save,
-                        'data-placeholder': this.state.body && this.state.body.length > 0 ? '' : '(add something)',
+                        'data-placeholder': body && body.length > 0 ? '' : '(add something)',
+                        dangerouslySetInnerHTML: {
+                            __html: converter.makeHtml(body && body.length > 0 ? converter.makeHtml(
+                                body) : '')
+                        },
                         key: 1
-                    }, this.state.body && this.state.body.length > 0 ? this.state.body : '');
+                    });
                 }
 
                 return React.DOM.div({className: 'explorer-resource-module-support-section explorer-resource-module-support-section-' + this.props.key}, [
-                    React.DOM.div({className: 'explorer-resource-module-support-section-title', key: 0}, this.props.title),
+                    hideTitle ? null : React.DOM.div({className: 'explorer-resource-module-support-section-title', key: 0}, this.props.title),
                     metaBody,
                 ]);
             }
@@ -1810,12 +1436,12 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
                         key: 2
                     }, 'SUGGEST MORE RESOURCES') : null,
 
-                    React.DOM.div({className: 'explorer-resource-listing-body-resource-actions', key: 3},
+                    this.props.edit ? React.DOM.div({className: 'explorer-resource-listing-body-resource-actions', key: 3},
                         React.DOM.button({
                             className: 'explorer-resource-actions-add',
                             onClick: this.addResource
                         }, '+ Add resource')
-                    )
+                    ) : null
                 ]);
             }
         }),
@@ -2042,88 +1668,6 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
 
         /************************END OF ISSUE RELATED VIEWS**********************/
 
-
-        initSideNavigation: function(){
-            // Learning outcomes / Standards.
-            /*var i, j, LOCategories = _.keys(OC.explorer.hctLOs), menu,
-                categoryLi, categoryMenu, categoryURL, categoryLOs, LoLi, LoURL;
-
-            menu = $('<ul/>', {
-                'class': 'explorer-body-side-menu hidden'
-            });
-            for (i = 0; i < LOCategories.length; i++){
-                categoryLi = $('<li/>');
-                categoryURL = $('<a/>', {
-                    'href': '',
-                    'text': LOCategories[i]
-                });
-                categoryLi.append(categoryURL);
-
-                categoryMenu = $('<ul/>', {
-                    'class': 'explorer-body-side-menu explorer-body-side-menu-light'
-                });
-
-                categoryLOs = OC.explorer.hctLOs[LOCategories[i]];
-                for (j = 0; j < categoryLOs.length; j++){
-                    LoLi = $('<li/>');
-                    LoURL = $('<a/>', {
-                        'href': '',
-                        'text': categoryLOs[j]
-                    });
-
-                    LoLi.append(LoURL);
-                    categoryMenu.append(LoLi);
-                }
-
-                categoryLi.append(categoryMenu);
-                menu.append(categoryLi);
-            }
-
-            $('li.learning-outcomes').append(menu);*/
-
-
-
-
-
-
-        },
-
-        /*initActions: function(){
-            $('button#new-objective').click(function(event){
-                // Get currently visible unit.
-                var selectedModule = $('li.textbooks .explorer-body-side-menu-light li.selected a'),
-                    title = selectedModule.text(),
-                    textbookTitle = selectedModule.parents('ul:first').parent().find('a:first').text();
-
-                var newObjective = new OC.explorer.Objective({
-                    description: 'New objective',
-                    resources: [],
-                });
-
-                var unit = _.findWhere(_.findWhere(OC.explorer.textbooks, {
-                    title: textbookTitle}).units, {title: title}),
-                    unitObjectives = unit.objectives;
-
-                OC.appBox.saving();
-                newObjective.save(null, {
-                    attrs: {unit_id: unit.id},
-                    success: function(model){
-                        unit.objectives.add(newObjective);
-                        
-                        unitObjectives.sync('update', model, {
-                            success: OC.appBox.saved
-                        });
-                        
-                        // Highlight the last objective AFTER rendering completion.
-                        setTimeout(function(){
-                            OC.explorer.resetPreHeights();
-                            $('.explorer-resource-objective-section:last').addClass('new');
-                        }, 100);
-                    }
-                });
-            });
-        },*/
-
         resetPreHeights: function(reverse) {
             // Set height of pre-columns to 100% of parent - bad CSS problem.
             var objectivePres = $('.explorer-resource-section-listing-item-pre, .explorer-resource-listing-labels-pre');
@@ -2345,6 +1889,12 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
                         $('.explorer-resource-contents').removeClass('reference-resource');
                         $('.explorer-resource-contents').addClass('foreign-resource');
                         renderResponse(response);
+
+                        if (type == 'document'){
+                            require(['mathjax'], function(MathJax){
+                                MathJax.Hub.Queue(["Typeset",MathJax.Hub,"document-body"]);
+                            });
+                        }
                     },
                 'html');
             }
@@ -2413,50 +1963,6 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'nanoscroll
 
         resizeApp();
         $(window).resize(resizeApp);
-
-
-        /*// Build a new Backbone'd object from textbook and chapter names.
-
-        var i, j, k, objective, resources;
-        for (i = 0; i < OC.explorer.rawTexts.length; i++){
-            rawTextbook = OC.explorer.rawTexts[i];
-            rawUnits = [];
-
-            for (j = 0; j < rawTextbook.units.length; j++){
-                var rawUnit = rawTextbook.units[j],
-                    rawObjectives = rawUnit.objectives;
-        
-                objectives = _.map(
-                    rawObjectives, function(ro){ return new OC.explorer.Objective(ro); });
-
-                rawUnit['objectives'] = new OC.explorer.Objectives(objectives);
-                
-                rawUnit['objectives'].each(function(objective){
-                    rawResources = objective.get('resources');
-                    resources = _.map(
-                        rawResources, function(rr){ return new OC.explorer.Resource(rr); });
-
-                    objective.set('resources', new OC.explorer.Resources(resources));
-                });
-
-                rawUnits.push(rawUnit);
-            //});
-            }
-
-            rawTextbook['units'] = rawUnits;
-            OC.explorer.textbooks.push(rawTextbook);
-        }
-
-        */
-
-        // Main grade-subject menu on home hover.
-        /*OC.explorer.initGradeSubjectMenu();
-
-        OC.explorer.initSideNavigation();
-
-        OC.explorer.initActions();
-
-        OC.explorer.initOverview();*/
     });
 });
 
