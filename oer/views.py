@@ -823,6 +823,8 @@ def fp_upload(request):
     b = Bucket(conn, settings.S3_BUCKET_NAME)
     k = Key(b)
 
+    import os, stat
+
     for (key, title) in file_list:
         k.key = key
 
@@ -831,6 +833,7 @@ def fp_upload(request):
             # And generate the list for the response.
             file_path = settings.FILEPICKER_ROOT + key
             #k.get_contents_to_filename(file_path)
+            os.chmod(file_path, stat.S_IRWXG)
 
             static_file = open(file_path)
 
@@ -840,7 +843,6 @@ def fp_upload(request):
             response[new_resource.id] = new_resource.title
             static_file.close()
 
-            import os
             os.remove(file_path)
 
         except Exception, e:          
