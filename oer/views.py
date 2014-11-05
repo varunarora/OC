@@ -834,7 +834,7 @@ def fp_upload(request):
             # Create Resource objects for each file uploaded.
             # And generate the list for the response.
             file_path = settings.FILEPICKER_ROOT + key
-            k.get_contents_to_filename(file_path)
+            #k.get_contents_to_filename(file_path)
 
             static_file = open(file_path)
 
