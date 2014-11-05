@@ -845,7 +845,7 @@ def fp_upload(request):
 
         except Exception, e:          
             # Delete this file from S3, and add it to the failure list
-            b.delete_key(k)
+            #b.delete_key(k)
 
             from django.core.mail import mail_admins
             mail_admins('Filepicker S3 mounting failed', (
