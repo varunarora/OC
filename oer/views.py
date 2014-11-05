@@ -247,13 +247,13 @@ def render_resource(resource_id, request=None):
         filesize = resource.revision.content.file.size
         if filesize >= 1048576:
             resource.filesize = str(
-                _filesizeFormat(float(filesize) / 1048576)) + " MB"
+                '{0:.2f}'.format(float(float(filesize) / 1048576))) + " MB"
         elif filesize >= 1024:
             resource.filesize = str(
-                _filesizeFormat(float(filesize) / 1024)) + " KB"
+                '{0:.2f}'.format(float(float(filesize) / 1024))) + " KB"
         else:
             resource.filesize = str(
-                _filesizeFormat(float(filesize))) + " B"
+                '{0:.2f}'.format(float(filesize))) + " B"
 
         # Determine the extension of the attachment.
         from os.path import splitext
@@ -299,10 +299,6 @@ def build_document_view(document_id):
             pass
 
     return document_elements
-
-
-def _filesizeFormat(size):
-    return '{0:.2f}'.format(float(size))
 
 
 def download(request, resource_id):
