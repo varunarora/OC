@@ -1,30 +1,4 @@
 define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'showdown', 'nanoscroller'], function($, OC, Backbone, _, React, Spinner, Showdown, undefined){
-
-    BackbonerMixin = {
-        _backboneForceUpdate: function() {
-            this.forceUpdate();
-        },
-
-        bindModelEvents: function() {
-            // Whenever there may be a change in the Backbone data, trigger a reconcile.
-            [this.props.model].map(function(model) {
-                model.on('add change remove', this._backboneForceUpdate, this);
-            }.bind(this));
-        },
-        
-        componentDidMount: function() {
-            this.bindModelEvents();
-        },
-
-        componentWillUnmount: function() {
-            // Ensure that we clean up any dangling references when the component is destroyed.
-            [this.props.model].map(function(model) {
-                model.off('add change remove', this._backboneForceUpdate, this);
-            }.bind(this));
-        }
-    };
-
-
     OC.api.curriculum = {
         sectionItem: {
             update: function(serializedObjective, callback){
@@ -1064,6 +1038,7 @@ define(['jquery', 'core', 'backbone', 'underscore', 'react', 'spin', 'showdown',
                             OC.explorer.ModuleSectionItem({
                                 model: this.props.model,
                                 openDrawer: this.openDrawer,
+                                edit: this.props.edit
                             })
                         ),
                         React.DOM.div({className: 'explorer-resource-section-listing-item-content-fill' + (
