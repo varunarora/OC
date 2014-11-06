@@ -823,7 +823,8 @@ def fp_upload(request):
     b = Bucket(conn, settings.S3_BUCKET_NAME)
     k = Key(b)
 
-    import os, stat
+    #import os
+    destination_dir = Attachment._meta.get_field('file').upload_to
 
     for (key, title) in file_list:
         k.key = key
@@ -831,23 +832,24 @@ def fp_upload(request):
         try:
             # Create Resource objects for each file uploaded.
             # And generate the list for the response.
-            file_path = settings.FILEPICKER_ROOT + key
+            #file_path = settings.FILEPICKER_ROOT + key
             #k.get_contents_to_filename(file_path)
-            os.chmod(file_path, stat.S_IRWXG)
+            #os.chmod(file_path, stat.S_IRWXG)
 
-            static_file = open(file_path)
+            #static_file = open(file_path)
 
-            new_resource = create_resource(
-                File(static_file), user, collection, title)
+            new_resource = create_resource(None, user, collection, title)
+            new_resource.revision.content.file.name = destination_dir + '/' + key
+            new_resource.revision.content.save()
 
             response[new_resource.id] = new_resource.title
-            static_file.close()
+            #static_file.close()
 
-            os.remove(file_path)
+            #b.delete_key(k)
 
         except Exception, e:          
             # Delete this file from S3, and add it to the failure list
-            #b.delete_key(k)
+            b.delete_key(k)
 
             from django.core.mail import mail_admins
             mail_admins('Filepicker S3 mounting failed', (

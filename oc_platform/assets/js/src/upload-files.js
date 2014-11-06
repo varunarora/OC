@@ -23,7 +23,7 @@ OC.upload = {
     launchFilepickerDialog: function(event, service) {
         // Allow multiple files at once, store to S3, and the callback is fpPost
         filepicker.pickAndStore({multiple: true, openTo: service},
-            {location: 'S3', path: '/', access: 'public'},
+            {location: 'S3', path: '/resources/', access: 'public'},
              OC.upload.fpPost, OC.upload.fpError);
         event.preventDefault();
         event.stopPropagation();
