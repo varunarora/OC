@@ -840,7 +840,10 @@ def fp_upload(request):
             temporary.write('')
             temporary.close()
 
-            new_resource = create_resource(File(open(temporary)), user, collection, title)
+            temporary_opened = open(temporary)
+
+            new_resource = create_resource(File(temporary_opened), user, collection, title)
+            temporary_opened.close()
 
             new_resource.revision.content.file.name = destination_dir + '/' + key
             new_resource.revision.content.save()
