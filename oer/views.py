@@ -836,11 +836,13 @@ def fp_upload(request):
             #k.get_contents_to_filename(file_path)
             #os.chmod(file_path, stat.S_IRWXG)
 
-            temporary = open(settings.MEDIA_ROOT + destination_dir + '/temp', 'w+')
+
+            temp_file_destination = settings.MEDIA_ROOT + destination_dir + '/temp'
+            temporary = open(temp_file_destination, 'w+')
             temporary.write('')
             temporary.close()
 
-            temporary_opened = open(temporary)
+            temporary_opened = open(temp_file_destination + '/temp')
 
             new_resource = create_resource(File(temporary_opened), user, collection, title)
             temporary_opened.close()
