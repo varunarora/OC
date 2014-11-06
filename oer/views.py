@@ -832,11 +832,6 @@ def fp_upload(request):
         try:
             # Create Resource objects for each file uploaded.
             # And generate the list for the response.
-            #file_path = settings.FILEPICKER_ROOT + key
-            #k.get_contents_to_filename(file_path)
-            #os.chmod(file_path, stat.S_IRWXG)
-
-
             temp_file_destination = settings.MEDIA_ROOT + destination_dir + '/temp'
             temporary = open(temp_file_destination, 'w+')
             temporary.write('')
@@ -847,13 +842,13 @@ def fp_upload(request):
             new_resource = create_resource(File(temporary_opened), user, collection, title)
             temporary_opened.close()
 
-            new_resource.revision.content.file.name = destination_dir + '/' + key
+            new_resource.revision.content.file.name = key
             new_resource.revision.content.save()
 
             response[new_resource.id] = new_resource.title
 
             b.delete_key('temp')
-            os.remove(temporary)
+            os.remove(temp_file_destination)
 
         except Exception, e:          
             # Delete this file from S3, and add it to the failure list
