@@ -27,6 +27,7 @@
                 <div class="change-picture" title="Change picture"></div>
                 <div class="reposition-picture" title="Reposition picture"></div>
             </div>
+            {% endif %}
 
         {% if page == "home" or page == "about" %}
             {% if user in project.confirmed_members %}
@@ -36,7 +37,6 @@
             {% endif %}
         {% endif %}
         </hgroup>
-        {% endif %}
         <div class="project-header-repositioner"></div>
     </header>
 
