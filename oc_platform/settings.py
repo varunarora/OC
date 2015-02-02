@@ -42,7 +42,7 @@ DATABASES = {
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = 'America/Los_Angeles'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -146,7 +146,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'oc_platform.middleware.SubdomainMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -188,9 +189,10 @@ INSTALLED_APPS = (
     'projects',
     'curriculum',
     'storages',
+    'planner',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    'debug_toolbar',
+    #'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -370,8 +372,8 @@ STRINGS = {
 }
 
 STAR_USERS = [
-    'khanacademy', 'ck12', 'joshua', 'mars', 'ddmeyer', 'illustrativemathematics',
-    'engageny', 'yummymath', 'fawnpnguyen', 'ericpollock'
+    'mjfenton', 'mars', 'ddmeyer', 'illustrativemathematics',
+    'engageny', 'yummymath', 'khanacademy', 'ck12', 'fawnpnguyen', 'ericpollock'
 ]
 
 DEBUG_TOOLBAR_PANELS = (

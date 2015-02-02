@@ -1,10 +1,5 @@
 /*global $, OC, filepicker */
 
-/**
- * @file Client-side for file upload using filepicker.io
- * @author sri@theopencurriculum.org (Srinivasan Vijayaraghavan)
- */
-
 // Set global variables, such as the Filepicker.io API key.
 define(['jquery', 'filepicker', 'dropzone', 'underscore'], function($, fp, Dropzone, _){
 OC.config.uploads = {
@@ -170,7 +165,7 @@ OC.upload = {
             dragDropReplace.removeClass('hidden');
 
             // Focus on input text.
-            $('input[type="filename"]', dragDropReplace).focus();
+            $('input[name="filename"]', dragDropReplace).focus();
 
             // Bind click handler on uploading something else.
             $('.alternative-upload a', dragDropReplace).click(function(){
@@ -330,7 +325,7 @@ OC.upload = {
     }
 };
 
-    $(document).ready(function() {
+    //$(document).ready(function() {
         OC.upload.isPost = $('form.files-upload-rename input[name="post"]').val() == 'true';
 
         // Prevent form being submitted on hitting enter
@@ -483,5 +478,5 @@ OC.upload = {
         }
 
         $('input[type=file]').change(OC.upload.onFileInputChange);
-    });
+    //});
 });

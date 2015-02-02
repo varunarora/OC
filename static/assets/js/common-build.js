@@ -15,6 +15,17 @@ require.config({
         article: 'article',
         explorer: 'explorer',
         standards: 'standards',
-        upload: 'upload'
+        upload: 'upload',
+
+        plus: '//plus.google.com/js/client:plusone.js?onload=renderPlus',
+        core_light: 'core_light',
+        react: 'react',
+        org_feed: 'org_feed',
+        curriculum: 'curriculum',
+        curricula: 'curricula',
+        planner: 'planner',
+        filesNew: 'filesNew',
+        uploadNew: 'uploadNew',
+        authenticate: 'authenticate'
     }
 });

@@ -30,11 +30,11 @@
                         <span class="headline-edit"></span>
                     </div>
                     <div class="profile-subscribe-wrapper">
-                        <a href="{% url user:user_subscribers username=user_profile.username %}" class="profile-subscriber-count{% if page == 'subscribers' %} selected{% endif %}">
+                        <a href="" class="profile-subscriber-count{% if page == 'subscribers' %} selected{% endif %}">
                             <div class="profile-subscribe-count">{{ subscriber_count }}</div>
                             <div class="profile-subscribe-count-label">SUBSCRIBER(S)</div>
                         </a>
-                        <a href="{% url user:user_subscriptions username=user_profile.username %}" class="profile-subscriptions-count {% if page == 'subscriptions' %} selected{% endif %}">
+                        <a href="" class="profile-subscriptions-count {% if page == 'subscriptions' %} selected{% endif %}">
                             <div class="profile-subscribe-count">{{ subscription_count }}</div>
                             <div class="profile-subscribe-count-label">SUBSCRIPTION(S)</div>
                         </a>

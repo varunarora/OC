@@ -57,22 +57,22 @@ define(['jquery', 'underscore', 'timeago'], function($, _){
                         if (isElementInViewport(loadButton) && !loadButton.hasClass('loading')){
                             loadButton.addClass('loading');
 
-                            $.get('/user/api/load-feed/' + OC.config.profile.id +
+                            $.get('/user/api/load-feed/home/' + OC.config.profile.id +
                                     '/from/' + OC.feed.currentCount + '/',
                                 function(response){
                                     if (response.status == 'true'){
-                                        var keys = Object.keys(response.feeds);
+                                        //var keys = Object.keys(response.feeds);
 
-                                        if (keys.length !== 0){
+                                        if (response.feeds.length !== 0){
                                             var newFeedItem;
-                                            for (i = 0; i < keys.length; i++){
-                                                newFeedItem = OC.feed.buildFeedItem(response.feeds[keys[i]]);
+                                            for (i = 0; i < response.feeds.length; i++){
+                                                newFeedItem = OC.feed.buildFeedItem(response.feeds[response.feeds[i]]);
                                                 $('.feed-list').append(newFeedItem);
 
                                                 newAppendedFeedItem = $('.feed-list .feed-item:last');
                                                 $('.feed-item-date', newAppendedFeedItem).timeago();
                                             }
-                                            OC.feed.currentCount += keys.length;
+                                            OC.feed.currentCount += response.feeds.length;
 
                                         } else {
                                             loadButton.remove();

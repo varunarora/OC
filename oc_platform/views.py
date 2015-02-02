@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.utils.translation import ugettext as _
 from django.conf import settings
+from django.http import Http404
 import json
 
 
@@ -8,15 +9,76 @@ def home(request):
     context = {
         'title': _(settings.STRINGS['global']['TITLE']),
     }
+
+    if hasattr(request, 'organization'):
+        if request.user.is_authenticated():
+            return organization_home(request)
+        else:
+            return redirect('login')
+
     if request.user.is_authenticated():
         return render(request, 'home.html', context)
 
     return render(request, 'index.html', context)
 
 
-def login(request):
+def organization_home(request):
+    from user_account.models import Activity
+    feed = Activity.objects.filter(actor=request.user).order_by('-pk')[:10]
+    feed_count = Activity.objects.filter(actor=request.user).count()
+
+    suggestions = None
+    if feed_count == 0:
+        import copy
+        from user_account.models import Subscription
+        from django.contrib.auth.models import User
+
+        if request.organization:
+            suggestions = []
+            org_members = request.organization.members.all().exclude(pk=request.user.id)
+
+            for member in org_members:
+                try:
+                    Subscription.objects.get(
+                        subscriber=request.user.get_profile(), subscribee__user=member)
+                except:
+                    suggestions.append(member)
+
+        else:
+            filtered_stars_raw = []
+            stars_raw = copy.deepcopy(settings.STAR_USERS)
+            try:
+                stars_raw.remove(request.user.username)
+            except:
+                pass
+
+            for star in stars_raw:
+                try:
+                    Subscription.objects.get(
+                        subscriber=request.user.get_profile(), subscribee__user__username=star)
+                except:
+                    filtered_stars_raw.append(star)
+
+            suggestions = User.objects.filter(username__in=filtered_stars_raw)
+
+    context = {
+        'user_profile': request.user,
+        'organization': request.organization,
+        'suggestions': suggestions,
+        'feed': feed,
+        'title':  request.organization.title + " &lsaquo; OpenCurriculum",
+        'feed_count': feed_count,
+        'page': 'home'
+    }
+    return render(request, 'new-profile.html', context)
+
+
+def login(request, organization_slug=None):
     if request.user.is_authenticated():
-        return redirect('user:user_profile', username=request.user.username)
+        if request.organization:
+            return organization_home(request)
+        else:
+            return redirect('user:user_profile', username=request.user.username)
 
     login_error_message = None
     source = None
@@ -44,6 +106,16 @@ def login(request):
             'source': source
         }.items()
     )
+
+    if hasattr(request, 'organization'):
+        try:
+            from user_account.models import Organization
+            context['organization'] = Organization.objects.get(slug=request.organization.slug)
+            return render(request, 'org-login.html', context)
+
+        except:
+            raise Http404
+
     return render(request, 'login.html', context)
 
 
@@ -261,12 +333,12 @@ def list_articles(request):
     serialized_articles = {}
     for article in articles:
         serialized_articles[str(article.id)] = {
-                'id': article.id,
-                'title': article.title,
-                'views': article.views,
-                'slug': article.slug,
-                'citation': article.citation
-            }
+            'id': article.id,
+            'title': article.title,
+            'views': article.views,
+            'slug': article.slug,
+            'citation': article.citation
+        }
 
     response = HttpResponse(
         json.dumps(serialized_articles), 401, content_type="application/json")
@@ -294,7 +366,11 @@ def worksheet(request):
     context = {
         'title': 'CBSE Math Clas 12 Sample paper maker'
     }
-    return render(request, 'questions.html', context)    
+    return render(request, 'questions.html', context)
+
+
+def newsletter(request):
+    return render(request, 'newsletters/halloween.html', {})
 
 
 def merge_tags(from_id, to_id):

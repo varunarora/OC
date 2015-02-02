@@ -1,0 +1,3941 @@
+@mixin dropdown
+	display: inline-block
+	float: right
+	border-color: #afafaf transparent transparent
+	border-width: 5px 5px 0
+	content: ""
+	border-style: solid
+
+@mixin actionDropdown
+	width: 20px
+	height: 20px
+	float: right
+	cursor: pointer
+	display: none
+	background-repeat: no-repeat
+	background-position: center center
+	background-image: url('data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAA4AAAAMCAYAAABSgIzaAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAHlJREFUeNpiYBiaYP369QYE5AOAWADEZkISLABS54F0Pw5NCSAKiPejaASCA0D8AYgLgIrmw0xG0jQfyp0IIhjRTFWAmgpy8gUgdgTiACRNiYGBgQswNEI1C0A1O0BdIICuCatGJANAtiRg00RMKDuAQnJwxDlAgAEA+ZoxsvAk2YkAAAAASUVORK5CYII=')
+
+	&:hover
+		background-color: #efefef
+
+$PLANNER_HOUR_HEIGHT: 3.85%
+
+.org-profile-view
+	background-color: #f9f9f9
+	overflow: hidden
+
+	.menu-panel
+		background-color: #efefef
+		width: 75px
+		float: left
+		height: 100%
+
+		.menu-logo
+			height: 75px
+			background-color: #5abd02
+			display: block
+			background-image: url('../images/org-header-logo.png')
+			background-position: center center
+			background-repeat: no-repeat
+			outline: 0 none
+
+			&.tfi-menu-logo
+				//background-color: #03a9f4
+				//background-image: url('../images/tfi-icon.png')
+				background-size: 75%
+
+		.menu-item
+			height: 75px
+			//border-bottom: 1px solid #5adb02
+			display: block
+			text-align: center
+			color: #afafaf
+			font-size: 0.9em
+			font-weight: bold
+			@include transition((background-color 0.1s linear))
+			outline: 0 none
+
+			&.current
+				background-color: #d8d8d8
+
+			&.menu-curricula-item, &.menu-planner-item, &.menu-files-item,
+			&.menu-favorites-item, &.menu-friends-item, &.menu-groups-item
+				padding-top: 7px
+				height: 68px
+
+				.menu-item-thumbnail
+					background-image: url('../images/org-navigation-buttons.png')
+					background-repeat: no-repeat
+					height: 40px
+					width: 40px
+					display: block
+					margin: auto
+
+				.menu-item-description
+					margin-top: 5px
+					display: block
+
+			&.menu-curricula-item
+				.menu-item-thumbnail
+					background-position: 0px 0px
+				&:hover, &.current
+					color: #2c3e50
+					.menu-item-thumbnail
+						background-position: -39px 0px
+
+			&.menu-planner-item
+				.menu-item-thumbnail
+					background-position: 0px -45px
+				&:hover, &.current
+					color: #2980b9
+					.menu-item-thumbnail
+						background-position: -39px -45px
+
+			&.menu-files-item
+				.menu-item-thumbnail
+					background-position: 0px -82px
+				&:hover, &.current
+					color: #16a085
+					.menu-item-thumbnail
+						background-position: -39px -82px
+
+			&.menu-favorites-item
+				.menu-item-thumbnail
+					background-position: 0px -118px
+				&:hover, &.current
+					color: #D14836
+					.menu-item-thumbnail
+						background-position: -39px -118px
+
+			&.menu-friends-item
+				.menu-item-thumbnail
+					background-position: 0px -156px
+				&:hover, &.current
+					color: #8e44ad
+					.menu-item-thumbnail
+						background-position: -39px -156px
+
+			&.menu-groups-item
+				.menu-item-thumbnail
+					background-position: 0px -191px
+				&:hover, &.current
+					color: #27ae60
+					.menu-item-thumbnail
+						background-position: -39px -191px
+
+			&:hover
+				background-color: #d8d8d8
+				text-decoration: none
+				color: $light-font
+
+			.menu-user-picture
+				height: 50px
+				width: 50px
+				background-size: cover
+				background-repeat: no-repeat
+				background-position: center center
+				margin: auto
+				margin-top: 12px
+				display: inline-block
+
+	.content-panel-wrapper
+		float: left
+
+	.content-panel
+		//float: left
+		margin: auto
+		opacity: 0
+		visibility: hidden
+		@include transition((opacity 0.4s ease))
+		height: 500px
+
+		&.show
+			opacity: 1
+			visibility: visible
+
+		header
+			height: 75px
+			width: 92%
+			margin: auto
+
+			&.unit-header
+				width: 100%
+				background-size: cover
+				background-position: center center
+				background-repeat: no-repeat
+
+				.unit-header-mask
+					height: 100%
+					background-color: #000
+					opacity: 0.5
+
+				.unit-header-body
+					margin-top: -75px
+					position: relative
+					height: 100%
+
+					.unit-header-body-back
+						width: 60px
+						background-image: url('../images/back-small.png')
+						background-position: center center
+						background-repeat: no-repeat
+						float: left
+						height: 100%
+						cursor: pointer
+
+						&:hover
+							background-color: #000
+
+					.unit-header-body-description
+						padding: 12px
+						float: left
+						width: 40%
+
+						.unit-header-body-description-thumbnail
+							height: 50px
+							background-size: cover
+							background-repeat: no-repeat
+							background-position: top center
+							width: 50px
+							float: left
+							margin-right: 24px
+
+						.unit-header-body-description-titles
+							color: #fff
+
+							.unit-header-body-description-titles-unit
+								font-size: 1.3em
+								font-weight: bold
+								letter-spacing: -1px
+								margin-bottom: 6px
+								padding-top: 3px
+
+					.unit-header-body-user
+						padding-top: 18px
+						margin-right: 24px
+
+						.user-notification-count
+							> a
+								background-image: url('../images/notifications-bell-light.png')
+
+						.content-panel-header-user-dropdown
+							.content-panel-header-user-firstname-assistant
+								border-color: #ddd transparent transparent
+
+							&:hover
+								.content-panel-header-user-firstname-assistant
+									border-color: #fff transparent transparent
+
+
+		header
+			.content-panel-header
+				padding-top: 12px
+
+			.content-panel-header-search-bar
+				float: left
+				padding-top: 4px
+
+				form
+					float: left
+
+					input[type=search]
+						border: 1px solid transparent
+						padding: 4px
+						padding-left: 28px
+						color: $light-font
+						height: 20px
+						font-size: 1.3em
+						width: 260px
+						background-image: url('../images/search-light-large.png')
+						background-position: 6px center
+						background-repeat: no-repeat
+						@include transition(width 0.6s ease)
+						outline: none
+
+						&:hover
+							border-color: #ddd
+
+						&:focus
+							border-color: #b2b2b2
+							width: 400px
+
+						&.show
+							width: 400px
+
+						&.pop
+							position: absolute
+							z-index: 8
+							background-color: transparent
+							color: #ddd
+							border-color: $light-font
+
+							&:focus
+								background: #fff
+								color: $light-font
+								border-color: transparent
+
+				.content-panel-header-search-bar-explore
+					color: #afafaf
+					font-size: 1.3em
+					margin-left: 32px
+					margin-top: 8px
+					display: inline-block
+
+					&.pop
+						z-index: 7
+						position: absolute
+						margin-left: 320px
+
+					&:hover
+						text-decoration: none
+						color: $light-font
+
+			.content-panel-header-user
+				float: right
+
+				.content-panel-header-user-buttons
+					> ul > li
+						float: left
+
+				.user-notification-count
+					//float: left
+
+					&.unread-notifications
+						.user-notification-count-box
+							visibility: visible
+
+					.user-notification-count-box
+						pointer-events: none
+						background-color: #d14836
+						color: #fff
+						font-size: 0.9em
+						display: inline
+						padding: 2px 4px
+						left: 32px
+						position: relative
+						top: -18px
+						font-weight: bold
+
+					> a
+						margin-top: 6px
+						outline: 0px none
+						width: 24px
+						background-repeat: none
+						background-position: 0px center
+						background-image: url('../images/notifications-bell.png')
+						display: inline-block
+						height: 24px
+						cursor: pointer
+
+						&:hover
+							background-position: 25px center
+
+				.content-panel-header-user-dropdown
+					overflow: hidden
+					display: inline-block
+					margin-left: 48px
+					cursor: pointer
+
+					.content-panel-header-user-picture
+						float: left
+						height: 30px
+						width: 30px
+						background-size: cover
+						background-repeat: no-repeat
+						background-position: center center
+						margin-right: 6px
+						display: inline-block
+
+					.content-panel-header-user-firstname-assistant
+						@include dropdown
+						height: 9px
+						margin: 13px 0 3px
+
+					&:hover
+						.content-panel-header-user-firstname-assistant
+							border-color: #666 transparent transparent
+
+
+		.content-panel-body-wrapper
+			overflow-y: auto
+			width: 96%
+			float: right
+			height: 500px
+
+			&.files-content-panel-body-wrapper
+				height: 75px
+
+			.content-panel-body-title-wrapper
+				height: 63px
+				overflow: hidden
+				padding-top: 12px
+
+				h1.content-panel-body-title
+					color: $light-font
+					letter-spacing: -1px
+					float: left
+
+				.content-panel-body-context
+					float: left
+
+					.content-panel-body-context-view
+						float: left
+						padding-top: 9px
+
+						a
+							font-size: 1.3em
+							color: #afafaf
+							font-weight: bold
+							margin-right: 24px
+							display: inline-block
+							cursor: pointer
+
+							&:hover
+								text-decoration: none
+								color: $light-font
+
+							&.current
+								color: $light-font
+
+					.content-panel-body-context-period
+						float: left
+						margin-left: 72px
+						overflow: hidden
+
+						.content-panel-body-context-period-arrow
+							content: ""
+							border-style: solid
+
+						.content-panel-body-context-period-back,
+						.content-panel-body-context-period-forward
+							border: 1px solid #afafaf
+							height: 36px
+							width: 36px
+							@include border-radius(19px)
+							float: left
+							cursor: pointer
+
+							&:hover
+								border-color: $light-font
+
+								.content-panel-body-context-period-back-arrow
+									background-position: 0px -16px
+
+								.content-panel-body-context-period-forward-arrow
+									background-position: -17px -16px
+
+						.content-panel-body-context-period-back-arrow,
+						.content-panel-body-context-period-forward-arrow
+							background-image: url('../images/calendar-nav.png')
+							background-repeat: no-repeat
+							width: 16px
+							height: 16px
+							margin: auto
+							margin-top: 9px
+
+						.content-panel-body-context-period-back-arrow
+							background-position: 0px 0px
+
+						.content-panel-body-context-period-forward-arrow
+							background-position: -17px 0px
+
+						.content-panel-body-context-period-body
+							font-size: 1.3em
+							color: #afafaf
+							font-weight: bold
+							float: left
+							margin: 0px 18px
+							padding-top: 9px
+
+				.content-panel-body-create
+					float: right
+
+					&.content-panel-body-create-files
+						overflow: hidden
+						
+						.content-panel-body-create-title
+							float: left
+
+						.content-panel-body-create-dropdown
+							@include dropdown
+							margin: 7px 0px 0px 6px
+
+					&:hover
+						.content-panel-body-create-dropdown
+							border-color: #666 transparent transparent
+
+					.content-panel-body-create-button-pre
+						margin-right: 6px
+
+				.files-button-wrapper
+					float: left
+
+					.oc-button
+						margin-right: 6px
+						background-repeat: no-repeat
+						padding-left: 36px
+						background-position: 12px 8px
+
+					.rename-button
+						background-image: url('../images/edit-dark.png')
+
+					.move-button
+						background-image: url('../images/move-to-folder-icon.png')
+
+					.delete-file-button
+						background-image: url('../images/trash-icon.png')
+
+					.share-button
+						background-image: url('../images/share-icon-dark.png')
+
+					.copy-button
+						background-image: url('../images/copy.png')
+
+			.tabular-list-wrapper
+				height: 400px
+				overflow: auto
+
+			.tabular-list
+				width: 100%
+				margin-top: 12px
+
+				th, td
+					padding: 0px
+
+				th
+					color: #afafaf
+					font-weight: normal
+					font-size: 1.3em
+
+				tr:first-child
+					border-bottom: 1px solid #afafaf
+
+					th
+						padding-bottom: 12px
+
+				tr
+					border-bottom: 1px solid #efefef
+
+					td
+						color: $light-font
+						padding: 24px 0px
+						
+						a.list-item-title
+							font-size: 1.8em
+							color: $light-font
+							margin-bottom: 6px
+							display: inline-block
+							outline: none
+
+							&:hover
+								text-decoration: none
+								color: $body-color
+								outline: 0 none
+
+						.list-item-description
+							font-size: 1.3em
+							color: #afafaf
+
+						.list-item-collaborators
+							.list-item-collaborator
+								display: inline-block
+								height: 50px
+								width: 50px
+								@include border-radius(25px)
+								background-position: center center
+								background-repeat: no-repeat
+								background-size: cover
+								float: left
+								margin-right: 3px
+
+								&.list-item-collaborator-more
+									height: 36px
+									width: 42px
+									background-image: none
+									border: 3px solid #ddd
+									text-align: center
+									font-size: 1.8em
+									color: #afafaf
+									font-weight: bold
+									padding-top: 6px
+
+									&:hover
+										text-decoration: none
+
+			.files-list
+				width: 96%
+
+				.name-column
+					width: 50%
+
+				.modified-column
+					width: 32%
+
+				.actions-column
+					width: 18%
+
+				.file-modified, .sharing-status
+					font-size: 1.3em
+					color: #afafaf
+
+				input.file-selector
+					float: left
+					margin-top: 18px
+					margin-right: 12px
+					cursor: pointer
+					margin-left: 6px
+
+				.file-thumbnail
+					display: inline-block
+					background-image: url('../images/file-light-icon.png')
+					width: 48px
+					height: 48px
+					background-position: 0px 0px
+					background-repeat: no-repeat
+					float: left
+
+					&.folder-thumbnail
+						background-image: url('../images/folder-light.png')
+
+				tr
+					//@include transition(background-color 0.6s ease)
+
+					&:hover
+						background-color: #fbfbfb
+
+					&:first-child
+						&:hover
+							background-color: transparent
+
+					&.selected
+						background-color: #fff
+
+					td
+						padding: 18px 0px
+
+						a.list-item-title
+							max-width: 75%
+							margin-left: 24px
+							display: inline-block
+							float: left
+							margin-top: 9px
+							line-height: 1.2em
+
+			.content-panel-body
+				overflow: hidden
+
+				&.abridged
+					height: 100%
+
+				.curricula-list
+					.name-column
+						width: 50%
+
+					.collaborators-column
+						width: 32%
+
+					.actions-column
+						width: 18%
+
+					tr
+						td
+							.curriculum-settings-button
+								margin-right: 4px
+
+				.groups-list
+					.name-column
+						width: 50%
+
+					.members-column
+						width: 32%
+
+					.actions-column
+						width: 18%
+
+				.profile-box
+					width: 600px
+					margin: auto
+					margin-bottom: 75px
+					background-color: #fff
+					margin-top: 12px
+					@include box-shadow(0 0px 2px rgba(0, 0, 0, 0.1))
+
+					.profile-box-user
+						.profile-box-user-description
+							color: #fff
+
+							h2
+								@include text-shadow(0 1px 0 rgba(97, 97, 97, 1))
+
+							.profile-box-user-description-headline,
+							.profile-box-user-description-social
+								@include text-shadow(0 1px 0 rgba(97, 97, 97, 0.6))
+								
+							.profile-box-user-description-headline
+								margin-bottom: 24px
+
+							.profile-box-user-description-social
+								height: 20px
+
+								.profile-box-user-description-social-twitter-text,
+								.profile-box-user-description-social-web-text
+									display: inline-block
+									vertical-align: top
+									margin-top: 2px
+									color: #fff
+
+									&:hover
+										text-decoration: none
+
+								.profile-box-user-description-social-twitter-text
+									margin-right: 24px
+
+								.profile-box-user-description-social-twitter,
+								.profile-box-user-description-social-web
+									width: 16px
+									height: 16px
+									display: inline-block
+									background-position: center center                                    
+									background-repeat: no-repeat
+									margin-right: 6px
+
+								.profile-box-user-description-social-twitter
+									background-image: url('../images/profile-twitter.png')
+
+								.profile-box-user-description-social-web
+									background-image: url('../images/profile-web.png')
+
+
+					.profile-box-social
+						height: 60px
+						border-bottom: 1px solid #ddd
+						overflow: auto
+
+						.profile-box-social-menu
+							margin-bottom: 6px
+							overflow: hidden
+							padding-top: 24px
+							margin-left: 12px
+							float: left
+
+							li
+								float: left
+								margin-right: 24px
+
+								a
+									color: #afafaf
+									font-size: 1.3em
+									padding-bottom: 6px
+									outline: none
+									display: inline-block
+
+									&:hover
+										text-decoration: none
+										color: $body-color
+
+									&.blue-current,
+									&.green-current
+										font-weight: bold
+										
+									&.blue-current
+										color: #2196f3
+
+									&.green-current
+										color: #5adb02
+
+						.profile-box-feed-subscribe-wrapper
+							float: right
+
+				.profile-box .profile-box-feed, .home-feed
+					.feed-item
+						overflow: hidden
+						border-bottom: 1px solid #ddd
+						padding: 24px 12px
+
+						.feed-item-user-thumbnail
+							height: 50px
+							width: 50px
+							background-size: cover
+							margin-right: 24px
+							float: left
+							background-position: center center
+							background-size: cover
+							background-repeat: no-repeat
+
+						.feed-item-description
+							float: left
+							width: 502px
+							font-size: 1.3em
+							line-height: 1.3em
+
+							.feed-item-date
+								color: #afafaf
+								margin-left: 6px
+
+							.feed-item-description-url,
+							.feed-item-description-video,
+							.feed-item-description-upload,
+							.feed-item-description-comment,
+							.feed-item-description-folder,
+							.feed-item-description-group,
+							.feed-item-description-membership
+								color: #4a4a4a
+
+							.feed-link, .feed-video, .feed-upload
+								color: $light-font
+
+							.feed-link
+								&:hover
+									text-decoration: none
+									color: $body-color
+
+							.feed-video
+								iframe
+									margin-top: 12px
+
+								.feed-link-link-wrapper
+									color: $light-font
+									
+									&:hover
+										color: $body-color
+										text-decoration: none
+
+							.feed-link, .feed-video
+								.feed-link-thumbnail
+									width: 100%
+									height: 250px
+									background-size: cover
+									margin-top: 12px
+									background-color: #efefef
+									background-position: center center
+
+								.feed-link-link
+									font-weight: bold
+									margin-top: 12px
+									//margin-bottom: 6px
+
+								.feed-link-url
+									font-size: 0.75em
+									text-transform: uppercase
+
+							.feed-upload-description
+								margin-top: 24px
+
+								.feed-upload-description-title
+									display: block
+									//margin-bottom: 6px
+									font-weight: bold
+
+								.feed-upload-description-download
+									font-size: 0.75em
+									text-transform: uppercase
+									
+									a
+										color: $light-font
+
+										&:hover
+											color: $body-color
+											text-decoration: none
+
+							.feed-comment
+								overflow: auto
+
+								blockquote
+									border-left: 6px solid #efefef
+									margin-left: 0px
+									padding: 6px 0px
+									padding-left: 12px
+									margin-top: 12px
+
+									p:first-child
+										margin-top: 0px
+
+								.feed-comment-user-photo
+									float: left
+									margin-right: 12px
+									background-position: center center
+									background-size: cover
+									background-repeat: no-repeat
+									width: 50px
+									height: 50px
+
+								.feed-comment-user-description
+									width: 440px
+									float: left
+
+									p:first-child
+										margin-top: 0px
+
+							.feed-comment-discussion-response
+								margin-top: 24px
+
+
+							.feed-folder
+								margin-top: 12px
+								overflow: hidden
+								display: block
+
+								.feed-folder-thumbnail
+									height: 50px
+									width: 50px
+									margin-right: 12px
+									background-image: url('../images/folder-small.png')
+									background-position: center
+									background-repeat: no-repeat
+									float: left
+
+								.feed-folder-description
+									float: left
+
+									.feed-folder-description-title
+										margin-top: 12px
+										font-weight: bold
+										color: $light-font
+
+								&:hover
+									.feed-folder-description
+										.feed-folder-description-title
+											color: $body-color
+											text-decoration: none
+
+							.feed-group
+								color: $light-font
+								
+								&:hover
+									color: $body-color
+									text-decoration: none
+
+								.feed-group-thumbnail
+									width: 100%
+									height: 100px
+									background-size: cover
+									margin-top: 12px
+									background-color: #efefef
+									background-position: center center
+
+								.feed-group-link-wrapper
+									.feed-group-link
+										font-weight: bold
+										margin-top: 12px
+
+									.feed-group-count
+										font-size: 0.75em
+										text-transform: uppercase
+
+				.empty-feed
+					margin-bottom: 0px
+
+				.empty-state-title
+					color: #afafaf
+					font-size: 1.3em
+					font-weight: bold
+					text-align: center
+					margin-top: 10px
+
+					&.empty-state-title-independent
+						margin-top: 50px
+						margin-bottom: 50px
+
+					&.empty-state-title-independent-large
+						font-size: 1.8em
+						letter-spacing: -1px
+				
+				.home-feed
+					width: 605px
+					margin: auto
+					margin-top: 12px
+
+					.feed-item
+						width: 576px
+						background-color: #fff
+						margin-bottom: 24px
+						@include box-shadow(0 0px 2px rgba(0, 0, 0, 0.1))
+
+				.suggestion-list
+					margin-top: 24px
+
+					.home-profile-suggestion
+						width: 400px
+						background-color: #fff
+						@include box-shadow(0 0px 2px rgba(0, 0, 0, 0.1))
+						margin: auto
+						margin-bottom: 12px
+
+						.home-profile-suggestion-cover
+							height: 24px
+							font-family: 'Arial','Helvetica',sans-serif
+							font-size: 1.3em
+							//font-weight: bold
+							//letter-spacing: -1px
+							@include text-shadow(0 1px 0 rgba(97, 97, 97, 1))
+							padding-left: 102px
+							color: #fff
+							padding-top: 36px
+							display: block
+
+							&:hover
+								text-decoration: none
+
+						.home-profile-suggestion-thumbnail
+							position: relative
+							top: 20px
+							left: 20px
+							width: 60px
+							height: 60px
+							background-color: #fff
+							margin-bottom: -66px
+							border-width: 3px
+							border-style: solid
+							@include border-radius(2px)
+							background-position: center center
+							background-repeat: no-repeat
+							background-size: cover
+							display: block
+
+						.home-profile-suggestion-wrapper-subscribe
+							height: 42px
+
+				.feed-subscribe-wrapper
+					text-align: right
+					padding: 12px
+					padding-bottom: 0px
+
+					.feed-subscribe
+						@include text-shadow(0 -1px 0 rgba(0, 0, 0, 0.2))
+						background-color: #6bb933
+						border-color: #60a62e #519f18 #409701
+
+						&:hover
+							@include box-shadow(0 1px 0 rgba(0, 0, 0, 0.15))
+
+						&.feed-unsubscribe
+							background-color: transparent
+							color: #6bb933
+							text-shadow: none
+
+
+				.profile-box-user
+					height: 90px
+					padding: 30px
+
+					.box-user-thumbnail
+						height: 90px
+						width: 90px
+						border-radius: 45px
+						background-size: cover
+						float: left
+
+					.box-user-description
+						color: #fff
+						float: left
+						margin-left: 30px
+						padding-top: 12px
+
+						h2
+							font-family: 'Arial', 'Helvetica', sans-serif
+							margin-bottom: 6px
+
+
+				.profile-box-social-user
+					height: 54px
+					padding: 18px 48px
+					border-bottom: 1px solid #efefef
+					overflow: hidden
+
+					.profile-box-social-user-info
+						float: left
+
+						.profile-box-social-user-thumbnail
+							height: 54px
+							width: 54px
+							border-radius: 27px
+							background-size: cover
+							float: left
+
+						.profile-box-social-user-description
+							float: left
+							margin-left: 48px
+							padding-top: 6px
+							width: 267px
+
+							a
+								color: $light-font
+								font-weight: normal
+								font-size: 1.3em
+								letter-spacing: 0px
+								font-family: 'Arial', 'Helvetica', sans-serif
+								margin-bottom: 6px
+								display: block
+								outline: none
+
+								&:hover
+									text-decoration: none
+									color: $body-color
+
+							.profile-box-social-user-description-headline
+								color: $light-font
+								line-height: 1.2em
+
+					.profile-box-social-user-actions
+						float: right
+
+						button
+							margin-top: 6px
+
+			.planner-calendar-wrapper
+				overflow: auto
+				height: 500px
+
+				.planner-calendar
+					width: 96%
+					background-color: #fff
+					height: 1000px
+					margin-bottom: 48px
+
+					.planner-calendar-times
+						width: 100%
+						height: 100%
+
+						.planner-calendar-times-date
+							height: 7.6%
+							border-bottom: 1px solid #efefef
+
+						.planner-calendar-times-allday
+							border-bottom: 1px solid #efefef
+
+						.planner-calendar-times-time
+							//height: $PLANNER_HOUR_HEIGHT
+							overflow: hidden
+
+							.planner-calendar-times-body
+								//position: relative
+								//top: 0px
+								height: 98%
+								border-bottom: 1px solid #efefef
+
+								.planner-calendar-times-time-title-wrapper
+									color: #afafaf
+									height: 100%
+									width: 5%
+									float: left
+
+									.planner-calendar-times-time-title
+										margin-top: 4%
+										margin-left: 12px
+
+								.planner-calendar-times-time-week
+									height: 100%
+									float: left
+									width: 95%
+
+					.planner-calendar-days
+						width: 100%
+						height: 100%
+						margin-top: -1000px
+						overflow: hidden
+
+						.planner-calendar-days-times
+							width: 5%
+							//background-color: #efefef
+							float: left
+							height: 100%
+
+						.planner-calendar-days-day
+							width: 19%
+							float: left
+							height: 100%
+							//border-right: 1px solid #ddd
+
+						.planner-calendar-days-day,
+						.planner-calendar-days-times
+							.planner-calendar-days-day-divider
+								height: 100%
+								width: 100%
+								border-right: 1px solid #f9f9f9
+
+					.planner-calendar-canvas
+						width: 100%
+						height: 100%
+						margin-top: -1000px
+						overflow: hidden
+
+						.planner-calendar-canvas-time
+							width: 5%
+							float: left
+							height: 100%
+
+						.planner-calendar-canvas-day
+							width: 19%
+							float: left
+							height: 100%
+
+							.planner-calendar-canvas-day-today
+								opacity: 0.5
+								height: 100%
+								width: 100%
+								margin-bottom: -1000px
+								position: relative
+								top: 0
+
+							.planner-calendar-canvas-day-header-wrapper
+								height: 7.6%
+
+								.planner-calendar-canvas-day-header
+									color: #afafaf
+									padding: 12px
+
+								.planner-calendar-canvas-day-header-day
+									font-size: 1.3em
+									margin-bottom: 6px
+
+								.planner-calendar-canvas-day-header-date
+									font-size: 2.8em
+									letter-spacing: -3px
+
+							.planner-calendar-canvas-day-events
+								position: relative
+								top: 0
+								height: 100%
+
+								.planner-calendar-canvas-day-event-wrapper
+									background-color: #2196f3
+									width: 90%
+									margin: auto
+									@include border-radius(2px)
+									cursor: pointer
+									position: relative
+
+									.planner-calendar-canvas-day-event
+										padding: 12px
+										color: #fff
+
+										.planner-calendar-canvas-day-event-title
+											font-weight: bold
+											margin-bottom: 2px
+
+					.planner-calendar-allday-canvas
+						width: 100%
+						height: 100%
+						margin-top: -1000px
+						position: relative
+						pointer-events: none
+
+						.planner-calendar-allday-canvas-date
+							height: 7.6%
+
+						.planner-calendar-allday-canvas-event
+							margin-left: 5%
+							margin-top: 2px
+							overflow: hidden
+
+							.planner-calendar-allday-canvas-event-padding
+								width: 20%
+								float: left
+								height: 1px
+
+							.planner-calendar-allday-canvas-event-body-wrapper
+								//width: 19%
+								//border-width: 1px
+								//border-style: solid
+								@include border-radius(2px)
+								margin-left: 1px
+								//cursor: pointer
+								pointer-events: auto
+								float: left
+
+								.planner-calendar-allday-canvas-event-body
+									padding: 12px
+									font-weight: bold
+
+			.card-wrapper
+				width: 605px
+				margin: auto
+				margin-top: 12px
+
+				.card
+					width: 576px
+					background-color: #fff
+					margin: auto
+					margin-bottom: 24px
+					@include box-shadow(0 0px 2px rgba(0, 0, 0, 0.1))
+					overflow: hidden
+
+					.card-toolbar
+						height: 48px
+						overflow: hidden
+
+						&.card-toolbar-mini
+							height: 12px
+
+						.card-toolbar-back, .card-toolbar-save,
+						.card-toolbar-add, .card-toolbar-delete,
+						.card-toolbar-edit, .card-toolbar-settings,
+						.card-toolbar-units
+							display: inline-block
+							background-repeat: no-repeat
+							padding: 16px 48px
+							cursor: pointer
+							color: #fff
+							font-size: 1.3em
+							outline: none
+							padding-right: 18px
+
+							&:hover
+								//background-color: black
+								text-decoration: none
+
+						.card-toolbar-back
+							float: left
+							background-image: url('../images/back-small.png')
+							width: 24px
+							background-position: 18px center
+							padding-right: 36px
+
+						.card-toolbar-save
+							float: left
+							background-image: url('../images/save.png')
+							background-position: 18px center
+
+						.card-toolbar-add
+							float: right
+							background-image: url('../images/add.png')
+							background-position: 18px 15px
+
+						.card-toolbar-delete
+							float: left
+							background-image: url('../images/delete.png')
+							background-position: 18px 15px
+
+						.card-toolbar-edit
+							float: left
+							background-image: url('../images/create.png')
+							background-position: 18px 15px
+						
+						.card-toolbar-settings
+							float: left
+							background-image: url('../images/settings-light.png')
+							background-position: 18px center
+						
+						.card-toolbar-units
+							float: left
+							background-image: url('../images/units.png')
+							background-position: 18px center
+
+						.card-toolbar-secondary
+							float: right
+
+					.card-title-wrapper
+						min-height: 60px
+						color: #fff
+						padding: 18px
+
+						&.card-title-wrapper-small
+							min-height: 24px
+
+						.card-title
+							font-size: 1.8em
+							letter-spacing: -1px
+							font-weight: bold
+							@include text-shadow(0 1px 0 rgba(97, 97, 97, 1))
+							
+						.planner-event-title
+							margin-bottom: 12px
+
+						.planner-event-title-assist
+							@include text-shadow(0 1px 0 rgba(97, 97, 97, 0.6))
+
+							.planner-event-title-assist-date
+								font-weight: bold
+
+					.card-input-wrapper
+						padding: 0px 18px 18px 18px
+						overflow: hidden
+
+						.card-input
+							font-size: 1.8em
+							letter-spacing: -1px
+							border-width: 0px 0px 1px 0px
+							border-style: solid
+							width: 100%
+							color: $light-font
+							font-weight: normal
+
+							option
+								padding: 0px
+
+						&.card-dual-input-wrapper
+							.card-input
+								float: left
+								width: 45%
+
+							.card-input:last-child
+								float: right
+
+					.card-section-title-wrapper
+						padding: 18px
+
+						.card-section-title
+							text-transform: uppercase
+							font-weight: bold
+
+					.card-details
+						&.card-details-padded
+							padding: 18px
+
+						.planner-event-details-block
+							margin-bottom: 36px
+
+							&:last-child
+								margin-bottom: 12px
+
+							.planner-event-details-block-title
+								text-transform: uppercase
+								font-weight: bold
+								margin-bottom: 12px
+
+							.planner-event-details-block-body
+								color: $light-font
+
+							.planner-event-details-block-item
+								overflow: hidden
+								border-bottom: 1px solid #efefef
+								display: block
+
+								.planner-event-details-block-item-description
+									float: left
+									color: $light-font
+									padding: 12px 0px
+									display: block
+									width: 90%
+
+								a.planner-event-details-block-item-description
+									cursor: pointer
+									text-decoration: none
+
+								.planner-event-details-block-item-actions
+									@include actionDropdown
+									margin-top: 6px
+
+									&.show
+										display: block
+
+								&:first-child
+									border-top: 1px solid #efefef
+
+								&:hover
+									color: $body-color
+									text-decoration: none
+									border-bottom: 1px solid #afafaf
+
+									.planner-event-details-block-item-actions
+										display: block
+					
+					.card-tabs
+						overflow: hidden
+						height: 36px
+
+						.card-tab
+							text-transform: uppercase
+							float: left
+							font-weight: bold
+							width: 50%
+							text-align: center
+							cursor: pointer
+							padding: 10px 0px
+
+							&:hover
+								color: #fff
+
+							&.selected
+								border-bottom: 3px solid #fff
+
+			.planner-classes-wrapper
+				.planner-classes-class
+					border-bottom: 1px solid #efefef
+					padding: 18px
+					cursor: pointer
+					color: $light-font
+
+					&:hover
+						background-color: #f9f9f9
+
+					.planner-classes-class-title
+						font-size: 1.3em
+						font-weight: bold
+						margin-bottom: 6px
+
+			.card-wrapper
+				.card
+					.card-title-wrapper-edit
+						.card-title
+							border-width: 0px
+							border-bottom-width: 1px
+							border-style: solid
+							width: 100%
+							@include text-shadow(none)
+							padding-bottom: 6px
+							font-weight: normal
+							color: $light-font
+							outline: 0 none
+							border-color: #ddd
+
+					.planner-class-details.card-details-padded 
+						padding-top: 0px
+						overflow: hidden
+
+						.planner-class-detail-support
+							color: #afafaf
+							margin-bottom: 12px
+
+							&.planner-class-detail-input-support
+								padding-top: 6px
+
+						.oc-loud-button
+							width: 100%
+
+						textarea
+							font-family: 'Arial', 'Helvetica', sans-serif
+							width: 98%
+
+					.planner-class-details-dates
+						overflow: hidden
+
+						.planner-class-detail
+							float: right
+							width: 46%
+
+							&:first-child
+								float: left
+								padding-right: 24px
+
+							.planner-class-detail-support
+								width: 20%
+								float: left
+
+							.planner-class-detail-body
+								float: right
+
+								input
+									outline: 0 none
+
+						&.planner-class-details-times
+							.planner-class-detail-body
+								input[type=text]
+									float: left
+									width: 80px
+									margin-left: 6px
+
+					.planner-class-details-class
+						.planner-class-detail
+							width: 46%
+
+							.planner-class-detail-support
+								width: 25%
+								float: left
+								padding-top: 6px
+
+					.planner-class-details-colors
+						.planner-class-detail-body
+							overflow: hidden
+
+							.planner-class-color
+								width: 24px
+								height: 24px
+								display: inline-block
+								float: left
+								border: 2px solid transparent
+								cursor: pointer
+								margin-right: 6px
+
+								&:hover
+									border-color: $light-font
+
+								&.selected
+									border-color: $body-color
+
+					.planner-class-details-schedule
+						margin-bottom: 18px
+						margin-top: 6px
+
+						.planner-class-details-schedule-body
+							min-height: 48px
+							padding: 18px
+							text-align: center
+							border: 1px solid #ddd
+							border-top-width: 0px
+							
+							.class-periods
+								.class-period
+									margin-bottom: 6px
+
+									input:first-child
+										margin-right: 6px
+
+							.add-class-period
+								margin-top: 6px
+								display: inline-block
+								cursor: pointer
+
+						.planner-class-details-schedule-days
+							overflow: hidden
+
+							li.planner-class-details-schedule-day
+								overflow: hidden
+								float: left
+								border-bottom-width: 3px
+								border-bottom-style: solid
+								border-color: #efefef
+								width: 20%
+								text-align: center
+								padding: 6px 0px
+								cursor: pointer
+								opacity: 0.8
+								@include transition(border-color 0.4s ease)
+
+								&:hover, &.current
+									opacity: 1
+
+								.planner-class-details-schedule-day-body
+									display: inline-block
+
+									input
+										float: left
+										margin-right: 6px
+
+									label
+										float: left
+										text-transform: uppercase
+										font-weight: bold
+										margin: 0px
+
+						.planner-class-details-schedule-placeholder
+							font-size: 1.3em
+							font-weight: bold
+							color: #afafaf
+							text-align: center
+							padding: 24px
+							border: 1px solid #ddd
+							border-top-width: 0px
+
+			.curriculum-menu-wrapper
+				.curriculum-empty-state
+					padding-bottom: 50px
+
+				.curriculum-action
+					text-decoration: none
+					cursor: pointer
+
+				.curriculum-calendar
+					overflow: hidden
+
+					.curriculum-calendar-canvas
+						height: 100%
+
+						.curriculum-calendar-canvas-period
+							height: 59px
+							border-bottom: 1px solid #ddd
+
+							.curriculum-calendar-canvas-period-title
+								font-size: 1.8em
+								letter-spacing: -1px
+								padding-top: 30px
+								padding-left: 18px
+								color: #ddd
+
+					.curriculum-units
+						//margin-top: -500px
+						position: relative
+						overflow: hidden
+						height: 100%
+						width: 460px
+						float: right
+
+						.curriculum-units-unit-wrapper
+							border-width: 1px
+							@include border-radius(2px)
+							border-style: solid
+							cursor: pointer
+							margin-right: 6px
+							margin-top: 6px
+							background-color: #fff
+							overflow: hidden
+							height: 40px
+
+							&:hover
+								background-color: #f9f9f9
+
+							.curriculum-units-unit
+								padding: 6px
+
+								.curriculum-units-unit-thumbnail
+									width: 60px
+									background-size: cover
+									height: 60px
+									float: left
+									background-repeat: no-repeat
+									background-position: top center
+									background-color: #efefef
+									margin-right: 12px
+
+								.curriculum-units-unit-body
+									float: left
+
+									.curriculum-units-unit-body-title
+										font-size: 1.3em
+										margin: 3px 0px
+										font-weight: bold
+
+
+			.card .card-title-wrapper,
+			.card .card-input-wrapper
+				input
+					&.deeppurple-card-title:focus, &.deeppurple-card-input:focus
+						border-color: #4527a0
+
+					&.red-card-title:focus, &.red-card-input:focus
+						border-color: #c62828
+
+					&.pink-card-title:focus, &.pink-card-input:focus
+						border-color: #ad1457
+
+					&.indigo-card-title:focus, &.indigo-card-input:focus
+						border-color: #283593
+
+					&.teal-card-title:focus, &.teal-card-input:focus
+						border-color: #00695c
+
+					&.green-card-title:focus, &.green-card-input:focus
+						border-color: #2e7d32
+
+					&.orange-card-title:focus, &.orange-card-input:focus
+						border-color: #ef6c00
+
+					&.blue-card-title:focus, &.blue-card-input:focus
+						border-color: #2196f3
+
+		.ajax-loader-wrapper
+			height: 50px
+			margin-top: 12px
+
+			&.hide
+				display: none
+
+			.ajax-loader
+				position: absolute
+				width: 576px
+				margin: auto
+				margin-top: 20px
+
+				.spinner
+					display: block
+
+		.ajax-spinner
+			.spinner
+				display: block
+
+		.files-loader-wrapper,
+		.planner-loader-wrapper
+			width: 576px
+			margin: auto
+
+			.ajax-loader
+				margin-top: 48px
+
+	input[type=text], textarea
+		@include light-textbox
+
+	select
+		border: 1px solid #ddd
+
+
+.files-create-menu
+	z-index: 4
+	width: 150px
+
+	ul
+		li
+			a
+				padding: 12px
+				padding-left: 32px
+				display: block
+				color: $light-font
+				overflow: hidden
+				background-repeat: no-repeat
+
+				&.files-create-folder
+					background-image: url('../images/browse-folder-icon.png')
+					background-position: 12px 12px
+
+				&.files-create-document
+					background-image: url('../images/browse-file-icon.png')
+					background-position: 14px 12px
+
+				&.files-create-upload
+					background-image: url('../images/create-files-upload.png')
+					background-position: 12px 13px
+
+				&.files-create-link
+					background-image: url('../images/create-files-link.png')
+					background-position: 12px 13px
+
+				&:hover
+					background-color: #efefef
+					text-decoration: none
+
+	.floating-menu-spacer
+		width: 150px
+		background-position: 125px bottom
+
+
+.move-file-folder-dialog
+	width: 500px
+	height: 460px
+
+.delete-file-folder-dialog
+	width: 420px
+
+.rename-file-folder-dialog
+	width: 300px
+
+.move-item-widget-dialog
+	width: 500px
+	min-height: 125px
+
+	.move-item-widget
+		color: $light-font
+
+.move-file-folder-browser
+	ul
+		li
+			ul
+				padding-left: 24px
+				display: none
+
+				&.show
+					display: block
+					margin-bottom: 6px
+
+	> ul:first-child
+		margin-top: 0px
+
+	> ul
+		//margin-top: 16px
+
+		> li
+			background-image: none
+			padding-left: 0px
+
+			&.opened-collection
+				background-image: none
+
+			> a
+				color: $light-font
+				background-image: url('../images/browse-folder-icon.png')
+				background-position: 4px 3px
+				background-repeat: no-repeat
+				padding-left: 24px
+
+			ul
+				clear: left
+				margin-top: 6px
+
+			> ul
+				padding-left: 6px
+				display: block
+				outline: none
+				margin-top: 0px
+
+	a
+		color: $light-font
+		display: inline-block
+		height: 16px
+
+		&:hover
+			color: $body-color
+			text-decoration: none
+
+		&.current-collection
+			border: 1px solid #ddd
+			color: $light-font
+			font-weight: bold
+
+	ul
+		li
+			margin: 2px 0px
+
+	a
+		padding: 2px 6px
+		outline: 0px
+
+	.parent-collection
+		> .toggle-collection
+			background-image: url('../images/arrow-mid-right-small.png')
+			background-position: 5px 4px
+
+		> a
+			background-image: url('../images/browse-folder-icon.png')
+			background-position: 4px 3px
+			background-repeat: no-repeat
+			padding-left: 24px
+
+
+	.empty-collection
+		> .toggle-collection
+			background-image: none
+
+		> a
+			background-image: url('../images/browse-empty-folder-icon.png')
+			background-position: 4px 3px
+			background-repeat: no-repeat
+			padding-left: 24px
+
+	.opened-collection
+		> .toggle-collection
+			background-image: url('../images/arrow-bottom-small.png')
+			background-position: 3px 4px
+
+.move-item-dialog
+	width: 360px
+
+	.move-item-dialog-option
+		font-size: 1.3em
+		color: $light-font
+		padding: 12px
+		cursor: pointer
+		border-bottom: 1px solid #f9f9f9
+		padding-left: 12px
+
+		.move-item-dialog-option-icon
+			background-image: url('../images/move-class.png')
+			background-repeat: no-repeat
+			width: 16px
+			height: 16px
+			display: inline-block
+			margin-right: 6px
+
+		&.option-next
+			.move-item-dialog-option-icon
+				background-position: -32px center
+
+		&.option-select
+			.move-item-dialog-option-icon
+				background-position: center center
+
+		&.option-before
+			.move-item-dialog-option-icon
+				background-position: 0px center
+
+		&:hover
+			background-color: #f9f9f9
+
+.confirm-move-dialog
+	width: 400px
+
+	.confirm-move-message, .confirm-move-none
+		display: none
+
+		&.show
+			display: block
+
+.planner-hour-ghost
+	height: $PLANNER_HOUR_HEIGHT
+
+.card .card-toolbar, .pseudo-card .card-toolbar,
+.curriculum-module-section-listing-collection,
+.curriculum-module-section-listing-contextual
+	.deeppurple-button:hover
+		background-color: #4527a0
+
+	.red-button:hover
+		background-color: #c62828
+
+	.pink-button:hover
+		background-color: #ad1457
+
+	.indigo-button:hover
+		background-color: #283593
+
+	.teal-button:hover
+		background-color: #00695c
+
+	.green-button:hover
+		background-color: #2e7d32
+
+	.orange-button:hover
+		background-color: #ef6c00
+
+	.blue-button:hover
+		background-color: #1565c0
+
+	.light-button:hover
+		background-color: #c4c4c4
+
+
+
+.card-tabs
+	&.blue-card-tabs
+		.card-tab
+			color: #90caf9
+
+	.card-tab.selected
+		color: #fff
+
+.selected
+	&.blue-item
+		background-color: #2196f3
+
+.curriculum-units-unit-wrapper
+	&.color-blue
+		border-color: #2196f3
+
+		.curriculum-units-unit-body-title, .curriculum-units-unit-body-textbook
+			color: #2196f3
+	
+		&:hover
+			border-color: #1976d2
+
+			.curriculum-units-unit-body-title, .curriculum-units-unit-body-textbook
+				color: #1976d2
+
+.curriculum-action
+	&.blue-action
+		color: #64b5f6
+
+		&:hover
+			color: #2196f3
+
+.setup-class-dialog
+	width: 600px
+
+	.setup-class-header
+		height: 72px
+		background-image: url('../images/class-schedule-header.png')
+
+
+	label
+		&.inline-input-label
+			input
+				margin-right: 4px
+				margin-left: 8px
+
+		input
+			vertical-align: baseline
+
+	.popup-body
+		.setup-class-options
+			margin: auto
+			width: 200px
+			margin-top: 24px
+
+		.popup-body-message
+			margin-bottom: 0px
+
+		.hidden
+			display: none
+
+		.popup-submit-button
+			font-size: 0.8em
+
+		.select-times
+			.setup-class-options
+				width: 350px
+				text-align: center
+				margin-bottom: 24px
+
+				.class-period
+					margin-bottom: 12px
+					overflow: hidden
+
+				.add-class-period
+					cursor: pointer
+
+			input[type=text]
+				float: left
+				width: 150px
+				margin-right: 12px
+
+			label
+				display: inline-block
+
+			.replicateLabels.hidden
+				display: none
+
+		.select-times-day-name
+			font-weight: bold
+
+.oc-timepicker
+	//width: 100px
+	//height: 200px
+	position: absolute
+	top: 0px
+	left: 0px
+	z-index: 25
+	opacity: 0
+	visibility: hidden
+	@include transition((opacity 0.2s ease))
+
+	&.show
+		opacity: 1
+		visibility: visible
+
+	ul
+		background-color: #fff
+		height: 100px
+		width: 100%
+		overflow: auto
+		@include border-radius(2px)
+		@include box-shadow(0 1px 2px rgba(0, 0, 0, 0.1))
+
+		li
+			padding: 6px
+			color: $light-font
+			font-size: 1.3em
+			cursor: pointer
+
+			&:hover
+				background-color: #efefef
+				color: $body-color
+
+.status
+	position: absolute
+	color: #fff
+	background-color: #000
+	opacity: 0
+	padding: 12px
+	@include transition((top 0.1s ease-in, opacity 0.1s ease-in))
+	@include border-radius(2px)
+	font-weight: bold
+	z-index: 30
+
+.tip-wrapper
+	position: absolute
+	display: none
+	z-index: 31
+	text-align: center
+
+	&.show
+		display: block
+
+	.tip-body
+		padding: 6px 9px
+		color: #fff
+		background-color: #444
+		font-size: 0.9em
+		margin-bottom: -6px
+		max-width: 200px
+		line-height: 1.3em
+
+		.tip-title
+			font-weight: bold
+			padding-right: 6px 
+
+		&.tip-body-south
+			margin-bottom: 0px
+			margin-top: -3px
+
+		&.tip-body-east
+			text-align: left
+			float: right
+
+	.tip-arrow
+		display: inline-block
+		border-color: #444 transparent transparent
+		border-width: 5px 5px 0
+		content: ""
+		border-style: solid
+
+		&.tip-arrow-south
+			border-color: transparent transparent #444
+			border-width: 0 5px 6px 5px
+
+		&.tip-arrow-east
+			border-color: transparent #444 transparent transparent
+			border-width: 6px 6px 6px 0px
+			float: left
+
+
+/*********** Upload popup ***********/
+
+.max-filesize-message
+	color: $light-font
+
+/*********** CURRICULUM *************/
+
+.org-profile-view .content-panel .curriculum-loader-wrapper
+	.ajax-loader
+		position: static
+
+.explorer-resource-module-header
+	overflow: hidden
+
+	.explorer-resource-module-thumbnail
+		width: 77px
+		height: 77px
+		background-size: cover
+		float: left
+		margin-right: 20px
+		background-color: #efefef
+
+		&.hide
+			display: none
+
+	.explorer-resource-module-content
+		padding-top: 10px
+		font-weight: bold
+
+		.explorer-resource-module-content-title
+			color: $light-font
+			font-size: 1.3em
+			line-height: 1.2em
+			@include text-shadow(0 1px 0 rgba(255, 255, 255, 1))
+
+		.explorer-resource-module-content-caption
+			color: #aaa
+			padding-top: 6px
+
+.curriculum
+	height: 100%
+
+.curriculum-module-wrapper
+	height: 100%
+
+	.curriculum-module
+		height: 100%
+
+		.explorer-resource-module-main
+			margin-top: 24px
+
+			.explorer-resource-add-section
+				width: 558px
+				margin: auto
+
+			&.compress
+				width: 45%
+				float: left
+				margin-top: 12px
+
+				.curriculum-module-section-listing-collection
+					.curriculum-module-section-listing-collection-title-wrapper
+						.curriculum-module-section-listing-collection-title
+							color: $light-font
+
+				.curriculum-module-section-listing-contextual
+					.curriculum-module-section-listing-contextual-title-wrapper
+						.curriculum-module-section-listing-contextual-title
+							color: $light-font
+
+				.curriculum-module-new-section
+					width: 96%
+
+				.explorer-resource-add-section
+					width: 96%
+
+	.explorer-resource-module-support
+		float: right
+		display: none
+		color: $light-font
+		height: 100%
+
+		&.show
+			width: 55%
+			display: block
+
+		.explorer-resource-module-support-body
+			background-color: #fff
+			height: 400px
+			margin-left: 20px
+			margin-top: 24px
+			@include box-shadow(0 0px 2px rgba(0, 0, 0, 0.1))
+			margin-bottom: 2px
+
+			.explorer-resource-module-support-pre
+				height: 36px
+				overflow: hidden
+
+				.explorer-resource-module-support-pre-planner
+					width: 54px
+					height: 100%
+					background-image: url('../images/add-to-planner.png')
+					background-position: 18px center
+					background-repeat: no-repeat
+					cursor: pointer
+					float: left
+
+				.explorer-resource-module-support-delete
+					width: 54px
+					height: 100%
+					background-image: url('../images/delete.png')
+					background-position: 20px center
+					background-repeat: no-repeat
+					cursor: pointer
+					float: right
+
+			.explorer-resource-module-support-title
+				font-size: 1.8em
+				font-weight: bold
+				letter-spacing: -1px
+				line-height: 1.15em
+				padding: 18px
+				color: #fff
+
+			.explorer-resource-module-support-contents
+				overflow-y: auto
+				//height: 100%
+				padding-top: 18px
+
+			.explorer-resource-module-support-section
+				padding: 10px 0px
+				overflow: auto
+
+				&.accepting
+					background-color: #f4f7f8
+
+				&.explorer-resource-module-support-section
+					.explorer-resource-module-support-section-title
+						background-image: url('../images/module-section-meta.png')
+
+				&.explorer-resource-module-support-section-methodology
+					.explorer-resource-module-support-section-title
+						background-image: url('../images/methodology.png')
+
+				&.explorer-resource-module-support-section-how
+					.explorer-resource-module-support-section-title
+						background-image: url('../images/how.png')
+
+				&.explorer-resource-module-support-section-resources
+					.explorer-resource-module-support-section-title
+						background-image: url('../images/objective-resources.png')
+
+				&.explorer-resource-module-support-section-prerequisites
+					.explorer-resource-module-support-section-title
+						background-image: url('../images/prerequisites.png')
+
+				&.explorer-resource-module-support-section-wordwall
+					.explorer-resource-module-support-section-title
+						background-image: url('../images/wordwall.png')
+
+				&.explorer-resource-module-support-section-ccss
+					.explorer-resource-module-support-section-title
+						background-image: url('../images/common-core.png')
+
+				&.explorer-resource-module-support-section-content
+					.explorer-resource-module-support-section-title
+						background-image: url('../images/common-core.png')
+
+				&.explorer-resource-module-support-section-practices
+					.explorer-resource-module-support-section-title
+						background-image: url('../images/common-core.png')
+
+				&.explorer-resource-module-support-section-big-idea
+					.explorer-resource-module-support-section-title
+						background-image: url('../images/big-idea.png')
+
+				&.explorer-resource-module-support-section-essential-understandings
+					.explorer-resource-module-support-section-title
+						background-image: url('../images/understandings.png')
+
+				&:hover
+					.explorer-resource-module-support-section-handle-wrapper
+						.explorer-resource-module-support-section-handle
+							opacity: 1
+
+					.explorer-resource-module-support-section-actions
+						display: block
+
+			.explorer-resource-module-support-section-handle-wrapper
+				width: 10px
+				float: left
+
+				.explorer-resource-module-support-section-handle
+					background: url('../images/move-handle.png')
+					width: 10px
+					height: 16px
+					margin: 0px 0px 0px 2px
+					cursor: move
+					opacity: 0
+
+			.explorer-resource-module-support-section-actions
+				@include actionDropdown
+				margin-right: 10px
+
+				&.show
+					display: block
+
+			.explorer-resource-module-support-section-title-wrapper
+				float: left
+				margin-left: 10px
+
+				.explorer-resource-module-support-section-title
+					text-transform: uppercase
+					color: #aaa
+					margin-bottom: 5px
+					font-weight: bold
+					padding-left: 20px
+					background-repeat: no-repeat
+					background-position: left center
+					font-size: 1.3em
+
+				.explorer-resource-module-support-section-body
+					padding-left: 20px
+					outline: none
+					line-height: 1.2em
+					min-height: 14px
+
+					.explorer-resource-module-support-section-body-field-snippet
+						margin-bottom: 6px
+
+						.explorer-resource-module-support-section-body-standard
+							font-weight: bold
+
+					p:first-child
+						margin-top: 0px
+
+				*[data-placeholder]:not(:focus):not([data-div-placeholder-content]):before
+					content: attr(data-placeholder)
+					float: left
+					margin-left: 2px
+					color: #b3b3b3
+
+			.explorer-resource-listing-body-resource-actions,
+			.explorer-resource-module-support-new-field,
+			.explorer-resource-actions-suggest-wrapper
+				margin: 0px 20px
+
+			.explorer-resource-actions-suggest-wrapper
+				margin-bottom: 20px
+				margin-top: 10px
+
+				.explorer-resource-actions-suggest
+					width: 100%
+					background-color: #2980b9
+					color: #fff
+					font-weight: bold
+					border-width: 0px
+					padding: 10px 0px
+
+			.explorer-resource-items
+				padding: 0px 20px
+				clear: left
+
+			.explorer-resource-module-support-new-field
+				margin-bottom: 20px
+
+			.explorer-resource-add-field
+				margin-left: 20px
+				margin-right: 20px
+
+			.explorer-resource-item
+				overflow: hidden
+				padding-bottom: 10px
+				margin-bottom: 10px
+				border-bottom: 1px solid #efefef
+
+				&:last-child
+					border-bottom-width: 0px
+
+				&:first-child
+					padding-top: 10px
+
+				.explorer-resource-item-thumbnail-wrapper
+					float: left
+					width: 18%
+
+					.explorer-resource-item-thumbnail
+						width: 60px
+						height: 60px
+						background-color: #efefef
+						margin-right: 16px
+						background-size: cover
+
+						.thumbnail-silhouette
+							height: 60px
+							width: 60px
+
+				.explorer-resource-item-content
+					float: left
+					width: 82%
+					//padding-right: 10px
+
+					.explorer-resource-item-content-body
+						float: left
+						width: 90%
+
+						.explorer-resource-item-content-title
+							font-size: 1.2em
+							display: block
+							margin-bottom: 8px
+							padding-top: 4px
+
+						.explorer-resource-item-content-description
+							color: #aaa
+
+					.explorer-resource-item-content-actions
+						float: right
+						width: 10%
+
+						.explorer-resource-item-content-action-delete
+							width: 14px
+							height: 14px
+							display: inline-block
+							background-image: url("../images/delete-resource.png")
+							background-repeat: no-repeat
+							background-position: center center
+							cursor: pointer
+							margin-right: 10px
+
+							&:hover
+								background-image: url("../images/delete-resource-hover.png")
+
+			.explorer-resource-listing-body-resource-actions
+				padding: 4px 0px
+				text-align: right
+
+
+.explorer-resource-sections
+	.explorer-resource-section
+		border-bottom: 1px solid #d0d1d5
+
+	.explorer-resource-section-body
+		margin-top: 12px
+
+		&.accepting
+			border-bottom: 4px solid #2980b9
+
+		.curriculum-module-section-listing-collection
+			overflow: hidden
+			height: 36px
+			background-color: #ddd
+
+			&:hover
+				.explorer-resource-section-listing-collection-handle-wrapper
+					.explorer-resource-section-listing-collection-handle
+						opacity: 1                  
+
+			.explorer-resource-section-listing-collection-handle-wrapper
+				width: 4%
+				float: left
+				height: 36px
+
+				.explorer-resource-section-listing-collection-handle
+					background: url('../images/move-handle.png')
+					width: 10px
+					height: 24px
+					margin: 6px 6px 3px 3px
+					cursor: move
+					opacity: 0
+
+			.curriculum-module-section-listing-collection-title-wrapper
+				//width: 91%
+				float: left
+				padding: 12px 0px
+
+				.curriculum-module-section-listing-collection-title
+					color: #fff
+					font-weight: bold
+					text-transform: uppercase
+
+		.explorer-resource-section-listing-items
+			background-color: #fff
+			//padding: 10px
+			overflow: hidden
+
+			&.accepting
+				cursor: move
+
+				.explorer-resource-section-listing-item
+					&:hover
+						border-bottom-width: 4px
+
+		.explorer-resource-section-listing-item
+			overflow: hidden
+			border-bottom: 1px solid #ddd
+			//padding: 10px
+
+			/*&:first-child
+				padding-top: 0px*/
+
+			&.new
+				background-color: #f7ebc6
+
+			&:hover
+				border-color: #aaa
+
+			&.selected
+				// border-color: #2980b9
+				.explorer-resource-section-listing-item-content
+					color: #fff
+
+			&:hover
+				.explorer-resource-section-listing-item-handle-wrapper
+					.explorer-resource-section-listing-item-handle
+						opacity: 1
+
+			.explorer-resource-section-listing-item-handle-wrapper
+				width: 4%
+				float: left
+				height: 36px
+
+				.explorer-resource-section-listing-item-handle
+					background: url('../images/move-handle.png')
+					width: 10px
+					height: 28px
+					margin: 3px 6px 3px 3px
+					cursor: move
+					opacity: 0
+
+			.explorer-resource-section-listing-item-pre
+				width: 6%
+				float: left
+				height: 34px
+				//background-color: #E4F7D2
+				cursor: pointer
+				background-image: url('../images/objective-ready.png')
+				background-repeat: no-repeat
+				background-position: center center
+
+				&.has-issue
+					//background-color: #FBC9C9
+					background-image: url('../images/objective-needs-work.png')
+
+			.explorer-resource-section-listing-item-content
+				overflow: hidden
+				width: 96%
+				//width: 480px
+				float: left
+				//margin-right: 10px
+				//padding: 12px
+				height: 36px
+				padding-left: 0px
+				outline: none
+				color: $light-font
+				line-height: 1.2em
+				min-height: 14px
+
+				&:focus
+					color: $body-color
+				
+				/*.explorer-resource-section-listing-item-content-key
+					width: 67%
+					float: left
+
+					&.expand
+						width: auto
+						float: none*/
+
+				.explorer-resource-objective
+					padding-top: 12px
+					outline: none
+
+				.explorer-resource-section-listing-item-content-fill
+					width: 33%
+					float: right
+
+					&.hide
+						display: none
+
+	.curriculum-module-section-listing-contextual
+		overflow: hidden
+		background-color: #fff
+		cursor: pointer
+		height: 36px
+
+		&:hover
+			color: $light-font
+			
+			.curriculum-module-section-listing-contextual-handle-wrapper
+				.curriculum-module-section-listing-contextual-handle
+					opacity: 1                  
+
+		&.selected
+			color: $light-font
+			border-color: #2980b9
+
+		.curriculum-module-section-listing-contextual-handle-wrapper
+			width: 4%
+			float: left
+			height: 36px
+
+			.curriculum-module-section-listing-contextual-handle
+				background: url('../images/move-handle.png')
+				width: 10px
+				height: 28px
+				margin: 3px 6px 3px 1px
+				cursor: move
+				opacity: 0
+
+		.curriculum-module-section-listing-contextual-title-wrapper
+			width: 96%
+			//width: 480px
+			float: left
+
+			.curriculum-module-section-listing-contextual-title
+				padding-top: 12px
+				font-weight: bold
+				text-transform: uppercase
+				color: #fff
+
+	.curriculum-module-section-listing-contextual,
+	.curriculum-module-section-listing-collection
+		.curriculum-module-section-listing-collection-menu,
+		.curriculum-module-section-listing-contextual-menu
+			width: 36px
+			height: 100%
+			background-image: url('../images/menu.png')
+			background-position: 10px center
+			background-repeat: no-repeat
+			cursor: pointer
+			float: right
+
+.explorer-resource-listing-labels
+	overflow: hidden
+	color: #aaa
+
+	&:hover
+		.explorer-resource-listing-labels-handle-wrapper
+			.explorer-resource-listing-labels-handle
+				opacity: 1
+
+	.explorer-resource-listing-labels-handle-wrapper
+		width: 3%
+		float: left
+
+		.explorer-resource-listing-labels-handle
+			background: url('../images/move-handle.png')
+			width: 10px
+			height: 24px
+			margin: 6px 6px 0px 1px
+			cursor: move
+			opacity: 0
+
+	.explorer-resource-listing-labels-pre
+		width: 6%
+		height: 1px
+		float: left
+
+	.explorer-resource-listing-labels-header
+		width: 91%
+		float: left
+		overflow: hidden
+
+	.explorer-resource-listing-label
+		padding-left: 10px
+
+	.explorer-resource-listing-labels-header-key
+		width: 67%
+		float: left
+		padding: 10px 0px
+
+		&.expand
+			width: auto
+			float: none
+
+	.explorer-resource-listing-labels-header-fill
+		width: 33%
+		float: right
+
+		&.hide
+			display: none
+
+.explorer-overview-section
+	margin-bottom: 40px
+	color: $light-font
+
+.explorer-overview-issues-wrapper
+	margin-top: 20px
+
+	.explorer-overview-issues-set
+		margin-bottom: 40px
+
+		.explorer-overview-issues-set-item
+			margin-top: 20px
+
+			.explorer-issue-listing-body
+				margin-top: 10px
+
+				.explorer-issue-listing-items-item
+					overflow: hidden
+					border-bottom: 1px solid #C8A0A0
+					background-color: #fbc9c9
+					color: #AE7A7A
+					font-weight: bold
+					cursor: pointer
+
+					.explorer-issue-listing-item-content-key
+						width: 67%
+						float: left
+
+					.explorer-issue-listing-item-content-fill
+						width: 33%
+						float: right
+
+					.explorer-issue-listing-item-objective,
+					.explorer-issue-listing-item-message
+						padding: 10px
+
+
+.explorer-overview-unit-table
+	overflow: hidden
+
+	.explorer-overview-timetable
+		overflow: hidden
+		width: 33%
+		float: left
+
+		.explorer-timetable-period
+			padding-top: 28px
+			border-bottom: 1px solid #9ED2F4// #ddd
+			background-color: #f4f7f8
+			padding-left: 50px
+
+			.explorer-timetable-period-title
+				font-size: 1.15em
+				color: #0971B2
+				font-weight: bold
+				margin-bottom: 6px
+
+			.explorer-timetable-period-caption
+				font-size: 0.9em
+				color: $light-font
+
+			&.explorer-timetable-week
+				height: 55px
+				color: #2980b9
+				font-weight: bold
+				font-size: 1.3em
+
+	.explorer-overview-unitflow
+		float: right
+		width: 67%
+		background-color: #fff
+
+		.explorer-unitflow-unit
+			padding: 20px
+			border-bottom: 1px solid #ddd
+			text-decoration: none
+			display: block
+			cursor: pointer
+			overflow: hidden
+			height: 77px
+
+			&:hover
+				background-color: #efefef
+
+.curriculum-module-new-section
+	margin: auto
+	width: 558px
+
+.curriculum-module-new-section,
+.explorer-resource-module-support-new-field,
+.explorer-textbook-add, .explorer-unit-add
+	padding: 9px
+	border: 1px solid #aaa
+	color: #aaa
+	font-weight: bold
+	text-align: center
+	margin-top: 20px
+	cursor: pointer
+	margin-bottom: 10px
+
+	&:hover
+		color: #666
+		border-color: #666
+
+
+.explorer-resource-add-section,
+.explorer-resource-add-field,
+.explorer-settings-textbooks-new,
+.explorer-settings-units-new
+	padding: 17px
+	background-color: #fff
+	margin-top: 20px
+	border: 1px solid #2980B9
+	margin-bottom: 10px
+
+.explorer-resource-add-section-title,
+.explorer-resource-add-field-title
+	margin: 3px 0px
+	color: #aaa
+
+.explorer-resource-add-section-name-wrapper,
+.explorer-resource-add-field-name-wrapper
+	display: block
+	margin: 6px 0px
+
+	.explorer-resource-add-section-name,
+	.explorer-resource-add-field-name
+		width: 99%
+
+.explorer-resource-add-section-type,
+.explorer-resource-add-field-type
+	display: block
+	margin: 6px 0px
+	width: 100%
+
+.explorer-resource-add-section-actions,
+.explorer-resource-add-field-actions,
+.explorer-resource-add-textbooks-actions,
+.explorer-resource-add-units-actions
+	text-align: right
+	margin: 3px 0px
+
+	.explorer-resource-add-section-action-cancel,
+	.explorer-resource-add-field-action-cancel,
+	.explorer-resource-add-textbook-action-cancel,
+	.explorer-resource-add-unit-action-cancel
+		margin-right: 6px
+
+.explorer-settings-textbooks-new
+	overflow: hidden
+
+	.explorer-settings-textbooks-new-thumbnail  
+		width: 80px
+		height: 80px
+		float: left
+		margin-right: 18px
+		background-color: #efefef
+
+	.explorer-settings-textbooks-new-body
+		overflow: hidden
+
+		.explorer-settings-textbooks-new-body-title
+			display: block
+			width: 420px
+			margin-bottom: 6px
+
+		.explorer-settings-textbooks-new-description
+			width: 420px
+			height: 50px
+			margin-bottom: 6px
+			font-family: 'Arial', 'Helvetica', sans-serif
+
+.curriculum-textbooks-item
+	overflow: hidden
+	padding: 18px
+	border-bottom: 1px solid #ddd
+	color: $light-font
+
+	.curriculum-textbooks-item-thumbnail 
+		width: 80px
+		height: 80px
+		float: left
+		margin-right: 18px
+		background-color: #efefef
+		background-size: cover
+		background-repeat: no-repeat
+
+	.curriculum-textbooks-item-body
+		float: left
+
+		.curriculum-textbooks-item-body-title
+			font-size: 1.3em
+			margin-top: 6px
+
+		.curriculum-textbooks-item-body-description
+			margin-top: 12px
+
+.explorer-settings-units-new
+	overflow: hidden
+
+	.explorer-settings-units-new-thumbnail  
+		width: 80px
+		height: 80px
+		float: left
+		margin-right: 20px
+		background-color: #efefef
+
+	.explorer-settings-units-new-body
+		overflow: hidden
+
+		.explorer-settings-units-new-body-title,
+		.explorer-settings-units-new-textbook
+			display: block
+			width: 420px
+			margin-bottom: 6px
+
+		.explorer-settings-units-new-body-duration-from
+			margin-right: 6px
+
+
+.curriculum-units-item
+	overflow: hidden
+	padding: 18px
+	border-bottom: 1px solid #ddd
+	color: $light-font
+
+	.curriculum-units-item-thumbnail
+		width: 80px
+		height: 80px
+		float: left
+		margin-right: 18px
+		background-color: #efefef
+		background-size: cover
+		background-repeat: no-repeat
+
+	.curriculum-units-item-body
+		float: left
+
+		.curriculum-units-item-body-title
+			font-size: 1.3em
+			margin-top: 6px
+
+		.curriculum-units-item-body-textbook
+			margin-top: 12px
+
+		.curriculum-units-item-body-duration
+			margin-top: 6px
+
+.curriculum-units-item-actions,
+.curriculum-textbooks-item-actions
+	float: right
+
+	.curriculum-units-item-actions-action,
+	.curriculum-textbooks-item-actions-action
+		background-image: url('../images/edit-item.png')
+		background-position: center center
+		background-repeat: no-repeat
+		width: 36px
+		height: 36px
+		@include border-radius(18px)
+		display: inline-block
+		cursor: pointer
+
+		&:hover
+			background-image: url('../images/create.png')
+
+
+.circle-action
+	&.blue-circle-action:hover
+		background-color: #2196f3
+
+
+//h2
+//    font-family: 'Arial', 'Helvetica', sans-serif
+//    color: $light-font
+
+select
+	background-color: #fff
+	border: 1px solid #b2b2b2
+	font-weight: bold
+	outline: 0px
+
+	option
+		outline: 0px
+		padding: 4px
+
+.explorer-resource-listing-actions
+	background-color: #efefef
+	padding: 10px
+	text-align: right
+
+.explorer-body
+	&.view-mode
+		.explorer-resource-objective
+			cursor: pointer
+
+button.explorer-light-button
+	padding: 4px 6px
+	border: 1px solid #3498db
+	color: #3498db
+	background-color: transparent
+
+	&:hover
+		border-color: #2980b9
+		color: #2980b9
+
+.explorer-settings
+	.oc-page-tabs
+		margin-left: 0px
+		margin-top: 0px
+
+		ul li
+			a.current
+				color: #666
+				border-color: #666
+
+	.explorer-settings-body
+		color: #666
+
+		.explorer-settings-textbooks
+			width: 600px
+
+		.explorer-settings-units
+			width: 600px
+
+		table.explorer-settings-general
+			width: 100%
+
+			colgroup
+				.explorer-settings-general-message
+					width: 25%
+
+				.explorer-settings-general-inputs
+					width: 35%
+
+				.explorer-settings-general-assist
+					width: 40%
+
+			tr
+				height: 40px
+
+			.explorer-settings-general-standards,
+			.explorer-settings-general-sync
+				label
+					float: left
+					margin-right: 20px
+
+					input[type=radio]
+						margin-right: 4px
+
+			.explorer-settings-general-name,
+			.explorer-settings-general-subject
+				input[type=text]
+					width: 250px
+
+			.explorer-settings-general-session
+				select
+					width: 260px
+
+			.explorer-settings-general-grade
+				select
+					width: 94px
+					margin-right: 6px
+
+			.explorer-settings-general-duration
+				input[type=text]
+					width: 117px
+
+					&:first-child
+						margin-right: 6px
+
+				.explorer-settings-general-duration-relevance
+					margin-top: 8px
+
+			.explorer-settings-general-advanced
+				td
+					font-weight: bold
+					vertical-align: bottom
+
+			.explorer-settings-general-sync
+				td
+					vertical-align: top
+
+				.explorer-settings-general-sync-labels-wrapper
+					overflow: hidden
+
+				button
+					width: 258px
+					padding: 8px
+
+				.explorer-settings-general-sync-pause,
+				.explorer-settings-general-sync-push
+					margin: 10px 0px
+
+				.explorer-settings-general-sync-push
+					.explorer-settings-general-sync-push-status
+						margin-top: 6px
+
+			.explorer-settings-general-tip
+				color: #aaa
+				visibility: hidden
+
+				&.show
+					visibility: visible
+
+.curriculum
+	input[type=text], textarea
+		@include light-textbox
+
+	button.explorer-button
+		padding: 4px 6px
+		color: #fff
+		border-width: 0px
+		background-color: #3498db
+
+		&:hover
+			background-color: #2980b9
+
+	button.explorer-dull-button
+		background-color: #aaa
+		padding: 4px 6px
+		color: #fff
+		border-width: 0px
+
+		&:hover
+			background-color: #999
+
+	button.explorer-button-small
+		color: #fff
+		padding: 4px 8px
+		background-color: #55acee
+		border-radius: 2px
+		border-width: 1px
+		border-color: #43a3ec
+		font-weight: bold
+		border-style: solid
+
+		&:hover
+			border-color: #319bea
+			@include box-shadow(0 1px 0 rgba(67, 135, 187, 0.5))
+
+
+	button.explorer-dull-button-small
+		color: $body-color
+		background-color: #f3f3f3
+		border-color: #ddd
+
+		&:hover
+			border-color: #c6c6c6
+			@include box-shadow(0 1px 0 rgba(0, 0, 0, 0.15), 0 0 0 1px #fff inset)
+
+
+
+.curriculum-copy-dialog
+	width: 600px
+	height: 400px
+	color: $light-font
+
+	.curriculum-copy-header
+		height: 120px
+		background-image: url('../images/explorer/copy-curriculum-header.png')
+
+		.curriculum-copy-header-flyer
+			background-image: url('../images/explorer/curriculum-copy-flyer.png')
+			position: relative
+			top: 50px
+			left: 360px
+			width: 30px
+			height: 30px
+			@include transition((left 3s ease, opacity 3s ease))
+
+			&.fly
+				left: 420px
+				opacity: 0
+
+	.curriculum-copy-body
+		h3
+			margin-bottom: 20px
+			font-family: 'Arial', 'Helvetica', sans-serif
+			font-weight: bold
+			color: $light-font
+
+		.curriculum-copy-question-wrapper
+			margin-bottom: 20px
+
+			.curriculum-copy-question
+				font-weight: bold
+				margin-bottom: 4px
+
+				.curriculum-copy-question-assist
+					color: #999
+					font-weight: normal
+
+			label
+				display: inline-block
+				margin-right: 16px
+
+				input
+					margin-right: 4px
+
+			input[type=text]
+				width: 550px
+
+		.curriculum-copy-suggestion
+			color: #999
+			margin-bottom: 14px
+
+		.curriculum-copy-button-wrapper
+			overflow: hidden
+
+			button
+				width: 49%
+				display: block
+
+				&.expand
+					width: 100%
+
+				&.hide
+					display: none
+
+				&.curriculum-copy-button-cancel
+					float: left
+
+				&.curriculum-copy-button-copy
+					float: right
+
+					.copy-spinner
+						display: block
+
+						.inline-spinner
+							margin-top: 6px
+							margin-left: 2px
+
+		.curriculum-copy-body-pre
+			@include transition((opacity 1s ease))
+
+			&.fadeOut
+				opacity: 0
+
+			&.hide
+				visibility: hidden
+
+		.curriculum-copy-body-post
+			text-align: center
+			opacity: 0
+			position: relative
+			top: -190px
+			left: 0px
+			width: 100%
+			@include transition((opacity 0.5s ease 1s))
+
+			&.show
+				opacity: 1
+
+			.curriculum-copy-url
+				font-weight: bold
+				font-size: 1.3em
+
+//.objective-status-popouts
+.objective-status-dialog
+	position: absolute
+	overflow: hidden
+	width: 250px
+	padding: 10px
+	padding-left: 0px
+	padding-top: 2px
+	display: none
+	top: 100px
+	left: 100px
+	//height: 200px
+	z-index: 10
+
+	&.show
+		display: block
+
+	.objective-status-pointer
+		width: 8px
+		background-image: url('../images/left-pointer.png')
+		background-repeat: no-repeat
+		background-position: right center
+		height: 10px
+		position: relative
+		margin-bottom: -30px
+		padding-top: 20px
+		left: 1px
+
+
+	.objective-status-body
+		width: 220px
+		//height: 180px
+		padding: 10px
+		background-color: #fff
+		@include box-shadow(0 2px 4px #d6d6d6)
+		margin-left: 8px
+		border: 1px solid #bbb
+
+
+		.objective-status-options
+			text-align: center
+
+			button.objective-ready-status
+				background-color: #E4F7D2
+				color: #41914F
+
+				&.selected
+					border-color: #41914F
+
+			button.objective-unready-status
+				background-color: #FBC9C9
+				color: #AE7A7A
+
+				&.selected
+					border-color: #AE7A7A
+			button
+				padding: 6px
+				border: 2px solid transparent
+				margin-bottom: 10px
+				width: 100%
+				font-weight: bold
+
+		.objective-status-unready-body
+			display: none
+			margin: auto
+
+			&.show
+				display: block
+
+			textarea
+				border: 1px solid #ddd
+				margin-bottom: 10px
+				width: 96%
+				padding: 4px
+				height: 140px
+				font-family: Arial, sans-serif
+
+			.action-button
+				float: none
+				text-align: center
+
+.explorer-loader
+	opacity: 0.7
+	position: absolute
+	background-image: url('../images/spinner.gif')
+	background-repeat: no-repeat
+	background-position: center center
+	display: none
+	background-color: #fff
+
+	&.show
+		display: block
+
+.state-message-wrapper
+	position: fixed
+	top: 60px
+	left: 90%
+	z-index: 1
+	color: #ccc
+	display: inline-block
+	width: 100px
+	overflow: hidden
+
+	.state-message
+		padding: 4px 
+		background-color: #fff
+		float: right
+
+.light-popup-background
+	z-index: 5
+	position: fixed
+	visibility: hidden
+	height: 100%
+	width: 100%
+	background: #ffffff
+	top: 0px
+	left: 0px
+	opacity: 0
+	@include transition(opacity 0.5s ease)
+
+	&.show-popup-background
+		visibility: visible
+		opacity: 0.7
+
+.explorer-suggest-resources-dialog
+	width: 800px
+	height: 500px
+
+	.explorer-suggest-resources-body
+		height: 435px
+		overflow-y: auto
+
+		&.loading
+			background-image: url('../images/spinner.gif')
+			background-repeat: no-repeat
+			background-position: center center
+
+		.explorer-suggest-resources-listing
+			overflow: hidden
+
+			&.failure
+				margin-top: 160px
+				text-align: center
+				color: #ccc
+				font-size: 1.8em
+				font-weight: bold
+
+			.explorer-suggest-resources-listing-item
+				overflow: hidden
+				margin-bottom: 20px
+				margin-right: 10px
+
+				.explorer-suggest-resources-listing-item-thumbnail
+					width: 80px
+					height: 80px
+					float: left
+					margin-right: 20px
+
+				.explorer-suggest-resources-listing-item-content
+					width: 50%
+					float: left
+					color: $light-font
+
+					.explorer-suggest-resources-listing-item-content-title
+						display: inline-block
+						margin-bottom: 6px
+						font-weight: bold
+
+				.explorer-suggest-resources-listing-item-actions
+					float: right
+
+.explorer-resource-preview-wrapper
+	z-index: 11
+	position: fixed
+	height: 100%
+	width: 100%
+	top: 0px
+	left: 0px
+	overflow-y: scroll
+	display: none
+
+	&.show
+		display: block
+
+	.spinner
+		display: block
+
+	.explorer-resource-preview
+		display: none
+
+		&.show
+			display: block
+
+	.explorer-resource-header
+		width: 1080px
+		margin: auto
+		overflow: hidden
+
+		.explorer-resource-header-thumbnail-wrapper
+			width: 60px
+			height: 60px
+			float: left
+
+			.explorer-resource-header-thumbnail
+				margin-top: 10px
+				width: 40px
+				height: 40px
+				border-radius: 20px
+				background-size: cover
+
+		.explorer-resource-header-title
+			padding: 20px 0px
+			color: #fff
+			font-size: 1.3em
+
+	.explorer-resource-contents
+		width: 1080px
+		margin: auto
+		overflow: hidden
+
+		&.reference-resource
+			margin-top: 40px
+
+			.explorer-resource-body
+				h2, h3
+					color: #fff
+
+				p
+					color: #ddd
+
+		&.foreign-resource
+			.explorer-resource-body
+				@include box-shadow(0 0 5px rgba(0, 0, 0, 0.5))
+				background-color: #fff
+
+		.explorer-resource-body
+			margin-left: 60px
+			float: left
+			display: none
+			width: 960px
+			height: 100%
+			margin-bottom: 40px
+
+			&.show
+				display: block
+
+			&.pdf
+				background-color: transparent
+
+			/* PDF JS specific styling */
+			.page-viewer.center-stage
+				margin-top: 0px
+
+				#viewerContainer
+					width: 1000px
+
+					.viewer-wrapper
+						margin-left: 0px
+						margin-top: 0px
+
+						.toolbar
+							display: none
+
+			/* Reference styling */
+			.reference-preview-wrapper
+				overflow: hidden
+
+				.reference-preview-thumbnail
+					float: left
+					margin-right: 40px
+					height: 100px
+					width: 100px
+					background-size: cover
+
+		.explorer-resource-actions
+			float: right
+			width: 60px
+
+			.explorer-resource-actions-close,
+			.explorer-resource-actions-open,
+			.explorer-resource-actions-favorite
+				display: block
+				background-repeat: no-repeat
+				background-position: center center
+				height: 24px
+				width: 24px
+				margin: auto
+				cursor: pointer
+				margin-bottom: 10px
+
+			.explorer-resource-actions-close
+				background-image: url('../images/close-resource.png')
+
+			.explorer-resource-actions-open
+				background-image: url('../images/open-resource.png')
+
+			.explorer-resource-actions-favorite
+				background-image: url('../images/heart-light.png')
+
+				&.favorited
+					background-image: url('../images/hearted-light.png')
+
+.planner-menu-body
+	height: 100%
+
+	.planner-menu-calendar
+		float: left
+		width: 192px
+		background-color: #f9f9f9
+		height: 240px
+
+		.calendar-header
+			overflow: hidden
+
+			.calendar-header-previous, .calendar-header-month, .calendar-header-next
+				padding: 12px 0px
+				text-align: center
+
+			.calendar-header-previous, .calendar-header-next
+				width: 36px
+				cursor: pointer
+
+				&:hover
+					background-color: #efefef
+
+			.calendar-header-month
+				width: 120px
+				float: left
+
+			.calendar-header-previous
+				float: left
+
+				.calendar-header-previous-arrow
+					display: inline-block
+					border-top: 5px solid transparent
+					border-bottom: 5px solid transparent
+					border-right: 5px solid #afafaf
+					content: ""
+					border-style: solid
+
+			.calendar-header-next
+				float: right
+
+				.calendar-header-next-arrow
+					display: inline-block
+					border-color: transparent transparent transparent #afafaf
+					border-width: 5px 0px 5px 5px
+					content: ""
+					border-style: solid
+
+		.calendar-body
+			padding: 12px
+
+			.calendar-body-days
+				overflow: hidden
+
+				.calendar-body-days-day
+					float: left
+					width: 24px
+					text-align: center
+					font-weight: bold
+					height: 24px
+
+			.calendar-body-dates
+				overflow: hidden
+
+				.calendar-body-dates-date
+					float: left
+					width: 22px
+					text-align: center
+					height: 18px
+					border: 1px solid transparent
+					cursor: pointer
+					padding-top: 6px
+
+					&:hover
+						border-color: #ddd
+
+					&.sibling-month-date
+						color: #afafaf
+
+					&.today
+						border-color: #afafaf
+
+					&.selected
+						color: $body-color
+						border-color: $body-color
+						font-weight: bold
+
+	.planner-menu-events
+		float: right
+		height: 240px
+		width: 308px
+
+		.planner-menu-events-list
+			height: 240px
+
+			.planner-menu-event
+				padding: 12px
+				cursor: pointer
+
+				.planner-menu-event-title
+					font-weight: bold
+					font-size: 1.3em
+					margin-bottom: 3px
+
+				.planner-menu-event-time
+					margin-right: 3px
+
+				&:hover
+					background-color: #f9f9f9
+
+				&.blue-planner-event
+					&.selected
+						color: #fff
+						background-color: #2196f3
+
+						a
+							color: #fff
+
+		.planner-menu-events-actions
+			position: relative
+			top: -60px
+			left: 0px
+			height: 59px
+			background-color: #fff
+			border-top: 1px solid #ddd
+
+		.ajax-loader-wrapper
+			margin-top: 100px
+
+			.ajax-loader
+				width: 308px
+
+.popup-buttons
+	float: right
+	overflow: hidden
+	padding-top: 12px
+	padding-right: 12px
+
+	&.popup-anti-buttons
+		float: left
+
+	.popup-button
+		text-transform: uppercase
+		font-weight: bold
+		float: left
+		padding: 12px 12px
+		cursor: pointer
+
+		&:hover
+			background-color: #f9f9f9
+
+		&:active
+			background-color: #ddd
+
+		&.secondary-popup-button
+			color: #afafaf
+
+		&.hide
+			display: none
+
+@import "pikaday"
+
+.movable-clones
+	position: absolute
+
+	.movable-clone
+		cursor: move
+		background-color: #2980b9
+		padding: 4px
+		color: #fff
+		pointer-events: none
+		display: inline-block
+
+		&.float
+			position: absolute
+
+
+.create-curriculum-dialog
+	width: 600px
+	height: 400px
+	color: $light-font
+
+	.create-curriculum-header
+		height: 120px
+		background-image: url('../images/create-curriculum.png')
+
+
+	h3
+		margin-bottom: 20px
+		font-family: 'Arial', 'Helvetica', sans-serif
+		font-weight: bold
+		color: $light-font
+
+	.create-curriculum-question-wrapper
+		margin-bottom: 18px
+		overflow: hidden
+
+		.create-curriculum-question
+			font-weight: bold
+			padding-top: 6px
+			float: left
+			width: 22%
+
+			//.explorer-copy-question-assist
+			//    color: #999
+			//    font-weight: normal
+
+		&.create-curriculum-single-question-wrapper
+			input[type=text]
+				width: 76%
+
+			select
+				width: 78%
+
+		&.create-curriculum-double-question-wrapper
+			.create-curriculum-single-question
+				width: 50%
+				float: left
+
+				.create-curriculum-question
+					padding-left: 30px
+
+				&:first-child
+					.create-curriculum-question
+						padding-left: 0px
+
+				input
+					float: right
+
+/********* END OF CURRICULUM *******/
+
+.organization-login
+	text-align: center
+	margin-top: 100px
+
+	.login-loader
+		.spinner
+			display: block
+
+	.google-plus-button
+		margin-top: 30px
+		background-color: #f3f3f3
+		border-color: #ddd
+		color: #737373
+		@include border-radius(2px)
+		padding: 9px 18px
+		padding-left: 39px
+		border-width: 1px
+		font-weight: bold
+		border-style: solid
+		background-image: url('../images/plus.png')
+		background-position: 6px center
+		background-repeat: no-repeat
+		display: none
+
+		&.show
+			display: inline-block
+
+		&:hover
+			border-color: #c6c6c6
+			@include box-shadow(0 1px 0 rgba(0, 0, 0, 0.15), 0 0 0 1px #fff inset)
+
+
+.search-results
+	position: absolute
+	background-color: #ffffff
+	@include border-radius(2px)
+	@include box-shadow(0 1px 2px rgba(0, 0, 0, 0.1))
+	z-index: 6
+	display: none
+	overflow: hidden
+
+	&.show
+		display: block
+
+	a
+		padding: 8px 4px
+		color: $light-font
+		padding-left: 28px
+		font-size: 1.3em
+		cursor: pointer
+		overflow: hidden
+		display: block
+		outline: 0px none
+
+		&:hover
+			text-decoration: none
+
+		&:hover
+			background-color: #f9f9f9
+
+		.search-result-thumbnail
+			float: left
+			width: 42px
+			height: 42px
+			margin-right: 12px
+
+		.search-result-body
+			float: left
+	
+			.search-result-title
+				margin-top: 3px
+				margin-bottom: 6px
+
+			.search-result-support
+				font-size: 0.75em
+				color: #afafaf
+
+.onboard-background
+	z-index: 5
+	position: fixed
+	height: 100%
+	width: 100%
+	background: #000000
+	top: 0px
+	left: 75px
+	opacity: 0.8
+	
+	&.hide
+		display: none
+
+.onboard-message
+	position: absolute
+	z-index: 6
+	width: 540px
+	top: 150px
+
+	.onboard-message-body
+		font-size: 1.8em
+		letter-spacing: -1px
+		color: #afafaf
+		font-weight: bold
+		margin-bottom: 24px
+		line-height: 1.3em
+
+		.onboard-message-body-title
+			color: #fff
+			margin-bottom: 12px
+
+	.oc-button
+		float: right
+

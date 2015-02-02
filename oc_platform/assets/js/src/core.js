@@ -317,6 +317,55 @@ define(['jquery', 'underscore', 'autocomplete', 'tagit', 'tipsy', 'modernizr', '
             return popup;
         },
 
+        lightPopup: function(elementSelector, options){
+            function launchPopup(blockToPopup){
+                $('.light-popup-background').addClass('show-popup-background');
+                blockToPopup.addClass('show-popup');
+
+                adjustPopupPosition(blockToPopup);
+
+                // Dismiss current message boxes.
+                OC.dismissMessageBox();
+
+                // On window resize, adjust the position of the theater
+                $(window).resize(function(){
+                    adjustPopupPosition(blockToPopup);
+                });
+            }
+
+            function adjustPopupPosition(popup) {
+                var windowWidth = $(window).width();
+                var windowHeight = $(window).height();
+
+                // With an assumption that the block is smaller than the window size
+                $(popup).css('left', (windowWidth - popup.width()) / 2);
+                $(popup).css('top', (windowHeight - popup.height()) / 2.5);
+            }
+
+            function closePopup(popup){
+                this.dialog.removeClass('show-popup');
+                $('.light-popup-background').removeClass('show-popup-background');
+            }
+
+            var blockToPopup = $(elementSelector);
+
+            $('.popup-background').unbind('click');
+
+            // Launch popup on init.
+            launchPopup(blockToPopup);
+
+            $('.light-popup-background').click(function(){
+                closePopup(popup);
+            });
+
+            var popup = {
+                dialog: blockToPopup,
+                close: closePopup
+            };
+
+            return popup;
+        },
+
         tabs: function(tabsWrapperClass, options){
             /**
              *  Tab and click handler for everything tabs
@@ -590,6 +639,11 @@ define(['jquery', 'underscore', 'autocomplete', 'tagit', 'tipsy', 'modernizr', '
             3000);
         },
 
+        slugify: function(text){
+            return text.toLowerCase()
+                .replace(/[^\w ]+/g,'')
+                .replace(/ +/g,'-');
+        },
 
         /**
          * Initializes the article/chapter <select> element with on change redirect
@@ -4282,6 +4336,8 @@ define(['jquery', 'underscore', 'autocomplete', 'tagit', 'tipsy', 'modernizr', '
         },
 
         initNewPostDialog: function(options){
+            require(['upload'], function(){
+
             function post(data, url, rawData){
                 var ref = null;
                 if (options.sent) ref = options.sent();
@@ -4446,6 +4502,8 @@ define(['jquery', 'underscore', 'autocomplete', 'tagit', 'tipsy', 'modernizr', '
 
                 bindPostClickHandler('.post-new-url-submit', newURLPopup,
                     true, options.urlPostURL);
+            });
+
             });
         },
 
@@ -5716,10 +5774,11 @@ define(['jquery', 'underscore', 'autocomplete', 'tagit', 'tipsy', 'modernizr', '
 
     window.renderPlus = function(){
         gapi.signin.render('custom-plus-button', {
-          'callback': 'gPlusSignInCallback',
-          'clientid': GPlusClientID,
-          'cookiepolicy': 'single_host_origin',
-          'scope': 'email',
+            'callback': 'gPlusSignInCallback',
+            'clientid': GPlusClientID,
+            'cookiepolicy': 'single_host_origin',
+            'scope': OC.config.hasOwnProperty('organization') ? 'email https://www.googleapis.com/auth/drive.readonly ' +
+                'https://www.googleapis.com/auth/calendar' : 'email',
         });
     };
 

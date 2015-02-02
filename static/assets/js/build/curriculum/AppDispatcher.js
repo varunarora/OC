@@ -1,0 +1,1 @@
+define(["flux"],function(e){var n=e.Dispatcher;return new n});

@@ -478,7 +478,7 @@ def add_video(request, submission_context=None):
             (collection_host_type, collection_host) = cu.get_collection_root(collection)
             Resource.resource_created.send(
                 sender="Resources", resource=url,
-                context_type=collection_host_type.name, context=collection_host
+                context_type='user profile', context=collection_host.get_profile()
             )
 
             return redirect_to_collection(user_id, project_id, collection_id)
@@ -527,7 +527,7 @@ def add_url(request):
             
             Resource.resource_created.send(
                 sender="Resources", resource=url,
-                context_type=collection_host_type.name, context=collection_host
+                context_type='user profile', context=collection_host.get_profile()
             )
 
             return redirect_to_collection(user_id, project_id, collection_id)
@@ -590,7 +590,7 @@ def new_unit(request):
                 add_unit_to_collection(unit, collection)
 
                 return redirect(
-                    'user:list_collection', username=new_collection.creator.username, collection_slug=new_collection.slug
+                    'user:user_folder', username=new_collection.creator.username, collection_slug=new_collection.slug
                 )
         except:
             try:
@@ -1046,7 +1046,7 @@ def create_resource(uploaded_file, user, collection, new_filename=None):
     (collection_host_type, collection_host) = cu.get_collection_root(collection)
     Resource.resource_created.send(
         sender="Resources", resource=new_resource,
-        context_type=collection_host_type.name, context=collection_host
+        context_type='user profile', context=collection_host
     )
 
     # Assign this resource to the revision created.
@@ -1327,7 +1327,7 @@ def delete_resource(request, resource_id, collection_id):
         delete_individual_resource(resource)
 
         context = {
-            'resourceID': resource_id
+            'resourceID': int(resource_id)
         }
         return APIUtilities._api_success(context)
 
@@ -1487,7 +1487,7 @@ def delete_collection(request, collection_id):
         delete_individual_collection(collection)
 
         context = {
-            'collectionID': collection_id
+            'collectionID': int(collection_id)
         }
 
         return APIUtilities._api_success(context)
@@ -1513,7 +1513,7 @@ def delete_collections(request):
         collections_deleted = []
         for collection in collections:
             if request.user == collection.creator:
-                collections_deleted(collection.id)
+                collections_deleted.append(collection.id)
                 delete_individual_collection(collection)
 
         context = {
@@ -1537,9 +1537,15 @@ def delete_individual_collection(collection):
 
     from django.contrib.contenttypes.models import ContentType
     collection_content_type = ContentType.objects.get_for_model(Collection)   
- 
-    child_collections = Collection.objects.filter(
-        host_id=collection.id, host_type=collection_content_type)
+    
+    from oer.models import Unit
+    unit_content_type = ContentType.objects.get_for_model(Unit)   
+
+    # Delete all child units.
+    for unit in collection.units.all():
+        delete_individual_collection(Collection.objects.get(
+            host_id=unit.id, host_type=unit_content_type))
+        unit.delete()
 
     # Find all child collections of this collection.
     child_collections = Collection.objects.filter(
@@ -2922,7 +2928,10 @@ def serialize_collection_resource(resource, visibility_classes, visibility_title
         'host': 'profile',
         'open_url': resource.open_url if hasattr(resource, 'open_url') else None,
         'visibility_classes': visibility_classes,
-        'visibility_title': visibility_title
+        'visibility_title': visibility_title,
+        'user_id': resource.user.id,
+        'file': True,
+        'collaborator_count': resource.collaborators.count()
     }
 
     return serialized_resource
@@ -3237,10 +3246,14 @@ def copy_collection_to_collection(request, collection_id, to_collection_id):
                 'title': new_collection.title,
                 'created': datetime.datetime.strftime(
                     datetime.datetime.now(), '%b. %d, %Y, %I:%M %P'),
+                'modified': new_collection.changed.isoformat(),
                 'visibility': new_collection.visibility,
                 'is_collaborator': request.user in new_collection.collaborators.all(),
                 'url': url,
                 'host': 'project' if to_collection_root_type.name == 'project' else 'profile',
+                'file': False,
+                'user_id': new_collection.creator.id,
+                'collaborator_count': new_collection.collaborators.count()
             }
         }
 
@@ -3390,16 +3403,47 @@ def autocomplete_search(request, query):
     from haystack.query import SearchQuerySet
 
     sqs = SearchQuerySet().autocomplete(
-        content_auto=query).filter(visibility='public')[:10]
+        content_auto=query.strip()).filter(visibility='public')[:5]
 
-    result_set = set()
+    result_set = []
+    resource_result_ids = []
+
     for resource in sqs:
-        result_set.add(resource.object.title)
+        if resource.object.id not in resource_result_ids:
+            result_set.append({
+                'id': resource.object.id,
+                'title': resource.object.title,
+                'type': 'resource',
+                'url': reverse(
+                    'read', kwargs={
+                        'resource_id': resource.object.id,
+                        'resource_slug': resource.object.slug
+                    }
+                )
+            })
+            resource_result_ids.append(resource.object.id)
 
-    serialized_resources = list(result_set)
+    users_sqs = SearchQuerySet().autocomplete(
+        content_name=query.strip())[:5]
 
-    return HttpResponse(
-        json.dumps(serialized_resources), 200, content_type="application/json")
+    userprofile_result_ids = []
+    for user in users_sqs:
+        if user.object.id not in userprofile_result_ids:
+            result_set.append({
+                'id': user.object.id,
+                'name': user.object.user.get_full_name(),
+                'profession': user.object.profession,
+                'picture': settings.MEDIA_URL + user.object.profile_pic.name,
+                'type': 'user',
+                'url': reverse(
+                    'user:user_profile', kwargs={
+                        'username': user.object.user.username
+                    }
+                )
+            })
+            userprofile_result_ids.append(user.object.id)
+
+    return APIUtilities.success(result_set)
 
 
 def editor_autocomplete_search(request, query):
@@ -3715,6 +3759,110 @@ def load_resources(request, collection_id, resource_count):
         'resources': serialized_resources
     }
     return APIUtilities._api_success(context)
+
+
+def api_folder(request, user_id, collection_id, from_count, organization_slug):
+    try:
+        from django.contrib.auth.models import User
+        user = User.objects.get(pk=user_id)
+        collection = Collection.objects.get(pk=collection_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    resource_list = collection.resources.all()[(int(from_count)):(
+        int(from_count) + 20)]
+
+    import oer.CollectionUtilities as cu
+
+    serialized_resources = []
+
+    cu.set_resources_type(resource_list)
+    cu.preprocess_collection_listings(resource_list)
+
+    (collection_root_host_type, collection_root) = cu.get_collection_root(
+        collection)
+
+    for resource in resource_list:
+        # Run through general visibility filter
+        if resource.visibility != 'public':
+            if request.user != collection_root.user and request.user not in resource.collaborators.all():
+                continue
+
+        (visibility_classes, visibility_title) = get_resource_visibility(
+            request, resource, collection_root)
+
+        serialized_resource = serialize_collection_resource(
+            resource, visibility_classes, visibility_title)
+        serialized_resource['file'] = True
+        serialized_resources.append(serialized_resource)
+
+    context = {
+        'title': collection.title,
+        'files': serialized_resources
+    }
+
+    if int(from_count) == 0:
+        serialized_folders = []
+        folders = cu._get_child_collections(collection)
+    
+        for folder in folders:
+            (visibility_classes, visibility_title) = get_collection_visibility(
+                request, folder, collection_root)
+
+            serialized_folders.append({
+                'id': folder.id,
+                'title': folder.title,
+                'file': False,
+                'modified': folder.changed.isoformat(),
+                'visibility': folder.visibility,
+                'user_id': folder.creator.id,
+                'url': reverse(
+                    'user:user_folder', kwargs={
+                        'username': user.username,
+                        'collection_slug': folder.slug
+                    }
+                ),
+                'visibility_classes': visibility_classes,
+                'visibility_title': visibility_title,
+                'collaborator_count': folder.collaborators.count()
+            })
+
+        context['folders'] = serialized_folders
+
+    return APIUtilities.success(context)
+
+
+def get_collection_visibility(request, collection, collection_root):
+    visibility_classes = ''
+    if request.user == collection_root:
+        visibility_classes += ' profile-collection is-owner'
+    elif request.user == collection.creator:
+        visibility_classes += ' is-owner'
+    elif collection.visibility == 'private' and request.user in collection.collaborators.all():
+        visibility_classes += ' is-collaborator'
+
+    if request.user != collection.creator:
+        visibility_classes += 'unclickable'
+    elif collection.visibility == 'private' and request.user not in collection.collaborators.all(
+        ) and request.user != collection.creator:
+        visibility_classes += 'unclickable'
+
+    if collection.visibility == 'public':
+        visibility_title = 'Public'
+        visibility_classes += ' publicly-shared-icon'
+    elif collection.creator != request.user and collection.visibility == 'private':
+        visibility_title = 'Shared with me'
+        visibility_classes += ' Shared-with-me-icon'
+    else:
+        if collection.visibility == 'private':
+            if len(collection.collaborators.all()) == 0:
+                visibility_title = 'Only me'
+                visibility_classes += ' personal-shared-icon'
+            else:
+                visibility_title = 'Shared'
+                visibility_classes += ' private-shared-icon'
+
+    return (visibility_classes, visibility_title)
 
 
 def get_resource_visibility(request, resource, collection_root):

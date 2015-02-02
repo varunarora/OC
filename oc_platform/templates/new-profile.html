@@ -1,0 +1,87 @@
+{% include 'partials/header.html' with header_type='vanilla' body_class='org-profile-view' %}
+<div class="center-spread org-profile-page">
+    <div class="menu-panel">
+        <a href={% if user.is_authenticated %}"{% url home %}"{% else %}"/"{% endif %} class="menu-logo{% if organization %} {{ organization.slug }}-menu-logo{% endif %}"{% if organization %}style="background-image: url('{{ MEDIA_URL }}{{ organization.icon.name }}'); background-color: {% if page == 'home' %}{{ organization.palette.dark }}{% else %}{{ organization.palette.base }}{% endif %};"{% endif %}></a>
+        <a href="{% url user:user_profile username=user_profile.username %}" class="menu-item menu-profile-item{% if page == 'profile' %} current{% endif %}">
+            <span style="background-image: url('{{ MEDIA_URL }}{{ user_profile.get_profile.profile_pic.name }}')" class="menu-user-picture">
+            </span>
+        </a>
+        {% if organization %}
+        <a href="{% url user:user_curricula username=user_profile.username %}" class="menu-item menu-curricula-item{% if page == 'curricula' %} current{% endif %}">
+            <span class="menu-item-thumbnail"></span>
+            <span class="menu-item-description">Curricula</span>
+        </a>
+        <a href="{% url user:user_planner username=user_profile.username %}" class="menu-item menu-planner-item{% if page == 'planner' %} current{% endif %}">
+            <span class="menu-item-thumbnail"></span>
+            <span class="menu-item-description">Planner</span>
+        </a>
+        {% endif %}
+        <a href="{% url user:user_files username=user_profile.username %}" class="menu-item menu-files-item{% if page == 'files' %} current{% endif %}">
+            <span class="menu-item-thumbnail"></span>
+            <span class="menu-item-description">Files</span>
+        </a>
+        <!--<a href="{% url user:user_favorites username=user_profile.username %}" class="menu-item menu-favorites-item{% if page == 'favorites' %} current{% endif %}">
+            <span class="menu-item-thumbnail"></span>
+            <span class="menu-item-description">Favorites</span>
+        </a>-->
+        <a href="{% url user:user_groups username=user_profile.username %}"  class="menu-item menu-groups-item{% if page == 'groups' %} current{% endif %}">
+            <span class="menu-item-thumbnail"></span>
+            <span class="menu-item-description">Groups</span>
+        </a>
+    </div>
+    <div class="content-panel-wrapper">
+    <div class="content-panel">
+        <div class="header-wrapper"></div>
+        
+        {% if page == 'files' %}
+            {% include 'partials/profile-files-new.html' %}
+
+        {% elif not subpage and page == 'planner' %}
+            {% include 'partials/profile-planner.html' %}
+
+        {% else %}
+        <div class="content-panel-body-wrapper">
+            <div class="content-panel-body {% if page == 'curricula' and subpage == 'curriculum' %}abridged{% endif %}">
+            {% if page == 'home' %}
+                {% include 'partials/profile-home.html' %}
+
+            {% elif page == 'profile' %}
+                {% include 'partials/profile-profile.html' %}
+
+            {% elif page == 'curricula' %}
+                {% if subpage == 'curriculum' %}
+                {% include 'partials/profile-curriculum.html' %}
+
+                {% else %}
+                {% include 'partials/profile-curricula.html' %}
+
+                {% endif %}
+
+            {% elif page == 'favorites' %}
+                {% include 'partials/profile-favorites.html' %}
+
+            {% elif page == 'files' %}
+                {% include 'partials/profile-files-new.html' %}
+
+            {% elif page == 'groups' %}
+                {% include 'partials/profile-groups-new.html' %}
+
+            {% elif page == 'preferences' %}
+                {% include 'partials/profile-preferences.html' %}
+
+            {% elif page == 'planner' %}
+                {% include 'partials/profile-classes.html' %}
+            
+            {% endif %}
+
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+    </div>
+</div>
+
+{% include 'partials/js.html' %}
+
+{% include 'partials/footer.html' with footer_type='vanilla' %}

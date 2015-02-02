@@ -1,0 +1,46 @@
+<div class="content-panel-body-wrapper"></div>
+
+<div class="ajax-loader-wrapper planner-loader-wrapper"><div class="ajax-loader loading"></div></div>
+
+<div class="move-item-dialog popup">
+    <div class="popup-title-bar">
+        <div class="popup-title">Move to...</div>
+        <div class="popup-exit"></div>
+    </div>
+    <div class="popup-body">
+        <div class="move-item-dialog-option option-next"><span class="move-item-dialog-option-icon"></span>Next period in schedule</div>
+        <div class="move-item-dialog-option option-select"><span class="move-item-dialog-option-icon"></span>Specific period... (select by date)</div>
+        <div class="move-item-dialog-option option-before"><span class="move-item-dialog-option-icon"></span>Previous period in schedule</div>
+    </div>
+</div>
+
+<div class="confirm-move-dialog popup">
+    <div class="popup-title-bar">
+        <div class="popup-title">Confirm move</div>
+        <div class="popup-exit"></div>
+    </div>
+    <div class="popup-body">
+        <div class="popup-body-loader"></div>
+        <div class="confirm-move-message popup-body-message">
+            Do you want to move this item to your <span class="confirm-move-dialog-class"></span> class on <span class="confirm-move-dialog-date"></span> at <span class="confirm-move-dialog-time"></span>? <a href="">See class</a>.
+        </div>
+        <div class="confirm-move-none popup-body-message">Cannot find a next period for this class! Perhaps 'Go back' try finding by a specific date.</div>
+        <div class="popup-buttons popup-anti-buttons">
+            <div class="popup-button secondary-popup-button go-back-button">Go Back</div>
+        </div>
+        <div class="popup-buttons">
+            <div class="popup-button secondary-popup-button cancel-button">Cancel</div>
+            <div class="popup-button confirm-button" style="color: {{ organization.palette.base }}">Confirm</div>
+        </div>
+    </div>
+</div>
+
+<div class="move-item-widget-dialog popup">
+    <div class="popup-title-bar">
+        <div class="popup-title">Move to specific class period (by date)</div>
+        <div class="popup-exit"></div>
+    </div>
+    <div class="move-item-widget">
+        <div class="popup-body-loader"></div>
+    </div>
+</div>

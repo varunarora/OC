@@ -1,0 +1,41 @@
+<div class="profile-box">
+    <div class="profile-box-user" style="background-color: {% if organization %}{{ organization.palette.dark }}{% else %}#51aa02{% endif %};">
+        <div class="profile-box-user-thumbnail box-user-thumbnail" style="background-image: url('{{ MEDIA_URL }}{{ user_profile.profile.profile_pic.name }}');" class="menu-user-picture"></div>
+        <div class="profile-box-user-description box-user-description">
+
+            <h2>{{ user_profile.get_full_name }}</h2>
+            <div class="profile-box-user-description-headline box-description-headline">{{ user_profile.profile.headline }}</div>
+            <div class="profile-box-user-description-social box-user-description-social">
+                {% if user_profile.profile.social %}
+                    {% if user_profile.profile.social.twitter %}
+                    <span class="profile-box-user-description-social-twitter"></span><a class="profile-box-user-description-social-twitter-text" href="http://www.twitter.com/{{ user_profile.profile.social.twitter }}" target="_blank">{{ user_profile.profile.social.twitter }}</a>
+                    {% endif %}
+
+                    {% if user_profile.profile.social.web %}
+                    <span class="profile-box-user-description-social-web"></span><a class="profile-box-user-description-social-web-text" href="{{ user_profile.profile.social.web }}" target="_blank">{{ user_profile.profile.social.web_pretty|truncatechars:30 }}</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="profile-box-feed">
+        <div class="profile-box-social">
+            <ul class="profile-box-social-menu">
+                <li><a href="{% url user:user_profile username=user_profile.username %}"{% if subpage == 'activity' %} class="{% if organization %}{{ organization.palette.title }}{% else %}green{% endif %}-current"{% endif %}>Activity</a></li>
+                <li><a href="{% url user:user_followers username=user_profile.username %}"{% if subpage == 'followers' %} class="{% if organization %}{{ organization.palette.title }}{% else %}green{% endif %}-current"{% endif %}>Followers ({{ follower_count }})</a></li>
+                <li><a href="{% url user:user_following username=user_profile.username %}"{% if subpage == 'following' %} class="{% if organization %}{{ organization.palette.title }}{% else %}green{% endif %}-current"{% endif %}>Following ({{ following_count }})</a></li>
+            </ul>
+            {% if user != user_profile %}
+            <div class="profile-box-feed-subscribe-wrapper feed-subscribe-wrapper"></div>
+            {% endif %}
+        </div>
+        <div class="profile-box-social-users"></div>
+
+
+        <div class="feed-list-wrapper"></div>
+
+        <div class="feed-loader-wrapper ajax-loader-wrapper">
+        <div class="profile-box-loader ajax-loader"></div>
+        </div>
+    </div>
+</div>

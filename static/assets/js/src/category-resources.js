@@ -806,6 +806,27 @@ if (OC.categoryResources){
             },
         },
 
+        commonCoreEasyEnglishMap: {
+            'Kindergarten': 'Kindergarten',
+            'Elementary / Primary School': {
+                'Grade 1': 'Grade 1',
+                'Grade 2': 'Grade 2',
+                'Grade 3': 'Grade 3',
+                'Grade 4': 'Grade 4',
+                'Grade 5': 'Grade 5'
+            },
+            'Middle School': {
+                'Grade 6': 'Grade 6',
+                'Grade 7': 'Grade 7',
+                'Grade 8': 'Grade 8',
+                'Grade 6-8': 'Grade 6-8'
+            },
+            'High School': {
+                'Grade 9-10': 'Grade 9-10',
+                'Grade 11-12': 'Grade 11-12'
+            },
+        },
+
         initBrowseView: function(){
             function resizeGradeTopics(){
                 // Set header height based on page height.

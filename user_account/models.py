@@ -41,6 +41,7 @@ class UserProfile(models.Model):
         related_name="user_subscriptions", blank=True, null=True, through='Subscription')
     onboarding = JSONField(default=get_empty_onboarding)
     digests = JSONField(default=get_default_digests)
+    social = JSONField(blank=True, null=True)
 
     def __unicode__(self):
         return self.user.username
@@ -56,7 +57,7 @@ class Subscription(models.Model):
     new_subscription = Signal(providing_args=['host', 'subscription_id'])
 
 
-def add_to_mailing_list(sender, instance, created, raw, **kwargs):
+"""def add_to_mailing_list(sender, instance, created, raw, **kwargs):
     if created:
         import mailchimp
         from django.conf import settings
@@ -74,8 +75,24 @@ def add_to_mailing_list(sender, instance, created, raw, **kwargs):
             
 
 from django.db.models.signals import post_save
-post_save.connect(add_to_mailing_list, sender=UserProfile)
+post_save.connect(add_to_mailing_list, sender=UserProfile)"""
 
+
+class Organization(models.Model):
+    kind = models.CharField(max_length=32)
+    members = models.ManyToManyField(User, related_name='org_members')
+    admins = models.ManyToManyField(User, related_name='org_admins')
+    title = models.CharField(max_length=128)
+    slug = models.SlugField(max_length=128)
+    icon = models.ImageField(
+        upload_to='images/orgs/icons', null=True, blank=True, storage=mu.get_file_storage())
+    logo = models.ImageField(
+        upload_to='images/orgs/logos', null=True, blank=True, storage=mu.get_file_storage())
+    palette = JSONField()
+    website = models.URLField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.title
 
 class Cohort(models.Model):
     members = models.ManyToManyField(User)
@@ -125,6 +142,9 @@ class Notification(models.Model):
     url = models.URLField(blank=True)
     description = models.CharField(max_length=512)
     read = models.BooleanField(default=False)
+    context_type = models.ForeignKey(ContentType, blank=True, null=True)
+    context_id = models.PositiveIntegerField(blank=True, null=True)
+    context = generic.GenericForeignKey('context_type', 'context_id')
 
     def __unicode__(self):
         return str(self.id)
@@ -259,7 +279,7 @@ class Notification(models.Model):
                                 'resource_id': root_parent.id,
                                 'resource_slug': root_parent.slug
                             }
-                        )                        
+                        )
 
                     notification.description = "%s commented on your post in %s: \"%s\"" % (
                         comment.user.get_full_name(), root_parent.title, comment.body_markdown[:100])
@@ -342,6 +362,15 @@ class Notification(models.Model):
                 )
                 new_activity.save()
 
+            elif resource_root_type.name == 'user profile':
+                new_activity = Activity(
+                    actor=comment.user,
+                    action=comment,
+                    target=comment.parent,
+                    context=resource_root
+                )
+                new_activity.save()
+
         if parent_ct.name == 'comment' or parent_ct.name == 'project':
             # Get root parent of the comment
             from interactions.CommentUtilities import CommentUtilities
@@ -382,6 +411,20 @@ class Notification(models.Model):
                 project_members = root_parent.confirmed_members
                 if len(project_members) >= 1:
                     recipients = project_members
+
+            if recipients:
+                for recipient in recipients:
+                    new_activity.recipients.add(recipient)
+
+        if parent_ct.name == 'resource':
+            recipients = None
+            subscriptions = Subscription.objects.filter(
+                subscribee=comment.user.get_profile())
+            if subscriptions.count() >= 1:
+                recipients = [x.subscriber.user for x in subscriptions]
+
+            if comment.parent.visibility == 'private':
+               recipients = [user for user in recipients if user in comment.parent.collaborators.all()]
 
             if recipients:
                 for recipient in recipients:
@@ -465,6 +508,7 @@ class Notification(models.Model):
 
 
     @receiver(Membership.invite_request_accepted)
+    @receiver(Membership.new_member)
     def new_membership_acceptance_activity(sender, **kwargs):
         membership_id = kwargs.get('membership_id', None)
 

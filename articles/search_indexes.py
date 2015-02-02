@@ -2,6 +2,7 @@ import datetime
 from haystack.indexes import *
 from haystack import site
 from oer.models import Resource
+from user_account.models import UserProfile
 
 class ResourceIndex(SearchIndex):
     text = CharField(document=True, use_template=True, model_attr='title')
@@ -32,4 +33,22 @@ class ResourceIndex(SearchIndex):
     def prepare_content_description(self, obj):
         if obj.description is None: return ''
 
+
+class UserIndex(SearchIndex):
+    text = CharField(document=True, use_template=True, model_attr='user')
+    profession = CharField(model_attr='profession')
+    content_name = NgramField(model_attr='user')
+
+    def prepare_text(self, obj):
+        return obj.user.get_full_name()
+
+    def prepare_content_name(self, obj):
+        return obj.user.get_full_name()
+
+    def index_queryset(self):
+        """Used when the entire index for model is updated."""
+        return UserProfile.objects.all()
+
+
 site.register(Resource, ResourceIndex)
+site.register(UserProfile, UserIndex)

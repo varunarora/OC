@@ -649,6 +649,7 @@ def authenticate(request):
     """Authenticates the user and redirects to previous page being surfed"""
     # Determine redirect-to path, if any
     redirect_to = request.POST.get('redirect_to', None)
+    organization_slug = request.POST.get('organization_slug', None)
     if redirect_to == 'False':
         redirect_to = False
 
@@ -670,13 +671,25 @@ def authenticate(request):
     else:
         user = authenticate(username=username, password=password)
 
+    if organization_slug:
+        try:
+            from user_account.models import Organization
+            Organization.objects.get(slug=organization_slug)
+            
+        except:
+            raise Http404
+
     if user:
         if user.is_active:
             login(request, user)
             if redirect_to:
                 return redirect(redirect_to)
             else:
-                return redirect('user:user_profile', username=user.username)
+                if organization_slug:
+                    return redirect('user:org_user_profile',
+                        username=request.user.username, organization_slug=organization_slug)
+                else:
+                    return redirect('user:user_profile', username=user.username)
         else:
             # HACK(Varun): These GET parameters need to be moved to settings
             redirect_url = '/login/?error=inactive'
@@ -690,10 +703,16 @@ def authenticate(request):
         return redirect(redirect_url)
 
 
-def logout_view(request):
+def logout_view(request, organization_slug=None):
     """Logs the user out of their site session"""
     from django.contrib.auth import logout
     logout(request)
+
+    if request.organization:
+        try:
+            return redirect(request.organization.website)
+        except:
+            return redirect('http://opencurriculum.org')
 
     try:
         return redirect(request.META.get('HTTP_REFERER'))
@@ -846,15 +865,7 @@ def fb_login(request):
     except:
         return APIUtilities._api_not_found()
 
-def user_profile(request, username):
-    """Renders the user profile page
-
-    Args:
-        request: The HTTP request object, as passed by django.
-        username: The username string.
-    Returns:
-        The User profile HttpResponse page.
-    """
+"""def user_profile(request, username):
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
@@ -918,7 +929,154 @@ def user_profile(request, username):
         'page': 'home',
         'title': user.first_name + ' ' + user.last_name + " &lsaquo; OpenCurriculum"
     }.items() + user_context.items())
-    return render(request, 'profile.html', context)
+    return render(request, 'profile.html', context)"""
+
+
+def get_unique_username(username, counter=0):
+    try:
+        User.object.get(username=username)
+        return get_unique_username(username, counter+1)
+    except:
+        return username if counter == 0 else username + '-' + counter
+
+
+def generate_profile_pic(profile_pic_url, user_id):
+    import urllib2
+    imgWeb = urllib2.urlopen(profile_pic_url).read()
+
+    # Write the image to disk.
+    image_path = settings.MEDIA_ROOT + 'profile/' + str(user_id) + "-profile.jpg"
+    localImage = open(image_path, 'w')
+    localImage.write(imgWeb)
+    localImage.close()
+    
+    from django.core.files.images import ImageFile
+    return ImageFile(open(image_path))
+
+
+def google_login(request):
+    """ Organization login method """
+    google_id = request.POST.get('id', None)
+
+    # Look for Google ID in the user profiles.
+    from django.contrib.auth import authenticate, login
+    user = authenticate(social_id=int(google_id), social_service='plus')
+
+    # If the user exists in the system.
+    if user:
+        login(request, user)
+        return APIUtilities._api_success()
+
+    else:
+        # Create an account <-- Has to go through, no matter what.
+        email = request.POST.get('email', '')
+        
+        from datetime import datetime
+        user = User(
+            first_name=request.POST.get('firstName', ''),
+            last_name=request.POST.get('lastName', ''),
+            username=get_unique_username(email[:email.index('@')]),
+            password=User.objects.make_random_password(),
+            email=email,
+            date_joined=datetime.now(),
+            last_login=datetime.now()
+        )
+        user.save()
+
+        # Set profile picture default position.
+        from media.models import ImagePosition
+        new_user_image_position = ImagePosition(top=50, left=50)
+        new_user_image_position.save()
+
+        from user_account.models import UserProfile
+        profile = UserProfile(
+            user=user,
+            social_id=request.POST.get('id', None),
+            social_service='plus',
+            dob=datetime(1970, 1, 1),
+            location='',
+            gender=True if request.POST.get('gender', None) == 'male' else False,
+            onboarding='{"signup": {"status": true, "version": "0.1"}}',
+            digests='{"newsletter": true}',
+            profile_pic_position=new_user_image_position
+        )
+
+        profile.save()
+
+        # Set profile pic.
+        profile_pic = request.POST.get('profilePic', None)
+
+        import os
+        (filename, extension) = os.path.splitext(os.path.basename(profile_pic))
+
+        profile.profile_pic.save(
+            str(user.id) + '-profile' + '300x300' + filename[:50] + '.jpg',
+            generate_profile_pic(profile_pic, user.id))
+
+
+        # Add a root collection to the user and add them to a group.
+        _set_profile_collection(profile)
+        _setup_user_social(user)
+
+        # Add user to the organization.
+        request.organization.members.add(user)
+
+        # TODO: Send welcome email to user.
+        # TODO: Add the user to a custom group.
+
+        user = authenticate(social_id=int(google_id), social_service='plus')
+        login(request, user)
+        return APIUtilities._api_success({ 'new': True })
+
+
+def _preset_user_social(user):
+    if user.profile.social:
+        if 'web' in user.profile.social:
+            try:
+                from urlparse import urlparse
+                url = urlparse(user.profile.social['web']).netloc
+                user.profile.social['web_pretty'] = url[4:] if url[:4] == 'www.' else url
+            except:
+                user.profile.social['web_pretty'] = user.profile.social['web']
+
+
+def user_profile(request, username):
+    """Renders the user profile page
+
+    Args:
+        request: The HTTP request object, as passed by django.
+        username: The username string.
+    Returns:
+        The User profile HttpResponse page.
+    """
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        raise Http404
+
+    from user_account.models import Activity
+    #feed = Activity.objects.filter(actor=user).order_by('-pk')[:10]
+    feed_count = Activity.objects.filter(actor=user).count()
+
+    #user_subscribed = _get_user_subscribed(user.get_profile(), request.user)
+    user_profile = user.get_profile()
+    user_context = _prepare_org_user_context(request, user, user_profile)
+
+    user.profile = user_profile
+    _preset_user_social(user)
+
+    context = {
+        'user_profile': user,
+        'organization': request.organization if hasattr(request, 'organization') else None,
+        #'user_subscribed': user_subscribed,
+        #'feed': feed,
+        'feed_count': feed_count,
+        'page': 'profile',
+        'subpage': 'activity',
+        'title': user.first_name + ' ' + user.last_name + " &lsaquo; OpenCurriculum"
+    }
+    return render(request, 'new-profile.html', dict(context.items(
+        ) + user_context.items()))
 
 
 def _preprocess_feed(feed):
@@ -952,7 +1110,6 @@ def _prepare_user_context(request, user, user_profile):
     return context
 
 
-
 def user_favorites(request, username):
     try:
         user = User.objects.get(username=username)
@@ -978,10 +1135,6 @@ def user_favorites(request, username):
         'page': 'favorites'
     }.items() + user_context.items())
     return render(request, 'profile.html', context)
-
-
-def user_files(request, username):
-    return list_collection(request, username, None)
 
 
 def list_collection(request, username, collection_slug):
@@ -1068,30 +1221,6 @@ def list_collection(request, username, collection_slug):
             'resource_count': resource_count
         }.items() + user_context.items())
         return render(request, 'profile.html', context)
-
-
-def user_groups(request, username):
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        raise Http404
-
-    user_profile = user.get_profile()
-
-    user_context = _prepare_user_context(request, user, user_profile)
-
-    # Get all the projects that the user is a part of.
-    from projects.models import Project
-    projects = Project.objects.filter(membership__user__id=user.id)
-
-    context = dict({
-        'user_profile': user,
-        'collection': user_profile.collection,
-        'title': user.get_full_name() + " &lsaquo; OpenCurriculum",
-        'projects': projects,
-        'page': 'groups'
-    }.items() + user_context.items())
-    return render(request, 'profile.html', context)
 
 
 def user_subscribers(request, username):
@@ -1234,6 +1363,233 @@ def contributor_registration(request):
     context = dict(page_context.items() + fields_context.items()
                    + form_context.items())
     return render(request, registration_template, context)
+
+
+def user_curricula(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except:
+        raise Http404
+
+    # Get all the curricula the user has created.
+    from curriculum.models import Curriculum
+    curricula = Curriculum.objects.filter(user=user)
+
+    context = {
+        'user_profile': user,
+        'curricula': curricula,
+        'organization': request.organization,
+        'title': 'Curricula &lsaquo; ' + user.get_full_name(),
+        'page': 'curricula',
+        'subpage': 'curricula'
+    }
+    return render(request, 'new-profile.html', context)
+
+
+def user_groups(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except:
+        raise Http404
+
+    # Get all the projects that the user is a part of.
+    from projects.models import Project
+    groups = Project.objects.filter(membership__user__id=user.id)
+
+    for group in groups:
+        group.featured_members = group.members.all()[:4]
+
+    context = {
+        'user_profile': user,
+        'groups': groups,
+        'organization': request.organization if hasattr(request, 'organization') else None,
+        'title': 'Groups &lsaquo; ' + user.get_full_name(),
+        'page': 'groups'
+    }
+    return render(request, 'new-profile.html', context)
+
+
+def user_followers(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except:
+        raise Http404
+
+    user_profile = user.get_profile()
+    user_context = _prepare_org_user_context(request, user, user_profile)
+
+    user.profile = user_profile
+    _preset_user_social(user)
+
+    from user_account.models import Subscription
+    subscribers = Subscription.objects.filter(subscribee=user_profile)
+
+    context = {
+        'user_profile': user,
+        'followers': subscribers,
+        'organization': request.organization if hasattr(request, 'organization') else None,
+        'title': 'Following &lsaquo; ' + user.get_full_name(),
+        'page': 'profile',
+        'subpage': 'followers'
+    }
+    return render(request, 'new-profile.html', dict(context.items(
+        ) + user_context.items()))
+
+
+def user_following(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except:
+        raise Http404
+
+    user_profile = user.get_profile()
+    user_context = _prepare_org_user_context(request, user, user_profile)
+
+    user.profile = user_profile
+    _preset_user_social(user)
+
+    from user_account.models import Subscription
+    subscriptions = Subscription.objects.filter(subscriber=user_profile)
+
+    context = {
+        'user_profile': user,
+        'followings': subscriptions,
+        'organization': request.organization if hasattr(request, 'organization') else None,
+        'title': 'Following &lsaquo; ' + user.get_full_name(),
+        'page': 'profile',
+        'subpage': 'following'
+    }
+    return render(request, 'new-profile.html', dict(context.items(
+        ) + user_context.items()))
+
+
+def user_files(request, username):
+    return user_folder(request, username, None)
+
+
+def user_folder(request, username, collection_slug):
+    try:
+        user = User.objects.get(username=username)
+    except:
+        raise Http404
+
+    user_profile = user.get_profile()
+
+    import oer.CollectionUtilities as cu
+    (browse_tree, flattened_tree) = cu._get_collections_browse_tree(
+        user_profile.collection)
+
+    if not collection_slug:
+        collection = user_profile.collection
+        title = 'Files' + ' &lsaquo; ' + user.get_full_name()
+    else:
+        from oer.models import Collection
+        match_collections = Collection.objects.filter(slug=collection_slug)
+
+        if match_collections.count() == 0:
+            raise Http404
+
+        # Get user collection.
+        collection = next(
+            tree_item for tree_item in flattened_tree if tree_item.slug == collection_slug)
+
+        # Determine if this collection is owned by a unit.
+        title = collection.title + ' &lsaquo; ' + user.get_full_name()
+
+    root_assets = collection.resources
+    child_collections = cu._get_child_collections(collection)
+    #child_units = cu._get_child_unit_collections(collection.units.all())
+
+    # TODO(Varun): Fix temporary hack of only listing top 20 files for loading sake.
+    resources = root_assets.all()[:20]
+    resource_count = root_assets.count()
+    #cu.set_resources_type(resources)
+    #cu.preprocess_collection_listings(resources)
+    
+    breadcrumb = cu.build_collection_breadcrumb(collection)
+    breadcrumb[0].title = 'Home'
+
+    context = {
+        'user_profile': user,
+        'folder': collection,
+        'title': title,
+        'resources': resources,
+        'collections': child_collections,
+        #'units': child_units,
+        'breadcrumb': breadcrumb,
+        'organization': request.organization if hasattr(request, 'organization') else None,
+        'items_count': resource_count + len(child_collections),
+        'page': 'files',
+        'resource_count': resource_count
+    }
+    return render(request, 'new-profile.html', context)
+
+
+def user_planner(request, username):
+    try:
+        user = User.objects.get(username=username)
+
+        from planner.models import Class
+        classes = Class.objects.filter(user=request.user)
+    except:
+        raise Http404
+
+    #user_profile = user.get_profile()
+
+    context = {
+        'user_profile': user,
+        'classes': classes,
+        'title': 'Planner &lsaquo; ' + user.get_full_name(),
+        'organization': request.organization,
+        'page': 'planner',
+    }
+    return render(request, 'new-profile.html', context)
+
+
+def user_classes(request, username):
+    try:
+        user = User.objects.get(username=username)
+
+        from planner.models import Class
+        classes = Class.objects.filter(user=request.user)      
+    except:
+        from django.shortcuts import Http404
+        raise Http404
+
+    import json
+    for single_class in classes:
+        single_class.serialized_schedule = json.dumps(single_class.schedule)
+
+    context = {
+        'user_profile': user,
+        'classes': classes,
+        'organization': request.organization,
+        'page': 'planner',
+        'subpage': 'classes',
+        'title': 'Classes &lsaquo; ' + user.get_full_name(),
+    }
+
+    return render(request, 'new-profile.html', context)
+
+
+def _prepare_org_user_context(request, user, user_profile):
+    user_subscribed = _get_user_subscribed(user_profile, request.user)
+    
+    from user_account.models import Subscription
+    subscriber_count = Subscription.objects.filter(subscribee=user_profile).count()
+    subscription_count = Subscription.objects.filter(subscriber=user_profile).count()
+
+    from forms import UploadProfilePicture
+    form = UploadProfilePicture(request.POST, request.FILES)
+    
+    context = {
+        'form': form,
+        'user_subscribed': user_subscribed,
+        'follower_count': subscriber_count,
+        'following_count': subscription_count
+    }
+
+    return context
 
 
 def _email_contributor_admins(original_form_inputs):
@@ -1772,7 +2128,7 @@ def _filesizeFormat(size):
     return '{0:.2f}'.format(float(size))
 
 
-def load_feed(request, user_id, feed_count):
+def load_feed(request, context, user_id, feed_count):
     try:
         from django.contrib.auth.models import User
         user = User.objects.get(pk=user_id)
@@ -1793,159 +2149,247 @@ def load_feed(request, user_id, feed_count):
         return filesize
 
     from user_account.models import Activity
-    feed = Activity.objects.filter(recipients=user).order_by('-pk')[(int(feed_count) + 1):(
-        int(feed_count) + 20)]
+    if context == 'home':
+        feed = Activity.objects.filter(recipients=user).order_by('-pk')[(0 if int(feed_count) == 0 else int(feed_count) + 1):(
+            int(feed_count) + 20)]
+    else:
+        # TODO(Varun): Do controlled check here!!
+        feed = Activity.objects.filter(actor=user).order_by('-pk')[(0 if int(feed_count) == 0 else int(feed_count) + 1):(
+            int(feed_count) + 20)]
 
     from django.core.urlresolvers import reverse
 
-    serialized_feed = {}
+    serialized_feed = []
     import oer.CollectionUtilities as cu
 
+    from urlparse import urlparse
+
     for feed_item in feed:
-        serialized_feed[feed_item.id] = {
-            'id': feed_item.id,
-            'actor_name': feed_item.actor.get_full_name(),
-            'actor_thumbnail': settings.MEDIA_URL + feed_item.actor.get_profile().profile_pic.name,
-            'actor_url': reverse(
-                'user:user_profile', kwargs={ 'username': feed_item.actor.username }),
-            'action_id': feed_item.action.id,
-            'action_type': feed_item.action_type.name,
-            'target_id': feed_item.target.id,
-            'target_type': feed_item.target_type.name,
-            #'target_created': datetime.datetime.strftime(feed_item.target.created, '%b. %d, %Y, %I:%M %P'),
-            'target_created': feed_item.target.created.isoformat(),
-        }
+        try:
+            serialized_feed_item = {
+                'id': feed_item.id,
+                'actor_id': feed_item.actor.id,
+                'actor_name': feed_item.actor.get_full_name(),
+                'actor_thumbnail': settings.MEDIA_URL + feed_item.actor.get_profile().profile_pic.name,
+                'actor_url': reverse(
+                    'user:user_profile', kwargs={ 'username': feed_item.actor.username }),
+                'action_id': feed_item.action.id,
+                'action_type': feed_item.action_type.name,
+                'target_id': feed_item.target.id,
+                'target_type': feed_item.target_type.name,
+                #'target_created': datetime.datetime.strftime(feed_item.target.created, '%b. %d, %Y, %I:%M %P'),
+                'target_created': feed_item.target.created.isoformat(),
+            }
 
-        # Determine the type of the resource.
-        if serialized_feed[feed_item.id]['action_type'] == 'resource' or (
-            serialized_feed[feed_item.id]['action_type'] == 'favorite'):
-            cu.set_resources_type([feed_item.target])
-            serialized_feed[feed_item.id]['target_type'] = feed_item.target.type
+            # Determine the type of the resource.
+            if serialized_feed_item['action_type'] == 'resource' or (
+                serialized_feed_item['action_type'] == 'favorite'):
+                cu.set_resources_type([feed_item.target])
+                serialized_feed_item['target_type'] = feed_item.target.type
 
-        # If this is a new resource creation activity.
-        if serialized_feed[feed_item.id]['action_type'] == 'resource':
-            serialized_feed[feed_item.id]['target_user'] = feed_item.target.user.get_full_name()
-            serialized_feed[feed_item.id]['target_user_url'] = reverse(
-                'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),
-            serialized_feed[feed_item.id]['target'] = feed_item.target.title
-            serialized_feed[feed_item.id]['target_thumbnail'] = settings.MEDIA_URL + feed_item.target.image.name
-            serialized_feed[feed_item.id]['target_license'] = feed_item.target.license.title
-            serialized_feed[feed_item.id]['target_url'] = reverse(
-                'read', kwargs={
-                    'resource_id': feed_item.target.id,
-                    'resource_slug': feed_item.target.slug
-                })
-
-            if feed_item.target.type == 'url':
-                serialized_feed[feed_item.id]['target_direct_url'] = feed_item.target.revision.content.url
-
-            if feed_item.target.type == 'video':
-                serialized_feed[feed_item.id]['target_provider'] = feed_item.target.provider
-                serialized_feed[feed_item.id]['target_video_tag'] = feed_item.target.video_tag
-
-            if feed_item.target.type == 'attachment':
-                serialized_feed[feed_item.id]['target_download_url'] = reverse(
-                'resource:download', kwargs={ 'resource_id': feed_item.target.id }),
-                serialized_feed[feed_item.id]['target_size'] = format_filesize(
-                    feed_item.target.revision.content.file.size)
-
-        # If this is a new comment creation activity.
-        if serialized_feed[feed_item.id]['action_type'] == 'comment':
-            serialized_feed[feed_item.id]['action'] = feed_item.action.body_markdown_html
-
-            # If its on a resource.
-            if serialized_feed[feed_item.id]['target_type'] == 'resource':
-                serialized_feed[feed_item.id]['target_url'] = reverse(
+            # If this is a new resource creation activity.
+            if serialized_feed_item['action_type'] == 'resource':
+                serialized_feed_item['target_user'] = feed_item.target.user.get_full_name()
+                serialized_feed_item['target_user_url'] = reverse(
+                    'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),
+                serialized_feed_item['target'] = feed_item.target.title
+                serialized_feed_item['target_thumbnail'] = settings.MEDIA_URL + feed_item.target.image.name
+                serialized_feed_item['target_license'] = feed_item.target.license.title
+                serialized_feed_item['target_url'] = reverse(
                     'read', kwargs={
                         'resource_id': feed_item.target.id,
                         'resource_slug': feed_item.target.slug
                     })
 
-            # Assuming it is in either on a project or in response to another comment.
-            else:
-                serialized_feed[feed_item.id]['context'] = feed_item.context.title
-                serialized_feed[feed_item.id]['target'] = feed_item.target.body_markdown_html
-                serialized_feed[feed_item.id]['target_url'] = reverse(
-                    'projects:project_discussion', kwargs={
-                        'project_slug': feed_item.context.slug,
-                        'discussion_id': feed_item.target.id
+                if feed_item.target.type == 'url' or serialized_feed_item['target_type'] == 'video':
+                    serialized_feed_item['target_direct_url'] = feed_item.target.revision.content.url
+                    serialized_feed_item['target_direct_url_host'] = urlparse(
+                        feed_item.target.revision.content.url).netloc
+
+                if feed_item.target.type == 'video':
+                    serialized_feed_item['target_provider'] = feed_item.target.provider
+                    serialized_feed_item['target_video_tag'] = feed_item.target.video_tag
+
+                if feed_item.target.type == 'attachment':
+                    serialized_feed_item['target_download_url'] = reverse(
+                    'resource:download', kwargs={ 'resource_id': feed_item.target.id }),
+                    serialized_feed_item['target_size'] = format_filesize(
+                        feed_item.target.revision.content.file.size)
+
+            # If this is a new comment creation activity.
+            if serialized_feed_item['action_type'] == 'comment':
+                serialized_feed_item['action'] = feed_item.action.body_markdown_html
+                serialized_feed_item['action_created'] = feed_item.action.created.isoformat()
+
+                # If its on a resource.
+                if serialized_feed_item['target_type'] == 'resource':
+                    serialized_feed_item['target'] = feed_item.target.title
+                    serialized_feed_item['target_url'] = reverse(
+                        'read', kwargs={
+                            'resource_id': feed_item.target.id,
+                            'resource_slug': feed_item.target.slug
+                        })
+
+                # Assuming it is in either on a project or in response to another comment.
+                else:
+                    serialized_feed_item['context'] = feed_item.context.title
+                    serialized_feed_item['target'] = feed_item.target.body_markdown_html
+                    serialized_feed_item['target_url'] = reverse(
+                        'projects:project_discussion', kwargs={
+                            'project_slug': feed_item.context.slug,
+                            'discussion_id': feed_item.target.id
+                        }
+                    )
+                    serialized_feed_item['context_url'] = reverse(
+                        'projects:project_home', kwargs={
+                            'project_slug': feed_item.context.slug })
+                    
+                    # Its NOT a new discussion post, mostly a response to an existing one.
+                    if serialized_feed_item['action_id'] != serialized_feed_item['target_id']:
+                        serialized_feed_item['target_user'] = feed_item.target.user.get_full_name()
+                        serialized_feed_item['target_user_url'] = reverse(
+                            'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),
+                        serialized_feed_item['target_user_thumbnail'] = settings.MEDIA_URL + feed_item.target.user.get_profile().profile_pic.name
+
+            # If this is a group joining activity.
+            if serialized_feed_item['action_type'] == 'membership':
+                serialized_feed_item['target_url'] = reverse(
+                    'projects:project_home', kwargs={
+                        'project_slug': feed_item.target.slug })
+                serialized_feed_item['target'] = feed_item.target.title
+                serialized_feed_item['target_description'] = feed_item.target.description
+                serialized_feed_item['target_thumbnail'] = settings.MEDIA_URL + feed_item.target.cover_pic.name
+                serialized_feed_item['target_thumbnail_position'] = [str(
+                    feed_item.target.cover_pic_position.left), str(
+                    feed_item.target.cover_pic_position.top)]
+                serialized_feed_item['target_member_count'] = feed_item.target.confirmed_members.count()
+                serialized_feed_item['action_joined'] = feed_item.action.joined.isoformat()
+
+
+            # If this is a new group creation activity.
+            if serialized_feed_item['action_type'] == 'project':
+                serialized_feed_item['action_url'] = reverse(
+                    'projects:project_home', kwargs={
+                        'project_slug': feed_item.action.slug })
+                serialized_feed_item['action'] = feed_item.action.title
+                serialized_feed_item['action_description'] = feed_item.target.description
+                serialized_feed_item['action_thumbnail'] = settings.MEDIA_URL + (
+                    feed_item.action.cover_pic)
+                serialized_feed_item['action_thumbnail_position'] = [settings.MEDIA_URL + (
+                    feed_item.action.cover_pic_position.left), settings.MEDIA_URL + (
+                    feed_item.action.cover_pic_position.top)]
+                serialized_feed_item['action_member_count'] = feed_item.action.confirmed_members.count()
+
+            # If this is a favoriting on a resource (or a collection) activity.
+            if serialized_feed_item['action_type'] == 'favorite':
+                serialized_feed_item['target_user'] = feed_item.target.user.get_full_name()
+                serialized_feed_item['target_user_url'] = reverse(
+                    'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),
+                serialized_feed_item['target'] = feed_item.target.title
+                serialized_feed_item['target_thumbnail'] = settings.MEDIA_URL + feed_item.target.image.name
+                serialized_feed_item['target_url'] = reverse(
+                    'read', kwargs={
+                        'resource_id': feed_item.target.id,
+                        'resource_slug': feed_item.target.slug
+                    })
+                serialized_feed_item['action_created'] = feed_item.action.created.isoformat()
+            
+                if feed_item.target.type == 'url' or serialized_feed_item['target_type'] == 'video':
+                    serialized_feed_item['target_direct_url'] = feed_item.target.revision.content.url
+                    serialized_feed_item['target_direct_url_host'] = urlparse(
+                        feed_item.target.revision.content.url).netloc
+
+                if feed_item.target.type == 'video':
+                    serialized_feed_item['target_provider'] = feed_item.target.provider
+                    serialized_feed_item['target_video_tag'] = feed_item.target.video_tag
+
+                if feed_item.target.type == 'attachment':
+                    serialized_feed_item['target_download_url'] = reverse(
+                    'resource:download', kwargs={ 'resource_id': feed_item.target.id }),
+                    serialized_feed_item['target_size'] = format_filesize(
+                        feed_item.target.revision.content.file.size)
+
+            # If this is a folder creation activity.
+            if serialized_feed_item['action_type'] == 'collection':
+                serialized_feed_item['target_url'] = reverse(
+                    'user:list_collection', kwargs={
+                        'username': feed_item.context.user.username,
+                        'collection_slug': feed_item.target.slug
                     }
                 )
-                serialized_feed[feed_item.id]['context_url'] = reverse(
-                    'projects:project_home', kwargs={
-                        'project_slug': feed_item.context.slug })
-                
-                # Its NOT a new discussion post, mostly a response to an existing one.
-                if serialized_feed[feed_item.id]['action_id'] != serialized_feed[feed_item.id]['target_id']:
-                    serialized_feed[feed_item.id]['target_user'] = feed_item.target.user.get_full_name()
-                    serialized_feed[feed_item.id]['target_user_url'] = reverse(
-                        'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),
-                    serialized_feed[feed_item.id]['target_user_thumbnail'] = settings.MEDIA_URL + feed_item.target.user.get_profile().profile_pic.name
+                serialized_feed_item['target'] = feed_item.target.title
 
-        # If this is a group joining activity.
-        if serialized_feed[feed_item.id]['action_type'] == 'membership':
-            serialized_feed[feed_item.id]['target_url'] = reverse(
-                'projects:project_home', kwargs={
-                    'project_slug': feed_item.target.slug })
-            serialized_feed[feed_item.id]['target'] = feed_item.target.title
-            serialized_feed[feed_item.id]['target_description'] = feed_item.target.description
-            serialized_feed[feed_item.id]['target_thumbnail'] = settings.MEDIA_URL + feed_item.target.cover_pic.name
-            serialized_feed[feed_item.id]['target_thumbnail_position'] = [settings.MEDIA_URL + (
-                feed_item.target.cover_pic_position.left), settings.MEDIA_URL + (
-                feed_item.target.cover_pic_position.top)]
-
-        # If this is a new group creation activity.
-        if serialized_feed[feed_item.id]['action_type'] == 'project':
-            serialized_feed[feed_item.id]['action_url'] = reverse(
-                'projects:project_home', kwargs={
-                    'project_slug': feed_item.action.slug })
-            serialized_feed[feed_item.id]['action'] = feed_item.action.title
-            serialized_feed[feed_item.id]['action_description'] = feed_item.target.description
-            serialized_feed[feed_item.id]['action_thumbnail'] = settings.MEDIA_URL + (
-                feed_item.action.cover_pic)
-            serialized_feed[feed_item.id]['action_thumbnail_position'] = [settings.MEDIA_URL + (
-                feed_item.action.cover_pic_position.left), settings.MEDIA_URL + (
-                feed_item.action.cover_pic_position.top)]
-
-        # If this is a favoriting on a resource (or a collection) activity.
-        if serialized_feed[feed_item.id]['action_type'] == 'favorite':
-            serialized_feed[feed_item.id]['target_user'] = feed_item.target.user.get_full_name()
-            serialized_feed[feed_item.id]['target_user_url'] = reverse(
-                'user:user_profile', kwargs={ 'username': feed_item.target.user.username }),
-            serialized_feed[feed_item.id]['target'] = feed_item.target.title
-            serialized_feed[feed_item.id]['target_thumbnail'] = settings.MEDIA_URL + feed_item.target.image.name
-            serialized_feed[feed_item.id]['target_url'] = reverse(
-                'read', kwargs={
-                    'resource_id': feed_item.target.id,
-                    'resource_slug': feed_item.target.slug
-                })
-        
-            if feed_item.target.type == 'url':
-                serialized_feed[feed_item.id]['target_direct_url'] = feed_item.target.revision.content.url
-
-            if feed_item.target.type == 'video':
-                serialized_feed[feed_item.id]['target_provider'] = feed_item.target.provider
-                serialized_feed[feed_item.id]['target_video_tag'] = feed_item.target.video_tag
-
-            if feed_item.target.type == 'attachment':
-                serialized_feed[feed_item.id]['target_download_url'] = reverse(
-                'resource:download', kwargs={ 'resource_id': feed_item.target.id }),
-                serialized_feed[feed_item.id]['target_size'] = format_filesize(
-                    feed_item.target.revision.content.file.size)
-
-        # If this is a folder creation activity.
-        if serialized_feed[feed_item.id]['action_type'] == 'collection':
-            serialized_feed[feed_item.id]['target_url'] = reverse(
-                'user:list_collection', kwargs={
-                    'username': feed_item.context.user.username,
-                    'collection_slug': feed_item.target.slug
-                }
-            )            
+            serialized_feed.append(serialized_feed_item)
+        except:
+            pass
 
     context = {
         'feeds': serialized_feed
     }
     return APIUtilities._api_success(context)
+
+
+def api_followers(request, user_id):
+    try:
+        user = User.objects.get(pk=user_id)
+    except:
+        raise Http404
+
+    from django.core.urlresolvers import reverse
+
+    user_profile = user.get_profile()
+    from user_account.models import Subscription
+    subscribers = Subscription.objects.filter(subscribee=user_profile)
+
+    serialized_followers = []
+    for subscriber in subscribers:
+        serialized_follower = {
+            'id': subscriber.subscriber.user.id,
+            'name': subscriber.subscriber.user.get_full_name(),
+            'url': reverse(
+                'user:user_profile', kwargs={ 'username': subscriber.subscriber.user.username }),
+            'thumbnail': settings.MEDIA_URL + subscriber.subscriber.profile_pic.name,
+            'headline': subscriber.subscriber.headline,
+            'following': True if Subscription.objects.filter(
+                subscribee=subscriber.subscriber, subscriber=request.user.get_profile()).count() > 0 else False
+        }
+        serialized_followers.append(serialized_follower)
+
+    context = {
+        'follows': serialized_followers
+    }
+    return APIUtilities.success(context)
+
+
+def api_following(request, user_id):
+    try:
+        user = User.objects.get(pk=user_id)
+    except:
+        raise Http404
+
+    from django.core.urlresolvers import reverse
+
+    user_profile = user.get_profile()
+    from user_account.models import Subscription
+    subscriptions = Subscription.objects.filter(subscriber=user_profile)
+
+    serialized_followees = []
+    for subscription in subscriptions:
+        serialized_following = {
+            'id': subscription.subscribee.user.id,
+            'name': subscription.subscribee.user.get_full_name(),
+            'url': reverse(
+                'user:user_profile', kwargs={ 'username': subscription.subscribee.user.username }),
+            'thumbnail': settings.MEDIA_URL + subscription.subscribee.profile_pic.name,
+            'headline': subscription.subscribee.headline,
+            'following': True
+        }
+        serialized_followees.append(serialized_following)
+
+    context = {
+        'follows': serialized_followees
+    }
+    return APIUtilities.success(context)
 
 
 def api_get_profile(request, username):
@@ -1989,6 +2433,62 @@ def api_resubscribe(request, user_id, service):
 
     except:
         return APIUtilities._api_failure()
+
+
+def notifications(request):
+    #curriculum_id = request.POST.get('curriculum_id', None)
+    #latest_notification_id = request.POST.get('latest_notification_id', 0)
+    #synced_to_id = request.POST.get('synced_to_id', 0)
+
+    from user_account.models import Notification
+    notifications = Notification.objects.filter(user=request.user).order_by('-id')[:12]
+    
+    serialized_notifications = []
+    for notification in notifications:
+        serialized_notifications.append({
+            'id': notification.id,
+            'url': notification.url,
+            'description': notification.description,
+            'read': notification.read
+        })
+
+
+    """try:
+        curriculum = Curriculum.objects.get(pk=curriculum_id)
+        synced_to_curriculum = Curriculum.objects.get(pk=synced_to_id)
+    except:
+        return APIUtilities._api_not_found()
+
+    curriculum_changes = Change.objects.filter(curriculum=synced_to_curriculum)
+    curriculum_change_ids = map(lambda change: change.id, curriculum_changes)
+
+    from django.contrib.contenttypes.models import ContentType
+    change_content_type = ContentType.objects.get_for_model(Change)
+
+    from user_account.models import Notification
+    unread_notifications_count = Notification.objects.filter(context_type=change_content_type,
+        context_id__in=curriculum_change_ids, user=curriculum.user, read=False).count()
+    new_notifications = Notification.objects.filter(context_type=change_content_type,
+        context_id__in=curriculum_change_ids, user=curriculum.user, pk__gte=latest_notification_id).order_by('-id')[:10]
+
+    serialized_top_notifications = []
+
+    for new_notification in new_notifications:
+        serialized_top_notifications.append({
+            'url': new_notification.url,
+            'description': new_notification.description,
+            'read': new_notification.read,
+            'path': new_notification.context.path,
+            'action': new_notification.context.action,
+            'target': serialize_change_target(new_notification.context, curriculum),
+            'target_type': new_notification.context.target_type.name
+        })
+
+    context = {
+        'unread_notifications_count': unread_notifications_count,
+        'notifications': serialized_top_notifications
+    }"""
+    return APIUtilities.success(serialized_notifications)
 
 
 # Non-view non API.

@@ -1,0 +1,35 @@
+<div class="content-panel-body-title-wrapper">
+    <h1 class="content-panel-body-title">Groups</h1>
+    <button class="content-panel-body-create oc-button oc-page-action-button">+ Create a group</button>
+</div>
+
+<table class="tabular-list groups-list">
+    <colgroup>
+        <col class="name-column"></col>
+        <col class="members-column"></col>
+        <col class="actions-column"></col>
+    </colgroup>
+    <tbody>
+        <tr><th>Name &amp; information</th><th>Members</th><th>Actions</th></tr>
+        
+        {% for group in groups %}
+        <tr>
+            <td>
+                <a href="{% url projects:project_home project_slug=group.slug %}" class="list-item-title">{{ group.title }}</a>
+                <div class="list-item-description">{{ group.confirmed_members.count }} members</div>
+            </td>
+            <td>
+                <div class="list-item-collaborators">
+                    {% for member in group.featured_members.all %}
+                    <a href="{% url user:user_profile username=member.username %}" class="list-item-collaborator" title="{{ member.get_full_name }}" style="background-image: url('{{ MEDIA_URL }}{{ member.get_profile.profile_pic.name }}');"></a>
+                    {% endfor %}
+                    {% if group.confirmed_members.count > 4 %}
+                    <a href="{% url projects:project_about project_slug=group.slug %}" class="list-item-collaborator list-item-collaborator-more" title="More">&hellip;</a>
+                    {% endif %}
+                </div>
+            </td>
+            <td><button class="oc-button">Settings</button><button class="oc-button oc-dull-button">Leave group</button></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

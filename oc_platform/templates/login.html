@@ -1,7 +1,13 @@
 {% include 'partials/header.html' with header_type='vanilla' body_class='login' %}
 <div class="center-stage authenticate-panel">
 <div class="authenticate-header">
+    {% if organization %}
+    <img src="{{ MEDIA_URL }}{{ organization.logo.name }}" class="easy-sign-header-logo org-easy-sign-header-logo" />
+
+    {% else %}
     <img src="{{ STATIC_URL }}images/logo_shine.png" class="easy-sign-header-logo" />
+    {% endif %}
+
     <h3>Login to your account</h3>
     <p>You'd be glad to know we took care of it while you were away</p>
 </div>
@@ -20,4 +26,6 @@
     </form>
 </div>
 </div>
+{% if not organization %}
 {% include 'partials/footer.html' with body_class='login' %}
+{% endif %}

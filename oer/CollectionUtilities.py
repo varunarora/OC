@@ -211,7 +211,7 @@ def build_user_collection_navigation(browse_tree, user):
         profileHref = ElementTree.SubElement(userRootElement, 'a')
         profileHref.set('href', _get_user_profile(user_profile))
         profileHref.set('id', 'collection-' + str(root_collection.id))
-        profileHref.text = user_profile.user.get_full_name()
+        profileHref.text = 'My files'
 
         userRootList = ElementTree.Element('ul')
 
@@ -352,7 +352,7 @@ def _get_project_collection_url(project, collection_slug):
 
 def _get_user_collection_url(user_profile, collection_slug): 
     return reverse(
-        'user:list_collection', kwargs={
+        'user:user_folder', kwargs={
             'username': user_profile.user.username,
             'collection_slug': collection_slug
         }
@@ -692,7 +692,7 @@ def host_urlize(host, collection_root, collection_root_type):
             )
         else:
             host.url = reverse(
-                'user:list_collection', kwargs={
+                'user:user_folder', kwargs={
                     'username': user.username,
                     'collection_slug': host.slug
                 }

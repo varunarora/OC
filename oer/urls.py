@@ -63,6 +63,7 @@ urlpatterns = patterns(
     url(r'^api/search/(?P<query>[\w\ ]+)/$', views.autocomplete_search, name='autocomplete'),
     url(r'^api/editor-search/(?P<query>[\w\ ]+)/$', views.editor_autocomplete_search, name='editor-autocomplete'),
     url(r'^api/load-resources/(?P<collection_id>\d+)/from/(?P<resource_count>\d+)/$', views.load_resources, name='load_resources'),
+    url(r'^api/folder/(?P<user_id>\d+)/(?P<collection_id>\d+)/from/(?P<from_count>\d+)/(?P<organization_slug>[a-z0-9_\.]+)/$', views.api_folder, name='api_folder'),
     # url(r'^api/load-browse-resources/(?P<category_id>\d+)/from/(?P<last_category_id>\d+)/$', views.load_browse_resources, name='load_browse_resources'),
     url(r'^api/load-category-resources/(?P<category_id>\d+)/from/(?P<resource_count>\d+)/$', views.load_category_resources, name='load_category_resources'),
     # url(r'^api/search-category/(?P<category_id>\d+)/from/(?P<last_category_id>\d+)/query/(?P<query>[\w\ ]+)/$', views.search_category_old, name='search_category_old'),

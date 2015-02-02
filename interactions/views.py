@@ -472,7 +472,7 @@ def list_user_favorites(request):
                 ) + settings.MEDIA_URL + favorite.parent.image.name
         else:
             url = reverse(
-                'user:list_collection', kwargs={
+                'user:user_folder', kwargs={
                     'username': favorite.parent.creator.username,
                     'collection_slug': favorite.parent.slug
             })

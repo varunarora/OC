@@ -26,6 +26,8 @@ urlpatterns = patterns(
 
     url(r'^curriculum/', include('curriculum.urls', namespace='curriculum')),
 
+    url(r'^planner/', include('planner.urls', namespace='planner')),
+
 
     # Interactions
     url(r'^interactions/', include('interactions.urls', namespace='interactions')),
@@ -71,6 +73,9 @@ urlpatterns = patterns(
     url(r'^404testing/', 'oc_platform.views.t404'),
     url(r'^500testing/', 'oc_platform.views.t500'),
 
+    # Org login (only Google+)
+    url(r'^google-login/', 'user_account.views.google_login', name='google_login'),
+
     # Initialize API stuff
     url(r'^api/getBreadcrumb/', 'oc_platform.views.get_breadcrumb', name='api-get-breadcrumb'),
     url(r'^api/emailShare/', 'oc_platform.views.email_share', name='api-email-share'),
@@ -85,6 +90,8 @@ urlpatterns = patterns(
     # Labs stuff
     url(r'^labs/article-center/$', 'articles.views.article_center', name='article_center'),
     url(r'^mailpimp/$', 'oc_platform.views.mailpimp_home', name='mailpimp_home'),
+
+    url(r'^newsletter/$', 'oc_platform.views.newsletter', name='newsletter'),
 
     # Article Center Registration
     url(r'^contributor-registration/', 'user_account.views.contributor_registration', name='contributor_registration'),
@@ -102,6 +109,12 @@ urlpatterns = patterns(
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'^cbse-sample-paper-maker/', 'oc_platform.views.worksheet'),
+
+    # Org stuff.
+    #url(r'^o/(?P<organization_slug>[a-z0-9_\.]+)/', 'oc_platform.views.organization_home', name='organization_home'),
+    #url(r'^(?P<organization_slug>[a-z0-9_\.]+)/login/', 'oc_platform.views.login', name='org_login'),
+    #url(r'^(?P<organization_slug>[a-z0-9_\.]+)/logout/', 'user_account.views.logout_view', name='org_logout'),
+
 )
 
 if settings.DEBUG:

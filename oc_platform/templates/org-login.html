@@ -1,0 +1,17 @@
+{% include 'partials/header.html' with header_type='vanilla' body_class='org-profile-view' %}
+<script>
+require([{% if debug %}'common'{% else %}'{{ STATIC_URL }}js/common-build.js'{% endif %}], function(){
+    require(['authenticate']);
+});
+</script>
+<div class="center-stage organization-login">
+    {% if organization %}
+    <img src="{{ MEDIA_URL }}{{ organization.logo.name }}" class="organization-login-logo" />
+    <div>
+        <button class="google-plus-button" id="google-plus-button">Sign in with Google</button>
+    </div>
+    <div class="login-loader"></div>
+    {% endif %}
+</div>
+
+{% include 'partials/footer.html' with footer_type='vanilla' %}

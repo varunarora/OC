@@ -2,6 +2,10 @@
     {% if source %}
     <input type="hidden" name="redirect_to" value="{{ source }}" />
     {% endif %}
+    {% if organization %}
+    <input type="hidden" name="organization_slug" value="{{ organization.slug }}" />
+    {% endif %}
+
     {% csrf_token %}
     <div>Username or Email address</div>
     <div><input type="text" name="username" placeholder="Username or Email address"/></div>

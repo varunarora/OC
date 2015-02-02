@@ -36,6 +36,16 @@ $content-width: 960px
 	margin-bottom: 12px
 	color: #444
 
+@mixin light-textbox
+	border: 1px solid #ddd
+	padding: 4px
+
+	&:hover
+		@include box-shadow(inset 0 0 2px rgba(0, 0, 0, 0.2))
+
+	&:focus
+		border-color: #b2b2b2
+
 // Mixins by Josh Broton (http://joshbroton.com/quick-fix-sass-mixins-for-css-keyframe-animations/)
 @mixin animation($animate)
 	$max: length($animate)
@@ -1705,8 +1715,6 @@ input.manual-upload
 
 
 .upload-services
-	margin-top: 20px
-
 	td
 		height: 100px
 		width: 100px
@@ -2358,7 +2366,7 @@ nav.collections-navigation,
 	background-position: 5px 2px
 
 .opened-collection > .toggle-collection, , .opened-category > .toggle-category
-	background-image: url('../images/arrow-bottom-small.png')				
+	background-image: url('../images/arrow-bottom-small.png')
 	background-position: 3px 4px
 
 .empty-resource > .toggle-resource, .empty-tag > .toggle-tag
@@ -3031,16 +3039,18 @@ ul.tagit
 .popup-background
 	z-index: 10
 	position: fixed
-	display: none
+	visibility: hidden
 	height: 100%
 	width: 100%
 	background: #000000
 	top: 0px
 	left: 0px
-	opacity: 0.65
+	@include transition(opacity 0.5s ease)
+	opacity: 0
 
 	&.show-popup-background
-		display: block
+		visibility: visible
+		opacity: 0.65
 
 .oc-popup-title-bar
 	overflow: hidden
@@ -3055,6 +3065,177 @@ ul.tagit
 .oc-popup-body
 	margin-top: 10px
 	overflow: hidden
+
+
+.oc-light-popup
+	background: none repeat scroll 0 0 #FFFFFF
+	@include box-shadow(0 0 4px rgba(0, 0, 0, 0.3))
+	display: none
+	margin: auto
+	z-index: 20
+	position: fixed
+
+	&.show-popup
+		display: block
+
+	.oc-light-popup-body
+		padding: 20px
+
+	.oc-light-popup-button-wrapper
+		overflow: hidden
+
+		button
+			width: 49%
+			display: block
+
+			&.expand
+				width: 100%
+
+			&.hide
+				display: none
+
+			&.oc-button
+				float: right
+
+				&.oc-dull-button
+					float: left
+
+.popup
+	background: none repeat scroll 0 0 #FFFFFF
+	@include box-shadow(0 0 4px rgba(0, 0, 0, 0.4))
+	display: none
+	margin: auto
+	z-index: 20
+	position: fixed
+	@include border-radius(2px)
+
+	&.show-popup
+		display: block
+
+	.popup-title-bar
+		overflow: hidden
+		padding: 24px
+
+		.popup-title
+			float: left
+			color: #fff
+			// font-family: 'Arial', 'Helvetica', sans-serif;
+			font-size: 1.3em
+			font-weight: bold
+			letter-spacing: -1px
+			@include text-shadow(0 1px 0 rgba(97, 97, 97, 1))
+
+		.popup-exit
+			float: right
+			background-image: url('../images/close-popup.png')
+			background-repeat: no-repeat
+			width: 16px
+			height: 16px
+			cursor: pointer
+			display: inline-block
+			//height: 26px
+
+	.popup-body-loader
+		.spinner
+			display: block
+
+	.popup-body
+		margin-top: 12px
+		overflow: hidden
+		padding: 24px
+
+		.popup-body-message
+			font-size: 1.3em
+			color: $light-font
+			margin-bottom: 12px
+			line-height: 1.2em
+
+		.popup-dialog-browser
+			height: 230px
+			border: 1px solid #ddd
+			padding: 12px
+			overflow: auto
+
+			&.loading-browser
+				background: url('../images/spinner.gif') no-repeat center center
+
+			.selected-destination-collection, .selected-destination-resource
+				background-color: #efefef
+				color: $body-color
+
+		.popup-submit-wrapper
+			margin-top: 12px
+			overflow: hidden
+
+			&.popup-simple-submit-wrapper
+				margin-top: 24px
+
+			.popup-submit-button
+				float: right
+
+		.popup-submit-wrapper-set
+			margin-top: 24px
+			overflow: hidden
+
+			.popup-submit-button-set
+				float: right
+
+		input[type=text], textarea
+			@include light-textbox
+			width: 96%
+			font-size: 1.3em
+
+.oc-button
+	color: #fff
+	padding: 9px 18px
+	background-color: #55acee
+	@include border-radius(2px)
+	border-width: 1px
+	border-color: #43a3ec
+	font-weight: bold
+	border-style: solid
+
+	&:hover
+		border-color: #319bea
+		@include box-shadow(0 1px 0 rgba(67, 135, 187, 0.5))
+		text-decoration: none
+
+.oc-dull-button
+	color: #444
+	background-color: #f3f3f3
+	border-color: #ddd
+
+	&:hover
+		border-color: #c6c6c6
+		@include box-shadow(0 1px 0 rgba(0, 0, 0, 0.15), 0 0 0 1px #fff inset)
+
+.oc-loud-button
+	@include text-shadow(0 -1px 0 rgba(0, 0, 0, 0.2))
+	background-color: #6bb933
+	border-color: #60a62e #519f18 #409701
+
+	&:hover
+		border-color: #60a62e #519f18 #409701
+		@include box-shadow(0 1px 0 rgba(0, 0, 0, 0.15))
+
+.oc-page-action-button
+	background-color: transparent
+	font-size: 1.3em
+	border-color: #afafaf
+	color: #afafaf
+	outline: none
+
+	&:hover
+		color: $light-font
+		border-color: $light-font
+		@include box-shadow(0 1px 0 rgba(0, 0, 0, 0.15))
+		text-decoration: none
+
+	&.active
+		color: $light-font
+		border-color: $light-font
+		@include box-shadow(0 1px 0 rgba(0, 0, 0, 0.15))
+
 
 .user-thumbnail-xsmall
 	background-size: cover
@@ -3474,6 +3655,9 @@ ul.collaborators
 	height: 80px
 	margin-bottom: 10px
 
+.org-easy-sign-header-logo
+	width: 100px
+	height: 100px
 
 .authenticate-panel
 	width: 420px
@@ -5487,6 +5671,7 @@ a.content-panel-body-listing-item-anchor
 		margin: 10px
 		text-align: center
 		cursor: pointer
+		@include border-radius(2px)
 
 		.browse-post-new-option-thumbnail
 			background-repeat: no-repeat
@@ -5496,23 +5681,20 @@ a.content-panel-body-listing-item-anchor
 
 		&.upload-option
 			.browse-post-new-option-thumbnail
-				background-image: url('../images/upload-icon-dark.png')
+				background-image: url('../images/post-upload.png')
 
 		&.file-folder-option
 			.browse-post-new-option-thumbnail
-				background-image: url('../images/unit-icon-dark.png')
-				background-size: 60px 60px
+				background-image: url('../images/post-file.png')
 
 		&.url-option
 			.browse-post-new-option-thumbnail
-				background-image: url('../images/earth.png')
-				background-size: 50px 50px
+				background-image: url('../images/post-link.png')
 
 		&:hover
-			background-color: #efefef
+			background-color: #f9f9f9
 
 		.browse-post-new-option-description
-			@include sans-bold
 			color: $light-font
 
 .login-dialog
@@ -5846,14 +6028,159 @@ body.signup, body.login, body.unsubscribe
 
 /***** EXPLORER *************/
 
+.notifications-listings-wrapper,
+.user-menu-wrapper
+	position: absolute
+	top: 0
+	left: 0
+
+
+.oc-menu
+	visibility: hidden
+	//display: none
+	opacity: 0
+	position: absolute
+	top: 0
+	left: 0
+	@include transition((opacity 0.2s ease))
+
+	&.show-menu
+		//display: block
+		visibility: visible
+		opacity: 1
+		top: 0
+
+	.floating-menu-spacer
+		height: 8px
+		background: url('../images/user-nav-pointer.png') no-repeat
+		z-index: 10
+		position: relative
+
+	> ul, .menu-body
+		background-color: #ffffff
+		@include border-radius(2px)
+		@include box-shadow(0 1px 2px rgba(0, 0, 0, 0.1))
+		//@include box-shadow(0 0 2px rgba(0, 0, 0, 0.4))
+		z-index: 6
+		overflow: hidden
+
+	ul
+		li
+			padding-top: 0px
+			border-bottom: 1px solid #efefef
+
+			a
+				outline: none
+
+.user-menu,
+.block-menu,
+.field-menu,
+.item-menu
+	z-index: 4
+
+	li
+		a
+			padding: 12px
+			display: block
+			color: $light-font
+			overflow: hidden
+			cursor: pointer
+
+			&:hover
+				background-color: #efefef
+				text-decoration: none
+
+.user-menu
+	width: 150px
+
+	.floating-menu-spacer
+		width: 150px
+		background-position: 125px bottom
+
+.block-menu,
+.field-menu
+	width: 120px
+
+	.floating-menu-spacer
+		width: 120px
+		background-position: 96px bottom
+
+.item-menu
+	width: 120px
+
+	.floating-menu-spacer
+		width: 120px
+		background-position: 106px bottom
+
+.notifications-menu
+	z-index: 4
+	width: 400px
+
+	ul
+		max-height: 400px
+		overflow-y: auto
+
+		li
+			.notification
+				padding: 12px
+				display: block
+				color: $light-font
+				overflow: hidden
+
+				&:hover
+					background-color: #efefef
+					text-decoration: none
+
+				&.curriculum-notification
+					cursor: auto
+
+					&:hover
+						background-color: transparent
+
+				.notification-message
+					float: left
+					width: 235px
+
+				.notification-actions
+					float: right
+					width: 130px
+
+					.notification-action-review
+						margin-right: 4px
+
+	.floating-menu-spacer
+		width: 400px
+		background-position: 384px bottom
+
+	.new-notification
+		//background-color: #f4f7f8
+		border-left: 4px solid #2980b9
+
+	.no-notification-contents
+		padding: 12px
+		color: $light-font
+		border-width: 0px
+
+.planner-menu
+	width: 500px
+	z-index: 11
+
+	.floating-menu-spacer
+		width: 600px
+		background-position: 245px bottom
+
+	.menu-body
+		height: 240px
+		//padding: 12px
+
 .explorer-header
-	height: 50px
+	height: 44px
 	background-color: #3498db
 
 	.explorer-header-current, .explorer-header-child
 		float: left
 		color: #fff
-		width: 25%
+		width: 22%
 		text-align: center
 		height: 34px
 		text-decoration: none
@@ -5862,7 +6189,7 @@ body.signup, body.login, body.unsubscribe
 		font-size: 1.2em
 
 	.explorer-header-child
-		padding-top: 16px
+		padding-top: 10px
 
 		&:hover
 			background-color: #2980b9
@@ -5871,12 +6198,12 @@ body.signup, body.login, body.unsubscribe
 		background-color: #2980b9
 		cursor: pointer
 		text-align: left
-		height: 50px
+		height: 44px
 
 		.explorer-header-current-organization-thumbnail
-			margin-top: 7px
-			width: 36px
-			height: 36px
+			margin-top: 5px
+			width: 32px
+			height: 32px
 			//background-image: url('../images/hct.jpg')
 			border-radius: 18px
 			display: inline-block
@@ -5887,12 +6214,64 @@ body.signup, body.login, body.unsubscribe
 
 		.explorer-header-current-organization-title
 			margin-top: 16px
-			
 			float: left
 
 			.explorer-header-current-organization-title-subject
 				font-weight: bold
 				margin-left: 8px
+
+	.explorer-header-actions
+		float: right
+		margin-right: 5px
+		margin-top: 10px
+		overflow: hidden
+
+		> a, .explorer-header-actions-notifications-wrapper
+			display: inline-block
+			float: left
+			height: 12px
+
+		.explorer-header-actions-notifications-wrapper
+			height: 18px
+			
+			> a
+				display: inline-block
+				height: 12px
+
+		> a, .explorer-header-actions-notifications-wrapper > a
+			color: #fff
+			font-weight: bold
+			padding: 6px
+			cursor: pointer
+			opacity: 0.8
+			padding-left: 24px
+			margin-right: 8px
+
+			&.persist
+				opacity: 1
+				background-color: #2980b9
+
+			&:hover
+				text-decoration: none
+				opacity: 1
+				background-color: #2980b9
+
+			&.explorer-header-actions-copy
+				background-image: url('../images/copy-light.png')
+				background-repeat: no-repeat
+				background-position: 6px center
+
+			&.explorer-header-actions-notifications
+				background-image: url('../images/explorer/notification.png')
+				background-repeat: no-repeat
+				background-position: 6px center
+
+				.explorer-header-actions-notifications-count
+					margin-left: 4px
+					background-color: #d14836
+					color: #fff
+					padding: 2px 4px
+					font-size: 0.9em
 
 	nav.explorer-home-menu
 		display: none
@@ -5920,7 +6299,6 @@ body.signup, body.login, body.unsubscribe
 			z-index: 6
 			
 			> li
-
 				a
 					padding: 2px 12px
 					padding-top: 10px
@@ -5939,13 +6317,12 @@ body.signup, body.login, body.unsubscribe
 .explorer-body-wrapper
 	height: 500px
 
-
 	.explorer-body
 		height: 100%
 
 	.explorer-body-side
-		background-color: #f2f2f2
-		width: 25%
+		background-color: #6c6c6c
+		width: 22%
 		height: 100%
 		float: left
 		overflow-y: auto
@@ -5959,25 +6336,31 @@ body.signup, body.login, body.unsubscribe
 
 				&.selected
 					> a
-						color: $light-font
 						font-weight: bold
-						color: #2980b9
+						color: #fff
 
 				a
-					color: #aaaaaa
+					color: #B8B8B8
 					outline: none
 					font-weight: bold
 
 					&:hover
 						text-decoration: none
-						color: $light-font
+						color: #fff
+
+				ul > li.textbooks
+					margin-top: 20px
+
+					&:first-child
+						margin-top: 10px
 
 			&.explorer-body-side-menu-main
-				padding-top: 20px
+				padding-top: 26px
 
 				> li
 					> a
 						font-size: 1.15em
+						@include text-shadow(0 1px 0 rgba(84, 84, 84, 1))
 
 			&.explorer-body-side-menu-domain-clusters
 				> li
@@ -5988,6 +6371,7 @@ body.signup, body.login, body.unsubscribe
 				> li
 					> a
 						font-weight: normal
+						@include text-shadow(0 1px 0 rgba(100, 100, 100, 1))
 
 			&.explorer-body-side-menu-light
 				padding: 0px
@@ -6021,7 +6405,7 @@ body.signup, body.login, body.unsubscribe
 			background-size: 100%
 
 	.explorer-body-stage
-		width: 75%
+		width: 78%
 		float: right
 		height: 100%
 		background-color: #f9f9f9
@@ -6052,6 +6436,7 @@ body.signup, body.login, body.unsubscribe
 						color: $light-font
 						font-size: 1.3em
 						line-height: 1.2em
+						@include text-shadow(0 1px 0 rgba(255, 255, 255, 1))
 
 					.explorer-resource-module-content-caption
 						color: #aaa
@@ -6078,19 +6463,22 @@ body.signup, body.login, body.unsubscribe
 						border: 1px solid #2980B9
 						height: 400px
 						margin-left: 20px
-						padding: 20px
 						overflow: auto
 
 						.explorer-resource-module-support-title
 							font-size: 1.8em
 							font-weight: bold
 							letter-spacing: -1px
-							margin-bottom: 20px
 							line-height: 1.15em
+							margin: 20px
+							margin-bottom: 10px
 
 						.explorer-resource-module-support-section
-							margin-bottom: 20px
+							padding: 10px 0px
 							overflow: auto
+
+							&.accepting
+								background-color: #f4f7f8
 
 							&.explorer-resource-module-support-section
 								.explorer-resource-module-support-section-title
@@ -6136,6 +6524,44 @@ body.signup, body.login, body.unsubscribe
 								.explorer-resource-module-support-section-title
 									background-image: url('../images/understandings.png')
 
+							&:hover
+								.explorer-resource-module-support-section-handle-wrapper
+									.explorer-resource-module-support-section-handle
+										opacity: 1
+
+								.explorer-resource-module-support-section-actions
+									display: block
+
+						.explorer-resource-module-support-section-handle-wrapper
+							width: 10px
+							float: left
+
+							.explorer-resource-module-support-section-handle
+								background: url('../images/move-handle.png')
+								width: 10px
+								height: 16px
+								margin: 0px 0px 0px 2px
+								cursor: move
+								opacity: 0
+
+						.explorer-resource-module-support-section-actions
+							width: 20px
+							height: 20px
+							margin-right: 10px
+							float: right
+							cursor: pointer
+							display: none
+							background-repeat: no-repeat
+							background-position: center center
+							background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAICAYAAADA+m62AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAFRJREFUeNpiYKA2YIQxZs6cuR5INaanp1+A8gWA1H6o2AYWJE0HQRJABYlA+gBUEQOUjTARakoCkOoH4g9Q7Ag07QOGQqhiAyCVD8SFMEW0AQABBgCuOBvzuIKJNgAAAABJRU5ErkJggg==')
+
+							&:hover
+								background-color: #efefef
+
+						.explorer-resource-module-support-section-title-wrapper
+							float: left
+							margin-left: 10px
+
 							.explorer-resource-module-support-section-title
 								text-transform: uppercase
 								color: #aaa
@@ -6158,21 +6584,42 @@ body.signup, body.login, body.unsubscribe
 									.explorer-resource-module-support-section-body-standard
 										font-weight: bold
 
+								p:first-child
+									margin-top: 0px
+
 							*[data-placeholder]:not(:focus):not([data-div-placeholder-content]):before
 								content: attr(data-placeholder)
 								float: left
 								margin-left: 2px
 								color: #b3b3b3
 
-						.explorer-resource-actions-suggest
-							width: 100%
-							background-color: #2980b9
-							color: #fff
-							font-weight: bold
-							border-width: 0px
-							padding: 10px 0px
+						.explorer-resource-listing-body-resource-actions,
+						.explorer-resource-module-support-new-field,
+						.explorer-resource-actions-suggest-wrapper
+							margin: 0px 20px
+
+						.explorer-resource-actions-suggest-wrapper
 							margin-bottom: 20px
 							margin-top: 10px
+
+							.explorer-resource-actions-suggest
+								width: 100%
+								background-color: #2980b9
+								color: #fff
+								font-weight: bold
+								border-width: 0px
+								padding: 10px 0px
+
+						.explorer-resource-items
+							padding: 0px 20px
+							clear: left
+
+						.explorer-resource-module-support-new-field
+							margin-bottom: 20px
+
+						.explorer-resource-add-field
+							margin-left: 20px
+							margin-right: 20px
 
 						.explorer-resource-item
 							overflow: hidden
@@ -6240,32 +6687,58 @@ body.signup, body.login, body.unsubscribe
 							padding: 4px 0px
 							text-align: right
 
-							button
-								padding: 4px 6px
-								color: #fff
-								border: 1px solid #3498db
-								background-color: #3498db
-
-								&:hover
-									background-color: #2980b9
-									border-color: #2980b9
-									//color: #fff
-
 
 			.explorer-resource-sections
+				.explorer-resource-section
+					border-bottom: 1px solid #d0d1d5
+
 				.explorer-resource-section-body
 					margin-top: 20px
 
-					.explorer-resource-section-listing-title
-						color: #aaa
-						font-weight: bold
-						text-transform: uppercase
+					&.accepting
+						border-bottom: 4px solid #2980b9
+
+					.explorer-resource-section-listing-collection
+						overflow: hidden
+
+						&:hover
+							.explorer-resource-section-listing-collection-handle-wrapper
+								.explorer-resource-section-listing-collection-handle
+									opacity: 1					
+
+						.explorer-resource-section-listing-collection-handle-wrapper
+							width: 9%
+							float: left
+
+							.explorer-resource-section-listing-collection-handle
+								background: url('../images/move-handle.png')
+								width: 10px
+								height: 24px
+								margin: 6px 6px 3px 1px
+								cursor: move
+								opacity: 0
+
+						.explorer-resource-section-listing-collection-title-wrapper
+							width: 91%
+							float: left
+							padding: 10px 0px
+
+							.explorer-resource-section-listing-collection-title
+								color: #aaa
+								font-weight: bold
+								text-transform: uppercase
 
 					.explorer-resource-section-listing-items
-						margin-top: 10px
 						background-color: #fff
 						//padding: 10px
 						overflow: hidden
+
+						&.accepting
+							cursor: move
+
+							.explorer-resource-section-listing-item
+								&:hover
+									border-bottom-width: 4px
 
 					.explorer-resource-section-listing-item
 						overflow: hidden
@@ -6284,10 +6757,27 @@ body.signup, body.login, body.unsubscribe
 						&.selected
 							border-color: #2980b9
 
+						&:hover
+							.explorer-resource-section-listing-item-handle-wrapper
+								.explorer-resource-section-listing-item-handle
+									opacity: 1
+
+						.explorer-resource-section-listing-item-handle-wrapper
+							width: 3%
+							float: left
+
+							.explorer-resource-section-listing-item-handle
+								background: url('../images/move-handle.png')
+								width: 10px
+								height: 28px
+								margin: 3px 6px 3px 1px
+								cursor: move
+								opacity: 0
 
 						.explorer-resource-section-listing-item-pre
 							width: 6%
 							float: left
+							height: 34px
 							//background-color: #E4F7D2
 							cursor: pointer
 							background-image: url('../images/objective-ready.png')
@@ -6300,7 +6790,7 @@ body.signup, body.login, body.unsubscribe
 
 						.explorer-resource-section-listing-item-content
 							overflow: hidden
-							width: 94%
+							width: 91%
 							float: left
 
 							.explorer-resource-section-listing-item-content-key
@@ -6329,32 +6819,73 @@ body.signup, body.login, body.unsubscribe
 								&.hide
 									display: none
 
-					.explorer-resource-section-contextual-listing-title
-						padding: 10px
-						background-color: #fff
-						font-weight: bold
-						text-transform: uppercase
-						color: #aaa
-						cursor: pointer
-						border: 1px solid #fff
+				.explorer-resource-section-listing-contextual
+					overflow: hidden
+					background-color: #fff
+					cursor: pointer
+					border: 1px solid #fff
 
-						&:hover
-							color: $light-font
+					&:hover
+						color: $light-font
+						
+						.explorer-resource-section-listing-contextual-handle-wrapper
+							.explorer-resource-section-listing-contextual-handle
+								opacity: 1					
 
-						&.selected
-							color: $light-font
-							border-color: #2980b9
+					&.selected
+						color: $light-font
+						border-color: #2980b9
+
+					.explorer-resource-section-listing-contextual-handle-wrapper
+						width: 9%
+						float: left
+
+						.explorer-resource-section-listing-contextual-handle
+							background: url('../images/move-handle.png')
+							width: 10px
+							height: 28px
+							margin: 3px 6px 3px 1px
+							cursor: move
+							opacity: 0
+
+					.explorer-resource-section-listing-contextual-title-wrapper
+						width: 91%
+						float: left
+
+						.explorer-resource-section-listing-contextual-title
+							padding: 10px
+							font-weight: bold
+							text-transform: uppercase
+							color: #aaa
 
 			.explorer-resource-listing-labels
 				overflow: hidden
 				color: #aaa
 
+				&:hover
+					.explorer-resource-listing-labels-handle-wrapper
+						.explorer-resource-listing-labels-handle
+							opacity: 1
+
+				.explorer-resource-listing-labels-handle-wrapper
+					width: 3%
+					float: left
+
+					.explorer-resource-listing-labels-handle
+						background: url('../images/move-handle.png')
+						width: 10px
+						height: 24px
+						margin: 6px 6px 0px 1px
+						cursor: move
+						opacity: 0
+
 				.explorer-resource-listing-labels-pre
 					width: 6%
+					height: 1px
 					float: left
 
 				.explorer-resource-listing-labels-header
-					width: 94%
+					width: 91%
 					float: left
 					overflow: hidden
 
@@ -6364,6 +6895,7 @@ body.signup, body.login, body.unsubscribe
 				.explorer-resource-listing-labels-header-key
 					width: 67%
 					float: left
+					padding: 10px 0px
 
 					&.expand
 						width: auto
@@ -6378,6 +6910,7 @@ body.signup, body.login, body.unsubscribe
 
 			.explorer-overview-section
 				margin-bottom: 40px
+				color: $light-font
 
 			.explorer-overview-issues-wrapper
 				margin-top: 20px
@@ -6422,7 +6955,7 @@ body.signup, body.login, body.unsubscribe
 
 					.explorer-timetable-period
 						padding-top: 28px
-						border-bottom: 1px solid #ddd
+						border-bottom: 1px solid #9ED2F4// #ddd
 						background-color: #f4f7f8
 						padding-left: 50px
 
@@ -6438,6 +6971,9 @@ body.signup, body.login, body.unsubscribe
 
 						&.explorer-timetable-week
 							height: 55px
+							color: #2980b9
+							font-weight: bold
+							font-size: 1.3em
 
 				.explorer-overview-unitflow
 					float: right
@@ -6456,29 +6992,445 @@ body.signup, body.login, body.unsubscribe
 						&:hover
 							background-color: #efefef
 
+		.explorer-resource-new-section,
+		.explorer-resource-module-support-new-field,
+		.explorer-textbook-add, .explorer-unit-add
+			padding: 9px
+			border: 1px solid #aaa
+			color: #aaa
+			font-weight: bold
+			text-align: center
+			margin-top: 20px
+			cursor: pointer
+			margin-bottom: 10px
+
+			&:hover
+				color: #666
+				border-color: #666
+
+
+		.explorer-resource-add-section,
+		.explorer-resource-add-field,
+		.explorer-settings-textbooks-new,
+		.explorer-settings-units-new
+			padding: 9px
+			background-color: #fff
+			margin-top: 20px
+			border: 1px solid #2980B9
+			margin-bottom: 10px
+
+		.explorer-resource-add-section-title,
+		.explorer-resource-add-field-title
+			margin: 3px 0px
+			color: #aaa
+
+		.explorer-resource-add-section-name-wrapper,
+		.explorer-resource-add-field-name-wrapper
+			display: block
+			margin: 6px 0px
+
+			.explorer-resource-add-section-name,
+			.explorer-resource-add-field-name
+				width: 99%
+
+		.explorer-resource-add-section-type,
+		.explorer-resource-add-field-type
+			display: block
+			margin: 6px 0px
+			width: 100%
+
+		.explorer-resource-add-section-actions,
+		.explorer-resource-add-field-actions,
+		.explorer-resource-add-textbooks-actions,
+		.explorer-resource-add-units-actions
+			text-align: right
+			margin: 3px 0px
+
+			.explorer-resource-add-section-action-cancel,
+			.explorer-resource-add-field-action-cancel,
+			.explorer-resource-add-textbook-action-cancel,
+			.explorer-resource-add-unit-action-cancel
+				margin-right: 6px
+
+		.explorer-settings-textbooks-new
+			overflow: hidden
+
+			.explorer-settings-textbooks-new-thumbnail	
+				width: 80px
+				height: 80px
+				float: left
+				margin-right: 20px
+				background-color: #efefef
+
+			.explorer-settings-textbooks-new-body
+				overflow: hidden
+
+				.explorer-settings-textbooks-new-body-title
+					display: block
+					width: 470px
+					margin-bottom: 6px
+
+				.explorer-settings-textbooks-new-description
+					width: 470px
+					height: 50px
+					margin-bottom: 6px
+					font-family: 'Arial', 'Helvetica', sans-serif
+
+		.explorer-settings-textbooks-item
+			overflow: hidden
+			padding: 11px
+
+			.explorer-settings-textbooks-item-thumbnail	
+				width: 80px
+				height: 80px
+				float: left
+				margin-right: 20px
+				background-color: #efefef
+				background-size: cover
+				background-repeat: no-repeat
+
+			.explorer-settings-textbooks-item-body
+				.explorer-settings-textbooks-item-body-title
+					font-size: 1.3em
+					margin-top: 6px
+
+				.explorer-settings-textbooks-item-body-description
+					margin-top: 10px
+
+		.explorer-settings-units-new
+			overflow: hidden
+
+			.explorer-settings-units-new-thumbnail	
+				width: 80px
+				height: 80px
+				float: left
+				margin-right: 20px
+				background-color: #efefef
+
+			.explorer-settings-units-new-body
+				overflow: hidden
+
+				.explorer-settings-units-new-body-title,
+				.explorer-settings-units-new-textbook
+					display: block
+					width: 470px
+					margin-bottom: 6px
+
+				.explorer-settings-units-new-body-duration-from
+					margin-right: 6px
+
+
+		.explorer-settings-units-item
+			overflow: hidden
+			padding: 11px
+			padding-left: 0px
+
+			.explorer-settings-units-item-thumbnail
+				width: 80px
+				height: 80px
+				float: left
+				margin-right: 20px
+				background-color: #efefef
+				background-size: cover
+				background-repeat: no-repeat
+
+			.explorer-settings-units-item-body
+				.explorer-settings-units-item-body-title
+					font-size: 1.3em
+					margin-top: 6px
+
+				.explorer-settings-units-item-body-textbook
+					margin-top: 10px
+
+				.explorer-settings-units-item-body-duration
+					margin-top: 6px
+
+
 		h2
 			font-family: 'Arial', 'Helvetica', sans-serif
 			color: $light-font
 
+		select
+			background-color: #fff
+			border: 1px solid #b2b2b2
+			font-weight: bold
+			outline: 0px
+
+			option
+				outline: 0px
+				padding: 4px
 
 	.explorer-resource-listing-actions
 		background-color: #efefef
 		padding: 10px
 		text-align: right
 
-		button
-			background-color: #aaa
-			padding: 4px 6px
-			color: #fff
-			border-width: 0px
-
-			&:hover
-				background-color: #999
-
 	.explorer-body
 		&.view-mode
 			.explorer-resource-objective
 				cursor: pointer
+
+	button.explorer-light-button
+		padding: 4px 6px
+		border: 1px solid #3498db
+		color: #3498db
+		background-color: transparent
+
+		&:hover
+			border-color: #2980b9
+			color: #2980b9
+
+	.explorer-settings
+		.oc-page-tabs
+			margin-left: 0px
+			margin-top: 0px
+
+			ul li
+				a.current
+					color: #666
+					border-color: #666
+
+		.explorer-settings-body
+			color: #666
+
+			.explorer-settings-textbooks
+				width: 600px
+
+			.explorer-settings-units
+				width: 600px
+
+			table.explorer-settings-general
+				width: 100%
+
+				colgroup
+					.explorer-settings-general-message
+						width: 25%
+
+					.explorer-settings-general-inputs
+						width: 35%
+
+					.explorer-settings-general-assist
+						width: 40%
+
+				tr
+					height: 40px
+
+				.explorer-settings-general-standards,
+				.explorer-settings-general-sync
+					label
+						float: left
+						margin-right: 20px
+
+						input[type=radio]
+							margin-right: 4px
+
+				.explorer-settings-general-name,
+				.explorer-settings-general-subject
+					input[type=text]
+						width: 250px
+
+				.explorer-settings-general-session
+					select
+						width: 260px
+
+				.explorer-settings-general-grade
+					select
+						width: 94px
+						margin-right: 6px
+
+				.explorer-settings-general-duration
+					input[type=text]
+						width: 117px
+
+						&:first-child
+							margin-right: 6px
+
+					.explorer-settings-general-duration-relevance
+						margin-top: 8px
+
+				.explorer-settings-general-advanced
+					td
+						font-weight: bold
+						vertical-align: bottom
+
+				.explorer-settings-general-sync
+					td
+						vertical-align: top
+
+					.explorer-settings-general-sync-labels-wrapper
+						overflow: hidden
+
+					button
+						width: 258px
+						padding: 8px
+
+					.explorer-settings-general-sync-pause,
+					.explorer-settings-general-sync-push
+						margin: 10px 0px
+
+					.explorer-settings-general-sync-push
+						.explorer-settings-general-sync-push-status
+							margin-top: 6px
+
+				.explorer-settings-general-tip
+					color: #aaa
+					visibility: hidden
+
+					&.show
+						visibility: visible
+
+.explorer
+	input[type=text], textarea
+		@include light-textbox
+
+	button.explorer-button
+		padding: 4px 6px
+		color: #fff
+		border-width: 0px
+		background-color: #3498db
+
+		&:hover
+			background-color: #2980b9
+
+	button.explorer-dull-button
+		background-color: #aaa
+		padding: 4px 6px
+		color: #fff
+		border-width: 0px
+
+		&:hover
+			background-color: #999
+
+	button.explorer-button-small
+		color: #fff
+		padding: 4px 8px
+		background-color: #55acee
+		border-radius: 2px
+		border-width: 1px
+		border-color: #43a3ec
+		font-weight: bold
+		border-style: solid
+
+		&:hover
+			border-color: #319bea
+			@include box-shadow(0 1px 0 rgba(67, 135, 187, 0.5))
+
+
+	button.explorer-dull-button-small
+		color: $body-color
+		background-color: #f3f3f3
+		border-color: #ddd
+
+		&:hover
+			border-color: #c6c6c6
+			@include box-shadow(0 1px 0 rgba(0, 0, 0, 0.15), 0 0 0 1px #fff inset)
+
+
+
+.explorer-copy-dialog
+	width: 600px
+	height: 400px
+	color: $light-font
+
+	.explorer-copy-header
+		height: 120px
+		background-image: url('../images/explorer/copy-curriculum-header.png')
+
+		.explorer-copy-header-flyer
+			background-image: url('../images/explorer/curriculum-copy-flyer.png')
+			position: relative
+			top: 50px
+			left: 360px
+			width: 30px
+			height: 30px
+			@include transition((left 3s ease, opacity 3s ease))
+
+			&.fly
+				left: 420px
+				opacity: 0
+
+	.explorer-copy-body
+		h3
+			margin-bottom: 20px
+			font-family: 'Arial', 'Helvetica', sans-serif
+			font-weight: bold
+			color: $light-font
+
+		.explorer-copy-question-wrapper
+			margin-bottom: 20px
+
+			.explorer-copy-question
+				font-weight: bold
+				margin-bottom: 4px
+
+				.explorer-copy-question-assist
+					color: #999
+					font-weight: normal
+
+			label
+				display: inline-block
+				margin-right: 16px
+
+				input
+					margin-right: 4px
+
+			input[type=text]
+				width: 550px
+
+		.explorer-copy-suggestion
+			color: #999
+			margin-bottom: 14px
+
+		.explorer-copy-button-wrapper
+			overflow: hidden
+
+			button
+				width: 49%
+				display: block
+
+				&.expand
+					width: 100%
+
+				&.hide
+					display: none
+
+				&.explorer-copy-button-cancel
+					float: left
+
+				&.explorer-copy-button-copy
+					float: right
+
+					.copy-spinner
+						display: block
+
+						.inline-spinner
+							margin-top: 6px
+							margin-left: 2px
+
+		.explorer-copy-body-pre
+			@include transition((opacity 1s ease))
+
+			&.fadeOut
+				opacity: 0
+
+			&.hide
+				visibility: hidden
+
+		.explorer-copy-body-post
+			text-align: center
+			opacity: 0
+			position: relative
+			top: -190px
+			left: 0px
+			width: 100%
+			@include transition((opacity 0.5s ease 1s))
+
+			&.show
+				opacity: 1
+
+			.explorer-copy-url
+				font-weight: bold
+				font-size: 1.3em
 
 //.objective-status-popouts
 .objective-status-dialog
@@ -6587,20 +7539,6 @@ body.signup, body.login, body.unsubscribe
 		padding: 4px 
 		background-color: #fff
 		float: right
-
-.light-popup-background
-	z-index: 5
-	position: fixed
-	display: none
-	height: 100%
-	width: 100%
-	background: #ffffff
-	top: 0px
-	left: 0px
-	opacity: 0.7
-
-	&.show-popup-background
-		display: block
 
 .explorer-suggest-resources-dialog
 	width: 800px
@@ -6779,6 +7717,22 @@ body.signup, body.login, body.unsubscribe
 
 				&.favorited
 					background-image: url('../images/hearted-light.png')
+
+@import "pikaday"
+
+.movable-clones
+	position: absolute
+
+	.movable-clone
+		cursor: move
+		background-color: #2980b9
+		padding: 4px
+		color: #fff
+		pointer-events: none
+		display: inline-block
+
+		&.float
+			position: absolute
 
 /***** INTERNAL TOOLS *************/
 
@@ -7130,6 +8084,9 @@ body.signup, body.login, body.unsubscribe
 
 			td:first-child
 				padding-top: 8px
+
+@import "org_profile"
+
 
 /***** EXPERIMENTS *************/
 

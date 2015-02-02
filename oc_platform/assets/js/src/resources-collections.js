@@ -533,7 +533,7 @@ OC.resourcesCollectionsActions = {
         renameResources: [],
         renameCollections: []
     },
-    actionCompletionCallback: '',
+    actionCompletionCallback: undefined,
 
     actionCompleted: function(){
         // Go through pending actions list to see if it is empty.
