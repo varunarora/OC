@@ -49,10 +49,10 @@ urlpatterns = patterns(
     # Changes.
     url(r'^api/curriculum/(?P<curriculum_id>\d+)/push/$', views.push_changes, name='push_changes'),
     url(r'^api/curriculum/(?P<curriculum_id>\d+)/pause/$', views.pause_changes, name='pause_changes'),
-    url(r'^(?P<username>[a-z0-9_\.]+)/(?P<grade_slug>[\w\-\.]+)/(?P<subject_slug>[\w\-\.]+)/changes/', views.curriculum_changes, name='curriculum_changes'),
+    url(r'^(?P<username>[a-z0-9_\-\.]+)/(?P<grade_slug>[\w\-\.]+)/(?P<subject_slug>[\w\-\.]+)/changes/', views.curriculum_changes, name='curriculum_changes'),
 
     # Issues.
     url(r'^api/issue/create-update/$', views.create_update_issue, name='create_update_issue'),
 
-    url(r'^(?P<organization_slug>[a-z0-9_\.]+)/(?P<username>[a-z0-9_\.]+)/(?P<curriculum_slug>[\w\-\.]+)/', views.curriculum, name='curriculum'),
+    url(r'^(?P<organization_slug>[a-z0-9_\.]+)/(?P<username>[a-z0-9_\-\.]+)/(?P<curriculum_slug>[\w\-\.]+)/', views.curriculum, name='curriculum'),
 )

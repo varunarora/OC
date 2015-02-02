@@ -13,7 +13,7 @@ urlpatterns = patterns(
 
     # Collections
     url(r'^new-collection/project/(?P<project_slug>[\w\-]+)/', views.new_project_collection, name='new_project_collection'),
-    url(r'^new-collection/user/(?P<username>\w+)/', views.new_user_collection, name='new_user_collection'),
+    url(r'^new-collection/user/(?P<username>[a-z0-9_\-\.]+)/', views.new_user_collection, name='new_user_collection'),
 
     # Resources API
     url(r'^delete-resource/(?P<resource_id>\d+)/from/(?P<collection_id>.+)/$', views.delete_resource, name='delete_resource'),
