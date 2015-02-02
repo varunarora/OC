@@ -1,4 +1,6 @@
 {% include 'partials/header.html' with header_type='vanilla' body_class='org-profile-view' %}
+<script src="{{ STATIC_URL }}js/build/core_light.js" type="text/javascript"></script>
+
 <script>
 require([{% if debug %}'common'{% else %}'{{ STATIC_URL }}js/common-build.js'{% endif %}], function(){
     require(['authenticate']);
