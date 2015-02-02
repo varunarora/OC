@@ -165,6 +165,8 @@
 				    {% endif %}
 
 					require(['article']);
+				{% elif body_class == 'org-profile-view' %}
+					// Do nothing.
 
 				{% elif body_class == 'editor' %}
 					require(['editor_page']);
