@@ -934,7 +934,7 @@ def fb_login(request):
 
 def get_unique_username(username, counter=0):
     try:
-        User.object.get(username=username)
+        User.objects.get(username=username)
         return get_unique_username(username, counter+1)
     except:
         return username if counter == 0 else username + '-' + counter
