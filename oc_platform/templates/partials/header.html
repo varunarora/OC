@@ -105,6 +105,8 @@
 
 		{% endif %}
 
+		{% if body_class != 'org-profile-view' %}
+
 		<script type="text/javascript">
 			require([{% if debug %}'common'{% else %}'{{ STATIC_URL }}js/common-build.js'{% endif %}], function(){
 				{% if body_class == 'browse' %}
@@ -165,9 +167,6 @@
 				    {% endif %}
 
 					require(['article']);
-				{% elif body_class == 'org-profile-view' %}
-					// Do nothing.
-
 				{% elif body_class == 'editor' %}
 					require(['editor_page']);
 
@@ -183,6 +182,7 @@
 				{% endif %}
 			});
 		</script>
+		{% endif %}
 		<link rel="icon" href="{{ STATIC_URL }}favicon.ico" type="image/x-icon"/>
 	</head>
 	<body{% if body_class %} class="{{ body_class }}"{% endif %}>
