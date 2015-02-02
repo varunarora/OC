@@ -708,7 +708,7 @@ def logout_view(request, organization_slug=None):
     from django.contrib.auth import logout
     logout(request)
 
-    if request.organization:
+    if hasattr(request, 'organization'):
         try:
             return redirect(request.organization.website)
         except:
