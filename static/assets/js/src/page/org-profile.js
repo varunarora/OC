@@ -478,9 +478,8 @@ define(['core_light'], function(OC){
                             document.querySelector('.content-panel-header-user-dropdown'));
                     }
                 });
+            search();
         }
-        
-        search();
 
         // Onboard if the user hasn't been onboarded; use cookeies to check.
         if (OC.utils.getCookie('onboard') === 'false'){
