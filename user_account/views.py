@@ -933,11 +933,12 @@ def fb_login(request):
 
 
 def get_unique_username(username, counter=0):
+    to_test = username if counter == 0 else username + '-' + str(counter)
     try:
-        User.objects.get(username=username)
+        User.objects.get(username=to_test)
         return get_unique_username(username, counter+1)
     except:
-        return username if counter == 0 else username + '-' + counter
+        return to_test
 
 
 def generate_profile_pic(profile_pic_url, user_id):
@@ -1515,6 +1516,7 @@ def user_folder(request, username, collection_slug):
         'title': title,
         'resources': resources,
         'collections': child_collections,
+        'isHome': collection_slug == None,
         #'units': child_units,
         'breadcrumb': breadcrumb,
         'organization': request.organization if hasattr(request, 'organization') else None,
@@ -1523,6 +1525,26 @@ def user_folder(request, username, collection_slug):
         'resource_count': resource_count
     }
     return render(request, 'new-profile.html', context)
+
+
+def user_drive(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except:
+        raise Http404
+
+    context = {
+        'user_profile': user,
+        'title': 'My Google Drive' + ' &lsaquo; ' + user.get_full_name(),
+        'organization': request.organization if hasattr(request, 'organization') else None,
+        'isHome': False,
+        'page': 'files',
+        'items_count': 0,
+        'resource_count': 0,
+        'drive': True,
+    }
+    return render(request, 'new-profile.html', context)
+
 
 
 def user_planner(request, username):
@@ -2343,6 +2365,13 @@ def api_followers(request, user_id):
 
     serialized_followers = []
     for subscriber in subscribers:
+        following = False
+
+        if request.user.is_authenticated():
+            if Subscription.objects.filter(subscribee=subscriber.subscriber,
+                subscriber=request.user.get_profile()).count() > 0:
+                following = True
+
         serialized_follower = {
             'id': subscriber.subscriber.user.id,
             'name': subscriber.subscriber.user.get_full_name(),
@@ -2350,8 +2379,7 @@ def api_followers(request, user_id):
                 'user:user_profile', kwargs={ 'username': subscriber.subscriber.user.username }),
             'thumbnail': settings.MEDIA_URL + subscriber.subscriber.profile_pic.name,
             'headline': subscriber.subscriber.headline,
-            'following': True if Subscription.objects.filter(
-                subscribee=subscriber.subscriber, subscriber=request.user.get_profile()).count() > 0 else False
+            'following': following
         }
         serialized_followers.append(serialized_follower)
 

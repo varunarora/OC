@@ -78,9 +78,14 @@ require([{% if debug %}'common'{% else %}'{{ STATIC_URL }}js/common-build.js'{% 
 
         {% elif page == 'files' %}
         OC.files = {};
-        OC.files.folderID = {{ folder.id }};
+        OC.files.folderID = {% if drive %}null{% else %}{{ folder.id }}{% endif %};
         OC.files.fileCount = 0;
         OC.files.itemsCount = {{ items_count }};
+        OC.files.drive = {% if drive %}true{% else %}false{% endif %};
+        OC.files.isHome = {% if isHome %}true{% else %}false{% endif %}
+        {% if isHome %}
+        OC.files.driveURL = '{% url user:user_drive username=user_profile.username %}'
+        {% endif %}
 
         require(['filesNew']);
 

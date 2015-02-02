@@ -598,6 +598,8 @@ $PLANNER_HOUR_HEIGHT: 3.85%
 					&.folder-thumbnail
 						background-image: url('../images/folder-light.png')
 
+					&.drive-thumbnail
+						background-image: url('../images/folder-drive.png')
 				tr
 					//@include transition(background-color 0.6s ease)
 
@@ -662,8 +664,11 @@ $PLANNER_HOUR_HEIGHT: 3.85%
 					@include box-shadow(0 0px 2px rgba(0, 0, 0, 0.1))
 
 					.profile-box-user
+						overflow: hidden
+
 						.profile-box-user-description
 							color: #fff
+							width: 75%
 
 							h2
 								@include text-shadow(0 1px 0 rgba(97, 97, 97, 1))

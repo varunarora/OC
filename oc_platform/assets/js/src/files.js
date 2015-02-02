@@ -3,7 +3,87 @@ define(['react', 'core_light', 'immutable'], function(React, OC, Immutable){
     var Files = {
         files: React.createClass({
             getInitialState: function(){
-                return {selectedFiles: [], files: iList(), folders: iList(), showCreateMenu: false};
+                return {selectedFiles: [],
+                    files: iList(),
+                    folders: OC.config.hasOwnProperty('organization') && OC.files.isHome ? iList(
+                        [Immutable.Map({title: 'My Google Drive', modified: new Date().toISOString(),
+                            url: OC.files.driveURL, drive: true})]) : iList(),
+                    showCreateMenu: false,
+                    mode: OC.files.drive === true ? 'view' : (
+                        OC.config.user.id === OC.config.profile.id ? 'edit' : 'view')
+                };
+            },
+            load: function(){
+                var view = this;
+                require(['atomic'], function(atomic){
+                    //if (Files.hasOwnProperty('spinner')) Files.spinner.spin(loadButton);
+
+                    atomic.get('/resources/api/folder/' + OC.config.profile.id + '/' + OC.files.folderID + '/from/0/tfi/')
+                    .success(function(response, xhr){
+                        response.folders.forEach(function(folder){folder.selected = false; });
+                        response.files.forEach(function(file){file.selected = false; });
+
+                        OC.files.itemsCount += response.files.length;
+                        view.setState({
+                            files: view.state.files.concat(Immutable.fromJS(response.files)),
+                            folders: view.state.folders.concat(Immutable.fromJS(response.folders))
+                        });
+                        
+                        //OC.$.removeClass(loadButton, 'loading');
+                        //OC.$.addClass(loadButtonWrapper, 'hide');
+                        Files.spinner.stop();
+                    });
+                });
+            },
+            gLoad: function(){
+                var view = this;
+
+                /** Google Drive part **/
+                var getFilesFolders = function(googleDriveListing){
+                    var files = [], folders = [], i;
+
+                    var rawFile, file;
+                    for (i = 0; i < googleDriveListing.items.length; i++){
+                        rawFile = googleDriveListing.items[i];
+                        file = Immutable.Map({
+                            title: rawFile.title,
+                            modified: rawFile.modifiedDate,
+                            visibility: 'private',
+                            url: rawFile.alternateLink
+                        });
+
+                        if (rawFile.mimeType === 'application/vnd.google-apps.folder') folders.push(file);
+                        else files.push(file.set('file', true));
+                    }
+
+                    return [iList(files), iList(folders)];
+                };
+
+                var listDrive = function(){
+                    var request = gapi.client.drive.files.list();
+                    request.execute(function(response){
+                        var filesFolders = getFilesFolders(response);
+                        view.setState({
+                            files: filesFolders[0],
+                            folders: filesFolders[1]
+                        });
+                        Files.spinner.stop();
+                    });
+                };
+
+                require(['gapi']);
+                window.gReady = function(){
+                    gapi.auth.authorize({'client_id': '747453362533.apps.googleusercontent.com',
+                        'scope': 'https://www.googleapis.com/auth/drive.readonly',
+                        'immediate': true
+                    },
+                        function(){
+                        gapi.client.load('drive', 'v2', function() {
+                            listDrive();
+                        });
+                    });
+                };
+                /** End of Google Drive part **/
             },
             componentDidMount: function(){
                 var loadButton = document.querySelector('.ajax-loader'),
@@ -22,26 +102,8 @@ define(['react', 'core_light', 'immutable'], function(React, OC, Immutable){
                 }
 
                 loadSpinner(function(){
-                    require(['jquery'], function($){
-                        if (Files.hasOwnProperty('spinner')) Files.spinner.spin(loadButton);
-
-                        $.get('/resources/api/folder/' + OC.config.profile.id + '/' + OC.files.folderID + '/from/0/tfi/',
-                            function(response){
-                                response.folders.forEach(function(folder){folder.selected = false; });
-                                response.files.forEach(function(file){file.selected = false; });
-
-                                OC.files.itemsCount += response.files.length;
-                                view.setState({
-                                    files: view.state.files.concat(Immutable.fromJS(response.files)),
-                                    folders: view.state.folders.concat(Immutable.fromJS(response.folders))
-                                });
-                                
-                                OC.$.removeClass(loadButton, 'loading');
-                                OC.$.addClass(loadButtonWrapper, 'hide');
-                                Files.spinner.stop();
-                            },
-                        'json');
-                    });
+                    //OC.files.drive === true ? view.gLoad : view.load);
+                    (OC.files.drive === true ? view.gLoad : view.load)();
                 });
 
                 function resizeUI(){
@@ -705,7 +767,7 @@ define(['react', 'core_light', 'immutable'], function(React, OC, Immutable){
             },
 
             render: function(){
-                if (OC.files.itemsCount > 0){
+                if (OC.files.drive === true || (OC.files.isHome === true && OC.config.hasOwnProperty('organization')) || OC.files.itemsCount > 0){
                     return React.DOM.div({className: 'files-wrapper'}, [
                         React.DOM.div({className: 'content-panel-body-title-bar-wrapper', ref: 'titleBarWrapper'},
                             React.DOM.div({className: 'content-panel-body-title-wrapper'}, [
@@ -836,7 +898,7 @@ define(['react', 'core_light', 'immutable'], function(React, OC, Immutable){
                             onClick: this.inputClick,
                             checked: this.state.selected ? true : false
                         }),
-                        React.DOM.a({className: 'file-thumbnail' + (this.props.file ? '' : ' folder-thumbnail')}),
+                        React.DOM.a({className: 'file-thumbnail' + (this.props.file ? '' : ' folder-thumbnail') + (this.props.hasOwnProperty('drive') ? ' drive-thumbnail' : '') }),
                         React.DOM.a({className: 'list-item-title', href: this.props.url, onClick: this.preventPropogation}, this.props.title)
                     ),
                     React.DOM.td({},

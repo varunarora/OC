@@ -29,6 +29,7 @@ require.config({
         hogan: 'lib/hogan',
         jstz: 'lib/jstz',
         plus: '//plus.google.com/js/client:plusone.js?onload=renderPlus',
+        gapi: '//apis.google.com/js/client.js?onload=gReady',
 
         // PDFJS
         pdfjs_l10n: 'lib/pdfjs/l10n',

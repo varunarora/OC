@@ -42,8 +42,11 @@ urlpatterns = patterns(
 
     url(r'^(?P<username>[a-z0-9_\.]+)/planner/classes/$', views.user_classes, name='user_classes'),
     url(r'^(?P<username>[a-z0-9_\.]+)/planner/$', views.user_planner, name='user_planner'),
+
     url(r'^(?P<username>[a-z0-9_\.]+)/files/(?P<collection_slug>.+)/$', views.user_folder, name='user_folder'),
     url(r'^(?P<username>[a-z0-9_\.]+)/files/$', views.user_files, name='user_files'),
+    url(r'^(?P<username>[a-z0-9_\.]+)/drive/$', views.user_drive, name='user_drive'),
+
     url(r'^(?P<username>[a-z0-9_\.]+)/followers/$', views.user_followers, name='user_followers'),
     url(r'^(?P<username>[a-z0-9_\.]+)/following/$', views.user_following, name='user_following'),
     url(r'^(?P<username>[a-z0-9_\.]+)/groups/$', views.user_groups, name='user_groups'),
