@@ -229,9 +229,9 @@ define(['react', 'curriculumPage', 'curriculumActions', 'curriculumSettings',
                             React.DOM.div({className: 'unit-header-body-description-titles-textbook'}, this.props.unit.textbookTitle),
                         ])
                     ]),
-                    React.DOM.div({className: 'unit-header-body-user content-panel-header-user'},
+                    OC.config.user.id ? React.DOM.div({className: 'unit-header-body-user content-panel-header-user'},
                         React.DOM.nav({className: 'content-panel-header-user-buttons'}, OC.views.UserHeader())
-                    )
+                    ) : null
                 )
             ]);
         }
