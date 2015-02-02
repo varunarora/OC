@@ -75,7 +75,7 @@ def organization_home(request):
 
 def login(request, organization_slug=None):
     if request.user.is_authenticated():
-        if request.organization:
+        if hasattr(request, 'organization'):
             return organization_home(request)
         else:
             return redirect('user:user_profile', username=request.user.username)
