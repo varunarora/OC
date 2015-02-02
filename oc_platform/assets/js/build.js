@@ -129,6 +129,7 @@
         filepicker: 'empty:',
         mathjax: 'empty:',
         plus: 'empty:',
+        gapi: 'empty:',
         requireLib: 'lib/require',
     },
     optimize: 'uglify2',
