@@ -105,7 +105,7 @@ define(['atomic', 'curriculumAppDispatcher', 'curriculumActions', 'curriculumSet
         },
         resources: {
             delete: function(serializedObjectiveResource, callback){
-                atomic.post('/curriculum/api/section-item/remove-resource/', JSON.stringify(serializedObjectiveResource))
+                atomic.post('/curriculum/api/section-item/remove-resource/', serializedObjectiveResource)
                 .success(function(response, xhr){
                     callback(response);
                 });
@@ -245,6 +245,15 @@ define(['atomic', 'curriculumAppDispatcher', 'curriculumActions', 'curriculumSet
 
             case 'MOVE_FIELD_SAVE':
                 OC.api.curriculum.sectionItem.repositionMeta(action.id, action.toShift);
+                break;
+
+
+            // Resources.
+            case 'REMOVE_RESOURCE':
+                OC.api.curriculum.resources.delete(
+                    {'resource_id': action.resourceID,
+                    'resource_set_id': action.resourceSetID
+                }, action.callback);
                 break;
 
             default:

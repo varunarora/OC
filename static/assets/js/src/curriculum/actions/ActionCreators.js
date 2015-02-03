@@ -260,6 +260,14 @@ define(['curriculumAppDispatcher'], function(AppDispatcher){
             });
         },
 
+        removeResource: function(resource, resourceSetID){
+            AppDispatcher.dispatch({
+                type: 'REMOVE_RESOURCE',
+                resourceID: resourceID,
+                resourceSetID: resourceSetID
+            });
+        },
+
         // Meta and resource set.
         deleteMeta: function(id, itemID){
             AppDispatcher.dispatch({

@@ -84,7 +84,11 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
         },
 
         get: function(itemID){
-            return _items.find(function(item){ return item.get('id') == itemID; });
+            return _items.find(function(item){ return item.get('id') === itemID; });
+        },
+
+        getSelected: function(itemID){
+            return _items.find(function(item){ return item.get('selected') === true; });
         },
 
         getSectionItems: function(sectionID){
@@ -197,6 +201,28 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
             updatedResourceSets[rsIndex].resources = updatedResourceSets[rsIndex].resources.push(resource);
             var updatedItem = toUpdateItem.set('resource_sets', updatedResourceSets);
 
+            _items = _items.set(index, updatedItem);
+        },
+
+        _removeResource: function(resourceID, resourceSetID){
+            toUpdateItem = _items.find(function(item, i){
+                index = i;
+                resourceSet = item.get('resource_sets').find(function(resourceSet, rsi){
+                    rsIndex = rsi;
+                    return resourceSet.id === resourceSetID;
+                });
+                return resourceSet !== undefined;
+            });
+
+            var updatedResourceSets = toUpdateItem.get('resource_sets');
+            var resourceToDelete = updatedResourceSets[rsIndex].resources.find(function(resource){
+                return resource.id === resourceID;
+            });
+
+            updatedResourceSets[rsIndex].resources = updatedResourceSets[rsIndex].resources.splice(
+                updatedResourceSets[rsIndex].resources.indexOf(resourceToDelete), 1);
+            var updatedItem = toUpdateItem.set('resource_sets', updatedResourceSets);
+            
             _items = _items.set(index, updatedItem);
         },
 
@@ -574,6 +600,13 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
                 case 'ADD_RESOURCE':
                     ItemsStore._addResource(
                         action.resource,
+                        action.resourceSetID
+                    );
+                    break;
+
+                case 'REMOVE_RESOURCE':
+                    ItemsStore._removeResource(
+                        action.resourceID,
                         action.resourceSetID
                     );
                     break;

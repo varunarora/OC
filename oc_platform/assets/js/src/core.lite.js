@@ -626,6 +626,11 @@ define([], function(){
         browser: function(tree, parentElement, collectionID){
             parentElement.innerHTML = tree;
 
+            // HACK intercept IF the user is a part of an organization.
+            if (OC.config.hasOwnProperty){
+                
+            }
+
             try {
                 // Bold the current collection, if this is in files.
                 OC.$.addClass(parentElement.querySelector('a#collection-' + collectionID), 'current-collection');

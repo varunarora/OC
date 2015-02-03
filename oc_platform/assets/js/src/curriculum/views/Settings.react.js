@@ -1,4 +1,5 @@
-define(['react', 'curriculumSettings', 'curriculumActions', 'pikaday'], function(React, SettingsStore, Actions, Pikaday){
+define(['react', 'curriculumSettings', 'curriculumActions', 'pikaday', 'reactRouter'], function(React, SettingsStore, Actions, Pikaday, Router){
+    var Link = Router.Link;
     var Settings = React.createClass({
         getInitialState: function() {
             return {
@@ -144,9 +145,10 @@ define(['react', 'curriculumSettings', 'curriculumActions', 'pikaday'], function
             return React.DOM.div({className: 'card-wrapper'},
                 React.DOM.div({className: 'card'}, [
                     React.DOM.div({className: 'card-toolbar', style: { backgroundColor: OC.config.palette.dark }}, [
-                        React.DOM.a({
+                        Link({
                             className: 'card-toolbar-back back-button ' + OC.config.palette.title + '-button',
-                            onClick: this.goBack
+                            //onClick: this.goBack,
+                            to: 'page'
                         }, 'Back')
                     ]),
                     React.DOM.div({className: 'card-title-wrapper card-title-wrapper-edit card-title-wrapper-small'}, [

@@ -30,7 +30,7 @@ urlpatterns = patterns(
     url(r'^api/section-item/(?P<section_item_id>\d+)/delete-meta/(?P<position>\d+)/$', views.delete_item_meta, name='delete_item_meta'),
 
     url(r'^api/section-item/add-item-to-section/$', views.add_item_to_section, name='add_item_to_section'),
-    url(r'^api/section-item/remove-resource/$', views.remove_resource_from_objective, name='remove_resource_from_objective'),
+    url(r'^api/section-item/remove-resource/$', views.remove_resource_from_resource_set, name='remove_resource_from_resource_set'),
     url(r'^api/section-items/reposition/$', views.reposition_items, name='reposition_items'),
     url(r'^api/section-item/create-resource-set/$', views.create_item_resources, name='create_item_resources'),
 

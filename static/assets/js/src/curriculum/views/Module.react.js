@@ -17,16 +17,20 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
         componentDidMount: function(){
             PageStore.on('change', this._onChange);
             Units.on('change', this._onChange);
+
+            OC.$.addClass(document.querySelector('.content-panel-body'), 'abridged');
         },
         componentWillUnmount: function(){
             PageStore.removeListener('change', this._onChange);
             Units.removeListener('change', this._onChange);
+
+            OC.$.removeClass(document.querySelector('.content-panel-body'), 'abridged');
         },
         _onChange: function(){
             this.setState({
                 addBlockState: PageStore.getAddBlockState(),
                 drawerOpen: PageStore.getDrawerView(),
-                sections: Units.getUnit(this.props.id).sections
+                sections: PageStore.getUnit().sections
             });
         },
 

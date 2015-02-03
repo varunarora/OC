@@ -737,19 +737,19 @@ def add_upload_to_section_item_resources(request):
     return APIUtilities.success(context)
 
 
-def remove_resource_from_objective(request):
-    objective_id = request.POST.get('id', None)
+def remove_resource_from_resource_set(request):
+    resource_set_id = request.POST.get('id', None)
     resource_id = request.POST.get('resource_id', None)
 
     try:
-        objective = Objective.objects.get(pk=objective_id)
+        resources = SectionItemResources.objects.get(pk=resource_set_id)
         resource = Resource.objects.get(pk=resource_id)
     except:
         return APIUtilities._api_not_found()
 
-    objective.resources.remove(resource)
+    resources.resources.remove(resource)
 
-    all_resource_objectives = Objective.objects.filter(resources=resource)
+    all_resource_objectives = SectionItemResources.objects.filter(resources=resource)
 
     if all_resource_objectives.count() == 0:
         resource.delete()

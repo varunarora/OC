@@ -37,7 +37,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
             Items.on('change', this._onChange);
 
             // Set a tip for 'Add to planner'
-            OC.utils.tip(this.refs.addToPlanner.getDOMNode());
+            if (this.refs.addToPlanner) OC.utils.tip(this.refs.addToPlanner.getDOMNode());
             if (this.refs.delete) OC.utils.tip(this.refs.delete.getDOMNode());
         
             // Set positioning of field menu.
@@ -67,7 +67,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
         _onChange: function(){
             this.setState({
                 addFieldState: Items.getFieldState(),
-                item: Items.get(this.props.itemID),
+                item: Items.getSelected(),
                 showPlanner: Items.getShowPlanner()
             });
         },
@@ -133,7 +133,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
 
         renderSections: function(){
             var props = this.props, view = this;
-            var metaLength = this.state.item.get('meta').size;
+            var metaLength = this.state.item.get('meta').length;
 
             if (metaLength > 0 || this.state.item.get('resource_sets').length > 0){
                 var metaProps = this.state.item.get(
@@ -308,13 +308,13 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
                         backgroundColor: OC.config.palette.dark
                     }
                 }, [
-                    React.DOM.div({
+                    OC.config.user.id ? React.DOM.div({
                         className: 'explorer-resource-module-support-pre-planner ' + OC.config.palette.title + '-button',
                         ref: 'addToPlanner',
                         title: 'Add to Planner',
                         onClick: this.togglePlanner
-                    }),
-                    PlannerWidget.Widget({
+                    }) : null,
+                    OC.config.user.id ? PlannerWidget.Widget({
                         open: this.state.showPlanner,
                         id: this.state.item.get('id')
                     }, {
@@ -331,7 +331,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
                         eventSelect: function(eventID, eventDate){
                             Actions.selectPlannerEvent(eventID, eventDate);
                         }
-                    }),
+                    }) : null,
                     Settings.getCanEdit() ? React.DOM.div({
                         className: 'explorer-resource-module-support-delete ' + OC.config.palette.title + '-button',
                         ref: 'delete',
@@ -655,6 +655,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
                 model: resource,
                 //collection: this.props.collection,
                 //objective: this.props.objective,
+                resourceSetID: this.props.id,
                 key: resource.get('id')
             });
         },
@@ -736,16 +737,15 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
 
     ResourceView = React.createClass({
         removeResource: function(){
-            OC.appBox.saving();
-            this.props.collection.remove(this.props.model);
+            OC.utils.status.saving();
 
-            this.props.model.save(null, {
-                attrs: {'remove_resource_from': this.props.objective},
-                success: function(){
-                    OC.appBox.saved();
-                    OC.explorer.resetPreHeights(true);
+            Actions.removeResource(
+                this.props.item.get('id'),
+                this.props.resourceSetID,
+                function(){
+                    OC.utils.status.saved();
                 }
-            });
+            );
         },
         openSesame: function(event){
             Utils.openResourcePreview(
