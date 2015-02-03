@@ -5,7 +5,7 @@ define(['react', 'core_light', 'immutable'], function(React, OC, Immutable){
             getInitialState: function(){
                 return {selectedFiles: [],
                     files: iList(),
-                    folders: OC.config.hasOwnProperty('organization') && OC.files.isHome ? iList(
+                    folders: OC.config.user.id === OC.config.profile.id && OC.config.hasOwnProperty('organization') && OC.files.isHome ? iList(
                         [Immutable.Map({title: 'My Google Drive', modified: new Date().toISOString(),
                             url: OC.files.driveURL, drive: true})]) : iList(),
                     showCreateMenu: false,
@@ -890,7 +890,7 @@ define(['react', 'core_light', 'immutable'], function(React, OC, Immutable){
                 }
             },
             render: function(){
-                return React.DOM.tr({onClick: this.cholay, className: this.state.selected ? 'selected' : '' }, [
+                return React.DOM.tr({onClick: OC.config.user.id === OC.config.profile.id ? this.cholay : null, className: this.state.selected ? 'selected' : '' }, [
                     React.DOM.td({},
                         React.DOM.input({
                             type: 'checkbox',

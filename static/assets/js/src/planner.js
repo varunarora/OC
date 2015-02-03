@@ -311,16 +311,16 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                                 onClick: this.goBack
                             }, 'Back'),
                             React.DOM.div({className: 'card-toolbar-secondary'}, [
-                                React.DOM.a({
+                                OC.config.user.id === OC.config.profile.id ? React.DOM.a({
                                     className: 'planner-event-toolbar-back card-toolbar-delete ' + (
                                     (this.props.evnt.palette ? this.props.evnt.palette : OC.config.palette.title) + '-button'),
                                     onClick: this.delete
-                                }, 'Delete'),
-                                React.DOM.a({
+                                }, 'Delete') : null,
+                                OC.config.user.id === OC.config.profile.id ? React.DOM.a({
                                     className: 'planner-event-toolbar-back card-toolbar-edit ' + (
                                     (this.props.evnt.palette ? this.props.evnt.palette : OC.config.palette.title) + '-button'),
                                     onClick: this.edit
-                                }, 'Edit')
+                                }, 'Edit') : null
                             ])
                         ]),
                         React.DOM.div({className: 'planner-event-title-wrapper card-title-wrapper',  style: titleStyle}, [

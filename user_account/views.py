@@ -1552,7 +1552,7 @@ def user_planner(request, username):
         user = User.objects.get(username=username)
 
         from planner.models import Class
-        classes = Class.objects.filter(user=request.user)
+        classes = Class.objects.filter(user=user)
     except:
         raise Http404
 

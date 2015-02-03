@@ -1,6 +1,5 @@
-OC.curriculum.loadButton = document.querySelector('.ajax-loader');
-
-require(['react', 'curriculumBootstrap',
+define(['react',
+    'curriculumBootstrap',
     'curriculumActions',
     'curriculumPageView',
     'curriculumWebAPI',
@@ -8,6 +7,7 @@ require(['react', 'curriculumBootstrap',
     function(React, Bootstrap, Actions, Sequence, undefined, Settings, Router){
 
     Actions.initSettings(OC.curriculum.settings);
+    OC.curriculum.loadButton = document.querySelector('.ajax-loader');
 
     var Route = Router.Route, DefaultRoute = Router.DefaultRoute,
         RouteHandler = Router.RouteHandler;

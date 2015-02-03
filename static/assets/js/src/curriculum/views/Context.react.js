@@ -38,7 +38,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
 
             // Set a tip for 'Add to planner'
             OC.utils.tip(this.refs.addToPlanner.getDOMNode());
-            OC.utils.tip(this.refs.delete.getDOMNode());
+            if (this.refs.delete) OC.utils.tip(this.refs.delete.getDOMNode());
         
             // Set positioning of field menu.
             var menuPosition = OC.utils.menu(this.getDOMNode().querySelector(

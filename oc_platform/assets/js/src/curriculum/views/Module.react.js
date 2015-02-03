@@ -276,10 +276,13 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
                 );
             }
 
-            var menuPosition = OC.utils.menu(this.getDOMNode().querySelector('nav.block-menu'),
-                this.getDOMNode().querySelector('.block-menu-button'));
+            var blockMenu = this.getDOMNode().querySelector('nav.block-menu');
+            if (blockMenu) {
+                var menuPosition = OC.utils.menu(blockMenu,
+                    this.getDOMNode().querySelector('.block-menu-button'));
 
-            this.setState({ menuPosition: menuPosition });
+                this.setState({ menuPosition: menuPosition });
+            }
 
             Items.on('change', this._onChange);
         },
@@ -289,7 +292,7 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
         },
         componentWillReceiveProps: function(nextProps){
             if (this.props.drawerOpen !== nextProps.drawerOpen){
-                this.state.menuPosition.reset();
+                if (this.state.menuPosition) this.state.menuPosition.reset();
             }
         },
         _onChange: function(){
