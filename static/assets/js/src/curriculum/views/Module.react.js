@@ -15,23 +15,28 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
         },
 
         componentDidMount: function(){
-            PageStore.on('change', this._onChange);
+            //PageStore.on('change', this._onChange);
             Units.on('change', this._onChange);
+            Items.on('change', this._onChange);
 
             OC.$.addClass(document.querySelector('.content-panel-body'), 'abridged');
         },
         componentWillUnmount: function(){
-            PageStore.removeListener('change', this._onChange);
+            //PageStore.removeListener('change', this._onChange);
             Units.removeListener('change', this._onChange);
+            Items.removeListener('change', this._onChange);
 
             OC.$.removeClass(document.querySelector('.content-panel-body'), 'abridged');
         },
         _onChange: function(){
-            this.setState({
-                addBlockState: PageStore.getAddBlockState(),
-                drawerOpen: PageStore.getDrawerView(),
-                sections: PageStore.getUnit().sections
-            });
+            var currentUnit = Units.getUnit(this.props.id);
+
+            if (this.isMounted())
+                this.setState({
+                    addBlockState: PageStore.getAddBlockState(),
+                    drawerOpen: PageStore.getDrawerView(),
+                    sections: currentUnit ? currentUnit.sections : null
+                });
         },
 
         /*getDefaultProps: function() {
@@ -66,12 +71,13 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
                 return Context({
                     itemID: getSelectedItem(selectedSection).get('id'),
                     section: selectedSection,
+                    host: 'curriculum'
                     //moveMetaTo: this.props.moveMetaTo,
                     //moveResourceSetTo: this.props.moveResourceSetTo
             });
             } else {
                 if (this.props.drawerView)
-                    return Context();
+                    return Context({host: 'curriculum'});
             }
         },
 
@@ -119,10 +125,7 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
 
                     // If contextual, add first item to section.
                     if (newSectionType === 'contextual'){
-                        Actions.addItemPost(Units.getSectionItem(), function(itemID){
-                            // Get unsectioned item by ID.
-                            Actions.addToSection(itemID, sectionID);
-                        }, sectionID);
+                        Actions.addItemPost(Items.getSectionItem(), sectionID);
                     }
                 }
             );
@@ -247,7 +250,10 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
             Actions.moveSectionSave(Units.getToShift());
         },
         getInitialState: function() {
-            return { showMenu: false, items: this.getItems(this.props.id) };
+            return {
+                showMenu: false,
+                id: this.props.id
+            };
         },
         getItems: function(){
             var items = Items.getSectionItems(this.props.id);
@@ -288,35 +294,20 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
                 this.setState({ menuPosition: menuPosition });
             }
 
-            Items.on('change', this._onChange);
-        },
-        componentWillUnmount: function() {
-            //this.props.collection.off('add change sort remove', this._backboneForceUpdate, this);
-            Items.removeListener('change', this._onChange);
         },
         componentWillReceiveProps: function(nextProps){
             if (this.props.drawerOpen !== nextProps.drawerOpen){
                 if (this.state.menuPosition) this.state.menuPosition.reset();
             }
         },
-        _onChange: function(){
-            this.setState({
-                addBlockState: PageStore.getAddBlockState(),
-                items: this.getItems(this.props.id)
-            });
-        },
         addItem: function(){
-            var sectionID = this.props.id;
+            var sectionID = this.state.id;
 
             // Determine the current max position.
             Actions.addItem(sectionID);
 
             // Save the item.
-            Actions.addItemPost(Items.getUnsavedItem(), function(itemID){
-                // Get unsectioned item by ID.
-                Actions.addToSection(itemID, sectionID);
-            });
-
+            Actions.addItemPost(Items.getUnsavedItem(), sectionID);
             /*
             var view = this;
             OC.appBox.saving();
@@ -342,10 +333,10 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
             this.props.openDrawer(newCollectionItem);*/
         },
         open: function() {
-            this.props.openDrawer(this.props.collection.get(0));
+            Actions.openItem(Items.getSectionItems(this.state.id).get(0));
         },
 
-        toggleMenu: function(){
+        toggleMenu: function(event){
             var view = this;
 
             this.setState({showMenu: !this.state.showMenu}, function(){
@@ -365,6 +356,10 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
                     });
                 }
             });
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
         },
 
         renderItem: function(item) {
@@ -416,16 +411,17 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
                             React.DOM.div({className: 'curriculum-module-section-listing-collection-title'},
                                 this.props.title)
                         ),
-                        Settings.getCanEdit() ? (React.DOM.div({className: 'curriculum-module-section-listing-collection-menu block-menu-button ' + (
+                        Settings.getCanEdit() ? React.DOM.div({className: 'curriculum-module-section-listing-collection-menu block-menu-button ' + (
                             drawerOpen ? 'light' : OC.config.palette.title) + '-button', onClick: this.toggleMenu,
-                            key: 2}),
-                        SectionMenu({open: this.state.showMenu, id: this.props.id})): null
+                            key: 2}): null,
+                        Settings.getCanEdit() ? SectionMenu({open: this.state.showMenu, id: this.props.id}): null
                     );
                 //}
+
                 return React.DOM.div({className: 'explorer-resource-section-body'}, [
                     sectionTitle,
                     React.DOM.div({className: 'explorer-resource-section-listing-items', key: 1},
-                       this.state.items.sortBy(function(item) { return item.get('position'); }).map(this.renderItem).toJS()),
+                       this.getItems(this.state.id).sortBy(function(item) { return item.get('position'); }).map(this.renderItem).toJS()),
                     Settings.getCanEdit() ? React.DOM.div({className: 'explorer-resource-listing-actions', key: 2},
                         React.DOM.button({
                             id: 'new-item',
@@ -435,16 +431,21 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
                     ) : null
                 ]);
             } else if (this.props.type === 'contextual') {
+                // Check to see if the item from this section is selected.
+                var item;
+                if (this.state.id){
+                    var sectionItems = Items.getSectionItems(this.state.id);
+                    item = sectionItems.size === 0 ? Items.getSectionItem() : sectionItems.get(0);
+                } else item = Items.getSectionItem();
+
                 titleAttributes = {
-                    className: 'curriculum-module-section-listing-contextual' + (this.props.collection.get(
-                        0).get('selected') ? ' selected' : ''),
+                    className: 'curriculum-module-section-listing-contextual' + (item.get('selected') ? ' selected' : ''),
                     onClick: this.open
                 };
 
                 if (drawerOpen){
                     titleAttributes.style = {};
                 } else titleAttributes.style = { backgroundColor: OC.config.palette.dark };
-
 
                 return React.DOM.div({className: 'explorer-resource-section-body'},
                     //React.DOM.div({
@@ -461,9 +462,9 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
                             React.DOM.div({className: 'curriculum-module-section-listing-contextual-title'},
                                 this.props.title)
                         ),
-                        React.DOM.div({className: 'curriculum-module-section-listing-contextual-menu block-menu-button ' + (
-                            drawerOpen ? 'light' : OC.config.palette.title) + '-button', onClick: this.toggleMenu, key: 2}),
-                        SectionMenu({open: this.state.showMenu, id: this.props.id})
+                        Settings.getCanEdit() ? React.DOM.div({className: 'curriculum-module-section-listing-contextual-menu block-menu-button ' + (
+                            drawerOpen ? 'light' : OC.config.palette.title) + '-button', onClick: this.toggleMenu, key: 2}) : null,
+                        Settings.getCanEdit() ? SectionMenu({open: this.state.showMenu, id: this.props.id}) : null
                     )
                 );
             }
@@ -471,8 +472,12 @@ define(['react', 'curriculumItemView',  'curriculumPage', 'curriculumItems', 'cu
     });
 
     var SectionMenu = React.createClass({
-        deleteSection: function(){
+        deleteSection: function(event){
             Actions.deleteSection(this.props.id);
+
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
         },
         render: function(){
             return React.DOM.nav({className: 'oc-menu block-menu' + (this.props.open ? ' show-menu' : '')}, [

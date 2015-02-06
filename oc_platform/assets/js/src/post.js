@@ -211,13 +211,13 @@ define(['core_light', 'uploadNew'], function(OC, Upload){
         },
 
         complete: function(data, url){
-            var ref = null;
+            var ref = null, options = _options;
             if (_options.sent) ref = _options.sent({ title: data.title });
 
             require(['atomic'], function(atomic){
                 atomic.post(url, data)
                 .success(function(response, xhr){
-                    _options.callback(response, ref);
+                    options.callback(response, ref);
                 });
             });
         }

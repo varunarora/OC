@@ -1,4 +1,4 @@
-define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curriculumSettings'],
+define(['dispatcher', 'events', 'deep_extend', 'immutable', 'curriculumSettings'],
     function(AppDispatcher, Events, extend, Immutable, Settings){
     
     var EventEmitter = Events.EventEmitter;
@@ -7,7 +7,19 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
         _textbooks = Immutable.List(),
         _unsavedTextbook = null;
 
-    var TextbookStore = extend(EventEmitter.prototype, {
+    var TextbookStore = extend({}, EventEmitter.prototype, {
+        emitChange: function() {
+            this.emit(CHANGE_EVENT);
+        },
+
+        addChangeListener: function(callback) {
+            this.on(CHANGE_EVENT, callback);
+        },
+
+        removeChangeListener: function(callback) {
+            this.removeListener(CHANGE_EVENT, callback);
+        },
+
         getTextbooks: function(){
             return _textbooks;
         },

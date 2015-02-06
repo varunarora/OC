@@ -11,7 +11,6 @@ define(['react', 'curriculumItems', 'curriculumActions', 'curriculumSettings', '
         },
         componentDidMount: function() {
             //this.setReady();
-
             var view = this,
                 handle = this.getDOMNode().querySelector('.explorer-resource-section-listing-item-handle');
 
@@ -239,6 +238,9 @@ define(['react', 'curriculumItems', 'curriculumActions', 'curriculumSettings', '
     });*/
 
     var ModuleSectionItem = React.createClass({
+        componentDidMount: function(){
+            if (!this.props.model.has('id')) this.getDOMNode().focus();
+        },
         save: function(event){
             newDescription = event.target.innerHTML;
 

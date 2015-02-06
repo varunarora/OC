@@ -231,13 +231,18 @@ def event_body(request, event_id):
     serialized_contexts = {}
 
     # For all items associated with this event, place into context.
+    from curriculum.models import Section, Unit
+    from curriculum.views import _get_fields
+
     for item in event.items.all():
-        from curriculum.models import Section, Unit
         section = Section.objects.get(items=item)
 
+        serialized_resource_sets, serialized_meta = _get_fields(item)
         serialized_item = {
             'id': item.id,
-            'description': item.description
+            'description': item.description,
+            'meta': serialized_meta,
+            'resource_sets': serialized_resource_sets
         }
 
         if section.id in serialized_contexts:

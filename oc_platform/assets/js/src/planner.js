@@ -1,4 +1,7 @@
-define(['react', 'core_light', 'moment'], function(React, OC, moment){
+define(['react', 'core_light', 'moment', 'curriculumContextView', 'plannerActions', 'plannerStore', 'immutable'],
+    function(React, OC, moment, ContextView, Actions, PlannerStore, Immutable){
+    
+    var bodyWrapper = document.querySelector('.content-panel-body-wrapper');
     OC.api = {
         planner: {
             event: {
@@ -253,19 +256,13 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
 
                 });
             },
-
             renderContexts: function(){
                 var c, contexts = [], items, i;
                 for (c in this.state.contexts){
                     items = [];
 
                     for (i = 0; i < this.state.contexts[c].items.length; i++){
-                        items.push(
-                            React.DOM.div({className: 'planner-event-details-block-item'},
-                                React.DOM.a({className: 'planner-event-details-block-item-description'},
-                                    this.state.contexts[c].items[i].description)
-                            )
-                        );
+                        items.push(Planner.evntItemView({ item: this.state.contexts[c].items[i] }));
                     }
 
                     contexts.push(
@@ -284,6 +281,8 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                 this.props.editEvent();
             },
             goBack: function(){
+                Actions.closeItem();
+
                 this.props.closeEvent();
             },
             delete: function(){
@@ -302,7 +301,7 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                 var start = moment(this.props.evnt.start),
                     end = moment(this.props.evnt.end);
 
-                return React.DOM.div({className: 'planner-event-wrapper card-wrapper'},
+                return React.DOM.div({className: 'planner-event-wrapper card-wrapper' + (this.props.drawer ? ' card-wrapper-condensed' : '')},
                     React.DOM.div({className: 'planner-event card'}, [
                         React.DOM.div({className: 'planner-event-toolbar card-toolbar', style: toolbarStyle }, [
                             React.DOM.a({
@@ -329,9 +328,9 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                                 React.DOM.span({className: 'planner-event-title-assist-class'}, (this.props.evnt.class_link ? this.props.evnt.class_link.title + ' / ' : '') + start.fromNow(
                                     )),
                                 React.DOM.span({}, ' on '),
-                                React.DOM.span({className: 'planner-event-title-assist-date'}, start.format('MMM Mo, YYYY [at] h:mma')),
+                                React.DOM.span({className: 'planner-event-title-assist-date'}, start.format('MMM Do, YYYY [at] h:mma')),
                                 React.DOM.span({}, ' to '),
-                                React.DOM.span({className: 'planner-event-title-assist-date'}, start.isSame(end, 'day') ? end.format('h:mma') : end.format('MMM Mo, YYYY [at] h:mma'))
+                                React.DOM.span({className: 'planner-event-title-assist-date'}, start.isSame(end, 'day') ? end.format('h:mma') : end.format('MMM Do, YYYY [at] h:mma'))
                             ])
                         ]),
                         this.state.contexts ? React.DOM.div({className: 'planner-event-details card-details card-details-padded'}, this.renderContexts()) : null,
@@ -342,8 +341,20 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                                 React.DOM.div({className: 'planner-event-details-block-body'}, this.props.notes)
                             ])
                         ): null,
-                        this.state.contexts === null ? null : React.DOM.div({className: 'ajax-loader-wrapper'}, React.DOM.div({className: 'ajax-loader'}))
+                        (this.state.contexts === null || typeof this.state.contexts === 'object' ) ? null : React.DOM.div({className: 'ajax-loader-wrapper'}, React.DOM.div({className: 'ajax-loader'}))
                     ])
+                );
+            }
+        }),
+
+        evntItemView: React.createClass({
+            open: function(){
+                Actions.openItem(this.props.item);
+            },
+            render: function(){
+                return React.DOM.div({className: 'planner-event-details-block-item'},
+                    React.DOM.a({className: 'planner-event-details-block-item-description', onClick: this.open},
+                        this.props.item.description)
                 );
             }
         }),
@@ -358,7 +369,7 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                 this.time = OC.utils.timepicker(this.getDOMNode(), null, this.props.listenToChange ? this.classPeriodChanged : null);
             },
             componentWillReceiveProps: function(nextProps){
-                if (nextProps.hasOwnProperty('scrollTo')){
+                if (nextProps.scrollTo){
                     this.time.scrollTo(nextProps.scrollTo);
                 }
             },
@@ -648,7 +659,7 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                     OC.$.addListener(confirm, 'click', function(event){
                         confirmDialog.close();
 
-                        require(['./src/PlannerAPI'], function(){
+                        require(['plannerAPI'], function(){
                             OC.api.planner.addItem(view.props.item.id, selectedEventID);
                             OC.api.planner.removeItem(view.props.item.id, view.props.evnt.id);
                             view.remove();
@@ -676,20 +687,18 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                             loader = moveWidget.dialog.querySelector('.popup-body-loader');
 
                         load(loader, function(){
-                            require(['./src/PlannerWidget.react',
-                                './src/curriculum/actions/ActionCreators',
-                                './src/PlannerAPI'
-                                ], function(PlannerWidget, Actions){
+                            require(['plannerWidget', 'curriculumActions', 'plannerAPI'],
+                                function(PlannerWidget, curriculumActions){
                                 React.renderComponent(
                                     PlannerWidget.Calendar(
                                         {itemID: view.props.item.id},
                                         {
                                             cancelEventSelect: function(){
-                                                Actions.clearEventSelection();
+                                                curriculumActions.clearEventSelection();
                                             },
                                             confirmEventSelect: function(itemID, eventID){
-                                                Actions.confirmAddItemToEvent(itemID, eventID);
-                                                Actions.removeItemFromEvent(itemID, view.props.evnt.id);
+                                                curriculumActions.confirmAddItemToEvent(itemID, eventID);
+                                                curriculumActions.removeItemFromEvent(itemID, view.props.evnt.id);
                                                 
                                                 view.remove();
 
@@ -700,10 +709,10 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                                                 OC.utils.messageBox.show();
                                             },
                                             dateSelect: function(date){
-                                                Actions.selectDate(date);
+                                                curriculumActions.selectDate(date);
                                             },
                                             eventSelect: function(eventID, eventDate){
-                                                Actions.selectPlannerEvent(eventID, eventDate);
+                                                curriculumActions.selectPlannerEvent(eventID, eventDate);
                                             }
                                         }),
                                     document.querySelector('.move-item-widget'),
@@ -740,8 +749,11 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                     }
                 });
             },
+
             render: function(){
-                return React.DOM.div({className: 'planner-event-details-block-item'}, [
+                return React.DOM.div({
+                    className: 'planner-event-details-block-item'
+                }, [
                     React.DOM.div({className: 'planner-event-details-block-item-description'},
                         this.props.item.description),
                     React.DOM.div({
@@ -823,7 +835,8 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                 return {
                     view: 'calendar', evnt: null, week: {},
                     currentWeek: 0, allDayEvents: {}, loaded: [],
-                    contexts: {}, notes: {}
+                    contexts: {}, notes: {},
+                    drawer: PlannerStore.getDrawer(), context: PlannerStore.getItem()
                 };
             },
 
@@ -845,8 +858,32 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
 
                 this.resizeUI();
                 window.addEventListener('resize', this.resizeUI);
+
+                PlannerStore.on('change', this._onChange);
+            },
+            componentWillUnmount: function(){
+                PlannerStore.removeListener('change', this._onChange);
             },
 
+            _onChange: function(){
+                this.setState({
+                    drawer: PlannerStore.getDrawer(),
+                    context: PlannerStore.getItem()
+                }, function(){
+                    if (this.state.drawer){
+                        function resize(){
+                            OC.$.addClass(bodyWrapper, 'condensed');
+                            bodyWrapper.style.width = OC.$.css(
+                                document.querySelector('header'), 'width');
+                        }
+                        resize();
+                        OC.$.addListener(window, 'resize', resize);
+                    } else {
+                        OC.$.removeClass(bodyWrapper, 'condensed');
+                        bodyWrapper.style.width = '96%';
+                    }
+                });
+            },
             loadSpinner: function(callback){
                 var loadButton = document.querySelector('.ajax-loader');
 
@@ -878,7 +915,7 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
             },
             closeEvent: function(){
                 // Close event view.
-                this.setState({view: 'calendar'});
+                this.setState({view: 'calendar' });
             },
             editEvent: function(){
                 // Close event view.
@@ -886,7 +923,8 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
             },
             closeEdit: function(){
                 // Open event view.
-                this.setState({view: 'event'});
+                if (!this.state.evnt.id) this.setState({view: 'calendar'});
+                else this.setState({view: 'event'});
             },
             updateEvents: function(data){
                 var view = this;
@@ -1020,7 +1058,7 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                 } else data[date] = event;
 
                 require(['deep_extend'], function(extend){
-                    view.setState({ evnt: event, week: extend(view.state.week, data) });
+                    view.setState({ evnt: event, week: data });
                 });
             },
             deleteEvent: function(){
@@ -1053,7 +1091,7 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                                 //React.DOM.h1({className: 'content-panel-body-title'}, 'Planner'),
                                 React.DOM.div({className: 'content-panel-body-context'}, [
                                     React.DOM.div({className: 'content-panel-body-context-view'}, [
-                                        React.DOM.a({}, 'Day'),
+                                        //React.DOM.a({}, 'Day'),
                                         React.DOM.a({className: 'current'}, 'Week'),
                                     ]),
                                     React.DOM.div({className: 'content-panel-body-context-period'}, [
@@ -1094,16 +1132,35 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
                         eventSaved: this.eventSaved
                     });
                 } else {
-                    return Planner.evnt({
-                        closeEvent: this.closeEvent,
-                        evnt: this.state.evnt,
-                        editEvent: this.editEvent,
-                        setContexts: this.setContexts,
-                        contexts: this.getContext(this.state.evnt.id),
-                        setNotes: this.setNotes,
-                        notes: this.getNotes(this.state.evnt.id),
-                        deleteEvent: this.deleteEvent
-                    });
+                    var item;
+                    if (this.state.drawer){
+                        item = this.state.context;
+
+                        item.resource_sets.forEach(function(resourceSet){
+                            resourceSet.resources = Immutable.fromJS(resourceSet.resources);
+                        });
+                    }
+                    
+                    return React.DOM.div({}, [
+                        Planner.evnt({
+                            closeEvent: this.closeEvent,
+                            evnt: this.state.evnt,
+                            editEvent: this.editEvent,
+                            setContexts: this.setContexts,
+                            contexts: this.getContext(this.state.evnt.id),
+                            setNotes: this.setNotes,
+                            notes: this.getNotes(this.state.evnt.id),
+                            deleteEvent: this.deleteEvent,
+                            drawer: this.state.drawer
+                        }),
+                        this.state.drawer ? React.DOM.div({ className: 'explorer-resource-module-support show planner-event-support'},
+                            ContextView({
+                                host: 'planner',
+                                item: Immutable.Map(item),
+                                palette: this.state.evnt.palette
+                            })
+                        ) : null
+                    ]);
                 }
             }
         }),
@@ -1132,8 +1189,7 @@ define(['react', 'core_light', 'moment'], function(React, OC, moment){
     };
 
     React.renderComponent(
-        Planner.calendarWrapper({week: {}}),
-        document.querySelector('.content-panel-body-wrapper')
+        Planner.calendarWrapper({week: {}}), bodyWrapper
     );
     return Planner;
 });

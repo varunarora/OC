@@ -1,4 +1,4 @@
-define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curriculumActions'],
+define(['dispatcher', 'events', 'deep_extend', 'immutable', 'curriculumActions'],
     function(AppDispatcher, Events, extend, Immutable, Actions){
 
     var EventEmitter = Events.EventEmitter;
@@ -13,6 +13,8 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
         // Resource set fields whose IDs have not been assigned.
         _unsetFields = Immutable.Map(),
 
+        _sectionItem = null, // UnID'ed item to new section.
+
         _addFieldState = false,
 
         _toShift = null,
@@ -21,7 +23,7 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
         _showPlanner = false;
 
 
-    var ItemsStore = extend(EventEmitter.prototype, {
+    var ItemsStore = extend({}, EventEmitter.prototype, {
         emitChange: function() {
             this.emit(CHANGE_EVENT);
         },
@@ -44,7 +46,7 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
                         host_id: ri.issue ? ri.host_id : null,
                         message: ri.issue ? ri.message : null
                     });
-                    newItem = newItem.set('sectionID', section.id);
+                    newItem = newItem.set('sectionID', section.id).set('selected', false);
 
                     return newItem;
                 });
@@ -63,8 +65,7 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
                     }));
                 });
 
-                _items = _items.merge(sectionItems);
-
+                _items = _items.concat(sectionItems);
             });
         },
 
@@ -74,6 +75,9 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
                 return item.get('selected') === true; });
 
             if (selectedItem) {
+                // If the same item is being clicked on, nothing to do.
+                if (selectedItem.get('id') === toSelectitem.get('id')) return;
+
                 _items = _items.update(_items.indexOf(selectedItem), function(item){
                     return item.set('selected', false); });
             }
@@ -89,6 +93,10 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
 
         getSelected: function(itemID){
             return _items.find(function(item){ return item.get('selected') === true; });
+        },
+
+        getSectionItem: function(){
+            return _sectionItem;
         },
 
         getSectionItems: function(sectionID){
@@ -137,14 +145,14 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
         },
 
         _add: function(sectionID){
-            var maxPosition = _items.filter(function(item){ return item.get('sectionID') === sectionID; }).max(
-                function(itemA, itemB){ return itemA.get('position') > itemB.get('position'); }).get('position');
+            var maxItem = _items.filter(function(item){ return item.get('sectionID') === sectionID; }).max(
+                function(itemA, itemB){ return itemA.get('position') > itemB.get('position'); });
 
             var newItem = Immutable.Map({
                 description: '',
                 resource_sets: [{ id: null, resources: Immutable.List() }],
                 meta: [],
-                position: maxPosition + 1,
+                position: maxItem ? maxItem.get('position') + 1 : 0,
                 issue: {
                     id: null, host_id: null, message: null
                 },
@@ -160,17 +168,43 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
                 return item.set('id', id); });
         },
 
-        _setSectionID: function(itemID, sectionID){
+        _addSectionItem: function(name, sectionType){
+            if (sectionType === 'contextual'){
+                _sectionItem = Immutable.Map({
+                    description: name,
+                    issue: {
+                        id: null, host_id: null, message: null
+                    },
+                    meta: [],
+                    resource_sets: Immutable.List(),
+                    parent: name,
+                    position: 0,
+                    selected: true,
+                    sectionID: null
+                });
+
+                //_items = _items.push(_sectionItem);
+            }
+        },
+
+        _setItemSectionID: function(sectionID){
+            _sectionItem = _unsaved ? _unsaved.set('sectionID', sectionID) : _sectionItem.set(
+                'sectionID', sectionID);
+
+            _items = _items.push(_sectionItem);
+        },
+
+        /*_setItemSectionID: function(itemID, sectionID){
             var toUpdateItem = _items.find(function(item){
                 return item.get('id') === itemID; });
-            
+
             _items = _items.update(_items.indexOf(toUpdateItem), function(item){
                 return item.set('sectionID', sectionID); });
-        },
+        },*/
 
         _setResourceSetID: function(itemID, resourceSetID){
             var toUpdateItem = _items.find(function(item){ return item.get('id') == itemID; }),
-                resourceSet = _unsavedField.get(itemID);
+                resourceSet = _unsetFields.get(itemID).resource_set;
 
             var updatedResourceSets = toUpdateItem.get('resource_sets'),
                 index = updatedResourceSets.indexOf(resourceSet);
@@ -188,11 +222,10 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
 
             toUpdateItem = _items.find(function(item, i){
                 index = i;
-                resourceSet = item.get('resource_sets').find(function(resourceSet, rsi){
-                    rsIndex = rsi;
-                    return resourceSet.id === resourceSetID;
-                });
-                return resourceSet !== undefined;
+                for (rsIndex = 0; rsIndex < item.get('resource_sets').length; rsIndex++){
+                    if (item.get('resource_sets')[rsIndex].id === resourceSetID) return true;
+                }
+                return undefined;
             });
 
             var updatedResourceSets = toUpdateItem.get('resource_sets');
@@ -207,11 +240,10 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
         _removeResource: function(resourceID, resourceSetID){
             toUpdateItem = _items.find(function(item, i){
                 index = i;
-                resourceSet = item.get('resource_sets').find(function(resourceSet, rsi){
-                    rsIndex = rsi;
-                    return resourceSet.id === resourceSetID;
-                });
-                return resourceSet !== undefined;
+                for (rsIndex = 0; rsIndex < item.get('resource_sets').length; rsIndex++){
+                    if (item.get('resource_sets')[rsIndex].id === resourceSetID) return true;
+                }
+                return undefined;
             });
 
             var updatedResourceSets = toUpdateItem.get('resource_sets');
@@ -258,8 +290,7 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
                 
                 item = toUpdateItem.set('resource_sets', currentResourceSets);
 
-                _unsavedField = _unsavedField.set(itemID, Immutable.Map(
-                    {'resource_set': newResourceSet}));
+                _unsavedField = _unsavedField.set(itemID, {'resource_set': newResourceSet});
             }
 
             _items = _items.set(_items.indexOf(toUpdateItem), item);
@@ -405,24 +436,24 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
                     if (fieldID === i) toMoveField = meta;
                 });
 
-                beforeField = toMoveFieldItem.get('resource_sets').find(function(resourceSet){
-                    return beforeFieldID === resourceSet.id;
+                toMoveFieldItem.get('resource_sets').forEach(function(resourceSet){
+                    if (beforeFieldID === resourceSet.id) beforeField = resourceSet;
                 });
             } else if (toMoveBeforeIsMeta){
-                toMoveField = toMoveFieldItem.get('resource_sets').find(function(resourceSet){
-                    return fieldID === resourceSet.id;
+                toMoveFieldItem.get('resource_sets').forEach(function(resourceSet){
+                    if (fieldID === resourceSet.id) toMoveField = resourceSet;
                 });
 
                 toMoveFieldItem.get('meta').forEach(function(meta, i){
                     if (beforeFieldID === i) beforeField = meta;
                 });
             } else {
-                toMoveField = toMoveFieldItem.get('resource_sets').find(function(resourceSet){
-                    return fieldID === resourceSet.id;
+                toMoveFieldItem.get('resource_sets').forEach(function(resourceSet){
+                    if (fieldID === resourceSet.id) toMoveField = resourceSet;
                 });
 
-                beforeField = toMoveFieldItem.get('resource_sets').find(function(resourceSet){
-                    return beforeFieldID === resourceSet.id;
+                toMoveFieldItem.get('resource_sets').forEach(function(resourceSet){
+                    if (beforeFieldID === resourceSet.id) beforeField = resourceSet;
                 });
             }
 
@@ -448,7 +479,8 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
                     } else metasToShift.push(null);
                 }
 
-                if (toMoveIsMeta) originalMeta[toMoveField.position].position = beforeField.position;
+                if (toMoveIsMeta)
+                    originalMeta[originalMeta.indexOf(toMoveField)].position = beforePosition;
 
                 _items = _items.update(items.indexOf(toMoveFieldItem), function(item){
                     
@@ -457,11 +489,13 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
                             rsToShiftIndex = resourceSets.indexOf(singleRsToShift);
 
                             if (rsToShiftIndex !== -1){
-                                resourceSets = resourceSets.update(rsToShiftIndex, function(rs){
-                                    return rs.set('position', rs.get('position') - 1);
-                                });
+                                resourceSets[rsToShiftIndex].position -= 1;
                             }
                         });
+
+                        if (! toMoveIsMeta)
+                            resourceSets[resourceSets.indexOf(toMoveField)].position = beforePosition;
+
                         return resourceSets;
                     });
 
@@ -487,20 +521,22 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
                     } else metasToShift.push(null);
                 }
 
-                if (toMoveIsMeta) originalMeta[toMoveField.position].position = beforePosition;
+                if (toMoveIsMeta)
+                    originalMeta[originalMeta.indexOf(toMoveField)].position = beforePosition;
 
                 _items = _items.update(items.indexOf(toMoveFieldItem), function(item){
-                    
                     item = item.update('resource_sets', function(resourceSets){
                         rsToShift.forEach(function(singleRsToShift){
                             rsToShiftIndex = resourceSets.indexOf(singleRsToShift);
 
                             if (rsToShiftIndex !== -1){
-                                resourceSets = resourceSets.update(rsToShiftIndex, function(rs){
-                                    return rs.set('position', rs.get('position') + 1);
-                                });
+                                resourceSets[rsToShiftIndex].position += 1;
                             }
                         });
+
+                        if (! toMoveIsMeta)
+                            resourceSets[resourceSets.indexOf(toMoveField)].position = beforePosition;
+
                         return resourceSets;
                     });
 
@@ -511,17 +547,22 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
             }
 
             function getResourceSetFromID(resourceSetID){
-                return _items.find(function(item){
+                var item = _items.find(function(item){
                     return item.get('id') === itemID;
-                }).get('resource_sets').find(function(resourceSet){
-                    return resourceSet.id === resourceSetID;
                 });
+
+                var i; resourceSets = item.get('resource_sets');
+                for (i = 0; i < resourceSets.length; i++){
+                    if (resourceSets[i].id === resourceSetID) {
+                        return resourceSets[i];
+                    }
+                }
             }
 
             // Persist the changes with XHR.
             if (rsToShift){
                 rsToShift.forEach(function(rs){
-                    toShift['set-' + rs.id] = getResourceSetFromID[rs.id].position;
+                    toShift['set-' + rs.id] = getResourceSetFromID(rs.id).position;
                 });
             }
 
@@ -532,7 +573,7 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
             }
 
             if (toMoveIsMeta) toShift['meta-' + fieldID] = toMoveField.position;
-            else toShift['set-' + fieldID] = toMoveField.position;
+            else toShift['set-' + fieldID] = beforePosition;
 
             _toShiftMeta = toShift;
 
@@ -568,8 +609,17 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
                     ItemsStore._setItemID(action.item, action.id);
                     break;
 
-                case 'ADD_ITEM_TO_SECTION':
-                    ItemsStore._setSectionID(action.itemID, action.sectionID);
+                case 'ADD_SECTION':
+                    ItemsStore._addSectionItem(action.name, action.sectionType);
+                    break;
+
+                //case 'ADD_ITEM_TO_SECTION':
+                //    ItemsStore._setItemSectionID(action.itemID, action.sectionID);
+                //    break;
+                
+                case 'ADD_ITEM_POST':
+                    if (! action.item.get('id'))
+                        ItemsStore._setItemSectionID(action.sectionID);
                     break;
 
                 case 'OPEN_ITEM':

@@ -2,7 +2,7 @@ define(['react', 'core_light', 'hogan'],  function(React, OC, Hogan){
     var _spinner;
     return {
         itemDraggable: function(element, wrapperSelector, parentSelector, text, callback){
-            var parent = document.querySelector('.' + parentSelector);
+            var parents = document.querySelectorAll('.' + parentSelector);
             
             // Create movable clones if don't exist.
             var movableClones = document.querySelector('.movable-clones');
@@ -50,6 +50,8 @@ define(['react', 'core_light', 'hogan'],  function(React, OC, Hogan){
 
                 var moveElement = OC.$.parents(event.target, 'content-panel-wrapper');
 
+                var i, j;
+
                 function onMouseMove(event){
                     OC.$.addClass(newElement, 'draggable-shadow');
 
@@ -57,7 +59,9 @@ define(['react', 'core_light', 'hogan'],  function(React, OC, Hogan){
                     draggableShadow.style.top = event.pageY + newElY - newElHeight + 'px';
                     draggableShadow.style.left = event.pageX + newElX - newElWidth + 20 + 'px';
 
-                    OC.$.removeClass(parent, 'accepting');
+                    for (i = 0; i < parents.length; i++)
+                        OC.$.removeClass(parents[i], 'accepting');
+                    
                     elementBeingHoveredOver = OC.$.parents(event.target, parentSelector);
 
                     if (elementBeingHoveredOver){
@@ -82,7 +86,9 @@ define(['react', 'core_light', 'hogan'],  function(React, OC, Hogan){
                     moveElement.removeEventListener('mouseup', onMouseUp);
 
                     OC.$.removeClass(droppableElement, 'accepting');
-                    OC.$.removeClass(parent, 'accepting');
+                    
+                    for (j = 0; j < parents.length; j++)
+                        OC.$.removeClass(parents[j], 'accepting');
                 }
 
                 OC.$.addListener(

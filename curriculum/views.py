@@ -181,25 +181,17 @@ def get_standard(request, standard_id):
 
 
 def get_serialized_sections(parent):
-    from django.contrib.contenttypes.models import ContentType
-    section_item_content_type = ContentType.objects.get_for_model(SectionItem)
-
-    from oer.models import Link, Attachment
-    link_content_type = ContentType.objects.get_for_model(Link)
-    reference_content_type = ContentType.objects.get_for_model(Reference)
-    attachment_content_type = ContentType.objects.get_for_model(Attachment)
-
-    from meta.models import Tag
-
     serialized_sections = []
 
     for section in parent.sections.all().order_by('position'):
         serialized_items = []
 
-        for item in section.items.all():
-            serialized_resource_sets = []
+        #section_item_content_type = ContentType.objects.get_for_model(SectionItem)
 
-            try:
+        for item in section.items.all():
+            serialized_resource_sets, serialized_meta = _get_fields(item)
+
+            """try:
                 issue = Issue.objects.get(
                     host_id=item.id, host_type=section_item_content_type)
                 serialized_issue = {
@@ -208,75 +200,13 @@ def get_serialized_sections(parent):
                     'message': issue.message
                 }
             except:
-                serialized_issue = None
-
-            from os.path import splitext
-            document = [".doc", ".docx", ".rtf", "odt"]
-
-            for resource_set in item.resource_sets.all():
-                serialized_resources = []
-
-                for resource in resource_set.resources.all():
-                    import oer.CollectionUtilities as cu
-                    cu.set_resources_type([resource.resource])
-                    cu.preprocess_collection_listings([resource.resource])
-
-                    if resource.resource.revision.content_type == attachment_content_type:
-                        name, extension = splitext(
-                            resource.resource.revision.content.file.name)
-
-                        if extension in document:
-                            resource.resource.type = 'pdf'
-
-                    thumbnail = settings.MEDIA_URL + resource.resource.revision.content.textbook.thumbnail.name if (
-                        resource.resource.revision.content_type == reference_content_type) else settings.MEDIA_URL + resource.resource.image.name
-
-                    serialized_resources.append({
-                        'id': resource.id,
-                        'url': resource.resource.revision.content.url if (
-                            resource.resource.revision.content_type == link_content_type) else reverse(
-                            'read', kwargs={
-                                'resource_id': resource.resource.id,
-                                'resource_slug': resource.resource.slug
-                            }
-                        ),
-                        'title': resource.resource.title,
-                        'thumbnail': thumbnail,
-                        'user_thumbnail': settings.MEDIA_URL + resource.resource.user.get_profile().profile_pic.name,
-                        'type': resource.resource.type
-                    })
-
-                serialized_resource_sets.append({
-                    'id': resource_set.id,
-                    'position': resource_set.position,
-                    'title': resource_set.title,
-                    'resources': serialized_resources
-                })
-
-            """if item.resource_sets.count() == 0:
-                serialized_resource_sets.append({
-                    'id': None,
-                    'resources': []
-                })"""
-
-            if item.meta:
-                for meta_item in item.meta:
-                    if 'standards' in meta_item:
-                        standards = []
-                        for std_id in meta_item['standards']:
-                            standard = Tag.objects.get(pk=std_id)
-                            standards.append({
-                                'title': standard.title,
-                                'description': standard.description
-                            })
-
-                        meta_item['standards'] = standards
+                serialized_issue = None"""
 
             serialized_items.append({
                 'id': item.id,
                 'description': item.description,
-                'issue': serialized_issue,
-                'meta': item.meta if item.meta else [],
+                #'issue': serialized_issue,
+                'meta': serialized_meta if item.meta else [],
                 'resource_sets': serialized_resource_sets,
                 'position': item.position if item.position else 0,
                 'parent': (item.content.parent.title if item.content.parent else None) if item.content else None
@@ -291,6 +221,84 @@ def get_serialized_sections(parent):
         })
 
     return serialized_sections
+
+
+def _get_fields(item):
+    serialized_resource_sets = []
+
+    from os.path import splitext
+    from oer.models import Link, Attachment
+
+    from django.contrib.contenttypes.models import ContentType
+
+    link_content_type = ContentType.objects.get_for_model(Link)
+    reference_content_type = ContentType.objects.get_for_model(Reference)
+    attachment_content_type = ContentType.objects.get_for_model(Attachment)
+
+    from meta.models import Tag
+
+    document = [".doc", ".docx", ".rtf", "odt"]
+
+    for resource_set in item.resource_sets.all():
+        serialized_resources = []
+
+        for resource in resource_set.resources.all():
+            import oer.CollectionUtilities as cu
+            cu.set_resources_type([resource.resource])
+            cu.preprocess_collection_listings([resource.resource])
+
+            if resource.resource.revision.content_type == attachment_content_type:
+                name, extension = splitext(
+                    resource.resource.revision.content.file.name)
+
+                if extension in document:
+                    resource.resource.type = 'pdf'
+
+            thumbnail = settings.MEDIA_URL + resource.resource.revision.content.textbook.thumbnail.name if (
+                resource.resource.revision.content_type == reference_content_type) else settings.MEDIA_URL + resource.resource.image.name
+
+            serialized_resources.append({
+                'id': resource.id,
+                'url': resource.resource.revision.content.url if (
+                    resource.resource.revision.content_type == link_content_type) else reverse(
+                    'read', kwargs={
+                        'resource_id': resource.resource.id,
+                        'resource_slug': resource.resource.slug
+                    }
+                ),
+                'title': resource.resource.title,
+                'thumbnail': thumbnail,
+                'user_thumbnail': settings.MEDIA_URL + resource.resource.user.get_profile().profile_pic.name,
+                'type': resource.resource.type
+            })
+
+        serialized_resource_sets.append({
+            'id': resource_set.id,
+            'position': resource_set.position,
+            'title': resource_set.title,
+            'resources': serialized_resources
+        })
+
+    """if item.resource_sets.count() == 0:
+        serialized_resource_sets.append({
+            'id': None,
+            'resources': []
+        })"""
+
+    if item.meta:
+        for meta_item in item.meta:
+            if 'standards' in meta_item:
+                standards = []
+                for std_id in meta_item['standards']:
+                    standard = Tag.objects.get(pk=std_id)
+                    standards.append({
+                        'title': standard.title,
+                        'description': standard.description
+                    })
+
+                meta_item['standards'] = standards
+
+    return (serialized_resource_sets, item.meta)
 
 
 """def update_objective(request):
@@ -387,6 +395,9 @@ def update_item(request):
                     next(meta_item for meta_item in item.meta if meta_item['slug'] == new_meta['slug'])['body'] = new_meta['body']
                 except:
                     # If not, create it.
+                    if not item.meta:
+                        item.meta = []
+
                     item.meta.append({
                         'slug': new_meta['slug'],
                         'body': new_meta['body'],
@@ -738,7 +749,7 @@ def add_upload_to_section_item_resources(request):
 
 
 def remove_resource_from_resource_set(request):
-    resource_set_id = request.POST.get('id', None)
+    resource_set_id = request.POST.get('resource_set_id', None)
     resource_id = request.POST.get('resource_id', None)
 
     try:

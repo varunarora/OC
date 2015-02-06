@@ -1,67 +1,92 @@
-define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', 'immutable',
-    'showdown', 'curriculumItems', 'plannerStore', 'plannerWidget'],
-    function(React, Actions, Settings, Utils, Immutable, Showdown, Items, Planner, PlannerWidget){
+define(['react', 'immutable', 'showdown'],
+    function(React, Immutable, Showdown){
+
+    _options = {};
+    var Settings, Utils, Items, Planner, PlannerWidget;
+
+    var ContextInit = function(options){
+        _options = options;
+
+        if (_options.host === 'curriculum'){
+            return Context(_options);
+        } else {
+            return Context(_options);
+        }
+    };
 
     var Context = React.createClass({
-        /*componentDidMount: function() {
-            $(this.getDOMNode()).nanoScroller({
-                paneClass: 'scroll-pane',
-                sliderClass: 'scroll-slider',
-                contentClass: 'scroll-content',
-                flash: true
-            });
-        },*/
-
-        componentDidMount: function(){
-            var titleBarEl = this.getDOMNode().querySelector(
-                '.explorer-resource-module-support-title'),
-                contentsEl = this.getDOMNode().querySelector(
-                    '.explorer-resource-module-support-contents'),
-                preEl = this.getDOMNode().querySelector(
-                    '.explorer-resource-module-support-pre');
-
+        componentWillMount: function(){
             var view = this;
-            function resizeContents(){
-                contentsEl.style.height = (
-                    parseInt(OC.$.css(view.getDOMNode(), 'height'), 10) - (
-                    parseInt(OC.$.css(titleBarEl, 'height'), 10)) - (
-                    parseInt(OC.$.css(titleBarEl, 'paddingTop'), 10) * 2) - (
-                    parseInt(OC.$.css(preEl, 'height'), 10)) - (
-                    parseInt(OC.$.css(contentsEl, 'paddingTop'), 10)) - (
-                    parseInt(OC.$.css(document.querySelector('.explorer-resource-module-main'), 'marginTop'), 10) * 4) + 'px');
+            if (_options.host === 'curriculum'){
+                require(['curriculumSettings', 'curriculumUtils', 'curriculumItems',
+                    'plannerStore', 'plannerWidget', 'curriculumActions'], function(a, b, c,
+                    d, e, f){
+                        Settings = a; Utils = b; Items = c;
+                        Planner = d; PlannerWidget = e; Actions = f;
+                        
+                        view.setState({
+                            addFieldState: Items.getFieldState(),
+                            item: Items.get(view.props.itemID),
+                            showPlanner: Items.getShowPlanner()
+                        }, function(){
+                            Items.on('change', this._onChange);
+                
+                            // Set positioning of field menu.
+                            var menuPosition = OC.utils.menu(view.getDOMNode().querySelector(
+                                'nav.planner-menu'), view.refs.addToPlanner.getDOMNode(), true);
+                        });
+
+                    }
+                );
+            } else {
+                require(['plannerActions'], function(Actions){});
+            }
+        },
+        componentDidMount: function(){
+            var view = this, resizeContents;
+            if (_options.host === 'curriculum'){
+                var titleBarEl = this.getDOMNode().querySelector(
+                    '.explorer-resource-module-support-title'),
+                    contentsEl = this.getDOMNode().querySelector(
+                        '.explorer-resource-module-support-contents'),
+                    preEl = this.getDOMNode().querySelector(
+                        '.explorer-resource-module-support-pre');
+
+                resizeContents = function(){
+                    contentsEl.style.height = (
+                        parseInt(OC.$.css(view.getDOMNode(), 'height'), 10) - (
+                        parseInt(OC.$.css(titleBarEl, 'height'), 10)) - (
+                        parseInt(OC.$.css(titleBarEl, 'paddingTop'), 10) * 2) - (
+                        parseInt(OC.$.css(preEl, 'height'), 10)) - (
+                        parseInt(OC.$.css(contentsEl, 'paddingTop'), 10)) - (
+                        parseInt(OC.$.css(document.querySelector('.explorer-resource-module-main'), 'marginTop'), 10) * 4) + 'px');
+                };
+
+                // Set a tip for 'Add to planner'
+                if (this.refs.addToPlanner) OC.utils.tip(this.refs.addToPlanner.getDOMNode());
+                if (this.refs.delete) OC.utils.tip(this.refs.delete.getDOMNode());
+            } else {
+                resizeContents = function(){
+
+                };
             }
 
             resizeContents();
             window.addEventListener('resize', resizeContents);
-
-            Items.on('change', this._onChange);
-
-            // Set a tip for 'Add to planner'
-            if (this.refs.addToPlanner) OC.utils.tip(this.refs.addToPlanner.getDOMNode());
-            if (this.refs.delete) OC.utils.tip(this.refs.delete.getDOMNode());
-        
-            // Set positioning of field menu.
-            var menuPosition = OC.utils.menu(this.getDOMNode().querySelector(
-                'nav.planner-menu'), this.refs.addToPlanner.getDOMNode(), true);
-
-            /*window.addEventListener('resize', function(){
-                this.getDOMNode().style.height = parseInt(OC.$.css(document.querySelector('.content-panel-body-wrapper'), 'height'), 10) - (
-                    parseInt(OC.$.css(document.querySelector('.explorer-resource-module-main'), 'marginTop'), 10) * 4) + 'px';
-            });*/
         },
 
         getInitialState: function(){
             return {
-                addFieldState: Items.getFieldState(),
+                addFieldState: false,
                 newFieldName: null,
                 newFieldType: 'text',
-                item: Items.get(this.props.itemID),
-                showPlanner: Items.getShowPlanner()
+                item: _options.host === 'curriculum' ? null : this.props.item,
+                showPlanner: false
             };
         },
 
         componentWillUnmount: function(){
-            Items.removeListener('change', this._onChange);
+            if (Items) Items.removeListener('change', this._onChange);
         },
 
         _onChange: function(){
@@ -133,7 +158,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
 
         renderSections: function(){
             var props = this.props, view = this;
-            var metaLength = this.state.item.get('meta').length;
+            var metaLength = this.state.item.get('meta') ? this.state.item.get('meta').length : 0;
 
             if (metaLength > 0 || this.state.item.get('resource_sets').length > 0){
                 var metaProps = this.state.item.get(
@@ -188,9 +213,10 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
         completeAddField: function(event){
             // Find the max position of fields and add one to determine new
             //     field position.
-            var maxPosition = OC.$.max(this.state.item.get('resource_sets').concat(
+            var maxItem = OC.$.max(this.state.item.get('resource_sets').concat(
                 this.state.item.get('meta')), function(resourceSet){
-                    return resourceSet.position; }).position,
+                    return resourceSet.position; }),
+                maxPosition = maxItem ? maxItem.position : 0,
                 view = this;
 
             Actions.addField(
@@ -213,17 +239,6 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
                     }
                 }
             );
-
-            /*this.props.addField(
-                this.state.newFieldName,
-                this.state.newFieldType,
-                maxPosition + 1,
-                this.props.item.get('id'),
-                this.props.section.id,
-                function(){
-                    view.setState({addFieldState: false});
-                }
-            );*/
         },
 
         updateNewFieldTitle: function(event){
@@ -237,27 +252,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
         togglePlanner: function(){
             var view = this;
             
-            //Actions.dim();
             Actions.launchPlanner();
-
-            /*this.setState({showPlanner: !this.state.showPlanner}, function(){
-                    Actions.dim();
-
-                    var view = this, body = document.querySelector('body');
-                    body.addEventListener('click', function hideMenu(event){
-                        if (view.getDOMNode() !== event.target && !view.getDOMNode(
-                            ).contains(event.target)){
-                            view.setState({showPlanner: false});
-
-                            body.removeEventListener('click', hideMenu);
-
-                            event.preventDefault();
-                            event.stopPropagation();
-                            return false;
-                        }
-                    });
-                }
-            });*/
         },
 
         render: function(){
@@ -298,23 +293,21 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
                 className: 'explorer-resource-module-support-body pseudo-card'/* + 'scrollable-block'*/,
                 style: {
                     height: '100%'
-                    //height: parseInt(OC.$.css(document.querySelector('.content-panel-body-wrapper'), 'height'), 10) - (
-                    //    parseInt(OC.$.css(document.querySelector('.explorer-resource-module-main'), 'marginTop'), 10) * 4) + 'px'
-                    }
-            }, this.state.item ? [
+                }
+            }, [
                 React.DOM.div({
                     className: 'explorer-resource-module-support-pre card-toolbar',
                     style: {
-                        backgroundColor: OC.config.palette.dark
+                        backgroundColor: _options.hasOwnProperty('palette') ? OC.utils.palettes[_options.palette].dark : OC.config.palette.dark
                     }
                 }, [
-                    OC.config.user.id ? React.DOM.div({
+                    OC.config.user.id && _options.host === 'curriculum' ? React.DOM.div({
                         className: 'explorer-resource-module-support-pre-planner ' + OC.config.palette.title + '-button',
                         ref: 'addToPlanner',
                         title: 'Add to Planner',
                         onClick: this.togglePlanner
                     }) : null,
-                    OC.config.user.id ? PlannerWidget.Widget({
+                    OC.config.user.id && this.state.item && _options.host === 'curriculum' ? PlannerWidget.Widget({
                         open: this.state.showPlanner,
                         id: this.state.item.get('id')
                     }, {
@@ -332,34 +325,34 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
                             Actions.selectPlannerEvent(eventID, eventDate);
                         }
                     }) : null,
-                    Settings.getCanEdit() ? React.DOM.div({
+                    Settings ? (Settings.getCanEdit() ? React.DOM.div({
                         className: 'explorer-resource-module-support-delete ' + OC.config.palette.title + '-button',
                         ref: 'delete',
                         title: 'Delete',
                         onClick: this.deleteItem
-                    }) : null
+                    }) : null) : null
                 ]),
                 React.DOM.div({
                     className: 'explorer-resource-module-support-title',
                     style: {
-                        backgroundColor: OC.config.palette.base
+                        backgroundColor: _options.hasOwnProperty('palette') ? OC.utils.palettes[_options.palette].base : OC.config.palette.base
                     },
                     key: 0
-                }, this.state.item.get('description')),
+                }, this.state.item ? this.state.item.get('description') : null),
 
                 React.DOM.div({className: 'explorer-resource-module-support-contents'}, [
-                    React.DOM.div({className: 'explorer-resource-module-support-sections', key: 1}, this.renderSections()),
+                    React.DOM.div({className: 'explorer-resource-module-support-sections', key: 1}, this.state.item ? this.renderSections() : null),
 
-                    Settings.getCanEdit() ? this.state.addFieldState ? addFieldView : (
+                    Settings ? (Settings.getCanEdit() ? this.state.addFieldState ? addFieldView : (
                         React.DOM.div({
                             className: 'explorer-resource-module-support-new-field',
                             onClick: this.addField,
                             key: 3
                         },
                             '+ ADD FIELD'
-                    )) : null
+                    )) : null) : null
                 ])
-            ]: null);
+            ]);
         }
     });
 
@@ -394,7 +387,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
                 );
             }
 
-            if (Settings.getCanEdit()){
+            if (Settings && Settings.getCanEdit()){
                 // Set positioning of field menu.
                 var actions = this.refs.actions.getDOMNode();
                 OC.$.addClass(actions, 'show');
@@ -481,7 +474,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
 
                 metaBody = React.DOM.div({
                     className: 'explorer-resource-module-support-section-body',
-                    contentEditable: Settings.getCanEdit() ? true : false,
+                    contentEditable: Settings ? (Settings.getCanEdit() ? true : false) : false,
                     onBlur: this.save,
                     'data-placeholder': body && body.length > 0 ? '' : '(add something)',
                     dangerouslySetInnerHTML: {
@@ -495,23 +488,23 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
             return React.DOM.div({className: 'explorer-resource-module-support-section explorer-resource-module-support-section-' + this.props.key,
                 id: 'meta-' + this.props.index}, [
                 React.DOM.div({className: 'explorer-resource-module-support-section-handle-wrapper'},
-                    Settings.getCanEdit() ? React.DOM.div({className: 'explorer-resource-module-support-section-handle'}, null) : null
+                    Settings ? (Settings.getCanEdit() ? React.DOM.div({className: 'explorer-resource-module-support-section-handle'}, null) : null) : null
                 ),
                 hideTitle ? null : React.DOM.div({className: 'explorer-resource-module-support-section-title-wrapper'},
                     React.DOM.div({className: 'explorer-resource-module-support-section-title', key: 0}, this.props.title),
                     metaBody
                 ),
-                Settings.getCanEdit() ? React.DOM.div({
+                Settings ? (Settings.getCanEdit() ? React.DOM.div({
                     className: 'explorer-resource-module-support-section-actions',
                     onClick: this.toggleMenu,
                     ref: 'actions'
-                }, null) : null,
-                Settings.getCanEdit() ? FieldMenu({
+                }, null) : null) : null,
+                Settings ? (Settings.getCanEdit() ? FieldMenu({
                     open: this.state.showMenu,
                     id: this.props.index,
                     itemID: this.props.item.get('id'),
                     meta: true,
-                }) : null
+                }) : null) : null
             ]);
         }
     });
@@ -536,7 +529,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
                 );
             }
 
-            if (Settings.getCanEdit()){
+            if (Settings && Settings.getCanEdit()){
                 // Set positioning of field menu.
                 var actions = this.refs.actions.getDOMNode();
                 OC.$.addClass(actions, 'show');
@@ -682,20 +675,21 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
         render: function() {
             return React.DOM.div({className: 'explorer-resource-module-support-section explorer-resource-module-support-section-resources',
                 id: 'resources-' + this.props.id}, [
-                React.DOM.div({className: 'explorer-resource-module-support-section-handle-wrapper'},
-                    Settings.getCanEdit() ? React.DOM.div({className: 'explorer-resource-module-support-section-handle'}, null) : null
-                ),
+                React.DOM.div({className: 'explorer-resource-module-support-section-header'}, [
+                    React.DOM.div({className: 'explorer-resource-module-support-section-handle-wrapper'},
+                        Settings && Settings.getCanEdit() ? React.DOM.div({className: 'explorer-resource-module-support-section-handle'}, null) : null
+                    ),
 
-                React.DOM.div({className: 'explorer-resource-module-support-section-title-wrapper'},
-                    React.DOM.div({className: 'explorer-resource-module-support-section-title', key: 0}, this.props.title ? this.props.title : 'Resources')
-                ),
-                Settings.getCanEdit() ? React.DOM.div({
-                    className: 'explorer-resource-module-support-section-actions',
-                    onClick: this.toggleMenu,
-                    ref: 'actions'
-                }, null) : null,
-                Settings.getCanEdit() ? FieldMenu({open: this.state.showMenu, id: this.props.id, meta: false}) : null,
-
+                    React.DOM.div({className: 'explorer-resource-module-support-section-title-wrapper'},
+                        React.DOM.div({className: 'explorer-resource-module-support-section-title', key: 0}, this.props.title ? this.props.title : 'Resources')
+                    ),
+                    Settings && Settings.getCanEdit() ? React.DOM.div({
+                        className: 'explorer-resource-module-support-section-actions',
+                        onClick: this.toggleMenu,
+                        ref: 'actions'
+                    }, null) : null,
+                    Settings && Settings.getCanEdit() ? FieldMenu({open: this.state.showMenu, id: this.props.id, meta: false}) : null,
+                ]),
                 this.props.collection.size > 0 ? React.DOM.div({className: 'explorer-resource-items', key: 1},
                     this.props.collection.map(this.renderResource).toJS()) : null,
 
@@ -706,7 +700,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
                     key: 2
                 }, 'SUGGEST MORE RESOURCES')) : null,
 
-                Settings.getCanEdit() ? React.DOM.div({className: 'explorer-resource-listing-body-resource-actions', key: 3},
+                Settings && Settings.getCanEdit() ? React.DOM.div({className: 'explorer-resource-listing-body-resource-actions', key: 3},
                     React.DOM.button({
                         className: 'explorer-resource-actions-add explorer-light-button',
                         onClick: this.addResource
@@ -716,31 +710,12 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
         }
     });
 
-    /*var Resource = Backbone.Model.extend({
-        id: '',
-        title: '',
-        url: '',
-        sync: function(method, model, options){
-            function success(response){ return options.success(response); }
-
-            switch(method) {
-                case 'update':
-                    if (_.has(options, 'attrs')){
-                        if (_.has(options.attrs, 'remove_resource_from')){
-                            return OC.api.curriculum.resources.delete(
-                                {'resource_id': this.get('id'), 'id': options.attrs.remove_resource_from.get('id')}, success);
-                        }
-                    }
-            }
-        }
-    });*/
-
     ResourceView = React.createClass({
         removeResource: function(){
             OC.utils.status.saving();
 
             Actions.removeResource(
-                this.props.item.get('id'),
+                this.props.model.get('id'),
                 this.props.resourceSetID,
                 function(){
                     OC.utils.status.saved();
@@ -783,7 +758,7 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
                         ),
                         React.DOM.div({className: 'explorer-resource-item-content-caption', key: 1}, '')
                     ]),
-                    Settings.getCanEdit() ? React.DOM.div({className: 'explorer-resource-item-content-actions', key: 1},
+                    Settings && Settings.getCanEdit() ? React.DOM.div({className: 'explorer-resource-item-content-actions', key: 1},
                         React.DOM.div({
                             className: 'explorer-resource-item-content-action-delete',
                             onClick: this.removeResource,
@@ -815,5 +790,5 @@ define(['react', 'curriculumActions', 'curriculumSettings', 'curriculumUtils', '
         }
     });
 
-    return Context;
+    return ContextInit;
 });

@@ -17,6 +17,7 @@ require.config({
         standards: 'standards',
         upload: 'upload',
 
+        gapi: '//apis.google.com/js/client.js?onload=gReady',
         plus: '//plus.google.com/js/client:plusone.js?onload=renderPlus',
         core_light: 'core_light',
         react: 'react',

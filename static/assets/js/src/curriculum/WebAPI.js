@@ -1,4 +1,4 @@
-define(['atomic', 'curriculumAppDispatcher', 'curriculumActions', 'curriculumSettings', 'plannerAPI'],
+define(['atomic', 'dispatcher', 'curriculumActions', 'curriculumSettings', 'plannerAPI'],
     function(atomic, AppDispatcher, Actions, Settings){
     
     OC.api.curriculum = {
@@ -12,7 +12,7 @@ define(['atomic', 'curriculumAppDispatcher', 'curriculumActions', 'curriculumSet
                     callback(response);
                 });
             },
-            create: function(item, callback){
+            create: function(item, sectionID){
                 var serializedItem = {
                     description: item.get('description'),
                     section_id: item.get('sectionID'),
@@ -22,8 +22,7 @@ define(['atomic', 'curriculumAppDispatcher', 'curriculumActions', 'curriculumSet
 
                 atomic.post('/curriculum/api/section-item/create/', serializedItem)
                 .success(function(response, xhr){
-                    Actions.addItemComplete(item, response.id);
-                    callback(response.id);
+                    Actions.addItemComplete(item, response.id, sectionID);
                 });
             },
             delete: function(id){
@@ -180,7 +179,11 @@ define(['atomic', 'curriculumAppDispatcher', 'curriculumActions', 'curriculumSet
 
             // Add item.
             case 'ADD_ITEM_POST':
-                OC.api.curriculum.sectionItem.create(action.item, action.callback);
+                OC.api.curriculum.sectionItem.create(action.item, action.sectionID);
+                break;
+
+            case 'ADD_ITEM_COMPLETE':
+                if (action.sectionID) OC.api.curriculum.section.addItem(action.id, action.sectionID);
                 break;
 
             case 'ADD_ITEM_TO_SECTION':
@@ -219,8 +222,8 @@ define(['atomic', 'curriculumAppDispatcher', 'curriculumActions', 'curriculumSet
                 } else {
                     OC.api.curriculum.sectionItem.createResourceSet({
                         id: item.get('id'),
-                        title: field.get('resource_set').title,
-                        position: field.get('resource_set').position
+                        title: field.resource_set.title,
+                        position: field.resource_set.position
                     }, action.callback);
                 }
                 break;

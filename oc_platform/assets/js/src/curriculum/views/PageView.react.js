@@ -197,6 +197,11 @@ define(['react', 'curriculumPage', 'curriculumActions', 'curriculumSettings',
     var UnitHeader = React.createClass({
         componentDidMount: function(){
             OC.utils.tip(this.refs.back.getDOMNode(), {gravity: 's'});
+
+            if (OC.config.user.id){
+                OC.utils.menu(document.querySelector('.user-menu'),
+                    document.querySelector('.content-panel-header-user-dropdown'));
+            }
         },
         return: function(){
             // Send an action to return to overview view.
@@ -590,12 +595,7 @@ define(['react', 'curriculumPage', 'curriculumActions', 'curriculumSettings',
                 document.querySelector('.header-wrapper'));
         } else {
             React.renderComponent(OC.views.Header(),
-                document.querySelector('.header-wrapper'), function(){
-                    if (! OC.curriculum.resized){
-                        OC.resize();
-                        window.addEventListener('resize', OC.resize);
-                    }
-                });
+                document.querySelector('.header-wrapper'));
         }
     }
 

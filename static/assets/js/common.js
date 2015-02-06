@@ -30,6 +30,7 @@ require.config({
         jstz: 'lib/jstz',
         plus: '//plus.google.com/js/client:plusone.js?onload=renderPlus',
         gapi: '//apis.google.com/js/client.js?onload=gReady',
+        dispatcher: 'lib/dispatcher',
 
         // PDFJS
         pdfjs_l10n: 'lib/pdfjs/l10n',
@@ -82,7 +83,6 @@ require.config({
         standards: 'src/page/standards',
 
         // Curriculum.
-        curriculumAppDispatcher: 'src/curriculum/AppDispatcher',
         curriculumBootstrap: 'src/curriculum/Bootstrap',
         curriculumUtils: 'src/curriculum/Utils',
         curriculumWebAPI: 'src/curriculum/WebAPI',
@@ -101,6 +101,7 @@ require.config({
         plannerStore: 'src/PlannerStore',
         plannerWidget: 'src/PlannerWidget.react',
         plannerAPI: 'src/PlannerAPI',
+        plannerActions: 'src/PlannerActions',
 
         // jQuery UI.
         autocomplete: 'lib/jquery-ui/autocomplete',

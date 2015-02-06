@@ -1,4 +1,4 @@
-define(['curriculumAppDispatcher'], function(AppDispatcher){
+define(['dispatcher'], function(AppDispatcher){
     return {
         initTextbooks: function(textbooks){
             AppDispatcher.dispatch({
@@ -97,9 +97,10 @@ define(['curriculumAppDispatcher'], function(AppDispatcher){
             });
         },
 
-        addUnitComplete: function(){
+        addUnitComplete: function(id){
             AppDispatcher.dispatch({
-                type: 'ADD_UNIT_COMPLETE'
+                type: 'ADD_UNIT_COMPLETE',
+                id: id
             });
         },
 
@@ -139,19 +140,19 @@ define(['curriculumAppDispatcher'], function(AppDispatcher){
                 sectionID: sectionID
             });
         },
-        addItemPost: function(item, callback, sectionID){
+        addItemPost: function(item, sectionID){
             AppDispatcher.dispatch({
                 type: 'ADD_ITEM_POST',
                 item: item,
-                callback: callback,
                 sectionID: sectionID || null
             });
         },
-        addItemComplete: function(item, id){
+        addItemComplete: function(item, id, sectionID){
             AppDispatcher.dispatch({
                 type: 'ADD_ITEM_COMPLETE',
                 item: item,
-                id: id
+                id: id,
+                sectionID: sectionID
             });
         },
         addToSection: function(itemID, sectionID){
@@ -260,11 +261,12 @@ define(['curriculumAppDispatcher'], function(AppDispatcher){
             });
         },
 
-        removeResource: function(resource, resourceSetID){
+        removeResource: function(resourceID, resourceSetID, callback){
             AppDispatcher.dispatch({
                 type: 'REMOVE_RESOURCE',
                 resourceID: resourceID,
-                resourceSetID: resourceSetID
+                resourceSetID: resourceSetID,
+                callback: callback
             });
         },
 

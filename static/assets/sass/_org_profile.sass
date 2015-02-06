@@ -200,6 +200,7 @@ $PLANNER_HOUR_HEIGHT: 3.85%
 							width: 50px
 							float: left
 							margin-right: 24px
+							background-color: $light-font
 
 						.unit-header-body-description-titles
 							color: #fff
@@ -365,6 +366,10 @@ $PLANNER_HOUR_HEIGHT: 3.85%
 
 			&.files-content-panel-body-wrapper
 				height: 75px
+
+			&.condensed
+				margin: auto
+				float: none
 
 			.content-panel-body-title-wrapper
 				height: 63px
@@ -1258,6 +1263,15 @@ $PLANNER_HOUR_HEIGHT: 3.85%
 				margin: auto
 				margin-top: 12px
 
+				&.card-wrapper-condensed
+					margin: 0
+					margin-top: 12px
+					width: 45%
+					float: left
+
+					.card
+						width: 100%
+
 				.card
 					width: 576px
 					background-color: #fff
@@ -1624,9 +1638,6 @@ $PLANNER_HOUR_HEIGHT: 3.85%
 							border-top-width: 0px
 
 			.curriculum-menu-wrapper
-				.curriculum-empty-state
-					padding-bottom: 50px
-
 				.curriculum-action
 					text-decoration: none
 					cursor: pointer
@@ -2236,274 +2247,284 @@ $PLANNER_HOUR_HEIGHT: 3.85%
 				.explorer-resource-add-section
 					width: 96%
 
-	.explorer-resource-module-support
-		float: right
-		display: none
-		color: $light-font
-		height: 100%
+.explorer-resource-module-support
+	float: right
+	display: none
+	color: $light-font
+	height: 100%
 
-		&.show
-			width: 55%
-			display: block
+	&.show
+		width: 55%
+		display: block
 
+	&.planner-event-support
 		.explorer-resource-module-support-body
-			background-color: #fff
-			height: 400px
-			margin-left: 20px
-			margin-top: 24px
-			@include box-shadow(0 0px 2px rgba(0, 0, 0, 0.1))
-			margin-bottom: 2px
+			margin-top: 12px
 
 			.explorer-resource-module-support-pre
-				height: 36px
-				overflow: hidden
+				height: 48px
 
-				.explorer-resource-module-support-pre-planner
-					width: 54px
-					height: 100%
-					background-image: url('../images/add-to-planner.png')
-					background-position: 18px center
-					background-repeat: no-repeat
-					cursor: pointer
-					float: left
+	.explorer-resource-module-support-body
+		background-color: #fff
+		height: 400px
+		margin-left: 20px
+		margin-top: 24px
+		@include box-shadow(0 0px 2px rgba(0, 0, 0, 0.1))
+		margin-bottom: 2px
 
-				.explorer-resource-module-support-delete
-					width: 54px
-					height: 100%
-					background-image: url('../images/delete.png')
-					background-position: 20px center
-					background-repeat: no-repeat
-					cursor: pointer
-					float: right
+		.explorer-resource-module-support-pre
+			height: 36px
+			overflow: hidden
 
-			.explorer-resource-module-support-title
-				font-size: 1.8em
-				font-weight: bold
-				letter-spacing: -1px
-				line-height: 1.15em
-				padding: 18px
-				color: #fff
-
-			.explorer-resource-module-support-contents
-				overflow-y: auto
-				//height: 100%
-				padding-top: 18px
-
-			.explorer-resource-module-support-section
-				padding: 10px 0px
-				overflow: auto
-
-				&.accepting
-					background-color: #f4f7f8
-
-				&.explorer-resource-module-support-section
-					.explorer-resource-module-support-section-title
-						background-image: url('../images/module-section-meta.png')
-
-				&.explorer-resource-module-support-section-methodology
-					.explorer-resource-module-support-section-title
-						background-image: url('../images/methodology.png')
-
-				&.explorer-resource-module-support-section-how
-					.explorer-resource-module-support-section-title
-						background-image: url('../images/how.png')
-
-				&.explorer-resource-module-support-section-resources
-					.explorer-resource-module-support-section-title
-						background-image: url('../images/objective-resources.png')
-
-				&.explorer-resource-module-support-section-prerequisites
-					.explorer-resource-module-support-section-title
-						background-image: url('../images/prerequisites.png')
-
-				&.explorer-resource-module-support-section-wordwall
-					.explorer-resource-module-support-section-title
-						background-image: url('../images/wordwall.png')
-
-				&.explorer-resource-module-support-section-ccss
-					.explorer-resource-module-support-section-title
-						background-image: url('../images/common-core.png')
-
-				&.explorer-resource-module-support-section-content
-					.explorer-resource-module-support-section-title
-						background-image: url('../images/common-core.png')
-
-				&.explorer-resource-module-support-section-practices
-					.explorer-resource-module-support-section-title
-						background-image: url('../images/common-core.png')
-
-				&.explorer-resource-module-support-section-big-idea
-					.explorer-resource-module-support-section-title
-						background-image: url('../images/big-idea.png')
-
-				&.explorer-resource-module-support-section-essential-understandings
-					.explorer-resource-module-support-section-title
-						background-image: url('../images/understandings.png')
-
-				&:hover
-					.explorer-resource-module-support-section-handle-wrapper
-						.explorer-resource-module-support-section-handle
-							opacity: 1
-
-					.explorer-resource-module-support-section-actions
-						display: block
-
-			.explorer-resource-module-support-section-handle-wrapper
-				width: 10px
+			.explorer-resource-module-support-pre-planner
+				width: 54px
+				height: 100%
+				background-image: url('../images/add-to-planner.png')
+				background-position: 18px center
+				background-repeat: no-repeat
+				cursor: pointer
 				float: left
 
-				.explorer-resource-module-support-section-handle
-					background: url('../images/move-handle.png')
-					width: 10px
-					height: 16px
-					margin: 0px 0px 0px 2px
-					cursor: move
-					opacity: 0
+			.explorer-resource-module-support-delete
+				width: 54px
+				height: 100%
+				background-image: url('../images/delete.png')
+				background-position: 20px center
+				background-repeat: no-repeat
+				cursor: pointer
+				float: right
 
-			.explorer-resource-module-support-section-actions
-				@include actionDropdown
-				margin-right: 10px
+		.explorer-resource-module-support-title
+			font-size: 1.8em
+			font-weight: bold
+			letter-spacing: -1px
+			line-height: 1.15em
+			padding: 18px
+			color: #fff
 
-				&.show
+		.explorer-resource-module-support-contents
+			overflow-y: auto
+			//height: 100%
+			padding-top: 18px
+
+		.explorer-resource-module-support-section
+			padding: 10px 0px
+			overflow: auto
+
+			&.accepting
+				background-color: #f4f7f8
+
+			&.explorer-resource-module-support-section
+				.explorer-resource-module-support-section-title
+					background-image: url('../images/module-section-meta.png')
+
+			&.explorer-resource-module-support-section-methodology
+				.explorer-resource-module-support-section-title
+					background-image: url('../images/methodology.png')
+
+			&.explorer-resource-module-support-section-how
+				.explorer-resource-module-support-section-title
+					background-image: url('../images/how.png')
+
+			&.explorer-resource-module-support-section-resources
+				.explorer-resource-module-support-section-title
+					background-image: url('../images/objective-resources.png')
+
+			&.explorer-resource-module-support-section-prerequisites
+				.explorer-resource-module-support-section-title
+					background-image: url('../images/prerequisites.png')
+
+			&.explorer-resource-module-support-section-wordwall
+				.explorer-resource-module-support-section-title
+					background-image: url('../images/wordwall.png')
+
+			&.explorer-resource-module-support-section-ccss
+				.explorer-resource-module-support-section-title
+					background-image: url('../images/common-core.png')
+
+			&.explorer-resource-module-support-section-content
+				.explorer-resource-module-support-section-title
+					background-image: url('../images/common-core.png')
+
+			&.explorer-resource-module-support-section-practices
+				.explorer-resource-module-support-section-title
+					background-image: url('../images/common-core.png')
+
+			&.explorer-resource-module-support-section-big-idea
+				.explorer-resource-module-support-section-title
+					background-image: url('../images/big-idea.png')
+
+			&.explorer-resource-module-support-section-essential-understandings
+				.explorer-resource-module-support-section-title
+					background-image: url('../images/understandings.png')
+
+			&:hover
+				.explorer-resource-module-support-section-handle-wrapper
+					.explorer-resource-module-support-section-handle
+						opacity: 1
+
+				.explorer-resource-module-support-section-actions
 					display: block
 
-			.explorer-resource-module-support-section-title-wrapper
+		.explorer-resource-module-support-section-header
+			overflow: hidden
+
+		.explorer-resource-module-support-section-handle-wrapper
+			width: 10px
+			float: left
+
+			.explorer-resource-module-support-section-handle
+				background: url('../images/move-handle.png')
+				width: 10px
+				height: 16px
+				margin: 0px 0px 0px 2px
+				cursor: move
+				opacity: 0
+
+		.explorer-resource-module-support-section-actions
+			@include actionDropdown
+			margin-right: 10px
+
+			&.show
+				display: block
+
+		.explorer-resource-module-support-section-title-wrapper
+			float: left
+			margin-left: 10px
+
+			.explorer-resource-module-support-section-title
+				text-transform: uppercase
+				color: #aaa
+				margin-bottom: 5px
+				font-weight: bold
+				padding-left: 20px
+				background-repeat: no-repeat
+				background-position: left center
+				font-size: 1.3em
+
+			.explorer-resource-module-support-section-body
+				padding-left: 20px
+				outline: none
+				line-height: 1.2em
+				min-height: 14px
+				cursor: text
+
+				.explorer-resource-module-support-section-body-field-snippet
+					margin-bottom: 6px
+
+					.explorer-resource-module-support-section-body-standard
+						font-weight: bold
+
+				p:first-child
+					margin-top: 0px
+
+			*[data-placeholder]:not(:focus):not([data-div-placeholder-content]):before
+				content: attr(data-placeholder)
 				float: left
-				margin-left: 10px
+				margin-left: 2px
+				color: #b3b3b3
 
-				.explorer-resource-module-support-section-title
-					text-transform: uppercase
-					color: #aaa
-					margin-bottom: 5px
-					font-weight: bold
-					padding-left: 20px
-					background-repeat: no-repeat
-					background-position: left center
-					font-size: 1.3em
+		.explorer-resource-listing-body-resource-actions,
+		.explorer-resource-module-support-new-field,
+		.explorer-resource-actions-suggest-wrapper
+			margin: 0px 20px
 
-				.explorer-resource-module-support-section-body
-					padding-left: 20px
-					outline: none
-					line-height: 1.2em
-					min-height: 14px
+		.explorer-resource-actions-suggest-wrapper
+			margin-bottom: 20px
+			margin-top: 10px
 
-					.explorer-resource-module-support-section-body-field-snippet
-						margin-bottom: 6px
+			.explorer-resource-actions-suggest
+				width: 100%
+				background-color: #2980b9
+				color: #fff
+				font-weight: bold
+				border-width: 0px
+				padding: 10px 0px
 
-						.explorer-resource-module-support-section-body-standard
-							font-weight: bold
+		.explorer-resource-items
+			padding: 0px 20px
+			clear: left
 
-					p:first-child
-						margin-top: 0px
+		.explorer-resource-module-support-new-field
+			margin-bottom: 20px
 
-				*[data-placeholder]:not(:focus):not([data-div-placeholder-content]):before
-					content: attr(data-placeholder)
-					float: left
-					margin-left: 2px
-					color: #b3b3b3
+		.explorer-resource-add-field
+			margin-left: 20px
+			margin-right: 20px
 
-			.explorer-resource-listing-body-resource-actions,
-			.explorer-resource-module-support-new-field,
-			.explorer-resource-actions-suggest-wrapper
-				margin: 0px 20px
+		.explorer-resource-item
+			overflow: hidden
+			padding-bottom: 10px
+			margin-bottom: 10px
+			border-bottom: 1px solid #efefef
 
-			.explorer-resource-actions-suggest-wrapper
-				margin-bottom: 20px
-				margin-top: 10px
+			&:last-child
+				border-bottom-width: 0px
 
-				.explorer-resource-actions-suggest
-					width: 100%
-					background-color: #2980b9
-					color: #fff
-					font-weight: bold
-					border-width: 0px
-					padding: 10px 0px
+			&:first-child
+				padding-top: 10px
 
-			.explorer-resource-items
-				padding: 0px 20px
-				clear: left
+			.explorer-resource-item-thumbnail-wrapper
+				float: left
+				width: 18%
 
-			.explorer-resource-module-support-new-field
-				margin-bottom: 20px
+				.explorer-resource-item-thumbnail
+					width: 60px
+					height: 60px
+					background-color: #efefef
+					margin-right: 16px
+					background-size: cover
 
-			.explorer-resource-add-field
-				margin-left: 20px
-				margin-right: 20px
-
-			.explorer-resource-item
-				overflow: hidden
-				padding-bottom: 10px
-				margin-bottom: 10px
-				border-bottom: 1px solid #efefef
-
-				&:last-child
-					border-bottom-width: 0px
-
-				&:first-child
-					padding-top: 10px
-
-				.explorer-resource-item-thumbnail-wrapper
-					float: left
-					width: 18%
-
-					.explorer-resource-item-thumbnail
-						width: 60px
+					.thumbnail-silhouette
 						height: 60px
-						background-color: #efefef
-						margin-right: 16px
-						background-size: cover
+						width: 60px
 
-						.thumbnail-silhouette
-							height: 60px
-							width: 60px
+			.explorer-resource-item-content
+				float: left
+				width: 82%
+				//padding-right: 10px
 
-				.explorer-resource-item-content
+				.explorer-resource-item-content-body
 					float: left
-					width: 82%
-					//padding-right: 10px
+					width: 90%
 
-					.explorer-resource-item-content-body
-						float: left
-						width: 90%
+					.explorer-resource-item-content-title
+						font-size: 1.2em
+						display: block
+						margin-bottom: 8px
+						padding-top: 4px
 
-						.explorer-resource-item-content-title
-							font-size: 1.2em
-							display: block
-							margin-bottom: 8px
-							padding-top: 4px
+					.explorer-resource-item-content-description
+						color: #aaa
 
-						.explorer-resource-item-content-description
-							color: #aaa
+				.explorer-resource-item-content-actions
+					float: right
+					width: 10%
 
-					.explorer-resource-item-content-actions
-						float: right
-						width: 10%
+					.explorer-resource-item-content-action-delete
+						width: 14px
+						height: 14px
+						display: inline-block
+						background-image: url("../images/delete-resource.png")
+						background-repeat: no-repeat
+						background-position: center center
+						cursor: pointer
+						margin-right: 10px
 
-						.explorer-resource-item-content-action-delete
-							width: 14px
-							height: 14px
-							display: inline-block
-							background-image: url("../images/delete-resource.png")
-							background-repeat: no-repeat
-							background-position: center center
-							cursor: pointer
-							margin-right: 10px
+						&:hover
+							background-image: url("../images/delete-resource-hover.png")
 
-							&:hover
-								background-image: url("../images/delete-resource-hover.png")
-
-			.explorer-resource-listing-body-resource-actions
-				padding: 4px 0px
-				text-align: right
+		.explorer-resource-listing-body-resource-actions
+			padding: 4px 0px
+			text-align: right
 
 
 .explorer-resource-sections
 	.explorer-resource-section
 		border-bottom: 1px solid #d0d1d5
-
-	.explorer-resource-section-body
 		margin-top: 12px
 
+	.explorer-resource-section-body
 		&.accepting
 			border-bottom: 4px solid #2980b9
 
@@ -2549,7 +2570,7 @@ $PLANNER_HOUR_HEIGHT: 3.85%
 				cursor: move
 
 				.explorer-resource-section-listing-item
-					&:hover
+					&.accepting
 						border-bottom-width: 4px
 
 		.explorer-resource-section-listing-item
@@ -2670,7 +2691,7 @@ $PLANNER_HOUR_HEIGHT: 3.85%
 				opacity: 0
 
 		.curriculum-module-section-listing-contextual-title-wrapper
-			width: 96%
+			width: 88%
 			//width: 480px
 			float: left
 

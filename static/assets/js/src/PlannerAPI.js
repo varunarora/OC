@@ -1,4 +1,4 @@
-define(['atomic', 'curriculumAppDispatcher', 'curriculumActions'],
+define(['atomic', 'dispatcher', 'curriculumActions'],
     function(atomic, AppDispatcher, Actions){
         if (!OC.hasOwnProperty('api')){
             OC.api = {};

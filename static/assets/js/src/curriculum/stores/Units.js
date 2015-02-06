@@ -1,4 +1,4 @@
-define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curriculumTextbooks', 'curriculumSettings'],
+define(['dispatcher', 'events', 'deep_extend', 'immutable', 'curriculumTextbooks', 'curriculumSettings'],
     function(AppDispatcher, Events, extend, Immutable, Textbooks, Settings){
     
     var EventEmitter = Events.EventEmitter;
@@ -6,52 +6,47 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
     var CHANGE_EVENT = 'change',
         _units = Immutable.List(),
         _unsavedSections = Immutable.List(),
-        _sectionItem = null,  // The item for the contextual section.
-
         _toShift = null,  // Temporarily storing what needs to be shifted.
 
         _unsavedUnit = null,
         _isView = null;
 
-    var UnitStore = extend(EventEmitter.prototype, {
+    var UnitStore = extend({}, EventEmitter.prototype, {
+        emitChange: function() {
+            this.emit(CHANGE_EVENT);
+        },
+
+        addChangeListener: function(callback) {
+            this.on(CHANGE_EVENT, callback);
+        },
+
+        removeChangeListener: function(callback) {
+            this.removeListener(CHANGE_EVENT, callback);
+        },
+
         getUnits: function(){
             return _units;
         },
+
         getUnit: function(id){
             return _units.find(function(unit){
-                return unit.get('id') === id;
+                return unit.id === id;
             });
         },
 
         _addSection: function(name, sectionType, moduleID, isUnit){
             // Add the section, mark it as selected.
-            var sectionItems = [], newSectionItem;
-            if (sectionType === 'contextual'){
-                newSectionItem = Immutable.Map({
-                    description: name,
-                    issue: {
-                        id: null, host_id: null, message: null
-                    },
-                    meta: [],
-                    resource_sets: Immutable.List(),
-                    parent: name,
-                    position: 0,
-                    selected: false
-                    // Section ID.
-                });
-                sectionItems.push(newSectionItem);
-                _sectionItem = newSectionItem;
-            }
-
             var toUpdateUnit = _units.find(function(unit){
                 return unit.id === moduleID; });
 
+            var maxSection = toUpdateUnit.sections.max(function(sectionA, sectionB){
+                return sectionA.get('position') > sectionB.get('position'); });
+            
             newSection = Immutable.Map({
                 // Determine max section position.
-                position: toUpdateUnit.sections.max(function(sectionA, sectionB){
-                    return sectionA.get('position') > sectionB.get('position'); }).get('position') + 1,
+                position: maxSection ? maxSection.get('position') + 1 : 0,
                 title: name,
-                items: Immutable.List(sectionItems),
+                items: [],
                 type: sectionType,
             });
 
@@ -86,16 +81,16 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
             });*/
         },
 
-        _setSectionID: function(section, id){
+        _setSectionID: function(id, section){
             // Get unit which contains this section.
             var unit = _units.find(function(unit){
-                return unit.sections.contains(section); });
+                return unit.hasOwnProperty('sections') ? unit.sections.contains(section) : false; });
 
             _units = _units.update(_units.indexOf(unit), function(unit){
-                unit.sections.update(unit.sections.indexOf(section), function(section){
+                sections = unit.sections.update(unit.sections.indexOf(section), function(section){
                     return section.set('id', id);
                 });
-
+                unit.sections = sections;
                 return unit;
             });
         },
@@ -105,13 +100,10 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
         },
 
         _setUnitID: function(id){
-
-            // Make XHR request.
-                /*function(response){
-                    newUnit.id = response.id;
-                    OC.appBox.saved();
-                }*/
-
+            _units = _units.update(_units.indexOf(_unsavedUnit), function(unit){
+                unit.id = id;
+                return unit;
+            });
         },
 
         getUnsavedSection: function(){
@@ -124,10 +116,6 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
 
         peekUnsavedSection: function(){
             return _unsavedSections.last();
-        },
-
-        getSectionItem: function(){
-            return _sectionItem;
         },
 
         getToShift: function(){
@@ -307,7 +295,8 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
             var newUnit = {
                 title: name,
                 textbook: Textbooks.getTitleFromID(textbook),
-                period: period
+                period: period,
+                sections: Immutable.List()
             };
 
             var serializedUnit = {
@@ -326,64 +315,60 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable', 'curric
 
             _units = _units.push(newUnit);
             _unsavedUnit = serializedUnit;
-        }
-    });
+        },
 
-    AppDispatcher.register(function(action) {
-        switch(action.type) {
-            case 'SET_UNITS':
-                units = action.units;
-                _units = units;
-                break;
+        dispatchToken: AppDispatcher.register(function(action) {
+            switch(action.type) {
+                case 'SET_UNITS':
+                    units = action.units;
+                    _units = units;
+                    break;
 
-            case 'ADD_SECTION':
-                UnitStore._addSection(
-                    action.name, action.sectionType, action.moduleID, action.isUnit);
-                break;
+                case 'ADD_SECTION':
+                    UnitStore._addSection(
+                        action.name, action.sectionType, action.moduleID, action.isUnit);
+                    break;
 
-            case 'ADD_SECTION_COMPLETE':
-                UnitStore._setSectionID(action.section, action.id);
-                break;
+                case 'ADD_SECTION_COMPLETE':
+                    UnitStore._setSectionID(action.section, action.id);
+                    break;
 
-            case 'ADD_ITEM_POST':
-                if (! action.item.get('id'))
-                    UnitStore._setItemSectionID(action.item, action.sectionID);
-                break;
+                case 'DELETE_SECTION':
+                    UnitStore._deleteSection(action.id);
+                    break;
 
-            case 'DELETE_SECTION':
-                UnitStore._deleteSection(action.id);
-                break;
+                case 'MOVE_SECTION':
+                    UnitStore._moveSection(action.sectionID, action.beforeSectionID);
+                    break;
 
-            case 'MOVE_SECTION':
-                UnitStore._moveSection(action.sectionID, action.beforeSectionID);
-                break;
+                case 'OPEN_UNITS':
+                    _isView = true;
+                    break;
+                
+                case 'OPEN_TEXTBOOKS':
+                    _isView = false;
+                    break;
 
-            case 'OPEN_UNITS':
-                _isView = true;
-                break;
-            
-            case 'OPEN_TEXTBOOKS':
-                _isView = false;
-                break;
+                case 'ADD_UNIT':
+                    UnitStore._addUnit(
+                        action.name, action.textbook,
+                        action.from, action.to
+                    );
+                    break;
 
-            case 'ADD_UNIT':
-                UnitStore._addUnit(
-                    action.name, action.textbook,
-                    action.from, action.to
-                );
-                break;
+                case 'ADD_UNIT_COMPLETE':
+                    UnitStore._setUnitID(action.id);
+                    break;
 
-            case 'ADD_UNIT_COMPLETE':
-                UnitStore._setUnitID(action.id);
-                break;
+                default:
+                    return true;
+            }
 
-            default:
-                return true;
-        }
+            UnitStore.emitChange();
 
-      UnitStore.emitChange();
+            return true;
+        })
 
-      return true;
     });
 
     return UnitStore;

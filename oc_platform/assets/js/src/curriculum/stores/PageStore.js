@@ -1,4 +1,4 @@
-define(['curriculumAppDispatcher', 'curriculumItems', 'curriculumUnits', 'events', 'deep_extend', 'immutable'],
+define(['dispatcher', 'curriculumItems', 'curriculumUnits', 'events', 'deep_extend', 'immutable'],
     function(AppDispatcher, Items, Units, Events, extend, Immutable){
 
     var EventEmitter = Events.EventEmitter;
@@ -10,8 +10,7 @@ define(['curriculumAppDispatcher', 'curriculumItems', 'curriculumUnits', 'events
         _drawerView = false,
         _addBlockState = false;
 
-    var PageStore = extend(EventEmitter.prototype, {
-
+    var PageStore = extend({}, EventEmitter.prototype, {
         emitChange: function() {
             this.emit(CHANGE_EVENT);
         },

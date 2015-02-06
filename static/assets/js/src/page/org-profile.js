@@ -233,8 +233,8 @@ define(['core_light'], function(OC){
             '.menu-curricula-item': '<span class="tip-title">Curricula</span>Create, see and manage curricula for your subjects. ',
             '.menu-planner-item': '<span class="tip-title">Planner</span>Classes you teach and units you cover on a calendar.',
             '.menu-files-item': '<span class="tip-title">Files</span>All your documents, uploads and links organized in folders.',
-            '.menu-favorites-item': '<span class="tip-title">Favorites</span>Lessons, activities, worksheets and other resources you '+
-                'liked across the site.',
+            //'.menu-favorites-item': '<span class="tip-title">Favorites</span>Lessons, activities, worksheets and other resources you '+
+            //    'liked across the site.',
             '.menu-groups-item': '<span class="tip-title">Groups</span>Conversations with people you teach with.'
         };
 
@@ -250,6 +250,15 @@ define(['core_light'], function(OC){
     require(['react'], function(React){
         OC.views = {
             Header: React.createClass({
+                componentDidMount: function(){
+                    OC.resize();
+                    window.addEventListener('resize', OC.resize);
+
+                    if (OC.config.user.id){
+                        OC.utils.menu(document.querySelector('.user-menu'),
+                            document.querySelector('.content-panel-header-user-dropdown'));
+                    }
+                },
                 render: function(){
                     return React.DOM.header({},
                         React.DOM.div({className: 'content-panel-header'}, [
@@ -469,15 +478,7 @@ define(['core_light'], function(OC){
 
         if (OC.config.page !== 'curriculum'){
             React.renderComponent(OC.views.Header(),
-                document.querySelector('.header-wrapper'), function(){
-                    OC.resize();
-                    window.addEventListener('resize', OC.resize);
-
-                    if (OC.config.user.id){
-                        OC.utils.menu(document.querySelector('.user-menu'),
-                            document.querySelector('.content-panel-header-user-dropdown'));
-                    }
-                });
+                document.querySelector('.header-wrapper'));
             search();
         }
 

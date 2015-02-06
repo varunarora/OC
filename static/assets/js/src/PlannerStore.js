@@ -1,4 +1,4 @@
-define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable'],
+define(['dispatcher', 'events', 'deep_extend', 'immutable'],
     function(AppDispatcher, Events, extend, Immutable){
     
     var EventEmitter = Events.EventEmitter;
@@ -7,10 +7,12 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable'],
         _selectedDate = null,
         _pending = false,
         _events = Immutable.Map(),
-        _selectedEvent = null;
+        _selectedEvent = null,
+        _drawer = false,
+        _item = null;
 
     var PlannerStore = extend(EventEmitter.prototype, {
-        emitChange: function() {
+        emitPlannerChange: function() {
             this.emit(CHANGE_EVENT);
         },
 
@@ -39,6 +41,14 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable'],
             return _pending === true;
         },
 
+        getDrawer: function(){
+            return _drawer;
+        },
+
+        getItem: function(){
+            return _item;
+        },
+
         dispatchToken: AppDispatcher.register(function(action) {
             switch(action.type) {
                 case 'SELECT_DATE':
@@ -52,9 +62,14 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable'],
                     break;
 
                 case 'SELECT_PLANNER_EVENT':
-                    _selectedEvent = _events.get(action.date).find(function(event){
-                        return event.id === action.id;
-                    });
+                    var i, event; events = _events.get(action.date);
+                    for (i = 0; i < events.length; i++) {
+                        event = events[i];
+                        if (event.id === action.id) {
+                            _selectedEvent = event;
+                            break;
+                        }
+                    }
                     break;
 
                 case 'CLEAR_EVENT_SELECTION':
@@ -75,11 +90,20 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend', 'immutable'],
                     _selectedEvent = null;
                     break;
 
+                case 'OPEN_ITEM':
+                    _drawer = true;
+                    _item = action.item;
+                    break;
+
+                case 'CLOSE_ITEM':
+                    _drawer = false;
+                    break;
+
                 default:
                     return true;
             }
 
-            PlannerStore.emitChange();
+            PlannerStore.emitPlannerChange();
 
             return true;
         })

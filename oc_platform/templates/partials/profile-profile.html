@@ -4,7 +4,7 @@
         <div class="profile-box-user-description box-user-description">
 
             <h2>{{ user_profile.get_full_name }}</h2>
-            <div class="profile-box-user-description-headline box-description-headline">{{ user_profile.profile.headline }}</div>
+            <div class="profile-box-user-description-headline box-description-headline">{% if user_profile.profile.headline %}{{ user_profile.profile.headline }}{% endif %}</div>
             <div class="profile-box-user-description-social box-user-description-social">
                 {% if user_profile.profile.social %}
                     {% if user_profile.profile.social.twitter %}

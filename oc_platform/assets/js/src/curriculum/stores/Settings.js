@@ -1,4 +1,4 @@
-define(['curriculumAppDispatcher', 'events', 'deep_extend'], function(AppDispatcher, Events, extend){
+define(['dispatcher', 'events', 'deep_extend'], function(AppDispatcher, Events, extend){
     var CHANGE_EVENT = 'change',
         EventEmitter = Events.EventEmitter,
         
@@ -36,7 +36,7 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend'], function(AppDispatc
         _gradeTypes = ['Grade', 'Class','Level', 'Group', 'Other'],
         _unsavedSettings = null,
 
-        SettingsStore = extend(EventEmitter.prototype, {
+        SettingsStore = extend({}, EventEmitter.prototype, {
             emitChange: function() {
                 this.emit(CHANGE_EVENT);
             },
@@ -143,6 +143,7 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend'], function(AppDispatc
                     case 'MOVE_FIELD':
                     case 'ADD_UNIT':
                     case 'ADD_TEXTBOOK':
+                    case 'ADD_SECTION':
                         SettingsStore._saving();
                         break;
 
@@ -154,6 +155,7 @@ define(['curriculumAppDispatcher', 'events', 'deep_extend'], function(AppDispatc
                     case 'ADD_UNIT_COMPLETE':
                     case 'ADD_TEXTBOOK_COMPLETE':
                     case 'SETTINGS_UPDATED':
+                    case 'ADD_SECTION_COMPLETE':
                         SettingsStore._saved();
                         break;
 
